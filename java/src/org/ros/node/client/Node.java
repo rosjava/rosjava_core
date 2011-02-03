@@ -1,20 +1,17 @@
 package org.ros.node.client;
 
-import java.io.IOException;
-import java.net.URL;
-
-import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
 import org.apache.xmlrpc.client.util.ClientFactory;
 
+import java.net.URL;
+
 public abstract class Node<T extends org.ros.node.xmlrpc.Node> {
   
   protected final T node;
   
-  public Node(URL url, Class<T> interfaceClass)
-      throws XmlRpcException, IOException {
+  public Node(URL url, Class<T> interfaceClass) {
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
     config.setServerURL(url);
     config.setEnabledForExtensions(true);

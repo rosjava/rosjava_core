@@ -1,17 +1,15 @@
 package org.ros.node.client;
 
-import java.io.IOException;
+import org.ros.node.Response;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.xmlrpc.XmlRpcException;
-import org.ros.node.Response;
-
 public class Slave extends Node<org.ros.node.xmlrpc.Slave>{
   
-  public Slave(URL url) throws XmlRpcException, IOException {
+  public Slave(URL url) {
     super(url, org.ros.node.xmlrpc.Slave.class);
   }
   

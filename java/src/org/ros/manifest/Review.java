@@ -1,12 +1,10 @@
 package org.ros.manifest;
 
-import javax.xml.parsers.ParserConfigurationException;
+import com.google.common.base.Preconditions;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import com.google.common.base.Preconditions;
 
 public class Review implements XmlSerializable {
 
@@ -35,7 +33,7 @@ public class Review implements XmlSerializable {
   }
 
   @Override
-  public Element toElement(Document doc) throws ParserConfigurationException {
+  public Element toElement(Document doc) {
     Element review = doc.createElement(REVIEW_TAG);
     review.setAttribute(STATUS_ATTRIBUTE, status);
     review.setAttribute(NOTES_ATTRIBUTE, notes);

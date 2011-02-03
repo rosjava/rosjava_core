@@ -1,9 +1,7 @@
 package org.ros.node.xmlrpc;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.Set;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,8 +10,9 @@ import org.ros.node.StatusCode;
 import org.ros.topic.Publisher;
 import org.ros.transport.ProtocolDescription;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.net.URL;
+import java.util.List;
+import java.util.Set;
 
 public class SlaveImpl implements Slave {
   
@@ -38,12 +37,8 @@ public class SlaveImpl implements Slave {
 
   @Override
   public List<Object> getMasterUri(String callerId) {
-    try {
-      URL url = slave.getMasterUri(callerId);
-      return new Response<String>(StatusCode.SUCCESS, "", url.toString()).toList();
-    } catch (MalformedURLException e) {
-      return new Response<String>(StatusCode.FAILURE, e.toString(), null).toList();
-    }
+    URL url = slave.getMasterUri(callerId);
+    return new Response<String>(StatusCode.SUCCESS, "", url.toString()).toList();
   }
 
   @Override

@@ -1,12 +1,10 @@
 package org.ros.manifest;
 
-import javax.xml.parsers.ParserConfigurationException;
+import com.google.common.base.Preconditions;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import com.google.common.base.Preconditions;
 
 public class Description implements XmlSerializable {
   
@@ -39,7 +37,7 @@ public class Description implements XmlSerializable {
   }
   
   @Override
-  public Element toElement(Document doc) throws ParserConfigurationException {
+  public Element toElement(Document doc) {
     Element element = doc.createElement(DESCRIPTION_TAG);
     element.appendChild(doc.createTextNode(description));
     if (brief.length() != 0) {

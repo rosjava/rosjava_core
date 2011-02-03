@@ -1,6 +1,13 @@
 package org.ros.node.client;
 
-import java.io.IOException;
+import com.google.common.collect.Lists;
+
+import org.ros.node.Response;
+import org.ros.topic.Publisher;
+import org.ros.topic.SubscriberDescription;
+import org.ros.topic.SystemState;
+import org.ros.topic.TopicDescription;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -8,18 +15,9 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.xmlrpc.XmlRpcException;
-import org.ros.node.Response;
-import org.ros.topic.Publisher;
-import org.ros.topic.SubscriberDescription;
-import org.ros.topic.SystemState;
-import org.ros.topic.TopicDescription;
-
-import com.google.common.collect.Lists;
-
 public class Master extends Node<org.ros.node.xmlrpc.Master> {
 
-  public Master(URL url) throws XmlRpcException, IOException {
+  public Master(URL url) {
     super(url, org.ros.node.xmlrpc.Master.class);
   }
 
@@ -51,8 +49,7 @@ public class Master extends Node<org.ros.node.xmlrpc.Master> {
    * Register the caller as a publisher the topic.
    * 
    * @param callerId ROS caller ID
-   * @param topic Fully-qualified name of topic to register.
-   * @param topicType Data type for topic (must be a package-resource name, i.e. the .msg name)
+   * @param publisher the publisher to register
    * @param callerApi API URI of publisher to register
    * @return List of current subscribers of topic in the form of XML-RPC URIs
    * @throws MalformedURLException

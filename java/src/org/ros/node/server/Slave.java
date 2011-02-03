@@ -1,12 +1,8 @@
 package org.ros.node.server;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.node.xmlrpc.SlaveImpl;
@@ -16,9 +12,12 @@ import org.ros.topic.SubscriberDescription;
 import org.ros.transport.ProtocolDescription;
 import org.ros.transport.TcpRosDescription;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Slave extends Node {
 
@@ -55,7 +54,7 @@ public class Slave extends Node {
     masterUrl = url;
   }
 
-  public URL getMasterUri(String callerId) throws MalformedURLException {
+  public URL getMasterUri(String callerId) {
     return masterUrl;
   }
 

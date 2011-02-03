@@ -51,6 +51,7 @@ public abstract class Publisher extends Topic {
     out.add(message);
   }
 
+  @Override
   protected void onNewConnection(Socket socket) {
     try {
       handshake(socket);

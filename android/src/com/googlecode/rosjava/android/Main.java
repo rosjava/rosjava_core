@@ -26,8 +26,10 @@ public class Main extends Activity {
     public void start(int port) throws IOException {
       super.start(port);
       (new Thread() {
+        @Override
         public void run() {
-          org.ros.communication.std_msgs.String message = new org.ros.communication.std_msgs.String();
+          org.ros.communication.std_msgs.String message =
+              new org.ros.communication.std_msgs.String();
           message.data = "Hello, ROS!";
           try {
             while (true) {
@@ -37,7 +39,7 @@ public class Main extends Activity {
           } catch (InterruptedException e) {
             e.printStackTrace();
           }
-        };
+        }
       }).start();
     }
   }

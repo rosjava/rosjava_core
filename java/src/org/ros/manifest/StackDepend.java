@@ -1,7 +1,5 @@
 package org.ros.manifest;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -14,7 +12,7 @@ public class StackDepend extends Depend {
   }
 
   @Override
-  public Element toElement(Document doc) throws ParserConfigurationException {
+  public Element toElement(Document doc) {
     Element element = super.toElement(doc);
     element.setAttribute("stack", stack);
     return element;

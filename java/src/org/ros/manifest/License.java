@@ -1,15 +1,13 @@
 package org.ros.manifest;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import javax.xml.parsers.ParserConfigurationException;
+import com.google.common.base.Preconditions;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.google.common.base.Preconditions;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class License implements XmlSerializable {
   
@@ -36,7 +34,7 @@ public class License implements XmlSerializable {
   }
 
   @Override
-  public Element toElement(Document doc) throws ParserConfigurationException {
+  public Element toElement(Document doc) {
     Element element = doc.createElement(LICENSE_TAG);
     element.appendChild(doc.createTextNode(license));
     if (url != null) {

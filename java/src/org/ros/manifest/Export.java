@@ -1,14 +1,12 @@
 package org.ros.manifest;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.xml.parsers.ParserConfigurationException;
+import com.google.common.collect.Maps;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class Export implements XmlSerializable {
   
@@ -27,7 +25,7 @@ public class Export implements XmlSerializable {
   }
 
   @Override
-  public Element toElement(Document doc) throws ParserConfigurationException {
+  public Element toElement(Document doc) {
     Element element = doc.createElement(name);
     for (Entry<String, String> entry : attributes.entrySet()) {
       element.setAttribute(entry.getKey(), entry.getValue());
