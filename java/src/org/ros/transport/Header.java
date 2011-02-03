@@ -33,6 +33,7 @@ public class Header {
       throws IOException {
     byte[] buffer = encode(header);
     LittleEndianDataOutputStream out = new LittleEndianDataOutputStream(outputStream);
+    out.writeInt(buffer.length);
     out.write(buffer);
     out.flush();
   }
@@ -65,19 +66,14 @@ public class Header {
 
   @VisibleForTesting
   static byte[] encode(Map<String, String> header) throws IOException {
-    ByteArrayOutputStream fieldBuffer = new ByteArrayOutputStream();
-    LittleEndianDataOutputStream out = new LittleEndianDataOutputStream(fieldBuffer);
+    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    LittleEndianDataOutputStream out = new LittleEndianDataOutputStream(buffer);
     for (Entry<String, String> entry : header.entrySet()) {
       String field = entry.getKey() + "=" + entry.getValue();
       out.writeInt(field.length());
       out.writeBytes(field);
     }
     out.close();
-    ByteArrayOutputStream headerBuffer = new ByteArrayOutputStream();
-    out = new LittleEndianDataOutputStream(headerBuffer);
-    out.writeInt(fieldBuffer.size());
-    out.close();
-    fieldBuffer.writeTo(headerBuffer);
-    return headerBuffer.toByteArray();
+    return buffer.toByteArray();
   }
 }
