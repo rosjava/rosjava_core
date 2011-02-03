@@ -1,0 +1,788 @@
+<!--
+
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+ 
+      http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+
+<!--
+  - Ant build file for commons-logging.
+  -
+  - Quick build instructions:
+  -  * ant getlibs
+  -  * cp build.properties.sample build.properties
+  -  * ant -lib lib/junit-3.8.1.jar dist 
+  -
+  - Note that this build file uses the optional <junit> task. While the
+  - task "adapter" class comes by default with ant 1.6+, the junit libraries
+  - (3.8.1 or later) are also required to be made available to ant. This
+  - requires that you do one of the following:
+  -  * create directory ~/.ant/lib and place the junit jar there
+  -  * put the junit jar in $ANT_HOME/lib
+  -  * run ant as "ant -lib path-to-junit-jar"
+  -  * put the junit jar in $CLASSPATH
+  -
+  - Note when building JCL for release it is strongly recommended that a 1.2 JVM
+  - is used for the main compile and the home.jdk4 property used to specify
+  - the path to a 1.4 J2SDK. This will be used to compile those classes
+  - which require the 1.4 API. 
+  -
+  - $Id: build.xml 587227 2007-10-22 20:08:26Z skitching $
+  -->
+
+<project name="Logging" default="all" basedir=".">
+
+
+<!-- ========== Initialize Properties ===================================== -->
+
+
+  <property file="build.properties"/>                <!-- Component local   -->
+  <property file="../build.properties"/>             <!-- Commons local     -->
+  <property file="${user.home}/build.properties"/>   <!-- User local        -->
+
+
+<!-- ========== External Dependencies ===================================== -->
+
+
+  <!-- The directories corresponding to your necessary dependencies -->
+  <property name="junit.home"              value="/usr/local/junit3.5"/>
+  <property name="jakarta.home"            value="../.."/>
+  <property name="commons.home"            value="../.."/>
+
+  <!--
+    - The names of the unit tests to run. By default all tests are run, but
+    - this can be overridden from the command line by something like:
+    -   ant -Dtestmatch=**/FooTestCase test
+    -->
+  <property name="testmatch" value="**/*TestCase"/>
+
+
+<!-- ========== Derived Values ============================================ -->
+
+
+  <!-- The locations of necessary jar files -->
+  <property name="junit.jar"               value="junit-3.8.1.jar"/>
+  <property name="log4j12.jar"             value="log4j-1.2.12.jar"/>
+  <property name="log4j13.jar"             value="log4j-1.3.0.jar"/>
+  <property name="logkit.jar"              value="logkit-1.0.1.jar"/>
+  <property name="avalon-framework.jar"    value="avalon-framework-4.1.3.jar"/>
+  <property name="servletapi.jar"          value="servletapi-2.3.jar"/>
+
+
+<!-- ========== Component Declarations ==================================== -->
+
+
+  <!-- The name of this component -->
+  <property name="component.name"          value="logging"/>
+
+  <!-- The primary package name of this component -->
+  <property name="component.package"       value="org.apache.commons.logging"/>
+
+  <!-- The title of this component -->
+  <property name="component.title"         value="Logging Wrapper Library"/>
+
+  <!-- The current version number of this component -->
+  <property name="component.version"       value="1.1.1-SNAPSHOT"/>
+
+  <!-- The base directory for compilation targets -->
+  <property name="build.home"              value="${basedir}/target"/>
+
+  <!-- The base directory for component configuration files -->
+  <property name="conf.home"               value="src/conf"/>
+
+  <!-- The base directory for distribution targets -->
+  <property name="dist.home"               value="dist"/>
+
+  <!-- The base directory for releases  -->
+  <property name="artifacts.home"               value="artifacts"/>
+
+  <!-- The base directory for component sources -->
+  <property name="source.home"             value="src/java"/>
+
+  <!-- The base directory for unit test sources -->
+  <property name="test.home"               value="src/test"/>
+
+  <!-- jar names -->
+  <property name="core.jar.name" value="commons-${component.name}-${component.version}.jar"/>
+  <property name="api.jar.name" value="commons-${component.name}-api-${component.version}.jar"/>
+  <property name="adapters.jar.name" value="commons-${component.name}-adapters-${component.version}.jar"/>
+  <property name="src.ide.name" value="commons-${component.name}-${component.version}-ide.zip"/>
+
+  <!-- dist names -->
+  <property name="windows.dist.name" value="commons-${component.name}-${component.version}.zip"/>
+  <property name="nix.dist.name" value="commons-${component.name}-${component.version}.tar.gz"/>
+  
+<!-- ========== Compiler Defaults ========================================= -->
+
+  <!-- Version of java class files to generate. -->
+  <property name="target.version" value="1.1"/>
+
+  <!-- Version of java source to accept -->
+  <property name="source.version" value="1.2"/>
+
+  <!-- Should Java compilations set the 'debug' compiler option? -->
+  <property name="compile.debug"           value="true"/>
+
+  <!-- Should Java compilations set the 'deprecation' compiler option? -->
+  <property name="compile.deprecation"     value="false"/>
+
+  <!-- Should Java compilations set the 'optimize' compiler option? -->
+  <property name="compile.optimize"        value="false"/>
+
+  <!-- Construct compile classpath -->
+  <path id="compile.classpath">
+    <pathelement location="${build.home}/classes"/>
+    <pathelement location="${junit.jar}"/>
+    <pathelement location="${logkit.jar}"/>
+    <pathelement location="${avalon-framework.jar}"/>
+    <pathelement location="${servletapi.jar}"/>
+  </path>
+
+
+<!-- ========== Test Execution Defaults =================================== -->
+
+
+  <!-- 
+    - Construct unit test classpath (generic tests).
+    -
+    - Note that unit tests that use the PathableTestSuite approach don't need
+    - any of this (except junit). However unit tests that don't use PathableTestSuite
+    - to configure their classpath will need the basic classes to be provided
+    - via this mechanism.
+    -->
+  <path id="test.classpath">
+    <pathelement location="${build.home}/classes"/>
+    <pathelement location="${build.home}/tests"/>
+    <pathelement location="${junit.jar}"/>
+    <pathelement location="${logkit.jar}"/>
+    <pathelement location="${avalon-framework.jar}"/>
+    <pathelement location="${conf.home}"/>
+    <pathelement location="${servletapi.jar}"/>
+  </path>
+
+  <!-- Construct unit test classpath (Log4J tests) -->
+  <path id="test.classpath.log4j13">
+    <pathelement location="${build.home}/classes"/>
+    <pathelement location="${build.home}/tests"/>
+    <pathelement location="${junit.jar}"/>
+    <pathelement location="${log4j13.jar}"/>
+  </path>
+
+  <!-- Construct unit test classpath (Log4J tests) -->
+  <path id="test.classpath.log4j12">
+    <pathelement location="${build.home}/classes"/>
+    <pathelement location="${build.home}/tests"/>
+    <pathelement location="${junit.jar}"/>
+    <pathelement location="${log4j12.jar}"/>
+  </path>
+
+  <!-- Construct javadoc classpath -->
+  <path id="javadoc.classpath">
+    <path refid="compile.classpath"/>
+    <pathelement location="${log4j12.jar}"/>
+  </path>
+
+  <!-- Should all tests fail if one does? -->
+  <property name="test.failonerror"        value="true"/>
+
+  <!-- The test runner to execute -->
+  <property name="test.runner" value="junit.textui.TestRunner"/>
+
+  <!-- libs to pass to the tests -->
+  <property name="test.sysprops.testclasses" value="${build.home}/tests"/>
+  <property name="test.sysprops.log4j12" value="${log4j12.jar}"/>
+  <property name="test.sysprops.log4j13" value="${log4j13.jar}"/>
+  <property name="test.sysprops.logkit" value="${logkit.jar}"/>
+  <property name="test.sysprops.servlet-api" value="${servletapi.jar}"/>
+  <property name="test.sysprops.commons-logging" value="${build.home}/${core.jar.name}"/>
+  <property name="test.sysprops.commons-logging-api" value="${build.home}/${api.jar.name}"/>
+  <property name="test.sysprops.commons-logging-adapters" value="${build.home}/${adapters.jar.name}"/>
+  <propertyset id="test-lib-props">
+    <propertyref prefix="test.sysprops."/>
+    <mapper type="glob" from="test.sysprops.*" to="*"/>
+  </propertyset>
+
+<!-- ========== Executable Targets ======================================== -->
+
+
+  <!--
+    - Running this target will download all the necessary dependencies into the "lib" subdirectory.
+    -->
+  <property name="getlibs.base" value="http://repo1.maven.org/maven"/>
+  <target name="getlibs">
+    <mkdir dir="lib"/>
+    <get dest="lib/junit-3.8.1.jar" src="${getlibs.base}/junit/jars/junit-3.8.1.jar"/>
+    <get dest="lib/logkit-1.0.1.jar" src="${getlibs.base}/logkit/jars/logkit-1.0.1.jar"/>
+    <get dest="lib/avalon-framework-4.1.3.jar" src="${getlibs.base}/avalon-framework/jars/avalon-framework-4.1.3.jar"/>
+    <get dest="lib/log4j-1.2.12.jar" src="${getlibs.base}/log4j/jars/log4j-1.2.12.jar"/>
+    <get dest="lib/servletapi-2.3.jar" src="${getlibs.base}/servletapi/jars/servletapi-2.3.jar"/>
+  </target>
+
+  <target name="init"
+   description="Initialize and evaluate conditionals">
+    <echo message="-------- ${component.title} ${component.version} --------"/>
+    <filter  token="name"                  value="${component.name}"/>
+    <filter  token="package"               value="${component.package}"/>
+    <filter  token="version"               value="${component.version}"/>
+  </target>  
+  
+  <target name="prepare" depends="init"
+   description="Prepare build directory">
+
+    <echo>
+    Log4j12: ${log4j12.jar}
+    <!-- Note: log4j13 support is not available in the 1.1 release. -->
+    <!--Log4j13: ${log4j13.jar}-->
+    LogKit: ${logkit.jar}
+    Avalon-Framework: ${avalon-framework.jar}
+    </echo>
+
+    <mkdir dir="${build.home}"/>
+    <mkdir dir="${build.home}/classes"/>
+    <mkdir dir="${build.home}/conf"/>
+    <mkdir dir="${build.home}/tests"/>
+  </target>
+
+
+  <target name="static" depends="prepare"
+   description="Copy static files to build directory">
+    <tstamp/>
+    <copy  todir="${build.home}/conf" filtering="on">
+      <fileset dir="${conf.home}" includes="*.MF"/>
+      <fileset dir="${conf.home}" includes="*.properties"/>
+    </copy>
+  </target>
+
+  <target name="compile" depends="static,compile-only"
+          description="Compile shareable components"/>
+
+  <target name='discovery' depends='init'>
+    <available property="jdk.1.4.present"
+               classname="java.util.logging.Logger"/>
+
+    <available property="logkit.present"
+               classpathref="compile.classpath"
+               classname="org.apache.log.Logger"/>
+
+    <available property="avalon-framework.present"
+               classpathref="compile.classpath"
+               classname="org.apache.avalon.framework.logger.Logger"/>
+
+    <available file="${log4j12.jar}" property="log4j12.present"/>
+    <available file="${log4j13.jar}" property="log4j13.present"/>
+    <available file="${build.home}/docs" property="maven.generated.docs.present"/>
+  </target>
+
+  <target name="log4j12-warning" unless='log4j12.present' depends='init,discovery'>
+    <echo>
+    *** WARNING ***
+    Log4j 1.2 not found: Cannot Build Log4JLogger
+    </echo>
+  </target>
+  
+  <target name="log4j13-warning" unless='log4j13.present' depends='init,discovery'>
+    <!--
+      - Note: log4j13 support is not available in the 1.1 release.
+      - If we add it in a future release, the code below should be uncommented.
+      -->
+    <!--
+    <echo>
+    *** WARNING ***
+    Log4j 1.3 not found: Cannot Build Log4J13Logger
+    </echo>
+    -->
+  </target>
+  
+  <target name="logkit-warning" unless='logkit.present' depends='init,discovery'>
+    <echo>
+    *** WARNING ***
+    LogKit not found: Cannot Build LogKitLogger
+    </echo>
+  </target>
+  
+  <target name="avalon-framework-warning" unless='avalon-framework.present' depends='init,discovery'>
+    <echo>
+    *** WARNING ***
+    Avalon-Framework not found: Cannot Build AvalonLogger
+    </echo>
+  </target>
+  
+  <target name="jdk1.4-warning" unless='jdk.1.4.present' depends='init,discovery'>
+    <echo>
+    *** WARNING ***
+    JDK 1.4 not present: Cannot Build Jdk14Logger
+    </echo>
+  </target>
+  
+  <target name="log4j12-test-warning" unless='log4j12.jar' depends='init,discovery'>
+    <echo>
+    *** WARNING ***
+    Log4J 1.2.x Jar not found: Cannot execute 1.2.x tests
+    </echo>
+  </target>
+    
+  <target name='warning' 
+    depends='log4j12-warning,log4j13-warning,logkit-warning,jdk1.4-warning,avalon-framework-warning,compile-1.4'/>
+
+  <target name="compile-only" 
+    depends="prepare,discovery,warning,show-lib-presence,compile-non-log4j,compile-log4j12,compile-log4j13,build-jar"/>
+
+  <target name="show-lib-presence">
+    <echo  message="jdk.1.4.present=${jdk.1.4.present}"/>
+    <echo  message="log4j12.present=${log4j12.present}"/>
+    <!-- Note: log4j13 support is not available in the 1.1 release. -->
+    <!--<echo  message="log4j13.present=${log4j13.present}"/>-->
+    <echo  message="logkit.present=${logkit.present}"/>
+    <echo  message="avalon-framework.present=${avalon-framework.present}"/>
+  </target>
+
+  <target name="compile-non-log4j" depends="prepare,discovery">
+    <!-- compile everything except Log4J classes -->
+    <javac srcdir="${source.home}"
+           destdir="${build.home}/classes"
+           debug="${compile.debug}"
+           deprecation="${compile.deprecation}"
+           optimize="${compile.optimize}"
+           source="${source.version}"
+           target="${target.version}">
+
+      <classpath refid="compile.classpath"/>
+    
+      <exclude name="org/apache/commons/logging/impl/Log4J*.java"/>
+
+      <exclude name="org/apache/commons/logging/impl/Jdk13LumberjackLogger.java"
+               unless="jdk.1.4.present"/>
+      <exclude name="org/apache/commons/logging/impl/Jdk14Logger.java"
+               unless="jdk.1.4.present"/>
+      <exclude name="org/apache/commons/logging/impl/LogKitLogger.java"
+               unless="logkit.present"/>
+      <exclude name="org/apache/commons/logging/impl/AvalonLogger.java"
+               unless="avalon-framework.present"/>
+    </javac>
+  </target>
+
+  <target name="compile-1.4" depends="prepare,discovery,compile-non-log4j" if='executable.javac1.4'>
+    <!-- 
+      - Compiles those classes which require a 1.4+ JSDK.
+      - This target will only be executed when ant is running a pre-1.4 JVM
+      - and the home.jdk4 property is set.
+      - This configuration is typically used to create a release only.
+      -->
+    <echo  message=""/>
+    <echo  message="************************************************************"/>
+    <echo  message="    Compiling 1.4 only classes using compiler@${executable.javac1.4}"/>
+    <echo  message="************************************************************"/>
+    <echo  message=""/>
+    <javac srcdir="${source.home}"
+           destdir="${build.home}/classes"
+           debug="${compile.debug}"
+           deprecation="${compile.deprecation}"
+           optimize="${compile.optimize}"
+           source="${source.version}"
+           target="${target.version}"
+           compiler='javac1.4'
+           fork='yes'
+           executable='${executable.javac1.4}'>
+
+      <classpath refid="compile.classpath"/>
+    
+      <include name="org/apache/commons/logging/impl/Jdk13LumberjackLogger.java"
+               unless="jdk.1.4.present"/>
+      <include name="org/apache/commons/logging/impl/Jdk14Logger.java"
+               unless="jdk.1.4.present"/>
+    </javac>
+  </target>
+
+  <target name="compile-log4j12" depends="prepare,discovery">
+    <!-- compile the log4j1.2 support classes -->
+    <javac srcdir="${source.home}"
+           destdir="${build.home}/classes"
+           debug="${compile.debug}"
+           deprecation="${compile.deprecation}"
+           optimize="${compile.optimize}"
+           source="${source.version}"
+           target="${target.version}">
+
+      <classpath refid="compile.classpath"/>
+      <classpath>
+        <!--
+        <pathelement refid="compile.classpath"/>
+        <classpath refid="compile.classpath"/>
+        -->
+        <pathelement location="${log4j12.jar}"/> 
+      </classpath>
+
+      <include name="org/apache/commons/logging/impl/Log4JLogger.java"
+               if="log4j12.present"/>
+    </javac>
+  </target>
+
+  <target name="compile-log4j13" depends="prepare,discovery">
+    <!-- compile the log4j1.3 support classes -->
+    <javac srcdir="${source.home}"
+           destdir="${build.home}/classes"
+           debug="${compile.debug}"
+           deprecation="${compile.deprecation}"
+           optimize="${compile.optimize}"
+           source="${source.version}"
+           target="${target.version}">
+
+      <classpath refid="compile.classpath"/>
+      <classpath>
+        <pathelement location="${log4j13.jar}"/> 
+      </classpath>
+
+    <!--
+      - Note: log4j13 support not available in 1.1 release. However if we do add it
+      - in a future release, this entry will pick it up. In the meantime, this
+      - simply compiles no classes.
+      -->
+      <include name="org/apache/commons/logging/impl/Log4J13Logger.java"
+               if="log4j13.present"/>
+    </javac>
+  </target>
+
+  <target name="build-jar">
+    <copy  todir="${build.home}/classes" filtering="on">
+      <fileset dir="${source.home}" excludes="**/*.java"/>
+    </copy>
+    <mkdir      dir="${build.home}/classes/META-INF"/>
+    <copy      file="LICENSE.txt"
+              todir="${build.home}/classes/META-INF"/>
+    <copy      file="NOTICE.txt"
+              todir="${build.home}/classes/META-INF"/>
+
+    <jar jarfile="${build.home}/${core.jar.name}"
+         basedir="${build.home}/classes"
+         manifest="${build.home}/conf/MANIFEST.MF">
+      <include name="org/apache/commons/logging/**" />
+      <include name="META-INF/LICENSE.txt"/>
+      <include name="META-INF/NOTICE.txt"/>
+      <exclude name="**/package.html"/>
+    </jar>
+
+    <jar jarfile="${build.home}/${api.jar.name}"
+         basedir="${build.home}/classes"
+         manifest="${build.home}/conf/MANIFEST.MF">
+      <include name="org/apache/commons/logging/*.class" />
+      <include name="org/apache/commons/logging/impl/LogFactoryImpl*.class" />
+      <include name="org/apache/commons/logging/impl/WeakHashtable*.class" />
+      <include name="org/apache/commons/logging/impl/SimpleLog*.class" />
+      <include name="org/apache/commons/logging/impl/NoOpLog*.class" />
+      <include name="org/apache/commons/logging/impl/Jdk14Logger.class" />
+      <include name="META-INF/LICENSE.txt"/>
+      <include name="META-INF/NOTICE.txt"/>
+      <exclude name="**/package.html"/>
+    </jar>
+
+    <jar jarfile="${build.home}/${adapters.jar.name}"
+         basedir="${build.home}/classes"
+         manifest="${build.home}/conf/MANIFEST.MF">
+      <include name="org/apache/commons/logging/impl/**.class" />
+      <include name="META-INF/LICENSE.txt"/>
+      <include name="META-INF/NOTICE.txt"/>
+      <exclude name="org/apache/commons/logging/impl/WeakHashtable*.class" />
+      <exclude name="org/apache/commons/logging/impl/LogFactoryImpl*.class" />
+    </jar>
+  </target>
+
+  <target name='compile.jdk1.4.tests' if='jdk.1.4.present'>
+    <javac  srcdir="${test.home}"
+           destdir="${build.home}/tests"
+             debug="${compile.debug}"
+       deprecation="${compile.deprecation}"
+          optimize="${compile.optimize}"
+            source="${source.version}"
+            target="${target.version}">
+      <classpath refid="test.classpath"/>
+        <include name='**/jdk14/**'/>
+    </javac>
+  </target>
+
+  <target name='compile.log4j.tests' if='log4j12.present'>
+    <javac  srcdir="${test.home}"
+           destdir="${build.home}/tests"
+             debug="${compile.debug}"
+       deprecation="${compile.deprecation}"
+          optimize="${compile.optimize}"
+            source="${source.version}"
+            target="${target.version}">
+      <classpath refid="test.classpath.log4j12"/>
+        <include name='**/log4j/**'/>
+        <!-- NOTE -->
+        <!--
+        Pathable tests do not reference the Log4J Logger directly
+        but try to load them by reflection from particular loaders.
+        They will therefore fail unless this logger is available.
+        -->
+        <include name='**/pathable/**'/>
+        <!-- END NOTE -->
+    </javac>
+  </target>
+
+
+  <target name='compile.avalon.tests' if='avalon-framework.present'>
+    <javac  srcdir="${test.home}"
+           destdir="${build.home}/tests"
+             debug="${compile.debug}"
+       deprecation="${compile.deprecation}"
+          optimize="${compile.optimize}"
+            source="${source.version}"
+            target="${target.version}">
+      <classpath refid="test.classpath"/>
+      <include name='**/avalon/**'/>
+    </javac>
+  </target>
+  
+  <target name='compile.logkit.tests' if='logkit.present'>
+    <javac  srcdir="${test.home}"
+           destdir="${build.home}/tests"
+             debug="${compile.debug}"
+       deprecation="${compile.deprecation}"
+          optimize="${compile.optimize}"
+            source="${source.version}"
+            target="${target.version}">
+      <classpath refid="test.classpath"/>
+      <include name='**/logkit/**'/>
+    </javac>
+  </target>
+
+  <target name="compile.tests" depends="compile"
+   description="Compile unit test cases">
+    <javac  srcdir="${test.home}"
+           destdir="${build.home}/tests"
+             debug="${compile.debug}"
+       deprecation="${compile.deprecation}"
+          optimize="${compile.optimize}"
+            source="${source.version}"
+            target="${target.version}">
+      <classpath refid="test.classpath"/>
+      <exclude name='**/jdk14/**'/>
+      <exclude name='**/log4j/**'/>
+      <!-- NOTE -->
+      <!--
+      Pathable tests do not reference the Log4J Logger directly
+      but try to load them by reflection from particular loaders.
+      They will therefore fail unless this logger is available.
+      -->
+      <exclude name='**/pathable/**'/>
+      <!-- END NOTE -->
+      <exclude name='**/avalon/**'/>
+      <exclude name='**/logkit/**'/>
+    </javac>
+    <antcall target='compile.log4j.tests'/>
+    <antcall target='compile.jdk1.4.tests'/>
+    <antcall target='compile.avalon.tests'/>
+    <antcall target='compile.logkit.tests'/>
+    <copy    todir="${build.home}/tests" filtering="on">
+      <fileset dir="${test.home}" excludes="**/*.java"/>
+    </copy>
+    <jar jarfile="${build.home}/commons-${component.name}-appender.jar"
+         basedir="${build.home}/tests"
+        manifest="${build.home}/conf/MANIFEST.MF">
+      <include name="org/apache/commons/logging/log4j/CustomConfig.properties"
+                 if="log4j12.present"/>
+      <include name="org/apache/commons/logging/log4j/TestAppender.class"
+                 if="log4j12.present"/>
+    </jar>
+    <jar jarfile="${build.home}/commons-${component.name}-tests.jar"
+         basedir="${build.home}/tests"
+        manifest="${build.home}/conf/MANIFEST.MF">
+      <exclude name="org/apache/commons/logging/Wrapper.class"/>
+      <exclude name="org/apache/commons/logging/jdk14/TestHandler.class"
+                 if="jdk.1.4.present"/>
+    </jar>
+    <jar jarfile="${build.home}/commons-${component.name}-wrapper.jar"
+         basedir="${build.home}/tests"
+        manifest="${build.home}/conf/MANIFEST.MF">
+      <include name="org/apache/commons/logging/Wrapper.class"/>
+      <include name="org/apache/commons/logging/jdk14/TestHandler.class"
+                 if="jdk.1.4.present"/>
+    </jar>
+
+  </target>
+
+
+  <target name="clean" description="Clean build and distribution directories">
+    <mkdir dir='${build.home}'/>
+    <delete includeemptydirs='yes'>
+      <fileset dir="${build.home}" excludes='docs/**/*'/>
+    </delete>
+    <delete    dir="${dist.home}"/>
+    <delete    dir="${artifacts.home}"/>
+  </target>
+
+
+  <target name="all" depends="clean,compile,test"
+   description="Clean and compile all components"/>
+
+
+  <target name="maven-docs-warning" unless="maven.generated.docs.present" depends="discovery">
+    <echo>
+    *** WARNING ***
+    Maven generated documentation not found: Documentation distribution will be empty
+    </echo>
+  </target>
+  
+
+  <target name="dist" depends="all,maven-docs-warning"
+     description="Create binary distribution">
+  
+    <!--
+      - Maven is used to generate the documentation.
+      - However, we cannot assume that it has been run.
+      - So, create the appropriate directories.
+      -->
+    <mkdir dir='${build.home}'/>
+    <mkdir dir='${build.home}/docs'/>
+    <mkdir dir='${build.home}/docs/apidocs'/>
+  
+    <!--
+      - Create a dist directory to hold all the files that go into a distribution.
+      - Copy the needed files from the build directory to the dist directory.
+      -->
+    <mkdir dir="${dist.home}"/>
+    <copy todir="${dist.home}">
+      <fileset dir=".">
+        <include name="LICENSE.txt"/>
+        <include name="NOTICE.txt"/>
+        <include name="RELEASE-NOTES.txt"/>
+      </fileset>
+      <fileset dir="${build.home}">
+        <include name="${core.jar.name}"/>
+        <include name="${api.jar.name}"/>
+        <include name="${adapters.jar.name}"/>
+      </fileset>
+    </copy>
+  
+    <!-- Copy documentation generated by maven -->
+    <mkdir dir="${dist.home}/docs"/>
+    <copy todir="${dist.home}/docs">
+      <fileset dir="${build.home}/docs"/>
+    </copy>
+  
+    <!--
+      - And copy the source too; we don't have separate source and binary distributions
+      - for logging; the source is so small there's little point.
+      -->
+    <mkdir dir="${dist.home}/src"/>
+    <copy todir="${dist.home}/src" filtering="on">
+      <fileset dir="${source.home}"/>
+    </copy>
+    <zip destfile='${dist.home}/${src.ide.name}'>
+      <zipfileset dir='${dist.home}/src'/>
+      <zipfileset dir='${dist.home}/docs/apidocs'/>
+      <zipfileset dir='${dist.home}' prefix='META-INF'>
+          <include name="LICENSE.txt"/>
+          <include name="NOTICE.txt"/>
+      </zipfileset>
+    </zip>
+  
+    <!-- Create release artifacts in the artifacts directory -->
+    <mkdir dir="${artifacts.home}"/>
+    <fixcrlf srcdir='${dist.home}' eol='dos' includes='**/*.txt,**/*.java,**/*.html'/>
+    <zip destfile='${artifacts.home}/${windows.dist.name}'>
+      <zipfileset dir='${dist.home}' prefix='commons-${component.name}-${component.version}'/>
+    </zip>
+    <fixcrlf srcdir='${dist.home}' eol='unix' includes='**/*.txt,**/*.java,**/*.html'/>
+    <tar compression="gzip" destfile='${artifacts.home}/${nix.dist.name}' longfile='gnu'>
+      <tarfileset dir='${dist.home}' prefix='commons-${component.name}-${component.version}'/>
+    </tar>
+    <copy todir="${artifacts.home}">
+      <fileset dir="${build.home}">
+        <include name="${core.jar.name}"/>
+        <include name="${api.jar.name}"/>
+        <include name="${adapters.jar.name}"/>
+      </fileset>
+    </copy>
+  </target>
+
+
+<!-- ========== Unit Test Targets ========================================= -->
+
+
+  <!--
+    - Target to run all unit tests.
+    -
+    - The batchtest task auto-detects what tests are available without
+    - any need to define TestSuite objects in the code to compose
+    - sets of tests to be run.
+    -
+    - Details of the unit test results for each TestCase will appear in
+    - a file in directory ${build.home}/test-reports, together with any
+    - output to stdout or stderr generated by the test code.
+    -
+    - If you're having problems running this target due to the use of
+    - the "junit" task below, see the comments at the head of this file.
+    - 
+    - Individual tests (or subsets of tests) can be run by doing
+    -   ant -Dtestmatch=**/FooTestCase testall
+    -->
+
+  <target name="test" depends="log4j12-test-warning, compile.tests"
+   description="Run all unit tests">
+    <echo message="Test output can be found in directory ${build.home}/test-reports."/>
+    <delete dir="${build.home}/test-reports"/>
+    <mkdir dir="${build.home}/test-reports"/>
+
+      <echo message="executing tests [${testmatch}.java]"/>
+    <!--
+      - Note that the fork/forkmode settings define default behaviour for tests. 
+      - The <test> and <batchtest> tags can override these settings if needed.
+      - The default settings cause a single VM to be created in which all of
+      - the tests are then run. 
+      -->
+    <junit printsummary="off" showoutput="no" fork="yes" forkmode="once" failureproperty="test.failure">
+      <!-- plain output to file; brief output to console. -->
+      <formatter type="plain"/>
+      <formatter usefile="false" type="brief"/>
+
+      <!-- 
+        - Provide a set of properties pointing to the logging libs for
+        - the use of the PathableClassLoader class used by some unit tests.
+        -->
+      <syspropertyset refid="test-lib-props"/>
+      <classpath refid="test.classpath"/>
+
+      <!--
+        - Uncomment this to enable logging diagnostics for tests
+        - <jvmarg value="-Dorg.apache.commons.logging.diagnostics.dest=STDERR"/>
+        -->
+
+      <!--
+        - Auto-detect the tests to run. Checking the ${build.home}/tests
+        - directory for .class files rather than the src/test directory
+        - for .java files means that when we run the tests on platforms
+        - where some components (eg jdk14 logging) is not available, 
+        - just ensuring the tests are skipped from the compile will
+        - also cause them to be skipped from the testing.
+        -
+        - This does introduce the danger that if tests accidentally
+        - fail to compile then we won't notice it here. However that
+        - should have been reported earlier anyway.
+        -->
+      <batchtest todir="${build.home}/test-reports">
+        <fileset dir="${build.home}/tests">
+          <include name="${testmatch}.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <fail if="test.failure">
+      One or more unit tests failed.
+    </fail>
+  </target>
+
+</project>

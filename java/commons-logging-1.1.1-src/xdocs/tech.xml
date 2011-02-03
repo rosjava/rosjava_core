@@ -1,0 +1,653 @@
+<?xml version="1.0"?>
+
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<document>
+
+ <properties>
+  <title>Technology Guide</title>
+  <author email="dev@commons.apache.org">Commons Documentation Team</author>
+ </properties>
+
+ <body>
+    <section name='Overview'>
+      <subsection name='Contents'>
+        <ul>
+          <li>
+          Overview
+            <ul>
+              <li>
+              Contents
+              </li>
+              <li>
+              <a href='#Introduction'>Introduction</a>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <a href='#A Short Introduction to Class Loading and Class Loaders'>
+            A Short Introduction to Class Loading and Class Loaders
+            </a>
+              <ul>
+              <li>
+                <a href='#Preamble'>
+            Preamble
+                </a>
+              </li>
+                  <li>
+                    <a href='#Resolution Of Symbolic References'>
+                Resolution Of Symbolic References
+                    </a>
+                  </li>
+                <li>
+                <a href='#Loading'>
+            Loading
+                </a>
+              </li>
+              <li>
+                <a href='#Linking'>
+            Linking
+                </a>
+              </li>
+              <li>
+                <a href='#Loading Classes'>
+            Loading Classes
+                </a>
+              </li>
+                <li>
+                  <a href='#Bootstrap Classloader'>
+            Bootstrap Classloader
+                </a>
+              </li>
+              <li>
+                <a href='#Runtime Package'>
+            Runtime Package
+                </a>
+                </li>
+              <li>
+                <a href='#Loader Used To Resolve A Symbolic Reference'>
+            Loader Used To Resolve A Symbolic Reference
+                </a>
+              </li>
+              <li>
+                <a href='#Bibliography'>
+            Bibliography
+                </a>
+              </li>
+          </ul>
+        </li>
+                <li>
+                  <a href='#A Short Guide To Hierarchical Class Loading'>
+          A Short Guide To Hierarchical Class Loading
+                  </a>
+          <ul>
+            <li>
+              <a href='#Delegating Class Loaders'>
+          Delegating Class Loaders
+              </a>
+            </li>
+            <li>
+              <a href='#Parent-First And Child-First Class Loaders'>
+          Parent-First And Child-First Class Loaders
+              </a>
+            </li>
+            <li>
+              <a href='#Class ClassLoader'>
+          Class ClassLoader
+              </a>
+            </li>
+            <li>
+              <a href='#Context ClassLoader'>
+          Context ClassLoader
+              </a>
+            </li>
+            <li>
+              <a href='#The Context Classloader in Container Applications'>
+          The Context Classloader in Container Applications
+              </a>
+            </li>
+            <li>
+              <a href='#Issues with Context ClassLoaders'>
+          Issues with Context ClassLoaders
+              </a>
+            </li>
+            <li>
+              <a href='#Reflection And The Context ClassLoader'>
+          Reflection And The Context ClassLoader
+              </a>
+            </li>
+            <li>
+              <a href='#More Information'>
+          More Information
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href='#A Short Theory Guide To JCL'>
+          A Short Theory Guide To JCL
+          </a>
+          <ul>
+            <li>
+              <a href='#Isolation And The Context Class Loader'>
+          Isolation And The Context Class Loader
+              </a>
+            </li>
+            <li>
+              <a href='#Log And LogFactory'>
+          Log And LogFactory
+              </a>
+            </li>
+            <li>
+              <a href='#Log Implementations'>
+          Log Implementations
+              </a>
+            </li>
+              <li>
+                <a href='#Using Reflection To Load Log Implementations'>
+            Using Reflection To Load Log Implementations
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </subsection>
+    <subsection name='Introduction'>
+      <p>
+  This guide is aimed at describing the technologies that JCL developers and expert users
+  (and users who need to become experts)
+  should be familiar with. The aim is to give an understanding whilst being precise but brief.
+  Details which are not relevant for JCL have been suppressed.
+  References have been included.
+      </p>
+      <p>
+  These topics are a little difficult and it's easy for even experienced developers to make
+  mistakes. We need you to help us get it right! Please submit corrections, comments, additional references
+  and requests for clarification
+  by either:
+      </p>
+      <ul>
+        <li>
+  posting to the <a href='http://commons.apache.org/mail-lists.html'>Apache Commons dev mailing list</a> or
+        </li>
+        <li>
+  creating an issue in <a href='http://issues.apache.org/jira/browse/LOGGING/'>JIRA</a>.
+        </li>
+      </ul>
+      <p>
+  TIA
+      </p>
+    </subsection>
+
+  </section>
+  <section name='A Short Introduction to Class Loading and Class Loaders'>
+    <subsection name='Preamble'>
+      <p>
+  This is intended to present a guide to the process by which Java bytecode uses bytecode in other classes
+  from the perspective of the language and virtual machine specifications. The focus will be on deciding
+  which bytecode will be used (rather than the mechanics of the usage). It focusses on facts and terminology.
+      </p>
+      <p>
+  The process is recursive: it is therefore difficult to pick a starting point.
+  Sun's documentation starts from the persective of the startup of a new application.
+  This guide starts from the perspective of an executing application.
+      </p>
+      <p>
+  During this discussion, please assume that each time that <em>class</em> is mentioned,
+  the comments applied equally well to interfaces.
+      </p>
+      <p>
+  This document is targeted at Java 1.2 and above.
+      </p>
+      </subsection>
+       <subsection name='Resolution Of Symbolic References'>
+      <p>
+  (<a href='http://java.sun.com/docs/books/jls/second_edition/html/execution.doc.html#44524'>LangSpec 12.3.3</a>)
+  The bytecode representation of a class contains symbolic names for other classes referenced.
+      </p>
+      <p>
+        <em>
+  In practical development terms: If a class is imported (either explicitly in the list of imports at the top of
+  the source file or implicitly through a fully qualified name in the source code) it is referenced symbolically.
+        </em>
+      </p>
+      <p>
+  (<a href='http://java.sun.com/docs/books/vmspec/2nd-edition/html/ConstantPool.doc.html#73492'>VMSpec 5.4.3</a>)
+  Resolution of a symbolic reference occurs dynamically at runtime and is carried out by
+  the Java Virtual Machine. Resolution of a symbolic reference requires loading and linking of the new class.
+      </p>
+      <p>
+        <em>
+  Note: references are not statically resolved at compile time.
+        </em>
+      </p>
+      </subsection>
+    <subsection name='Loading'>
+      <p>
+  (<a href='http://java.sun.com/docs/books/vmspec/2nd-edition/html/Concepts.doc.html#19175'>VMSpec 2.17.2</a>)
+  Loading is the name given to the process by which a binary form of a class is obtained
+  by the Java Virtual Machine.
+  Java classes are always loaded and linked dynamically by the Java Virtual Machine
+  (rather than statically by the compiler).
+      </p>
+      <p>
+        <em>
+  In practical development terms:
+  This means that the developer has no certain knowledge about the actual
+  bytecode that will be used to execute any external call (one made outside the class). This is determined only
+  at execution time and is affected by the way that the code is deployed.
+        </em>
+      </p>
+      </subsection>
+    <subsection name='Linking'>
+      <p>
+  (<a href='http://java.sun.com/docs/books/vmspec/2nd-edition/html/Concepts.doc.html#22574'>VMSpec 2.17.3</a>)
+  Linking is the name used for combining the
+  binary form of a class into the Java Virtual Machine. This must happen before the class can be used.
+      </p>
+      <p>
+  (<a href='http://java.sun.com/docs/books/vmspec/2nd-edition/html/Concepts.doc.html#22574'>VMSpec 2.17.3</a>)
+  Linking is composed of verification, preparation and resolution (of symbolic references).
+  Flexibility is allowed over the timing of resolution. (Within limit) this may happen at any time after
+  preparation and before that reference is used.
+      </p>
+      <p>
+        <em>
+  In practical development terms: This means that different JVMs may realize that a reference cannot be
+  resolved at different times during execution. Consequently, the actual behaviour cannot be precisely predicted
+  without intimate knowledge of the JVM (on which the bytecode will be executed).
+  This makes it hard to give universal guidance to users.
+        </em>
+      </p>
+      </subsection>
+
+    <subsection name='Loading Classes'>
+      <p>
+  (<a href='http://java.sun.com/docs/books/vmspec/2nd-edition/html/Concepts.doc.html#19175'>VMSpec 2.17.2</a>)
+  The loading process is performed by a <code>ClassLoader</code>.
+      </p>
+      <p>
+  (<a href='http://java.sun.com/docs/books/vmspec/2nd-edition/html/ConstantPool.doc.html#72007'>VMSpec 5.3</a>)
+  A classloader may create a class either by delegation or by defining it directly.
+  The classloader that initiates loading of a class is known as the initiating loader.
+  The classloader that defines the class is known as the defining loader.
+      </p>
+      <p>
+        <em>
+  In practical terms: understanding and appreciating this distinction is crucial when debugging issues
+  concerning classloaders.
+        </em>
+      </p>
+      </subsection>
+
+    <subsection name='Bootstrap Classloader'>
+      <p>
+  (<a href='http://java.sun.com/docs/books/vmspec/2nd-edition/html/ConstantPool.doc.html#72007'>VMSPEC 5.3</a>)
+  The bootstrap is the base <code>ClassLoader</code> supplied by the Java Virtual Machine.
+  All others are user (also known as application) <code>ClassLoader</code> instances.
+      </p>
+      <p>
+        <em>
+  In practical development terms: The System classloader returned by <code>Classloader.getSystemClassLoader()</code>
+  will be either the bootstrap classloader or a direct descendent of the bootstrap classloader.
+  Only when debugging issues concerning the system classloader should there be any need to consider the detailed
+  differences between the bootstrap classloader and the system classloader.
+        </em>
+      </p>
+      </subsection>
+    <subsection name='Runtime Package'>
+      <p>
+  (<a href='http://java.sun.com/docs/books/vmspec/2nd-edition/html/ConstantPool.doc.html#72007'>VMSpec 5.3</a>)
+  At runtime, a class (or interface) is determined by its fully qualified name
+  and by the classloader that defines it. This is known as the class's runtime package.
+      </p>
+      <p>
+  (<a href='http://java.sun.com/docs/books/vmspec/2nd-edition/html/ConstantPool.doc.html#75929'>VMSpec 5.4.4</a>)
+  Only classes in the same runtime package are mutually accessible.
+      </p>
+      <p>
+        <em>
+  In practical development terms: two classes with the same symbolic name can only be used interchangably
+  if they are defined by the same classloader. A classic symptom indicative of a classloader issue is that
+  two classes with the same fully qualified name are found to be incompatible during a method call.
+  This may happen when a member is expecting an interface which is (seemingly) implemented by a class
+  but the class is in a different runtime package after being defined by a different classloader. This is a
+  fundamental java language security feature.
+        </em>
+      </p>
+      </subsection>
+
+    <subsection name='Loader Used To Resolve A Symbolic Reference'>
+      <p>
+  (<a href='http://java.sun.com/docs/books/vmspec/2nd-edition/html/ConstantPool.doc.html#72007'>VMSpec 5.3</a>)
+  The classloader which defines the class (whose reference is being resolved) is the one
+  used to initiate loading of the class referred to.
+      </p>
+      <p>
+        <em>
+  In practial development terms: This is very important to bear in mind when trying to solve classloader issues.
+  A classic misunderstanding is this: suppose class A defined by classloader C has a symbolic reference to
+  class B and further that when C initiates loading of B, this is delegated to classloader D which defines B.
+  Class B can now only resolve symbols that can be loaded by D, rather than all those which can be loaded by C.
+  This is a classic recipe for classloader problems.
+        </em>
+      </p>
+      </subsection>
+
+    <subsection name='Bibliography'>
+      <ul>
+        <li>
+    <a href='http://java.sun.com/docs/books/vmspec/'>VMSpec</a> <em>The Java Virtual Machine Specification, Second Edition</em>
+        </li>
+        <li>
+    <a href='http://java.sun.com/docs/books/jls/'>LangSpec</a> <em>The Java Language Specification, Second Edition</em>
+        </li>
+      </ul>
+      </subsection>
+  </section>
+  <section name='A Short Guide To Hierarchical Class Loading'>
+    <subsection name='Delegating Class Loaders'>
+      <p>
+  When asked to load a class, a class loader may either define the class itself or delegate.
+  The base <code>ClassLoader</code> class insists that every implementation has a parent class loader.
+  This delegation model therefore naturally forms a tree structure rooted in the bootstrap classloader.
+      </p>
+      <p>
+  Containers (i.e. applications such as servlet engines or application servers
+  that manage and provide support services for a number of "contained" applications
+  that run inside of them) often use complex trees to allow isolation of different applications
+  running within the container. This is particularly true of J2EE containers.
+      </p>
+    </subsection>
+
+    <subsection name='Parent-First And Child-First Class Loaders'>
+      <p>
+  When a classloader is asked to load a class, a question presents itself: should it immediately
+  delegate the loading to its parent (and thus only define those classes not defined by its parent)
+  or should it try to define it first itself (and only delegate to its parent those classes it does
+  not itself define). Classloaders which universally adopt the first approach are termed parent-first
+  and the second child-first.
+      </p>
+      <p>
+   <strong>Note:</strong> the term child-first (though commonly used) is misleading.
+   A better term (and one which may be encountered on the mailing list) is parent-last.
+   This more accurately describes the actual process of classloading performed
+   by such a classloader.
+      </p>
+      <p>
+  Parent-first loading has been the standard mechanism in the JDK
+  class loader, at least since Java 1.2 introduced hierarchical classloaders.
+      </p>
+      <p>
+  Child-first classloading has the advantage of helping to improve isolation
+  between containers and the applications inside them.  If an application
+  uses a library jar that is also used by the container, but the version of
+  the jar used by the two is different, child-first classloading allows the
+  contained application to load its version of the jar without affecting the
+  container.
+      </p>
+      <p>
+  The ability for a servlet container to offer child-first classloading
+  is made available, as an option, by language in the servlet spec (Section
+  9.7.2) that allows a container to offer child-first loading with
+  certain restrictions, such as not allowing replacement of java.* or
+  javax.* classes, or the container's implementation classes.
+      </p>
+      <p>
+  Though child-first and parent-first are not the only strategies possible,
+  they are by far the most common.
+  All other strategies are rare.
+  However, it is not uncommon to be faced with a mixture of parent-first and child-first
+  classloaders within the same hierarchy.
+      </p>
+    </subsection>
+
+    <subsection name='Class ClassLoader'>
+      <p>
+  The class loader used to define a class is available programmatically by calling
+  the <code>getClassLoader</code> method
+  on the class in question. This is often known as the class classloader.
+      </p>
+    </subsection>
+
+    <subsection name='Context ClassLoader'>
+      <p>
+  Java 1.2 introduces a mechanism which allows code to access classloaders
+  which are not the class classloader or one of its parents.
+  A thread may have a class loader associated with it by its creator for use
+  by code running in the thread when loading resources and classes.
+  This classloader is accessed by the <code>getContextClassLoader</code>
+  method on <code>Thread</code>. It is therefore often known as the context classloader.
+      </p>
+      <p>
+  Note that the quality and appropriateness of the context classloader depends on the
+  care with which the thread's owner manages it.
+      </p>
+    </subsection>
+
+    <subsection name='The Context Classloader in Container Applications'>
+      <p>
+  The Javadoc for
+  <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/Thread.html#setContextClassLoader(java.lang.ClassLoader)">
+  <code>Thread.setContextClassLoader</code></a> emphasizes the setting of the
+  context classloader as an aspect of thread creation.  However, in many
+  applications the context classloader is not fixed at thread creation but
+  rather is changed throughout the life of a thread as thread execution moves
+  from one context to another.  This usage of the context classloader is
+  particularly important in container applications.
+      </p>
+      <p>
+  For example, in a hypothetical servlet container, a pool of threads
+  is created to handle HTTP requests.  When created these threads have their
+  context classloader set to a classloader that loads container classes.
+  After the thread is assigned to handle a request, container code parses
+  the request and then determines which of the deployed web applications
+  should handle it. Only when the container is about to call code associated
+  with a particular web application (i.e. is about to cross an "application
+  boundary") is the context classloader set to the classloader used to load
+  the web app's classes.  When the web application finishes handling the
+  request and the call returns, the context classloader is set back to the
+  container classloader.
+      </p>
+      <p>
+  In a properly managed container, changes in the context classloader are
+  made when code execution crosses an application boundary.  When contained
+  application <code>A</code> is handling a request, the context classloader
+  should be the one used to load <code>A</code>'s resources. When application
+  <code>B</code> is handling a request, the context classloader should be
+  <code>B</code>'s.
+        </p>
+      <p>
+  While a contained application is handling a request, it is not
+  unusual for it to call system or library code loaded by the container.
+  For example, a contained application may wish to call a utility function
+  provided by a shared library.  This kind of call is considered to be
+  within the "application boundary", so the context classloader remains
+  the contained application's classloader.  If the system or library code
+  needs to load classes or other resources only visible to the contained
+  application's classloader, it can use the context classloader to access
+  these resources.
+      </p>
+      <p>
+  If the context classloader is properly managed, system and library code
+  that can be accessed by multiple applications can not only use it to load
+  application-specific resources, but also can use it to detect which
+  application is making a call and thereby provided services tailored to the
+  caller.
+      </p>
+    </subsection>
+
+    <subsection name='Issues with Context ClassLoaders'>
+      <p>
+  In practice, context classloaders vary in quality and issues sometimes arise
+  when using them.
+  The owner of the thread is responsible for setting the classloader.
+  If the context classloader is not set then it will default to the system
+  classloader.
+  Any container doing so will cause difficulties for any code using the context classloader.
+      </p>
+      <p>
+  The owner is also at liberty to set the classloader as they wish.
+  Containers may set the context classloader so that it is neither a child nor a parent
+  of the classloader that defines the class using that loader.
+  Again, this will cause difficulties.
+      </p>
+      <p>
+  Introduced in <a href='http://java.sun.com/j2ee/j2ee-1_3-fr-spec.pdf'>Java J2EE 1.3</a>
+  is a requirement for vendors to appropriately set the context classloader.
+  Section 6.2.4.8 (1.4 text):
+      </p>
+<source>
+This specification requires that J2EE containers provide a per thread
+context class loader for the use of system or library classes in
+dynamicly loading classes provided by the application.  The EJB
+specification requires that all EJB client containers provide a per
+thread context class loader for dynamicly loading system value classes.
+The per thread context class loader is accessed using the Thread method
+getContextClassLoader.
+
+The classes used by an application will typically be loaded by a
+hierarchy of class loaders. There may be a top level application class
+loader, an extension class loader, and so on, down to a system class
+loader.  The top level application class loader delegates to the lower
+class loaders as needed.  Classes loaded by lower class loaders, such as
+portable EJB system value classes, need to be able to discover the top
+level application class loader used to dynamicly load application
+classes.
+
+We require that containers provide a per thread context class loader
+that can be used to load top level application classes as described
+above.
+</source>
+      <p>
+  This specification leaves quite a lot of freedom for vendors.
+  (As well as using unconventional terminology and containing the odd typo.)
+  It is a difficult passage (to say the least).
+      </p>
+    </subsection>
+
+    <subsection name='Reflection And The Context ClassLoader'>
+      <p>
+  Reflection cannot bypass restrictions imposed by the java language security model, but, by avoiding symbolic
+  references, reflection can be used to load classes which could not otherwise be loaded. Another <code>ClassLoader</code>
+  can be used to load a class and then reflection used to create an instance.
+      </p>
+      <p>
+  Recall that the runtime packaging is used to determine accessibility.
+  Reflection cannot be used to avoid basic java security.
+  Therefore, the runtime packaging becomes an issue when attempting to cast classes
+  created by reflection using other class loaders.
+  When using this strategy, various modes of failure are possible
+  when common class references are defined by the different class loaders.
+      </p>
+      <p>
+  Reflection is often used with the context classloader. In theory, this allows a class defined in
+  a parent classloader to load any class that is loadable by the application.
+  In practice, this only works well when the context classloader is set carefully.
+      </p>
+    </subsection>
+
+    <subsection name='More Information'>
+      <ul>
+        <li>
+          Articles On Class Loaders And Class Loading
+          <ul>
+            <li>
+              <a
+    href='http://www.onjava.com/pub/a/onjava/2001/07/25/ejb.html'>
+  Article on J2EE class loading
+              </a>
+            </li>
+            <li>
+              <a
+    href='http://www.onjava.com/pub/a/onjava/2003/11/12/classloader.html'>
+  Article on class loading
+              </a>
+            </li>
+            <li>
+              <a
+    href='http://www.javaworld.com/javaworld/javaqa/2003-06/01-qa-0606-load.html'>
+  Article on context class loaders
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li>Specific Containers
+          <ul>
+            <li>
+              <a
+    href='http://tomcat.apache.org/tomcat-4.1-doc/class-loader-howto.html'>
+  Tomcat 4.1 ClassLoader Guide
+              </a>
+            </li>
+            <li>
+              <a
+    href='http://tomcat.apache.org/tomcat-5.0-doc/class-loader-howto.html'>
+  Tomcat 5.0 ClassLoader Guide
+              </a>
+            </li>
+            <li>
+              <a
+href='http://publib.boulder.ibm.com/infocenter/wasinfo/v6r0/index.jsp?topic=/com.ibm.websphere.express.doc/info/exp/ae/trun_classload_web.html'>
+  Classloading In WebSphere
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </subsection>
+  </section>
+
+  <section name='A Short Theory Guide To JCL'>
+    <subsection name='Isolation And The Context Class Loader'>
+      <p>
+  JCL takes the view that different context class loader indicate boundaries between applications
+  running in a container environment. Isolation requires that JCL honours these boundaries
+  and therefore allows different isolated applications to configure their logging systems
+  independently.
+      </p>
+      </subsection>
+      <subsection name='Log And LogFactory'>
+      <p>
+  Performance dictates that symbolic references to these classes are present in the calling application code
+  (reflection would simply be too slow). Therefore, these classes must be loadable by the classloader
+  that loads the application code.
+      </p>
+      </subsection>
+      <subsection name='Log Implementations'>
+      <p>
+  Performance dictates that symbolic references to the logging systems are present in the implementation
+  classes (again, reflection would simply be too slow). So, for an implementation to be able to function,
+  it is neccessary for the logging system to be loadable by the classloader that defines the implementing class.
+      </p>
+      </subsection>
+
+      <subsection name='Using Reflection To Load Log Implementations'>
+      <p>
+  However, there is actually no reason why <code>LogFactory</code> requires symbolic references to particular <code>Log</code>
+  implementations. Reflection can be used to load these from an appropriate classloader
+  without unacceptable performance degradation.
+  This is the strategy adopted by JCL.
+      </p>
+      <p>
+  JCL uses the context classloader to load the <code>Log</code> implementation.
+      </p>
+      </subsection>
+  </section>
+</body>
+</document>

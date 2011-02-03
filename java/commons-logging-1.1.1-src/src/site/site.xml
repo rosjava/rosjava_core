@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<project>
+  <bannerRight>
+    <name>Commons Logging</name>
+    <src>http://commons.apache.org/logging/images/logo.png</src>
+    <href>http://commons.apache.org/logging/</href>
+  </bannerRight>
+  <body>
+    <menu name="Commons Logging">
+      <item name="Overview"
+            href="/index.html"/>
+      <item name="User Guide"
+            href="/guide.html"/>
+      <item name="Tech Guide"
+            href="/tech.html"/>
+      <item name="Troubleshooting Guide"
+            href="/troubleshooting.html"/>
+      <item name="Wiki"
+            href="http://wiki.apache.org/commons/Logging"/>
+      <item name='JavaDoc'
+            href='/apidocs/index.html'/>
+      <item name="Release Notes"
+            href="/RELEASE-NOTES.txt"/>
+      <item name="Building"
+            href="/building.html"/>
+      <item name="Download"
+            href="http://commons.apache.org/downloads/download_logging.cgi"/>
+    </menu>
+    <menu name="1.1 Release">
+      <item name="Overview"
+            href="http://commons.apache.org/logging/commons-logging-1.1/index.html"/>
+      <item name="User Guide"
+            href="http://commons.apache.org/logging/commons-logging-1.1/guide.html"/>
+      <item name="Tech Guide"
+            href="http://commons.apache.org/logging/commons-logging-1.1/tech.html"/>
+      <item name="Troubleshooting Guide"
+            href="http://commons.apache.org/logging/commons-logging-1.1/troubleshooting.html"/>
+      <item name='JavaDoc'
+            href='http://commons.apache.org/logging/commons-logging-1.1/apidocs/index.html'/>
+      <item name="Release Notes"
+            href="http://commons.apache.org/logging/commons-logging-1.1/RELEASE-NOTES.txt"/>
+    </menu>
+    <menu name='1.0.4 Release'>
+      <item   name='Documentation'
+              href='http://commons.apache.org/logging/commons-logging-1.0.4/docs/'/>
+      <item   name='JavaDoc'
+              href='http://commons.apache.org/logging/commons-logging-1.0.4/docs/apidocs/'/>
+      <item   name='Release Notes'
+              href='http://commons.apache.org/logging/commons-logging-1.0.4/RELEASE-NOTES.txt'/>
+    </menu>
+    <menu name='1.0.3 Release'>
+      <item   name='User Guide'
+              href='http://commons.apache.org/logging/commons-logging-1.0.3/usersguide.html'/>
+      <item   name='JavaDoc'
+              href='http://commons.apache.org/logging/commons-logging-1.0.3/docs/api/'/>
+      <item   name='Release Notes'
+              href='http://commons.apache.org/logging/commons-logging-1.0.3/RELEASE-NOTES.txt'/>
+    </menu>
+    <menu name='1.0.2 Release'>
+      <item   name='JavaDoc'
+              href='http://commons.apache.org/logging/commons-logging-1.0.2/docs/api/'/>
+    </menu>
+  </body>
+</project>

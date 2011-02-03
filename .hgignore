@@ -1,0 +1,10 @@
+syntax: glob
+*.class
+*.dex
+*.orig
+*.swp
+*.pyc
+*~
+
+syntax: regexp
+android/(bin|gen)/.*

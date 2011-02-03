@@ -1,0 +1,229 @@
+~~
+~~
+~~  Licensed to the Apache Software Foundation (ASF) under one
+~~  or more contributor license agreements.  See the NOTICE file
+~~  distributed with this work for additional information
+~~  regarding copyright ownership.  The ASF licenses this file
+~~  to you under the Apache License, Version 2.0 (the
+~~  "License"); you may not use this file except in compliance
+~~  with the License.  You may obtain a copy of the License at
+~~
+~~    http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~  Unless required by applicable law or agreed to in writing,
+~~  software distributed under the License is distributed on an
+~~  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~  KIND, either express or implied.  See the License for the
+~~  specific language governing permissions and limitations
+~~  under the License.
+~~
+           -------------------------
+           The Apache XML-RPC Client
+           -------------------------
+
+The XmlRpcClient
+
+  Before talking to an XML-RPC server, you need an instance of
+  {{{apidocs/org/apache/xmlrpc/client/XmlRpcClient.html}XmlRpcClient}}.
+
+  The XmlRpcClient is a stateless, thread safe object. The clients
+  configuration occurs by setting the following objects:
+
+*------------------+--------------------------------------------------------------+
+| Name             | Description                                                  |
+*------------------+--------------------------------------------------------------+
+| ClientConfig     | This object is an instance of                                |
+|                  | {{{apidocs/org/apache/xmlrpc/client/XmlRpcClientConfig.html} |
+|                  | XmlRpcClientConfig}}. It has a lot of atomic properties,     |
+|                  | that specify details like server URL, credentials, character |
+|                  | set, and the like.                                           |
+*------------------+--------------------------------------------------------------+
+| TransportFactory | The task of the transport factory is to create an object,    |
+|                  | which uses the client configuration for talking to the       |
+|                  | server. For example, there is a transport factory, which     |
+|                  | uses the java.net classes. Another example is a transport    |
+|                  | factory based on the Jakarta Commons Http Client. However,   |
+|                  | transport factories don't need to use HTTP: An excellent     |
+|                  | example is the local transport factory, which talks to an    |
+|                  | embedded server. This last factory is, of course, very       |
+|                  | useful for debugging.                                        |
+*------------------+--------------------------------------------------------------+
+| XmlWriterFactory | The XmlWriter is an object, which creates XML for you.       |
+|                  | Typically, you do not need to care for this object, because  |
+|                  | the defaults should be fine. However, it is useful, if you   |
+|                  | need a special XML syntax.                                   |
+*------------------+--------------------------------------------------------------+
+
+  So, let's have a look at a first example:
+
+-----------------------------------------------------------------------------------
+    import org.apache.xmlrpc.client.XmlRpcClient;
+    import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+
+    XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
+    config.setServerURL(new URL("http://127.0.0.1:8080/xmlrpc"));
+    XmlRpcClient client = new XmlRpcClient();
+    client.setConfig(config);
+    Object[] params = new Object[]{new Integer(33), new Integer(9)};
+    Integer result = (Integer) client.execute("Calculator.add", params);
+-----------------------------------------------------------------------------------
+
+  In other words, we invoke the remote method <Calculator.add>, passing the arguments
+  2 and 3.  Hopefully, we know <the answer>. :-) 
+
+The Transport Factory
+
+  The above example uses the java.net.URLConnection classes to talk to the server.
+  What, if you'd prefer to use the {{{http://jakarta.apache.org/commons/httpclient}
+  Jakarta HTTP Client}}? There's basically just a single line, you'd need to add:
+
+-----------------------------------------------------------------------------------
+    import org.apache.xmlrpc.client.XmlRpcClient;
+    import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+    import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
+
+    XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
+    config.setServerURL(new URL("http://127.0.0.1:8080/XmlRpcServlet"));
+    XmlRpcClient client = new XmlRpcClient();
+    client.setTransportFactory(new XmlRpcCommonsTransportFactory(client));
+    client.setConfig(config);
+    Object[] params = new Object[]{new Integer(2), new Integer(3)};
+    Integer result = (Integer) client.execute("Calculator.add", params);
+-----------------------------------------------------------------------------------
+
+  In other words, the transport factory determines the way, how the client
+  communicates with the server. The most important transport factories are:
+
+*--------------------------------+-------------------------------------------+
+| Name                           | Description                               |
+*--------------------------------+-------------------------------------------+
+| XmlRpcSunHttpTransportFactory  | This is the default factory, connecting   |
+|                                | to an HTTP server using the               |
+|                                | <<<java.net.HttpURLConnection>>>.         |
+*--------------------------------+-------------------------------------------+
+| XmlRpcCommonsTransportFactory  | Another HTTP transport factory, which     |
+|                                | uses the Jakarta Commons HttpClient.      |
+|                                | The main advantage over the default       |
+|                                | factory is, that the Commons HttpClient   |
+|                                | allows direct access to the result        |
+|                                | document. This allows a much lower        |
+|                                | memory profile.                           |
+*--------------------------------+-------------------------------------------+
+| XmlRpcLiteHttpTransportFactory | Yet another HTTP transport factory, which |
+|                                | is based on an own and very lightweight   |
+|                                | HTTP client. It is possibly the fastest   |
+|                                | of the HTTP transport factories. On the   |
+|                                | other hand, it doesn't support HTTP/1.1,  |
+|                                | thus cannot use keepalive connections.    |
+*--------------------------------+-------------------------------------------+
+| XmlRpcLocalTransportFactory    | This transport factory has an embedded    |
+|                                | XML-RPC server, which is invoked via      |
+|                                | direct Java calls. This is particularly   |
+|                                | useful for debugging and development.     |
+*--------------------------------+-------------------------------------------+
+
+The Client Configuration
+
+  The transport factory uses the clients configuration. Obviously, the
+  clients configuration depends on the transport factory. In particular,
+  different transport factories depend on different configuration types:
+
+    * The HTTP transport factories need an instance of
+      <<<org.apache.xmlrpc.client.XmlRpcHttpClientConfig>>>.
+
+    * The local transport factory requires an instance of
+ 
+      <<<org.apache.xmlrpc.client.XmlRpcLocalClientConfig>>>.
+
+  For convenience, you can simply use the
+  <<<org.apache.xmlrpc.client.XmlRpcClientConfigImpl>>>, which implements
+  both interfaces.
+
+  Let's have a look at the various properties, which HTTP client configurations
+  accept:
+
+*-----------------------+---------------------------------------------------+
+| Property Name         | Description                                       |
+*-----------------------+---------------------------------------------------+
+| basicUserName         | The user name and password, if your HTTP server   |
+| basicPassword         | requires basic authentication.                    |
+*-----------------------+---------------------------------------------------+
+| basicEncoding         | Specifies the encoding being used to create the   |
+|                       | base 64 encoded Authorization header, which is    |
+|                       | being used for basic authentication.              |
+|                       |                                                 |
+|                       | By default, the value of the encoding property    |
+|                       | is used. The encoding property itself defaults to |
+|                       | UTF-8.                                            |
+*-----------------------+---------------------------------------------------+
+| contentLengthOptional | Enables the faster and memory saving streaming    |
+|                       | mode: The client will not set the content-length  |
+|                       | header and the request is directly written to the |
+|                       | HTTP requests output stream. The XML-RPC          |
+|                       | specification requires setting a content-length   |
+|                       | header. For that reason, the streaming mode is    |
+|                       | only available, if the property                   |
+|                       | enabledForExtensions is set was well.             |
+*-----------------------+---------------------------------------------------+
+| enabledForExceptions  | Whether the client should request, that the       |
+|                       | server returns exceptions as serializable objects.|
+|                       | If the server does, then the client will          |
+|                       | deserialize such exceptions and throw them, as    |
+|                       | if they had been cause within the clients code.   |
+*-----------------------+---------------------------------------------------+
+| enabledForExtensions  | Whether the vendor extensions of Apache XML-RPC   |
+|                       | should be enabled. By default, Apache XML-RPC is  |
+|                       | strictly compliant to the XML-RPC specification.  |
+|                       | Unfortunately, this specification has serious     |
+|                       | limitations. For example, it requires setting a   |
+|                       | content-length header. This enforces writing the  |
+|                       | XML-RPC request and response to byte arrays,      |
+|                       | before sending them over the net.                 |
+|                       |                                                   |
+|                       | Vendor extensions include the very fast and       |
+|                       | memory saving streaming mode (by disabling the    |
+|                       | content-length header), the compression of        |
+|                       | request and/or response. In particular, a lot of  |
+|                       | additional data types may be transmitted, when    |
+|                       | extensions are enabled: longs, shorts, bytes,     |
+|                       | floats, DOM nodes, instances of                   |
+|                       | java.io.Serializable, or JAXB objects.            |
+*-----------------------+---------------------------------------------------+
+| encoding              | Sets the encoding, which is used for creating the |
+|                       | XML-RPC request. The default encoding is UTF-8.   |
+|                       |                                                   |
+|                       | Typically, the encoding is also used for the      |
+|                       | basic authentications, if any. However, you may   |
+|                       | specify a different encoding for the credentials  |
+|                       | using the basicEncoding property.                 |
+*-----------------------+---------------------------------------------------+
+| gzipCompressing       | Whether the XML-RPC request should be compressed. |
+|                       | Request compression is violating the XML-RPC      |
+|                       | specification, that's why gzipCompressing is only |
+|                       | available, if the enabledForExtension property is |
+|                       | also set. For the same reason, you should not     |
+|                       | assume, that the server is able to handle         |
+|                       | compressed requests, unless you know, that the    |
+|                       | server is itself running version 3 of             |
+|                       | Apache XML-RPC.                                   |
+*-----------------------+---------------------------------------------------+
+| gzipRequesting        | Requests, that the server will be compressing the |
+|                       | response. Response compression is violating the   |
+|                       | XML-RPC specification. Therefore, this feature is |
+|                       | only available, if the enabledForExtension        |
+|                       | property is set. Also, do not assume, that the    |
+|                       | server will actually compress the response,       |
+|                       | unless it is an Apache XML-RPC 3 server.          |
+*-----------------------+---------------------------------------------------+
+
+  And these properties are for configuring the local transport factory:
+  
+*-----------------------+---------------------------------------------------+
+| Property Name         | Description                                       |
+*-----------------------+---------------------------------------------------+
+| xmlRpcServer          | This is the embedded XML-RPC server, which is     |
+|                       | called to execute the clients requests.           |
+|                       | Obviously, this is an extremely fast transport.   |
+|                       | However, its main use is for debugging and        |
+|                       | development.                                      |
+*-----------------------+---------------------------------------------------+

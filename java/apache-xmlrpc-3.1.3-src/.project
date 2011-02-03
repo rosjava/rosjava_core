@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>ws-xmlrpc-3.1</name>
+	<comment>Apache XML-RPC is a Java implementation of XML-RPC, a popular protocol
+        that uses XML over HTTP to implement remote procedure calls.
+        Compared to SOAP, or JAX-RPC, it is stable, much simpler and easier to
+        handle. Version 3 of Apache XML-RPC introduces several important vendor
+        extensions over the original XML-RPC specification.</comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.maven.ide.eclipse.maven2Builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.maven.ide.eclipse.maven2Nature</nature>
+	</natures>
+</projectDescription>

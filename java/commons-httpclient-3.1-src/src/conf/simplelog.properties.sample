@@ -1,0 +1,35 @@
+####################################################
+# Sample configuraion for the simple logging system
+####################################################
+
+# httpclient.simplelog.defaultlog
+#   - Default log level for all SimpleLogs.
+httpclient.simplelog.defaultlog=FATAL
+
+# httpclient.simplelog.showlogname
+#   - When true, show the name of the log in log output.
+httpclient.simplelog.showlogname=false
+
+# httpclient.simplelog.showdate
+#   - When true, show a timestamp the log in log output.
+httpclient.simplelog.showdate=true
+
+# httpclient.simplelog.dateformat
+#   - A SimpleDateFormat format string for timestamps in the log output
+httpclient.simplelog.dateformat=yyyy/MM/dd HH:mm:ss:SSS zzz
+
+# httpclient.simplelog.log.*
+#   - Sets the logging level for specific logs.
+#     Note that if that if you set the log level
+#     for a log named "a.b", it will apply to all
+#     logs with names of the form "a.b.c[.d]*"
+#     unless overriden by a more specific log setting.
+#httpclient.simplelog.log.org.apache.commons.httpclient=DEBUG
+#httpclient.simplelog.log.org.apache.commons.httpclient.HttpClient=DEBUG
+#httpclient.simplelog.log.org.apache.commons.httpclient.HeaderElement=DEBUG
+#httpclient.simplelog.log.org.apache.commons.httpclient.Base64=DEBUG
+
+# the httpclient.wire category provides a trace of all of
+# httpclient's network communictation
+#httpclient.simplelog.log.httpclient.wire=INFO
+

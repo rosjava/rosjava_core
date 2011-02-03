@@ -1,0 +1,8 @@
+Extension-Name: org.apache.commons.logging
+Specification-Title: Commons Logging
+Specification-Vendor: Apache Software Foundation
+Specification-Version: 1.0
+Implementation-Title: Commons Logging
+Implementation-Vendor-Id: org.apache
+Implementation-Vendor: Apache Software Foundation
+Implementation-Version: 1.1.1
