@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TestHeaderTest {
+public class HeaderTest {
   
   @Test
   public void testEncodeAndDecodeHeader() throws IOException {

@@ -28,6 +28,7 @@ import org.ros.transport.Header;
 import org.ros.transport.HeaderFields;
 import org.ros.transport.OutgoingMessageQueue;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -78,7 +79,8 @@ public abstract class Publisher extends Topic {
     }
   }
 
-  private void handshake(Socket socket) throws IOException {
+  @VisibleForTesting
+  void handshake(Socket socket) throws IOException {
     Map<String, String> incomingHeader = Header.readHeader(socket.getInputStream());
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
