@@ -35,7 +35,7 @@ public class Header {
   private static final Log log = LogFactory.getLog(Header.class);
 
   private Header() {
-    // Utility class.
+    // Utility class
   }
 
   public static Map<String, String> readHeader(InputStream inputStream) throws IOException {
