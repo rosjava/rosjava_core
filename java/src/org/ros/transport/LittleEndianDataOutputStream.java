@@ -35,6 +35,11 @@ public class LittleEndianDataOutputStream extends OutputStream {
     outputStream.write(value);
   }
   
+  public void writeField(byte[] field) throws IOException {
+    writeInt(field.length);
+    outputStream.write(field);
+  }
+  
   public void writeInt(int value) throws IOException {
     Preconditions.checkArgument(value > 0);
     byte[] buffer = new byte[4];

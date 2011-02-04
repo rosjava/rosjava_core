@@ -80,13 +80,11 @@ public class OutgoingMessageQueue {
 
   private void sendMessage(Message message) {
     byte[] data = message.serialize(0 /* unused seq */);
-    int size = message.serializationLength();
     Iterator<LittleEndianDataOutputStream> iterator = streams.iterator();
     while (iterator.hasNext()) {
       LittleEndianDataOutputStream out = iterator.next();
       try {
-        out.writeInt(size);
-        out.write(data);
+        out.writeField(data);
         out.flush();
       } catch (IOException e) {
         if (DEBUG) {
