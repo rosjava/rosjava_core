@@ -30,6 +30,9 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class Header {
 
   private static final boolean DEBUG = false;

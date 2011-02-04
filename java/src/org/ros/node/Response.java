@@ -18,7 +18,9 @@ package org.ros.node;
 
 import java.util.List;
 
-
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 import com.google.common.collect.Lists;
 
 public class Response<T> {

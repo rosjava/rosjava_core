@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 public class SlaveImpl implements Slave {
-  
+
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(SlaveImpl.class);
 
@@ -100,7 +100,7 @@ public class SlaveImpl implements Slave {
       requestedProtocols.add((String) ((Object[]) protocols[i])[0]);
     }
     ProtocolDescription protocol = slave.requestTopic(topic, requestedProtocols);
-    List<Object> response = Response.CreateSuccess("Success", protocol.toList()).toList();
+    List<Object> response = Response.CreateSuccess(protocol.toString(), protocol.toList()).toList();
     if (DEBUG) {
       log.info("requestTopic response: " + response.toString());
     }

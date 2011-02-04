@@ -18,6 +18,9 @@ package org.ros.transport;
 
 import java.net.InetSocketAddress;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class TcpRosDescription extends ProtocolDescription {
 
   public TcpRosDescription(InetSocketAddress address) {

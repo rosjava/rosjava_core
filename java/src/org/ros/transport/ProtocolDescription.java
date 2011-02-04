@@ -40,7 +40,11 @@ public class ProtocolDescription {
   }
 
   public List<Object> toList() {
-    // TODO(damonkohler): Why is the cast necessary?
     return Lists.newArrayList((Object) name, address.getHostName(), address.getPort());
+  }
+  
+  @Override
+  public String toString() {
+    return "Protocol<" + name + ", " + getAddress() + ">";    
   }
 }

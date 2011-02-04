@@ -65,6 +65,9 @@ public class Publisher extends Topic {
   }
 
   public void publish(Message message) {
+    if (DEBUG) {
+      log.info("Publishing message: " + message);
+    }
     out.add(message);
   }
 

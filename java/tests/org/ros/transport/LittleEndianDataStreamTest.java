@@ -26,7 +26,6 @@ import java.io.IOException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
- *
  */
 public class LittleEndianDataStreamTest {
   
