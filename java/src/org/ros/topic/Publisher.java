@@ -36,7 +36,7 @@ import com.google.common.collect.Lists;
 
 public class Publisher extends Topic {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final OutgoingMessageQueue out;

@@ -52,6 +52,13 @@ public class OutgoingMessageQueue {
 
     public void cancel() {
       interrupt();
+      for (LittleEndianDataOutputStream stream : streams) {
+        try {
+          stream.close();
+        } catch (IOException e) {
+          log.error("Failed to close stream.", e);
+        }
+      }
     }
   }
 
