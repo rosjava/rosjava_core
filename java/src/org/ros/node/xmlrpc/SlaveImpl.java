@@ -16,6 +16,7 @@
 
 package org.ros.node.xmlrpc;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -102,7 +103,8 @@ public class SlaveImpl implements Slave {
     ProtocolDescription protocol = slave.requestTopic(topic, requestedProtocols);
     List<Object> response = Response.CreateSuccess(protocol.toString(), protocol.toList()).toList();
     if (DEBUG) {
-      log.info("requestTopic response: " + response.toString());
+      log.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
+          + response.toString());
     }
     return response;
   }

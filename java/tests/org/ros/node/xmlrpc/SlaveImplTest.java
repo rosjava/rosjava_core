@@ -20,11 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.ros.node.StatusCode;
+import org.ros.topic.Publisher;
 import org.ros.transport.ProtocolNames;
 import org.ros.transport.TcpRosDescription;
 
@@ -37,15 +39,40 @@ import java.util.List;
 public class SlaveImplTest {
 
   @Test
+  public void testGetPublicationsEmptyList() {
+    org.ros.node.server.Slave mockSlave = mock(org.ros.node.server.Slave.class);
+    when(mockSlave.getPublications()).thenReturn(Lists.<Publisher>newArrayList());
+    SlaveImpl slave = new SlaveImpl(mockSlave);
+    List<Object> response = slave.getPublications("/foo");
+    assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
+    assertEquals(response.get(2), Lists.newArrayList());
+  }
+
+  @Test
+  public void testGetPublications() {
+    org.ros.node.server.Slave mockSlave = mock(org.ros.node.server.Slave.class);
+    Publisher mockPublisher = mock(Publisher.class);
+    when(mockSlave.getPublications()).thenReturn(Lists.newArrayList(mockPublisher));
+    when(mockPublisher.getTopicName()).thenReturn("/bar");
+    when(mockPublisher.getTopicType()).thenReturn("/baz");
+    SlaveImpl slave = new SlaveImpl(mockSlave);
+    List<Object> response = slave.getPublications("/foo");
+    assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
+    List<List<String>> protocols = Lists.newArrayList();
+    protocols.add(Lists.newArrayList("/bar", "/baz"));
+    assertEquals(protocols, response.get(2));
+  }
+
+  @Test
   public void testRequestTopic() {
     org.ros.node.server.Slave mockSlave = mock(org.ros.node.server.Slave.class);
     InetSocketAddress localhost = InetSocketAddress.createUnresolved("localhost", 1234);
     TcpRosDescription protocol = new TcpRosDescription(localhost);
     when(
         mockSlave.requestTopic(Matchers.<String>any(),
-            Matchers.eq(Sets.newHashSet(ProtocolNames.TCPROS)))).thenReturn(protocol);
+            Matchers.eq(Sets.newHashSet(ProtocolNames.TCPROS, ProtocolNames.UDPROS)))).thenReturn(protocol);
     SlaveImpl slave = new SlaveImpl(mockSlave);
-    Object[][] protocols = new Object[][] {{ProtocolNames.TCPROS}};
+    Object[][] protocols = new Object[][] {{ProtocolNames.TCPROS}, {ProtocolNames.UDPROS}};
     List<Object> response = slave.requestTopic("/foo", "/bar", protocols);
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
     assertEquals(response.get(2), protocol.toList());
