@@ -32,6 +32,7 @@ import com.google.common.collect.Maps;
 
 public class Header {
 
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Header.class);
 
   private Header() {
@@ -77,7 +78,9 @@ public class Header {
       String[] keyAndValue = field.split("=");
       result.put(keyAndValue[0], keyAndValue[1]);
     }
-    log.info("Decoded header: " + result);
+    if (DEBUG) {
+      log.info("Decoded header: " + result);
+    }
     return result;
   }
 

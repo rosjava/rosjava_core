@@ -44,7 +44,7 @@ public class TopicDescription {
   }
   
   public String getMessageType() {
-    return messageDescription.getName();
+    return messageDescription.getType();
   }
   
   public String getMd5Checksum() {

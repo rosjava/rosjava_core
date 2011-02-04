@@ -33,7 +33,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-public abstract class Publisher extends Topic {
+public class Publisher extends Topic {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
@@ -64,7 +64,7 @@ public abstract class Publisher extends Topic {
     out.shutdown();
   }
 
-  protected void publish(Message message) {
+  public void publish(Message message) {
     out.add(message);
   }
 
