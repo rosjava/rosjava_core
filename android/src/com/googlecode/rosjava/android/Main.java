@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -32,15 +32,15 @@ public class Main extends Activity {
 
   private static class Chatter extends Publisher {
 
-    public Chatter(String hostname) {
-      super(new TopicDescription("/chatter", new MessageDescription(
-          org.ros.communication.std_msgs.String.__s_getDataType(),
-          org.ros.communication.std_msgs.String.__s_getMD5Sum())), hostname);
+    public Chatter(String hostname, int port) throws IOException {
+      super(new TopicDescription("/chatter",
+          MessageDescription.CreateFromMessage(new org.ros.communication.std_msgs.String())),
+          hostname, port);
     }
 
     @Override
-    public void start(int port) throws IOException {
-      super.start(port);
+    public void start() {
+      super.start();
       (new Thread() {
         @Override
         public void run() {
@@ -66,8 +66,8 @@ public class Main extends Activity {
     setContentView(R.layout.main);
     try {
       Slave slave = new Slave();
-      Publisher publisher = new Chatter("localhost");
-      publisher.start(7332);
+      Publisher publisher = new Chatter("localhost", 7332);
+      publisher.start();
       slave.addPublisher(publisher);
       slave.start(7331);
       Master master = new Master(new URL("http://10.0.2.2:11311/"));

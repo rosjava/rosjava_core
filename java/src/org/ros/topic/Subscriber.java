@@ -16,8 +16,6 @@
 
 package org.ros.topic;
 
-import java.net.Socket;
-
 public class Subscriber extends Topic {
 
   public Subscriber(TopicDescription description) {
