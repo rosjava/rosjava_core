@@ -26,6 +26,7 @@ import org.ros.topic.Publisher;
 import org.ros.topic.Subscriber;
 import org.ros.topic.SubscriberDescription;
 import org.ros.transport.ProtocolDescription;
+import org.ros.transport.ProtocolNames;
 import org.ros.transport.TcpRosDescription;
 
 import java.io.IOException;
@@ -35,6 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class Slave extends Node {
 
   private final Map<String, Publisher> publishers;
@@ -101,7 +105,7 @@ public class Slave extends Node {
   public ProtocolDescription requestTopic(String topic, Set<String> protocols) {
     Preconditions.checkArgument(publishers.containsKey(topic));
     // TODO(damonkohler): Pull out list of supported protocols.
-    Preconditions.checkArgument(protocols.contains("TCPROS"));
+    Preconditions.checkArgument(protocols.contains(ProtocolNames.TCPROS));
     return new TcpRosDescription(publishers.get(topic).getAddress());
   }
 }
