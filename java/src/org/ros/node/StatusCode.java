@@ -40,4 +40,17 @@ public enum StatusCode {
       return FAILURE;
     }
   }
+  
+  @Override
+  public String toString() {
+    switch (this) {
+      case ERROR:
+        return "Error";
+      case SUCCESS:
+        return "Success";
+      case FAILURE:
+      default:
+        return "Failure";
+    }
+  }
 }

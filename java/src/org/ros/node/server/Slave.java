@@ -21,6 +21,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.ros.node.RemoteException;
+import org.ros.node.Response;
 import org.ros.node.xmlrpc.SlaveImpl;
 import org.ros.topic.Publisher;
 import org.ros.topic.Subscriber;
@@ -59,10 +61,10 @@ public class Slave extends Node {
     super.start(org.ros.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
   }
 
-  public void addPublisher(Publisher publisher) throws MalformedURLException {
+  public void addPublisher(Publisher publisher) throws MalformedURLException, RemoteException {
     String topic = publisher.getTopicName();
     publishers.put(topic, publisher);
-    master.registerPublisher(name, publisher, getAddress());
+    Response.checkOk(master.registerPublisher(name, publisher, getAddress()));
   }
 
   public void addSubscriber(Subscriber subscriber) {

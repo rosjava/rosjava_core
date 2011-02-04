@@ -16,15 +16,12 @@
 
 package org.ros.node;
 
-import java.util.List;
-
-/**
- * @author damonkohler@google.com (Damon Kohler)
- */
 import com.google.common.collect.Lists;
 
-public class Response<T> {
+import java.util.List;
 
+public class Response<T> {
+  
   private final StatusCode statusCode;
   private final String statusMessage;
   private final T value;
@@ -65,6 +62,17 @@ public class Response<T> {
 
   public T getValue() {
     return value;
+  }
+  
+  @Override
+  public String toString() {
+    return "Response<" + statusCode + ", " + statusMessage + ", " + value.toString() + ">";
+  }
+
+  public static void checkOk(Response<?> response) throws RemoteException {
+    if (response.getStatusCode() != StatusCode.SUCCESS) {
+      throw new RemoteException(response.toString());
+    }
   }
 
 }

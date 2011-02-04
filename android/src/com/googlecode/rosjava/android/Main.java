@@ -16,8 +16,8 @@
 
 package com.googlecode.rosjava.android;
 
-import java.io.IOException;
-import java.net.URL;
+import android.app.Activity;
+import android.os.Bundle;
 
 import org.ros.communication.MessageDescription;
 import org.ros.node.client.Master;
@@ -25,8 +25,8 @@ import org.ros.node.server.Slave;
 import org.ros.topic.Publisher;
 import org.ros.topic.TopicDescription;
 
-import android.app.Activity;
-import android.os.Bundle;
+import java.io.IOException;
+import java.net.URL;
 
 public class Main extends Activity {
 
