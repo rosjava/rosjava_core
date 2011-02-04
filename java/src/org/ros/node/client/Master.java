@@ -65,12 +65,12 @@ public class Master extends Node<org.ros.node.xmlrpc.Master> {
    * 
    * @param callerId ROS caller ID
    * @param publisher the publisher to register
-   * @param callerApi API URI of publisher to register
+   * @param url API URL of publisher to register
    * @return List of current subscribers of topic in the form of XML-RPC URIs
    * @throws MalformedURLException
    */
-  public Response<List<URL>> registerPublisher(String callerId, Publisher publisher, String callerApi) throws MalformedURLException {
-    List<Object> response = node.registerPublisher(callerId, publisher.getTopicName(), publisher.getTopicType(), callerApi);
+  public Response<List<URL>> registerPublisher(String callerId, Publisher publisher, URL url) throws MalformedURLException {
+    List<Object> response = node.registerPublisher(callerId, publisher.getTopicName(), publisher.getTopicType(), url.toString());
     List<Object> values = Arrays.asList((Object[]) response.get(2));
     List<URL> urls = Lists.newArrayList();
     for (Object value : values) {

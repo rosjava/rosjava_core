@@ -30,6 +30,7 @@ import org.ros.transport.ProtocolNames;
 import org.ros.transport.TcpRosDescription;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
@@ -41,21 +42,27 @@ import java.util.Set;
  */
 public class Slave extends Node {
 
+  private final String name;
+  private final org.ros.node.client.Master master;
   private final Map<String, Publisher> publishers;
 
   private URL masterUrl;
 
-  public Slave() {
+  public Slave(String name, org.ros.node.client.Master master, String hostname, int port) {
+    super(hostname, port);
+    this.name = name;
+    this.master = master;
     publishers = Maps.newConcurrentMap();
   }
 
-  public void start(int port) throws XmlRpcException, IOException {
-    super.start(port, org.ros.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
+  public void start() throws XmlRpcException, IOException {
+    super.start(org.ros.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
   }
 
-  public void addPublisher(Publisher publisher) {
+  public void addPublisher(Publisher publisher) throws MalformedURLException {
     String topic = publisher.getTopicName();
     publishers.put(topic, publisher);
+    master.registerPublisher(name, publisher, getAddress());
   }
 
   public void addSubscriber(Subscriber subscriber) {

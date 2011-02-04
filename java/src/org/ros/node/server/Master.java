@@ -24,8 +24,12 @@ import org.ros.node.xmlrpc.MasterImpl;
 
 public class Master extends Node {
   
-  public void serveForever(int port) throws XmlRpcException, IOException {
-    super.start(port, org.ros.node.xmlrpc.MasterImpl.class, new MasterImpl(this));
+  public Master(String hostname, int port) {
+    super(hostname, port);
+  }
+
+  public void serveForever() throws XmlRpcException, IOException {
+    super.start(org.ros.node.xmlrpc.MasterImpl.class, new MasterImpl(this));
   }
 
   public List<Object> registerService(String callerId, String service, String serviceApi,

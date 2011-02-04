@@ -65,13 +65,12 @@ public class Main extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
     try {
-      Slave slave = new Slave();
+      Master master = new Master(new URL("http://10.0.2.2:11311/"));
+      Slave slave = new Slave("/android", master, "localhost", 7331);
       Publisher publisher = new Chatter("localhost", 7332);
       publisher.start();
       slave.addPublisher(publisher);
-      slave.start(7331);
-      Master master = new Master(new URL("http://10.0.2.2:11311/"));
-      master.registerPublisher("/foo", publisher, "http://localhost:7331");
+      slave.start();
     } catch (Exception e) {
       e.printStackTrace();
     }

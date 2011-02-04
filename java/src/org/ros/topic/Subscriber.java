@@ -21,5 +21,5 @@ public class Subscriber extends Topic {
   public Subscriber(TopicDescription description) {
     super(description);
   }
- 
+  
 }
