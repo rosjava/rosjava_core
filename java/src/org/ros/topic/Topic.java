@@ -16,81 +16,15 @@
 
 package org.ros.topic;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.google.common.base.Preconditions;
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class Topic {
-
-  private static final Log log = LogFactory.getLog(Topic.class);
+public class Topic {
 
   protected final TopicDescription description;
-  protected final String hostname;
 
-  private ServerThread thread;
-  private ServerSocket server;
-
-  public Topic(TopicDescription description, String hostname) {
+  public Topic(TopicDescription description) {
     this.description = description;
-    this.hostname = hostname;
-  }
-
-  protected abstract void onNewConnection(Socket socket);
-
-  private final class ServerThread extends Thread {
-    
-    public ServerThread(int port) throws IOException {
-      server = new ServerSocket(port);
-    }
-
-    @Override
-    public void run() {
-      while (!Thread.currentThread().isInterrupted()) {
-        try {
-          onNewConnection(server.accept());
-        } catch (IOException e) {
-          log.error("Connection failed.", e);
-        }
-      }
-    }
-
-    public void cancel() {
-      interrupt();
-      try {
-        server.close();
-        server = null;
-      } catch (IOException e) {
-        log.error("Server shutdown failed.", e);
-      }
-    }
-  }
-
-  public void start(int port) throws IOException {
-    Preconditions.checkState(thread == null);
-    Preconditions.checkState(server == null);
-    thread = new ServerThread(port);
-    thread.start();
-    log.info("Topic " + description.getName() + " bound to: " + getAddress());
-  }
-
-  public void shutdown() {
-    Preconditions.checkNotNull(thread);
-    Preconditions.checkNotNull(server);
-    thread.cancel();
-    thread = null;
-  }
-
-  public InetSocketAddress getAddress() {
-    return InetSocketAddress.createUnresolved(hostname, server.getLocalPort());
   }
 
   public String getTopicName() {

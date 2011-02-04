@@ -21,15 +21,7 @@ import java.net.Socket;
 public class Subscriber extends Topic {
 
   public Subscriber(TopicDescription description) {
-    super(description, "localhost");
+    super(description);
   }
-
-  @Override
-  protected void onNewConnection(Socket socket) {
-  }
-
-  public SubscriberDescription getDescription() {
-    return null;
-  }
-  
+ 
 }

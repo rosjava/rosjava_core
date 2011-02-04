@@ -53,7 +53,7 @@ public class PublisherTest {
     Publisher publisher =
         new Publisher(new TopicDescription("/foo",
             MessageDescription.CreateFromMessage(new org.ros.communication.std_msgs.String())),
-            "localhost");
+            "localhost", 1234);
     publisher.handshake(socket);
     buffer = outputStream.toByteArray();
     Map<String, String> result = Header.readHeader(new ByteArrayInputStream(buffer));

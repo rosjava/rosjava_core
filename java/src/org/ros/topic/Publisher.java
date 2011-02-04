@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -17,6 +17,7 @@
 package org.ros.topic;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 import java.util.Map;
@@ -41,27 +42,48 @@ public class Publisher extends Topic {
   private final OutgoingMessageQueue out;
   private final ImmutableMap<String, String> header;
   private final List<SubscriberDescription> subscribers;
+  private final TcpServer server;
 
-  public Publisher(TopicDescription topicDescription, String hostname) {
-    super(topicDescription, hostname);
-    out = new OutgoingMessageQueue();
-    header = new ImmutableMap.Builder<String, String>()
-        .put(HeaderFields.TYPE, topicDescription.getMessageType())
-        .put(HeaderFields.MD5_CHECKSUM, topicDescription.getMd5Checksum())
-        .build();
-    subscribers = Lists.newArrayList();
+  private class Server extends TcpServer {
+    public Server(String hostname, int port) throws IOException {
+      super(hostname, port);
+    }
+
+    @Override
+    protected void onNewConnection(Socket socket) {
+      try {
+        handshake(socket);
+        Preconditions.checkState(socket.isConnected());
+        out.addSocket(socket);
+      } catch (IOException e) {
+        log.error("Failed to accept connection.", e);
+      }
+    }
   }
 
-  @Override
-  public void start(int port) throws IOException {
-    super.start(port);
+  public Publisher(TopicDescription topicDescription, String hostname, int port) throws IOException {
+    super(topicDescription);
+    out = new OutgoingMessageQueue();
+    header =
+        new ImmutableMap.Builder<String, String>()
+            .put(HeaderFields.TYPE, topicDescription.getMessageType())
+            .put(HeaderFields.MD5_CHECKSUM, topicDescription.getMd5Checksum()).build();
+    subscribers = Lists.newArrayList();
+    server = new Server(hostname, port);
+  }
+
+  public void start() {
+    server.start();
     out.start();
   }
 
-  @Override
   public void shutdown() {
-    super.shutdown();
+    server.shutdown();
     out.shutdown();
+  }
+
+  public InetSocketAddress getAddress() {
+    return server.getAddress();
   }
 
   public void publish(Message message) {
@@ -71,23 +93,12 @@ public class Publisher extends Topic {
     out.add(message);
   }
 
-  @Override
-  protected void onNewConnection(Socket socket) {
-    try {
-      handshake(socket);
-      Preconditions.checkState(socket.isConnected());
-      out.addSocket(socket);
-    } catch (IOException e) {
-      log.error("Failed to accept connection.", e);
-    }
-  }
-
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
     Map<String, String> incomingHeader = Header.readHeader(socket.getInputStream());
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
-      log.info("Expected handshake header: " + header); 
+      log.info("Expected handshake header: " + header);
     }
     Preconditions.checkState(incomingHeader.get(HeaderFields.TYPE).equals(
         header.get(HeaderFields.TYPE)));
