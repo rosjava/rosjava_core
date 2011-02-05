@@ -17,18 +17,22 @@
 package org.ros.node.server;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.node.xmlrpc.MasterImpl;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class Master extends Node {
   
   public Master(String hostname, int port) {
     super(hostname, port);
   }
 
-  public void serveForever() throws XmlRpcException, IOException {
+  public void start() throws XmlRpcException, IOException {
     super.start(org.ros.node.xmlrpc.MasterImpl.class, new MasterImpl(this));
   }
 
@@ -50,7 +54,21 @@ public class Master extends Node {
     return null;
   }
 
-  public List<Object> registerPublisher(String callerId, String topic, String topicType,
+  /**
+   * Register the caller as a publisher the topic.
+   * 
+   * @param callerId
+   *          ROS caller ID
+   * @param topic
+   *          Fully-qualified name of topic to register.
+   * @param topicType
+   *          Datatype for topic. Must be a package-resource name, i.e. the .msg
+   *          name.
+   * @param callerApi
+   *          API URI of publisher to register.
+   * @return List of current subscribers of topic in the form of XML-RPC URIs.
+   */
+  public List<URL> registerPublisher(String callerId, String topic, String topicType,
       String callerApi) {
     return null;
   }

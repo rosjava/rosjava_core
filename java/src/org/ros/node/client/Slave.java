@@ -30,7 +30,6 @@ import org.ros.transport.ProtocolNames;
 import org.ros.transport.TcpRosDescription;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 public class Slave extends Node<org.ros.node.xmlrpc.Slave>{
   
