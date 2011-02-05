@@ -22,6 +22,7 @@ import org.ros.communication.MessageDescription;
 import org.ros.transport.HeaderFields;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 public class TopicDescription {
 
@@ -49,6 +50,13 @@ public class TopicDescription {
   
   public String getMd5Checksum() {
     return messageDescription.getMd5Checksum();
+  }
+  
+  public Map<String, String> toHeader() {
+    Map<String, String> header = Maps.newHashMap();
+    header.put(HeaderFields.TOPIC, name);
+    header.putAll(messageDescription.toHeader());
+    return header;
   }
 
 }

@@ -31,7 +31,7 @@ public class IncomingMessageQueue<T extends Message> {
   private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
 
   private final Class<T> messageClass;
-  private final LittleEndianDataInputStream stream;
+  private LittleEndianDataInputStream stream;
   private final BlockingQueue<T> messages;
   private final MessageReceivingThread thread;
 
@@ -66,11 +66,14 @@ public class IncomingMessageQueue<T extends Message> {
     }
   }
 
-  public IncomingMessageQueue(Class<T> messageClass, Socket socket) throws IOException {
+  public IncomingMessageQueue(Class<T> messageClass) throws IOException {
     this.messageClass = messageClass;
-    stream = new LittleEndianDataInputStream(socket.getInputStream());
     messages = new LinkedBlockingQueue<T>();
     thread = new MessageReceivingThread();
+  }
+  
+  public void setSocket(Socket socket) throws IOException {
+    stream = new LittleEndianDataInputStream(socket.getInputStream());
   }
 
   public T take() throws InterruptedException {

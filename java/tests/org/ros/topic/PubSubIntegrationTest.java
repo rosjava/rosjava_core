@@ -45,7 +45,7 @@ public class PubSubIntegrationTest {
         new Socket(publisher.getAddress().getHostName(), publisher.getAddress().getPort());
     Subscriber<org.ros.communication.std_msgs.String> subscriber =
         new Subscriber<org.ros.communication.std_msgs.String>(
-            org.ros.communication.std_msgs.String.class, topicDescription, publisherSocket);
+            topicDescription, "/caller", org.ros.communication.std_msgs.String.class, publisherSocket);
     subscriber.start();
     
     final CountDownLatch messageReceived = new CountDownLatch(1);
