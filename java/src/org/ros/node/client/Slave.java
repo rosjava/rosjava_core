@@ -16,12 +16,21 @@
 
 package org.ros.node.client;
 
-import org.ros.node.Response;
-
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+
+import org.ros.node.Response;
+import org.ros.transport.ProtocolDescription;
+import org.ros.transport.ProtocolNames;
+import org.ros.transport.TcpRosDescription;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 public class Slave extends Node<org.ros.node.xmlrpc.Slave>{
   
@@ -66,8 +75,16 @@ public class Slave extends Node<org.ros.node.xmlrpc.Slave>{
     throw new UnsupportedOperationException();
   }
 
-  public List<Object> requestTopic(String callerId, String topic,
-      Collection<Collection<String>> protocols) {
-    throw new UnsupportedOperationException();
+  public Response<ProtocolDescription> requestTopic(String callerId, String topic,
+      Set<String> requestedProtocols) {
+    List<Object> response = node.requestTopic(callerId, topic,
+        new Object[][] { requestedProtocols.toArray() });
+    List<Object> protocolParameters = Arrays.asList(response.get(2));
+    Preconditions.checkState(protocolParameters.size() == 3);
+    Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
+    InetSocketAddress address = new InetSocketAddress((String) protocolParameters.get(1),
+        (Integer) protocolParameters.get(2));
+    return new Response<ProtocolDescription>((Integer) response.get(0), (String) response.get(1),
+        new TcpRosDescription(address));
   }
 }

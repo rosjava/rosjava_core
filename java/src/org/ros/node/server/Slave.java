@@ -17,6 +17,7 @@
 package org.ros.node.server;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
@@ -35,9 +36,13 @@ import org.ros.transport.ProtocolDescription;
 import org.ros.transport.ProtocolNames;
 import org.ros.transport.TcpRosDescription;
 
+import sun.awt.image.PNGImageDecoder.PNGException;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -69,10 +74,18 @@ public class Slave extends Node {
     Response.checkOk(master.registerPublisher(name, publisher, getAddress()));
   }
 
-  public void addSubscriber(Subscriber<?> subscriber) throws MalformedURLException, RemoteException {
+  public void addSubscriber(Subscriber<?> subscriber) throws RemoteException, IOException {
     String topic = subscriber.getTopicName();
     subscribers.put(topic, subscriber);
-    Response.checkOk(master.registerSubscriber(name, topic, subscriber.getTopicType(), getAddress()));
+    Response<List<URL>> response = Response.checkOk(master.registerSubscriber(name, topic,
+        subscriber.getTopicType(), getAddress()));
+    // TODO(damonkohler): Provide possibility for choosing a publisher and
+    // handling the case in which there are no publishers.
+    Preconditions.checkState(response.getValue().size() > 0);
+    org.ros.node.client.Slave slave = new org.ros.node.client.Slave(response.getValue().get(0));
+    Response<ProtocolDescription> requestTopicResponse = Response.checkOk(slave.requestTopic(name,
+        topic, Sets.newHashSet(ProtocolNames.TCPROS)));
+    subscriber.start(requestTopicResponse.getValue().getAddress());
   }
 
   public List<Object> getBusStats(String callerId) {

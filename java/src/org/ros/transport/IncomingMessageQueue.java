@@ -72,6 +72,7 @@ public class IncomingMessageQueue<T extends Message> {
     thread = new MessageReceivingThread();
   }
   
+  // TODO(damonkohler): Add support for multiple publisher sockets.
   public void setSocket(Socket socket) throws IOException {
     stream = new LittleEndianDataInputStream(socket.getInputStream());
   }

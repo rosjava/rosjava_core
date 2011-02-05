@@ -17,6 +17,7 @@
 package org.ros.topic;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -44,7 +45,6 @@ public class Subscriber<T extends Message> extends Topic {
   private final IncomingMessageQueue<T> in;
   private final MessageReadingThread thread;
   private final ImmutableMap<String, String> header;
-  private final Socket publisherSocket;
 
   public interface SubscriberListener<T extends Message> {
     public void onNewMessage(T message);
@@ -79,10 +79,9 @@ public class Subscriber<T extends Message> extends Topic {
     }
   }
 
-  public Subscriber(TopicDescription description, String name, Class<T> messageClass, Socket publisherSocket)
+  public Subscriber(TopicDescription description, String name, Class<T> messageClass)
       throws IOException {
     super(description);
-    this.publisherSocket = publisherSocket;
     this.listeners = new CopyOnWriteArrayList<Subscriber.SubscriberListener<T>>();
     this.in = new IncomingMessageQueue<T>(messageClass);
     thread = new MessageReadingThread();
@@ -96,9 +95,10 @@ public class Subscriber<T extends Message> extends Topic {
     listeners.add(listener);
   }
 
-  public void start() throws IOException {
-    handshake(publisherSocket);
-    in.setSocket(publisherSocket);
+  public void start(InetSocketAddress publisher) throws IOException {
+    Socket socket = new Socket(publisher.getHostName(), publisher.getPort());
+    handshake(socket);
+    in.setSocket(socket);
     in.start();
     thread.start();
   }

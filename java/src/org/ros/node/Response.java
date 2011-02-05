@@ -69,10 +69,11 @@ public class Response<T> {
     return "Response<" + statusCode + ", " + statusMessage + ", " + value.toString() + ">";
   }
 
-  public static void checkOk(Response<?> response) throws RemoteException {
+  public static <T> Response<T> checkOk(Response<T> response) throws RemoteException {
     if (response.getStatusCode() != StatusCode.SUCCESS) {
       throw new RemoteException(response.toString());
     }
+    return response;
   }
 
 }
