@@ -16,9 +16,13 @@
 
 package org.ros.node.server;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.node.RemoteException;
@@ -31,13 +35,9 @@ import org.ros.transport.ProtocolDescription;
 import org.ros.transport.ProtocolNames;
 import org.ros.transport.TcpRosDescription;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -47,6 +47,7 @@ public class Slave extends Node {
   private final String name;
   private final org.ros.node.client.Master master;
   private final Map<String, Publisher> publishers;
+  private final Map<String, Subscriber<?>> subscribers;
 
   private URL masterUrl;
 
@@ -55,6 +56,7 @@ public class Slave extends Node {
     this.name = name;
     this.master = master;
     publishers = Maps.newConcurrentMap();
+    subscribers = Maps.newConcurrentMap();
   }
 
   public void start() throws XmlRpcException, IOException {
@@ -67,8 +69,10 @@ public class Slave extends Node {
     Response.checkOk(master.registerPublisher(name, publisher, getAddress()));
   }
 
-  public void addSubscriber(Subscriber subscriber) {
-    throw new UnsupportedOperationException();
+  public void addSubscriber(Subscriber<?> subscriber) throws MalformedURLException, RemoteException {
+    String topic = subscriber.getTopicName();
+    subscribers.put(topic, subscriber);
+    Response.checkOk(master.registerSubscriber(name, topic, subscriber.getTopicType(), getAddress()));
   }
 
   public List<Object> getBusStats(String callerId) {
@@ -95,8 +99,8 @@ public class Slave extends Node {
     throw new UnsupportedOperationException();
   }
 
-  public List<SubscriberDescription> getSubscriptions() {
-    throw new UnsupportedOperationException();
+  public List<Subscriber<?>> getSubscriptions() {
+    return ImmutableList.copyOf(subscribers.values());
   }
 
   public List<Publisher> getPublications() {

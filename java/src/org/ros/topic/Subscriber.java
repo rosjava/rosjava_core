@@ -40,7 +40,6 @@ public class Subscriber<T extends Message> extends Topic {
   private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(Subscriber.class);
 
-  private final String name;
   private final CopyOnWriteArrayList<SubscriberListener<T>> listeners;
   private final IncomingMessageQueue<T> in;
   private final MessageReadingThread thread;
@@ -83,7 +82,6 @@ public class Subscriber<T extends Message> extends Topic {
   public Subscriber(TopicDescription description, String name, Class<T> messageClass, Socket publisherSocket)
       throws IOException {
     super(description);
-    this.name = name;
     this.publisherSocket = publisherSocket;
     this.listeners = new CopyOnWriteArrayList<Subscriber.SubscriberListener<T>>();
     this.in = new IncomingMessageQueue<T>(messageClass);

@@ -16,19 +16,18 @@
 
 package org.ros.node.client;
 
-import com.google.common.collect.Lists;
-
-import org.ros.node.Response;
-import org.ros.topic.Publisher;
-import org.ros.topic.SubscriberDescription;
-import org.ros.topic.TopicDescription;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+
+import org.ros.node.Response;
+import org.ros.topic.Publisher;
+import org.ros.topic.TopicDescription;
+
+import com.google.common.collect.Lists;
 
 public class Master extends Node<org.ros.node.xmlrpc.Master> {
 
@@ -49,9 +48,33 @@ public class Master extends Node<org.ros.node.xmlrpc.Master> {
         (Integer) response.get(2));
   }
 
-  public Response<List<SubscriberDescription>> registerSubscriber(String callerId, String topic,
-      String topicType, String callerApi) {
-    throw new UnsupportedOperationException();
+  /**
+   * Subscribe the caller to the specified topic. In addition to receiving a
+   * list of current publishers, the subscriber will also receive notifications
+   * of new publishers via the publisherUpdate API.
+   * 
+   * @param callerId
+   *          ROS caller ID
+   * @param topic
+   *          fully-qualified name of topic
+   * @param topicType
+   *          data-type for topic
+   * @param url
+   *          API URI of subscriber to register (used for new publisher
+   *          notifications)
+   * @return Publishers for topic as a list of XML-RPC API URIs for nodes
+   *         currently publishing the specified topic.
+   * @throws MalformedURLException
+   */
+  public Response<List<URL>> registerSubscriber(String callerId, String topic,
+      String topicType, URL url) throws MalformedURLException {
+    List<Object> response = node.registerSubscriber(callerId, topic, topicType, url.toString());
+    List<Object> values = Arrays.asList((Object[]) response.get(2));
+    List<URL> urls = Lists.newArrayList();
+    for (Object value : values) {
+      urls.add(new URL((String) value));
+    }
+    return new Response<List<URL>>((Integer) response.get(0), (String) response.get(1), urls);
   }
 
   public Response<Integer> unregisterSubscriber(String callerId, String topic, String callerApi) {
@@ -63,9 +86,12 @@ public class Master extends Node<org.ros.node.xmlrpc.Master> {
   /**
    * Register the caller as a publisher the topic.
    * 
-   * @param callerId ROS caller ID
-   * @param publisher the publisher to register
-   * @param url API URL of publisher to register
+   * @param callerId
+   *          ROS caller ID
+   * @param publisher
+   *          the publisher to register
+   * @param url
+   *          API URL of publisher to register
    * @return List of current subscribers of topic in the form of XML-RPC URIs
    * @throws MalformedURLException
    */
