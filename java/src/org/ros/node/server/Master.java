@@ -17,19 +17,30 @@
 package org.ros.node.server;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.node.xmlrpc.MasterImpl;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Master extends Node {
-  
+
+  private final Multimap<String, PublisherDescription> publishers;
+  private final Multimap<String, SubscriberDescription> subscribers;
+
   public Master(String hostname, int port) {
     super(hostname, port);
+    publishers = Multimaps.synchronizedMultimap(ArrayListMultimap
+        .<String, PublisherDescription> create());
+    subscribers = Multimaps.synchronizedMultimap(ArrayListMultimap
+        .<String, SubscriberDescription> create());
   }
 
   public void start() throws XmlRpcException, IOException {
@@ -45,9 +56,22 @@ public class Master extends Node {
     return null;
   }
 
-  public List<Object> registerSubscriber(String callerId, String topic, String topicType,
-      String callerApi) {
-    return null;
+  /**
+   * Subscribe the caller to the specified topic. In addition to receiving a
+   * list of current publishers, the subscriber will also receive notifications
+   * of new publishers via the publisherUpdate API.
+   * 
+   * 
+   * @param callerId
+   *          ROS caller ID
+   * @param description
+   * @return Publishers is a list of XMLRPC API URIs for nodes currently
+   *         publishing the specified topic.
+   */
+  public List<PublisherDescription> registerSubscriber(String callerId,
+      SubscriberDescription description) {
+    subscribers.put(description.getTopicName(), description);
+    return ImmutableList.copyOf(publishers.get(description.getTopicName()));
   }
 
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi) {
@@ -59,18 +83,12 @@ public class Master extends Node {
    * 
    * @param callerId
    *          ROS caller ID
-   * @param topic
-   *          Fully-qualified name of topic to register.
-   * @param topicType
-   *          Datatype for topic. Must be a package-resource name, i.e. the .msg
-   *          name.
-   * @param callerApi
-   *          API URI of publisher to register.
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
    */
-  public List<URL> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) {
-    return null;
+  public List<SubscriberDescription> registerPublisher(String callerId,
+      PublisherDescription description) {
+    publishers.put(description.getTopicName(), description);
+    return ImmutableList.copyOf(subscribers.get(description.getTopicName()));
   }
 
   public List<Object> unregisterPublisher(String callerId, String topic, String callerApi) {
