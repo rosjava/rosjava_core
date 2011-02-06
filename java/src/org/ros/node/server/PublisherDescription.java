@@ -25,19 +25,28 @@ import org.ros.topic.TopicDescription;
  */
 public class PublisherDescription {
   
+  private final SlaveDescription slaveDescription;
   private final TopicDescription topicDescription;
-  private final URL slaveUrl;
   
-  public PublisherDescription(TopicDescription topicDescription, URL slaveUrl) {
+  public PublisherDescription(SlaveDescription slaveDescription, TopicDescription topicDescription) {
+    this.slaveDescription = slaveDescription;
     this.topicDescription = topicDescription;
-    this.slaveUrl = slaveUrl;
+  }
+  
+  public SlaveDescription getSlaveDescription() {
+    return slaveDescription;
+  }
+  
+  public String getNodeName() {
+    return slaveDescription.getName();
+  }
+  
+  public URL getSlaveUrl() {
+    return slaveDescription.getUrl();
   }
   
   public String getTopicName() {
     return topicDescription.getName();
   }
   
-  public URL getSlaveUrl() {
-    return slaveUrl;
-  }
 }

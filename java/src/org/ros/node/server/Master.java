@@ -18,12 +18,15 @@ package org.ros.node.server;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.node.xmlrpc.MasterImpl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
@@ -32,11 +35,15 @@ import com.google.common.collect.Multimaps;
  */
 public class Master extends Node {
 
+  private final Map<String, SlaveDescription> slaves;
   private final Multimap<String, PublisherDescription> publishers;
   private final Multimap<String, SubscriberDescription> subscribers;
 
   public Master(String hostname, int port) {
     super(hostname, port);
+    // TODO(damonkohler): Make slaves refcounted so that they are removed when
+    // the last publisher/subscriber/service is unregistered.
+    slaves = Maps.newConcurrentMap();
     publishers = Multimaps.synchronizedMultimap(ArrayListMultimap
         .<String, PublisherDescription> create());
     subscribers = Multimaps.synchronizedMultimap(ArrayListMultimap
@@ -56,6 +63,12 @@ public class Master extends Node {
     return null;
   }
 
+  private void addSlave(SlaveDescription description) {
+    Preconditions.checkState(slaves.get(description.getName()) == null
+        || slaves.get(description.getName()).equals(description));
+    slaves.put(description.getName(), description);
+  }
+
   /**
    * Subscribe the caller to the specified topic. In addition to receiving a
    * list of current publishers, the subscriber will also receive notifications
@@ -71,6 +84,7 @@ public class Master extends Node {
   public List<PublisherDescription> registerSubscriber(String callerId,
       SubscriberDescription description) {
     subscribers.put(description.getTopicName(), description);
+    addSlave(description.getSlaveDescription());
     return ImmutableList.copyOf(publishers.get(description.getTopicName()));
   }
 
@@ -88,6 +102,7 @@ public class Master extends Node {
   public List<SubscriberDescription> registerPublisher(String callerId,
       PublisherDescription description) {
     publishers.put(description.getTopicName(), description);
+    addSlave(description.getSlaveDescription());
     return ImmutableList.copyOf(subscribers.get(description.getTopicName()));
   }
 
@@ -95,12 +110,25 @@ public class Master extends Node {
     return null;
   }
 
-  public List<Object> lookupNode(String callerId, String nodeName) {
-    return null;
+  /**
+   * Get the XML-RPC URI of the node with the associated name/caller_id. This
+   * API is for looking information about publishers and subscribers. Use
+   * lookupService instead to lookup ROS-RPC URIs.
+   * 
+   * @param callerId
+   *          ROS caller ID
+   * @param nodeName
+   *          Name of node to lookup
+   * @return
+   */
+  public SlaveDescription lookupNode(String callerId, String nodeName) {
+    return slaves.get(nodeName);
   }
 
-  public List<Object> getPublishedTopics(String callerId, String subgraph) {
-    return null;
+  public List<PublisherDescription> getPublishedTopics(String callerId, String subgraph) {
+    // TODO(damonkohler): Add support for subgraph filtering.
+    Preconditions.checkArgument(subgraph.length() == 0);
+    return ImmutableList.copyOf(publishers.values());
   }
 
   public List<Object> getSystemState(String callerId) {
