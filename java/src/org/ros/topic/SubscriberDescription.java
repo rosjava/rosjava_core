@@ -29,7 +29,7 @@ public class SubscriberDescription {
 
   public static SubscriberDescription CreateFromHeader(Map<String, String> header) {
     String callerId = header.get(HeaderFields.CALLER_ID);
-    return new SubscriberDescription(callerId, TopicDescription.CreateFromHeader(header),
+    return new SubscriberDescription(callerId, TopicDescription.createFromHeader(header),
         MessageDescription.createFromHeader(header));
   }
 

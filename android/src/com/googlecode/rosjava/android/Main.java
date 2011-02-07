@@ -17,63 +17,100 @@
 package com.googlecode.rosjava.android;
 
 import android.app.Activity;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 
+import org.apache.xmlrpc.XmlRpcException;
 import org.ros.communication.MessageDescription;
+import org.ros.communication.geometry_msgs.Point;
+import org.ros.communication.geometry_msgs.Pose;
+import org.ros.communication.geometry_msgs.Quaternion;
+import org.ros.node.RemoteException;
 import org.ros.node.client.Master;
 import org.ros.node.server.Slave;
 import org.ros.topic.Publisher;
 import org.ros.topic.TopicDescription;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class Main extends Activity {
 
-  private static class Chatter extends Publisher {
+  private final Point origin;
 
-    public Chatter(String hostname, int port) throws IOException {
-      super(new TopicDescription("/chatter",
-          MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String())),
-          hostname, port);
-    }
+  public Main() throws IOException {
+    super();
+    origin = new Point();
+    origin.x = 0;
+    origin.y = 0;
+    origin.z = 0;
 
-    @Override
-    public void start() {
-      super.start();
-      (new Thread() {
-        @Override
-        public void run() {
-          org.ros.communication.std_msgs.String message =
-              new org.ros.communication.std_msgs.String();
-          message.data = "Hello, ROS!";
-          try {
-            while (true) {
-              publish(message);
-              Thread.sleep(1000);
-            }
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-        }
-      }).start();
-    }
   }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
+
+    Master master;
     try {
-      Master master = new Master(new URL("http://10.0.2.2:11311/"));
-      Slave slave = new Slave("/android", master, "localhost", 7331);
-      Publisher publisher = new Chatter("localhost", 7332);
-      publisher.start();
-      slave.addPublisher(publisher);
+      master = new Master(new URL("http://10.0.2.2:11311/"));
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      return;
+    }
+    
+    TopicDescription topicDescription =
+        new TopicDescription("/android/pose",
+            MessageDescription.createFromMessage(new org.ros.communication.geometry_msgs.Pose()));
+    final Publisher publisher;
+    try {
+      publisher = new Publisher(topicDescription, "localhost", 7332);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return;
+    }
+    publisher.start();
+    
+    Slave slave = new Slave("/android", master, "localhost", 7331);
+    try {
       slave.start();
+      slave.addPublisher(publisher);
     } catch (Exception e) {
       e.printStackTrace();
-    }
+      return;
+    } 
+
+    SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+    Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+    sensorManager.registerListener(new SensorEventListener() {
+
+      @Override
+      public void onAccuracyChanged(Sensor sensor, int accuracy) {
+      }
+
+      @Override
+      public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+          float[] quaternion = new float[4];
+          SensorManager.getQuaternionFromVector(quaternion, event.values);
+          Quaternion orientation = new Quaternion();
+          orientation.w = quaternion[0];
+          orientation.x = quaternion[1];
+          orientation.y = quaternion[2];
+          orientation.z = quaternion[3];
+          Pose pose = new Pose();
+          pose.position = origin;
+          pose.orientation = orientation;
+          publisher.publish(pose);
+        }
+      }
+
+    }, sensor, SensorManager.SENSOR_DELAY_FASTEST);
   }
 
 }

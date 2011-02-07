@@ -34,7 +34,7 @@ public class TopicDescription {
   private final String name;
   private final MessageDescription messageDescription;
 
-  public static TopicDescription CreateFromHeader(Map<String, String> header) {
+  public static TopicDescription createFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(HeaderFields.TOPIC));
     return new TopicDescription(header.get(HeaderFields.TOPIC),
         MessageDescription.createFromHeader(header));
