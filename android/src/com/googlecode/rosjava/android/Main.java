@@ -23,12 +23,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.ros.communication.MessageDescription;
+import org.ros.communication.Time;
 import org.ros.communication.geometry_msgs.Point;
-import org.ros.communication.geometry_msgs.Pose;
+import org.ros.communication.geometry_msgs.PoseStamped;
 import org.ros.communication.geometry_msgs.Quaternion;
-import org.ros.node.RemoteException;
 import org.ros.node.client.Master;
 import org.ros.node.server.Slave;
 import org.ros.topic.Publisher;
@@ -41,14 +40,14 @@ import java.net.URL;
 public class Main extends Activity {
 
   private final Point origin;
+  private volatile int seq = 0;
 
-  public Main() throws IOException {
+  public Main() {
     super();
     origin = new Point();
     origin.x = 0;
     origin.y = 0;
     origin.z = 0;
-
   }
 
   @Override
@@ -58,36 +57,38 @@ public class Main extends Activity {
 
     Master master;
     try {
-      master = new Master(new URL("http://10.0.2.2:11311/"));
+      master = new Master(new URL("http://192.168.144.238:11311/"));
     } catch (MalformedURLException e) {
       e.printStackTrace();
       return;
     }
-    
+
     TopicDescription topicDescription =
         new TopicDescription("/android/pose",
-            MessageDescription.createFromMessage(new org.ros.communication.geometry_msgs.Pose()));
+            MessageDescription
+                .createFromMessage(new org.ros.communication.geometry_msgs.PoseStamped()));
     final Publisher publisher;
     try {
-      publisher = new Publisher(topicDescription, "localhost", 7332);
+      publisher = new Publisher(topicDescription, "192.168.145.178", 7332);
     } catch (IOException e) {
       e.printStackTrace();
       return;
     }
     publisher.start();
-    
-    Slave slave = new Slave("/android", master, "localhost", 7331);
+
+    Slave slave = new Slave("/android", master, "192.168.145.178", 7331);
     try {
       slave.start();
       slave.addPublisher(publisher);
     } catch (Exception e) {
       e.printStackTrace();
       return;
-    } 
+    }
 
     SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
     Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
     sensorManager.registerListener(new SensorEventListener() {
+
 
       @Override
       public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -103,9 +104,12 @@ public class Main extends Activity {
           orientation.x = quaternion[1];
           orientation.y = quaternion[2];
           orientation.z = quaternion[3];
-          Pose pose = new Pose();
-          pose.position = origin;
-          pose.orientation = orientation;
+          PoseStamped pose = new PoseStamped();
+          pose.header.frame_id = "0";
+          pose.header.seq = seq++;
+          pose.header.stamp = Time.now();
+          pose.pose.position = origin;
+          pose.pose.orientation = orientation;
           publisher.publish(pose);
         }
       }
