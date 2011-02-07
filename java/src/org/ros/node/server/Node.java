@@ -16,6 +16,8 @@
 
 package org.ros.node.server;
 
+import com.google.common.base.Preconditions;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.server.PropertyHandlerMapping;
 import org.apache.xmlrpc.server.XmlRpcServer;
@@ -26,20 +28,25 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public abstract class Node {
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public class Node {
 
   private final String hostname;
-  private final int port;
   private final WebServer server;
+  
+  private boolean running;
   
   public Node(String hostname, int port) {
     this.hostname = hostname;
-    this.port = port;
     server = new WebServer(port);
+    running = false;
   }
 
   public <T extends org.ros.node.xmlrpc.Node> void start(Class<T> instanceClass,
       T instance) throws XmlRpcException, IOException {
+    Preconditions.checkState(!running);
     XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
     PropertyHandlerMapping phm = new PropertyHandlerMapping();
     phm.setRequestProcessorFactoryFactory(new NodeRequestProcessorFactoryFactory<T>(instance));
@@ -49,13 +56,16 @@ public abstract class Node {
     serverConfig.setEnabledForExtensions(false);
     serverConfig.setContentLengthOptional(false);
     server.start();
+    running = true;
   }
 
   public void shutdown() {
+    Preconditions.checkState(running);
     server.shutdown();
   }
   
   public URL getAddress() throws MalformedURLException {
-    return new URL("http", hostname, port, "");
+    Preconditions.checkState(running);
+    return new URL("http", hostname, server.getPort(), "");
   }
 }

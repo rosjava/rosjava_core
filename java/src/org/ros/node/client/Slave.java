@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -31,12 +31,15 @@ import org.ros.transport.TcpRosDescription;
 
 import com.google.common.base.Preconditions;
 
-public class Slave extends Node<org.ros.node.xmlrpc.Slave>{
-  
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public class Slave extends Node<org.ros.node.xmlrpc.Slave> {
+
   public Slave(URL url) {
     super(url, org.ros.node.xmlrpc.Slave.class);
   }
-  
+
   public List<Object> getBusStats(String callerId) {
     throw new UnsupportedOperationException();
   }
@@ -47,7 +50,8 @@ public class Slave extends Node<org.ros.node.xmlrpc.Slave>{
 
   public Response<URL> getMasterUri(String callerId) throws MalformedURLException {
     List<Object> response = node.getMasterUri(callerId);
-    return new Response<URL>((Integer) response.get(0), (String) response.get(1), new URL((String) response.get(2)));
+    return new Response<URL>((Integer) response.get(0), (String) response.get(1), new URL(
+        (String) response.get(2)));
   }
 
   public List<Object> shutdown(String callerId, String message) {
@@ -76,13 +80,14 @@ public class Slave extends Node<org.ros.node.xmlrpc.Slave>{
 
   public Response<ProtocolDescription> requestTopic(String callerId, String topic,
       Set<String> requestedProtocols) {
-    List<Object> response = node.requestTopic(callerId, topic,
-        new Object[][] { requestedProtocols.toArray() });
+    List<Object> response =
+        node.requestTopic(callerId, topic, new Object[][] {requestedProtocols.toArray()});
     List<Object> protocolParameters = Arrays.asList(response.get(2));
     Preconditions.checkState(protocolParameters.size() == 3);
     Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
-    InetSocketAddress address = new InetSocketAddress((String) protocolParameters.get(1),
-        (Integer) protocolParameters.get(2));
+    InetSocketAddress address =
+        new InetSocketAddress((String) protocolParameters.get(1),
+            (Integer) protocolParameters.get(2));
     return new Response<ProtocolDescription>((Integer) response.get(0), (String) response.get(1),
         new TcpRosDescription(address));
   }

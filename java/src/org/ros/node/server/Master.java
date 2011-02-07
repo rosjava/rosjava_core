@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -36,18 +36,16 @@ import com.google.common.collect.Multimaps;
 public class Master extends Node {
 
   private final Map<String, SlaveDescription> slaves;
-  private final Map<String, Integer> slaveRefcounts;
   private final Multimap<String, PublisherDescription> publishers;
   private final Multimap<String, SubscriberDescription> subscribers;
 
   public Master(String hostname, int port) {
     super(hostname, port);
     slaves = Maps.newConcurrentMap();
-    slaveRefcounts = Maps.newHashMap();
-    publishers = Multimaps.synchronizedMultimap(ArrayListMultimap
-        .<String, PublisherDescription> create());
-    subscribers = Multimaps.synchronizedMultimap(ArrayListMultimap
-        .<String, SubscriberDescription> create());
+    publishers =
+        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, PublisherDescription>create());
+    subscribers =
+        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, SubscriberDescription>create());
   }
 
   public void start() throws XmlRpcException, IOException {
@@ -65,30 +63,8 @@ public class Master extends Node {
 
   private void addSlave(SlaveDescription description) {
     String name = description.getName();
-    Preconditions.checkState(slaves.get(name) == null
-        || slaves.get(name).equals(description));
+    Preconditions.checkState(slaves.get(name) == null || slaves.get(name).equals(description));
     slaves.put(name, description);
-    synchronized (slaveRefcounts) {
-      Integer refcount = slaveRefcounts.get(name);
-      if (refcount == null) {
-        refcount = 0;
-      }
-      slaveRefcounts.put(name, refcount);
-    }
-  }
-  
-  private void removeSlave(SlaveDescription description) {
-    String name = description.getName();
-    Preconditions.checkState(slaves.get(name) != null);
-    synchronized (slaveRefcounts) {
-      int refcount = slaveRefcounts.get(name) - 1;
-      if (refcount == 0) {
-        slaves.remove(name);
-        slaveRefcounts.remove(name);
-      } else {
-        slaveRefcounts.put(name, refcount);
-      }
-    }
   }
 
   /**
@@ -97,8 +73,7 @@ public class Master extends Node {
    * of new publishers via the publisherUpdate API.
    * 
    * 
-   * @param callerId
-   *          ROS caller ID
+   * @param callerId ROS caller ID
    * @param description
    * @return Publishers is a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic.
@@ -117,8 +92,7 @@ public class Master extends Node {
   /**
    * Register the caller as a publisher the topic.
    * 
-   * @param callerId
-   *          ROS caller ID
+   * @param callerId ROS caller ID
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
    */
   public List<SubscriberDescription> registerPublisher(String callerId,
@@ -137,10 +111,8 @@ public class Master extends Node {
    * API is for looking information about publishers and subscribers. Use
    * lookupService instead to lookup ROS-RPC URIs.
    * 
-   * @param callerId
-   *          ROS caller ID
-   * @param nodeName
-   *          Name of node to lookup
+   * @param callerId ROS caller ID
+   * @param nodeName Name of node to lookup
    * @return
    */
   public SlaveDescription lookupNode(String callerId, String nodeName) {

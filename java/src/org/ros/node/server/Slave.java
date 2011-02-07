@@ -49,8 +49,6 @@ public class Slave extends Node {
   private final Map<String, Publisher> publishers;
   private final Map<String, Subscriber<?>> subscribers;
 
-  private URL masterUrl;
-
   public Slave(String name, org.ros.node.client.Master master, String hostname, int port) {
     super(hostname, port);
     this.name = name;
@@ -91,12 +89,8 @@ public class Slave extends Node {
     throw new UnsupportedOperationException();
   }
 
-  public void setMasterUri(URL url) {
-    masterUrl = url;
-  }
-
   public URL getMasterUri(String callerId) {
-    return masterUrl;
+    return master.getRemoteAddress();
   }
 
   public void shutdown(String callerId, String message) {

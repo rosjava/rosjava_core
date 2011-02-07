@@ -23,11 +23,19 @@ import org.apache.xmlrpc.client.util.ClientFactory;
 
 import java.net.URL;
 
-public abstract class Node<T extends org.ros.node.xmlrpc.Node> {
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ */
+public class Node<T extends org.ros.node.xmlrpc.Node> {
   
   protected final T node;
+  private final URL url;
   
   public Node(URL url, Class<T> interfaceClass) {
+    this.url = url;
+    
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
     config.setServerURL(url);
     config.setEnabledForExtensions(true);
@@ -40,6 +48,13 @@ public abstract class Node<T extends org.ros.node.xmlrpc.Node> {
 
     ClientFactory factory = new ClientFactory(client);
     node = interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, ""));
+  }
+
+  /**
+   * @return the URL address of the remote node
+   */
+  public URL getRemoteAddress() {
+    return url;
   }
 
 }
