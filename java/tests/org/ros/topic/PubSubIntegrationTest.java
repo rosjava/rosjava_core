@@ -24,7 +24,6 @@ import org.ros.communication.MessageDescription;
 import org.ros.topic.Subscriber.SubscriberListener;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -40,22 +39,21 @@ public class PubSubIntegrationTest {
             MessageDescription.CreateFromMessage(new org.ros.communication.std_msgs.String()));
     Publisher publisher = new Publisher(topicDescription, "localhost", 0);
     publisher.start();
-    
-    Socket publisherSocket =
-        new Socket(publisher.getAddress().getHostName(), publisher.getAddress().getPort());
+
     Subscriber<org.ros.communication.std_msgs.String> subscriber =
-        new Subscriber<org.ros.communication.std_msgs.String>(
-            topicDescription, "/caller", org.ros.communication.std_msgs.String.class, publisherSocket);
-    subscriber.start();
-    
+        new Subscriber<org.ros.communication.std_msgs.String>(topicDescription, "/caller",
+            org.ros.communication.std_msgs.String.class);
+    subscriber.start(publisher.getAddress());
+
     final CountDownLatch messageReceived = new CountDownLatch(1);
     subscriber.addListener(new SubscriberListener<org.ros.communication.std_msgs.String>() {
       @Override
       public void onNewMessage(org.ros.communication.std_msgs.String message) {
         assertEquals(message.data, "Hello, ROS!");
         messageReceived.countDown();
-      }});
-    
+      }
+    });
+
     org.ros.communication.std_msgs.String message = new org.ros.communication.std_msgs.String();
     message.data = "Hello, ROS!";
     publisher.publish(message);
