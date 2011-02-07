@@ -38,7 +38,7 @@ import com.google.common.collect.ImmutableMap;
  */
 public class Subscriber<T extends Message> extends Topic {
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Subscriber.class);
 
   private final CopyOnWriteArrayList<SubscriberListener<T>> listeners;

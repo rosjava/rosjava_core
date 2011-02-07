@@ -57,7 +57,7 @@ public class Main extends Activity {
 
     Master master;
     try {
-      master = new Master(new URL("http://192.168.144.238:11311/"));
+      master = new Master(new URL("http://192.168.1.136:11311/"));
     } catch (MalformedURLException e) {
       e.printStackTrace();
       return;
@@ -69,14 +69,14 @@ public class Main extends Activity {
                 .createFromMessage(new org.ros.communication.geometry_msgs.PoseStamped()));
     final Publisher publisher;
     try {
-      publisher = new Publisher(topicDescription, "192.168.145.178", 7332);
+      publisher = new Publisher(topicDescription, "192.168.1.141", 7332);
     } catch (IOException e) {
       e.printStackTrace();
       return;
     }
     publisher.start();
 
-    Slave slave = new Slave("/android", master, "192.168.145.178", 7331);
+    Slave slave = new Slave("/android", master, "192.168.1.141", 7331);
     try {
       slave.start();
       slave.addPublisher(publisher);
@@ -105,7 +105,7 @@ public class Main extends Activity {
           orientation.y = quaternion[2];
           orientation.z = quaternion[3];
           PoseStamped pose = new PoseStamped();
-          pose.header.frame_id = "0";
+          pose.header.frame_id = "/map";
           pose.header.seq = seq++;
           pose.header.stamp = Time.now();
           pose.pose.position = origin;

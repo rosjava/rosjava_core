@@ -34,11 +34,7 @@
 
 // author: Jason Wolfe
 
-
-
 package org.ros.communication;
-
-//import ros.Ros;
 
 public class Time extends TimeUnit {
 	public Time() {}
@@ -78,7 +74,9 @@ public class Time extends TimeUnit {
 		return (secs > t.secs) || ((secs == t.secs) && nsecs > t.nsecs);
 	}
 
-	public static Time now() { return null; }//Ros.getInstance().now(); }
+	public static Time now() {
+	  return new Time(System.currentTimeMillis() / 1000);
+    }
 	
 	public boolean inFuture() {
 		normalize();

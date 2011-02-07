@@ -27,7 +27,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class IncomingMessageQueue<T extends Message> {
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
 
   private final Class<T> messageClass;
