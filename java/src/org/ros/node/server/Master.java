@@ -36,14 +36,14 @@ import com.google.common.collect.Multimaps;
 public class Master extends Node {
 
   private final Map<String, SlaveDescription> slaves;
+  private final Map<String, Integer> slaveRefcounts;
   private final Multimap<String, PublisherDescription> publishers;
   private final Multimap<String, SubscriberDescription> subscribers;
 
   public Master(String hostname, int port) {
     super(hostname, port);
-    // TODO(damonkohler): Make slaves refcounted so that they are removed when
-    // the last publisher/subscriber/service is unregistered.
     slaves = Maps.newConcurrentMap();
+    slaveRefcounts = Maps.newHashMap();
     publishers = Multimaps.synchronizedMultimap(ArrayListMultimap
         .<String, PublisherDescription> create());
     subscribers = Multimaps.synchronizedMultimap(ArrayListMultimap
@@ -64,9 +64,31 @@ public class Master extends Node {
   }
 
   private void addSlave(SlaveDescription description) {
-    Preconditions.checkState(slaves.get(description.getName()) == null
-        || slaves.get(description.getName()).equals(description));
-    slaves.put(description.getName(), description);
+    String name = description.getName();
+    Preconditions.checkState(slaves.get(name) == null
+        || slaves.get(name).equals(description));
+    slaves.put(name, description);
+    synchronized (slaveRefcounts) {
+      Integer refcount = slaveRefcounts.get(name);
+      if (refcount == null) {
+        refcount = 0;
+      }
+      slaveRefcounts.put(name, refcount);
+    }
+  }
+  
+  private void removeSlave(SlaveDescription description) {
+    String name = description.getName();
+    Preconditions.checkState(slaves.get(name) != null);
+    synchronized (slaveRefcounts) {
+      int refcount = slaveRefcounts.get(name) - 1;
+      if (refcount == 0) {
+        slaves.remove(name);
+        slaveRefcounts.remove(name);
+      } else {
+        slaveRefcounts.put(name, refcount);
+      }
+    }
   }
 
   /**
