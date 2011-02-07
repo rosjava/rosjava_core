@@ -40,9 +40,9 @@ public class PublisherTest {
   public void testHandshake() throws IOException {
     Socket socket = mock(Socket.class);
     Map<String, String> header =
-        MessageDescription.CreateFromMessage(new org.ros.communication.std_msgs.String())
+        new TopicDescription("/foo",
+            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()))
             .toHeader();
-    header.put(HeaderFields.TOPIC, "/foo");
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     Header.writeHeader(header, outputStream);
     byte[] buffer = outputStream.toByteArray();
@@ -52,7 +52,7 @@ public class PublisherTest {
 
     Publisher publisher =
         new Publisher(new TopicDescription("/foo",
-            MessageDescription.CreateFromMessage(new org.ros.communication.std_msgs.String())),
+            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String())),
             "localhost", 1234);
     publisher.handshake(socket);
     buffer = outputStream.toByteArray();

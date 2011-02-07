@@ -26,15 +26,15 @@ public class Response<T> {
   private final String statusMessage;
   private final T value;
   
-  public static <T> Response<T> CreateError(String message, T value) {
+  public static <T> Response<T> createError(String message, T value) {
     return new Response<T>(StatusCode.ERROR, message, value);
   }
   
-  public static <T> Response<T> CreateFailure(String message, T value) {
+  public static <T> Response<T> createFailure(String message, T value) {
     return new Response<T>(StatusCode.FAILURE, message, value);
   }
   
-  public static <T> Response<T> CreateSuccess(String message, T value) {
+  public static <T> Response<T> createSuccess(String message, T value) {
     return new Response<T>(StatusCode.SUCCESS, message, value);
   }
   

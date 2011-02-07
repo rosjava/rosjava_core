@@ -34,7 +34,7 @@ public class Main extends Activity {
 
     public Chatter(String hostname, int port) throws IOException {
       super(new TopicDescription("/chatter",
-          MessageDescription.CreateFromMessage(new org.ros.communication.std_msgs.String())),
+          MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String())),
           hostname, port);
     }
 

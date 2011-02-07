@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.ros.node.Response;
 import org.ros.topic.Publisher;
+import org.ros.topic.Subscriber;
 import org.ros.topic.TopicDescription;
 
 import com.google.common.collect.Lists;
@@ -53,22 +54,19 @@ public class Master extends Node<org.ros.node.xmlrpc.Master> {
    * list of current publishers, the subscriber will also receive notifications
    * of new publishers via the publisherUpdate API.
    * 
-   * @param callerId
-   *          ROS caller ID
-   * @param topic
-   *          fully-qualified name of topic
-   * @param topicType
-   *          data-type for topic
-   * @param url
-   *          API URI of subscriber to register (used for new publisher
-   *          notifications)
+   * @param callerId ROS caller ID
+   * @param subscriber
+   * @param url API URI of subscriber to register (used for new publisher
+   *        notifications)
    * @return Publishers for topic as a list of XML-RPC API URIs for nodes
    *         currently publishing the specified topic.
    * @throws MalformedURLException
    */
-  public Response<List<URL>> registerSubscriber(String callerId, String topic,
-      String topicType, URL url) throws MalformedURLException {
-    List<Object> response = node.registerSubscriber(callerId, topic, topicType, url.toString());
+  public Response<List<URL>> registerSubscriber(String callerId, Subscriber<?> subscriber, URL url)
+      throws MalformedURLException {
+    List<Object> response =
+        node.registerSubscriber(callerId, subscriber.getTopicName(),
+            subscriber.getTopicMessageType(), url.toString());
     List<Object> values = Arrays.asList((Object[]) response.get(2));
     List<URL> urls = Lists.newArrayList();
     for (Object value : values) {
@@ -86,17 +84,18 @@ public class Master extends Node<org.ros.node.xmlrpc.Master> {
   /**
    * Register the caller as a publisher the topic.
    * 
-   * @param callerId
-   *          ROS caller ID
-   * @param publisher
-   *          the publisher to register
-   * @param url
-   *          API URL of publisher to register
+   * @param callerId ROS caller ID
+   * @param publisher the publisher to register
+   * @param url API URL of publisher to register
    * @return List of current subscribers of topic in the form of XML-RPC URIs
    * @throws MalformedURLException
    */
-  public Response<List<URL>> registerPublisher(String callerId, Publisher publisher, URL url) throws MalformedURLException {
-    List<Object> response = node.registerPublisher(callerId, publisher.getTopicName(), publisher.getTopicType(), url.toString());
+  public Response<List<URL>> registerPublisher(String callerId, Publisher publisher, URL url)
+      throws MalformedURLException {
+    String topicName = publisher.getTopicName();
+    String messageType = publisher.getTopicMessageType();
+    List<Object> response =
+        node.registerPublisher(callerId, topicName, messageType, url.toString());
     List<Object> values = Arrays.asList((Object[]) response.get(2));
     List<URL> urls = Lists.newArrayList();
     for (Object value : values) {

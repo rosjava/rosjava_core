@@ -54,7 +54,8 @@ public class SlaveImplTest {
     Publisher mockPublisher = mock(Publisher.class);
     when(mockSlave.getPublications()).thenReturn(Lists.newArrayList(mockPublisher));
     when(mockPublisher.getTopicName()).thenReturn("/bar");
-    when(mockPublisher.getTopicType()).thenReturn("/baz");
+    when(mockPublisher.getTopicMessageType()).thenReturn("/baz");
+    when(mockPublisher.getTopicDescriptionAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));
     SlaveImpl slave = new SlaveImpl(mockSlave);
     List<Object> response = slave.getPublications("/foo");
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
@@ -70,9 +71,10 @@ public class SlaveImplTest {
     TcpRosDescription protocol = new TcpRosDescription(localhost);
     when(
         mockSlave.requestTopic(Matchers.<String>any(),
-            Matchers.eq(Sets.newHashSet(ProtocolNames.TCPROS, ProtocolNames.UDPROS)))).thenReturn(protocol);
+            Matchers.eq(Sets.newHashSet(ProtocolNames.TCPROS, ProtocolNames.UDPROS)))).thenReturn(
+        protocol);
     SlaveImpl slave = new SlaveImpl(mockSlave);
-    Object[][] protocols = new Object[][] {{ProtocolNames.TCPROS}, {ProtocolNames.UDPROS}};
+    Object[][] protocols = new Object[][] { {ProtocolNames.TCPROS}, {ProtocolNames.UDPROS}};
     List<Object> response = slave.requestTopic("/foo", "/bar", protocols);
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
     assertEquals(response.get(2), protocol.toList());

@@ -16,6 +16,8 @@
 
 package org.ros.topic;
 
+import java.util.List;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -26,12 +28,17 @@ public class Topic {
   public Topic(TopicDescription description) {
     this.description = description;
   }
-
+ 
+  public List<String> getTopicDescriptionAsList() {
+    return description.toList();
+  }
+  
   public String getTopicName() {
     return description.getName();
   }
-
-  public String getTopicType() {
+  
+  public String getTopicMessageType() {
     return description.getMessageType();
   }
+  
 }

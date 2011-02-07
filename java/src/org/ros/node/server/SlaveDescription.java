@@ -32,6 +32,11 @@ public class SlaveDescription {
   }
   
   @Override
+  public String toString() {
+    return "SlaveDescription<" + name + ", " + url.toString() + ">";
+  }
+  
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;

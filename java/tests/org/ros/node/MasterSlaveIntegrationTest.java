@@ -17,6 +17,7 @@
 package org.ros.node;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 
@@ -24,7 +25,9 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.communication.MessageDescription;
+import org.ros.node.server.PublisherDescription;
 import org.ros.topic.Publisher;
+import org.ros.topic.Subscriber;
 import org.ros.topic.TopicDescription;
 import org.ros.transport.ProtocolDescription;
 import org.ros.transport.ProtocolNames;
@@ -32,6 +35,7 @@ import org.ros.transport.TcpRosDescription;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -63,15 +67,30 @@ public class MasterSlaveIntegrationTest {
   public void testAddPublisher() throws RemoteException, IOException {
     TopicDescription topicDescription =
         new TopicDescription("/hello",
-            MessageDescription.CreateFromMessage(new org.ros.communication.std_msgs.String()));
+            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()));
     Publisher publisher = new Publisher(topicDescription, "localhost", 0);
-    publisher.start();
-
     slaveServer.addPublisher(publisher);
     Response<ProtocolDescription> response =
         Response.checkOk(slaveClient.requestTopic("/caller", "/hello",
             Sets.newHashSet(ProtocolNames.TCPROS)));
     assertEquals(response.getValue(), new TcpRosDescription(publisher.getAddress()));
+  }
+
+  @Test
+  public void testAddSubscriber() throws RemoteException, IOException {
+    TopicDescription topicDescription =
+        new TopicDescription("/hello",
+            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()));
+    Subscriber<org.ros.communication.std_msgs.String> subscriber =
+        Subscriber.create("/bloop", topicDescription, org.ros.communication.std_msgs.String.class);
+    List<PublisherDescription> publishers = slaveServer.addSubscriber(subscriber);
+    assertTrue(publishers.size() == 0);
+    Publisher publisher = new Publisher(topicDescription, "localhost", 0);
+    slaveServer.addPublisher(publisher);
+    publishers = slaveServer.addSubscriber(subscriber);
+    PublisherDescription publisherDescription =
+        publisher.toPublisherDescription(slaveServer.toSlaveDescription());
+    assertTrue(publishers.contains(publisherDescription));
   }
 
 }

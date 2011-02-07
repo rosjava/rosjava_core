@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,6 +16,23 @@
 
 package org.ros.node.server;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import org.apache.xmlrpc.XmlRpcException;
+import org.ros.communication.MessageDescription;
+import org.ros.node.RemoteException;
+import org.ros.node.Response;
+import org.ros.node.xmlrpc.SlaveImpl;
+import org.ros.topic.Publisher;
+import org.ros.topic.Subscriber;
+import org.ros.topic.TopicDescription;
+import org.ros.transport.ProtocolDescription;
+import org.ros.transport.ProtocolNames;
+import org.ros.transport.TcpRosDescription;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,21 +40,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.xmlrpc.XmlRpcException;
-import org.ros.node.RemoteException;
-import org.ros.node.Response;
-import org.ros.node.xmlrpc.SlaveImpl;
-import org.ros.topic.Publisher;
-import org.ros.topic.Subscriber;
-import org.ros.transport.ProtocolDescription;
-import org.ros.transport.ProtocolNames;
-import org.ros.transport.TcpRosDescription;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -67,18 +69,21 @@ public class Slave extends Node {
     Response.checkOk(master.registerPublisher(name, publisher, getAddress()));
   }
 
-  public void addSubscriber(Subscriber<?> subscriber) throws RemoteException, IOException {
+  public List<PublisherDescription> addSubscriber(Subscriber<?> subscriber) throws RemoteException,
+      IOException {
     String topic = subscriber.getTopicName();
     subscribers.put(topic, subscriber);
-    Response<List<URL>> response = Response.checkOk(master.registerSubscriber(name, topic,
-        subscriber.getTopicType(), getAddress()));
-    // TODO(damonkohler): Provide possibility for choosing a publisher and
-    // handling the case in which there are no publishers.
-    Preconditions.checkState(response.getValue().size() > 0);
-    org.ros.node.client.Slave slave = new org.ros.node.client.Slave(response.getValue().get(0));
-    Response<ProtocolDescription> requestTopicResponse = Response.checkOk(slave.requestTopic(name,
-        topic, Sets.newHashSet(ProtocolNames.TCPROS)));
-    subscriber.start(requestTopicResponse.getValue().getAddress());
+    Response<List<URL>> response =
+        Response.checkOk(master.registerSubscriber(name, subscriber, getAddress()));
+    List<PublisherDescription> publishers = Lists.newArrayList();
+    for (URL url : response.getValue()) {
+      SlaveDescription slaveDescription = new SlaveDescription(name, url);
+      MessageDescription messageDescription =
+          MessageDescription.createMessageDescription(subscriber.getTopicMessageType());
+      TopicDescription topicDescription = new TopicDescription(topic, messageDescription);
+      publishers.add(new PublisherDescription(slaveDescription, topicDescription));
+    }
+    return publishers;
   }
 
   public List<Object> getBusStats(String callerId) {
@@ -122,5 +127,13 @@ public class Slave extends Node {
     // TODO(damonkohler): Pull out list of supported protocols.
     Preconditions.checkArgument(protocols.contains(ProtocolNames.TCPROS));
     return new TcpRosDescription(publishers.get(topic).getAddress());
+  }
+
+  /**
+   * @return
+   * @throws MalformedURLException 
+   */
+  public SlaveDescription toSlaveDescription() throws MalformedURLException {
+    return new SlaveDescription(name, getAddress());
   }
 }

@@ -16,12 +16,12 @@
 
 package org.ros.communication;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 import org.ros.transport.HeaderFields;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -31,39 +31,40 @@ public class MessageDescription {
   private final String type;
   private final String md5Checksum;
 
-  public static MessageDescription CreateFromMessage(Message message) {
+  public static MessageDescription createFromMessage(Message message) {
     return new MessageDescription(message.getDataType(), message.getMD5Sum());
   }
 
-  public static MessageDescription CreateFromHeader(Map<String, String> header) {
+  public static MessageDescription createFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(HeaderFields.TYPE));
     Preconditions.checkArgument(header.containsKey(HeaderFields.MD5_CHECKSUM));
     return new MessageDescription(header.get(HeaderFields.TYPE),
         header.get(HeaderFields.MD5_CHECKSUM));
   }
 
-  public MessageDescription(String type, String md5) {
+  public static MessageDescription createMessageDescription(String type) {
+    return new MessageDescription(type, null);
+  }
+
+  private MessageDescription(String type, String md5Checksum) {
     Preconditions.checkNotNull(type);
     this.type = type;
-    this.md5Checksum = md5;
+    this.md5Checksum = md5Checksum;
   }
 
   public String getType() {
     return type;
   }
 
-  public String getMd5Checksum() {
-    // TODO(damonkohler): This should move into the constructor. However,
-    // presently we do not always know the MD5 at construction time.
+  public Map<String, String> toHeader() {
     Preconditions.checkNotNull(md5Checksum);
-    return md5Checksum;
+    return new ImmutableMap.Builder<String, String>().put(HeaderFields.TYPE, type)
+        .put(HeaderFields.MD5_CHECKSUM, md5Checksum).build();
   }
 
-  public Map<String, String> toHeader() {
-    Map<String, String> header = Maps.newHashMap();
-    header.put(HeaderFields.TYPE, type);
-    header.put(HeaderFields.MD5_CHECKSUM, md5Checksum);
-    return header;
+  @Override
+  public String toString() {
+    return "MessageDescription<" + type + ", " + md5Checksum + ">";
   }
 
   /*
@@ -91,12 +92,12 @@ public class MessageDescription {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MessageDescription other = (MessageDescription) obj;
-    if (md5Checksum == null) {
-      if (other.md5Checksum != null) return false;
-    } else if (!md5Checksum.equals(other.md5Checksum)) return false;
     if (type == null) {
       if (other.type != null) return false;
     } else if (!type.equals(other.type)) return false;
+    if (md5Checksum == null || other.md5Checksum == null) {
+      return true;
+    } else if (!md5Checksum.equals(other.md5Checksum)) return false;
     return true;
   }
 }

@@ -79,16 +79,20 @@ public class Subscriber<T extends Message> extends Topic {
     }
   }
 
-  public Subscriber(TopicDescription description, String name, Class<T> messageClass)
+  public static <S extends Message> Subscriber<S> create(String name, TopicDescription description,
+      Class<S> messageClass) throws IOException {
+    return new Subscriber<S>(name, description, messageClass);
+  }
+
+  private Subscriber(String name, TopicDescription description, Class<T> messageClass)
       throws IOException {
     super(description);
     this.listeners = new CopyOnWriteArrayList<Subscriber.SubscriberListener<T>>();
     this.in = new IncomingMessageQueue<T>(messageClass);
     thread = new MessageReadingThread();
-    header = ImmutableMap.<String, String>builder()
-        .put(HeaderFields.CALLER_ID, name)
-        .putAll(description.toHeader())
-        .build();
+    header =
+        ImmutableMap.<String, String>builder().put(HeaderFields.CALLER_ID, name)
+            .putAll(description.toHeader()).build();
   }
 
   public void addListener(SubscriberListener<T> listener) {
@@ -121,4 +125,5 @@ public class Subscriber<T extends Message> extends Topic {
     Preconditions.checkState(incomingHeader.get(HeaderFields.MD5_CHECKSUM).equals(
         header.get(HeaderFields.MD5_CHECKSUM)));
   }
+  
 }

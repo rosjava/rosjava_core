@@ -71,15 +71,13 @@ public class Master extends Node {
    * Subscribe the caller to the specified topic. In addition to receiving a
    * list of current publishers, the subscriber will also receive notifications
    * of new publishers via the publisherUpdate API.
-   * 
-   * 
-   * @param callerId ROS caller ID
    * @param description
+   * 
+   * 
    * @return Publishers is a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic.
    */
-  public List<PublisherDescription> registerSubscriber(String callerId,
-      SubscriberDescription description) {
+  public List<PublisherDescription> registerSubscriber(SubscriberDescription description) {
     subscribers.put(description.getTopicName(), description);
     addSlave(description.getSlaveDescription());
     return ImmutableList.copyOf(publishers.get(description.getTopicName()));

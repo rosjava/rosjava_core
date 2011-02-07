@@ -19,6 +19,9 @@ package org.ros.node.xmlrpc;
 import java.net.MalformedURLException;
 import java.util.List;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public interface Master extends Node {
 
   public List<Object> registerService(String callerId, String service, String serviceApi,
@@ -26,8 +29,24 @@ public interface Master extends Node {
 
   public List<Object> unregisterService(String callerId, String service, String serviceApi);
 
+  /**
+   * Subscribe the caller to the specified topic. In addition to receiving a
+   * list of current publishers, the subscriber will also receive notifications
+   * of new publishers via the publisherUpdate API.
+   * 
+   * 
+   * @param callerId ROS caller ID
+   * @param topic Fully-qualified name of topic
+   * @param topicType Datatype for topic. Must be a package-resource name, i.e.
+   *        the .msg name
+   * @param callerApi API URI of subscriber to register. Will be used for new
+   *        publisher notifications
+   * @return publishers as a list of XMLRPC API URIs for nodes currently
+   *         publishing the specified topic
+   * @throws MalformedURLException 
+   */
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
-      String callerApi);
+      String callerApi) throws MalformedURLException;
 
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi);
 

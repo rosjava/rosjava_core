@@ -72,16 +72,15 @@ public class MasterImpl implements Master {
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
       String callerApi) throws MalformedURLException {
     SlaveDescription slaveDescription = new SlaveDescription(callerId, new URL(callerApi));
-    // TODO(damonkohler): What to do about MD5 checksum here?
-    MessageDescription messageDescription = new MessageDescription(topicType, null);
-    TopicDescription topicDescription = new TopicDescription(topic, messageDescription);
+    TopicDescription topicDescription =
+        new TopicDescription(topic, MessageDescription.createMessageDescription(topicType));
     PublisherDescription description = new PublisherDescription(slaveDescription, topicDescription);
     List<SubscriberDescription> subscribers = master.registerPublisher(callerId, description);
-    List<URL> subscriberUrls = Lists.newArrayList();
+    List<String> urls = Lists.newArrayList();
     for (SubscriberDescription subscriberDescription : subscribers) {
-      subscriberUrls.add(subscriberDescription.getSlaveUrl());
+      urls.add(subscriberDescription.getSlaveUrl().toString());
     }
-    return Response.CreateSuccess("Success", subscriberUrls).toList();
+    return Response.createSuccess("Success", urls).toList();
   }
 
   @Override
@@ -90,10 +89,26 @@ public class MasterImpl implements Master {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#registerSubscriber(java.lang.String,
+   * java.lang.String, java.lang.String, java.lang.String)
+   */
   @Override
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
-      String callerApi) {
-    throw new UnsupportedOperationException();
+      String callerApi) throws MalformedURLException {
+    SlaveDescription slaveDescription = new SlaveDescription(callerId, new URL(callerApi));
+    TopicDescription topicDescription =
+        new TopicDescription(topic, MessageDescription.createMessageDescription(topicType));
+    List<PublisherDescription> publishers =
+        master.registerSubscriber(new SubscriberDescription(slaveDescription,
+            topicDescription));
+    List<String> urls = Lists.newArrayList();
+    for (PublisherDescription publisherDescription : publishers) {
+      urls.add(publisherDescription.getSlaveUrl().toString());
+    }
+    return Response.createSuccess("Success", urls).toList();
   }
 
   @Override

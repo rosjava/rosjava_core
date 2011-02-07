@@ -25,6 +25,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.communication.Message;
+import org.ros.node.server.PublisherDescription;
+import org.ros.node.server.SlaveDescription;
 import org.ros.transport.Header;
 import org.ros.transport.HeaderFields;
 import org.ros.transport.OutgoingMessageQueue;
@@ -40,9 +42,9 @@ public class Publisher extends Topic {
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final OutgoingMessageQueue out;
-  private final ImmutableMap<String, String> header;
   private final List<SubscriberDescription> subscribers;
   private final TcpServer server;
+  private final TopicDescription topicDescription;
 
   private class Server extends TcpServer {
     public Server(String hostname, int port) throws IOException {
@@ -63,11 +65,8 @@ public class Publisher extends Topic {
 
   public Publisher(TopicDescription topicDescription, String hostname, int port) throws IOException {
     super(topicDescription);
+    this.topicDescription = topicDescription;
     out = new OutgoingMessageQueue();
-    header =
-        new ImmutableMap.Builder<String, String>()
-            .put(HeaderFields.TYPE, topicDescription.getMessageType())
-            .put(HeaderFields.MD5_CHECKSUM, topicDescription.getMd5Checksum()).build();
     subscribers = Lists.newArrayList();
     server = new Server(hostname, port);
   }
@@ -80,6 +79,10 @@ public class Publisher extends Topic {
   public void shutdown() {
     server.shutdown();
     out.shutdown();
+  }
+
+  public PublisherDescription toPublisherDescription(SlaveDescription description) {
+    return new PublisherDescription(description, topicDescription);
   }
 
   public InetSocketAddress getAddress() {
@@ -96,6 +99,7 @@ public class Publisher extends Topic {
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
     Map<String, String> incomingHeader = Header.readHeader(socket.getInputStream());
+    Map<String, String> header = topicDescription.toHeader();
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
       log.info("Expected handshake header: " + header);

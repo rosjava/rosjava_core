@@ -60,7 +60,7 @@ public class SlaveImpl implements Slave {
   @Override
   public List<Object> shutdown(String callerId, String message) {
     slave.shutdown(callerId, message);
-    return Response.CreateSuccess("Shutdown successful.", null).toList();
+    return Response.createSuccess("Shutdown successful.", null).toList();
   }
 
   @Override
@@ -78,9 +78,9 @@ public class SlaveImpl implements Slave {
     List<Publisher> publishers = slave.getPublications();
     List<List<String>> publications = Lists.newArrayList();
     for (Publisher publisher : publishers) {
-      publications.add(Lists.newArrayList(publisher.getTopicName(), publisher.getTopicType()));
+      publications.add(publisher.getTopicDescriptionAsList());
     }
-    return Response.CreateSuccess("Success", publications).toList();
+    return Response.createSuccess("Success", publications).toList();
   }
 
   @Override
@@ -106,7 +106,7 @@ public class SlaveImpl implements Slave {
       requestedProtocols.add((String) ((Object[]) protocols[i])[0]);
     }
     ProtocolDescription protocol = slave.requestTopic(topic, requestedProtocols);
-    List<Object> response = Response.CreateSuccess(protocol.toString(), protocol.toList()).toList();
+    List<Object> response = Response.createSuccess(protocol.toString(), protocol.toList()).toList();
     if (DEBUG) {
       log.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
           + response.toString());
