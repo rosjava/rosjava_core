@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,6 +16,7 @@
 
 package org.ros.node.xmlrpc;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 public interface Master extends Node {
@@ -30,8 +31,19 @@ public interface Master extends Node {
 
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi);
 
+  /**
+   * Register the caller as a publisher the topic.
+   * 
+   * @param callerId ROS caller ID
+   * @param topic Fully-qualified name of topic to register.
+   * @param topicType Datatype for topic. Must be a package-resource name, i.e.
+   *        the .msg name.
+   * @param callerApi API URI of publisher to register.
+   * @return List of current subscribers of topic in the form of XMLRPC URIs.
+   * @throws MalformedURLException
+   */
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi);
+      String callerApi) throws MalformedURLException;
 
   public List<Object> unregisterPublisher(String callerId, String topic, String callerApi);
 

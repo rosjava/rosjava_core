@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,10 +16,21 @@
 
 package org.ros.node.xmlrpc;
 
+import com.google.common.collect.Lists;
+
+import org.ros.communication.MessageDescription;
+import org.ros.node.Response;
+import org.ros.node.server.PublisherDescription;
+import org.ros.node.server.SlaveDescription;
+import org.ros.node.server.SubscriberDescription;
+import org.ros.topic.TopicDescription;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 public class MasterImpl implements Master {
-  
+
   private final org.ros.node.server.Master master;
 
   public MasterImpl(org.ros.node.server.Master master) {
@@ -51,10 +62,26 @@ public class MasterImpl implements Master {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#registerPublisher(java.lang.String,
+   * java.lang.String, java.lang.String, java.lang.String)
+   */
   @Override
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) {
-    throw new UnsupportedOperationException();
+      String callerApi) throws MalformedURLException {
+    SlaveDescription slaveDescription = new SlaveDescription(callerId, new URL(callerApi));
+    // TODO(damonkohler): What to do about MD5 checksum here?
+    MessageDescription messageDescription = new MessageDescription(topicType, null);
+    TopicDescription topicDescription = new TopicDescription(topic, messageDescription);
+    PublisherDescription description = new PublisherDescription(slaveDescription, topicDescription);
+    List<SubscriberDescription> subscribers = master.registerPublisher(callerId, description);
+    List<URL> subscriberUrls = Lists.newArrayList();
+    for (SubscriberDescription subscriberDescription : subscribers) {
+      subscriberUrls.add(subscriberDescription.getSlaveUrl());
+    }
+    return Response.CreateSuccess("Success", subscriberUrls).toList();
   }
 
   @Override

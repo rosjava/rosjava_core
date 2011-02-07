@@ -18,8 +18,17 @@ package org.ros.node;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.collect.Sets;
+
 import org.apache.xmlrpc.XmlRpcException;
+import org.junit.Before;
 import org.junit.Test;
+import org.ros.communication.MessageDescription;
+import org.ros.topic.Publisher;
+import org.ros.topic.TopicDescription;
+import org.ros.transport.ProtocolDescription;
+import org.ros.transport.ProtocolNames;
+import org.ros.transport.TcpRosDescription;
 
 import java.io.IOException;
 import java.net.URL;
@@ -29,20 +38,40 @@ import java.net.URL;
  */
 public class MasterSlaveIntegrationTest {
 
-  @Test
-  public void testMasterSlaveGetMasterUri() throws XmlRpcException, IOException, RemoteException {
-    org.ros.node.server.Master masterServer = new org.ros.node.server.Master("localhost", 0);
+  private org.ros.node.server.Master masterServer;
+  private org.ros.node.client.Master masterClient;
+  private org.ros.node.server.Slave slaveServer;
+  private org.ros.node.client.Slave slaveClient;
+
+  @Before
+  public void setUp() throws XmlRpcException, IOException {
+    masterServer = new org.ros.node.server.Master("localhost", 0);
     masterServer.start();
-
-    org.ros.node.client.Master masterClient =
-        new org.ros.node.client.Master(masterServer.getAddress());
-    org.ros.node.server.Slave slaveServer =
-        new org.ros.node.server.Slave("/foo", masterClient, "localhost", 0);
+    masterClient = new org.ros.node.client.Master(masterServer.getAddress());
+    slaveServer = new org.ros.node.server.Slave("/foo", masterClient, "localhost", 0);
     slaveServer.start();
+    slaveClient = new org.ros.node.client.Slave(slaveServer.getAddress());
+  }
 
-    org.ros.node.client.Slave slaveClient = new org.ros.node.client.Slave(slaveServer.getAddress());
-    Response<URL> response = Response.checkOk(slaveClient.getMasterUri("/foo"));
+  @Test
+  public void testGetMasterUri() throws IOException, RemoteException {
+    Response<URL> response = Response.checkOk(slaveClient.getMasterUri("/caller"));
     assertEquals(masterServer.getAddress(), response.getValue());
+  }
+
+  @Test
+  public void testAddPublisher() throws RemoteException, IOException {
+    TopicDescription topicDescription =
+        new TopicDescription("/hello",
+            MessageDescription.CreateFromMessage(new org.ros.communication.std_msgs.String()));
+    Publisher publisher = new Publisher(topicDescription, "localhost", 0);
+    publisher.start();
+
+    slaveServer.addPublisher(publisher);
+    Response<ProtocolDescription> response =
+        Response.checkOk(slaveClient.requestTopic("/caller", "/hello",
+            Sets.newHashSet(ProtocolNames.TCPROS)));
+    assertEquals(response.getValue(), new TcpRosDescription(publisher.getAddress()));
   }
 
 }

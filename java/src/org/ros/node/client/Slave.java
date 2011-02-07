@@ -82,11 +82,11 @@ public class Slave extends Node<org.ros.node.xmlrpc.Slave> {
       Set<String> requestedProtocols) {
     List<Object> response =
         node.requestTopic(callerId, topic, new Object[][] {requestedProtocols.toArray()});
-    List<Object> protocolParameters = Arrays.asList(response.get(2));
+    List<Object> protocolParameters = Arrays.asList((Object[]) response.get(2));
     Preconditions.checkState(protocolParameters.size() == 3);
     Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
     InetSocketAddress address =
-        new InetSocketAddress((String) protocolParameters.get(1),
+        InetSocketAddress.createUnresolved((String) protocolParameters.get(1),
             (Integer) protocolParameters.get(2));
     return new Response<ProtocolDescription>((Integer) response.get(0), (String) response.get(1),
         new TcpRosDescription(address));

@@ -32,7 +32,7 @@ import java.util.Set;
 
 public class SlaveImpl implements Slave {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(SlaveImpl.class);
 
   private final org.ros.node.server.Slave slave;
@@ -93,6 +93,12 @@ public class SlaveImpl implements Slave {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Slave#requestTopic(java.lang.String,
+   * java.lang.String, java.lang.Object[])
+   */
   @Override
   public List<Object> requestTopic(String callerId, String topic, Object[] protocols) {
     Set<String> requestedProtocols = Sets.newHashSet();

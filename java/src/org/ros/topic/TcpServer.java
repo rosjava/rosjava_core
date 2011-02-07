@@ -32,13 +32,13 @@ public abstract class TcpServer {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(TcpServer.class);
 
-  private final String hostname;
+  private final InetSocketAddress address;
   private final ServerThread thread;
   private final ServerSocket server;
   
   public TcpServer(String hostname, int port) throws IOException {
-    this.hostname = hostname;
     server = new ServerSocket(port);
+    address = InetSocketAddress.createUnresolved(hostname, server.getLocalPort());
     thread = new ServerThread();
   }
 
@@ -79,7 +79,7 @@ public abstract class TcpServer {
   }
 
   public InetSocketAddress getAddress() {
-    return InetSocketAddress.createUnresolved(hostname, server.getLocalPort());
+    return address;
   }
 
 }
