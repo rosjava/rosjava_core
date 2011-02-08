@@ -16,37 +16,56 @@
 
 package org.ros.node.server;
 
-import java.net.URL;
+import com.google.common.collect.ImmutableMap;
 
 import org.ros.topic.TopicDescription;
+import org.ros.transport.HeaderFields;
+
+import java.net.URL;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class SubscriberDescription {
-  
+
   private final SlaveDescription slaveDescription;
   private final TopicDescription topicDescription;
-  
+
+  public static SubscriberDescription createFromHeader(Map<String, String> header) {
+    // TODO(damonkohler): Update SlaveDescription to handle the case where the
+    // URL is not set.
+    SlaveDescription slaveDescription = new SlaveDescription(header.get(HeaderFields.CALLER_ID),
+        null);
+    return new SubscriberDescription(slaveDescription, TopicDescription.createFromHeader(header));
+  }
+
   public SubscriberDescription(SlaveDescription slaveDescription, TopicDescription topicDescription) {
     this.slaveDescription = slaveDescription;
     this.topicDescription = topicDescription;
   }
-  
+
   public SlaveDescription getSlaveDescription() {
     return slaveDescription;
   }
-  
+
   public String getNodeName() {
     return slaveDescription.getName();
   }
-  
+
   public URL getSlaveUrl() {
     return slaveDescription.getUrl();
   }
-  
+
   public String getTopicName() {
     return topicDescription.getName();
   }
-  
+
+  public Map<String, String> toHeader() {
+    return new ImmutableMap.Builder<String, String>()
+        .putAll(slaveDescription.toHeader())
+        .putAll(topicDescription.toHeader())
+        .build();
+  }
+
 }

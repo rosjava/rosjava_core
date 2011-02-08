@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.communication.Message;
 import org.ros.node.server.PublisherDescription;
 import org.ros.node.server.SlaveDescription;
+import org.ros.node.server.SubscriberDescription;
 import org.ros.transport.Header;
 import org.ros.transport.HeaderFields;
 import org.ros.transport.OutgoingMessageQueue;
@@ -110,7 +111,7 @@ public class Publisher extends Topic {
         header.get(HeaderFields.TYPE)));
     Preconditions.checkState(incomingHeader.get(HeaderFields.MD5_CHECKSUM).equals(
         header.get(HeaderFields.MD5_CHECKSUM)));
-    SubscriberDescription subscriber = SubscriberDescription.CreateFromHeader(incomingHeader);
+    SubscriberDescription subscriber = SubscriberDescription.createFromHeader(incomingHeader);
     subscribers.add(subscriber);
     Header.writeHeader(header, socket.getOutputStream());
   }

@@ -16,7 +16,13 @@
 
 package org.ros.node.server;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+
+import org.ros.transport.HeaderFields;
+
 import java.net.URL;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -27,13 +33,29 @@ public class SlaveDescription {
   private final URL url;
   
   public SlaveDescription(String name, URL url) {
+    Preconditions.checkNotNull(name);
     this.name = name;
     this.url = url;
   }
   
   @Override
   public String toString() {
+    Preconditions.checkNotNull(url);
     return "SlaveDescription<" + name + ", " + url.toString() + ">";
+  }
+
+  public String getName() {
+    return name;
+  }
+  
+  public URL getUrl() {
+    return url;
+  }
+
+  public Map<String, String> toHeader() {
+    return new ImmutableMap.Builder<String, String>()
+        .put(HeaderFields.CALLER_ID, name)
+        .build();
   }
   
   @Override
@@ -65,14 +87,6 @@ public class SlaveDescription {
     } else if (!url.equals(other.url))
       return false;
     return true;
-  }
-
-  public String getName() {
-    return name;
-  }
-  
-  public URL getUrl() {
-    return url;
   }
 
 }

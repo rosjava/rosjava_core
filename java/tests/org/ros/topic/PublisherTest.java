@@ -22,6 +22,8 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.ros.communication.MessageDescription;
+import org.ros.node.server.SlaveDescription;
+import org.ros.node.server.SubscriberDescription;
 import org.ros.transport.Header;
 import org.ros.transport.HeaderFields;
 
@@ -39,10 +41,12 @@ public class PublisherTest {
   @Test
   public void testHandshake() throws IOException {
     Socket socket = mock(Socket.class);
-    Map<String, String> header =
-        new TopicDescription("/foo",
-            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()))
-            .toHeader();
+    TopicDescription topicDescription = new TopicDescription("/topic",
+        MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()));
+    SlaveDescription slaveDescription = new SlaveDescription("/caller", null);
+    SubscriberDescription subscriberDescription = new SubscriberDescription(slaveDescription,
+        topicDescription);
+    Map<String, String> header = subscriberDescription.toHeader();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     Header.writeHeader(header, outputStream);
     byte[] buffer = outputStream.toByteArray();
@@ -50,10 +54,7 @@ public class PublisherTest {
     outputStream = new ByteArrayOutputStream();
     when(socket.getOutputStream()).thenReturn(outputStream);
 
-    Publisher publisher =
-        new Publisher(new TopicDescription("/foo",
-            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String())),
-            "localhost", 1234);
+    Publisher publisher = new Publisher(topicDescription, "localhost", 1234);
     publisher.handshake(socket);
     buffer = outputStream.toByteArray();
     Map<String, String> result = Header.readHeader(new ByteArrayInputStream(buffer));

@@ -20,6 +20,11 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ *
+ * @param <T>
+ */
 public class Response<T> {
   
   private final StatusCode statusCode;
