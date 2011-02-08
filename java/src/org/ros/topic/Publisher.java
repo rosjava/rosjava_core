@@ -26,8 +26,8 @@ import org.ros.communication.Message;
 import org.ros.node.server.PublisherDescription;
 import org.ros.node.server.SlaveDescription;
 import org.ros.node.server.SubscriberDescription;
-import org.ros.transport.Header;
-import org.ros.transport.HeaderFields;
+import org.ros.transport.ConnectionHeader;
+import org.ros.transport.ConnectionHeaderFields;
 import org.ros.transport.OutgoingMessageQueue;
 
 import java.io.IOException;
@@ -101,18 +101,18 @@ public class Publisher extends Topic {
 
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
-    Map<String, String> incomingHeader = Header.readHeader(socket.getInputStream());
+    Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
     Map<String, String> header = topicDescription.toHeader();
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
       log.info("Expected handshake header: " + header);
     }
-    Preconditions.checkState(incomingHeader.get(HeaderFields.TYPE).equals(
-        header.get(HeaderFields.TYPE)));
-    Preconditions.checkState(incomingHeader.get(HeaderFields.MD5_CHECKSUM).equals(
-        header.get(HeaderFields.MD5_CHECKSUM)));
+    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
+        header.get(ConnectionHeaderFields.TYPE)));
+    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
+        header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
     SubscriberDescription subscriber = SubscriberDescription.createFromHeader(incomingHeader);
     subscribers.add(subscriber);
-    Header.writeHeader(header, socket.getOutputStream());
+    ConnectionHeader.writeHeader(header, socket.getOutputStream());
   }
 }

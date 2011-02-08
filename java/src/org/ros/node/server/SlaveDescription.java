@@ -19,7 +19,7 @@ package org.ros.node.server;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-import org.ros.transport.HeaderFields;
+import org.ros.transport.ConnectionHeaderFields;
 
 import java.net.URL;
 import java.util.Map;
@@ -54,7 +54,7 @@ public class SlaveDescription {
 
   public Map<String, String> toHeader() {
     return new ImmutableMap.Builder<String, String>()
-        .put(HeaderFields.CALLER_ID, name)
+        .put(ConnectionHeaderFields.CALLER_ID, name)
         .build();
   }
   

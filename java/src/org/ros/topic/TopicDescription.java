@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import org.ros.communication.MessageDescription;
-import org.ros.transport.HeaderFields;
+import org.ros.transport.ConnectionHeaderFields;
 
 import java.util.List;
 import java.util.Map;
@@ -35,8 +35,8 @@ public class TopicDescription {
   private final MessageDescription messageDescription;
 
   public static TopicDescription createFromHeader(Map<String, String> header) {
-    Preconditions.checkArgument(header.containsKey(HeaderFields.TOPIC));
-    return new TopicDescription(header.get(HeaderFields.TOPIC),
+    Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));
+    return new TopicDescription(header.get(ConnectionHeaderFields.TOPIC),
         MessageDescription.createFromHeader(header));
   }
 
@@ -55,7 +55,7 @@ public class TopicDescription {
 
   public Map<String, String> toHeader() {
     return new ImmutableMap.Builder<String, String>()
-        .put(HeaderFields.TOPIC, name)
+        .put(ConnectionHeaderFields.TOPIC, name)
         .putAll(messageDescription.toHeader())
         .build();
   }

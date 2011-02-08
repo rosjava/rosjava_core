@@ -29,14 +29,14 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class HeaderTest {
+public class ConnectionHeaderTest {
   
   @Test
   public void testEncodeAndDecodeHeader() throws IOException {
     Map<String, String> header = Maps.newHashMap();
     header.put("foo", "bar");
-    byte[] encoded = Header.encode(header);
-    Assert.assertEquals(header, Header.decode(encoded));
+    byte[] encoded = ConnectionHeader.encode(header);
+    Assert.assertEquals(header, ConnectionHeader.decode(encoded));
   }
 
   @Test
@@ -44,9 +44,9 @@ public class HeaderTest {
     Map<String, String> header = Maps.newHashMap();
     header.put("foo", "bar");
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    Header.writeHeader(header, out);
+    ConnectionHeader.writeHeader(header, out);
     ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-    Assert.assertEquals(header, Header.readHeader(in));
+    Assert.assertEquals(header, ConnectionHeader.readHeader(in));
   }
 
 }

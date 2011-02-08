@@ -33,12 +33,12 @@ import com.google.common.collect.Maps;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Header {
+public class ConnectionHeader {
 
-  private static final boolean DEBUG = true;
-  private static final Log log = LogFactory.getLog(Header.class);
+  private static final boolean DEBUG = false;
+  private static final Log log = LogFactory.getLog(ConnectionHeader.class);
 
-  private Header() {
+  private ConnectionHeader() {
     // Utility class
   }
 

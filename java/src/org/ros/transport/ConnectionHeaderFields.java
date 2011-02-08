@@ -16,7 +16,10 @@
 
 package org.ros.transport;
 
-public interface HeaderFields {
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public interface ConnectionHeaderFields {
 
   public static final String CALLER_ID = "callerid";
   public static final String TOPIC = "topic";

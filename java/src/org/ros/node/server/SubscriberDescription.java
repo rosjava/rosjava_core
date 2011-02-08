@@ -19,7 +19,7 @@ package org.ros.node.server;
 import com.google.common.collect.ImmutableMap;
 
 import org.ros.topic.TopicDescription;
-import org.ros.transport.HeaderFields;
+import org.ros.transport.ConnectionHeaderFields;
 
 import java.net.URL;
 import java.util.Map;
@@ -35,7 +35,7 @@ public class SubscriberDescription {
   public static SubscriberDescription createFromHeader(Map<String, String> header) {
     // TODO(damonkohler): Update SlaveDescription to handle the case where the
     // URL is not set.
-    SlaveDescription slaveDescription = new SlaveDescription(header.get(HeaderFields.CALLER_ID),
+    SlaveDescription slaveDescription = new SlaveDescription(header.get(ConnectionHeaderFields.CALLER_ID),
         null);
     return new SubscriberDescription(slaveDescription, TopicDescription.createFromHeader(header));
   }

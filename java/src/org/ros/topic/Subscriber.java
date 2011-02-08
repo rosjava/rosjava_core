@@ -25,8 +25,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.communication.Message;
-import org.ros.transport.Header;
-import org.ros.transport.HeaderFields;
+import org.ros.transport.ConnectionHeader;
+import org.ros.transport.ConnectionHeaderFields;
 import org.ros.transport.IncomingMessageQueue;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -91,7 +91,7 @@ public class Subscriber<T extends Message> extends Topic {
     this.in = new IncomingMessageQueue<T>(messageClass);
     thread = new MessageReadingThread();
     header =
-        ImmutableMap.<String, String>builder().put(HeaderFields.CALLER_ID, name)
+        ImmutableMap.<String, String>builder().put(ConnectionHeaderFields.CALLER_ID, name)
             .putAll(description.toHeader()).build();
   }
 
@@ -114,16 +114,16 @@ public class Subscriber<T extends Message> extends Topic {
 
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
-    Header.writeHeader(header, socket.getOutputStream());
-    Map<String, String> incomingHeader = Header.readHeader(socket.getInputStream());
+    ConnectionHeader.writeHeader(header, socket.getOutputStream());
+    Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
     if (DEBUG) {
       log.info("Sent handshake header: " + header);
       log.info("Received handshake header: " + incomingHeader);
     }
-    Preconditions.checkState(incomingHeader.get(HeaderFields.TYPE).equals(
-        header.get(HeaderFields.TYPE)));
-    Preconditions.checkState(incomingHeader.get(HeaderFields.MD5_CHECKSUM).equals(
-        header.get(HeaderFields.MD5_CHECKSUM)));
+    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
+        header.get(ConnectionHeaderFields.TYPE)));
+    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
+        header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
   }
   
 }

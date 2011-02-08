@@ -22,8 +22,8 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.ros.communication.MessageDescription;
-import org.ros.transport.Header;
-import org.ros.transport.HeaderFields;
+import org.ros.transport.ConnectionHeader;
+import org.ros.transport.ConnectionHeaderFields;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,7 +43,7 @@ public class SubscriberTest {
         MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()))
         .toHeader();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    Header.writeHeader(header, outputStream);
+    ConnectionHeader.writeHeader(header, outputStream);
     byte[] buffer = outputStream.toByteArray();
     when(socket.getInputStream()).thenReturn(new ByteArrayInputStream(buffer));
     outputStream = new ByteArrayOutputStream();
@@ -56,8 +56,8 @@ public class SubscriberTest {
         org.ros.communication.std_msgs.String.class);
     subscriber.handshake(socket);
     buffer = outputStream.toByteArray();
-    Map<String, String> result = Header.readHeader(new ByteArrayInputStream(buffer));
-    assertEquals(result.get(HeaderFields.TYPE), header.get(HeaderFields.TYPE));
-    assertEquals(result.get(HeaderFields.MD5_CHECKSUM), header.get(HeaderFields.MD5_CHECKSUM));
+    Map<String, String> result = ConnectionHeader.readHeader(new ByteArrayInputStream(buffer));
+    assertEquals(result.get(ConnectionHeaderFields.TYPE), header.get(ConnectionHeaderFields.TYPE));
+    assertEquals(result.get(ConnectionHeaderFields.MD5_CHECKSUM), header.get(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 }

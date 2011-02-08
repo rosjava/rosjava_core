@@ -19,7 +19,7 @@ package org.ros.communication;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-import org.ros.transport.HeaderFields;
+import org.ros.transport.ConnectionHeaderFields;
 
 import java.util.Map;
 
@@ -36,10 +36,10 @@ public class MessageDescription {
   }
 
   public static MessageDescription createFromHeader(Map<String, String> header) {
-    Preconditions.checkArgument(header.containsKey(HeaderFields.TYPE));
-    Preconditions.checkArgument(header.containsKey(HeaderFields.MD5_CHECKSUM));
-    return new MessageDescription(header.get(HeaderFields.TYPE),
-        header.get(HeaderFields.MD5_CHECKSUM));
+    Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TYPE));
+    Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.MD5_CHECKSUM));
+    return new MessageDescription(header.get(ConnectionHeaderFields.TYPE),
+        header.get(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 
   public static MessageDescription createMessageDescription(String type) {
@@ -58,8 +58,8 @@ public class MessageDescription {
 
   public Map<String, String> toHeader() {
     Preconditions.checkNotNull(md5Checksum);
-    return new ImmutableMap.Builder<String, String>().put(HeaderFields.TYPE, type)
-        .put(HeaderFields.MD5_CHECKSUM, md5Checksum).build();
+    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.TYPE, type)
+        .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum).build();
   }
 
   @Override
