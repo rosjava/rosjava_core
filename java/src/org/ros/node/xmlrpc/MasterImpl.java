@@ -37,26 +37,54 @@ public class MasterImpl implements Master {
     this.master = master;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#getPublishedTopics(java.lang.String,
+   * java.lang.String)
+   */
   @Override
   public List<Object> getPublishedTopics(String callerId, String subgraph) {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#getSystemState(java.lang.String)
+   */
   @Override
   public List<Object> getSystemState(String callerId) {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#getUri(java.lang.String)
+   */
   @Override
   public List<Object> getUri(String callerId) {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#lookupNode(java.lang.String,
+   * java.lang.String)
+   */
   @Override
   public List<Object> lookupNode(String callerId, String nodeName) {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#lookupService(java.lang.String,
+   * java.lang.String)
+   */
   @Override
   public List<Object> lookupService(String callerId, String service) {
     throw new UnsupportedOperationException();
@@ -72,8 +100,8 @@ public class MasterImpl implements Master {
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
       String callerApi) throws MalformedURLException {
     SlaveDescription slaveDescription = new SlaveDescription(callerId, new URL(callerApi));
-    TopicDescription topicDescription =
-        new TopicDescription(topic, MessageDescription.createMessageDescription(topicType));
+    TopicDescription topicDescription = new TopicDescription(topic,
+        MessageDescription.createMessageDescription(topicType));
     PublisherDescription description = new PublisherDescription(slaveDescription, topicDescription);
     List<SubscriberDescription> subscribers = master.registerPublisher(callerId, description);
     List<String> urls = Lists.newArrayList();
@@ -83,6 +111,12 @@ public class MasterImpl implements Master {
     return Response.createSuccess("Success", urls).toList();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#registerService(java.lang.String,
+   * java.lang.String, java.lang.String, java.lang.String)
+   */
   @Override
   public List<Object> registerService(String callerId, String service, String serviceApi,
       String callerApi) {
@@ -99,11 +133,10 @@ public class MasterImpl implements Master {
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
       String callerApi) throws MalformedURLException {
     SlaveDescription slaveDescription = new SlaveDescription(callerId, new URL(callerApi));
-    TopicDescription topicDescription =
-        new TopicDescription(topic, MessageDescription.createMessageDescription(topicType));
-    List<PublisherDescription> publishers =
-        master.registerSubscriber(new SubscriberDescription(slaveDescription,
-            topicDescription));
+    TopicDescription topicDescription = new TopicDescription(topic,
+        MessageDescription.createMessageDescription(topicType));
+    List<PublisherDescription> publishers = master.registerSubscriber(new SubscriberDescription(
+        slaveDescription, topicDescription));
     List<String> urls = Lists.newArrayList();
     for (PublisherDescription publisherDescription : publishers) {
       urls.add(publisherDescription.getSlaveUrl().toString());
@@ -111,16 +144,34 @@ public class MasterImpl implements Master {
     return Response.createSuccess("Success", urls).toList();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#unregisterPublisher(java.lang.String,
+   * java.lang.String, java.lang.String)
+   */
   @Override
   public List<Object> unregisterPublisher(String callerId, String topic, String callerApi) {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#unregisterService(java.lang.String,
+   * java.lang.String, java.lang.String)
+   */
   @Override
   public List<Object> unregisterService(String callerId, String service, String serviceApi) {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Master#unregisterSubscriber(java.lang.String,
+   * java.lang.String, java.lang.String)
+   */
   @Override
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi) {
     throw new UnsupportedOperationException();
