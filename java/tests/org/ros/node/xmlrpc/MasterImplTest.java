@@ -68,4 +68,34 @@ public class MasterImplTest {
     assertEquals(response.get(2),
         Lists.newArrayList(subscriberDescription.getSlaveUrl().toString()));
   }
+
+  @Test
+  public void testRegisterSubscriberWithNoSubscribers() throws MalformedURLException {
+    org.ros.node.server.Master mockMaster = mock(org.ros.node.server.Master.class);
+    when(mockMaster.registerSubscriber(Matchers.<SubscriberDescription>any())).thenReturn(
+        Lists.<PublisherDescription>newArrayList());
+    MasterImpl master = new MasterImpl(mockMaster);
+    List<Object> response = master.registerSubscriber("/caller", "/foo", "/bar", "http://baz");
+    assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
+    assertEquals(response.get(2), Lists.newArrayList());
+  }
+
+  @Test
+  public void testRegisterSubscriber() throws MalformedURLException {
+    org.ros.node.server.Master mockMaster = mock(org.ros.node.server.Master.class);
+    SlaveDescription slaveDescription = new SlaveDescription("/slave", new URL("http://api"));
+    TopicDescription topicDescription = new TopicDescription("/topic",
+        MessageDescription.createMessageDescription("msg"));
+    PublisherDescription publisherDescription = new PublisherDescription(slaveDescription,
+        topicDescription);
+    when(mockMaster.registerSubscriber(Matchers.<SubscriberDescription>any())).thenReturn(
+        Lists.<PublisherDescription>newArrayList(publisherDescription));
+    MasterImpl master = new MasterImpl(mockMaster);
+    List<Object> response = master.registerSubscriber("/slave", "/topic", "/topicType",
+        "http://api");
+    assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
+    assertEquals(response.get(2),
+        Lists.newArrayList(publisherDescription.getSlaveUrl().toString()));
+  }
+
 }
