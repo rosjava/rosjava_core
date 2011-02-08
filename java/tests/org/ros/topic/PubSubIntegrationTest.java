@@ -21,7 +21,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.ros.communication.MessageDescription;
-import org.ros.topic.Subscriber.SubscriberListener;
+import org.ros.topic.client.Subscriber;
+import org.ros.topic.client.Subscriber.SubscriberListener;
+import org.ros.topic.server.Publisher;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;

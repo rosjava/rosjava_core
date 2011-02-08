@@ -26,10 +26,10 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.ros.communication.MessageDescription;
 import org.ros.node.StatusCode;
-import org.ros.node.server.PublisherDescription;
 import org.ros.node.server.SlaveDescription;
-import org.ros.node.server.SubscriberDescription;
 import org.ros.topic.TopicDescription;
+import org.ros.topic.client.SubscriberDescription;
+import org.ros.topic.server.PublisherDescription;
 
 import java.net.MalformedURLException;
 import java.net.URL;

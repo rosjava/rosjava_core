@@ -30,8 +30,8 @@ import org.ros.communication.geometry_msgs.PoseStamped;
 import org.ros.communication.geometry_msgs.Quaternion;
 import org.ros.node.client.Master;
 import org.ros.node.server.Slave;
-import org.ros.topic.Publisher;
 import org.ros.topic.TopicDescription;
+import org.ros.topic.server.Publisher;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

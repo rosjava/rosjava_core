@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.topic;
+package org.ros.topic.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -22,8 +22,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.ros.communication.MessageDescription;
-import org.ros.node.server.SlaveDescription;
-import org.ros.node.server.SubscriberDescription;
+import org.ros.topic.TopicDescription;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
 
@@ -36,18 +35,14 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PublisherTest {
+public class SubscriberTest {
 
   @Test
   public void testHandshake() throws IOException {
     Socket socket = mock(Socket.class);
-    TopicDescription topicDescription =
-        new TopicDescription("/topic",
-            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()));
-    SlaveDescription slaveDescription = new SlaveDescription("/caller", null);
-    SubscriberDescription subscriberDescription =
-        new SubscriberDescription(slaveDescription, topicDescription);
-    Map<String, String> header = subscriberDescription.toHeader();
+    Map<String, String> header = new TopicDescription("/foo",
+        MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()))
+        .toHeader();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     ConnectionHeader.writeHeader(header, outputStream);
     byte[] buffer = outputStream.toByteArray();
@@ -55,12 +50,15 @@ public class PublisherTest {
     outputStream = new ByteArrayOutputStream();
     when(socket.getOutputStream()).thenReturn(outputStream);
 
-    Publisher publisher = new Publisher(topicDescription, "localhost", 1234);
-    publisher.handshake(socket);
+    Subscriber<org.ros.communication.std_msgs.String> subscriber = Subscriber.create(
+        "/caller",
+        new TopicDescription("/foo", MessageDescription
+            .createFromMessage(new org.ros.communication.std_msgs.String())),
+        org.ros.communication.std_msgs.String.class);
+    subscriber.handshake(socket);
     buffer = outputStream.toByteArray();
     Map<String, String> result = ConnectionHeader.readHeader(new ByteArrayInputStream(buffer));
     assertEquals(result.get(ConnectionHeaderFields.TYPE), header.get(ConnectionHeaderFields.TYPE));
-    assertEquals(result.get(ConnectionHeaderFields.MD5_CHECKSUM),
-        header.get(ConnectionHeaderFields.MD5_CHECKSUM));
+    assertEquals(result.get(ConnectionHeaderFields.MD5_CHECKSUM), header.get(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 }

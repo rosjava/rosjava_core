@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.node.Response;
 import org.ros.node.StatusCode;
-import org.ros.topic.Publisher;
+import org.ros.topic.server.Publisher;
 import org.ros.transport.ProtocolDescription;
 
 import java.net.URL;
