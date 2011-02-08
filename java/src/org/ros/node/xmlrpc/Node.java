@@ -16,6 +16,9 @@
 
 package org.ros.node.xmlrpc;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public interface Node {
 
 }

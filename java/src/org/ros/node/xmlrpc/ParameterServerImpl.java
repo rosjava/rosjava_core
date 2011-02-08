@@ -18,6 +18,9 @@ package org.ros.node.xmlrpc;
 
 import java.util.List;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class ParameterServerImpl implements ParameterServer {
 
   @Override

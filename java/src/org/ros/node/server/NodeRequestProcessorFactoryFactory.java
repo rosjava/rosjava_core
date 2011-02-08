@@ -19,9 +19,14 @@ package org.ros.node.server;
 import org.apache.xmlrpc.XmlRpcRequest;
 import org.apache.xmlrpc.server.RequestProcessorFactoryFactory;
 
-class NodeRequestProcessorFactoryFactory<T extends org.ros.node.xmlrpc.Node>
-    implements
-      RequestProcessorFactoryFactory {
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ */
+class NodeRequestProcessorFactoryFactory<T extends org.ros.node.xmlrpc.Node> implements
+    RequestProcessorFactoryFactory {
+  
   private final RequestProcessorFactory factory = new NodeRequestProcessorFactory();
   private final T node;
 
@@ -30,7 +35,7 @@ class NodeRequestProcessorFactoryFactory<T extends org.ros.node.xmlrpc.Node>
   }
 
   @Override
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public RequestProcessorFactory getRequestProcessorFactory(Class unused) {
     return factory;
   }
@@ -41,4 +46,5 @@ class NodeRequestProcessorFactoryFactory<T extends org.ros.node.xmlrpc.Node>
       return node;
     }
   }
+  
 }

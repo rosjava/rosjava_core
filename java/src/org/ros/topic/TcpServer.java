@@ -42,6 +42,7 @@ public abstract class TcpServer {
     thread = new ServerThread();
   }
 
+  // TODO(damonkohler): Change to composition?
   protected abstract void onNewConnection(Socket socket);
 
   private final class ServerThread extends Thread {
