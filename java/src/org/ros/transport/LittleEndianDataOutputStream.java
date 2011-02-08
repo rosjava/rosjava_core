@@ -22,6 +22,9 @@ import java.io.OutputStream;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class LittleEndianDataOutputStream extends OutputStream {
 
   private final DataOutputStream outputStream;

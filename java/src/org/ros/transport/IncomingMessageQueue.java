@@ -25,6 +25,11 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ *
+ * @param <T>
+ */
 public class IncomingMessageQueue<T extends Message> {
 
   private static final boolean DEBUG = false;

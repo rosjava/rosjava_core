@@ -29,6 +29,9 @@ import org.ros.communication.Message;
 
 import com.google.common.collect.Lists;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class OutgoingMessageQueue {
 
   private static final boolean DEBUG = false;

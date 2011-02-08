@@ -21,6 +21,9 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class ProtocolDescription {
 
   private final String name;

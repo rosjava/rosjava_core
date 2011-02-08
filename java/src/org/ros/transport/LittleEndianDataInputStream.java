@@ -20,6 +20,9 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class LittleEndianDataInputStream extends InputStream {
   
   private final DataInputStream inputStream;
