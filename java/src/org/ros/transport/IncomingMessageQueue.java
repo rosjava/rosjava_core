@@ -16,6 +16,8 @@
 
 package org.ros.transport;
 
+import com.google.common.base.Preconditions;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.communication.Message;
@@ -36,10 +38,11 @@ public class IncomingMessageQueue<T extends Message> {
   private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
 
   private final Class<T> messageClass;
-  private LittleEndianDataInputStream stream;
   private final BlockingQueue<T> messages;
   private final MessageReceivingThread thread;
 
+  private LittleEndianDataInputStream stream;
+  
   private final class MessageReceivingThread extends Thread {
     @Override
     public void run() {
@@ -52,11 +55,7 @@ public class IncomingMessageQueue<T extends Message> {
         if (DEBUG) {
           log.info("Canceled.");
         }
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      } catch (InstantiationException e) {
-        throw new RuntimeException(e);
-      } catch (IllegalAccessException e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
@@ -70,14 +69,17 @@ public class IncomingMessageQueue<T extends Message> {
       }
     }
   }
+  
+  public static <S extends Message> IncomingMessageQueue<S> create(Class<S> messageClass) {
+    return new IncomingMessageQueue<S>(messageClass);
+  }
 
-  public IncomingMessageQueue(Class<T> messageClass) throws IOException {
+  private IncomingMessageQueue(Class<T> messageClass) {
     this.messageClass = messageClass;
     messages = new LinkedBlockingQueue<T>();
     thread = new MessageReceivingThread();
   }
   
-  // TODO(damonkohler): Add support for multiple publisher sockets.
   public void setSocket(Socket socket) throws IOException {
     stream = new LittleEndianDataInputStream(socket.getInputStream());
   }
@@ -91,6 +93,7 @@ public class IncomingMessageQueue<T extends Message> {
   }
 
   public void start() {
+    Preconditions.checkState(stream != null);
     thread.start();
   }
 

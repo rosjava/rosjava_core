@@ -41,11 +41,12 @@ public class PublisherTest {
   @Test
   public void testHandshake() throws IOException {
     Socket socket = mock(Socket.class);
-    TopicDescription topicDescription = new TopicDescription("/topic",
-        MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()));
+    TopicDescription topicDescription =
+        new TopicDescription("/topic",
+            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()));
     SlaveDescription slaveDescription = new SlaveDescription("/caller", null);
-    SubscriberDescription subscriberDescription = new SubscriberDescription(slaveDescription,
-        topicDescription);
+    SubscriberDescription subscriberDescription =
+        new SubscriberDescription(slaveDescription, topicDescription);
     Map<String, String> header = subscriberDescription.toHeader();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     ConnectionHeader.writeHeader(header, outputStream);
@@ -59,6 +60,7 @@ public class PublisherTest {
     buffer = outputStream.toByteArray();
     Map<String, String> result = ConnectionHeader.readHeader(new ByteArrayInputStream(buffer));
     assertEquals(result.get(ConnectionHeaderFields.TYPE), header.get(ConnectionHeaderFields.TYPE));
-    assertEquals(result.get(ConnectionHeaderFields.MD5_CHECKSUM), header.get(ConnectionHeaderFields.MD5_CHECKSUM));
+    assertEquals(result.get(ConnectionHeaderFields.MD5_CHECKSUM),
+        header.get(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 }

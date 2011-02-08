@@ -80,15 +80,14 @@ public class Subscriber<T extends Message> extends Topic {
   }
 
   public static <S extends Message> Subscriber<S> create(String name, TopicDescription description,
-      Class<S> messageClass) throws IOException {
+      Class<S> messageClass) {
     return new Subscriber<S>(name, description, messageClass);
   }
 
-  private Subscriber(String name, TopicDescription description, Class<T> messageClass)
-      throws IOException {
+  private Subscriber(String name, TopicDescription description, Class<T> messageClass) {
     super(description);
     this.listeners = new CopyOnWriteArrayList<Subscriber.SubscriberListener<T>>();
-    this.in = new IncomingMessageQueue<T>(messageClass);
+    this.in = IncomingMessageQueue.create(messageClass);
     thread = new MessageReadingThread();
     header =
         ImmutableMap.<String, String>builder().put(ConnectionHeaderFields.CALLER_ID, name)
@@ -125,5 +124,5 @@ public class Subscriber<T extends Message> extends Topic {
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
   }
-  
+
 }
