@@ -20,10 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.ros.communication.MessageDescription;
-import org.ros.topic.client.Subscriber;
-import org.ros.topic.client.Subscriber.SubscriberListener;
-import org.ros.topic.server.Publisher;
+import org.ros.message.MessageDescription;
+import org.ros.topic.Subscriber.SubscriberListener;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -38,25 +36,25 @@ public class PubSubIntegrationTest {
   public void testPubSub() throws IOException, InterruptedException {
     TopicDescription topicDescription =
         new TopicDescription("/foo",
-            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()));
+            MessageDescription.createFromMessage(new org.ros.message.std.String()));
     Publisher publisher = new Publisher(topicDescription, "localhost", 0);
     publisher.start();
 
-    Subscriber<org.ros.communication.std_msgs.String> subscriber =
+    Subscriber<org.ros.message.std.String> subscriber =
         Subscriber.create("/caller", topicDescription,
-            org.ros.communication.std_msgs.String.class);
+            org.ros.message.std.String.class);
     subscriber.start(publisher.getAddress());
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
-    subscriber.addListener(new SubscriberListener<org.ros.communication.std_msgs.String>() {
+    subscriber.addListener(new SubscriberListener<org.ros.message.std.String>() {
       @Override
-      public void onNewMessage(org.ros.communication.std_msgs.String message) {
+      public void onNewMessage(org.ros.message.std.String message) {
         assertEquals(message.data, "Hello, ROS!");
         messageReceived.countDown();
       }
     });
 
-    org.ros.communication.std_msgs.String message = new org.ros.communication.std_msgs.String();
+    org.ros.message.std.String message = new org.ros.message.std.String();
     message.data = "Hello, ROS!";
     publisher.publish(message);
     assertTrue(messageReceived.await(3, TimeUnit.SECONDS));

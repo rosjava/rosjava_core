@@ -34,60 +34,38 @@
 
 // author: Jason Wolfe
 
-package org.ros.communication;
 
-public class Time extends TimeUnit {
-	public Time() {}
+
+package org.ros.message;
+
+public abstract class TimeUnit implements Cloneable {
+	public int secs;
+	public int nsecs;
 	
-	public Time(int secs, int nsecs) {
-		this.secs = secs;
-		this.nsecs = nsecs;
-		normalize();
-	}
-
-	public Time(double secs) {
-		this.secs = (int) secs;
-		this.nsecs = (int) ((secs - this.secs) * 1000000000);
-		normalize();
-	}
-
-	public Time(Time t) {
-		this.secs = t.secs;
-		this.nsecs = t.nsecs;
+	public long totalNsecs() { 
+		return ((long) secs) * 1000000000 + nsecs;
 	}
 	
-	public Time add (Duration d) {
-		return new Time(secs + d.secs,nsecs + d.nsecs);
-	}
+	public boolean isZero()     { return totalNsecs() == 0; }
+	public boolean isPositive() { return totalNsecs() >  0; }
+	public boolean isNegative() { return totalNsecs() <  0; }
 
-	public Time subtract (Duration d) {
-		return new Time(secs - d.secs,nsecs - d.nsecs);
-	}
-
-	public Duration subtract (Time t) {
-		return new Duration(secs - t.secs,nsecs - t.nsecs);
-	}
-
-	public boolean laterThan(Time t) {
-		normalize();
-		t.normalize();
-		return (secs > t.secs) || ((secs == t.secs) && nsecs > t.nsecs);
-	}
-
-	public static Time now() {
-	  return new Time(System.currentTimeMillis() / 1000);
-    }
-	
-	public boolean inFuture() {
-		normalize();
-		return laterThan(now());
+	public void normalize() {
+		while(nsecs < 0) {
+			nsecs += 1000000000;
+			secs -= 1;
+		}
+		while(nsecs >= 1000000000) {
+			nsecs -= 1000000000;
+			secs += 1;			
+		}
 	}
 	
-	public boolean hasElapsed(Duration d) {
-		return now().subtract(this).isLonger(d);
-	}
-
-	public String toString() {
-		return secs + ":" + nsecs;
+	public TimeUnit clone() {
+		try {
+			return (TimeUnit) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException("TimeUnit not cloneable?!");
+		}
 	}
 }

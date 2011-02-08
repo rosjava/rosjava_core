@@ -34,7 +34,7 @@
 
 // author: Jason Wolfe
 
-package org.ros.communication;
+package org.ros.message;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

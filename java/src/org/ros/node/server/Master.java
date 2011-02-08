@@ -22,8 +22,8 @@ import java.util.Map;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.node.xmlrpc.MasterImpl;
-import org.ros.topic.client.SubscriberDescription;
-import org.ros.topic.server.PublisherDescription;
+import org.ros.topic.PublisherDescription;
+import org.ros.topic.SubscriberDescription;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;

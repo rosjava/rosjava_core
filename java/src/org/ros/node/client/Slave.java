@@ -27,7 +27,7 @@ import java.util.Set;
 import org.ros.node.Response;
 import org.ros.transport.ProtocolDescription;
 import org.ros.transport.ProtocolNames;
-import org.ros.transport.TcpRosDescription;
+import org.ros.transport.tcp.TcpRosProtocolDescription;
 
 import com.google.common.base.Preconditions;
 
@@ -89,6 +89,6 @@ public class Slave extends Node<org.ros.node.xmlrpc.Slave> {
         InetSocketAddress.createUnresolved((String) protocolParameters.get(1),
             (Integer) protocolParameters.get(2));
     return new Response<ProtocolDescription>((Integer) response.get(0), (String) response.get(1),
-        new TcpRosDescription(address));
+        new TcpRosProtocolDescription(address));
   }
 }

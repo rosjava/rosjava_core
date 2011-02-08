@@ -19,6 +19,8 @@ package org.ros.transport;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.ros.transport.tcp.IncomingMessageQueue;
+import org.ros.transport.tcp.OutgoingMessageQueue;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -63,13 +65,13 @@ public class MessageQueueIntegrationTest {
     latch.await(3, TimeUnit.SECONDS);
     OutgoingMessageQueue out = new OutgoingMessageQueue();
     out.addSocket(serverThread.server);
-    IncomingMessageQueue<org.ros.communication.std_msgs.String> in =
-        IncomingMessageQueue.create(org.ros.communication.std_msgs.String.class);
+    IncomingMessageQueue<org.ros.message.std.String> in =
+        IncomingMessageQueue.create(org.ros.message.std.String.class);
     in.setSocket(client);
     
     out.start();
     in.start();
-    org.ros.communication.std_msgs.String hello = new org.ros.communication.std_msgs.String();
+    org.ros.message.std.String hello = new org.ros.message.std.String();
     hello.data = "Would you like to play a game?";
     out.add(hello);
     assertEquals(in.take(), hello);

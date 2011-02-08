@@ -14,17 +14,15 @@
  * the License.
  */
 
-package org.ros.topic.server;
+package org.ros.topic;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
-import org.ros.communication.MessageDescription;
+import org.ros.message.MessageDescription;
 import org.ros.node.server.SlaveDescription;
-import org.ros.topic.TopicDescription;
-import org.ros.topic.client.SubscriberDescription;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
 
@@ -44,7 +42,7 @@ public class PublisherTest {
     Socket socket = mock(Socket.class);
     TopicDescription topicDescription =
         new TopicDescription("/topic",
-            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()));
+            MessageDescription.createFromMessage(new org.ros.message.std.String()));
     SlaveDescription slaveDescription = new SlaveDescription("/caller", null);
     SubscriberDescription subscriberDescription =
         new SubscriberDescription(slaveDescription, topicDescription);

@@ -14,12 +14,11 @@
  * the License.
  */
 
-package org.ros.topic.server;
+package org.ros.topic;
 
 import java.net.URL;
 
 import org.ros.node.server.SlaveDescription;
-import org.ros.topic.TopicDescription;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

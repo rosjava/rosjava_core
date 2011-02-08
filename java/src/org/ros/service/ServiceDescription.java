@@ -14,11 +14,11 @@
  * the License.
  */
 
-package org.ros.topic.client;
+package org.ros.service;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Service {
+public class ServiceDescription {
 
 }

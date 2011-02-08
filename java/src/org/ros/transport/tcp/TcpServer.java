@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.topic.server;
+package org.ros.transport.tcp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

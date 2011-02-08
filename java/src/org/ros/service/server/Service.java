@@ -14,42 +14,43 @@
  * the License.
  */
 
-package org.ros.topic.server;
+package org.ros.service.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.communication.Message;
-import org.ros.node.server.SlaveDescription;
-import org.ros.topic.Topic;
-import org.ros.topic.TopicDescription;
-import org.ros.topic.client.SubscriberDescription;
+import org.ros.service.ServiceDescription;
+import org.ros.topic.Publisher;
+import org.ros.topic.SubscriberDescription;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
-import org.ros.transport.OutgoingMessageQueue;
+import org.ros.transport.tcp.OutgoingMessageQueue;
+import org.ros.transport.tcp.TcpServer;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.List;
 import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Publisher extends Topic {
+public class Service {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final OutgoingMessageQueue out;
-  private final List<SubscriberDescription> subscribers;
   private final TcpServer server;
-  private final TopicDescription topicDescription;
-
+  private final ServiceDescription description;
+  
+  public Service() throws IOException {
+    out = new OutgoingMessageQueue();
+    server = new Server(null, 0);
+    description = null;
+  }
+  
   private class Server extends TcpServer {
     public Server(String hostname, int port) throws IOException {
       super(hostname, port);
@@ -65,39 +66,6 @@ public class Publisher extends Topic {
         log.error("Failed to accept connection.", e);
       }
     }
-  }
-
-  public Publisher(TopicDescription topicDescription, String hostname, int port) throws IOException {
-    super(topicDescription);
-    this.topicDescription = topicDescription;
-    out = new OutgoingMessageQueue();
-    subscribers = Lists.newArrayList();
-    server = new Server(hostname, port);
-  }
-
-  public void start() {
-    server.start();
-    out.start();
-  }
-
-  public void shutdown() {
-    server.shutdown();
-    out.shutdown();
-  }
-
-  public PublisherDescription toPublisherDescription(SlaveDescription description) {
-    return new PublisherDescription(description, topicDescription);
-  }
-
-  public InetSocketAddress getAddress() {
-    return server.getAddress();
-  }
-
-  public void publish(Message message) {
-    if (DEBUG) {
-      log.info("Publishing message: " + message);
-    }
-    out.add(message);
   }
 
   @VisibleForTesting

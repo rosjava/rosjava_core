@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.transport;
+package org.ros.transport.tcp;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -25,7 +25,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.communication.Message;
+import org.ros.message.Message;
+import org.ros.transport.LittleEndianDataOutputStream;
 
 import com.google.common.collect.Lists;
 

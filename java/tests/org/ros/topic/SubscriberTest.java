@@ -14,15 +14,14 @@
  * the License.
  */
 
-package org.ros.topic.client;
+package org.ros.topic;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
-import org.ros.communication.MessageDescription;
-import org.ros.topic.TopicDescription;
+import org.ros.message.MessageDescription;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
 
@@ -41,7 +40,7 @@ public class SubscriberTest {
   public void testHandshake() throws IOException {
     Socket socket = mock(Socket.class);
     Map<String, String> header = new TopicDescription("/foo",
-        MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()))
+        MessageDescription.createFromMessage(new org.ros.message.std.String()))
         .toHeader();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     ConnectionHeader.writeHeader(header, outputStream);
@@ -50,11 +49,11 @@ public class SubscriberTest {
     outputStream = new ByteArrayOutputStream();
     when(socket.getOutputStream()).thenReturn(outputStream);
 
-    Subscriber<org.ros.communication.std_msgs.String> subscriber = Subscriber.create(
+    Subscriber<org.ros.message.std.String> subscriber = Subscriber.create(
         "/caller",
         new TopicDescription("/foo", MessageDescription
-            .createFromMessage(new org.ros.communication.std_msgs.String())),
-        org.ros.communication.std_msgs.String.class);
+            .createFromMessage(new org.ros.message.std.String())),
+        org.ros.message.std.String.class);
     subscriber.handshake(socket);
     buffer = outputStream.toByteArray();
     Map<String, String> result = ConnectionHeader.readHeader(new ByteArrayInputStream(buffer));

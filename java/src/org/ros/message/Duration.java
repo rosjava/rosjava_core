@@ -36,36 +36,49 @@
 
 
 
-package org.ros.communication;
+package org.ros.message;
 
-public abstract class TimeUnit implements Cloneable {
-	public int secs;
-	public int nsecs;
+public class Duration extends TimeUnit {
+	public Duration() {}
 	
-	public long totalNsecs() { 
-		return ((long) secs) * 1000000000 + nsecs;
+	public Duration(int secs, int nsecs) {
+		this.secs = secs;
+		this.nsecs = nsecs;
+		normalize();
+	}
+
+	public Duration(double secs) {
+		this.secs = (int) secs;
+		this.nsecs = (int) ((secs - this.secs) * 1000000000);
+		normalize();
+	}
+
+	public Duration(Duration t) {
+		this.secs = t.secs;
+		this.nsecs = t.nsecs;
+	}
+
+	public Duration add (Duration d) {
+		return new Duration(secs + d.secs,nsecs + d.nsecs);
+	}
+
+	public Duration subtract (Duration d) {
+		return new Duration(secs - d.secs,nsecs - d.nsecs);
 	}
 	
-	public boolean isZero()     { return totalNsecs() == 0; }
-	public boolean isPositive() { return totalNsecs() >  0; }
-	public boolean isNegative() { return totalNsecs() <  0; }
-
-	public void normalize() {
-		while(nsecs < 0) {
-			nsecs += 1000000000;
-			secs -= 1;
-		}
-		while(nsecs >= 1000000000) {
-			nsecs -= 1000000000;
-			secs += 1;			
-		}
+	public void sleep() throws InterruptedException {
+		Thread.sleep(totalNsecs() / 1000000);
 	}
 	
-	public TimeUnit clone() {
-		try {
-			return (TimeUnit) super.clone();
-		} catch (CloneNotSupportedException e) {
-			throw new RuntimeException("TimeUnit not cloneable?!");
-		}
+	public boolean isLonger(Duration d) {
+		normalize();
+		d.normalize();
+		return (secs > d.secs) || ((secs == d.secs) && nsecs > d.nsecs);
+	}
+	
+	public static final Duration MAX_VALUE = new Duration(Integer.MAX_VALUE, 999999999);
+	
+	public String toString() {
+		return secs + ":" + nsecs;
 	}
 }

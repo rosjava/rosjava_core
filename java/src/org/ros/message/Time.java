@@ -34,14 +34,60 @@
 
 // author: Jason Wolfe
 
+package org.ros.message;
 
-
-package org.ros.communication;
-
-public abstract class Service <Q extends Message, A extends Message> {
-	public abstract String getDataType();
-	public abstract String getMD5Sum();
+public class Time extends TimeUnit {
+	public Time() {}
 	
-	public abstract Q createRequest(); 
-	public abstract A createResponse(); 
+	public Time(int secs, int nsecs) {
+		this.secs = secs;
+		this.nsecs = nsecs;
+		normalize();
+	}
+
+	public Time(double secs) {
+		this.secs = (int) secs;
+		this.nsecs = (int) ((secs - this.secs) * 1000000000);
+		normalize();
+	}
+
+	public Time(Time t) {
+		this.secs = t.secs;
+		this.nsecs = t.nsecs;
+	}
+	
+	public Time add (Duration d) {
+		return new Time(secs + d.secs,nsecs + d.nsecs);
+	}
+
+	public Time subtract (Duration d) {
+		return new Time(secs - d.secs,nsecs - d.nsecs);
+	}
+
+	public Duration subtract (Time t) {
+		return new Duration(secs - t.secs,nsecs - t.nsecs);
+	}
+
+	public boolean laterThan(Time t) {
+		normalize();
+		t.normalize();
+		return (secs > t.secs) || ((secs == t.secs) && nsecs > t.nsecs);
+	}
+
+	public static Time now() {
+	  return new Time(System.currentTimeMillis() / 1000);
+    }
+	
+	public boolean inFuture() {
+		normalize();
+		return laterThan(now());
+	}
+	
+	public boolean hasElapsed(Duration d) {
+		return now().subtract(this).isLonger(d);
+	}
+
+	public String toString() {
+		return secs + ":" + nsecs;
+	}
 }

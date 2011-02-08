@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.topic.client;
+package org.ros.topic;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -24,12 +24,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.communication.Message;
-import org.ros.topic.Topic;
-import org.ros.topic.TopicDescription;
+import org.ros.message.Message;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
-import org.ros.transport.IncomingMessageQueue;
+import org.ros.transport.tcp.IncomingMessageQueue;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;

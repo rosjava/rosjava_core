@@ -18,12 +18,12 @@ package org.ros.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 
-import org.ros.communication.MessageDescription;
+import org.ros.message.MessageDescription;
 import org.ros.node.Response;
 import org.ros.node.server.SlaveDescription;
+import org.ros.topic.PublisherDescription;
+import org.ros.topic.SubscriberDescription;
 import org.ros.topic.TopicDescription;
-import org.ros.topic.client.SubscriberDescription;
-import org.ros.topic.server.PublisherDescription;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -24,9 +24,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.ros.node.Response;
+import org.ros.topic.Publisher;
+import org.ros.topic.Subscriber;
 import org.ros.topic.TopicDescription;
-import org.ros.topic.client.Subscriber;
-import org.ros.topic.server.Publisher;
 
 import com.google.common.collect.Lists;
 

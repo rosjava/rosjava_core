@@ -26,9 +26,9 @@ import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.ros.node.StatusCode;
-import org.ros.topic.server.Publisher;
+import org.ros.topic.Publisher;
 import org.ros.transport.ProtocolNames;
-import org.ros.transport.TcpRosDescription;
+import org.ros.transport.tcp.TcpRosProtocolDescription;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -68,7 +68,7 @@ public class SlaveImplTest {
   public void testRequestTopic() {
     org.ros.node.server.Slave mockSlave = mock(org.ros.node.server.Slave.class);
     InetSocketAddress localhost = InetSocketAddress.createUnresolved("localhost", 1234);
-    TcpRosDescription protocol = new TcpRosDescription(localhost);
+    TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(localhost);
     when(
         mockSlave.requestTopic(Matchers.<String>any(),
             Matchers.eq(Sets.newHashSet(ProtocolNames.TCPROS, ProtocolNames.UDPROS)))).thenReturn(

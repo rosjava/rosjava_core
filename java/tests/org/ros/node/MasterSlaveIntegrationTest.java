@@ -24,14 +24,14 @@ import com.google.common.collect.Sets;
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.communication.MessageDescription;
+import org.ros.message.MessageDescription;
+import org.ros.topic.Publisher;
+import org.ros.topic.PublisherDescription;
+import org.ros.topic.Subscriber;
 import org.ros.topic.TopicDescription;
-import org.ros.topic.client.Subscriber;
-import org.ros.topic.server.Publisher;
-import org.ros.topic.server.PublisherDescription;
 import org.ros.transport.ProtocolDescription;
 import org.ros.transport.ProtocolNames;
-import org.ros.transport.TcpRosDescription;
+import org.ros.transport.tcp.TcpRosProtocolDescription;
 
 import java.io.IOException;
 import java.net.URL;
@@ -67,22 +67,22 @@ public class MasterSlaveIntegrationTest {
   public void testAddPublisher() throws RemoteException, IOException {
     TopicDescription topicDescription =
         new TopicDescription("/hello",
-            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()));
+            MessageDescription.createFromMessage(new org.ros.message.std.String()));
     Publisher publisher = new Publisher(topicDescription, "localhost", 0);
     slaveServer.addPublisher(publisher);
     Response<ProtocolDescription> response =
         Response.checkOk(slaveClient.requestTopic("/caller", "/hello",
             Sets.newHashSet(ProtocolNames.TCPROS)));
-    assertEquals(response.getValue(), new TcpRosDescription(publisher.getAddress()));
+    assertEquals(response.getValue(), new TcpRosProtocolDescription(publisher.getAddress()));
   }
 
   @Test
   public void testAddSubscriber() throws RemoteException, IOException {
     TopicDescription topicDescription =
         new TopicDescription("/hello",
-            MessageDescription.createFromMessage(new org.ros.communication.std_msgs.String()));
-    Subscriber<org.ros.communication.std_msgs.String> subscriber =
-        Subscriber.create("/bloop", topicDescription, org.ros.communication.std_msgs.String.class);
+            MessageDescription.createFromMessage(new org.ros.message.std.String()));
+    Subscriber<org.ros.message.std.String> subscriber =
+        Subscriber.create("/bloop", topicDescription, org.ros.message.std.String.class);
     List<PublisherDescription> publishers = slaveServer.addSubscriber(subscriber);
     assertTrue(publishers.size() == 0);
     Publisher publisher = new Publisher(topicDescription, "localhost", 0);

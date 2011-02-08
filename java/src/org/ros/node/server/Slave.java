@@ -22,17 +22,17 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.apache.xmlrpc.XmlRpcException;
-import org.ros.communication.MessageDescription;
+import org.ros.message.MessageDescription;
 import org.ros.node.RemoteException;
 import org.ros.node.Response;
 import org.ros.node.xmlrpc.SlaveImpl;
+import org.ros.topic.Publisher;
+import org.ros.topic.PublisherDescription;
+import org.ros.topic.Subscriber;
 import org.ros.topic.TopicDescription;
-import org.ros.topic.client.Subscriber;
-import org.ros.topic.server.Publisher;
-import org.ros.topic.server.PublisherDescription;
 import org.ros.transport.ProtocolDescription;
 import org.ros.transport.ProtocolNames;
-import org.ros.transport.TcpRosDescription;
+import org.ros.transport.tcp.TcpRosProtocolDescription;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -127,7 +127,7 @@ public class Slave extends Node {
     Preconditions.checkArgument(publishers.containsKey(topic));
     // TODO(damonkohler): Pull out list of supported protocols.
     Preconditions.checkArgument(protocols.contains(ProtocolNames.TCPROS));
-    return new TcpRosDescription(publishers.get(topic).getAddress());
+    return new TcpRosProtocolDescription(publishers.get(topic).getAddress());
   }
 
   /**

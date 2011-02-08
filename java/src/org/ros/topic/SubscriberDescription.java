@@ -14,12 +14,11 @@
  * the License.
  */
 
-package org.ros.topic.client;
+package org.ros.topic;
 
 import com.google.common.collect.ImmutableMap;
 
 import org.ros.node.server.SlaveDescription;
-import org.ros.topic.TopicDescription;
 import org.ros.transport.ConnectionHeaderFields;
 
 import java.net.URL;

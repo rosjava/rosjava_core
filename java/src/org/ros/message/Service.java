@@ -36,49 +36,12 @@
 
 
 
-package org.ros.communication;
+package org.ros.message;
 
-public class Duration extends TimeUnit {
-	public Duration() {}
+public abstract class Service <Q extends Message, A extends Message> {
+	public abstract String getDataType();
+	public abstract String getMD5Sum();
 	
-	public Duration(int secs, int nsecs) {
-		this.secs = secs;
-		this.nsecs = nsecs;
-		normalize();
-	}
-
-	public Duration(double secs) {
-		this.secs = (int) secs;
-		this.nsecs = (int) ((secs - this.secs) * 1000000000);
-		normalize();
-	}
-
-	public Duration(Duration t) {
-		this.secs = t.secs;
-		this.nsecs = t.nsecs;
-	}
-
-	public Duration add (Duration d) {
-		return new Duration(secs + d.secs,nsecs + d.nsecs);
-	}
-
-	public Duration subtract (Duration d) {
-		return new Duration(secs - d.secs,nsecs - d.nsecs);
-	}
-	
-	public void sleep() throws InterruptedException {
-		Thread.sleep(totalNsecs() / 1000000);
-	}
-	
-	public boolean isLonger(Duration d) {
-		normalize();
-		d.normalize();
-		return (secs > d.secs) || ((secs == d.secs) && nsecs > d.nsecs);
-	}
-	
-	public static final Duration MAX_VALUE = new Duration(Integer.MAX_VALUE, 999999999);
-	
-	public String toString() {
-		return secs + ":" + nsecs;
-	}
+	public abstract Q createRequest(); 
+	public abstract A createResponse(); 
 }

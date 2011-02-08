@@ -23,15 +23,15 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
-import org.ros.communication.MessageDescription;
-import org.ros.communication.Time;
-import org.ros.communication.geometry_msgs.Point;
-import org.ros.communication.geometry_msgs.PoseStamped;
-import org.ros.communication.geometry_msgs.Quaternion;
+import org.ros.message.MessageDescription;
+import org.ros.message.Time;
+import org.ros.message.geometry.Point;
+import org.ros.message.geometry.PoseStamped;
+import org.ros.message.geometry.Quaternion;
 import org.ros.node.client.Master;
 import org.ros.node.server.Slave;
+import org.ros.topic.Publisher;
 import org.ros.topic.TopicDescription;
-import org.ros.topic.server.Publisher;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -66,7 +66,7 @@ public class Main extends Activity {
     TopicDescription topicDescription =
         new TopicDescription("/android/pose",
             MessageDescription
-                .createFromMessage(new org.ros.communication.geometry_msgs.PoseStamped()));
+                .createFromMessage(new org.ros.message.geometry.PoseStamped()));
     final Publisher publisher;
     try {
       publisher = new Publisher(topicDescription, "192.168.1.141", 7332);
