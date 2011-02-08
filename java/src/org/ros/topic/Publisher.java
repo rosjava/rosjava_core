@@ -16,11 +16,9 @@
 
 package org.ros.topic;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.List;
-import java.util.Map;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,11 +29,15 @@ import org.ros.transport.Header;
 import org.ros.transport.HeaderFields;
 import org.ros.transport.OutgoingMessageQueue;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class Publisher extends Topic {
 
   private static final boolean DEBUG = false;
