@@ -16,9 +16,18 @@
 
 package org.ros.service;
 
+import java.util.Map;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ServiceDescription {
+
+  /**
+   * @return
+   */
+  public Map<String, String> toHeader() {
+    return null;
+  }
 
 }

@@ -21,11 +21,12 @@ import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.message.Message;
 import org.ros.service.ServiceDescription;
 import org.ros.topic.Publisher;
-import org.ros.topic.SubscriberDescription;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
+import org.ros.transport.tcp.IncomingMessageQueue;
 import org.ros.transport.tcp.OutgoingMessageQueue;
 import org.ros.transport.tcp.TcpServer;
 
@@ -36,20 +37,15 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Service {
+public class Service<T extends Message> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final OutgoingMessageQueue out;
+  private final IncomingMessageQueue<T> in;
   private final TcpServer server;
   private final ServiceDescription description;
-  
-  public Service() throws IOException {
-    out = new OutgoingMessageQueue();
-    server = new Server(null, 0);
-    description = null;
-  }
   
   private class Server extends TcpServer {
     public Server(String hostname, int port) throws IOException {
@@ -68,10 +64,17 @@ public class Service {
     }
   }
 
+  public Service(Class<T> incomingMessageClass) throws IOException {
+    in = IncomingMessageQueue.create(incomingMessageClass);
+    out = new OutgoingMessageQueue();
+    server = new Server(null, 0);
+    description = null;
+  }
+  
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
     Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
-    Map<String, String> header = topicDescription.toHeader();
+    Map<String, String> header = description.toHeader();
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
       log.info("Expected handshake header: " + header);
@@ -80,8 +83,6 @@ public class Service {
         header.get(ConnectionHeaderFields.TYPE)));
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
-    SubscriberDescription subscriber = SubscriberDescription.createFromHeader(incomingHeader);
-    subscribers.add(subscriber);
     ConnectionHeader.writeHeader(header, socket.getOutputStream());
   }
 }
