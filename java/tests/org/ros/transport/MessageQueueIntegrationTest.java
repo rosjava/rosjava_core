@@ -58,7 +58,6 @@ public class MessageQueueIntegrationTest {
   public void testSendAndReceiveMessage() throws IOException, InterruptedException {
     final CountDownLatch latch = new CountDownLatch(1);
     final ServerSocket serverSocket = new ServerSocket(0);
-    final Socket server;
     ServerThread serverThread = new ServerThread(serverSocket, latch);
     serverThread.start();
     Socket client = new Socket(serverSocket.getInetAddress(), serverSocket.getLocalPort());

@@ -57,7 +57,6 @@ public class Publisher extends Topic {
     protected void onNewConnection(Socket socket) {
       try {
         handshake(socket);
-        Preconditions.checkState(socket.isConnected());
         out.addSocket(socket);
       } catch (IOException e) {
         log.error("Failed to accept connection.", e);

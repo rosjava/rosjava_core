@@ -18,6 +18,9 @@ package org.ros.service.server;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+
+import org.ros.node.server.SlaveDescription;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,22 +34,24 @@ import org.ros.transport.tcp.OutgoingMessageQueue;
 import org.ros.transport.tcp.TcpServer;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Service<T extends Message> {
+public abstract class Service<T extends Message> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
-  private final OutgoingMessageQueue out;
-  private final IncomingMessageQueue<T> in;
   private final TcpServer server;
   private final ServiceDescription description;
-  
+  private final Class<T> incomingMessageClass;
+  private final Collection<PersistentSession> persistentSessions;
+
   private class Server extends TcpServer {
     public Server(String hostname, int port) throws IOException {
       super(hostname, port);
@@ -56,21 +61,74 @@ public class Service<T extends Message> {
     protected void onNewConnection(Socket socket) {
       try {
         handshake(socket);
-        Preconditions.checkState(socket.isConnected());
-        out.addSocket(socket);
+        persistentSessions.add(new PersistentSession(socket));
       } catch (IOException e) {
         log.error("Failed to accept connection.", e);
       }
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.ros.transport.tcp.TcpServer#shutdown()
+     */
+    @Override
+    public void shutdown() {
+      super.shutdown();
+      for (PersistentSession session : persistentSessions) {
+        session.cancel();
+      }
+    }
   }
 
-  public Service(Class<T> incomingMessageClass) throws IOException {
-    in = IncomingMessageQueue.create(incomingMessageClass);
-    out = new OutgoingMessageQueue();
-    server = new Server(null, 0);
-    description = null;
+  private class PersistentSession extends Thread {
+    private final OutgoingMessageQueue out;
+    private final IncomingMessageQueue<T> in;
+
+    public PersistentSession(Socket socket) throws IOException {
+      in = IncomingMessageQueue.create(incomingMessageClass);
+      in.setSocket(socket);
+      out = new OutgoingMessageQueue();
+      out.addSocket(socket);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Thread#run()
+     */
+    @Override
+    public void run() {
+      while (!Thread.currentThread().isInterrupted()) {
+        try {
+          T message = in.take();
+          out.add(buildResponse(message));
+        } catch (InterruptedException e) {
+          // Cancelable
+        }
+      }
+    }
+
+    public void cancel() {
+      interrupt();
+      server.shutdown();
+    }
   }
-  
+
+  public Service(Class<T> incomingMessageClass, SlaveDescription slaveDescription, String hostname,
+      int port) throws IOException {
+    this.incomingMessageClass = incomingMessageClass;
+    server = new Server(hostname, port);
+    description = new ServiceDescription(slaveDescription);
+    persistentSessions = Lists.newArrayList();
+  }
+
+  /**
+   * @param message
+   * @return
+   */
+  public abstract Message buildResponse(T message);
+
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
     Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
@@ -85,4 +143,16 @@ public class Service<T extends Message> {
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
     ConnectionHeader.writeHeader(header, socket.getOutputStream());
   }
+
+  public void shutdown() {
+    server.shutdown();
+  }
+
+  /**
+   * @return
+   */
+  public InetSocketAddress getAddress() {
+    return server.getAddress();
+  }
+
 }
