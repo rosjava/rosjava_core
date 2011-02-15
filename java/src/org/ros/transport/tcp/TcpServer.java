@@ -29,7 +29,7 @@ import java.net.Socket;
  */
 public abstract class TcpServer {
   
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(TcpServer.class);
 
   private final InetSocketAddress address;

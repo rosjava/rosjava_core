@@ -20,11 +20,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import org.ros.node.server.SlaveDescription;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
+import org.ros.node.server.SlaveDescription;
 import org.ros.service.ServiceDescription;
 import org.ros.topic.Publisher;
 import org.ros.transport.ConnectionHeader;
@@ -99,6 +98,8 @@ public abstract class Service<T extends Message> {
      */
     @Override
     public void run() {
+      in.start();
+      out.start();
       while (!Thread.currentThread().isInterrupted()) {
         try {
           T message = in.take();
@@ -112,14 +113,16 @@ public abstract class Service<T extends Message> {
     public void cancel() {
       interrupt();
       server.shutdown();
+      in.shutdown();
+      out.shutdown();
     }
   }
 
-  public Service(Class<T> incomingMessageClass, SlaveDescription slaveDescription, String hostname,
-      int port) throws IOException {
+  public Service(Class<T> incomingMessageClass, SlaveDescription slaveDescription, String type,
+      String md5Checksum, String hostname, int port) throws IOException {
     this.incomingMessageClass = incomingMessageClass;
     server = new Server(hostname, port);
-    description = new ServiceDescription(slaveDescription);
+    description = new ServiceDescription(slaveDescription, type, md5Checksum);
     persistentSessions = Lists.newArrayList();
   }
 
@@ -142,6 +145,10 @@ public abstract class Service<T extends Message> {
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
     ConnectionHeader.writeHeader(header, socket.getOutputStream());
+  }
+
+  public void start() {
+    server.start();
   }
 
   public void shutdown() {

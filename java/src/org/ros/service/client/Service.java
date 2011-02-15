@@ -47,12 +47,12 @@ public class Service<T extends Message> {
   private final ServiceDescription description;
 
   public static <S extends Message> Service<S> create(Class<S> outgoingMessageClass,
-      SlaveDescription slaveDescription) {
-    return new Service<S>(slaveDescription);
+      SlaveDescription slaveDescription, String type, String md5Checksum) {
+    return new Service<S>(slaveDescription, type, md5Checksum);
   }
 
-  private Service(SlaveDescription slaveDescription) {
-    description = new ServiceDescription(slaveDescription);
+  private Service(SlaveDescription slaveDescription, String type, String md5Checksum) {
+    description = new ServiceDescription(slaveDescription, type, md5Checksum);
   }
 
   public void start(InetSocketAddress server) throws UnknownHostException, IOException {

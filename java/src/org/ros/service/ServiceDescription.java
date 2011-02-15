@@ -16,7 +16,12 @@
 
 package org.ros.service;
 
+import com.google.common.collect.ImmutableMap;
+
+import org.omg.IOP.CodecFactoryHelper;
+import org.ros.message.MessageDescription;
 import org.ros.node.server.SlaveDescription;
+import org.ros.transport.ConnectionHeaderFields;
 
 import java.util.Map;
 
@@ -24,21 +29,29 @@ import java.util.Map;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ServiceDescription {
-  
+
   private final SlaveDescription slaveDescription;
+  private final String type;
+  private final String md5Checksum;
 
   /**
    * 
    */
-  public ServiceDescription(SlaveDescription slaveDescription) {
+  public ServiceDescription(SlaveDescription slaveDescription, String type, String md5Checksum) {
     this.slaveDescription = slaveDescription;
+    this.type = type;
+    this.md5Checksum = md5Checksum;
   }
-  
+
   /**
    * @return
    */
   public Map<String, String> toHeader() {
-    return slaveDescription.toHeader();
+    return ImmutableMap.<String, String>builder()
+        .putAll(slaveDescription.toHeader())
+        .put(ConnectionHeaderFields.TYPE, type)
+        .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum)
+        .build();
   }
 
 }
