@@ -59,4 +59,14 @@ public class LittleEndianDataInputStream extends InputStream {
     }
     return unsignedResult;
   }
+  
+  /* (non-Javadoc)
+   * @see java.io.InputStream#close()
+   */
+  @Override
+  public void close() throws IOException {
+    super.close();
+    inputStream.close();
+  }
+  
 }

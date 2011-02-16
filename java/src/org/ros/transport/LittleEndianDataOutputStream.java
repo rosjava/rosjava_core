@@ -56,4 +56,23 @@ public class LittleEndianDataOutputStream extends OutputStream {
   public void writeBytes(String value) throws IOException {
     outputStream.writeBytes(value);
   }
+  
+  /* (non-Javadoc)
+   * @see java.io.OutputStream#close()
+   */
+  @Override
+  public void close() throws IOException {
+    super.close();
+    outputStream.close();
+  }
+  
+  /* (non-Javadoc)
+   * @see java.io.OutputStream#flush()
+   */
+  @Override
+  public void flush() throws IOException {
+    super.flush();
+    outputStream.flush();
+  }
+  
 }
