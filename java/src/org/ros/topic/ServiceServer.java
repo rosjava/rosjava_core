@@ -58,7 +58,9 @@ public abstract class ServiceServer<T extends Message> {
     protected void onNewConnection(Socket socket) {
       try {
         handshake(socket);
-        persistentSessions.add(new PersistentSession(socket));
+        PersistentSession session = new PersistentSession(socket);
+        persistentSessions.add(session);
+        session.start();
       } catch (IOException e) {
         log.error("Failed to accept connection.", e);
       }

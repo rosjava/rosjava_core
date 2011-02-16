@@ -17,13 +17,15 @@
 package org.ros.topic;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
-import org.ros.message.srv.AddTwoInts.Request;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -31,7 +33,7 @@ import java.io.IOException;
 public class ServiceIntegrationTest {
 
   @Test
-  public void PesistentServiceConnectionTest() throws IOException {
+  public void PesistentServiceConnectionTest() throws IOException, InterruptedException {
     ServiceDefinition definition =
         new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
 
@@ -39,23 +41,22 @@ public class ServiceIntegrationTest {
         new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/server", definition,
             "localhost", 0) {
           @Override
-          public Message buildResponse(AddTwoInts.Request message) {
-            return message;
+          public Message buildResponse(AddTwoInts.Request request) {
+            AddTwoInts.Response response = new AddTwoInts.Response();
+            response.sum = request.a + request.b;
+            return response;
           }
         };
     server.start();
 
-    ServiceClient<AddTwoInts.Response> client = ServiceClient.create("/client", definition);
+    ServiceClient<AddTwoInts.Response> client =
+        ServiceClient.create(AddTwoInts.Response.class, "/client", definition);
     client.start(server.getAddress());
 
-    final AddTwoInts serviceMessage = new AddTwoInts();
-    Request request = serviceMessage.createRequest();
-    client.call(request, new ServiceCallback<AddTwoInts.Response>() {
-      @Override
-      public void run(AddTwoInts.Response response) {
-        assertEquals(response.sum, 4);
-      }
-    });
+    AddTwoInts.Request request = new AddTwoInts.Request();
+    request.a = 2;
+    request.b = 2;
+    assertEquals(client.call(request).sum, 4);
   }
 
 }

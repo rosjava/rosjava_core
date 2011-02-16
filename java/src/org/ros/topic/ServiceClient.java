@@ -23,9 +23,10 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
-import org.ros.node.server.SlaveDescription;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
+import org.ros.transport.tcp.IncomingMessageQueue;
+import org.ros.transport.tcp.OutgoingMessageQueue;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -40,24 +41,34 @@ public class ServiceClient<T extends Message> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
+  
+  private final OutgoingMessageQueue out;
+  private final IncomingMessageQueue<T> in;
 
   public static <S extends Message> ServiceClient<S> create(
-      String name, ServiceDefinition serviceDefinition) {
-    return new ServiceClient<S>(name, serviceDefinition);
+      Class<S> incomingMessageClass, String name, ServiceDefinition serviceDefinition) {
+    return new ServiceClient<S>(incomingMessageClass, name, serviceDefinition);
   }
 
   private Map<String, String> header;
   
-  private ServiceClient(String name, ServiceDefinition serviceDefinition) {
+  private ServiceClient(Class<T> incomingMessageClass, String name,
+      ServiceDefinition serviceDefinition) {
     header = ImmutableMap.<String, String>builder()
         .put(ConnectionHeaderFields.CALLER_ID, name)
         .putAll(serviceDefinition.toHeader())
         .build();
+    in = IncomingMessageQueue.create(incomingMessageClass);
+    out = new OutgoingMessageQueue();
   }
 
   public void start(InetSocketAddress server) throws UnknownHostException, IOException {
     Socket socket = new Socket(server.getHostName(), server.getPort());
     handshake(socket);
+    in.setSocket(socket);
+    in.start();
+    out.addSocket(socket);
+    out.start();
   }
 
   @VisibleForTesting
@@ -76,9 +87,11 @@ public class ServiceClient<T extends Message> {
 
   /**
    * @param message
-   * @param serviceCallback
+   * @throws InterruptedException 
    */
-  public void call(Message message, ServiceCallback<T> serviceCallback) {
+  public T call(Message message) throws InterruptedException {
+    out.add(message);
+    return in.take();
   }
 
 }
