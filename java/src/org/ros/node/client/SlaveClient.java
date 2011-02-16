@@ -34,9 +34,9 @@ import com.google.common.base.Preconditions;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Slave extends Node<org.ros.node.xmlrpc.Slave> {
+public class SlaveClient extends Node<org.ros.node.xmlrpc.Slave> {
 
-  public Slave(URL url) {
+  public SlaveClient(URL url) {
     super(url, org.ros.node.xmlrpc.Slave.class);
   }
 

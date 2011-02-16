@@ -25,6 +25,10 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.message.MessageDescription;
+import org.ros.node.client.MasterClient;
+import org.ros.node.client.SlaveClient;
+import org.ros.node.server.MasterServer;
+import org.ros.node.server.SlaveServer;
 import org.ros.topic.Publisher;
 import org.ros.topic.PublisherDescription;
 import org.ros.topic.Subscriber;
@@ -40,21 +44,21 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterSlaveIntegrationTest {
+public class MasterClientServerSlaveIntegrationTest {
 
-  private org.ros.node.server.Master masterServer;
-  private org.ros.node.client.Master masterClient;
-  private org.ros.node.server.Slave slaveServer;
-  private org.ros.node.client.Slave slaveClient;
+  private MasterServer masterServer;
+  private MasterClient masterClient;
+  private SlaveServer slaveServer;
+  private SlaveClient slaveClient;
 
   @Before
   public void setUp() throws XmlRpcException, IOException {
-    masterServer = new org.ros.node.server.Master("localhost", 0);
+    masterServer = new MasterServer("localhost", 0);
     masterServer.start();
-    masterClient = new org.ros.node.client.Master(masterServer.getAddress());
-    slaveServer = new org.ros.node.server.Slave("/foo", masterClient, "localhost", 0);
+    masterClient = new MasterClient(masterServer.getAddress());
+    slaveServer = new SlaveServer("/foo", masterClient, "localhost", 0);
     slaveServer.start();
-    slaveClient = new org.ros.node.client.Slave(slaveServer.getAddress());
+    slaveClient = new SlaveClient(slaveServer.getAddress());
   }
 
   @Test

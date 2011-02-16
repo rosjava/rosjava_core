@@ -25,6 +25,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.ros.message.MessageDescription;
 import org.ros.node.RemoteException;
 import org.ros.node.Response;
+import org.ros.node.client.MasterClient;
 import org.ros.node.xmlrpc.SlaveImpl;
 import org.ros.topic.Publisher;
 import org.ros.topic.PublisherDescription;
@@ -45,14 +46,14 @@ import java.util.Set;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Slave extends Node {
+public class SlaveServer extends Node {
 
   private final String name;
-  private final org.ros.node.client.Master master;
+  private final MasterClient master;
   private final Map<String, Publisher> publishers;
   private final Map<String, Subscriber<?>> subscribers;
 
-  public Slave(String name, org.ros.node.client.Master master, String hostname, int port) {
+  public SlaveServer(String name, MasterClient master, String hostname, int port) {
     super(hostname, port);
     this.name = name;
     this.master = master;
@@ -132,7 +133,7 @@ public class Slave extends Node {
 
   /**
    * @return
-   * @throws MalformedURLException 
+   * @throws MalformedURLException
    */
   public SlaveDescription toSlaveDescription() throws MalformedURLException {
     return new SlaveDescription(name, getAddress());

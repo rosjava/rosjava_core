@@ -39,19 +39,19 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Service<T extends Message> {
+public class ServiceClient<T extends Message> {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(Service.class);
+  private static final Log log = LogFactory.getLog(ServiceClient.class);
 
   private final ServiceDescription description;
 
-  public static <S extends Message> Service<S> create(Class<S> outgoingMessageClass,
+  public static <S extends Message> ServiceClient<S> create(Class<S> outgoingMessageClass,
       SlaveDescription slaveDescription, String type, String md5Checksum) {
-    return new Service<S>(slaveDescription, type, md5Checksum);
+    return new ServiceClient<S>(slaveDescription, type, md5Checksum);
   }
 
-  private Service(SlaveDescription slaveDescription, String type, String md5Checksum) {
+  private ServiceClient(SlaveDescription slaveDescription, String type, String md5Checksum) {
     description = new ServiceDescription(slaveDescription, type, md5Checksum);
   }
 

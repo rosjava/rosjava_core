@@ -35,13 +35,13 @@ import com.google.common.collect.Multimaps;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Master extends Node {
+public class MasterServer extends Node {
 
   private final Map<String, SlaveDescription> slaves;
   private final Multimap<String, PublisherDescription> publishers;
   private final Multimap<String, SubscriberDescription> subscribers;
 
-  public Master(String hostname, int port) {
+  public MasterServer(String hostname, int port) {
     super(hostname, port);
     slaves = Maps.newConcurrentMap();
     publishers =

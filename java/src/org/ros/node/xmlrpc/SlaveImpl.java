@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.node.Response;
 import org.ros.node.StatusCode;
+import org.ros.node.server.SlaveServer;
 import org.ros.topic.Publisher;
 import org.ros.transport.ProtocolDescription;
 
@@ -35,9 +36,9 @@ public class SlaveImpl implements Slave {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(SlaveImpl.class);
 
-  private final org.ros.node.server.Slave slave;
+  private final SlaveServer slave;
 
-  public SlaveImpl(org.ros.node.server.Slave slave) {
+  public SlaveImpl(SlaveServer slave) {
     this.slave = slave;
   }
 

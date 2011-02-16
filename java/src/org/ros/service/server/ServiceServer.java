@@ -41,7 +41,7 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class Service<T extends Message> {
+public abstract class ServiceServer<T extends Message> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
@@ -118,7 +118,7 @@ public abstract class Service<T extends Message> {
     }
   }
 
-  public Service(Class<T> incomingMessageClass, SlaveDescription slaveDescription, String type,
+  public ServiceServer(Class<T> incomingMessageClass, SlaveDescription slaveDescription, String type,
       String md5Checksum, String hostname, int port) throws IOException {
     this.incomingMessageClass = incomingMessageClass;
     server = new Server(hostname, port);

@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.ros.message.MessageDescription;
 import org.ros.node.StatusCode;
+import org.ros.node.server.MasterServer;
 import org.ros.node.server.SlaveDescription;
 import org.ros.topic.PublisherDescription;
 import org.ros.topic.SubscriberDescription;
@@ -38,11 +39,11 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterImplTest {
+public class MasterClientServerImplTest {
 
   @Test
   public void testRegisterPublisherWithNoSubscribers() throws MalformedURLException {
-    org.ros.node.server.Master mockMaster = mock(org.ros.node.server.Master.class);
+    MasterServer mockMaster = mock(MasterServer.class);
     when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherDescription>any()))
         .thenReturn(Lists.<SubscriberDescription>newArrayList());
     MasterImpl master = new MasterImpl(mockMaster);
@@ -53,7 +54,7 @@ public class MasterImplTest {
 
   @Test
   public void testRegisterPublisher() throws MalformedURLException {
-    org.ros.node.server.Master mockMaster = mock(org.ros.node.server.Master.class);
+    MasterServer mockMaster = mock(MasterServer.class);
     SlaveDescription slaveDescription = new SlaveDescription("/slave", new URL("http://api"));
     TopicDescription topicDescription = new TopicDescription("/topic",
         MessageDescription.createMessageDescription("msg"));
@@ -71,7 +72,7 @@ public class MasterImplTest {
 
   @Test
   public void testRegisterSubscriberWithNoSubscribers() throws MalformedURLException {
-    org.ros.node.server.Master mockMaster = mock(org.ros.node.server.Master.class);
+    MasterServer mockMaster = mock(MasterServer.class);
     when(mockMaster.registerSubscriber(Matchers.<SubscriberDescription>any())).thenReturn(
         Lists.<PublisherDescription>newArrayList());
     MasterImpl master = new MasterImpl(mockMaster);
@@ -82,7 +83,7 @@ public class MasterImplTest {
 
   @Test
   public void testRegisterSubscriber() throws MalformedURLException {
-    org.ros.node.server.Master mockMaster = mock(org.ros.node.server.Master.class);
+    MasterServer mockMaster = mock(MasterServer.class);
     SlaveDescription slaveDescription = new SlaveDescription("/slave", new URL("http://api"));
     TopicDescription topicDescription = new TopicDescription("/topic",
         MessageDescription.createMessageDescription("msg"));

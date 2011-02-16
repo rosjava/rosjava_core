@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.ros.node.StatusCode;
+import org.ros.node.server.SlaveServer;
 import org.ros.topic.Publisher;
 import org.ros.transport.ProtocolNames;
 import org.ros.transport.tcp.TcpRosProtocolDescription;
@@ -36,11 +37,11 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveImplTest {
+public class SlaveClientServerImplTest {
 
   @Test
   public void testGetPublicationsEmptyList() {
-    org.ros.node.server.Slave mockSlave = mock(org.ros.node.server.Slave.class);
+    SlaveServer mockSlave = mock(SlaveServer.class);
     when(mockSlave.getPublications()).thenReturn(Lists.<Publisher>newArrayList());
     SlaveImpl slave = new SlaveImpl(mockSlave);
     List<Object> response = slave.getPublications("/foo");
@@ -50,7 +51,7 @@ public class SlaveImplTest {
 
   @Test
   public void testGetPublications() {
-    org.ros.node.server.Slave mockSlave = mock(org.ros.node.server.Slave.class);
+    SlaveServer mockSlave = mock(SlaveServer.class);
     Publisher mockPublisher = mock(Publisher.class);
     when(mockSlave.getPublications()).thenReturn(Lists.newArrayList(mockPublisher));
     when(mockPublisher.getTopicName()).thenReturn("/bar");
@@ -66,7 +67,7 @@ public class SlaveImplTest {
 
   @Test
   public void testRequestTopic() {
-    org.ros.node.server.Slave mockSlave = mock(org.ros.node.server.Slave.class);
+    SlaveServer mockSlave = mock(SlaveServer.class);
     InetSocketAddress localhost = InetSocketAddress.createUnresolved("localhost", 1234);
     TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(localhost);
     when(

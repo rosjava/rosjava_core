@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 
 import org.ros.message.MessageDescription;
 import org.ros.node.Response;
+import org.ros.node.server.MasterServer;
 import org.ros.node.server.SlaveDescription;
 import org.ros.topic.PublisherDescription;
 import org.ros.topic.SubscriberDescription;
@@ -31,9 +32,9 @@ import java.util.List;
 
 public class MasterImpl implements Master {
 
-  private final org.ros.node.server.Master master;
+  private final MasterServer master;
 
-  public MasterImpl(org.ros.node.server.Master master) {
+  public MasterImpl(MasterServer master) {
     this.master = master;
   }
 

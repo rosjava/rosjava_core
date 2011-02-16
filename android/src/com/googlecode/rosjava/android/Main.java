@@ -28,8 +28,8 @@ import org.ros.message.Time;
 import org.ros.message.geometry.Point;
 import org.ros.message.geometry.PoseStamped;
 import org.ros.message.geometry.Quaternion;
-import org.ros.node.client.Master;
-import org.ros.node.server.Slave;
+import org.ros.node.client.MasterClient;
+import org.ros.node.server.SlaveServer;
 import org.ros.topic.Publisher;
 import org.ros.topic.TopicDescription;
 
@@ -55,9 +55,9 @@ public class Main extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    Master master;
+    MasterClient master;
     try {
-      master = new Master(new URL("http://192.168.1.136:11311/"));
+      master = new MasterClient(new URL("http://192.168.1.136:11311/"));
     } catch (MalformedURLException e) {
       e.printStackTrace();
       return;
@@ -76,7 +76,7 @@ public class Main extends Activity {
     }
     publisher.start();
 
-    Slave slave = new Slave("/android", master, "192.168.1.141", 7331);
+    SlaveServer slave = new SlaveServer("/android", master, "192.168.1.141", 7331);
     try {
       slave.start();
       slave.addPublisher(publisher);
