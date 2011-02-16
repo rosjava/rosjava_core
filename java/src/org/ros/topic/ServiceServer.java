@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.service.server;
+package org.ros.topic;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -24,8 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
 import org.ros.node.server.SlaveDescription;
-import org.ros.service.ServiceDescription;
-import org.ros.topic.Publisher;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
 import org.ros.transport.tcp.IncomingMessageQueue;

@@ -35,7 +35,7 @@ import com.google.common.collect.Multimaps;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterServer extends Node {
+public class MasterServer extends NodeServer {
 
   private final Map<String, SlaveDescription> slaves;
   private final Multimap<String, PublisherDescription> publishers;

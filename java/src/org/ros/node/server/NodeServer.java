@@ -31,14 +31,14 @@ import java.net.URL;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Node {
+public class NodeServer {
 
   private final String hostname;
   private final WebServer server;
   
   private boolean running;
   
-  public Node(String hostname, int port) {
+  public NodeServer(String hostname, int port) {
     this.hostname = hostname;
     server = new WebServer(port);
     running = false;

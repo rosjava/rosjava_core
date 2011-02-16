@@ -26,8 +26,9 @@ import org.ros.message.srv.AddTwoInts.Request;
 import org.ros.node.client.MasterClient;
 import org.ros.node.server.MasterServer;
 import org.ros.node.server.SlaveServer;
-import org.ros.service.client.ServiceClient;
-import org.ros.service.server.ServiceServer;
+import org.ros.topic.ServiceCallback;
+import org.ros.topic.ServiceClient;
+import org.ros.topic.ServiceServer;
 
 import java.io.IOException;
 

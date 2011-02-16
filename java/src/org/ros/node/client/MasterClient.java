@@ -30,7 +30,7 @@ import org.ros.topic.TopicDescription;
 
 import com.google.common.collect.Lists;
 
-public class MasterClient extends Node<org.ros.node.xmlrpc.Master> {
+public class MasterClient extends NodeClient<org.ros.node.xmlrpc.Master> {
 
   public MasterClient(URL url) {
     super(url, org.ros.node.xmlrpc.Master.class);

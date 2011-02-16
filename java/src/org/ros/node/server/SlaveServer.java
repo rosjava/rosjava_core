@@ -46,7 +46,7 @@ import java.util.Set;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveServer extends Node {
+public class SlaveServer extends NodeServer {
 
   private final String name;
   private final MasterClient master;

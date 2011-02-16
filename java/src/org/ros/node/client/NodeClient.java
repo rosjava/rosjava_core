@@ -28,12 +28,12 @@ import java.net.URL;
  * 
  * @param <T>
  */
-public class Node<T extends org.ros.node.xmlrpc.Node> {
+public class NodeClient<T extends org.ros.node.xmlrpc.Node> {
   
   protected final T node;
   private final URL url;
   
-  public Node(URL url, Class<T> interfaceClass) {
+  public NodeClient(URL url, Class<T> interfaceClass) {
     this.url = url;
     
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();

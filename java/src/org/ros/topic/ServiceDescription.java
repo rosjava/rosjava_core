@@ -14,12 +14,10 @@
  * the License.
  */
 
-package org.ros.service;
+package org.ros.topic;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.omg.IOP.CodecFactoryHelper;
-import org.ros.message.MessageDescription;
 import org.ros.node.server.SlaveDescription;
 import org.ros.transport.ConnectionHeaderFields;
 

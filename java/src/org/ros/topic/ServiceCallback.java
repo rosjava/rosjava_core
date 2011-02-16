@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.service;
+package org.ros.topic;
 
 import org.ros.message.Message;
 
