@@ -48,7 +48,7 @@ public class IncomingMessageQueue<T extends Message> {
     @Override
     public void run() {
       try {
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!isInterrupted()) {
           messages.put(receiveMessage());
         }
       } catch (InterruptedException e) {

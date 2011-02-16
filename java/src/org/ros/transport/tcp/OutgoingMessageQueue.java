@@ -46,7 +46,7 @@ public class OutgoingMessageQueue {
     @Override
     public void run() {
       try {
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!isInterrupted()) {
           sendMessage(messages.take());
         }
       } catch (InterruptedException e) {
