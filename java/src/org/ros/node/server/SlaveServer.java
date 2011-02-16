@@ -22,11 +22,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.apache.xmlrpc.XmlRpcException;
-import org.ros.message.MessageDescription;
 import org.ros.node.RemoteException;
 import org.ros.node.Response;
 import org.ros.node.client.MasterClient;
 import org.ros.node.xmlrpc.SlaveImpl;
+import org.ros.topic.MessageDescription;
 import org.ros.topic.Publisher;
 import org.ros.topic.PublisherDescription;
 import org.ros.topic.Subscriber;

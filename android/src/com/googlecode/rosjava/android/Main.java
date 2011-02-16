@@ -23,13 +23,13 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
-import org.ros.message.MessageDescription;
 import org.ros.message.Time;
 import org.ros.message.geometry.Point;
 import org.ros.message.geometry.PoseStamped;
 import org.ros.message.geometry.Quaternion;
 import org.ros.node.client.MasterClient;
 import org.ros.node.server.SlaveServer;
+import org.ros.topic.MessageDescription;
 import org.ros.topic.Publisher;
 import org.ros.topic.TopicDescription;
 

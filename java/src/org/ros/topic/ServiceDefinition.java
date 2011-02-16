@@ -16,9 +16,9 @@
 
 package org.ros.topic;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-import org.ros.node.server.SlaveDescription;
 import org.ros.transport.ConnectionHeaderFields;
 
 import java.util.Map;
@@ -26,27 +26,21 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceDescription {
+public class ServiceDefinition {
 
-  private final SlaveDescription slaveDescription;
-  private final ServiceDefinition serviceDefinition;
-
-  /**
-   * 
-   */
-  public ServiceDescription(SlaveDescription slaveDescription, ServiceDefinition serviceDefinition) {
-    this.slaveDescription = slaveDescription;
-    this.serviceDefinition = serviceDefinition;
+  private final String type;
+  private final String md5Checksum;
+  
+  public ServiceDefinition(String type, String md5Checksum) {
+    this.type = type;
+    this.md5Checksum = md5Checksum;
   }
-
-  /**
-   * @return
-   */
+  
   public Map<String, String> toHeader() {
-    return ImmutableMap.<String, String>builder()
-        .putAll(slaveDescription.toHeader())
-        .putAll(serviceDefinition.toHeader())
+    Preconditions.checkNotNull(md5Checksum);
+    return new ImmutableMap.Builder<String, String>()
+        .put(ConnectionHeaderFields.TYPE, type)
+        .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum)
         .build();
   }
-
 }

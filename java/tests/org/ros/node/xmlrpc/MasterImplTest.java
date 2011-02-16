@@ -24,10 +24,10 @@ import com.google.common.collect.Lists;
 
 import org.junit.Test;
 import org.mockito.Matchers;
-import org.ros.message.MessageDescription;
 import org.ros.node.StatusCode;
 import org.ros.node.server.MasterServer;
 import org.ros.node.server.SlaveDescription;
+import org.ros.topic.MessageDescription;
 import org.ros.topic.PublisherDescription;
 import org.ros.topic.SubscriberDescription;
 import org.ros.topic.TopicDescription;
@@ -39,7 +39,7 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterClientServerImplTest {
+public class MasterImplTest {
 
   @Test
   public void testRegisterPublisherWithNoSubscribers() throws MalformedURLException {

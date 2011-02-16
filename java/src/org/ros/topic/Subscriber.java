@@ -89,9 +89,10 @@ public class Subscriber<T extends Message> extends Topic {
     this.listeners = new CopyOnWriteArrayList<Subscriber.SubscriberListener<T>>();
     this.in = IncomingMessageQueue.create(messageClass);
     thread = new MessageReadingThread();
-    header =
-        ImmutableMap.<String, String>builder().put(ConnectionHeaderFields.CALLER_ID, name)
-            .putAll(description.toHeader()).build();
+    header = ImmutableMap.<String, String>builder()
+        .put(ConnectionHeaderFields.CALLER_ID, name)
+        .putAll(description.toHeader())
+        .build();
   }
 
   public void addListener(SubscriberListener<T> listener) {

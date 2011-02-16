@@ -18,10 +18,10 @@ package org.ros.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 
-import org.ros.message.MessageDescription;
 import org.ros.node.Response;
 import org.ros.node.server.MasterServer;
 import org.ros.node.server.SlaveDescription;
+import org.ros.topic.MessageDescription;
 import org.ros.topic.PublisherDescription;
 import org.ros.topic.SubscriberDescription;
 import org.ros.topic.TopicDescription;

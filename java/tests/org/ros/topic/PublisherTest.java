@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
-import org.ros.message.MessageDescription;
 import org.ros.node.server.SlaveDescription;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;

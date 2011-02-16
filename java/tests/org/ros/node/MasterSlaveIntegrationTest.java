@@ -24,11 +24,11 @@ import com.google.common.collect.Sets;
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.message.MessageDescription;
 import org.ros.node.client.MasterClient;
 import org.ros.node.client.SlaveClient;
 import org.ros.node.server.MasterServer;
 import org.ros.node.server.SlaveServer;
+import org.ros.topic.MessageDescription;
 import org.ros.topic.Publisher;
 import org.ros.topic.PublisherDescription;
 import org.ros.topic.Subscriber;
@@ -44,7 +44,7 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterClientServerSlaveIntegrationTest {
+public class MasterSlaveIntegrationTest {
 
   private MasterServer masterServer;
   private MasterClient masterClient;

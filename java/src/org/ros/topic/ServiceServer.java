@@ -18,12 +18,12 @@ package org.ros.topic;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
-import org.ros.node.server.SlaveDescription;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
 import org.ros.transport.tcp.IncomingMessageQueue;
@@ -45,9 +45,9 @@ public abstract class ServiceServer<T extends Message> {
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final TcpServer server;
-  private final ServiceDescription description;
   private final Class<T> incomingMessageClass;
   private final Collection<PersistentSession> persistentSessions;
+  private Map<String, String> header;
 
   private class Server extends TcpServer {
     public Server(String hostname, int port) throws IOException {
@@ -116,12 +116,15 @@ public abstract class ServiceServer<T extends Message> {
     }
   }
 
-  public ServiceServer(Class<T> incomingMessageClass, SlaveDescription slaveDescription, String type,
-      String md5Checksum, String hostname, int port) throws IOException {
+  public ServiceServer(Class<T> incomingMessageClass, String name, ServiceDefinition definition,
+      String hostname, int port) throws IOException {
     this.incomingMessageClass = incomingMessageClass;
     server = new Server(hostname, port);
-    description = new ServiceDescription(slaveDescription, type, md5Checksum);
     persistentSessions = Lists.newArrayList();
+    header = ImmutableMap.<String, String>builder()
+        .put(ConnectionHeaderFields.CALLER_ID, name)
+        .putAll(definition.toHeader())
+        .build();
   }
 
   /**
@@ -133,7 +136,6 @@ public abstract class ServiceServer<T extends Message> {
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
     Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
-    Map<String, String> header = description.toHeader();
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
       log.info("Expected handshake header: " + header);

@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveClientServerImplTest {
+public class SlaveImplTest {
 
   @Test
   public void testGetPublicationsEmptyList() {

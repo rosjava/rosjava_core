@@ -18,13 +18,12 @@ package org.ros.topic;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-
-import org.ros.node.server.SlaveDescription;
-
+import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
+import org.ros.node.server.SlaveDescription;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
 
@@ -42,15 +41,18 @@ public class ServiceClient<T extends Message> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
 
-  private final ServiceDescription description;
-
-  public static <S extends Message> ServiceClient<S> create(Class<S> outgoingMessageClass,
-      SlaveDescription slaveDescription, String type, String md5Checksum) {
-    return new ServiceClient<S>(slaveDescription, type, md5Checksum);
+  public static <S extends Message> ServiceClient<S> create(
+      String name, ServiceDefinition serviceDefinition) {
+    return new ServiceClient<S>(name, serviceDefinition);
   }
 
-  private ServiceClient(SlaveDescription slaveDescription, String type, String md5Checksum) {
-    description = new ServiceDescription(slaveDescription, type, md5Checksum);
+  private Map<String, String> header;
+  
+  private ServiceClient(String name, ServiceDefinition serviceDefinition) {
+    header = ImmutableMap.<String, String>builder()
+        .put(ConnectionHeaderFields.CALLER_ID, name)
+        .putAll(serviceDefinition.toHeader())
+        .build();
   }
 
   public void start(InetSocketAddress server) throws UnknownHostException, IOException {
@@ -60,7 +62,6 @@ public class ServiceClient<T extends Message> {
 
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
-    Map<String, String> header = description.toHeader();
     ConnectionHeader.writeHeader(header, socket.getOutputStream());
     Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
     if (DEBUG) {

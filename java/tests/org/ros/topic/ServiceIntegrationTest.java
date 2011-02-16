@@ -18,17 +18,10 @@ package org.ros.topic;
 
 import static org.junit.Assert.assertEquals;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Test;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
 import org.ros.message.srv.AddTwoInts.Request;
-import org.ros.node.client.MasterClient;
-import org.ros.node.server.MasterServer;
-import org.ros.node.server.SlaveServer;
-import org.ros.topic.ServiceCallback;
-import org.ros.topic.ServiceClient;
-import org.ros.topic.ServiceServer;
 
 import java.io.IOException;
 
@@ -38,17 +31,13 @@ import java.io.IOException;
 public class ServiceIntegrationTest {
 
   @Test
-  public void PesistentServiceConnectionTest() throws IOException, XmlRpcException {
-    MasterServer masterServer = new MasterServer("localhost", 0);
-    masterServer.start();
-    MasterClient masterClient = new MasterClient(masterServer.getAddress());
+  public void PesistentServiceConnectionTest() throws IOException {
+    ServiceDefinition definition =
+        new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
 
-    SlaveServer serverSlave = new SlaveServer("/serverSlave", masterClient, "localhost", 0);
-    serverSlave.start();
     ServiceServer<AddTwoInts.Request> server =
-        new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class,
-            serverSlave.toSlaveDescription(), AddTwoInts.__s_getDataType(),
-            AddTwoInts.__s_getMD5Sum(), "localhost", 0) {
+        new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/server", definition,
+            "localhost", 0) {
           @Override
           public Message buildResponse(AddTwoInts.Request message) {
             return message;
@@ -56,11 +45,7 @@ public class ServiceIntegrationTest {
         };
     server.start();
 
-    SlaveServer clientSlave = new SlaveServer("/clientSlave", masterClient, "localhost", 0);
-    clientSlave.start();
-    ServiceClient<AddTwoInts.Response> client =
-        ServiceClient.create(AddTwoInts.Response.class, clientSlave.toSlaveDescription(),
-            AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
+    ServiceClient<AddTwoInts.Response> client = ServiceClient.create("/client", definition);
     client.start(server.getAddress());
 
     final AddTwoInts serviceMessage = new AddTwoInts();
