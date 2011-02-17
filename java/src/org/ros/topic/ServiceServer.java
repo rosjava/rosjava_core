@@ -32,7 +32,9 @@ import org.ros.transport.tcp.TcpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 
@@ -119,16 +121,15 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
     }
   }
 
-  public ServiceServer(Class<RequestMessageType> requestMessageClass, String name, ServiceDefinition definition,
-      String hostname, int port) throws IOException {
+  public ServiceServer(Class<RequestMessageType> requestMessageClass, String name,
+      ServiceDefinition definition, String hostname, int port) throws IOException {
     this.requestMessageClass = requestMessageClass;
     this.definition = definition;
     server = new Server(hostname, port);
     persistentSessions = Lists.newArrayList();
-    header = ImmutableMap.<String, String>builder()
-        .put(ConnectionHeaderFields.CALLER_ID, name)
-        .putAll(definition.toHeader())
-        .build();
+    header =
+        ImmutableMap.<String, String>builder().put(ConnectionHeaderFields.CALLER_ID, name)
+            .putAll(definition.toHeader()).build();
   }
 
   /**
@@ -164,6 +165,11 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
    */
   public InetSocketAddress getAddress() {
     return server.getAddress();
+  }
+
+  public URL getUrl() throws MalformedURLException {
+    return new URL("http://" + server.getAddress().getHostName() + ":"
+        + server.getAddress().getPort());
   }
 
   /**

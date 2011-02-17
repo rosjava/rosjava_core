@@ -51,7 +51,7 @@ public class MasterClient extends NodeClient<org.ros.node.xmlrpc.Master> {
       throws MalformedURLException {
     List<Object> response =
         node.registerService(callerId, service.getServiceDefinition().getType(), service
-            .getAddress().toString(), callerApi.toString());
+            .getUrl().toString(), callerApi.toString());
     return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
         (Integer) response.get(2));
   }
@@ -143,10 +143,14 @@ public class MasterClient extends NodeClient<org.ros.node.xmlrpc.Master> {
         (String) response.get(2)));
   }
 
-  public Response<URL> lookupService(String callerId, String service) throws MalformedURLException {
+  public Response<List<URL>> lookupService(String callerId, String service) throws MalformedURLException {
     List<Object> response = node.lookupService(callerId, service);
-    return new Response<URL>((Integer) response.get(0), (String) response.get(1), new URL(
-        (String) response.get(2)));
+    List<Object> values = Arrays.asList((Object[]) response.get(2));
+    List<URL> urls = Lists.newArrayList();
+    for (Object value : values) {
+      urls.add(new URL((String) value));
+    }
+    return new Response<List<URL>>((Integer) response.get(0), (String) response.get(1), urls);
   }
 
 }

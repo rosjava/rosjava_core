@@ -90,7 +90,12 @@ public class MasterImpl implements Master {
    */
   @Override
   public List<Object> lookupService(String callerId, String service) {
-    throw new UnsupportedOperationException();
+    List<ServiceDescription> services = master.lookupService(callerId, service);
+    List<String> urls = Lists.newArrayList();
+    for (ServiceDescription description : services) {
+      urls.add(description.getUrl().toString());
+    }
+    return Response.createSuccess("Success", urls).toList();
   }
 
   /*
@@ -125,7 +130,7 @@ public class MasterImpl implements Master {
       String callerApi) throws MalformedURLException {
     ServiceDescription description =
         new ServiceDescription(new SlaveDescription(callerId, new URL(callerApi)),
-            new ServiceDefinition(service, null));
+            new ServiceDefinition(service, null), new URL(serviceApi));
     master.registerService(description);
     return Response.createSuccess("Success", 0).toList();
   }

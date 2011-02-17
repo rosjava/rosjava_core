@@ -103,7 +103,7 @@ public class MasterSlaveIntegrationTest {
   }
 
   @Test
-  public void testAddServiceClient() throws IOException {
+  public void testAddServiceClient() throws IOException, RemoteException {
     ServiceDefinition serviceDefinition =
         new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
     ServiceClient<AddTwoInts.Response> client =
@@ -119,6 +119,9 @@ public class MasterSlaveIntegrationTest {
           }
         };
     slaveServer.addService(server);
+    Response<List<URL>> response =
+        Response.checkOk(masterClient.lookupService("/foo", serviceDefinition.getType()));
+    assertEquals(server.getUrl(), response.getValue().get(0));
   }
 
 }
