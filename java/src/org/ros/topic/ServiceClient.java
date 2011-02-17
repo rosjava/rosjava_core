@@ -37,13 +37,13 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceClient<T extends Message> {
+public class ServiceClient<ResponseMessageType extends Message> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
   
   private final OutgoingMessageQueue out;
-  private final IncomingMessageQueue<T> in;
+  private final IncomingMessageQueue<ResponseMessageType> in;
 
   public static <S extends Message> ServiceClient<S> create(
       Class<S> incomingMessageClass, String name, ServiceDefinition serviceDefinition) {
@@ -52,7 +52,7 @@ public class ServiceClient<T extends Message> {
 
   private Map<String, String> header;
   
-  private ServiceClient(Class<T> incomingMessageClass, String name,
+  private ServiceClient(Class<ResponseMessageType> incomingMessageClass, String name,
       ServiceDefinition serviceDefinition) {
     header = ImmutableMap.<String, String>builder()
         .put(ConnectionHeaderFields.CALLER_ID, name)
@@ -89,7 +89,7 @@ public class ServiceClient<T extends Message> {
    * @param message
    * @throws InterruptedException 
    */
-  public T call(Message message) throws InterruptedException {
+  public ResponseMessageType call(Message message) throws InterruptedException {
     out.add(message);
     return in.take();
   }

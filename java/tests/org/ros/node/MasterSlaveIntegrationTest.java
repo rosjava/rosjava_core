@@ -24,6 +24,8 @@ import com.google.common.collect.Sets;
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.message.Message;
+import org.ros.message.srv.AddTwoInts;
 import org.ros.node.client.MasterClient;
 import org.ros.node.client.SlaveClient;
 import org.ros.node.server.MasterServer;
@@ -31,6 +33,9 @@ import org.ros.node.server.SlaveServer;
 import org.ros.topic.MessageDescription;
 import org.ros.topic.Publisher;
 import org.ros.topic.PublisherDescription;
+import org.ros.topic.ServiceClient;
+import org.ros.topic.ServiceDefinition;
+import org.ros.topic.ServiceServer;
 import org.ros.topic.Subscriber;
 import org.ros.topic.TopicDescription;
 import org.ros.transport.ProtocolDescription;
@@ -95,6 +100,25 @@ public class MasterSlaveIntegrationTest {
     PublisherDescription publisherDescription =
         publisher.toPublisherDescription(slaveServer.toSlaveDescription());
     assertTrue(publishers.contains(publisherDescription));
+  }
+
+  @Test
+  public void testAddServiceClient() throws IOException {
+    ServiceDefinition serviceDefinition =
+        new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
+    ServiceClient<AddTwoInts.Response> client =
+        ServiceClient.create(AddTwoInts.Response.class, "/client", serviceDefinition);
+    ServiceServer<AddTwoInts.Request> server =
+        new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/server",
+            serviceDefinition, "localhost", 0) {
+          @Override
+          public Message buildResponse(AddTwoInts.Request requestMessage) {
+            AddTwoInts.Response response = new AddTwoInts.Response();
+            response.sum = requestMessage.a + requestMessage.b;
+            return response;
+          }
+        };
+    slaveServer.addService(server);
   }
 
 }

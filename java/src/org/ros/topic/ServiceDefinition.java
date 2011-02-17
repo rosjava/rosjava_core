@@ -43,4 +43,11 @@ public class ServiceDefinition {
         .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum)
         .build();
   }
+
+  /**
+   * @return
+   */
+  public String getType() {
+    return type;
+  }
 }

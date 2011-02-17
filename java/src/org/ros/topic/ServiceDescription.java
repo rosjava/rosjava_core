@@ -49,4 +49,11 @@ public class ServiceDescription {
         .build();
   }
 
+  /**
+   * @return
+   */
+  public String getName() {
+    return serviceDefinition.getType();
+  }
+
 }

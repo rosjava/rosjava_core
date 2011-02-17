@@ -24,8 +24,18 @@ import java.util.List;
  */
 public interface Master extends Node {
 
+  /**
+   * Register the caller as a provider of the specified service.
+   * 
+   * @param callerId ROS caller ID
+   * @param service Fully-qualified name of service
+   * @param serviceApi XML-RPC URI of caller node
+   * @param callerApi
+   * @return ignore
+   * @throws MalformedURLException 
+   */
   public List<Object> registerService(String callerId, String service, String serviceApi,
-      String callerApi);
+      String callerApi) throws MalformedURLException;
 
   public List<Object> unregisterService(String callerId, String service, String serviceApi);
 
@@ -43,7 +53,7 @@ public interface Master extends Node {
    *        publisher notifications
    * @return publishers as a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic
-   * @throws MalformedURLException 
+   * @throws MalformedURLException
    */
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
       String callerApi) throws MalformedURLException;

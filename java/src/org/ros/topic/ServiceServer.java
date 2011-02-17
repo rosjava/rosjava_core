@@ -39,15 +39,16 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class ServiceServer<T extends Message> {
+public abstract class ServiceServer<RequestMessageType extends Message> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final TcpServer server;
-  private final Class<T> incomingMessageClass;
+  private final Class<RequestMessageType> requestMessageClass;
   private final Collection<PersistentSession> persistentSessions;
-  private Map<String, String> header;
+  private final ServiceDefinition definition;
+  private final Map<String, String> header;
 
   private class Server extends TcpServer {
     public Server(String hostname, int port) throws IOException {
@@ -82,10 +83,10 @@ public abstract class ServiceServer<T extends Message> {
 
   private class PersistentSession extends Thread {
     private final OutgoingMessageQueue out;
-    private final IncomingMessageQueue<T> in;
+    private final IncomingMessageQueue<RequestMessageType> in;
 
     public PersistentSession(Socket socket) throws IOException {
-      in = IncomingMessageQueue.create(incomingMessageClass);
+      in = IncomingMessageQueue.create(requestMessageClass);
       in.setSocket(socket);
       out = new OutgoingMessageQueue();
       out.addSocket(socket);
@@ -102,7 +103,7 @@ public abstract class ServiceServer<T extends Message> {
       out.start();
       while (!Thread.currentThread().isInterrupted()) {
         try {
-          T message = in.take();
+          RequestMessageType message = in.take();
           out.add(buildResponse(message));
         } catch (InterruptedException e) {
           // Cancelable
@@ -118,9 +119,10 @@ public abstract class ServiceServer<T extends Message> {
     }
   }
 
-  public ServiceServer(Class<T> incomingMessageClass, String name, ServiceDefinition definition,
+  public ServiceServer(Class<RequestMessageType> requestMessageClass, String name, ServiceDefinition definition,
       String hostname, int port) throws IOException {
-    this.incomingMessageClass = incomingMessageClass;
+    this.requestMessageClass = requestMessageClass;
+    this.definition = definition;
     server = new Server(hostname, port);
     persistentSessions = Lists.newArrayList();
     header = ImmutableMap.<String, String>builder()
@@ -130,10 +132,10 @@ public abstract class ServiceServer<T extends Message> {
   }
 
   /**
-   * @param message
+   * @param requestMessage
    * @return
    */
-  public abstract Message buildResponse(T message);
+  public abstract Message buildResponse(RequestMessageType requestMessage);
 
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
@@ -162,6 +164,13 @@ public abstract class ServiceServer<T extends Message> {
    */
   public InetSocketAddress getAddress() {
     return server.getAddress();
+  }
+
+  /**
+   * @return
+   */
+  public ServiceDefinition getServiceDefinition() {
+    return definition;
   }
 
 }

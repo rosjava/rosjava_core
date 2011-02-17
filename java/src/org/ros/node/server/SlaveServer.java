@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.ros.message.Message;
 import org.ros.node.RemoteException;
 import org.ros.node.Response;
 import org.ros.node.client.MasterClient;
@@ -29,6 +30,7 @@ import org.ros.node.xmlrpc.SlaveImpl;
 import org.ros.topic.MessageDescription;
 import org.ros.topic.Publisher;
 import org.ros.topic.PublisherDescription;
+import org.ros.topic.ServiceServer;
 import org.ros.topic.Subscriber;
 import org.ros.topic.TopicDescription;
 import org.ros.transport.ProtocolDescription;
@@ -88,6 +90,14 @@ public class SlaveServer extends NodeServer {
     return publishers;
   }
 
+  /**
+   * @param server 
+   * @throws MalformedURLException 
+   */
+  public void addService(ServiceServer<? extends Message> server) throws MalformedURLException {
+    master.registerService(name, server, getAddress());
+  }
+  
   public List<Object> getBusStats(String callerId) {
     throw new UnsupportedOperationException();
   }
@@ -138,4 +148,5 @@ public class SlaveServer extends NodeServer {
   public SlaveDescription toSlaveDescription() throws MalformedURLException {
     return new SlaveDescription(name, getAddress());
   }
+
 }

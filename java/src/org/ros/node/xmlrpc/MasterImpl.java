@@ -23,6 +23,8 @@ import org.ros.node.server.MasterServer;
 import org.ros.node.server.SlaveDescription;
 import org.ros.topic.MessageDescription;
 import org.ros.topic.PublisherDescription;
+import org.ros.topic.ServiceDefinition;
+import org.ros.topic.ServiceDescription;
 import org.ros.topic.SubscriberDescription;
 import org.ros.topic.TopicDescription;
 
@@ -101,8 +103,8 @@ public class MasterImpl implements Master {
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
       String callerApi) throws MalformedURLException {
     SlaveDescription slaveDescription = new SlaveDescription(callerId, new URL(callerApi));
-    TopicDescription topicDescription = new TopicDescription(topic,
-        MessageDescription.createMessageDescription(topicType));
+    TopicDescription topicDescription =
+        new TopicDescription(topic, MessageDescription.createMessageDescription(topicType));
     PublisherDescription description = new PublisherDescription(slaveDescription, topicDescription);
     List<SubscriberDescription> subscribers = master.registerPublisher(callerId, description);
     List<String> urls = Lists.newArrayList();
@@ -120,8 +122,12 @@ public class MasterImpl implements Master {
    */
   @Override
   public List<Object> registerService(String callerId, String service, String serviceApi,
-      String callerApi) {
-    throw new UnsupportedOperationException();
+      String callerApi) throws MalformedURLException {
+    ServiceDescription description =
+        new ServiceDescription(new SlaveDescription(callerId, new URL(callerApi)),
+            new ServiceDefinition(service, null));
+    master.registerService(description);
+    return Response.createSuccess("Success", 0).toList();
   }
 
   /*
@@ -134,10 +140,10 @@ public class MasterImpl implements Master {
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
       String callerApi) throws MalformedURLException {
     SlaveDescription slaveDescription = new SlaveDescription(callerId, new URL(callerApi));
-    TopicDescription topicDescription = new TopicDescription(topic,
-        MessageDescription.createMessageDescription(topicType));
-    List<PublisherDescription> publishers = master.registerSubscriber(new SubscriberDescription(
-        slaveDescription, topicDescription));
+    TopicDescription topicDescription =
+        new TopicDescription(topic, MessageDescription.createMessageDescription(topicType));
+    List<PublisherDescription> publishers =
+        master.registerSubscriber(new SubscriberDescription(slaveDescription, topicDescription));
     List<String> urls = Lists.newArrayList();
     for (PublisherDescription publisherDescription : publishers) {
       urls.add(publisherDescription.getSlaveUrl().toString());

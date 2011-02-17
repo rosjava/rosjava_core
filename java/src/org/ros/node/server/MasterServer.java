@@ -16,21 +16,22 @@
 
 package org.ros.node.server;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.xmlrpc.XmlRpcException;
-import org.ros.node.xmlrpc.MasterImpl;
-import org.ros.topic.PublisherDescription;
-import org.ros.topic.SubscriberDescription;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+
+import org.apache.xmlrpc.XmlRpcException;
+import org.ros.node.xmlrpc.MasterImpl;
+import org.ros.topic.PublisherDescription;
+import org.ros.topic.ServiceDescription;
+import org.ros.topic.SubscriberDescription;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -40,6 +41,7 @@ public class MasterServer extends NodeServer {
   private final Map<String, SlaveDescription> slaves;
   private final Multimap<String, PublisherDescription> publishers;
   private final Multimap<String, SubscriberDescription> subscribers;
+  private final Multimap<String, ServiceDescription> services;
 
   public MasterServer(String hostname, int port) {
     super(hostname, port);
@@ -48,15 +50,16 @@ public class MasterServer extends NodeServer {
         Multimaps.synchronizedMultimap(ArrayListMultimap.<String, PublisherDescription>create());
     subscribers =
         Multimaps.synchronizedMultimap(ArrayListMultimap.<String, SubscriberDescription>create());
+    services =
+        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, ServiceDescription>create());
   }
 
   public void start() throws XmlRpcException, IOException {
     super.start(org.ros.node.xmlrpc.MasterImpl.class, new MasterImpl(this));
   }
 
-  public List<Object> registerService(String callerId, String service, String serviceApi,
-      String callerApi) {
-    return null;
+  public void registerService(ServiceDescription description) {
+    services.put(description.getName(), description);
   }
 
   public List<Object> unregisterService(String callerId, String service, String serviceApi) {
@@ -73,6 +76,7 @@ public class MasterServer extends NodeServer {
    * Subscribe the caller to the specified topic. In addition to receiving a
    * list of current publishers, the subscriber will also receive notifications
    * of new publishers via the publisherUpdate API.
+   * 
    * @param description
    * 
    * 
@@ -133,7 +137,15 @@ public class MasterServer extends NodeServer {
     return null;
   }
 
-  public List<Object> lookupService(String callerId, String service) {
-    return null;
+  /**
+   * Lookup all provider of a particular service.
+   * 
+   * @param callerId ROS caller ID
+   * @param service Fully-qualified name of service
+   * @return service URL is provides address and port of the service. Fails if
+   *         there is no provider.
+   */
+  public List<ServiceDescription> lookupService(String callerId, String service) {
+    return ImmutableList.copyOf(services.get(service));
   }
 }
