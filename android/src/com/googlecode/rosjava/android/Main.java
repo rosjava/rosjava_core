@@ -89,7 +89,6 @@ public class Main extends Activity {
     Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
     sensorManager.registerListener(new SensorEventListener() {
 
-
       @Override
       public void onAccuracyChanged(Sensor sensor, int accuracy) {
       }
