@@ -33,7 +33,6 @@ import org.ros.node.server.SlaveServer;
 import org.ros.topic.MessageDescription;
 import org.ros.topic.Publisher;
 import org.ros.topic.PublisherDescription;
-import org.ros.topic.ServiceClient;
 import org.ros.topic.ServiceDefinition;
 import org.ros.topic.ServiceServer;
 import org.ros.topic.Subscriber;
@@ -108,11 +107,9 @@ public class MasterSlaveIntegrationTest {
   }
 
   @Test
-  public void testAddServiceClient() throws IOException, RemoteException {
+  public void testAddService() throws IOException, RemoteException {
     ServiceDefinition serviceDefinition =
         new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
-    ServiceClient<AddTwoInts.Response> client =
-        ServiceClient.create(AddTwoInts.Response.class, "/client", serviceDefinition);
     ServiceServer<AddTwoInts.Request> server =
         new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/server",
             serviceDefinition, "localhost", 0) {
