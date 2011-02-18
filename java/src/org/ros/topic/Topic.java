@@ -17,16 +17,21 @@
 package org.ros.topic;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Topic {
 
-  protected final TopicDescription description;
+  private final TopicDescription description;
 
   public Topic(TopicDescription description) {
     this.description = description;
+  }
+  
+  public TopicDescription getTopicDescription() {
+    return description;
   }
  
   public List<String> getTopicDescriptionAsList() {
@@ -39,6 +44,10 @@ public class Topic {
   
   public String getTopicMessageType() {
     return description.getMessageType();
+  }
+  
+  public Map<String, String> getTopicDescriptionHeader() {
+    return description.toHeader();
   }
   
 }

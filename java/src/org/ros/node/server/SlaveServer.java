@@ -134,6 +134,7 @@ public class SlaveServer extends NodeServer {
     throw new UnsupportedOperationException();
   }
 
+  // TODO(damonkohler): Support multiple publishers for a particular topic.
   public ProtocolDescription requestTopic(String topic, Set<String> protocols) {
     Preconditions.checkArgument(publishers.containsKey(topic));
     // TODO(damonkohler): Pull out list of supported protocols.

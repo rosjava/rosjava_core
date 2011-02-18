@@ -35,6 +35,13 @@ public interface Slave extends Node {
 
   public List<Object> getSubscriptions(String callerId);
 
+  /**
+   * Retrieve a list of topics that this node publishes.
+   * 
+   * @param callerId ROS caller ID.
+   * @return topicList is a list of topics published by this node and is of the
+   *         form [ [topic1, topicType1]...[topicN, topicTypeN]]]
+   */
   public List<Object> getPublications(String callerId);
 
   public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue);

@@ -93,13 +93,18 @@ public class MasterSlaveIntegrationTest {
     Subscriber<org.ros.message.std.String> subscriber =
         Subscriber.create("/bloop", topicDescription, org.ros.message.std.String.class);
     List<PublisherDescription> publishers = slaveServer.addSubscriber(subscriber);
-    assertTrue(publishers.size() == 0);
+    assertEquals(0, publishers.size());
     Publisher publisher = new Publisher(topicDescription, "localhost", 0);
     slaveServer.addPublisher(publisher);
     publishers = slaveServer.addSubscriber(subscriber);
     PublisherDescription publisherDescription =
         publisher.toPublisherDescription(slaveServer.toSlaveDescription());
     assertTrue(publishers.contains(publisherDescription));
+
+    Response<List<TopicDescription>> response =
+        Response.checkOk(slaveClient.getPublications("/foo"));
+    assertEquals(1, response.getValue().size());
+    assertTrue(response.getValue().contains(publisher.getTopicDescription()));
   }
 
   @Test
@@ -118,9 +123,12 @@ public class MasterSlaveIntegrationTest {
             return response;
           }
         };
-    slaveServer.addService(server);
     Response<List<URL>> response =
         Response.checkOk(masterClient.lookupService("/foo", serviceDefinition.getType()));
+    assertEquals(0, response.getValue().size());
+
+    slaveServer.addService(server);
+    response = Response.checkOk(masterClient.lookupService("/foo", serviceDefinition.getType()));
     assertEquals(server.getUrl(), response.getValue().get(0));
   }
 

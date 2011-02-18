@@ -46,7 +46,6 @@ public class Publisher extends Topic {
   private final OutgoingMessageQueue out;
   private final List<SubscriberDescription> subscribers;
   private final TcpServer server;
-  private final TopicDescription topicDescription;
 
   private class Server extends TcpServer {
     public Server(String hostname, int port) throws IOException {
@@ -64,9 +63,8 @@ public class Publisher extends Topic {
     }
   }
 
-  public Publisher(TopicDescription topicDescription, String hostname, int port) throws IOException {
-    super(topicDescription);
-    this.topicDescription = topicDescription;
+  public Publisher(TopicDescription description, String hostname, int port) throws IOException {
+    super(description);
     out = new OutgoingMessageQueue();
     subscribers = Lists.newArrayList();
     server = new Server(hostname, port);
@@ -83,7 +81,7 @@ public class Publisher extends Topic {
   }
 
   public PublisherDescription toPublisherDescription(SlaveDescription description) {
-    return new PublisherDescription(description, topicDescription);
+    return new PublisherDescription(description, getTopicDescription());
   }
 
   public InetSocketAddress getAddress() {
@@ -100,7 +98,7 @@ public class Publisher extends Topic {
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
     Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
-    Map<String, String> header = topicDescription.toHeader();
+    Map<String, String> header = getTopicDescriptionHeader();
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
       log.info("Expected handshake header: " + header);
@@ -113,4 +111,5 @@ public class Publisher extends Topic {
     subscribers.add(subscriber);
     ConnectionHeader.writeHeader(header, socket.getOutputStream());
   }
+
 }

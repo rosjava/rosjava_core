@@ -42,38 +42,73 @@ public class SlaveImpl implements Slave {
     this.slave = slave;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Slave#getBusStats(java.lang.String)
+   */
   @Override
   public List<Object> getBusStats(String callerId) {
     return slave.getBusStats(callerId);
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Slave#getBusInfo(java.lang.String)
+   */
   @Override
   public List<Object> getBusInfo(String callerId) {
     return slave.getBusInfo(callerId);
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Slave#getMasterUri(java.lang.String)
+   */
   @Override
   public List<Object> getMasterUri(String callerId) {
     URL url = slave.getMasterUri(callerId);
     return new Response<String>(StatusCode.SUCCESS, "", url.toString()).toList();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Slave#shutdown(java.lang.String, java.lang.String)
+   */
   @Override
   public List<Object> shutdown(String callerId, String message) {
     slave.shutdown(callerId, message);
     return Response.createSuccess("Shutdown successful.", null).toList();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Slave#getPid(java.lang.String)
+   */
   @Override
   public List<Object> getPid(String callerId) {
     return slave.getPid(callerId);
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Slave#getSubscriptions(java.lang.String)
+   */
   @Override
   public List<Object> getSubscriptions(String callerId) {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Slave#getPublications(java.lang.String)
+   */
   @Override
   public List<Object> getPublications(String callerId) {
     List<Publisher> publishers = slave.getPublications();
@@ -84,11 +119,23 @@ public class SlaveImpl implements Slave {
     return Response.createSuccess("Success", publications).toList();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Slave#paramUpdate(java.lang.String,
+   * java.lang.String, java.lang.String)
+   */
   @Override
   public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) {
     throw new UnsupportedOperationException();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.node.xmlrpc.Slave#publisherUpdate(java.lang.String,
+   * java.lang.String, java.lang.Object[])
+   */
   @Override
   public List<Object> publisherUpdate(String callerId, String topic, Object[] publishers) {
     throw new UnsupportedOperationException();
@@ -114,4 +161,5 @@ public class SlaveImpl implements Slave {
     }
     return response;
   }
+
 }
