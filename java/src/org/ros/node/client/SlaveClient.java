@@ -16,6 +16,16 @@
 
 package org.ros.node.client;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+
+import org.ros.node.Response;
+import org.ros.topic.MessageDescription;
+import org.ros.topic.TopicDescription;
+import org.ros.transport.ProtocolDescription;
+import org.ros.transport.ProtocolNames;
+import org.ros.transport.tcp.TcpRosProtocolDescription;
+
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,17 +33,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import org.ros.node.Response;
-import org.ros.topic.MessageDescription;
-import org.ros.topic.PublisherDescription;
-import org.ros.topic.TopicDescription;
-import org.ros.transport.ProtocolDescription;
-import org.ros.transport.ProtocolNames;
-import org.ros.transport.tcp.TcpRosProtocolDescription;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
