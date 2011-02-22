@@ -114,7 +114,7 @@ public class SlaveImpl implements Slave {
     List<Publisher> publishers = slave.getPublications();
     List<List<String>> publications = Lists.newArrayList();
     for (Publisher publisher : publishers) {
-      publications.add(publisher.getTopicDescriptionAsList());
+      publications.add(publisher.getTopicDefinitionAsList());
     }
     return Response.createSuccess("Success", publications).toList();
   }

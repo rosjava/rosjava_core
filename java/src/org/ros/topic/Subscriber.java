@@ -79,12 +79,12 @@ public class Subscriber<T extends Message> extends Topic {
     }
   }
 
-  public static <S extends Message> Subscriber<S> create(String name, TopicDescription description,
+  public static <S extends Message> Subscriber<S> create(String name, TopicDefinition description,
       Class<S> messageClass) {
     return new Subscriber<S>(name, description, messageClass);
   }
 
-  private Subscriber(String name, TopicDescription description, Class<T> messageClass) {
+  private Subscriber(String name, TopicDefinition description, Class<T> messageClass) {
     super(description);
     this.listeners = new CopyOnWriteArrayList<Subscriber.SubscriberListener<T>>();
     this.in = IncomingMessageQueue.create(messageClass);

@@ -26,11 +26,11 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.ros.node.StatusCode;
 import org.ros.node.server.MasterServer;
-import org.ros.node.server.SlaveDescription;
-import org.ros.topic.MessageDescription;
-import org.ros.topic.PublisherDescription;
-import org.ros.topic.SubscriberDescription;
-import org.ros.topic.TopicDescription;
+import org.ros.node.server.SlaveIdentifier;
+import org.ros.topic.MessageDefinition;
+import org.ros.topic.PublisherIdentifier;
+import org.ros.topic.SubscriberIdentifier;
+import org.ros.topic.TopicDefinition;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -44,8 +44,8 @@ public class MasterImplTest {
   @Test
   public void testRegisterPublisherWithNoSubscribers() throws MalformedURLException {
     MasterServer mockMaster = mock(MasterServer.class);
-    when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherDescription>any()))
-        .thenReturn(Lists.<SubscriberDescription>newArrayList());
+    when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
+        .thenReturn(Lists.<SubscriberIdentifier>newArrayList());
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response = master.registerPublisher("/caller", "/foo", "/bar", "http://baz");
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
@@ -55,13 +55,13 @@ public class MasterImplTest {
   @Test
   public void testRegisterPublisher() throws MalformedURLException {
     MasterServer mockMaster = mock(MasterServer.class);
-    SlaveDescription slaveDescription = new SlaveDescription("/slave", new URL("http://api"));
-    TopicDescription topicDescription = new TopicDescription("/topic",
-        MessageDescription.createMessageDescription("msg"));
-    SubscriberDescription subscriberDescription = new SubscriberDescription(slaveDescription,
-        topicDescription);
-    when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherDescription>any()))
-        .thenReturn(Lists.<SubscriberDescription>newArrayList(subscriberDescription));
+    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/slave", new URL("http://api"));
+    TopicDefinition topicDefinition = new TopicDefinition("/topic",
+        MessageDefinition.createMessageDefinition("msg"));
+    SubscriberIdentifier subscriberDescription = new SubscriberIdentifier(slaveIdentifier,
+        topicDefinition);
+    when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
+        .thenReturn(Lists.<SubscriberIdentifier>newArrayList(subscriberDescription));
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response = master
         .registerPublisher("/slave", "/topic", "/topicType", "http://api");
@@ -73,8 +73,8 @@ public class MasterImplTest {
   @Test
   public void testRegisterSubscriberWithNoSubscribers() throws MalformedURLException {
     MasterServer mockMaster = mock(MasterServer.class);
-    when(mockMaster.registerSubscriber(Matchers.<SubscriberDescription>any())).thenReturn(
-        Lists.<PublisherDescription>newArrayList());
+    when(mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any())).thenReturn(
+        Lists.<PublisherIdentifier>newArrayList());
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response = master.registerSubscriber("/caller", "/foo", "/bar", "http://baz");
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
@@ -84,13 +84,13 @@ public class MasterImplTest {
   @Test
   public void testRegisterSubscriber() throws MalformedURLException {
     MasterServer mockMaster = mock(MasterServer.class);
-    SlaveDescription slaveDescription = new SlaveDescription("/slave", new URL("http://api"));
-    TopicDescription topicDescription = new TopicDescription("/topic",
-        MessageDescription.createMessageDescription("msg"));
-    PublisherDescription publisherDescription = new PublisherDescription(slaveDescription,
-        topicDescription);
-    when(mockMaster.registerSubscriber(Matchers.<SubscriberDescription>any())).thenReturn(
-        Lists.<PublisherDescription>newArrayList(publisherDescription));
+    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/slave", new URL("http://api"));
+    TopicDefinition topicDefinition = new TopicDefinition("/topic",
+        MessageDefinition.createMessageDefinition("msg"));
+    PublisherIdentifier publisherDescription = new PublisherIdentifier(slaveIdentifier,
+        topicDefinition);
+    when(mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any())).thenReturn(
+        Lists.<PublisherIdentifier>newArrayList(publisherDescription));
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response = master.registerSubscriber("/slave", "/topic", "/topicType",
         "http://api");

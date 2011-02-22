@@ -28,20 +28,20 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TopicDescription {
+public class TopicDefinition {
 
   private final String name;
-  private final MessageDescription messageDescription;
+  private final MessageDefinition messageDefinition;
 
-  public static TopicDescription createFromHeader(Map<String, String> header) {
+  public static TopicDefinition createFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));
-    return new TopicDescription(header.get(ConnectionHeaderFields.TOPIC),
-        MessageDescription.createFromHeader(header));
+    return new TopicDefinition(header.get(ConnectionHeaderFields.TOPIC),
+        MessageDefinition.createFromHeader(header));
   }
 
-  public TopicDescription(String name, MessageDescription messageDescription) {
+  public TopicDefinition(String name, MessageDefinition messageDefinition) {
     this.name = name;
-    this.messageDescription = messageDescription;
+    this.messageDefinition = messageDefinition;
   }
 
   public String getName() {
@@ -49,13 +49,13 @@ public class TopicDescription {
   }
 
   public String getMessageType() {
-    return messageDescription.getType();
+    return messageDefinition.getType();
   }
 
   public Map<String, String> toHeader() {
     return new ImmutableMap.Builder<String, String>()
         .put(ConnectionHeaderFields.TOPIC, name)
-        .putAll(messageDescription.toHeader())
+        .putAll(messageDefinition.toHeader())
         .build();
   }
 
@@ -65,7 +65,7 @@ public class TopicDescription {
 
   @Override
   public String toString() {
-    return "TopicDescription<" + name + ", " + messageDescription.toString() + ">";
+    return "TopicDefinition<" + name + ", " + messageDefinition.toString() + ">";
   }
 
   /*
@@ -77,7 +77,7 @@ public class TopicDescription {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((messageDescription == null) ? 0 : messageDescription.hashCode());
+    result = prime * result + ((messageDefinition == null) ? 0 : messageDefinition.hashCode());
     result = prime * result + ((name == null) ? 0 : name.hashCode());
     return result;
   }
@@ -92,10 +92,10 @@ public class TopicDescription {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    TopicDescription other = (TopicDescription) obj;
-    if (messageDescription == null) {
-      if (other.messageDescription != null) return false;
-    } else if (!messageDescription.equals(other.messageDescription)) return false;
+    TopicDefinition other = (TopicDefinition) obj;
+    if (messageDefinition == null) {
+      if (other.messageDefinition != null) return false;
+    } else if (!messageDefinition.equals(other.messageDefinition)) return false;
     if (name == null) {
       if (other.name != null) return false;
     } else if (!name.equals(other.name)) return false;

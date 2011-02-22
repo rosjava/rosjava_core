@@ -24,17 +24,17 @@ import java.util.Map;
  */
 public class Topic {
 
-  private final TopicDescription description;
+  private final TopicDefinition description;
 
-  public Topic(TopicDescription description) {
+  public Topic(TopicDefinition description) {
     this.description = description;
   }
   
-  public TopicDescription getTopicDescription() {
+  public TopicDefinition getTopicDefinition() {
     return description;
   }
  
-  public List<String> getTopicDescriptionAsList() {
+  public List<String> getTopicDefinitionAsList() {
     return description.toList();
   }
   
@@ -46,7 +46,7 @@ public class Topic {
     return description.getMessageType();
   }
   
-  public Map<String, String> getTopicDescriptionHeader() {
+  public Map<String, String> getTopicDefinitionHeader() {
     return description.toHeader();
   }
   

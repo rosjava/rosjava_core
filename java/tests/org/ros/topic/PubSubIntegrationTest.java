@@ -33,14 +33,14 @@ public class PubSubIntegrationTest {
 
   @Test
   public void testPubSub() throws IOException, InterruptedException {
-    TopicDescription topicDescription =
-        new TopicDescription("/foo",
-            MessageDescription.createFromMessage(new org.ros.message.std.String()));
-    Publisher publisher = new Publisher(topicDescription, "localhost", 0);
+    TopicDefinition topicDefinition =
+        new TopicDefinition("/foo",
+            MessageDefinition.createFromMessage(new org.ros.message.std.String()));
+    Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
     publisher.start();
 
     Subscriber<org.ros.message.std.String> subscriber =
-        Subscriber.create("/caller", topicDescription,
+        Subscriber.create("/caller", topicDefinition,
             org.ros.message.std.String.class);
     subscriber.start(publisher.getAddress());
 

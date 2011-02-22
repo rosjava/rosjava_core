@@ -18,41 +18,41 @@ package org.ros.topic;
 
 import java.net.URL;
 
-import org.ros.node.server.SlaveDescription;
+import org.ros.node.server.SlaveIdentifier;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PublisherDescription {
+public class PublisherIdentifier {
 
-  private final SlaveDescription slaveDescription;
-  private final TopicDescription topicDescription;
+  private final SlaveIdentifier slaveIdentifier;
+  private final TopicDefinition topicDefinition;
 
-  public PublisherDescription(SlaveDescription slaveDescription, TopicDescription topicDescription) {
-    this.slaveDescription = slaveDescription;
-    this.topicDescription = topicDescription;
+  public PublisherIdentifier(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition) {
+    this.slaveIdentifier = slaveIdentifier;
+    this.topicDefinition = topicDefinition;
   }
 
-  public SlaveDescription getSlaveDescription() {
-    return slaveDescription;
+  public SlaveIdentifier getSlaveIdentifier() {
+    return slaveIdentifier;
   }
 
   public String getNodeName() {
-    return slaveDescription.getName();
+    return slaveIdentifier.getName();
   }
 
   public URL getSlaveUrl() {
-    return slaveDescription.getUrl();
+    return slaveIdentifier.getUrl();
   }
 
   public String getTopicName() {
-    return topicDescription.getName();
+    return topicDefinition.getName();
   }
 
   @Override
   public String toString() {
-    return "PublisherDescription<" + slaveDescription.toString() + ", "
-        + topicDescription.toString() + ">";
+    return "PublisherIdentifier<" + slaveIdentifier.toString() + ", "
+        + topicDefinition.toString() + ">";
   }
 
   /*
@@ -64,8 +64,8 @@ public class PublisherDescription {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((slaveDescription == null) ? 0 : slaveDescription.hashCode());
-    result = prime * result + ((topicDescription == null) ? 0 : topicDescription.hashCode());
+    result = prime * result + ((slaveIdentifier == null) ? 0 : slaveIdentifier.hashCode());
+    result = prime * result + ((topicDefinition == null) ? 0 : topicDefinition.hashCode());
     return result;
   }
 
@@ -79,13 +79,13 @@ public class PublisherDescription {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    PublisherDescription other = (PublisherDescription) obj;
-    if (slaveDescription == null) {
-      if (other.slaveDescription != null) return false;
-    } else if (!slaveDescription.equals(other.slaveDescription)) return false;
-    if (topicDescription == null) {
-      if (other.topicDescription != null) return false;
-    } else if (!topicDescription.equals(other.topicDescription)) return false;
+    PublisherIdentifier other = (PublisherIdentifier) obj;
+    if (slaveIdentifier == null) {
+      if (other.slaveIdentifier != null) return false;
+    } else if (!slaveIdentifier.equals(other.slaveIdentifier)) return false;
+    if (topicDefinition == null) {
+      if (other.topicDefinition != null) return false;
+    } else if (!topicDefinition.equals(other.topicDefinition)) return false;
     return true;
   }
 

@@ -18,7 +18,7 @@ package org.ros.topic;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.ros.node.server.SlaveDescription;
+import org.ros.node.server.SlaveIdentifier;
 import org.ros.transport.ConnectionHeaderFields;
 
 import java.net.URL;
@@ -27,44 +27,44 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SubscriberDescription {
+public class SubscriberIdentifier {
 
-  private final SlaveDescription slaveDescription;
-  private final TopicDescription topicDescription;
+  private final SlaveIdentifier slaveIdentifier;
+  private final TopicDefinition topicDefinition;
 
-  public static SubscriberDescription createFromHeader(Map<String, String> header) {
-    // TODO(damonkohler): Update SlaveDescription to handle the case where the
+  public static SubscriberIdentifier createFromHeader(Map<String, String> header) {
+    // TODO(damonkohler): Update SlaveIdentifier to handle the case where the
     // URL is not set.
-    SlaveDescription slaveDescription = new SlaveDescription(header.get(ConnectionHeaderFields.CALLER_ID),
+    SlaveIdentifier slaveIdentifier = new SlaveIdentifier(header.get(ConnectionHeaderFields.CALLER_ID),
         null);
-    return new SubscriberDescription(slaveDescription, TopicDescription.createFromHeader(header));
+    return new SubscriberIdentifier(slaveIdentifier, TopicDefinition.createFromHeader(header));
   }
 
-  public SubscriberDescription(SlaveDescription slaveDescription, TopicDescription topicDescription) {
-    this.slaveDescription = slaveDescription;
-    this.topicDescription = topicDescription;
+  public SubscriberIdentifier(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition) {
+    this.slaveIdentifier = slaveIdentifier;
+    this.topicDefinition = topicDefinition;
   }
 
-  public SlaveDescription getSlaveDescription() {
-    return slaveDescription;
+  public SlaveIdentifier getSlaveIdentifier() {
+    return slaveIdentifier;
   }
 
   public String getNodeName() {
-    return slaveDescription.getName();
+    return slaveIdentifier.getName();
   }
 
   public URL getSlaveUrl() {
-    return slaveDescription.getUrl();
+    return slaveIdentifier.getUrl();
   }
 
   public String getTopicName() {
-    return topicDescription.getName();
+    return topicDefinition.getName();
   }
 
   public Map<String, String> toHeader() {
     return new ImmutableMap.Builder<String, String>()
-        .putAll(slaveDescription.toHeader())
-        .putAll(topicDescription.toHeader())
+        .putAll(slaveIdentifier.toHeader())
+        .putAll(topicDefinition.toHeader())
         .build();
   }
 

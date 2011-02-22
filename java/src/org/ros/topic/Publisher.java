@@ -23,7 +23,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
-import org.ros.node.server.SlaveDescription;
+import org.ros.node.server.SlaveIdentifier;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
 import org.ros.transport.tcp.OutgoingMessageQueue;
@@ -44,7 +44,7 @@ public class Publisher extends Topic {
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final OutgoingMessageQueue out;
-  private final List<SubscriberDescription> subscribers;
+  private final List<SubscriberIdentifier> subscribers;
   private final TcpServer server;
 
   private class Server extends TcpServer {
@@ -63,7 +63,7 @@ public class Publisher extends Topic {
     }
   }
 
-  public Publisher(TopicDescription description, String hostname, int port) throws IOException {
+  public Publisher(TopicDefinition description, String hostname, int port) throws IOException {
     super(description);
     out = new OutgoingMessageQueue();
     subscribers = Lists.newArrayList();
@@ -80,8 +80,8 @@ public class Publisher extends Topic {
     out.shutdown();
   }
 
-  public PublisherDescription toPublisherDescription(SlaveDescription description) {
-    return new PublisherDescription(description, getTopicDescription());
+  public PublisherIdentifier toPublisherIdentifier(SlaveIdentifier description) {
+    return new PublisherIdentifier(description, getTopicDefinition());
   }
 
   public InetSocketAddress getAddress() {
@@ -98,7 +98,7 @@ public class Publisher extends Topic {
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
     Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
-    Map<String, String> header = getTopicDescriptionHeader();
+    Map<String, String> header = getTopicDefinitionHeader();
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
       log.info("Expected handshake header: " + header);
@@ -107,7 +107,7 @@ public class Publisher extends Topic {
         header.get(ConnectionHeaderFields.TYPE)));
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
-    SubscriberDescription subscriber = SubscriberDescription.createFromHeader(incomingHeader);
+    SubscriberIdentifier subscriber = SubscriberIdentifier.createFromHeader(incomingHeader);
     subscribers.add(subscriber);
     ConnectionHeader.writeHeader(header, socket.getOutputStream());
   }

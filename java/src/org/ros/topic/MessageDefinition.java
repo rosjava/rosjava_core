@@ -27,27 +27,27 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageDescription {
+public class MessageDefinition {
 
   private final String type;
   private final String md5Checksum;
 
-  public static MessageDescription createFromMessage(Message message) {
-    return new MessageDescription(message.getDataType(), message.getMD5Sum());
+  public static MessageDefinition createFromMessage(Message message) {
+    return new MessageDefinition(message.getDataType(), message.getMD5Sum());
   }
 
-  public static MessageDescription createFromHeader(Map<String, String> header) {
+  public static MessageDefinition createFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TYPE));
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.MD5_CHECKSUM));
-    return new MessageDescription(header.get(ConnectionHeaderFields.TYPE),
+    return new MessageDefinition(header.get(ConnectionHeaderFields.TYPE),
         header.get(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 
-  public static MessageDescription createMessageDescription(String type) {
-    return new MessageDescription(type, null);
+  public static MessageDefinition createMessageDefinition(String type) {
+    return new MessageDefinition(type, null);
   }
 
-  private MessageDescription(String type, String md5Checksum) {
+  private MessageDefinition(String type, String md5Checksum) {
     Preconditions.checkNotNull(type);
     this.type = type;
     this.md5Checksum = md5Checksum;
@@ -65,7 +65,7 @@ public class MessageDescription {
 
   @Override
   public String toString() {
-    return "MessageDescription<" + type + ", " + md5Checksum + ">";
+    return "MessageDefinition<" + type + ", " + md5Checksum + ">";
   }
 
   /*
@@ -92,7 +92,7 @@ public class MessageDescription {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    MessageDescription other = (MessageDescription) obj;
+    MessageDefinition other = (MessageDefinition) obj;
     if (type == null) {
       if (other.type != null) return false;
     } else if (!type.equals(other.type)) return false;

@@ -38,8 +38,8 @@ public class SubscriberTest {
   @Test
   public void testHandshake() throws IOException {
     Socket socket = mock(Socket.class);
-    Map<String, String> header = new TopicDescription("/foo",
-        MessageDescription.createFromMessage(new org.ros.message.std.String()))
+    Map<String, String> header = new TopicDefinition("/foo",
+        MessageDefinition.createFromMessage(new org.ros.message.std.String()))
         .toHeader();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     ConnectionHeader.writeHeader(header, outputStream);
@@ -50,7 +50,7 @@ public class SubscriberTest {
 
     Subscriber<org.ros.message.std.String> subscriber = Subscriber.create(
         "/caller",
-        new TopicDescription("/foo", MessageDescription
+        new TopicDefinition("/foo", MessageDefinition
             .createFromMessage(new org.ros.message.std.String())),
         org.ros.message.std.String.class);
     subscriber.handshake(socket);

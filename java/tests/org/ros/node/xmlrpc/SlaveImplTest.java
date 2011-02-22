@@ -56,7 +56,7 @@ public class SlaveImplTest {
     when(mockSlave.getPublications()).thenReturn(Lists.newArrayList(mockPublisher));
     when(mockPublisher.getTopicName()).thenReturn("/bar");
     when(mockPublisher.getTopicMessageType()).thenReturn("/baz");
-    when(mockPublisher.getTopicDescriptionAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));
+    when(mockPublisher.getTopicDefinitionAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));
     SlaveImpl slave = new SlaveImpl(mockSlave);
     List<Object> response = slave.getPublications("/foo");
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));

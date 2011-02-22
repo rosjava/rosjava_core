@@ -22,7 +22,7 @@ import org.ros.node.Response;
 import org.ros.topic.Publisher;
 import org.ros.topic.ServiceServer;
 import org.ros.topic.Subscriber;
-import org.ros.topic.TopicDescription;
+import org.ros.topic.TopicDefinition;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -129,7 +129,7 @@ public class MasterClient extends NodeClient<org.ros.node.xmlrpc.Master> {
         (String) response.get(2)));
   }
 
-  public Response<List<TopicDescription>> getPublishedTopics(String callerId, String subgraph) {
+  public Response<List<TopicDefinition>> getPublishedTopics(String callerId, String subgraph) {
     throw new UnsupportedOperationException();
   }
 

@@ -20,8 +20,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.ros.node.Response;
-import org.ros.topic.MessageDescription;
-import org.ros.topic.TopicDescription;
+import org.ros.topic.MessageDefinition;
+import org.ros.topic.TopicDefinition;
 import org.ros.transport.ProtocolDescription;
 import org.ros.transport.ProtocolNames;
 import org.ros.transport.tcp.TcpRosProtocolDescription;
@@ -69,17 +69,17 @@ public class SlaveClient extends NodeClient<org.ros.node.xmlrpc.Slave> {
     throw new UnsupportedOperationException();
   }
 
-  public Response<List<TopicDescription>> getPublications(String callerId) {
+  public Response<List<TopicDefinition>> getPublications(String callerId) {
     List<Object> response = node.getPublications(callerId);
-    List<TopicDescription> descriptions = Lists.newArrayList();
+    List<TopicDefinition> descriptions = Lists.newArrayList();
     List<Object> topics = Arrays.asList((Object[]) response.get(2));
     for (Object topic : topics) {
       String name = (String) ((Object[]) topic)[0];
       String type = (String) ((Object[]) topic)[1];
       descriptions
-          .add(new TopicDescription(name, MessageDescription.createMessageDescription(type)));
+          .add(new TopicDefinition(name, MessageDefinition.createMessageDefinition(type)));
     }
-    return new Response<List<TopicDescription>>((Integer) response.get(0),
+    return new Response<List<TopicDefinition>>((Integer) response.get(0),
         (String) response.get(1), descriptions);
   }
 

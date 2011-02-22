@@ -30,13 +30,13 @@ import org.ros.node.client.MasterClient;
 import org.ros.node.client.SlaveClient;
 import org.ros.node.server.MasterServer;
 import org.ros.node.server.SlaveServer;
-import org.ros.topic.MessageDescription;
+import org.ros.topic.MessageDefinition;
 import org.ros.topic.Publisher;
-import org.ros.topic.PublisherDescription;
+import org.ros.topic.PublisherIdentifier;
 import org.ros.topic.ServiceDefinition;
 import org.ros.topic.ServiceServer;
 import org.ros.topic.Subscriber;
-import org.ros.topic.TopicDescription;
+import org.ros.topic.TopicDefinition;
 import org.ros.transport.ProtocolDescription;
 import org.ros.transport.ProtocolNames;
 import org.ros.transport.tcp.TcpRosProtocolDescription;
@@ -73,10 +73,10 @@ public class MasterSlaveIntegrationTest {
 
   @Test
   public void testAddPublisher() throws RemoteException, IOException {
-    TopicDescription topicDescription =
-        new TopicDescription("/hello",
-            MessageDescription.createFromMessage(new org.ros.message.std.String()));
-    Publisher publisher = new Publisher(topicDescription, "localhost", 0);
+    TopicDefinition topicDefinition =
+        new TopicDefinition("/hello",
+            MessageDefinition.createFromMessage(new org.ros.message.std.String()));
+    Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
     slaveServer.addPublisher(publisher);
     Response<ProtocolDescription> response =
         Response.checkOk(slaveClient.requestTopic("/caller", "/hello",
@@ -86,24 +86,24 @@ public class MasterSlaveIntegrationTest {
 
   @Test
   public void testAddSubscriber() throws RemoteException, IOException {
-    TopicDescription topicDescription =
-        new TopicDescription("/hello",
-            MessageDescription.createFromMessage(new org.ros.message.std.String()));
+    TopicDefinition topicDefinition =
+        new TopicDefinition("/hello",
+            MessageDefinition.createFromMessage(new org.ros.message.std.String()));
     Subscriber<org.ros.message.std.String> subscriber =
-        Subscriber.create("/bloop", topicDescription, org.ros.message.std.String.class);
-    List<PublisherDescription> publishers = slaveServer.addSubscriber(subscriber);
+        Subscriber.create("/bloop", topicDefinition, org.ros.message.std.String.class);
+    List<PublisherIdentifier> publishers = slaveServer.addSubscriber(subscriber);
     assertEquals(0, publishers.size());
-    Publisher publisher = new Publisher(topicDescription, "localhost", 0);
+    Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
     slaveServer.addPublisher(publisher);
     publishers = slaveServer.addSubscriber(subscriber);
-    PublisherDescription publisherDescription =
-        publisher.toPublisherDescription(slaveServer.toSlaveDescription());
+    PublisherIdentifier publisherDescription =
+        publisher.toPublisherIdentifier(slaveServer.toSlaveIdentifier());
     assertTrue(publishers.contains(publisherDescription));
 
-    Response<List<TopicDescription>> response =
+    Response<List<TopicDefinition>> response =
         Response.checkOk(slaveClient.getPublications("/foo"));
     assertEquals(1, response.getValue().size());
-    assertTrue(response.getValue().contains(publisher.getTopicDescription()));
+    assertTrue(response.getValue().contains(publisher.getTopicDefinition()));
   }
 
   @Test

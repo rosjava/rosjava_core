@@ -27,12 +27,12 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveDescription {
+public class SlaveIdentifier {
   
   private final String name;
   private final URL url;
   
-  public SlaveDescription(String name, URL url) {
+  public SlaveIdentifier(String name, URL url) {
     Preconditions.checkNotNull(name);
     this.name = name;
     this.url = url;
@@ -41,7 +41,7 @@ public class SlaveDescription {
   @Override
   public String toString() {
     Preconditions.checkNotNull(url);
-    return "SlaveDescription<" + name + ", " + url.toString() + ">";
+    return "SlaveIdentifier<" + name + ", " + url.toString() + ">";
   }
 
   public String getName() {
@@ -75,7 +75,7 @@ public class SlaveDescription {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    SlaveDescription other = (SlaveDescription) obj;
+    SlaveIdentifier other = (SlaveIdentifier) obj;
     if (name == null) {
       if (other.name != null)
         return false;

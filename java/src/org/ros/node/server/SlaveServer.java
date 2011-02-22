@@ -27,12 +27,12 @@ import org.ros.node.RemoteException;
 import org.ros.node.Response;
 import org.ros.node.client.MasterClient;
 import org.ros.node.xmlrpc.SlaveImpl;
-import org.ros.topic.MessageDescription;
+import org.ros.topic.MessageDefinition;
 import org.ros.topic.Publisher;
-import org.ros.topic.PublisherDescription;
+import org.ros.topic.PublisherIdentifier;
 import org.ros.topic.ServiceServer;
 import org.ros.topic.Subscriber;
-import org.ros.topic.TopicDescription;
+import org.ros.topic.TopicDefinition;
 import org.ros.transport.ProtocolDescription;
 import org.ros.transport.ProtocolNames;
 import org.ros.transport.tcp.TcpRosProtocolDescription;
@@ -73,19 +73,19 @@ public class SlaveServer extends NodeServer {
     Response.checkOk(master.registerPublisher(name, publisher, getAddress()));
   }
 
-  public List<PublisherDescription> addSubscriber(Subscriber<?> subscriber) throws RemoteException,
+  public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws RemoteException,
       IOException {
     String topic = subscriber.getTopicName();
     subscribers.put(topic, subscriber);
     Response<List<URL>> response =
         Response.checkOk(master.registerSubscriber(name, subscriber, getAddress()));
-    List<PublisherDescription> publishers = Lists.newArrayList();
+    List<PublisherIdentifier> publishers = Lists.newArrayList();
     for (URL url : response.getValue()) {
-      SlaveDescription slaveDescription = new SlaveDescription(name, url);
-      MessageDescription messageDescription =
-          MessageDescription.createMessageDescription(subscriber.getTopicMessageType());
-      TopicDescription topicDescription = new TopicDescription(topic, messageDescription);
-      publishers.add(new PublisherDescription(slaveDescription, topicDescription));
+      SlaveIdentifier slaveIdentifier = new SlaveIdentifier(name, url);
+      MessageDefinition messageDefinition =
+          MessageDefinition.createMessageDefinition(subscriber.getTopicMessageType());
+      TopicDefinition topicDefinition = new TopicDefinition(topic, messageDefinition);
+      publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
     }
     return publishers;
   }
@@ -146,8 +146,8 @@ public class SlaveServer extends NodeServer {
    * @return
    * @throws MalformedURLException
    */
-  public SlaveDescription toSlaveDescription() throws MalformedURLException {
-    return new SlaveDescription(name, getAddress());
+  public SlaveIdentifier toSlaveIdentifier() throws MalformedURLException {
+    return new SlaveIdentifier(name, getAddress());
   }
 
 }

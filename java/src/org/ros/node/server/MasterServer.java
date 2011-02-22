@@ -25,9 +25,9 @@ import com.google.common.collect.Multimaps;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.node.xmlrpc.MasterImpl;
-import org.ros.topic.PublisherDescription;
-import org.ros.topic.ServiceDescription;
-import org.ros.topic.SubscriberDescription;
+import org.ros.topic.PublisherIdentifier;
+import org.ros.topic.ServiceIdentifier;
+import org.ros.topic.SubscriberIdentifier;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,27 +38,27 @@ import java.util.Map;
  */
 public class MasterServer extends NodeServer {
 
-  private final Map<String, SlaveDescription> slaves;
-  private final Multimap<String, PublisherDescription> publishers;
-  private final Multimap<String, SubscriberDescription> subscribers;
-  private final Multimap<String, ServiceDescription> services;
+  private final Map<String, SlaveIdentifier> slaves;
+  private final Multimap<String, PublisherIdentifier> publishers;
+  private final Multimap<String, SubscriberIdentifier> subscribers;
+  private final Multimap<String, ServiceIdentifier> services;
 
   public MasterServer(String hostname, int port) {
     super(hostname, port);
     slaves = Maps.newConcurrentMap();
     publishers =
-        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, PublisherDescription>create());
+        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, PublisherIdentifier>create());
     subscribers =
-        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, SubscriberDescription>create());
+        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, SubscriberIdentifier>create());
     services =
-        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, ServiceDescription>create());
+        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, ServiceIdentifier>create());
   }
 
   public void start() throws XmlRpcException, IOException {
     super.start(org.ros.node.xmlrpc.MasterImpl.class, new MasterImpl(this));
   }
 
-  public void registerService(ServiceDescription description) {
+  public void registerService(ServiceIdentifier description) {
     services.put(description.getName(), description);
   }
 
@@ -66,7 +66,7 @@ public class MasterServer extends NodeServer {
     return null;
   }
 
-  private void addSlave(SlaveDescription description) {
+  private void addSlave(SlaveIdentifier description) {
     String name = description.getName();
     Preconditions.checkState(slaves.get(name) == null || slaves.get(name).equals(description));
     slaves.put(name, description);
@@ -83,9 +83,9 @@ public class MasterServer extends NodeServer {
    * @return Publishers is a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic.
    */
-  public List<PublisherDescription> registerSubscriber(SubscriberDescription description) {
+  public List<PublisherIdentifier> registerSubscriber(SubscriberIdentifier description) {
     subscribers.put(description.getTopicName(), description);
-    addSlave(description.getSlaveDescription());
+    addSlave(description.getSlaveIdentifier());
     return ImmutableList.copyOf(publishers.get(description.getTopicName()));
   }
 
@@ -99,10 +99,10 @@ public class MasterServer extends NodeServer {
    * @param callerId ROS caller ID
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
    */
-  public List<SubscriberDescription> registerPublisher(String callerId,
-      PublisherDescription description) {
+  public List<SubscriberIdentifier> registerPublisher(String callerId,
+      PublisherIdentifier description) {
     publishers.put(description.getTopicName(), description);
-    addSlave(description.getSlaveDescription());
+    addSlave(description.getSlaveIdentifier());
     return ImmutableList.copyOf(subscribers.get(description.getTopicName()));
   }
 
@@ -119,11 +119,11 @@ public class MasterServer extends NodeServer {
    * @param nodeName Name of node to lookup
    * @return
    */
-  public SlaveDescription lookupNode(String callerId, String nodeName) {
+  public SlaveIdentifier lookupNode(String callerId, String nodeName) {
     return slaves.get(nodeName);
   }
 
-  public List<PublisherDescription> getPublishedTopics(String callerId, String subgraph) {
+  public List<PublisherIdentifier> getPublishedTopics(String callerId, String subgraph) {
     // TODO(damonkohler): Add support for subgraph filtering.
     Preconditions.checkArgument(subgraph.length() == 0);
     return ImmutableList.copyOf(publishers.values());
@@ -145,7 +145,7 @@ public class MasterServer extends NodeServer {
    * @return service URL is provides address and port of the service. Fails if
    *         there is no provider.
    */
-  public List<ServiceDescription> lookupService(String callerId, String service) {
+  public List<ServiceIdentifier> lookupService(String callerId, String service) {
     return ImmutableList.copyOf(services.get(service));
   }
 }

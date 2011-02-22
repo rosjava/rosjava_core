@@ -29,9 +29,9 @@ import org.ros.message.geometry.PoseStamped;
 import org.ros.message.geometry.Quaternion;
 import org.ros.node.client.MasterClient;
 import org.ros.node.server.SlaveServer;
-import org.ros.topic.MessageDescription;
+import org.ros.topic.MessageDefinition;
 import org.ros.topic.Publisher;
-import org.ros.topic.TopicDescription;
+import org.ros.topic.TopicDefinition;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -63,13 +63,13 @@ public class Main extends Activity {
       return;
     }
 
-    TopicDescription topicDescription =
-        new TopicDescription("/android/pose",
-            MessageDescription
+    TopicDefinition topicDefinition =
+        new TopicDefinition("/android/pose",
+            MessageDefinition
                 .createFromMessage(new org.ros.message.geometry.PoseStamped()));
     final Publisher publisher;
     try {
-      publisher = new Publisher(topicDescription, "192.168.1.141", 7332);
+      publisher = new Publisher(topicDefinition, "192.168.1.141", 7332);
     } catch (IOException e) {
       e.printStackTrace();
       return;

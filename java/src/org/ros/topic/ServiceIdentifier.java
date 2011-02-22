@@ -18,7 +18,7 @@ package org.ros.topic;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.ros.node.server.SlaveDescription;
+import org.ros.node.server.SlaveIdentifier;
 
 import java.net.URL;
 import java.util.Map;
@@ -26,15 +26,15 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceDescription {
+public class ServiceIdentifier {
 
-  private final SlaveDescription slaveDescription;
+  private final SlaveIdentifier slaveIdentifier;
   private final ServiceDefinition serviceDefinition;
   private final URL url;
 
-  public ServiceDescription(SlaveDescription slaveDescription, ServiceDefinition serviceDefinition,
+  public ServiceIdentifier(SlaveIdentifier slaveIdentifier, ServiceDefinition serviceDefinition,
       URL url) {
-    this.slaveDescription = slaveDescription;
+    this.slaveIdentifier = slaveIdentifier;
     this.serviceDefinition = serviceDefinition;
     this.url = url;
   }
@@ -43,7 +43,7 @@ public class ServiceDescription {
    * @return
    */
   public Map<String, String> toHeader() {
-    return ImmutableMap.<String, String>builder().putAll(slaveDescription.toHeader())
+    return ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
         .putAll(serviceDefinition.toHeader()).build();
   }
 
