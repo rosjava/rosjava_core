@@ -17,6 +17,7 @@
 package org.ros.node.xmlrpc;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -33,9 +34,10 @@ public interface Master extends Node {
    * @param callerApi
    * @return ignore
    * @throws MalformedURLException 
+   * @throws URISyntaxException 
    */
   public List<Object> registerService(String callerId, String service, String serviceApi,
-      String callerApi) throws MalformedURLException;
+      String callerApi) throws URISyntaxException;
 
   public List<Object> unregisterService(String callerId, String service, String serviceApi);
 

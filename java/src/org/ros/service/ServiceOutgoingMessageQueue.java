@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.transport.tcp;
+package org.ros.service;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -33,10 +33,10 @@ import com.google.common.collect.Lists;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class OutgoingMessageQueue {
+public class ServiceOutgoingMessageQueue {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
+  private static final Log log = LogFactory.getLog(ServiceOutgoingMessageQueue.class);
   
   private final Collection<LittleEndianDataOutputStream> streams;
   private final BlockingQueue<Message> messages;
@@ -66,7 +66,7 @@ public class OutgoingMessageQueue {
     }
   }
 
-  public OutgoingMessageQueue() {
+  public ServiceOutgoingMessageQueue() {
     streams = Lists.newArrayList();
     messages = new LinkedBlockingQueue<Message>();
     thread = new MessageSendingThread();

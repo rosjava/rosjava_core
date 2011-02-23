@@ -18,13 +18,16 @@ package org.ros.node.client;
 
 import com.google.common.collect.Lists;
 
+import org.ros.service.ServiceServer;
+
 import org.ros.node.Response;
 import org.ros.topic.Publisher;
-import org.ros.topic.ServiceServer;
 import org.ros.topic.Subscriber;
 import org.ros.topic.TopicDefinition;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -46,12 +49,13 @@ public class MasterClient extends NodeClient<org.ros.node.xmlrpc.Master> {
    * @param callerApi XML-RPC URI of caller node
    * @return
    * @throws MalformedURLException
+   * @throws URISyntaxException 
    */
   public Response<Integer> registerService(String callerId, ServiceServer<?> service, URL callerApi)
-      throws MalformedURLException {
-    List<Object> response =
-        node.registerService(callerId, service.getServiceDefinition().getType(), service
-            .getUrl().toString(), callerApi.toString());
+      throws MalformedURLException, URISyntaxException {
+    List<Object> response = node
+        .registerService(callerId, service.getServiceDefinition().getType(), service.getUri()
+            .toString(), callerApi.toString());
     return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
         (Integer) response.get(2));
   }
@@ -143,14 +147,10 @@ public class MasterClient extends NodeClient<org.ros.node.xmlrpc.Master> {
         (String) response.get(2)));
   }
 
-  public Response<List<URL>> lookupService(String callerId, String service) throws MalformedURLException {
+  public Response<URI> lookupService(String callerId, String service) throws URISyntaxException {
     List<Object> response = node.lookupService(callerId, service);
-    List<Object> values = Arrays.asList((Object[]) response.get(2));
-    List<URL> urls = Lists.newArrayList();
-    for (Object value : values) {
-      urls.add(new URL((String) value));
-    }
-    return new Response<List<URL>>((Integer) response.get(0), (String) response.get(1), urls);
+    String value = (String) response.get(2);
+    return new Response<URI>((Integer) response.get(0), (String) response.get(1), new URI(value));
   }
 
 }

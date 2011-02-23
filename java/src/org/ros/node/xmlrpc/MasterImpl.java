@@ -18,17 +18,20 @@ package org.ros.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 
+import org.ros.service.ServiceDefinition;
+import org.ros.service.ServiceIdentifier;
+
 import org.ros.node.Response;
 import org.ros.node.server.MasterServer;
 import org.ros.node.server.SlaveIdentifier;
 import org.ros.topic.MessageDefinition;
 import org.ros.topic.PublisherIdentifier;
-import org.ros.topic.ServiceDefinition;
-import org.ros.topic.ServiceIdentifier;
 import org.ros.topic.SubscriberIdentifier;
 import org.ros.topic.TopicDefinition;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
@@ -93,12 +96,8 @@ public class MasterImpl implements Master {
    */
   @Override
   public List<Object> lookupService(String callerId, String service) {
-    List<ServiceIdentifier> services = master.lookupService(callerId, service);
-    List<String> urls = Lists.newArrayList();
-    for (ServiceIdentifier description : services) {
-      urls.add(description.getUrl().toString());
-    }
-    return Response.createSuccess("Success", urls).toList();
+    ServiceIdentifier identifier = master.lookupService(callerId, service);
+    return Response.createSuccess("Success", identifier.getUri().toString()).toList();
   }
 
   /*
@@ -130,10 +129,10 @@ public class MasterImpl implements Master {
    */
   @Override
   public List<Object> registerService(String callerId, String service, String serviceApi,
-      String callerApi) throws MalformedURLException {
+      String callerApi) throws URISyntaxException {
+    // TODO(damonkohler): Pull out factory methods to avoid passing in the null md5Checksum here.
     ServiceIdentifier description =
-        new ServiceIdentifier(new SlaveIdentifier(callerId, new URL(callerApi)),
-            new ServiceDefinition(service, null), new URL(serviceApi));
+        new ServiceIdentifier(service, new URI(serviceApi), new ServiceDefinition(service, null));
     master.registerService(description);
     return Response.createSuccess("Success", 0).toList();
   }

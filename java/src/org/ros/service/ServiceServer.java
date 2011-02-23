@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.topic;
+package org.ros.service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -24,17 +24,16 @@ import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
+import org.ros.topic.Publisher;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
-import org.ros.transport.tcp.IncomingMessageQueue;
-import org.ros.transport.tcp.OutgoingMessageQueue;
 import org.ros.transport.tcp.TcpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.Socket;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -84,13 +83,13 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
   }
 
   private class PersistentSession extends Thread {
-    private final OutgoingMessageQueue out;
-    private final IncomingMessageQueue<RequestMessageType> in;
+    private final ServiceOutgoingMessageQueue out;
+    private final ServiceIncomingMessageQueue<RequestMessageType> in;
 
     public PersistentSession(Socket socket) throws IOException {
-      in = IncomingMessageQueue.create(requestMessageClass);
+      in = ServiceIncomingMessageQueue.create(requestMessageClass);
       in.setSocket(socket);
-      out = new OutgoingMessageQueue();
+      out = new ServiceOutgoingMessageQueue();
       out.addSocket(socket);
     }
 
@@ -167,8 +166,8 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
     return server.getAddress();
   }
 
-  public URL getUrl() throws MalformedURLException {
-    return new URL("http://" + server.getAddress().getHostName() + ":"
+  public URI getUri() throws URISyntaxException {
+    return new URI("rosrpc://" + server.getAddress().getHostName() + ":"
         + server.getAddress().getPort());
   }
 

@@ -17,6 +17,7 @@
 package org.ros.transport;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -45,7 +46,11 @@ public class LittleEndianDataInputStream extends InputStream {
     byte[] buffer = new byte[size];
     int bytesRead = 0;
     while (bytesRead < size) {
-      bytesRead += inputStream.read(buffer, bytesRead, size - bytesRead);
+      int readResult = inputStream.read(buffer, bytesRead, size - bytesRead);
+      if (readResult == -1) {
+        throw new EOFException();
+      }
+      bytesRead += readResult;
     }
     return buffer;
   }

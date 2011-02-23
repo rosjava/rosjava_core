@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
-import org.ros.transport.tcp.IncomingMessageQueue;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -42,7 +41,7 @@ public class Subscriber<T extends Message> extends Topic {
   private static final Log log = LogFactory.getLog(Subscriber.class);
 
   private final CopyOnWriteArrayList<SubscriberListener<T>> listeners;
-  private final IncomingMessageQueue<T> in;
+  private final SubscriberMessageQueue<T> in;
   private final MessageReadingThread thread;
   private final ImmutableMap<String, String> header;
 
@@ -87,7 +86,7 @@ public class Subscriber<T extends Message> extends Topic {
   private Subscriber(String name, TopicDefinition description, Class<T> messageClass) {
     super(description);
     this.listeners = new CopyOnWriteArrayList<Subscriber.SubscriberListener<T>>();
-    this.in = IncomingMessageQueue.create(messageClass);
+    this.in = SubscriberMessageQueue.create(messageClass);
     thread = new MessageReadingThread();
     header = ImmutableMap.<String, String>builder()
         .put(ConnectionHeaderFields.CALLER_ID, name)

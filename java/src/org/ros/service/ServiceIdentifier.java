@@ -14,13 +14,13 @@
  * the License.
  */
 
-package org.ros.topic;
+package org.ros.service;
 
 import com.google.common.collect.ImmutableMap;
 
-import org.ros.node.server.SlaveIdentifier;
+import org.ros.transport.ConnectionHeaderFields;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Map;
 
 /**
@@ -28,22 +28,22 @@ import java.util.Map;
  */
 public class ServiceIdentifier {
 
-  private final SlaveIdentifier slaveIdentifier;
+  private final String name;
+  private final URI uri;
   private final ServiceDefinition serviceDefinition;
-  private final URL url;
 
-  public ServiceIdentifier(SlaveIdentifier slaveIdentifier, ServiceDefinition serviceDefinition,
-      URL url) {
-    this.slaveIdentifier = slaveIdentifier;
+  public ServiceIdentifier(String name, URI uri, ServiceDefinition serviceDefinition) {
+    this.name = name;
+    this.uri = uri;
     this.serviceDefinition = serviceDefinition;
-    this.url = url;
   }
 
   /**
    * @return
    */
   public Map<String, String> toHeader() {
-    return ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
+    return ImmutableMap.<String, String>builder()
+        .put(ConnectionHeaderFields.SERVICE, name)
         .putAll(serviceDefinition.toHeader()).build();
   }
 
@@ -57,8 +57,8 @@ public class ServiceIdentifier {
   /**
    * @return
    */
-  public Object getUrl() {
-    return url;
+  public URI getUri() {
+    return uri;
   }
 
 }

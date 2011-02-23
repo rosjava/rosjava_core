@@ -26,7 +26,6 @@ import org.ros.message.Message;
 import org.ros.node.server.SlaveIdentifier;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
-import org.ros.transport.tcp.OutgoingMessageQueue;
 import org.ros.transport.tcp.TcpServer;
 
 import java.io.IOException;
@@ -43,7 +42,7 @@ public class Publisher extends Topic {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
-  private final OutgoingMessageQueue out;
+  private final PublisherMessageQueue out;
   private final List<SubscriberIdentifier> subscribers;
   private final TcpServer server;
 
@@ -65,7 +64,7 @@ public class Publisher extends Topic {
 
   public Publisher(TopicDefinition description, String hostname, int port) throws IOException {
     super(description);
-    out = new OutgoingMessageQueue();
+    out = new PublisherMessageQueue();
     subscribers = Lists.newArrayList();
     server = new Server(hostname, port);
   }

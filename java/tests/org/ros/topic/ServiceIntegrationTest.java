@@ -18,11 +18,17 @@ package org.ros.topic;
 
 import static org.junit.Assert.assertEquals;
 
+import org.ros.service.ServiceClient;
+import org.ros.service.ServiceDefinition;
+import org.ros.service.ServiceIdentifier;
+import org.ros.service.ServiceServer;
+
 import org.junit.Test;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -30,24 +36,24 @@ import java.io.IOException;
 public class ServiceIntegrationTest {
 
   @Test
-  public void PesistentServiceConnectionTest() throws IOException, InterruptedException {
-    ServiceDefinition definition =
-        new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
+  public void PesistentServiceConnectionTest() throws IOException, InterruptedException,
+      URISyntaxException {
+    ServiceDefinition definition = new ServiceDefinition(AddTwoInts.__s_getDataType(),
+        AddTwoInts.__s_getMD5Sum());
 
-    ServiceServer<AddTwoInts.Request> server =
-        new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/server", definition,
-            "localhost", 0) {
-          @Override
-          public Message buildResponse(AddTwoInts.Request request) {
-            AddTwoInts.Response response = new AddTwoInts.Response();
-            response.sum = request.a + request.b;
-            return response;
-          }
-        };
+    ServiceServer<AddTwoInts.Request> server = new ServiceServer<AddTwoInts.Request>(
+        AddTwoInts.Request.class, "/server", definition, "localhost", 0) {
+      @Override
+      public Message buildResponse(AddTwoInts.Request request) {
+        AddTwoInts.Response response = new AddTwoInts.Response();
+        response.sum = request.a + request.b;
+        return response;
+      }
+    };
     server.start();
 
-    ServiceClient<AddTwoInts.Response> client =
-        ServiceClient.create(AddTwoInts.Response.class, "/client", definition);
+    ServiceClient<AddTwoInts.Response> client = ServiceClient.create(AddTwoInts.Response.class,
+        "/client", new ServiceIdentifier("add_two_ints", server.getUri(), definition));
     client.start(server.getAddress());
 
     AddTwoInts.Request request = new AddTwoInts.Request();

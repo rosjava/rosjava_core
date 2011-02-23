@@ -23,10 +23,11 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
+import org.ros.service.ServiceIdentifier;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.node.xmlrpc.MasterImpl;
 import org.ros.topic.PublisherIdentifier;
-import org.ros.topic.ServiceIdentifier;
 import org.ros.topic.SubscriberIdentifier;
 
 import java.io.IOException;
@@ -39,19 +40,18 @@ import java.util.Map;
 public class MasterServer extends NodeServer {
 
   private final Map<String, SlaveIdentifier> slaves;
+  private final Map<String, ServiceIdentifier> services;
   private final Multimap<String, PublisherIdentifier> publishers;
   private final Multimap<String, SubscriberIdentifier> subscribers;
-  private final Multimap<String, ServiceIdentifier> services;
 
   public MasterServer(String hostname, int port) {
     super(hostname, port);
     slaves = Maps.newConcurrentMap();
+    services = Maps.newConcurrentMap();
     publishers =
         Multimaps.synchronizedMultimap(ArrayListMultimap.<String, PublisherIdentifier>create());
     subscribers =
         Multimaps.synchronizedMultimap(ArrayListMultimap.<String, SubscriberIdentifier>create());
-    services =
-        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, ServiceIdentifier>create());
   }
 
   public void start() throws XmlRpcException, IOException {
@@ -138,14 +138,14 @@ public class MasterServer extends NodeServer {
   }
 
   /**
-   * Lookup all provider of a particular service.
+   * Lookup the provider of a particular service.
    * 
    * @param callerId ROS caller ID
    * @param service Fully-qualified name of service
-   * @return service URL is provides address and port of the service. Fails if
+   * @return service URI that provides address and port of the service. Fails if
    *         there is no provider.
    */
-  public List<ServiceIdentifier> lookupService(String callerId, String service) {
-    return ImmutableList.copyOf(services.get(service));
+  public ServiceIdentifier lookupService(String callerId, String service) {
+    return services.get(service);
   }
 }

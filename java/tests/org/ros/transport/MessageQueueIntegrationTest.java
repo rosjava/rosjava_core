@@ -18,9 +18,10 @@ package org.ros.transport;
 
 import static org.junit.Assert.assertEquals;
 
+import org.ros.topic.SubscriberMessageQueue;
+import org.ros.topic.PublisherMessageQueue;
+
 import org.junit.Test;
-import org.ros.transport.tcp.IncomingMessageQueue;
-import org.ros.transport.tcp.OutgoingMessageQueue;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -62,10 +63,10 @@ public class MessageQueueIntegrationTest {
     serverThread.start();
     Socket client = new Socket(serverSocket.getInetAddress(), serverSocket.getLocalPort());
     latch.await(3, TimeUnit.SECONDS);
-    OutgoingMessageQueue out = new OutgoingMessageQueue();
+    PublisherMessageQueue out = new PublisherMessageQueue();
     out.addSocket(serverThread.server);
-    IncomingMessageQueue<org.ros.message.std.String> in =
-        IncomingMessageQueue.create(org.ros.message.std.String.class);
+    SubscriberMessageQueue<org.ros.message.std.String> in =
+        SubscriberMessageQueue.create(org.ros.message.std.String.class);
     in.setSocket(client);
     
     out.start();

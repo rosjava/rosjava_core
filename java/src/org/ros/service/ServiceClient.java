@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.topic;
+package org.ros.service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -25,8 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
 import org.ros.transport.ConnectionHeader;
 import org.ros.transport.ConnectionHeaderFields;
-import org.ros.transport.tcp.IncomingMessageQueue;
-import org.ros.transport.tcp.OutgoingMessageQueue;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -39,27 +37,27 @@ import java.util.Map;
  */
 public class ServiceClient<ResponseMessageType extends Message> {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
   
-  private final OutgoingMessageQueue out;
-  private final IncomingMessageQueue<ResponseMessageType> in;
+  private final ServiceOutgoingMessageQueue out;
+  private final ServiceIncomingMessageQueue<ResponseMessageType> in;
 
   public static <S extends Message> ServiceClient<S> create(
-      Class<S> incomingMessageClass, String name, ServiceDefinition serviceDefinition) {
-    return new ServiceClient<S>(incomingMessageClass, name, serviceDefinition);
+      Class<S> incomingMessageClass, String name, ServiceIdentifier serviceIdentifier) {
+    return new ServiceClient<S>(incomingMessageClass, name, serviceIdentifier);
   }
 
   private Map<String, String> header;
   
-  private ServiceClient(Class<ResponseMessageType> incomingMessageClass, String name,
-      ServiceDefinition serviceDefinition) {
+  private ServiceClient(Class<ResponseMessageType> responseMessageClass, String name,
+      ServiceIdentifier serviceIdentifier) {
     header = ImmutableMap.<String, String>builder()
         .put(ConnectionHeaderFields.CALLER_ID, name)
-        .putAll(serviceDefinition.toHeader())
+        .putAll(serviceIdentifier.toHeader())
         .build();
-    in = IncomingMessageQueue.create(incomingMessageClass);
-    out = new OutgoingMessageQueue();
+    in = ServiceIncomingMessageQueue.create(responseMessageClass);
+    out = new ServiceOutgoingMessageQueue();
   }
 
   public void start(InetSocketAddress server) throws UnknownHostException, IOException {

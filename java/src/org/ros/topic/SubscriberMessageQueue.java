@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.transport.tcp;
+package org.ros.topic;
 
 import com.google.common.base.Preconditions;
 
@@ -33,10 +33,10 @@ import java.util.concurrent.LinkedBlockingQueue;
  *
  * @param <T>
  */
-public class IncomingMessageQueue<T extends Message> {
+public class SubscriberMessageQueue<T extends Message> {
 
-  private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
+  private static final boolean DEBUG = true;
+  private static final Log log = LogFactory.getLog(SubscriberMessageQueue.class);
 
   private final Class<T> messageClass;
   private final BlockingQueue<T> messages;
@@ -71,11 +71,11 @@ public class IncomingMessageQueue<T extends Message> {
     }
   }
   
-  public static <S extends Message> IncomingMessageQueue<S> create(Class<S> messageClass) {
-    return new IncomingMessageQueue<S>(messageClass);
+  public static <S extends Message> SubscriberMessageQueue<S> create(Class<S> messageClass) {
+    return new SubscriberMessageQueue<S>(messageClass);
   }
 
-  private IncomingMessageQueue(Class<T> messageClass) {
+  private SubscriberMessageQueue(Class<T> messageClass) {
     this.messageClass = messageClass;
     messages = new LinkedBlockingQueue<T>();
     thread = new MessageReceivingThread();
@@ -104,7 +104,8 @@ public class IncomingMessageQueue<T extends Message> {
     T message = messageClass.newInstance();
     message.deserialize(buffer);
     if (DEBUG) {
-      log.info("Received message: " + message.toString());
+      log.info("Received buffer of size " + size);
+      log.info("Received buffer: " + buffer);
     }
     return message;
   }

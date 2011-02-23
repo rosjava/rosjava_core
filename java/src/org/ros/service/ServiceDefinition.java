@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.topic;
+package org.ros.service;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;

@@ -21,6 +21,9 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 
+import org.ros.service.ServiceDefinition;
+import org.ros.service.ServiceServer;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,8 +36,6 @@ import org.ros.node.server.SlaveServer;
 import org.ros.topic.MessageDefinition;
 import org.ros.topic.Publisher;
 import org.ros.topic.PublisherIdentifier;
-import org.ros.topic.ServiceDefinition;
-import org.ros.topic.ServiceServer;
 import org.ros.topic.Subscriber;
 import org.ros.topic.TopicDefinition;
 import org.ros.transport.ProtocolDescription;
@@ -42,6 +43,8 @@ import org.ros.transport.ProtocolNames;
 import org.ros.transport.tcp.TcpRosProtocolDescription;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
@@ -107,7 +110,7 @@ public class MasterSlaveIntegrationTest {
   }
 
   @Test
-  public void testAddService() throws IOException, RemoteException {
+  public void testAddService() throws IOException, RemoteException, URISyntaxException {
     ServiceDefinition serviceDefinition =
         new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
     ServiceServer<AddTwoInts.Request> server =
@@ -120,13 +123,10 @@ public class MasterSlaveIntegrationTest {
             return response;
           }
         };
-    Response<List<URL>> response =
-        Response.checkOk(masterClient.lookupService("/foo", serviceDefinition.getType()));
-    assertEquals(0, response.getValue().size());
-
     slaveServer.addService(server);
-    response = Response.checkOk(masterClient.lookupService("/foo", serviceDefinition.getType()));
-    assertEquals(server.getUrl(), response.getValue().get(0));
+    Response<URI> response = Response.checkOk(masterClient.lookupService("/foo",
+        serviceDefinition.getType()));
+    assertEquals(server.getUri(), response.getValue());
   }
 
 }
