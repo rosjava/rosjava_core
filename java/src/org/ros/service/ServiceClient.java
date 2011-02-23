@@ -54,6 +54,8 @@ public class ServiceClient<ResponseMessageType extends Message> {
       ServiceIdentifier serviceIdentifier) {
     header = ImmutableMap.<String, String>builder()
         .put(ConnectionHeaderFields.CALLER_ID, name)
+        // TODO(damonkohler): Support non-persistent connections.
+        .put(ConnectionHeaderFields.PERSISTENT, "1")
         .putAll(serviceIdentifier.toHeader())
         .build();
     in = ServiceIncomingMessageQueue.create(responseMessageClass);
