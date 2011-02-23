@@ -40,8 +40,8 @@ public class ServiceClient<ResponseMessageType extends Message> {
   private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
   
-  private final ServiceOutgoingMessageQueue out;
-  private final ServiceIncomingMessageQueue<ResponseMessageType> in;
+  private final ServiceClientOutgoingMessageQueue out;
+  private final ServiceClientIncomingMessageQueue<ResponseMessageType> in;
 
   public static <S extends Message> ServiceClient<S> create(
       Class<S> incomingMessageClass, String name, ServiceIdentifier serviceIdentifier) {
@@ -58,8 +58,8 @@ public class ServiceClient<ResponseMessageType extends Message> {
         .put(ConnectionHeaderFields.PERSISTENT, "1")
         .putAll(serviceIdentifier.toHeader())
         .build();
-    in = ServiceIncomingMessageQueue.create(responseMessageClass);
-    out = new ServiceOutgoingMessageQueue();
+    in = new ServiceClientIncomingMessageQueue<ResponseMessageType>(responseMessageClass);
+    out = new ServiceClientOutgoingMessageQueue();
   }
 
   public void start(InetSocketAddress server) throws UnknownHostException, IOException {

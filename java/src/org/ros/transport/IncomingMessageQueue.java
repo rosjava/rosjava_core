@@ -14,14 +14,13 @@
  * the License.
  */
 
-package org.ros.service;
+package org.ros.transport;
 
 import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
-import org.ros.transport.LittleEndianDataInputStream;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -30,26 +29,26 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
- *
- * @param <T>
+ * 
+ * @param <MessageType>
  */
-public class ServiceIncomingMessageQueue<T extends Message> {
+public abstract class IncomingMessageQueue<MessageType extends Message> {
 
   private static final boolean DEBUG = true;
-  private static final Log log = LogFactory.getLog(ServiceIncomingMessageQueue.class);
+  private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
 
-  private final Class<T> messageClass;
-  private final BlockingQueue<T> messages;
+  private final Class<MessageType> messageClass;
+  private final BlockingQueue<MessageType> messages;
   private final MessageReceivingThread thread;
 
   private LittleEndianDataInputStream stream;
-  
+
   private final class MessageReceivingThread extends Thread {
     @Override
     public void run() {
       try {
         while (!isInterrupted()) {
-          messages.put(receiveMessage());
+          messages.put(receiveMessage(messageClass, stream));
         }
       } catch (InterruptedException e) {
         // Cancelable
@@ -70,22 +69,18 @@ public class ServiceIncomingMessageQueue<T extends Message> {
       }
     }
   }
-  
-  public static <S extends Message> ServiceIncomingMessageQueue<S> create(Class<S> messageClass) {
-    return new ServiceIncomingMessageQueue<S>(messageClass);
-  }
 
-  private ServiceIncomingMessageQueue(Class<T> messageClass) {
+  public IncomingMessageQueue(Class<MessageType> messageClass) {
     this.messageClass = messageClass;
-    messages = new LinkedBlockingQueue<T>();
+    messages = new LinkedBlockingQueue<MessageType>();
     thread = new MessageReceivingThread();
   }
-  
+
   public void setSocket(Socket socket) throws IOException {
     stream = new LittleEndianDataInputStream(socket.getInputStream());
   }
 
-  public T take() throws InterruptedException {
+  public MessageType take() throws InterruptedException {
     return messages.take();
   }
 
@@ -98,17 +93,7 @@ public class ServiceIncomingMessageQueue<T extends Message> {
     thread.start();
   }
 
-  private T receiveMessage() throws IOException, InstantiationException, IllegalAccessException {
-    byte[] ok = stream.readByteArray(1);
-    Preconditions.checkState(ok[0] == 1);
-    int size = stream.readInt();
-    byte[] buffer = stream.readByteArray(size);
-    T message = messageClass.newInstance();
-    message.deserialize(buffer);
-    if (DEBUG) {
-      log.info("Received buffer of size " + size);
-      log.info("Received buffer: " + buffer);
-    }
-    return message;
-  }
+  protected abstract MessageType receiveMessage(Class<MessageType> messageClass,
+      LittleEndianDataInputStream stream) throws IOException, InstantiationException,
+      IllegalAccessException;
 }

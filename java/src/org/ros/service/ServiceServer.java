@@ -83,13 +83,13 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
   }
 
   private class PersistentSession extends Thread {
-    private final ServiceOutgoingMessageQueue out;
-    private final ServiceIncomingMessageQueue<RequestMessageType> in;
+    private final ServiceServerOutgoingMessageQueue out;
+    private final ServiceClientIncomingMessageQueue<RequestMessageType> in;
 
     public PersistentSession(Socket socket) throws IOException {
-      in = ServiceIncomingMessageQueue.create(requestMessageClass);
+      in = new ServiceClientIncomingMessageQueue<RequestMessageType>(requestMessageClass);
       in.setSocket(socket);
-      out = new ServiceOutgoingMessageQueue();
+      out = new ServiceServerOutgoingMessageQueue();
       out.addSocket(socket);
     }
 

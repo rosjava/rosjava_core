@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.service;
+package org.ros.transport;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -33,11 +33,11 @@ import com.google.common.collect.Lists;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceOutgoingMessageQueue {
+public abstract class OutgoingMessageQueue {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(ServiceOutgoingMessageQueue.class);
-  
+  private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
+
   private final Collection<LittleEndianDataOutputStream> streams;
   private final BlockingQueue<Message> messages;
   private final MessageSendingThread thread;
@@ -47,7 +47,7 @@ public class ServiceOutgoingMessageQueue {
     public void run() {
       try {
         while (!isInterrupted()) {
-          sendMessage(messages.take());
+          sendMessageToAllStreams(messages.take());
         }
       } catch (InterruptedException e) {
         // Cancelable
@@ -66,12 +66,12 @@ public class ServiceOutgoingMessageQueue {
     }
   }
 
-  public ServiceOutgoingMessageQueue() {
+  public OutgoingMessageQueue() {
     streams = Lists.newArrayList();
     messages = new LinkedBlockingQueue<Message>();
     thread = new MessageSendingThread();
   }
-  
+
   public void add(Message message) {
     messages.add(message);
   }
@@ -89,13 +89,12 @@ public class ServiceOutgoingMessageQueue {
     streams.add(out);
   }
 
-  private void sendMessage(Message message) {
-    byte[] data = message.serialize(0 /* unused seq */);
+  private void sendMessageToAllStreams(Message message) {
     Iterator<LittleEndianDataOutputStream> iterator = streams.iterator();
     while (iterator.hasNext()) {
       LittleEndianDataOutputStream out = iterator.next();
       try {
-        out.writeField(data);
+        sendMessage(message, out);
         out.flush();
       } catch (IOException e) {
         if (DEBUG) {
@@ -105,4 +104,12 @@ public class ServiceOutgoingMessageQueue {
       }
     }
   }
+
+  /**
+   * @param message
+   * @param out
+   * @throws IOException
+   */
+  protected abstract void sendMessage(Message message, LittleEndianDataOutputStream stream)
+      throws IOException;
 }

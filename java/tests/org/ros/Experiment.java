@@ -49,7 +49,7 @@ public class Experiment {
 
     Response<URI> lookupService = Response.checkOk(master.lookupService("/foo", "add_two_ints"));
     URI uri = lookupService.getValue();
-    System.out.print(uri.toString());
+    System.out.println(uri.toString());
 
     ServiceClient<AddTwoInts.Response> client = ServiceClient.create(
         AddTwoInts.Response.class,
@@ -61,7 +61,7 @@ public class Experiment {
     AddTwoInts.Request request = new AddTwoInts.Request();
     request.a = 3;
     request.b = 2;
-    System.out.print(client.call(request).sum);
+    System.out.println(client.call(request).sum);
   }
 
 }
