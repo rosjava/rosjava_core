@@ -15,14 +15,17 @@
  */
 package org.ros;
 
-import org.ros.service.ServiceClient;
-import org.ros.service.ServiceDefinition;
-import org.ros.service.ServiceIdentifier;
+import org.ros.internal.service.ServiceClient;
+import org.ros.internal.service.ServiceDefinition;
+import org.ros.internal.service.ServiceIdentifier;
+
+import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.Response;
+
+import org.ros.internal.node.client.MasterClient;
+
 
 import org.ros.message.srv.AddTwoInts;
-import org.ros.node.RemoteException;
-import org.ros.node.Response;
-import org.ros.node.client.MasterClient;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

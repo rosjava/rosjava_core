@@ -16,6 +16,14 @@
 
 package com.googlecode.rosjava.android;
 
+import org.ros.internal.topic.MessageDefinition;
+import org.ros.internal.topic.Publisher;
+import org.ros.internal.topic.TopicDefinition;
+
+import org.ros.internal.node.server.SlaveServer;
+
+import org.ros.internal.node.client.MasterClient;
+
 import android.app.Activity;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -27,11 +35,6 @@ import org.ros.message.Time;
 import org.ros.message.geometry.Point;
 import org.ros.message.geometry.PoseStamped;
 import org.ros.message.geometry.Quaternion;
-import org.ros.node.client.MasterClient;
-import org.ros.node.server.SlaveServer;
-import org.ros.topic.MessageDefinition;
-import org.ros.topic.Publisher;
-import org.ros.topic.TopicDefinition;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

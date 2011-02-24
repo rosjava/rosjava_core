@@ -1,0 +1,111 @@
+/*
+ * Copyright (C) 2011 Google Inc.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package org.ros.internal.node.client;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+
+import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
+
+import org.ros.internal.transport.ProtocolDescription;
+import org.ros.internal.transport.ProtocolNames;
+
+import org.ros.internal.topic.MessageDefinition;
+import org.ros.internal.topic.TopicDefinition;
+
+import org.ros.internal.node.Response;
+
+
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
+public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> {
+
+  public SlaveClient(URL url) {
+    super(url, org.ros.internal.node.xmlrpc.Slave.class);
+  }
+
+  public List<Object> getBusStats(String callerId) {
+    throw new UnsupportedOperationException();
+  }
+
+  public List<Object> getBusInfo(String callerId) {
+    throw new UnsupportedOperationException();
+  }
+
+  public Response<URL> getMasterUri(String callerId) throws MalformedURLException {
+    List<Object> response = node.getMasterUri(callerId);
+    return new Response<URL>((Integer) response.get(0), (String) response.get(1), new URL(
+        (String) response.get(2)));
+  }
+
+  public List<Object> shutdown(String callerId, String message) {
+    throw new UnsupportedOperationException();
+  }
+
+  public List<Object> getPid(String callerId) {
+    throw new UnsupportedOperationException();
+  }
+
+  public List<Object> getSubscriptions(String callerId) {
+    throw new UnsupportedOperationException();
+  }
+
+  public Response<List<TopicDefinition>> getPublications(String callerId) {
+    List<Object> response = node.getPublications(callerId);
+    List<TopicDefinition> descriptions = Lists.newArrayList();
+    List<Object> topics = Arrays.asList((Object[]) response.get(2));
+    for (Object topic : topics) {
+      String name = (String) ((Object[]) topic)[0];
+      String type = (String) ((Object[]) topic)[1];
+      descriptions
+          .add(new TopicDefinition(name, MessageDefinition.createMessageDefinition(type)));
+    }
+    return new Response<List<TopicDefinition>>((Integer) response.get(0),
+        (String) response.get(1), descriptions);
+  }
+
+  public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) {
+    throw new UnsupportedOperationException();
+  }
+
+  public List<Object> publisherUpdate(String callerId, String topic, Collection<String> publishers) {
+    throw new UnsupportedOperationException();
+  }
+
+  public Response<ProtocolDescription> requestTopic(String callerId, String topic,
+      Set<String> requestedProtocols) {
+    List<Object> response =
+        node.requestTopic(callerId, topic, new Object[][] {requestedProtocols.toArray()});
+    List<Object> protocolParameters = Arrays.asList((Object[]) response.get(2));
+    Preconditions.checkState(protocolParameters.size() == 3);
+    Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
+    InetSocketAddress address =
+        InetSocketAddress.createUnresolved((String) protocolParameters.get(1),
+            (Integer) protocolParameters.get(2));
+    return new Response<ProtocolDescription>((Integer) response.get(0), (String) response.get(1),
+        new TcpRosProtocolDescription(address));
+  }
+}
