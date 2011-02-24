@@ -31,5 +31,6 @@ public interface ConnectionHeaderFields {
   public static final String PERSISTENT = "persistent";
   public static final String MESSAGE_DEFINITION = "message_definition";
   public static final String ERROR = "error";
+  public static final String PROBE = "probe";
   
 }

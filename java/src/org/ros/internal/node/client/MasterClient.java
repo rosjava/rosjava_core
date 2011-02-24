@@ -57,7 +57,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   public Response<Integer> registerService(String callerId, ServiceServer<?> service, URL callerApi)
       throws MalformedURLException, URISyntaxException {
     List<Object> response = node
-        .registerService(callerId, service.getServiceDefinition().getType(), service.getUri()
+        .registerService(callerId, service.getName(), service.getUri()
             .toString(), callerApi.toString());
     return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
         (Integer) response.get(2));

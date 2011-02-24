@@ -29,7 +29,7 @@ import java.net.Socket;
  */
 public abstract class TcpServer {
   
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(TcpServer.class);
 
   private final InetSocketAddress address;
@@ -71,7 +71,7 @@ public abstract class TcpServer {
   public void start() {
     thread.start();
     if (DEBUG) {
-      log.info("Bound to: " + getAddress());
+      log.info("TCP server bound to: " + getAddress());
     }
   }
 
