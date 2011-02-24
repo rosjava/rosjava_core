@@ -53,7 +53,7 @@ public class PublisherTest {
     outputStream = new ByteArrayOutputStream();
     when(socket.getOutputStream()).thenReturn(outputStream);
 
-    Publisher publisher = new Publisher(topicDefinition, "localhost", 1234);
+    Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
     publisher.handshake(socket);
     buffer = outputStream.toByteArray();
     Map<String, String> result = ConnectionHeader.readHeader(new ByteArrayInputStream(buffer));

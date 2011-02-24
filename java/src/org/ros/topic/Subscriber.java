@@ -35,13 +35,13 @@ import com.google.common.collect.ImmutableMap;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Subscriber<T extends Message> extends Topic {
+public class Subscriber<MessageType extends Message> extends Topic {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Subscriber.class);
 
-  private final CopyOnWriteArrayList<SubscriberListener<T>> listeners;
-  private final SubscriberMessageQueue<T> in;
+  private final CopyOnWriteArrayList<SubscriberListener<MessageType>> listeners;
+  private final SubscriberMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
   private final ImmutableMap<String, String> header;
 
@@ -54,11 +54,11 @@ public class Subscriber<T extends Message> extends Topic {
     public void run() {
       try {
         while (!Thread.currentThread().isInterrupted()) {
-          T message = in.take();
+          MessageType message = in.take();
           if (DEBUG) {
             log.info("Received message: " + message);
           }
-          for (SubscriberListener<T> listener : listeners) {
+          for (SubscriberListener<MessageType> listener : listeners) {
             if (isInterrupted()) {
               break;
             }
@@ -83,10 +83,10 @@ public class Subscriber<T extends Message> extends Topic {
     return new Subscriber<S>(name, description, messageClass);
   }
 
-  private Subscriber(String name, TopicDefinition description, Class<T> messageClass) {
+  private Subscriber(String name, TopicDefinition description, Class<MessageType> messageClass) {
     super(description);
-    this.listeners = new CopyOnWriteArrayList<Subscriber.SubscriberListener<T>>();
-    this.in = SubscriberMessageQueue.create(messageClass);
+    this.listeners = new CopyOnWriteArrayList<Subscriber.SubscriberListener<MessageType>>();
+    this.in = new SubscriberMessageQueue<MessageType>(messageClass);
     thread = new MessageReadingThread();
     header = ImmutableMap.<String, String>builder()
         .put(ConnectionHeaderFields.CALLER_ID, name)
@@ -94,7 +94,7 @@ public class Subscriber<T extends Message> extends Topic {
         .build();
   }
 
-  public void addListener(SubscriberListener<T> listener) {
+  public void addListener(SubscriberListener<MessageType> listener) {
     listeners.add(listener);
   }
 

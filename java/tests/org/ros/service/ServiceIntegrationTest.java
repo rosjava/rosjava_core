@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.topic;
+package org.ros.service;
 
 import static org.junit.Assert.assertEquals;
 

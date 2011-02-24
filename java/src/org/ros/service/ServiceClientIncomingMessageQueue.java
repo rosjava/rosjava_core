@@ -18,8 +18,6 @@ package org.ros.service;
 
 import com.google.common.base.Preconditions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
 import org.ros.transport.IncomingMessageQueue;
 import org.ros.transport.LittleEndianDataInputStream;
@@ -33,9 +31,6 @@ import java.io.IOException;
  */
 public class ServiceClientIncomingMessageQueue<MessageType extends Message> extends
     IncomingMessageQueue<MessageType> {
-
-  private static final boolean DEBUG = true;
-  private static final Log log = LogFactory.getLog(ServiceClientIncomingMessageQueue.class);
   
   /**
    * @param messageClass
@@ -60,10 +55,6 @@ public class ServiceClientIncomingMessageQueue<MessageType extends Message> exte
     byte[] buffer = stream.readByteArray(size);
     MessageType message = messageClass.newInstance();
     message.deserialize(buffer);
-    if (DEBUG) {
-      log.info("Received buffer of size " + size);
-      log.info("Received buffer: " + buffer);
-    }
     return message;
   }
 }

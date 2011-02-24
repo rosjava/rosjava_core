@@ -16,93 +16,28 @@
 
 package org.ros.topic;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
 import org.ros.transport.LittleEndianDataOutputStream;
+import org.ros.transport.OutgoingMessageQueue;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PublisherMessageQueue {
+public class PublisherMessageQueue extends OutgoingMessageQueue {
 
-  private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(PublisherMessageQueue.class);
-  
-  private final Collection<LittleEndianDataOutputStream> streams;
-  private final BlockingQueue<Message> messages;
-  private final MessageSendingThread thread;
-
-  private final class MessageSendingThread extends Thread {
-    @Override
-    public void run() {
-      try {
-        while (!isInterrupted()) {
-          sendMessage(messages.take());
-        }
-      } catch (InterruptedException e) {
-        // Cancelable
-      }
-    }
-
-    public void cancel() {
-      interrupt();
-      for (LittleEndianDataOutputStream stream : streams) {
-        try {
-          stream.close();
-        } catch (IOException e) {
-          log.error("Failed to close stream.", e);
-        }
-      }
-    }
-  }
-
-  public PublisherMessageQueue() {
-    streams = Lists.newArrayList();
-    messages = new LinkedBlockingQueue<Message>();
-    thread = new MessageSendingThread();
-  }
-  
-  public void add(Message message) {
-    messages.add(message);
-  }
-
-  public void shutdown() {
-    thread.cancel();
-  }
-
-  public void start() {
-    thread.start();
-  }
-
-  public void addSocket(Socket socket) throws IOException {
-    LittleEndianDataOutputStream out = new LittleEndianDataOutputStream(socket.getOutputStream());
-    streams.add(out);
-  }
-
-  private void sendMessage(Message message) {
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.ros.transport.OutgoingMessageQueue#sendMessage(org.ros.message.Message,
+   * org.ros.transport.LittleEndianDataOutputStream)
+   */
+  @Override
+  protected void sendMessage(Message message, LittleEndianDataOutputStream stream)
+      throws IOException {
     byte[] data = message.serialize(0 /* unused seq */);
-    Iterator<LittleEndianDataOutputStream> iterator = streams.iterator();
-    while (iterator.hasNext()) {
-      LittleEndianDataOutputStream out = iterator.next();
-      try {
-        out.writeField(data);
-        out.flush();
-      } catch (IOException e) {
-        if (DEBUG) {
-          log.info("Connection died.", e);
-        }
-        iterator.remove();
-      }
-    }
+    stream.writeField(data);
   }
 }

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.topic;
+package org.ros.service;
 
 import org.ros.message.Message;
 import org.ros.transport.IncomingMessageQueue;
@@ -27,13 +27,13 @@ import java.io.IOException;
  * 
  * @param <MessageType>
  */
-public class SubscriberMessageQueue<MessageType extends Message> extends
+public class ServiceServerIncomingMessageQueue<MessageType extends Message> extends
     IncomingMessageQueue<MessageType> {
 
   /**
    * @param messageClass
    */
-  public SubscriberMessageQueue(Class<MessageType> messageClass) {
+  public ServiceServerIncomingMessageQueue(Class<MessageType> messageClass) {
     super(messageClass);
   }
 

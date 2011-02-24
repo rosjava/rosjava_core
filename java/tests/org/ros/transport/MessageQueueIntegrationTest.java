@@ -66,9 +66,9 @@ public class MessageQueueIntegrationTest {
     PublisherMessageQueue out = new PublisherMessageQueue();
     out.addSocket(serverThread.server);
     SubscriberMessageQueue<org.ros.message.std.String> in =
-        SubscriberMessageQueue.create(org.ros.message.std.String.class);
+        new SubscriberMessageQueue<org.ros.message.std.String>(org.ros.message.std.String.class);
     in.setSocket(client);
-    
+
     out.start();
     in.start();
     org.ros.message.std.String hello = new org.ros.message.std.String();
