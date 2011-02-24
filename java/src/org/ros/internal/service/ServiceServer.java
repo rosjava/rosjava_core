@@ -53,6 +53,7 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
   private final Collection<PersistentSession> persistentSessions;
   private final ServiceDefinition definition;
   private final Map<String, String> header;
+  private final String name;
 
   private class Server extends TcpServer {
     public Server(String hostname, int port) throws IOException {
@@ -126,12 +127,13 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
   public ServiceServer(Class<RequestMessageType> requestMessageClass, String name,
       ServiceDefinition definition, String hostname, int port) throws IOException {
     this.requestMessageClass = requestMessageClass;
+    this.name = name;
     this.definition = definition;
     server = new Server(hostname, port);
     persistentSessions = Lists.newArrayList();
-    header =
-        ImmutableMap.<String, String>builder().put(ConnectionHeaderFields.CALLER_ID, name)
-            .putAll(definition.toHeader()).build();
+    header = ImmutableMap.<String, String>builder()
+        .put(ConnectionHeaderFields.SERVICE, name)
+        .putAll(definition.toHeader()).build();
   }
 
   /**
@@ -145,10 +147,13 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
     Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
-      log.info("Expected handshake header: " + header);
+      log.info("Outgoing handshake header: " + header);
     }
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
-        header.get(ConnectionHeaderFields.TYPE)));
+    if (incomingHeader.containsKey(ConnectionHeaderFields.PROBE)) {
+      // TODO(damonkohler): Either return a bool or handle the closed socket later.
+      socket.close();
+      return;
+    }
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
     ConnectionHeader.writeHeader(header, socket.getOutputStream());
@@ -179,6 +184,13 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
    */
   public ServiceDefinition getServiceDefinition() {
     return definition;
+  }
+
+  /**
+   * @return
+   */
+  public String getName() {
+    return name;
   }
 
 }

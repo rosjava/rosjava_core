@@ -123,7 +123,7 @@ public class MasterSlaveIntegrationTest {
     ServiceDefinition serviceDefinition =
         new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
     ServiceServer<AddTwoInts.Request> server =
-        new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/server",
+        new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/service",
             serviceDefinition, "localhost", 0) {
           @Override
           public Message buildResponse(AddTwoInts.Request requestMessage) {
@@ -133,8 +133,7 @@ public class MasterSlaveIntegrationTest {
           }
         };
     slaveServer.addService(server);
-    Response<URI> response = Response.checkOk(masterClient.lookupService("/foo",
-        serviceDefinition.getType()));
+    Response<URI> response = Response.checkOk(masterClient.lookupService("/foo", "/service"));
     assertEquals(server.getUri(), response.getValue());
   }
 
