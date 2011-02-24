@@ -13,7 +13,7 @@ public class SampleNode {
 
   public static void main(String[] argv) {
     //Node node = new Node(argv, "sample_node"); this crashes when topic is subscribed to
-    Node node = new Node(argv, "sample_node");
+    Node node = new Node(argv, "/sample_node");
     node.init();
 
     Publisher<PoseStamped> pub_pose = node.createPublisher("pose", PoseStamped.class);
