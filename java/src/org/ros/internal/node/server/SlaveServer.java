@@ -66,6 +66,8 @@ public class SlaveServer extends NodeServer {
 
   public SlaveServer(String name, MasterClient master, String hostname, int port) {
     super(hostname, port);
+    Preconditions.checkNotNull(name);
+    Preconditions.checkArgument(name.startsWith("/"));
     this.name = name;
     this.master = master;
     publishers = Maps.newConcurrentMap();

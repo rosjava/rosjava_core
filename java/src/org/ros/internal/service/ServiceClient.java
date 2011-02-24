@@ -51,10 +51,12 @@ public class ServiceClient<ResponseMessageType extends Message> {
 
   private Map<String, String> header;
   
-  private ServiceClient(Class<ResponseMessageType> responseMessageClass, String name,
+  private ServiceClient(Class<ResponseMessageType> responseMessageClass, String nodeName,
       ServiceIdentifier serviceIdentifier) {
+    Preconditions.checkNotNull(nodeName);
+    Preconditions.checkArgument(nodeName.startsWith("/"));
     header = ImmutableMap.<String, String>builder()
-        .put(ConnectionHeaderFields.CALLER_ID, name)
+        .put(ConnectionHeaderFields.CALLER_ID, nodeName)
         // TODO(damonkohler): Support non-persistent connections.
         .put(ConnectionHeaderFields.PERSISTENT, "1")
         .putAll(serviceIdentifier.toHeader())

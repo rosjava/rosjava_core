@@ -35,6 +35,7 @@ public class SlaveIdentifier {
   
   public SlaveIdentifier(String name, URL url) {
     Preconditions.checkNotNull(name);
+    Preconditions.checkArgument(name.startsWith("/"));
     this.name = name;
     this.url = url;
   }
