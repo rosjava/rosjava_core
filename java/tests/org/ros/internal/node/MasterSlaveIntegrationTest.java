@@ -21,40 +21,29 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 
-import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
-
-import org.ros.internal.transport.ProtocolDescription;
-import org.ros.internal.transport.ProtocolNames;
-
+import org.apache.xmlrpc.XmlRpcException;
+import org.junit.Before;
+import org.junit.Test;
+import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.client.SlaveClient;
+import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.service.ServiceDefinition;
+import org.ros.internal.service.ServiceServer;
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.PublisherIdentifier;
 import org.ros.internal.topic.Subscriber;
 import org.ros.internal.topic.TopicDefinition;
-
-import org.ros.internal.service.ServiceDefinition;
-import org.ros.internal.service.ServiceServer;
-
-import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.Response;
-
-import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.server.SlaveServer;
-
-import org.ros.internal.node.client.MasterClient;
-import org.ros.internal.node.client.SlaveClient;
-
-
-import org.apache.xmlrpc.XmlRpcException;
-import org.junit.Before;
-import org.junit.Test;
+import org.ros.internal.transport.ProtocolDescription;
+import org.ros.internal.transport.ProtocolNames;
+import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 
 /**

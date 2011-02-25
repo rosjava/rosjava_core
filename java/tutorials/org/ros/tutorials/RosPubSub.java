@@ -5,7 +5,6 @@ import org.ros.Node;
 import org.ros.Publisher;
 import org.ros.RosLoader;
 import org.ros.RosMain;
-import org.ros.exceptions.RosInitException;
 
 /**
  * Simple rosjava publisher and subscriber node, requires an external roscore
@@ -27,6 +26,7 @@ public class RosPubSub extends RosMain {
     }
   };
 
+  @Override
   public void rosMain(String[] argv) {
     try {
       node = new Node(argv, "/sample_node");
@@ -46,7 +46,7 @@ public class RosPubSub extends RosMain {
     }
   }
 
-  public static void main(String[] argv) throws RosInitException, ClassNotFoundException,
+  public static void main(String[] argv) throws ClassNotFoundException,
       InstantiationException, IllegalAccessException {
 
     // Example of using a string based class loader so that we can load classes
