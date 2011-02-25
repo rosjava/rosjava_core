@@ -46,10 +46,6 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private final MessageReadingThread thread;
   private final ImmutableMap<String, String> header;
 
-  public interface SubscriberListener<T extends Message> {
-    public void onNewMessage(T message);
-  }
-
   private final class MessageReadingThread extends Thread {
     @Override
     public void run() {
@@ -79,14 +75,14 @@ public class Subscriber<MessageType extends Message> extends Topic {
     }
   }
 
-  public static <S extends Message> Subscriber<S> create(String name, TopicDefinition description,
+  public static <S extends Message> Subscriber<S> create(String nodeName, TopicDefinition description,
       Class<S> messageClass) {
-    return new Subscriber<S>(name, description, messageClass);
+    return new Subscriber<S>(nodeName, description, messageClass);
   }
 
   private Subscriber(String name, TopicDefinition description, Class<MessageType> messageClass) {
     super(description);
-    this.listeners = new CopyOnWriteArrayList<Subscriber.SubscriberListener<MessageType>>();
+    this.listeners = new CopyOnWriteArrayList<SubscriberListener<MessageType>>();
     this.in = new SubscriberMessageQueue<MessageType>(messageClass);
     thread = new MessageReadingThread();
     header = ImmutableMap.<String, String>builder()

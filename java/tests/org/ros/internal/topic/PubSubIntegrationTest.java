@@ -23,7 +23,6 @@ import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.Subscriber;
 import org.ros.internal.topic.TopicDefinition;
-import org.ros.internal.topic.Subscriber.SubscriberListener;
 
 import org.junit.Test;
 

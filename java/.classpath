@@ -8,6 +8,7 @@
 	<classpathentry kind="src" path="ws-commons-util-1.0.2-src/src/main/java"/>
 	<classpathentry kind="src" path="commons-httpclient-3.1-src/src/java"/>
 	<classpathentry kind="src" path="tests"/>
+	<classpathentry kind="src" path="tutorials"/>
 	<classpathentry kind="lib" path="commons-codec-1.3/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="guava-r07/guava-r07.jar" sourcepath="guava-r07/guava-src-r07.zip"/>
 	<classpathentry kind="lib" path="mockito-all-1.8.5.jar"/>

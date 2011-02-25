@@ -43,38 +43,41 @@ import java.util.Set;
  */
 public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> {
 
-  public SlaveClient(URL url) {
+  private final String nodeName;
+
+  public SlaveClient(String nodeName, URL url) {
     super(url, org.ros.internal.node.xmlrpc.Slave.class);
+    this.nodeName = nodeName;
   }
 
-  public List<Object> getBusStats(String callerId) {
+  public List<Object> getBusStats() {
     throw new UnsupportedOperationException();
   }
 
-  public List<Object> getBusInfo(String callerId) {
+  public List<Object> getBusInfo() {
     throw new UnsupportedOperationException();
   }
 
-  public Response<URL> getMasterUri(String callerId) throws MalformedURLException {
-    List<Object> response = node.getMasterUri(callerId);
+  public Response<URL> getMasterUri() throws MalformedURLException {
+    List<Object> response = node.getMasterUri(nodeName);
     return new Response<URL>((Integer) response.get(0), (String) response.get(1), new URL(
         (String) response.get(2)));
   }
 
-  public List<Object> shutdown(String callerId, String message) {
+  public List<Object> shutdown(String message) {
     throw new UnsupportedOperationException();
   }
 
-  public List<Object> getPid(String callerId) {
+  public List<Object> getPid() {
     throw new UnsupportedOperationException();
   }
 
-  public List<Object> getSubscriptions(String callerId) {
+  public List<Object> getSubscriptions() {
     throw new UnsupportedOperationException();
   }
 
-  public Response<List<TopicDefinition>> getPublications(String callerId) {
-    List<Object> response = node.getPublications(callerId);
+  public Response<List<TopicDefinition>> getPublications() {
+    List<Object> response = node.getPublications(nodeName);
     List<TopicDefinition> descriptions = Lists.newArrayList();
     List<Object> topics = Arrays.asList((Object[]) response.get(2));
     for (Object topic : topics) {
@@ -87,18 +90,17 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
         (String) response.get(1), descriptions);
   }
 
-  public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) {
+  public List<Object> paramUpdate(String parameterKey, String parameterValue) {
     throw new UnsupportedOperationException();
   }
 
-  public List<Object> publisherUpdate(String callerId, String topic, Collection<String> publishers) {
+  public List<Object> publisherUpdate(String topic, Collection<String> publishers) {
     throw new UnsupportedOperationException();
   }
 
-  public Response<ProtocolDescription> requestTopic(String callerId, String topic,
-      Set<String> requestedProtocols) {
+  public Response<ProtocolDescription> requestTopic(String topic, Set<String> requestedProtocols) {
     List<Object> response =
-        node.requestTopic(callerId, topic, new Object[][] {requestedProtocols.toArray()});
+        node.requestTopic(nodeName, topic, new Object[][] {requestedProtocols.toArray()});
     List<Object> protocolParameters = Arrays.asList((Object[]) response.get(2));
     Preconditions.checkState(protocolParameters.size() == 3);
     Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
@@ -108,4 +110,5 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
     return new Response<ProtocolDescription>((Integer) response.get(0), (String) response.get(1),
         new TcpRosProtocolDescription(address));
   }
+  
 }

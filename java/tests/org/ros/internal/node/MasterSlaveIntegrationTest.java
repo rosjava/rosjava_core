@@ -74,12 +74,12 @@ public class MasterSlaveIntegrationTest {
     masterClient = new MasterClient(masterServer.getAddress());
     slaveServer = new SlaveServer("/foo", masterClient, "localhost", 0);
     slaveServer.start();
-    slaveClient = new SlaveClient(slaveServer.getAddress());
+    slaveClient = new SlaveClient("/bar", slaveServer.getAddress());
   }
 
   @Test
   public void testGetMasterUri() throws IOException, RemoteException {
-    Response<URL> response = Response.checkOk(slaveClient.getMasterUri("/caller"));
+    Response<URL> response = Response.checkOk(slaveClient.getMasterUri());
     assertEquals(masterServer.getAddress(), response.getValue());
   }
 
@@ -91,8 +91,7 @@ public class MasterSlaveIntegrationTest {
     Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
     slaveServer.addPublisher(publisher);
     Response<ProtocolDescription> response =
-        Response.checkOk(slaveClient.requestTopic("/caller", "/hello",
-            Sets.newHashSet(ProtocolNames.TCPROS)));
+        Response.checkOk(slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS)));
     assertEquals(response.getValue(), new TcpRosProtocolDescription(publisher.getAddress()));
   }
 
@@ -113,7 +112,7 @@ public class MasterSlaveIntegrationTest {
     assertTrue(publishers.contains(publisherDescription));
 
     Response<List<TopicDefinition>> response =
-        Response.checkOk(slaveClient.getPublications("/foo"));
+        Response.checkOk(slaveClient.getPublications());
     assertEquals(1, response.getValue().size());
     assertTrue(response.getValue().contains(publisher.getTopicDefinition()));
   }
