@@ -1,4 +1,10 @@
-package org.ros;
+package org.ros.tutorials;
+
+import org.ros.Callback;
+
+import org.ros.Node;
+
+import org.ros.Publisher;
 
 import org.ros.exceptions.RosInitException;
 
@@ -9,10 +15,11 @@ import org.ros.message.geometry.PoseStamped;
 import org.ros.message.geometry.Quaternion;
 
 public class SampleNode {
-
+  Node node;
+  
   public static void main(String[] argv) throws RosInitException {
     //Node node = new Node(argv, "sample_node"); this crashes when topic is subscribed to
-    Node node = new Node(argv, "/sample_node");
+    final Node node = new Node(argv, "/sample_node");
     node.init();
 
     Publisher<PoseStamped> pub_pose = node.createPublisher("pose", PoseStamped.class);
@@ -21,7 +28,7 @@ public class SampleNode {
 
       @Override
       public void onRecieve(Quaternion m) {
-        Ros.logi("Toto " + m.w);
+        node.logInfo("Toto " + m.w);
       }
     };
 
