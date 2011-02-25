@@ -37,48 +37,66 @@
 package org.ros.message;
 
 public class Time extends TimeUnit {
-	public Time() {}
-	
-	public Time(int secs, int nsecs) {
-		this.secs = secs;
-		this.nsecs = nsecs;
-		normalize();
-	}
 
-	public Time(double secs) {
-		this.secs = (int) secs;
-		this.nsecs = (int) ((secs - this.secs) * 1000000000);
-		normalize();
-	}
+  public Time() {
+  }
 
-	public Time(Time t) {
-		this.secs = t.secs;
-		this.nsecs = t.nsecs;
-	}
-	
-	public Time add (Duration d) {
-		return new Time(secs + d.secs,nsecs + d.nsecs);
-	}
+  public Time(int secs, int nsecs) {
+    this.secs = secs;
+    this.nsecs = nsecs;
+    normalize();
+  }
 
-	public Time subtract (Duration d) {
-		return new Time(secs - d.secs,nsecs - d.nsecs);
-	}
+  public Time(double secs) {
+    this.secs = (int) secs;
+    this.nsecs = (int) ((secs - this.secs) * 1000000000);
+    normalize();
+  }
 
-	public Duration subtract (Time t) {
-		return new Duration(secs - t.secs,nsecs - t.nsecs);
-	}
+  public Time(Time t) {
+    this.secs = t.secs;
+    this.nsecs = t.nsecs;
+  }
 
-	public boolean laterThan(Time t) {
-		normalize();
-		t.normalize();
-		return (secs > t.secs) || ((secs == t.secs) && nsecs > t.nsecs);
-	}
+  public Time add(Duration d) {
+    return new Time(secs + d.secs, nsecs + d.nsecs);
+  }
 
-	public static Time fromMillis(double timeInMillis) {
-	  return new Time(timeInMillis / 1000);
-    }
+  public Time subtract(Duration d) {
+    return new Time(secs - d.secs, nsecs - d.nsecs);
+  }
 
-	public String toString() {
-		return secs + ":" + nsecs;
-	}
+  public Duration subtract(Time t) {
+    return new Duration(secs - t.secs, nsecs - t.nsecs);
+  }
+
+  public boolean laterThan(Time t) {
+    normalize();
+    t.normalize();
+    return (secs > t.secs) || ((secs == t.secs) && nsecs > t.nsecs);
+  }
+
+  public static Time fromMillis(double timeInMillis) {
+    int secs = (int) Math.floor(timeInMillis/1000);
+    int nsecs = (int) (timeInMillis - secs*1000) * 1000000;
+    return new Time(secs, nsecs);
+  }
+
+  public String toString() {
+    return secs + ":" + nsecs;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Time other = (Time) obj;
+    normalize();
+    other.normalize();
+    return (secs == other.secs) && (nsecs == other.nsecs);
+  }
 }
