@@ -74,18 +74,9 @@ public class Time extends TimeUnit {
 		return (secs > t.secs) || ((secs == t.secs) && nsecs > t.nsecs);
 	}
 
-	public static Time now() {
-	  return new Time(System.currentTimeMillis() / 1000);
+	public static Time fromMillis(double timeInMillis) {
+	  return new Time(timeInMillis / 1000);
     }
-	
-	public boolean inFuture() {
-		normalize();
-		return laterThan(now());
-	}
-	
-	public boolean hasElapsed(Duration d) {
-		return now().subtract(this).isLonger(d);
-	}
 
 	public String toString() {
 		return secs + ":" + nsecs;
