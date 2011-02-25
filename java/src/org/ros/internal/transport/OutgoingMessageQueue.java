@@ -94,6 +94,11 @@ public abstract class OutgoingMessageQueue {
     Iterator<LittleEndianDataOutputStream> iterator = streams.iterator();
     while (iterator.hasNext()) {
       LittleEndianDataOutputStream out = iterator.next();
+      if (out == null) {
+        log.warn("out is null, removing from streams!");
+        iterator.remove();
+        continue;
+      }
       try {
         sendMessage(message, out);
         out.flush();

@@ -1,6 +1,5 @@
 package org.ros;
 
-import org.ros.Ros;
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.TopicDefinition;
 import org.ros.message.Message;
@@ -17,11 +16,10 @@ import java.io.IOException;
  *          messages of this type.
  */
 public class Publisher<MessageT extends Message> {
-
-  Publisher(String topic_name, Class<MessageT> clazz) {
-    this.topic_name = topic_name;
-    this.clazz = clazz;
-  }
+  org.ros.internal.topic.Publisher publisher;
+  String topic_name;
+  // deal with type erasure for generics
+  Class<MessageT> clazz;
 
   /**
    * @param m
@@ -33,6 +31,17 @@ public class Publisher<MessageT extends Message> {
   }
 
   /**
+   * Private package level constructor
+   * 
+   * @param topic_name
+   * @param clazz
+   */
+  protected Publisher(String topic_name, Class<MessageT> clazz) {
+    this.topic_name = topic_name;
+    this.clazz = clazz;
+  }
+
+  /**
    * This starts up the topic
    * 
    * @throws IOException
@@ -40,18 +49,11 @@ public class Publisher<MessageT extends Message> {
    * @throws InstantiationException
    */
   protected void start() throws IOException, InstantiationException, IllegalAccessException {
-
     // create an instance of the message of type MessageT
     Message m = (Message) clazz.newInstance();
-    
     TopicDefinition topicDefinition;
     topicDefinition = new TopicDefinition(topic_name, MessageDefinition.createFromMessage(m));
     publisher = new org.ros.internal.topic.Publisher(topicDefinition, Ros.getHostName(), 0);
     publisher.start();
   }
-
-  org.ros.internal.topic.Publisher publisher;
-  String topic_name;
-  // deal with type erasure for generics
-  Class<MessageT> clazz;
 }

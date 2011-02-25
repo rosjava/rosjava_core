@@ -5,6 +5,6 @@ syntax: glob
 *.swp
 *.pyc
 *~
-
+*.log
 syntax: regexp
 android/(bin|gen)/.*

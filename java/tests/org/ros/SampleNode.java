@@ -1,8 +1,6 @@
 package org.ros;
 
 import org.ros.exceptions.RosInitException;
-
-import org.ros.Ros;
 import org.ros.message.Time;
 import org.ros.message.geometry.Point;
 import org.ros.message.geometry.PoseStamped;
@@ -11,21 +9,13 @@ import org.ros.message.geometry.Quaternion;
 public class SampleNode {
 
   public static void main(String[] argv) throws RosInitException {
-    //Node node = new Node(argv, "sample_node"); this crashes when topic is subscribed to
+    // Node node = new Node(argv, "sample_node"); this crashes when topic is
+    // subscribed to
     Node node = new Node(argv, "/sample_node");
     node.init();
 
     Publisher<PoseStamped> pub_pose = node.createPublisher("pose", PoseStamped.class);
 
-    Callback<Quaternion> callback = new Callback<Quaternion>() {
-
-      @Override
-      public void onRecieve(Quaternion m) {
-        Ros.logi("Toto " + m.w);
-      }
-    };
-
-    node.createSubscriber("foo", callback, Quaternion.class);
     PoseStamped p = new PoseStamped();
     pub_pose.publish(p);
 
@@ -35,9 +25,8 @@ public class SampleNode {
     origin.y = 0;
     origin.z = 0;
     int seq = 0;
-    //which one should it be?
-    //while (!ros.isShutdown()) {
-    while (!node.isShutdown()) {
+
+    while (true) {
       float[] quaternion = new float[4];
       Quaternion orientation = new Quaternion();
       orientation.w = quaternion[0];
@@ -52,5 +41,6 @@ public class SampleNode {
       pose.pose.orientation = orientation;
       pub_pose.publish(pose);
     }
+
   }
 }

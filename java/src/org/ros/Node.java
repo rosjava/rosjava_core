@@ -1,9 +1,7 @@
 package org.ros;
 
-import org.apache.commons.logging.LogFactory;
-
 import org.apache.commons.logging.Log;
-
+import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosInitException;
 import org.ros.internal.node.RemoteException;
@@ -21,6 +19,7 @@ import java.io.IOException;
 public class Node implements Namespace {
   private MasterClient master = null;
   private SlaveServer slave = null;
+
   private String name = "node";
   private int port = 0; // default port
 
@@ -88,9 +87,20 @@ public class Node implements Namespace {
 
   @Override
   public <MessageT extends Message> Subscriber<MessageT> createSubscriber(String topic_name,
-      Callback<MessageT> callback, Class<MessageT> clazz) throws RosInitException {
-    // TODO Auto-generated method stub
-    return null;
+      final Callback<MessageT> callback, Class<MessageT> clazz) throws RosInitException {
+
+    try {
+      Subscriber<MessageT> sub = new Subscriber<MessageT>(getName(), resolveName(topic_name), clazz);
+      sub.init(slave, callback);
+      return sub;
+    } catch (InstantiationException e) {
+      throw new RosInitException(e.getMessage());
+    } catch (IllegalAccessException e) {
+      throw new RosInitException(e.getMessage());
+    } catch (IOException e) {
+      throw new RosInitException(e.getMessage());
+    }
+
   }
 
   /**
@@ -126,14 +136,6 @@ public class Node implements Namespace {
    */
   public void logFatal(Object message) {
     log.fatal(message);
-  }
-
-  /**
-   * @return true if the node has been shutdown.
-   */
-  public boolean isShutdown() {
-    // TODO Auto-generated method stub
-    return false;
   }
 
   private Log log;

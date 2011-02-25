@@ -11,39 +11,25 @@ import java.net.URL;
  */
 public class Ros {
 
-    /**
-     * Get the master uri, maybe from environment or else where?
-     * 
-     * @return
-     */
-    public static URL getMasterUri() {
-      try {
-        return new URL("http://localhost:11311/");
-      } catch (MalformedURLException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-        return null;
-      }
-    }
+  /**
+   * Get the master uri, maybe from environment or else where?
+   * 
+   * @return The url of the master, with port(typically 11311).
+   * @throws MalformedURLException
+   */
+  public static URL getMasterUri() throws MalformedURLException {
 
-    /**
-     * Finds the environment's host name, will look in TODO ROS_HOSTNAME
-     * 
-     * @return the undecorated hostname, e.g. 'localhost'
-     */
-    public static String getHostName() {
-      // TODO better resolution? from env
-      return "localhost";
-    }
+    return new URL("http://localhost:11311/");
+  }
 
-    protected static void logi(String string) {
-      // TODO ros logging
-      System.out.println(string);
-    }
-
-    public static boolean isShutdown() {
-      // TODO Auto-generated method stub
-      return false;
-    }
+  /**
+   * Finds the environment's host name, will look in TODO ROS_HOSTNAME
+   * 
+   * @return the undecorated hostname, e.g. 'localhost'
+   */
+  public static String getHostName() {
+    // TODO better resolution? from env
+    return "localhost";
+  }
 
 }
