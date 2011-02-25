@@ -18,25 +18,18 @@ package org.ros.internal.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 
+import org.ros.internal.node.Response;
+import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.service.ServiceDefinition;
+import org.ros.internal.service.ServiceIdentifier;
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.PublisherIdentifier;
 import org.ros.internal.topic.SubscriberIdentifier;
 import org.ros.internal.topic.TopicDefinition;
 
-import org.ros.internal.service.ServiceDefinition;
-import org.ros.internal.service.ServiceIdentifier;
-
-import org.ros.internal.node.Response;
-
-import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.server.SlaveIdentifier;
-
-
-
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -112,15 +105,15 @@ public class MasterImpl implements Master {
    */
   @Override
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) throws MalformedURLException {
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier(callerId, new URL(callerApi));
+      String callerApi) throws URISyntaxException {
+    SlaveIdentifier slaveIdentifier = new SlaveIdentifier(callerId, new URI(callerApi));
     TopicDefinition topicDefinition =
         new TopicDefinition(topic, MessageDefinition.createMessageDefinition(topicType));
     PublisherIdentifier description = new PublisherIdentifier(slaveIdentifier, topicDefinition);
     List<SubscriberIdentifier> subscribers = master.registerPublisher(callerId, description);
     List<String> urls = Lists.newArrayList();
     for (SubscriberIdentifier subscriberDescription : subscribers) {
-      urls.add(subscriberDescription.getSlaveUrl().toString());
+      urls.add(subscriberDescription.getSlaveUri().toString());
     }
     return Response.createSuccess("Success", urls).toList();
   }
@@ -149,15 +142,15 @@ public class MasterImpl implements Master {
    */
   @Override
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
-      String callerApi) throws MalformedURLException {
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier(callerId, new URL(callerApi));
+      String callerApi) throws URISyntaxException {
+    SlaveIdentifier slaveIdentifier = new SlaveIdentifier(callerId, new URI(callerApi));
     TopicDefinition topicDefinition =
         new TopicDefinition(topic, MessageDefinition.createMessageDefinition(topicType));
     List<PublisherIdentifier> publishers =
         master.registerSubscriber(new SubscriberIdentifier(slaveIdentifier, topicDefinition));
     List<String> urls = Lists.newArrayList();
     for (PublisherIdentifier publisherDescription : publishers) {
-      urls.add(publisherDescription.getSlaveUrl().toString());
+      urls.add(publisherDescription.getSlaveUri().toString());
     }
     return Response.createSuccess("Success", urls).toList();
   }

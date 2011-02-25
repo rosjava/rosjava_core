@@ -32,8 +32,8 @@ import org.ros.internal.topic.PublisherIdentifier;
 import org.ros.internal.topic.SubscriberIdentifier;
 import org.ros.internal.topic.TopicDefinition;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -42,7 +42,7 @@ import java.util.List;
 public class MasterImplTest {
 
   @Test
-  public void testRegisterPublisherWithNoSubscribers() throws MalformedURLException {
+  public void testRegisterPublisherWithNoSubscribers() throws URISyntaxException {
     MasterServer mockMaster = mock(MasterServer.class);
     when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
         .thenReturn(Lists.<SubscriberIdentifier>newArrayList());
@@ -53,9 +53,9 @@ public class MasterImplTest {
   }
 
   @Test
-  public void testRegisterPublisher() throws MalformedURLException {
+  public void testRegisterPublisher() throws URISyntaxException {
     MasterServer mockMaster = mock(MasterServer.class);
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/slave", new URL("http://api"));
+    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/slave", new URI("http://api"));
     TopicDefinition topicDefinition = new TopicDefinition("/topic",
         MessageDefinition.createMessageDefinition("msg"));
     SubscriberIdentifier subscriberDescription = new SubscriberIdentifier(slaveIdentifier,
@@ -67,11 +67,11 @@ public class MasterImplTest {
         .registerPublisher("/slave", "/topic", "/topicType", "http://api");
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
     assertEquals(response.get(2),
-        Lists.newArrayList(subscriberDescription.getSlaveUrl().toString()));
+        Lists.newArrayList(subscriberDescription.getSlaveUri().toString()));
   }
 
   @Test
-  public void testRegisterSubscriberWithNoSubscribers() throws MalformedURLException {
+  public void testRegisterSubscriberWithNoSubscribers() throws URISyntaxException {
     MasterServer mockMaster = mock(MasterServer.class);
     when(mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any())).thenReturn(
         Lists.<PublisherIdentifier>newArrayList());
@@ -82,9 +82,9 @@ public class MasterImplTest {
   }
 
   @Test
-  public void testRegisterSubscriber() throws MalformedURLException {
+  public void testRegisterSubscriber() throws URISyntaxException {
     MasterServer mockMaster = mock(MasterServer.class);
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/slave", new URL("http://api"));
+    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/slave", new URI("http://api"));
     TopicDefinition topicDefinition = new TopicDefinition("/topic",
         MessageDefinition.createMessageDefinition("msg"));
     PublisherIdentifier publisherDescription = new PublisherIdentifier(slaveIdentifier,
@@ -95,8 +95,7 @@ public class MasterImplTest {
     List<Object> response = master.registerSubscriber("/slave", "/topic", "/topicType",
         "http://api");
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
-    assertEquals(response.get(2),
-        Lists.newArrayList(publisherDescription.getSlaveUrl().toString()));
+    assertEquals(response.get(2), Lists.newArrayList(publisherDescription.getSlaveUri().toString()));
   }
 
 }

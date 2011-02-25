@@ -11,6 +11,7 @@ import org.ros.message.Message;
 import org.ros.namespace.Namespace;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * @author "Ethan Rublee ethan.rublee@gmail.com"
@@ -39,6 +40,7 @@ public class Node implements Namespace {
    * This starts up a connection with the master and gets the juices flowing
    * 
    * @throws RosInitException
+   * @throws URISyntaxException 
    */
   public void init() throws RosInitException {
     try {
@@ -49,20 +51,19 @@ public class Node implements Namespace {
       throw new RosInitException(e.getMessage());
     } catch (XmlRpcException e) {
       throw new RosInitException(e.getMessage());
+    } catch (URISyntaxException e) {
+      throw new RosInitException(e.getMessage());
     }
-
   }
 
   @Override
   public <MessageT extends Message> Publisher<MessageT> createPublisher(String topic_name,
       Class<MessageT> clazz) throws RosInitException {
     try {
-
       Publisher<MessageT> pub = new Publisher<MessageT>(resolveName(topic_name), clazz);
       pub.start();
       slave.addPublisher(pub.publisher);
       return pub;
-
     } catch (IOException e) {
       throw new RosInitException(e.getMessage());
     } catch (InstantiationException e) {
@@ -70,6 +71,8 @@ public class Node implements Namespace {
     } catch (IllegalAccessException e) {
       throw new RosInitException(e.getMessage());
     } catch (RemoteException e) {
+      throw new RosInitException(e.getMessage());
+    } catch (URISyntaxException e) {
       throw new RosInitException(e.getMessage());
     }
   }
@@ -98,6 +101,8 @@ public class Node implements Namespace {
     } catch (IllegalAccessException e) {
       throw new RosInitException(e.getMessage());
     } catch (IOException e) {
+      throw new RosInitException(e.getMessage());
+    } catch (URISyntaxException e) {
       throw new RosInitException(e.getMessage());
     }
 

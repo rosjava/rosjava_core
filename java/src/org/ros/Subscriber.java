@@ -29,6 +29,7 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.Message;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * Handle for subscription
@@ -55,7 +56,7 @@ public class Subscriber<MessageType extends Message> {
   }
 
   protected void init(SlaveServer server, final Callback<MessageType> callback)
-      throws InstantiationException, IllegalAccessException, IOException {
+      throws InstantiationException, IllegalAccessException, IOException, URISyntaxException {
 
     // Set up topic definition.
     Message m = (Message) messageClass.newInstance(); // a raw instance of a message
@@ -73,7 +74,7 @@ public class Subscriber<MessageType extends Message> {
       }
     });
     // FIXME is this correct? Can we just use the server to request a topic
-    slaveClient = new SlaveClient(namespace, server.getAddress());
+    slaveClient = new SlaveClient(namespace, server.getUri());
     Response<ProtocolDescription> response = slaveClient.requestTopic(topicName,
         Sets.newHashSet(ProtocolNames.TCPROS));
     subscriber.start(response.getValue().getAddress());

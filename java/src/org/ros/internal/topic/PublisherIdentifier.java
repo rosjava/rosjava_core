@@ -18,7 +18,8 @@ package org.ros.internal.topic;
 
 import org.ros.internal.node.server.SlaveIdentifier;
 
-import java.net.URL;
+import java.net.URI;
+
 
 
 /**
@@ -42,8 +43,8 @@ public class PublisherIdentifier {
     return slaveIdentifier.getName();
   }
 
-  public URL getSlaveUrl() {
-    return slaveIdentifier.getUrl();
+  public URI getSlaveUri() {
+    return slaveIdentifier.getUri();
   }
 
   public String getTopicName() {

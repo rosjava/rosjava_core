@@ -30,6 +30,7 @@ public class LittleEndianDataOutputStream extends OutputStream {
   private final DataOutputStream outputStream;
 
   public LittleEndianDataOutputStream(OutputStream outputStream) {
+    Preconditions.checkNotNull(outputStream);
     this.outputStream = new DataOutputStream(outputStream);
   }
 

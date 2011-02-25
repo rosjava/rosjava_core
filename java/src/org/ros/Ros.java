@@ -1,7 +1,8 @@
 package org.ros;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Alias class for some global convenience functions ?
@@ -16,10 +17,10 @@ public class Ros {
    * 
    * @return The url of the master, with port(typically 11311).
    * @throws MalformedURLException
+   * @throws URISyntaxException 
    */
-  public static URL getMasterUri() throws MalformedURLException {
-
-    return new URL("http://localhost:11311/");
+  public static URI getMasterUri() throws URISyntaxException {
+    return new URI("http://localhost:11311/");
   }
 
   /**

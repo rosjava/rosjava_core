@@ -19,20 +19,17 @@ package org.ros.internal.node.client;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
-
-import org.ros.internal.transport.ProtocolDescription;
-import org.ros.internal.transport.ProtocolNames;
-
+import org.ros.internal.node.Response;
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.TopicDefinition;
-
-import org.ros.internal.node.Response;
-
+import org.ros.internal.transport.ProtocolDescription;
+import org.ros.internal.transport.ProtocolNames;
+import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -45,8 +42,8 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
 
   private final String nodeName;
 
-  public SlaveClient(String nodeName, URL url) {
-    super(url, org.ros.internal.node.xmlrpc.Slave.class);
+  public SlaveClient(String nodeName, URI uri) throws MalformedURLException {
+    super(uri, org.ros.internal.node.xmlrpc.Slave.class);
     this.nodeName = nodeName;
   }
 
@@ -58,9 +55,9 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
     throw new UnsupportedOperationException();
   }
 
-  public Response<URL> getMasterUri() throws MalformedURLException {
+  public Response<URI> getMasterUri() throws URISyntaxException {
     List<Object> response = node.getMasterUri(nodeName);
-    return new Response<URL>((Integer) response.get(0), (String) response.get(1), new URL(
+    return new Response<URI>((Integer) response.get(0), (String) response.get(1), new URI(
         (String) response.get(2)));
   }
 

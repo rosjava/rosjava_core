@@ -33,6 +33,7 @@ import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -45,10 +46,10 @@ public class SimplePubSub {
   private static SlaveClient slaveClient;
 
   public static void main(String[] args) throws XmlRpcException, IOException, RemoteException,
-      InterruptedException {
+      InterruptedException, URISyntaxException {
     masterServer = new MasterServer("localhost", 0);
     masterServer.start();
-    masterClient = new MasterClient(masterServer.getAddress());
+    masterClient = new MasterClient(masterServer.getUri());
     slaveServer = new SlaveServer("/foo", masterClient, "localhost", 0);
     slaveServer.start();
 
@@ -67,7 +68,7 @@ public class SimplePubSub {
       }
     });
 
-    slaveClient = new SlaveClient("/bar", slaveServer.getAddress());
+    slaveClient = new SlaveClient("/bar", slaveServer.getUri());
     Response<ProtocolDescription> response = slaveClient.requestTopic("/hello",
         Sets.newHashSet(ProtocolNames.TCPROS));
     subscriber.start(response.getValue().getAddress());

@@ -18,20 +18,15 @@ package org.ros.internal.node.client;
 
 import com.google.common.collect.Lists;
 
+import org.ros.internal.node.Response;
+import org.ros.internal.service.ServiceServer;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.Subscriber;
 import org.ros.internal.topic.TopicDefinition;
 
-import org.ros.internal.service.ServiceServer;
-
-import org.ros.internal.node.Response;
-
-
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,8 +35,8 @@ import java.util.List;
  */
 public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master> {
 
-  public MasterClient(URL url) {
-    super(url, org.ros.internal.node.xmlrpc.Master.class);
+  public MasterClient(URI uri) throws MalformedURLException {
+    super(uri, org.ros.internal.node.xmlrpc.Master.class);
   }
 
   /**
@@ -49,16 +44,16 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * 
    * @param callerId ROS caller ID
    * @param service
-   * @param callerApi XML-RPC URI of caller node
+   * @param uri XML-RPC URI of caller node
    * @return
    * @throws MalformedURLException
    * @throws URISyntaxException 
    */
-  public Response<Integer> registerService(String callerId, ServiceServer<?> service, URL callerApi)
+  public Response<Integer> registerService(String callerId, ServiceServer<?> service, URI uri)
       throws MalformedURLException, URISyntaxException {
     List<Object> response = node
         .registerService(callerId, service.getName(), service.getUri()
-            .toString(), callerApi.toString());
+            .toString(), uri.toString());
     return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
         (Integer) response.get(2));
   }
@@ -81,18 +76,19 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @return Publishers for topic as a list of XML-RPC API URIs for nodes
    *         currently publishing the specified topic.
    * @throws MalformedURLException
+   * @throws URISyntaxException 
    */
-  public Response<List<URL>> registerSubscriber(String callerId, Subscriber<?> subscriber,
-      URL callerApi) throws MalformedURLException {
+  public Response<List<URI>> registerSubscriber(String callerId, Subscriber<?> subscriber,
+      URI callerApi) throws MalformedURLException, URISyntaxException {
     List<Object> response =
         node.registerSubscriber(callerId, subscriber.getTopicName(),
             subscriber.getTopicMessageType(), callerApi.toString());
     List<Object> values = Arrays.asList((Object[]) response.get(2));
-    List<URL> urls = Lists.newArrayList();
+    List<URI> uris = Lists.newArrayList();
     for (Object value : values) {
-      urls.add(new URL((String) value));
+      uris.add(new URI((String) value));
     }
-    return new Response<List<URL>>((Integer) response.get(0), (String) response.get(1), urls);
+    return new Response<List<URI>>((Integer) response.get(0), (String) response.get(1), uris);
   }
 
   public Response<Integer> unregisterSubscriber(String callerId, String topic, String callerApi) {
@@ -106,22 +102,23 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * 
    * @param callerId ROS caller ID
    * @param publisher the publisher to register
-   * @param callerApi API URL of publisher to register
+   * @param uri API URL of publisher to register
    * @return List of current subscribers of topic in the form of XML-RPC URIs
    * @throws MalformedURLException
+   * @throws URISyntaxException 
    */
-  public Response<List<URL>> registerPublisher(String callerId, Publisher publisher, URL callerApi)
-      throws MalformedURLException {
+  public Response<List<URI>> registerPublisher(String callerId, Publisher publisher, URI uri)
+      throws MalformedURLException, URISyntaxException {
     String topicName = publisher.getTopicName();
     String messageType = publisher.getTopicMessageType();
     List<Object> response =
-        node.registerPublisher(callerId, topicName, messageType, callerApi.toString());
+        node.registerPublisher(callerId, topicName, messageType, uri.toString());
     List<Object> values = Arrays.asList((Object[]) response.get(2));
-    List<URL> urls = Lists.newArrayList();
+    List<URI> uris = Lists.newArrayList();
     for (Object value : values) {
-      urls.add(new URL((String) value));
+      uris.add(new URI((String) value));
     }
-    return new Response<List<URL>>((Integer) response.get(0), (String) response.get(1), urls);
+    return new Response<List<URI>>((Integer) response.get(0), (String) response.get(1), uris);
   }
 
   public Response<Integer> unregisterPublisher(String callerId, String topic, String callerApi) {
@@ -130,9 +127,9 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
         (Integer) response.get(2));
   }
 
-  public Response<URL> lookupNode(String callerId, String nodeName) throws MalformedURLException {
+  public Response<URI> lookupNode(String callerId, String nodeName) throws URISyntaxException {
     List<Object> response = node.lookupNode(callerId, nodeName);
-    return new Response<URL>((Integer) response.get(0), (String) response.get(1), new URL(
+    return new Response<URI>((Integer) response.get(0), (String) response.get(1), new URI(
         (String) response.get(2)));
   }
 
@@ -144,9 +141,9 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
     throw new UnsupportedOperationException();
   }
 
-  public Response<URL> getUri(String callerId) throws MalformedURLException {
+  public Response<URI> getUri(String callerId) throws URISyntaxException {
     List<Object> response = node.getUri(callerId);
-    return new Response<URL>((Integer) response.get(0), (String) response.get(1), new URL(
+    return new Response<URI>((Integer) response.get(0), (String) response.get(1), new URI(
         (String) response.get(2)));
   }
 

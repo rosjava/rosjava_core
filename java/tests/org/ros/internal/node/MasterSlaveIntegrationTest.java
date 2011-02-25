@@ -68,23 +68,23 @@ public class MasterSlaveIntegrationTest {
   private SlaveClient slaveClient;
 
   @Before
-  public void setUp() throws XmlRpcException, IOException {
+  public void setUp() throws XmlRpcException, IOException, URISyntaxException {
     masterServer = new MasterServer("localhost", 0);
     masterServer.start();
-    masterClient = new MasterClient(masterServer.getAddress());
+    masterClient = new MasterClient(masterServer.getUri());
     slaveServer = new SlaveServer("/foo", masterClient, "localhost", 0);
     slaveServer.start();
-    slaveClient = new SlaveClient("/bar", slaveServer.getAddress());
+    slaveClient = new SlaveClient("/bar", slaveServer.getUri());
   }
 
   @Test
-  public void testGetMasterUri() throws IOException, RemoteException {
-    Response<URL> response = Response.checkOk(slaveClient.getMasterUri());
-    assertEquals(masterServer.getAddress(), response.getValue());
+  public void testGetMasterUri() throws IOException, RemoteException, URISyntaxException {
+    Response<URI> response = Response.checkOk(slaveClient.getMasterUri());
+    assertEquals(masterServer.getUri(), response.getValue());
   }
 
   @Test
-  public void testAddPublisher() throws RemoteException, IOException {
+  public void testAddPublisher() throws RemoteException, IOException, URISyntaxException {
     TopicDefinition topicDefinition =
         new TopicDefinition("/hello",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
@@ -96,7 +96,7 @@ public class MasterSlaveIntegrationTest {
   }
 
   @Test
-  public void testAddSubscriber() throws RemoteException, IOException {
+  public void testAddSubscriber() throws RemoteException, IOException, URISyntaxException {
     TopicDefinition topicDefinition =
         new TopicDefinition("/hello",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));

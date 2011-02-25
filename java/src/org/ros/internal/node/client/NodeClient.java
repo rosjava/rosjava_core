@@ -21,7 +21,8 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
 import org.apache.xmlrpc.client.util.ClientFactory;
 
-import java.net.URL;
+import java.net.MalformedURLException;
+import java.net.URI;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -31,13 +32,13 @@ import java.net.URL;
 public class NodeClient<T extends org.ros.internal.node.xmlrpc.Node> {
   
   protected final T node;
-  private final URL url;
+  private final URI uri;
   
-  public NodeClient(URL url, Class<T> interfaceClass) {
-    this.url = url;
+  public NodeClient(URI uri, Class<T> interfaceClass) throws MalformedURLException {
+    this.uri = uri;
     
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-    config.setServerURL(url);
+    config.setServerURL(uri.toURL());
     config.setEnabledForExtensions(true);
     config.setConnectionTimeout(60 * 1000);
     config.setReplyTimeout(60 * 1000);
@@ -53,8 +54,8 @@ public class NodeClient<T extends org.ros.internal.node.xmlrpc.Node> {
   /**
    * @return the URL address of the remote node
    */
-  public URL getRemoteAddress() {
-    return url;
+  public URI getRemoteUri() {
+    return uri;
   }
 
 }

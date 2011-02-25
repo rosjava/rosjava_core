@@ -21,8 +21,7 @@ import com.google.common.collect.ImmutableMap;
 
 import org.ros.internal.transport.ConnectionHeaderFields;
 
-
-import java.net.URL;
+import java.net.URI;
 import java.util.Map;
 
 /**
@@ -31,27 +30,27 @@ import java.util.Map;
 public class SlaveIdentifier {
   
   private final String name;
-  private final URL url;
+  private final URI uri;
   
-  public SlaveIdentifier(String name, URL url) {
+  public SlaveIdentifier(String name, URI uri) {
     Preconditions.checkNotNull(name);
     Preconditions.checkArgument(name.startsWith("/"));
     this.name = name;
-    this.url = url;
+    this.uri = uri;
   }
   
   @Override
   public String toString() {
-    Preconditions.checkNotNull(url);
-    return "SlaveIdentifier<" + name + ", " + url.toString() + ">";
+    Preconditions.checkNotNull(uri);
+    return "SlaveIdentifier<" + name + ", " + uri.toString() + ">";
   }
 
   public String getName() {
     return name;
   }
   
-  public URL getUrl() {
-    return url;
+  public URI getUri() {
+    return uri;
   }
 
   public Map<String, String> toHeader() {
@@ -65,7 +64,7 @@ public class SlaveIdentifier {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((name == null) ? 0 : name.hashCode());
-    result = prime * result + ((url == null) ? 0 : url.hashCode());
+    result = prime * result + ((uri == null) ? 0 : uri.hashCode());
     return result;
   }
 
@@ -83,10 +82,10 @@ public class SlaveIdentifier {
         return false;
     } else if (!name.equals(other.name))
       return false;
-    if (url == null) {
-      if (other.url != null)
+    if (uri == null) {
+      if (other.uri != null)
         return false;
-    } else if (!url.equals(other.url))
+    } else if (!uri.equals(other.uri))
       return false;
     return true;
   }

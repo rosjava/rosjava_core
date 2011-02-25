@@ -19,19 +19,15 @@ package org.ros.internal.node.xmlrpc;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import org.ros.internal.transport.ProtocolDescription;
-
-import org.ros.internal.topic.Publisher;
-
-import org.ros.internal.node.Response;
-import org.ros.internal.node.StatusCode;
-
-import org.ros.internal.node.server.SlaveServer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.internal.node.Response;
+import org.ros.internal.node.StatusCode;
+import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.topic.Publisher;
+import org.ros.internal.transport.ProtocolDescription;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
@@ -73,8 +69,8 @@ public class SlaveImpl implements Slave {
    */
   @Override
   public List<Object> getMasterUri(String callerId) {
-    URL url = slave.getMasterUri(callerId);
-    return new Response<String>(StatusCode.SUCCESS, "", url.toString()).toList();
+    URI uri = slave.getMasterUri(callerId);
+    return new Response<String>(StatusCode.SUCCESS, "", uri.toString()).toList();
   }
 
   /*

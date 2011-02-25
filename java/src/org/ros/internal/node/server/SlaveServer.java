@@ -21,34 +21,26 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
-
-import org.ros.internal.transport.ProtocolDescription;
-import org.ros.internal.transport.ProtocolNames;
-
+import org.apache.xmlrpc.XmlRpcException;
+import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.Response;
+import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.xmlrpc.SlaveImpl;
+import org.ros.internal.service.ServiceServer;
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.PublisherIdentifier;
 import org.ros.internal.topic.Subscriber;
 import org.ros.internal.topic.TopicDefinition;
-
-import org.ros.internal.service.ServiceServer;
-
-import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.Response;
-
-import org.ros.internal.node.xmlrpc.SlaveImpl;
-
-import org.ros.internal.node.client.MasterClient;
-
-
-import org.apache.xmlrpc.XmlRpcException;
+import org.ros.internal.transport.ProtocolDescription;
+import org.ros.internal.transport.ProtocolNames;
+import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.message.Message;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -74,27 +66,28 @@ public class SlaveServer extends NodeServer {
     subscribers = Maps.newConcurrentMap();
   }
 
-  public void start() throws XmlRpcException, IOException {
+  public void start() throws XmlRpcException, IOException, URISyntaxException {
     super.start(org.ros.internal.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
   }
 
-  public void addPublisher(Publisher publisher) throws MalformedURLException, RemoteException {
+  public void addPublisher(Publisher publisher) throws MalformedURLException, RemoteException,
+      URISyntaxException {
     String topic = publisher.getTopicName();
     publishers.put(topic, publisher);
-    Response.checkOk(master.registerPublisher(name, publisher, getAddress()));
+    Response.checkOk(master.registerPublisher(name, publisher, getUri()));
   }
 
   public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws RemoteException,
-      IOException {
+      IOException, URISyntaxException {
     String topic = subscriber.getTopicName();
     subscribers.put(topic, subscriber);
-    Response<List<URL>> response =
-        Response.checkOk(master.registerSubscriber(name, subscriber, getAddress()));
+    Response<List<URI>> response = Response.checkOk(master.registerSubscriber(name, subscriber,
+        getUri()));
     List<PublisherIdentifier> publishers = Lists.newArrayList();
-    for (URL url : response.getValue()) {
-      SlaveIdentifier slaveIdentifier = new SlaveIdentifier(name, url);
-      MessageDefinition messageDefinition =
-          MessageDefinition.createMessageDefinition(subscriber.getTopicMessageType());
+    for (URI uri : response.getValue()) {
+      SlaveIdentifier slaveIdentifier = new SlaveIdentifier(name, uri);
+      MessageDefinition messageDefinition = MessageDefinition.createMessageDefinition(subscriber
+          .getTopicMessageType());
       TopicDefinition topicDefinition = new TopicDefinition(topic, messageDefinition);
       publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
     }
@@ -102,15 +95,15 @@ public class SlaveServer extends NodeServer {
   }
 
   /**
-   * @param server 
-   * @throws MalformedURLException 
-   * @throws URISyntaxException 
+   * @param server
+   * @throws MalformedURLException
+   * @throws URISyntaxException
    */
   public void addService(ServiceServer<? extends Message> server) throws MalformedURLException,
       URISyntaxException {
-    master.registerService(name, server, getAddress());
+    master.registerService(name, server, getUri());
   }
-  
+
   public List<Object> getBusStats(String callerId) {
     throw new UnsupportedOperationException();
   }
@@ -119,8 +112,8 @@ public class SlaveServer extends NodeServer {
     throw new UnsupportedOperationException();
   }
 
-  public URL getMasterUri(String callerId) {
-    return master.getRemoteAddress();
+  public URI getMasterUri(String callerId) {
+    return master.getRemoteUri();
   }
 
   public void shutdown(String callerId, String message) {
@@ -158,9 +151,10 @@ public class SlaveServer extends NodeServer {
   /**
    * @return
    * @throws MalformedURLException
+   * @throws URISyntaxException
    */
-  public SlaveIdentifier toSlaveIdentifier() throws MalformedURLException {
-    return new SlaveIdentifier(name, getAddress());
+  public SlaveIdentifier toSlaveIdentifier() throws URISyntaxException, MalformedURLException {
+    return new SlaveIdentifier(name, getUri());
   }
 
 }

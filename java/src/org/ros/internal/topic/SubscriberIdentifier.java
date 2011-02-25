@@ -18,12 +18,10 @@ package org.ros.internal.topic;
 
 import com.google.common.collect.ImmutableMap;
 
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
-import org.ros.internal.node.server.SlaveIdentifier;
-
-
-import java.net.URL;
+import java.net.URI;
 import java.util.Map;
 
 /**
@@ -55,8 +53,8 @@ public class SubscriberIdentifier {
     return slaveIdentifier.getName();
   }
 
-  public URL getSlaveUrl() {
-    return slaveIdentifier.getUrl();
+  public URI getSlaveUri() {
+    return slaveIdentifier.getUri();
   }
 
   public String getTopicName() {

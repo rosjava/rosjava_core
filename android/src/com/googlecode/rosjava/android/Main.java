@@ -16,21 +16,17 @@
 
 package com.googlecode.rosjava.android;
 
-import org.ros.internal.topic.MessageDefinition;
-import org.ros.internal.topic.Publisher;
-import org.ros.internal.topic.TopicDefinition;
-
-import org.ros.internal.node.server.SlaveServer;
-
-import org.ros.internal.node.client.MasterClient;
-
 import android.app.Activity;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-
+import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.topic.MessageDefinition;
+import org.ros.internal.topic.Publisher;
+import org.ros.internal.topic.TopicDefinition;
 import org.ros.message.Time;
 import org.ros.message.geometry.Point;
 import org.ros.message.geometry.PoseStamped;
@@ -38,7 +34,8 @@ import org.ros.message.geometry.Quaternion;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class Main extends Activity {
 
@@ -58,12 +55,14 @@ public class Main extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    MasterClient master;
+    MasterClient master = null;
     try {
-      master = new MasterClient(new URL("http://192.168.1.136:11311/"));
+      master = new MasterClient(new URI("http://192.168.1.136:11311/"));
     } catch (MalformedURLException e) {
       e.printStackTrace();
       return;
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
     }
 
     TopicDefinition topicDefinition =

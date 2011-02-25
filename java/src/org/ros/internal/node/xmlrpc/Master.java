@@ -56,9 +56,10 @@ public interface Master extends Node {
    * @return publishers as a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic
    * @throws MalformedURLException
+   * @throws URISyntaxException 
    */
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
-      String callerApi) throws MalformedURLException;
+      String callerApi) throws URISyntaxException;
 
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi);
 
@@ -72,9 +73,10 @@ public interface Master extends Node {
    * @param callerApi API URI of publisher to register.
    * @return List of current subscribers of topic in the form of XMLRPC URIs.
    * @throws MalformedURLException
+   * @throws URISyntaxException 
    */
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) throws MalformedURLException;
+      String callerApi) throws URISyntaxException;
 
   public List<Object> unregisterPublisher(String callerId, String topic, String callerApi);
 

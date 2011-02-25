@@ -28,6 +28,8 @@ import org.apache.xmlrpc.webserver.WebServer;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 /**
@@ -50,7 +52,7 @@ public class NodeServer {
   }
 
   public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass,
-      T instance) throws XmlRpcException, IOException {
+      T instance) throws XmlRpcException, IOException, URISyntaxException {
     Preconditions.checkState(!running);
     XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
     PropertyHandlerMapping phm = new PropertyHandlerMapping();
@@ -63,7 +65,7 @@ public class NodeServer {
     server.start();
     running = true;
     if (DEBUG) {
-      log.info("Slave node bound to: " + getAddress());
+      log.info("Slave node bound to: " + getUri());
     }
   }
 
@@ -72,8 +74,8 @@ public class NodeServer {
     server.shutdown();
   }
   
-  public URL getAddress() throws MalformedURLException {
+  public URI getUri() throws MalformedURLException, URISyntaxException {
     Preconditions.checkState(running);
-    return new URL("http", hostname, server.getPort(), "");
+    return new URL("http", hostname, server.getPort(), "").toURI();
   }
 }

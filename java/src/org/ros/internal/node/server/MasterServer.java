@@ -34,6 +34,7 @@ import org.ros.internal.node.xmlrpc.MasterImpl;
 import org.apache.xmlrpc.XmlRpcException;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +58,7 @@ public class MasterServer extends NodeServer {
         Multimaps.synchronizedMultimap(ArrayListMultimap.<String, SubscriberIdentifier>create());
   }
 
-  public void start() throws XmlRpcException, IOException {
+  public void start() throws XmlRpcException, IOException, URISyntaxException {
     super.start(org.ros.internal.node.xmlrpc.MasterImpl.class, new MasterImpl(this));
   }
 
