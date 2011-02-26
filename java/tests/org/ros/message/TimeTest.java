@@ -30,7 +30,7 @@ import org.ros.message.Time;
 public class TimeTest {
 
   @Before
-  public void setUp()  {
+  public void setUp() {
   }
 
   @Test
@@ -39,7 +39,7 @@ public class TimeTest {
     Time t = new Time();
     assertEquals(0, t.nsecs);
     assertEquals(0, t.secs);
-      
+
     // Test secs/nsecs constructor with no normalization.
     t = new Time(1, 2);
     assertEquals(1, t.secs);
@@ -49,22 +49,14 @@ public class TimeTest {
     t = new Time(2, -1);
     assertEquals(1, t.secs);
     assertEquals(1000000000 - 1, t.nsecs);
-    
+
     t = new Time(2, 1000000000 + 2);
     assertEquals(3, t.secs);
     assertEquals(2, t.nsecs);
   }
-  
+
   @Test
-  public void testLaterThan() { 
-    assertTrue(new Time(0, 1).laterThan(new Time(0, 0)));
-    assertFalse(new Time(0, 0).laterThan(new Time(0, 1)));
-    assertTrue(new Time(1, 0).laterThan(new Time(0, 0)));
-    assertFalse(new Time(0, 0).laterThan(new Time(1, 0)));
-  }
-  
-  @Test
-  public void testFromMillis() { 
+  public void testFromMillis() {
     assertEquals(new Time(0, 0), Time.fromMillis(0));
     assertEquals(new Time(0, 1000000), Time.fromMillis(1));
     assertEquals(new Time(1, 0), Time.fromMillis(1000));
@@ -73,4 +65,39 @@ public class TimeTest {
     assertEquals(new Time(1, 11000000), Time.fromMillis(1011));
   }
 
+  @Test
+  public void testNormalize() {
+    Time t = new Time(0, 0);
+    t.secs = 1;
+    t.nsecs = 1000000000;
+    t.normalize();
+    assertEquals(2, t.secs);
+    assertEquals(0, t.nsecs);
+
+    t.secs = 1;
+    t.nsecs = -1;
+    t.normalize();
+    assertEquals(0, t.secs);
+    assertEquals(1000000000 - 1, t.nsecs);
+  }
+
+  @Test
+  public void testIsZero() {
+    assertTrue(new Time(0, 0).isZero());
+    assertFalse(new Time(1, 0).isZero());
+    assertFalse(new Time(0, 1).isZero());
+  }
+
+  @Test
+  public void testComparable() {
+    assertEquals(0, new Time(0, 0).compareTo(new Time(0, 0)));
+    assertEquals(0, new Time(1, 1).compareTo(new Time(1, 1)));
+    assertTrue(new Time(0, 1).compareTo(new Time(0, 0)) > 0);
+    
+    assertEquals(-1, new Time(0, 0).compareTo(new Time(0, 1)));
+    assertTrue(new Time(0, 0).compareTo(new Time(0, 1)) < 0);
+    assertTrue(new Time(1, 0).compareTo(new Time(0, 0)) > 0);
+    assertTrue(new Time(0, 0).compareTo(new Time(1, 0)) < 0);
+
+  }
 }

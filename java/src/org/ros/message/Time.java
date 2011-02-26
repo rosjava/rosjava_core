@@ -32,13 +32,25 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-// author: Jason Wolfe
-
 package org.ros.message;
 
-public class Time extends TimeUnit {
+/**
+ * ROS Time representation. Time and Time are primitive types in ROS.
+ * ROS represents each as two 32-bit integers: seconds and nanoseconds since epoch.
+ * 
+ * http://www.ros.org/wiki/msg
+ * 
+ * @author Jason Wolfe, kwc@willowgarage.com (Ken Conley)
+ *
+ */
+public class Time implements Comparable<Time> {
+
+  public int secs;
+  public int nsecs;
 
   public Time() {
+    secs = 0;
+    nsecs = 0;
   }
 
   public Time(int secs, int nsecs) {
@@ -66,19 +78,13 @@ public class Time extends TimeUnit {
     return new Time(secs - d.secs, nsecs - d.nsecs);
   }
 
-  public Duration subtract(Time t) {
-    return new Duration(secs - t.secs, nsecs - t.nsecs);
-  }
-
-  public boolean laterThan(Time t) {
-    normalize();
-    t.normalize();
-    return (secs > t.secs) || ((secs == t.secs) && nsecs > t.nsecs);
+  public Time subtract(Time t) {
+    return new Time(secs - t.secs, nsecs - t.nsecs);
   }
 
   public static Time fromMillis(double timeInMillis) {
-    int secs = (int) Math.floor(timeInMillis/1000);
-    int nsecs = (int) (timeInMillis - secs*1000) * 1000000;
+    int secs = (int) Math.floor(timeInMillis / 1000);
+    int nsecs = (int) (timeInMillis - secs * 1000) * 1000000;
     return new Time(secs, nsecs);
   }
 
@@ -86,7 +92,47 @@ public class Time extends TimeUnit {
     return secs + ":" + nsecs;
   }
 
+  public long totalNsecs() {
+    return ((long) secs) * 1000000000 + nsecs;
+  }
+
+  public boolean isZero() {
+    return (secs == 0) && (nsecs == 0);
+  }
+
+  public void normalize() {
+    while (nsecs < 0) {
+      nsecs += 1000000000;
+      secs -= 1;
+    }
+    while (nsecs >= 1000000000) {
+      nsecs -= 1000000000;
+      secs += 1;
+    }
+  }
+
+  public Time clone() {
+    try {
+      return (Time) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new RuntimeException("TimeUnit not cloneable?!");
+    }
+  }
+
   @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + nsecs;
+    result = prime * result + secs;
+    return result;
+  }
+
+  @Override
+  /**
+   * Check for equality between Time objects.  
+   * equals() does not normalize Time representations, so fields must match exactly.
+   */
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
@@ -95,8 +141,23 @@ public class Time extends TimeUnit {
     if (getClass() != obj.getClass())
       return false;
     Time other = (Time) obj;
-    normalize();
-    other.normalize();
-    return (secs == other.secs) && (nsecs == other.nsecs);
+    if (nsecs != other.nsecs)
+      return false;
+    if (secs != other.secs)
+      return false;
+    return true;
   }
+
+  @Override
+  public int compareTo(Time t) {    
+    if ((secs > t.secs) || ((secs == t.secs) && nsecs > t.nsecs)) { 
+      return 1;
+    }
+    if ((secs == t.secs) && (nsecs == t.nsecs)) { 
+      return 0;
+    }
+    return -1;
+  }
+
+  
 }
