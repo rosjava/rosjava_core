@@ -13,18 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros;
+package org.ros.namespace;
 
-/**
- * A simple interface for entry points into your app.
- * 
- * @author "Ethan Rublee ethan.rublee@gmail.com"
- */
-public abstract class RosMain {
-  /**
-   * Called to start your node by some magical ros java file.
-   * 
-   * @param argv
-   */
-  abstract public void rosMain(String argv[]);
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+public class AllTests {
+
+  public static Test suite() {
+    TestSuite suite = new TestSuite(AllTests.class.getName());
+    //$JUnit-BEGIN$
+    suite.addTestSuite(NamespaceTest.class);
+    suite.addTestSuite(NameTest.class);
+    //$JUnit-END$
+    return suite;
+  }
+
 }

@@ -15,26 +15,23 @@
  */
 package org.ros;
 
-/**
- *  A test of dynamic loading for ros classes.
- *  
- * @author "Ethan Rublee ethan.rublee@gmail.com"
+import org.ros.message.Message;
+
+
+
+/** This simple callback interface is used by the
+ * Subscriber whenever a new message is available.
+ * 
+ * @see Subscriber
+ * 
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
+ *
+ * @param <MessageType> The subscriber is specialized on a
+ * particular message type, to alleviate ambiguity.
  */
-public class RosTestMain {
-
+public interface MessageListener<MessageType extends Message> {
   /**
-   * @param args
-   * @throws IllegalAccessException
-   * @throws InstantiationException
-   * @throws ClassNotFoundException
+   * @param m
    */
-  public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException {
-    // Example of using a string based class loader so that we can load classes
-    // dynamically at runtime.
-    RosLoader rl = new RosLoader();
-    RosMain rm = rl.loadClass("org.ros.tutorials.RosPubSub");
-    rm.rosMain(args);
-  }
-
+  void onNewMessage(MessageType m);
 }

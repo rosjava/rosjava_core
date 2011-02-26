@@ -40,11 +40,11 @@ import java.net.URISyntaxException;
  * 
  */
 public class Subscriber<MessageType extends Message> {
-  
+
   private final Class<MessageType> messageClass;
   private final String topicName;
   private final String namespace;
-  
+
   private SlaveClient slaveClient;
   private org.ros.internal.topic.Subscriber<MessageType> subscriber;
 
@@ -55,12 +55,20 @@ public class Subscriber<MessageType extends Message> {
     subscriber = null;
   }
 
-  protected void init(SlaveServer server, final Callback<MessageType> callback)
+  /**
+   * Cancel all callbacks listening on this topic.
+   */
+  public void cancel() {
+    // FIXME cancel the subscrition
+    subscriber.shutdown();
+  }
+
+  protected void init(SlaveServer server, final MessageListener<MessageType> callback)
       throws InstantiationException, IllegalAccessException, IOException, URISyntaxException {
 
     // Set up topic definition.
-    Message m = (Message) messageClass.newInstance(); // a raw instance of a message
-
+    Message m = (Message) messageClass.newInstance(); // a raw instance of a
+                                                      // message
     TopicDefinition topicDefinition;
     topicDefinition = new TopicDefinition(topicName, MessageDefinition.createFromMessage(m));
     // Create a subscriber, and add a listener.
@@ -78,14 +86,6 @@ public class Subscriber<MessageType extends Message> {
     Response<ProtocolDescription> response = slaveClient.requestTopic(topicName,
         Sets.newHashSet(ProtocolNames.TCPROS));
     subscriber.start(response.getValue().getAddress());
-  }
-
-  /**
-   * Cancel all callbacks listening on this topic.
-   */
-  public void cancel() {
-    // FIXME cancel the subscrition
-    subscriber.shutdown();
   }
 
 }

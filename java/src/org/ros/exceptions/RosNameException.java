@@ -13,18 +13,39 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros;
+package org.ros.exceptions;
 
 /**
- * A simple interface for entry points into your app.
- * 
- * @author "Ethan Rublee ethan.rublee@gmail.com"
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
+ *
  */
-public abstract class RosMain {
+public class RosNameException extends RosException {
+
   /**
-   * Called to start your node by some magical ros java file.
    * 
-   * @param argv
    */
-  abstract public void rosMain(String argv[]);
+  private static final long serialVersionUID = 1L;
+
+  /**
+   * @param exception
+   */
+  public RosNameException(final Exception exception) {
+    super(exception);
+  }
+
+  /**
+   * @param message
+   * @param throwable
+   */
+  public RosNameException(final String message, final Throwable throwable) {
+    super(message, throwable);
+  }
+
+  /**
+   * @param message
+   */
+  public RosNameException(final String message) {
+    super(message);
+  }
+
 }

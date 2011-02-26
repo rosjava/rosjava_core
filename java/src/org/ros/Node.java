@@ -15,156 +15,165 @@
  */
 package org.ros;
 
-import org.ros.message.Time;
+import com.google.common.base.Preconditions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosInitException;
+import org.ros.exceptions.RosNameException;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.logging.RosLog;
 import org.ros.message.Message;
+import org.ros.message.Time;
 import org.ros.namespace.Namespace;
+import org.ros.namespace.NamespaceTools;
+import org.ros.namespace.RosName;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 /**
- * @author "Ethan Rublee ethan.rublee@gmail.com"
- * 
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
 public class Node implements Namespace {
-  private MasterClient master = null;
-  private SlaveServer slave = null;
-
-  private String name = "node";
-  private int port = 0; // default port
+  /** The node's namespace name. */
+  private final RosName rosName;
+  /** Port on which the slave server will be initialized on. */
+  private final int port;
+  /** The master client, used for communicating with an existing master. */
+  private MasterClient masterClient;
+  /** ... */
+  private SlaveServer slaveServer;
 
   /**
+   * The log of this node. This log has the node_name inserted in each message,
+   * along with ROS standard logging conventions.
+   */
+  private RosLog log;
+
+  /**
+   * Create a node, using the command line args which will be mined for ros
+   * specific tags.
    * 
    * @param argv
    *          arg parsing
    * @param name
    *          the name, as in namespace of the node
+   * @throws RosNameException
    */
-  public Node(String argv[], String name) {
-    this.name = name;
-    log = LogFactory.getLog(this.name);
+  public Node(String argv[], String name) throws RosNameException {
+    RosName tname = new RosName(name);
+    if (!tname.isGlobal()) {
+      rosName = new RosName("/" + name); // FIXME Resolve node name from
+                                         // args remappings or pushdown,
+                                         // what have you.
+    } else {
+      rosName = tname;
+    }
+
+    port = 0; // default port
+    masterClient = null;
+    slaveServer = null;
+    // FIXME arg parsing
+    log = new RosLog(rosName.toString());
+  }
+
+  @Override
+  public <MessageType extends Message> Publisher<MessageType> createPublisher(String topic_name,
+      Class<MessageType> clazz) throws RosInitException, RosNameException {
+    try {
+      Preconditions.checkNotNull(masterClient);
+      Preconditions.checkNotNull(slaveServer);
+      Publisher<MessageType> pub = new Publisher<MessageType>(resolveName(topic_name), clazz);
+      pub.start();
+      slaveServer.addPublisher(pub.publisher);
+      return pub;
+    } catch (IOException e) {
+      throw new RosInitException(e);
+    } catch (InstantiationException e) {
+      throw new RosInitException(e);
+    } catch (IllegalAccessException e) {
+      throw new RosInitException(e);
+    } catch (RemoteException e) {
+      throw new RosInitException(e);
+    } catch (URISyntaxException e) {
+      throw new RosInitException(e);
+    }
+  }
+
+  @Override
+  public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topic_name,
+      final MessageListener<MessageType> callback, Class<MessageType> clazz)
+      throws RosInitException, RosNameException {
+
+    try {
+      Subscriber<MessageType> sub = new Subscriber<MessageType>(getName(), resolveName(topic_name),
+          clazz);
+      sub.init(slaveServer, callback);
+      return sub;
+    } catch (InstantiationException e) {
+      throw new RosInitException(e);
+    } catch (IllegalAccessException e) {
+      throw new RosInitException(e);
+    } catch (IOException e) {
+      throw new RosInitException(e);
+    } catch (URISyntaxException e) {
+      throw new RosInitException(e);
+    }
+
+  }
+
+  /**
+   * @return The current time of the system, using rostime.
+   */
+  public Time currentTime() {
+    // TODO: need to add in rostime implementation for simulated time in the
+    // event that wallclock is not being used
+    return Time.fromMillis(System.currentTimeMillis());
+  }
+
+  @Override
+  public String getName() {
+    return rosName.toString();
   }
 
   /**
    * This starts up a connection with the master and gets the juices flowing
    * 
    * @throws RosInitException
-   * @throws URISyntaxException 
    */
   public void init() throws RosInitException {
     try {
-      master = new MasterClient(Ros.getMasterUri());
-      slave = new SlaveServer(name, master, Ros.getHostName(), port);
-      slave.start();
+      masterClient = new MasterClient(Ros.getMasterUri());
+      slaveServer = new SlaveServer(rosName.toString(), masterClient, Ros.getHostName(), port);
+      slaveServer.start();
+      log().debug(
+          "Successfully initiallized " + rosName.toString() + " with:\n\tmaster @"
+              + masterClient.getRemoteUri().toString() + "\n\tListening on port: "
+              + slaveServer.getUri().toString());
     } catch (IOException e) {
-      throw new RosInitException(e.getMessage());
+      throw new RosInitException(e);
     } catch (XmlRpcException e) {
-      throw new RosInitException(e.getMessage());
+      throw new RosInitException(e);
     } catch (URISyntaxException e) {
-      throw new RosInitException(e.getMessage());
+      throw new RosInitException(e);
     }
   }
 
-  @Override
-  public <MessageT extends Message> Publisher<MessageT> createPublisher(String topic_name,
-      Class<MessageT> clazz) throws RosInitException {
-    try {
-      Publisher<MessageT> pub = new Publisher<MessageT>(resolveName(topic_name), clazz);
-      pub.start();
-      slave.addPublisher(pub.publisher);
-      return pub;
-    } catch (IOException e) {
-      throw new RosInitException(e.getMessage());
-    } catch (InstantiationException e) {
-      throw new RosInitException(e.getMessage());
-    } catch (IllegalAccessException e) {
-      throw new RosInitException(e.getMessage());
-    } catch (RemoteException e) {
-      throw new RosInitException(e.getMessage());
-    } catch (URISyntaxException e) {
-      throw new RosInitException(e.getMessage());
-    }
+  /**
+   * @return This is this nodes logger, and may be used to pump messages to
+   *         rosout.
+   */
+  public RosLog log() {
+    return log;
   }
 
   @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public String resolveName(String name) {
-    // TODO make better
-    return this.name + "/" + name;
-  }
-
-  @Override
-  public <MessageT extends Message> Subscriber<MessageT> createSubscriber(String topic_name,
-      final Callback<MessageT> callback, Class<MessageT> clazz) throws RosInitException {
-
-    try {
-      Subscriber<MessageT> sub = new Subscriber<MessageT>(getName(), resolveName(topic_name), clazz);
-      sub.init(slave, callback);
-      return sub;
-    } catch (InstantiationException e) {
-      throw new RosInitException(e.getMessage());
-    } catch (IllegalAccessException e) {
-      throw new RosInitException(e.getMessage());
-    } catch (IOException e) {
-      throw new RosInitException(e.getMessage());
-    } catch (URISyntaxException e) {
-      throw new RosInitException(e.getMessage());
-    }
-
-  }
-
-  /**
-   * @param message
-   */
-  public void logDebug(Object message) {
-    log.debug(message);
-  }
-
-  /**
-   * @param message
-   */
-  public void logWarn(Object message) {
-    log.warn(message);
-  }
-
-  /**
-   * @param message
-   */
-  public void logInfo(Object message) {
-    log.info(message);
-  }
-
-  /**
-   * @param message
-   */
-  public void logError(Object message) {
-    log.warn(message);
-  }
-
-  /**
-   * @param message
-   */
-  public void logFatal(Object message) {
-    log.fatal(message);
-  }
-
-  private Log log;
-
-  public Time currentTime() {
-    //TODO: need to add in rostime implementation for simulated time in the event that wallclock is not being used
-    return Time.fromMillis(System.currentTimeMillis());
+  public String resolveName(String name) throws RosNameException {
+    String r = NamespaceTools.resolveName(this, name);
+    log.debug("Resolved name " + name + " as " + r);
+    return r;
   }
 
 }

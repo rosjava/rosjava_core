@@ -1,6 +1,6 @@
 package org.ros.tutorials;
 
-import org.ros.Callback;
+import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.Publisher;
 import org.ros.RosLoader;
@@ -18,21 +18,21 @@ public class RosPubSub extends RosMain {
   Publisher<org.ros.message.std.String> pub;
 
   // callback for string messages
-  Callback<org.ros.message.std.String> hello_cb = new Callback<org.ros.message.std.String>() {
+  MessageListener<org.ros.message.std.String> hello_cb = new MessageListener<org.ros.message.std.String>() {
 
     @Override
     public void onNewMessage(org.ros.message.std.String m) {
-      node.logInfo(m.data);
+      node.log().info(m.data);
     }
   };
 
   @Override
   public void rosMain(String[] argv) {
     try {
-      node = new Node(argv, "/sample_node");
+      node = new Node(argv, "rosjava/sample_node");
       node.init();
-      pub = node.createPublisher("hello", org.ros.message.std.String.class);
-      node.createSubscriber("hello", hello_cb, org.ros.message.std.String.class);
+      pub = node.createPublisher("~hello", org.ros.message.std.String.class);
+      node.createSubscriber("~hello", hello_cb, org.ros.message.std.String.class);
 
       int seq = 0;
       while (true) {
@@ -42,12 +42,12 @@ public class RosPubSub extends RosMain {
         Thread.sleep(100);
       }
     } catch (Exception e) {
-      node.logFatal(e);
+      node.log().fatal(e);
     }
   }
 
-  public static void main(String[] argv) throws ClassNotFoundException,
-      InstantiationException, IllegalAccessException {
+  public static void main(String[] argv) throws ClassNotFoundException, InstantiationException,
+      IllegalAccessException {
 
     // Example of using a string based class loader so that we can load classes
     // dynamically at runtime.

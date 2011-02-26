@@ -13,18 +13,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros;
+package org.ros.logging;
 
-/**
- * A simple interface for entry points into your app.
- * 
- * @author "Ethan Rublee ethan.rublee@gmail.com"
+import org.apache.commons.logging.impl.SimpleLog;
+
+/** A Ros implementation of the commons logging.
+ * FIXME Make it a full implementation that barfs to /rosout.
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
+ *
  */
-public abstract class RosMain {
+public class RosLog extends SimpleLog {
+
   /**
-   * Called to start your node by some magical ros java file.
    * 
-   * @param argv
    */
-  abstract public void rosMain(String argv[]);
+  private static final long serialVersionUID = 1L;
+
+  /**
+   * @param nodeName This will be added as the tag to all log messages.
+   */
+  public RosLog(String nodeName) {
+    super(nodeName);
+    setLevel(LOG_LEVEL_DEBUG);
+  }
+
+
 }
