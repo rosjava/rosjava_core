@@ -27,7 +27,7 @@ import org.ros.logging.RosLog;
 import org.ros.message.Message;
 import org.ros.message.Time;
 import org.ros.namespace.Namespace;
-import org.ros.namespace.NamespaceTools;
+import org.ros.namespace.Resolver;
 import org.ros.namespace.RosName;
 
 import java.io.IOException;
@@ -171,7 +171,8 @@ public class Node implements Namespace {
 
   @Override
   public String resolveName(String name) throws RosNameException {
-    String r = NamespaceTools.resolveName(this, name);
+    Resolver resolver = Resolver.getDefault();
+    String r = resolver.resolveName(getName(), name);
     log.debug("Resolved name " + name + " as " + r);
     return r;
   }

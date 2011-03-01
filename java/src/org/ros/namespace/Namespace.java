@@ -25,10 +25,15 @@ import org.ros.exceptions.RosInitException;
 import org.ros.message.Message;
 
 /**
- * Interface for the ROS namespace spec.
+ * Interface for the ROS namespace specification.
  * 
+ * http://www.ros.org/wiki/Names
  */
 public interface Namespace {
+
+  /** Name of Java system property for setting default namespace */
+  public final static String DEFAULT_NAMESPACE_PROPERTY = "rosNamespace";
+  public final static String GLOBAL_NS = "/";
 
   /**
    * @param <MessageType>
@@ -40,8 +45,10 @@ public interface Namespace {
    *          the Class object used to deal with type eraser
    * @return A handle to a publisher that may be used to publish messages of
    *         type MessageType
-   * @throws RosInitException May throw if the system is not in a proper state.
-   * @throws RosNameException May throw if the name is invalid.
+   * @throws RosInitException
+   *           May throw if the system is not in a proper state.
+   * @throws RosNameException
+   *           May throw if the name is invalid.
    */
   public <MessageType extends Message> Publisher<MessageType> createPublisher(String topic_name,
       Class<MessageType> clazz) throws RosInitException, RosNameException;
@@ -66,10 +73,12 @@ public interface Namespace {
    *           The subscriber may fail if the Ros system has not been
    *           initialized or other wackyness. TODO specify exceptions that
    *           might be thrown here.
-   * @throws RosNameException May throw if the topic name is invalid.
+   * @throws RosNameException
+   *           May throw if the topic name is invalid.
    */
   public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topic_name,
-      MessageListener<MessageType> callback, Class<MessageType> clazz) throws RosInitException, RosNameException;
+      MessageListener<MessageType> callback, Class<MessageType> clazz) throws RosInitException,
+      RosNameException;
 
   /**
    * @return The fully resolved name of this namespace, e.g. "/foo/bar/boop".
@@ -78,12 +87,12 @@ public interface Namespace {
 
   /**
    * Resolve the given name, using ROS conventions, into a full ROS namespace
-   * name. Will be relative to the current namespace unless prepended by a "/"
+   * name. Will be relative to the current namespace unless the name is global.
    * 
    * @param name
    *          The name to resolve.
    * @return Fully resolved ros namespace name.
-   * @throws RosNameException 
+   * @throws RosNameException
    */
   public String resolveName(String name) throws RosNameException;
 }

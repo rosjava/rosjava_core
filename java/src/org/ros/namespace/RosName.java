@@ -25,6 +25,7 @@ import org.ros.exceptions.RosNameException;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * 
  */
+//TODO: kwc: unless this becomes part of the user-facing API, should probably stuff this inside of internal
 public class RosName {
   private final String name;
 
@@ -35,12 +36,17 @@ public class RosName {
   public RosName(String name) throws RosNameException {
     Preconditions.checkNotNull(name);
     try {
-      Preconditions.checkArgument(!name.isEmpty());
-      Preconditions.checkArgument(name.matches("[0-9|a-z|A-Z|_|/|~]*"),
-          "Invalid unix name, may not contain special characters.");
-      Preconditions.checkArgument(!name.endsWith("/"), "No trailing slash please!");
+      // allow empty name
+      if (name.length() > 0) {
+        Preconditions.checkArgument(name.matches("^[\\~\\/A-Za-z][\\w_\\/]*$"),
+            "Invalid unix name, may not contain special characters.");
+      }
     } catch (IllegalArgumentException e) {
       throw new RosNameException(e);
+    }
+    // trim trailing slashes for canonical representation
+    while (name != Namespace.GLOBAL_NS && name.endsWith("/")) {
+      name = name.substring(0, name.length() - 1);
     }
     this.name = name;
   }
@@ -106,11 +112,22 @@ public class RosName {
    * @return Gets the parent of this name, may be empty if there is no parent.
    */
   public String getParent() {
-    int slashIdx = name.lastIndexOf('/');
-    if (slashIdx != -1)
-      return name.substring(0, slashIdx);
-    else
+    if (name.length() == 0) {
       return "";
+    }
+    if (name.equals(Namespace.GLOBAL_NS)) {
+      return Namespace.GLOBAL_NS;
+    }
+    int slashIdx = name.lastIndexOf('/');
+    if (slashIdx > 1) {
+      return name.substring(0, slashIdx);
+    } else {
+      if (isGlobal()) { 
+        return Namespace.GLOBAL_NS;
+      } else { 
+        return "";
+      }
+    }
   }
 
   @Override

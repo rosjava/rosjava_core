@@ -32,61 +32,80 @@ public class NameTest extends TestCase {
   }
 
   @Test
-  public void testValidNames() throws RosNameException {
+  public void testToString() {
     try {
-      RosName n = new RosName("abc");
-      n = new RosName("ab7");
-      n = new RosName("ab7_kdfJKSDJFGkd");
-      n = new RosName("/abc");
-      n = new RosName("~garge");
-      n = new RosName("~kjdfkj/dfa");
+      String[] canonical = { "abc", "ab7", "/abc", "/abc/bar", "/", "~garage", "~foo/bar" };
+      for (String c : canonical) {
+        assertEquals(c, new RosName(c).toString());
+      }
+      // test canonicalization
+      System.out.println(new RosName("/foo/").toString());
+      assertEquals("/foo", new RosName("/foo/").toString());
+      assertEquals("foo", new RosName("foo/").toString());
+      assertEquals("foo/bar", new RosName("foo/bar/").toString());
     } catch (IllegalArgumentException e) {
+      fail("These names should be valid" + e.toString());
+    } catch (RosNameException e) {
       fail("These names should be valid" + e.toString());
     }
   }
 
   @Test
-  public void testInvalidNames() throws RosNameException {
-    try {
-      RosName n = new RosName("d23-+_)(abc");
-      fail("bad name not caught");
-    } catch (IllegalArgumentException e) {
+  public void testValidNames() {
 
+    String[] valid = { "", "abc", "ab7", "ab7_kdfJKSDJFGkd", "/abc", "/", "~private",
+        "~private/something", "/global", "/global/", "/global/local" };
+    try {
+      for (String v : valid) {
+        new RosName(v);
+      }
+    } catch (RosNameException e) {
+      fail("These names should be valid" + e.toString());
     }
-    try {
-      RosName n = new RosName("");
-      fail("bad name not caught");
-    } catch (IllegalArgumentException e) {
+  }
 
+  @Test
+  public void testInvalidNames() {
+    final String[] illegalChars = { "=", "-", "(", ")", "*", "%", "^" };
+    for (String i : illegalChars) {
+      try {
+        new RosName("good" + i);
+        fail("bad name not caught: " + i);
+      } catch (RosNameException e) {
+      }
     }
-    try {
-      RosName n = new RosName("/");
-      fail("bad name not caught");
-    } catch (IllegalArgumentException e) {
-
-    }
-    try {
-      RosName n = new RosName("5/");
-      fail("bad name not caught");
-    } catch (IllegalArgumentException e) {
-
+    final String[] illegalNames = { "/~private", "5foo" };
+    for (String i : illegalNames) {
+      try {
+        new RosName(i);
+        fail("bad name not caught" + i);
+      } catch (RosNameException e) {
+      }
     }
   }
 
   @Test
   public void testIsGlobal() throws RosNameException {
-    RosName n = new RosName("/gobal/name");
-    assertTrue(n.isGlobal());
-    n = new RosName("notgobal/name");
-    assertFalse(n.isGlobal());
+    final String[] tests = { "/", "/global", "/global2" };
+    for (String t : tests) {
+      assertTrue(new RosName(t).isGlobal());
+    }
+    final String[] fails = { "", "not_global", "not/global" };
+    for (String t : fails) {
+      assertFalse(new RosName(t).isGlobal());
+    }
   }
 
   @Test
   public void testIsPrivate() throws RosNameException {
-    RosName n = new RosName("~name");
-    assertTrue(n.isPrivate());
-    n = new RosName("name/m");
-    assertFalse(n.isPrivate());
+    String[] tests = { "~name", "~name/sub" };
+    for (String t : tests) {
+      assertTrue(new RosName(t).isPrivate());
+    }
+    String[] fails = { "", "not_private", "not/private", "/" };
+    for (String f : fails) {
+      assertFalse(new RosName(f).isPrivate());
+    }
   }
 
   @Test
@@ -99,10 +118,25 @@ public class NameTest extends TestCase {
 
   @Test
   public void testGetParent() throws RosNameException {
-    RosName n = new RosName("/wg/name");
-    assertTrue(n.getParent().equals("/wg"));
-    n = new RosName("/wg");
-    assertTrue(n.getParent().equals(""));
+    // parent of empty is empty, just like dirname
+    assertEquals("", new RosName("").getParent());
+    // parent of global is global, just like dirname
+    assertEquals("/", new RosName("/").getParent());
+
+    // test with global names
+    assertEquals("/wg", new RosName("/wg/name").getParent());
+    assertEquals("/wg", new RosName("/wg/name/").getParent());
+    System.out.println(new RosName("/wg/").getParent());
+    System.out.println(new RosName("/wg/").isGlobal());
+    System.out.println(new RosName("/wg/").toString());
+    assertEquals("/", new RosName("/wg/").getParent());
+    assertEquals("/", new RosName("/wg").getParent());
+
+    // test with relative names
+    System.out.println(new RosName("wg/name").getParent());
+    assertEquals("wg", new RosName("wg/name").getParent());
+    System.out.println(new RosName("wg/").getParent());
+    assertEquals("", new RosName("wg/").getParent());
   }
 
 }
