@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Provides access to the XML-RPC API exposed by a {@link MasterServer}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master> {
