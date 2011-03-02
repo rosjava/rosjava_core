@@ -26,7 +26,6 @@ import org.ros.internal.node.server.SlaveServer;
 import org.ros.logging.RosLog;
 import org.ros.message.Message;
 import org.ros.message.Time;
-import org.ros.namespace.Resolver;
 import org.ros.namespace.RosName;
 import org.ros.namespace.RosNamespace;
 
@@ -38,6 +37,11 @@ import java.net.URISyntaxException;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
 public class Node implements RosNamespace {
+  /**
+   * The node's context for name resolution and possibly other global
+   * configuration issues (rosparam)
+   */
+  private final RosContext context;
   /** The node's namespace name. */
   private final RosName rosName;
   private String hostName;
@@ -49,40 +53,33 @@ public class Node implements RosNamespace {
   private SlaveServer slaveServer;
 
   /**
-   * The log of this node. This log has the node_name inserted in each message,
-   * along with ROS standard logging conventions.
+   * The log of this node. This log has the node's name inserted in each
+   * message, along with ROS standard logging conventions.
    */
   private RosLog log;
   private String masterUri;
 
   /**
-   * Create a node, using the command line args which will be mined for ros
-   * specific tags.
-   * 
-   * @param argv
-   *          arg parsing
    * @param name
-   *          the name, as in namespace of the node
    * @throws RosNameException
    */
-  public Node(String argv[], String name) throws RosNameException {
-    this(name);
+  public Node(String name) throws RosNameException {
+    this(name, Ros.getDefaultContext());
   }
 
-  public Node(String name) throws RosNameException {
-    RosName tname = new RosName(name);
-    if (!tname.isGlobal()) {
-      rosName = new RosName("/" + name); // FIXME Resolve node name from
-                                         // args remappings or pushdown,
-                                         // what have you.
-    } else {
-      rosName = tname;
-    }
-
+  /**
+   * @param name
+   * @param context
+   * @throws RosNameException
+   */
+  public Node(String name, RosContext context) throws RosNameException {
+    Preconditions.checkNotNull(context);
+    Preconditions.checkNotNull(name);
+    this.context = context;
+    rosName = new RosName(this.context.getResolver().resolveName(name));
     port = 0; // default port
     masterClient = null;
     slaveServer = null;
-    // FIXME arg parsing
     log = new RosLog(rosName.toString());
   }
 
@@ -163,7 +160,8 @@ public class Node implements RosNamespace {
    * @param masterUri
    *          The uri of the rosmaster, typically "http://localhost:11311", or
    *          "http://remotehost.com:11311"
-   * @param hostName the host
+   * @param hostName
+   *          the host
    * @throws RosInitException
    */
   public void init(String masterUri, String hostName) throws RosInitException {
@@ -196,8 +194,7 @@ public class Node implements RosNamespace {
 
   @Override
   public String resolveName(String name) throws RosNameException {
-    Resolver resolver = Resolver.getDefault();
-    String r = resolver.resolveName(getName(), name);
+    String r = context.getResolver().resolveName(getName(), name);
     log.debug("Resolved name " + name + " as " + r);
     return r;
   }

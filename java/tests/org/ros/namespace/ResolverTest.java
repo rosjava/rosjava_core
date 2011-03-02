@@ -15,6 +15,7 @@
  */
 package org.ros.namespace;
 
+import static org.junit.Assert.assertTrue;
 import org.ros.exceptions.RosNameException;
 
 import junit.framework.TestCase;
@@ -36,7 +37,7 @@ public class ResolverTest extends TestCase {
   @Test
   public void testResolveName() {
     // these tests are based on test_roslib_names.py
-    Resolver r = Resolver.getDefault();
+    RosResolver r = RosResolver.getDefault();
     try { 
       r.resolveName("foo", "bar");
       fail("should have raised");
@@ -105,23 +106,38 @@ public class ResolverTest extends TestCase {
 
      */
   }
+  @Test
+  public void testArgRemapping() throws RosNameException
+  {
+    String args = "name:=/my/name foo:=/my/foo --help";
+    RosResolver r = new RosResolver();
+    String[] stripped = r.initRemapping(args.split(" "));
+    assertTrue(stripped.length == 1);
+    assertTrue(stripped[0].equals("--help"));
+    String n = r.resolveName("name");
+    System.out.print(n);
+    assertTrue(n.equals("/my/name"));
+    assertTrue(r.resolveName("/name").equals("/name"));
+    assertTrue(r.resolveName("foo").equals("/my/foo"));
+    assertTrue(r.resolveName("/my/name").equals("/my/name"));
+  }
 
   @Test
   public void testGetDefaultNamespace() {
     try {
       
       System.clearProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY);
-      assertEquals(RosNamespace.GLOBAL_NS, Resolver.getDefaultNamespace());
+      assertEquals(RosNamespace.GLOBAL_NS, RosResolver.getDefaultNamespace());
       System.setProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY, "/");
-      assertEquals(RosNamespace.GLOBAL_NS, Resolver.getDefaultNamespace());
+      assertEquals(RosNamespace.GLOBAL_NS, RosResolver.getDefaultNamespace());
       
       
       System.setProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY, "/foo");
-      assertEquals("/foo", Resolver.getDefaultNamespace());
+      assertEquals("/foo", RosResolver.getDefaultNamespace());
       
       // make sure that the routine returns canonical
       System.setProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY, "/foo/");
-      assertEquals("/foo", Resolver.getDefaultNamespace());
+      assertEquals("/foo", RosResolver.getDefaultNamespace());
       
     } catch (RosNameException e) {
       e.printStackTrace();

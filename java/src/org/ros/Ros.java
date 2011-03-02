@@ -15,8 +15,6 @@
  */
 package org.ros;
 
-import org.ros.exceptions.RosException;
-
 import org.ros.logging.RosLog;
 
 import java.net.InetAddress;
@@ -78,4 +76,14 @@ public class Ros {
     }
     throw new RuntimeException("Could not find a network address for the local host!");
   }
+
+  /**
+   * @return The default roscontext, with is a global context.
+   */
+  public static RosContext getDefaultContext() {
+    // TODO Auto-generated method stub
+    return defaultContext;
+  }
+  
+  static private RosContext defaultContext = new RosContext();
 }

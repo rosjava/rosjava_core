@@ -25,7 +25,8 @@ import org.ros.exceptions.RosNameException;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * 
  */
-//TODO: kwc: unless this becomes part of the user-facing API, should probably stuff this inside of internal
+// TODO: kwc: unless this becomes part of the user-facing API, should probably
+// stuff this inside of internal
 public class RosName {
   private final String name;
 
@@ -38,7 +39,7 @@ public class RosName {
     try {
       // allow empty name
       if (name.length() > 0) {
-        Preconditions.checkArgument(name.matches("^[\\~\\/A-Za-z][\\w_\\/]*$"),
+        Preconditions.checkArgument(name.matches(getValidRosNamePattern()),
             "Invalid unix name, may not contain special characters.");
       }
     } catch (IllegalArgumentException e) {
@@ -49,6 +50,13 @@ public class RosName {
       name = name.substring(0, name.length() - 1);
     }
     this.name = name;
+  }
+
+  /**
+   * @return A pattern that may be used for verifying if a name is valid.
+   */
+  public static String getValidRosNamePattern() {
+    return "^[\\~\\/A-Za-z][\\w_\\/]*$";
   }
 
   /**
@@ -122,9 +130,9 @@ public class RosName {
     if (slashIdx > 1) {
       return name.substring(0, slashIdx);
     } else {
-      if (isGlobal()) { 
+      if (isGlobal()) {
         return RosNamespace.GLOBAL_NS;
-      } else { 
+      } else {
         return "";
       }
     }
