@@ -29,7 +29,7 @@ import org.ros.message.Message;
  * 
  * http://www.ros.org/wiki/Names
  */
-public interface Namespace {
+public interface RosNamespace {
 
   /** Name of Java system property for setting default namespace */
   public final static String DEFAULT_NAMESPACE_PROPERTY = "rosNamespace";

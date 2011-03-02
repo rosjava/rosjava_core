@@ -15,8 +15,16 @@
  */
 package org.ros;
 
+import org.ros.exceptions.RosException;
+
+import org.ros.logging.RosLog;
+
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Enumeration;
 
 /**
  * Alias class for some global convenience functions ?
@@ -26,6 +34,7 @@ import java.net.URISyntaxException;
  */
 public class Ros {
 
+  private static final RosLog log = new RosLog("Ros");
   /**
    * Finds the environment's host name, will look in TODO ROS_HOSTNAME
    * 
@@ -46,4 +55,27 @@ public class Ros {
     return new URI("http://localhost:11311/");
   }
 
+
+  /**
+   * @return The url of the local host. IPv4 only for now.
+   */
+  public static String getLocalIpAddress() {
+    try {
+      for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
+          .hasMoreElements();) {
+        NetworkInterface intf = en.nextElement();
+        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
+            .hasMoreElements();) {
+          InetAddress inetAddress = enumIpAddr.nextElement();
+          // IPv4 only for now
+          if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
+            return inetAddress.getHostAddress().toString();
+          }
+        }
+      }
+    } catch (SocketException ex) {
+      log.error(ex);
+    }
+    throw new RuntimeException("Could not find a network address for the local host!");
+  }
 }

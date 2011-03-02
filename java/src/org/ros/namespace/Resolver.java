@@ -53,7 +53,7 @@ public class Resolver {
 
     // This routine does not need to be high performance.
     return new RosName(
-        System.getProperty(Namespace.DEFAULT_NAMESPACE_PROPERTY, Namespace.GLOBAL_NS)).toString();
+        System.getProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY, RosNamespace.GLOBAL_NS)).toString();
   }
 
   /**
@@ -120,8 +120,8 @@ public class Resolver {
     // TODO: review - another possible behavior is to just return name2
     Preconditions.checkArgument(name2.isRelative(),
         "name2 cannot be joined as it is global or private");
-    if (name1.equals(Namespace.GLOBAL_NS)) {
-      return Namespace.GLOBAL_NS + name2.toString();
+    if (name1.equals(RosNamespace.GLOBAL_NS)) {
+      return RosNamespace.GLOBAL_NS + name2.toString();
     } else {
       return new RosName(name1.toString() + "/" + name2.toString()).toString();
     }

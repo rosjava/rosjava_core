@@ -26,9 +26,9 @@ import org.ros.internal.node.server.SlaveServer;
 import org.ros.logging.RosLog;
 import org.ros.message.Message;
 import org.ros.message.Time;
-import org.ros.namespace.Namespace;
 import org.ros.namespace.Resolver;
 import org.ros.namespace.RosName;
+import org.ros.namespace.RosNamespace;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,7 +37,7 @@ import java.net.URISyntaxException;
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
-public class Node implements Namespace {
+public class Node implements RosNamespace {
   /** The node's namespace name. */
   private final RosName rosName;
   private String hostName;
@@ -53,6 +53,7 @@ public class Node implements Namespace {
    * along with ROS standard logging conventions.
    */
   private RosLog log;
+  private String masterUri;
 
   /**
    * Create a node, using the command line args which will be mined for ros
@@ -158,10 +159,18 @@ public class Node implements Namespace {
     }
   }
 
-  public void init(String masteruri, String hostname) throws RosInitException {
+  /**
+   * @param masterUri
+   *          The uri of the rosmaster, typically "http://localhost:11311", or
+   *          "http://remotehost.com:11311"
+   * @param hostName the host
+   * @throws RosInitException
+   */
+  public void init(String masterUri, String hostName) throws RosInitException {
     try {
-      this.hostName = hostname;
-      masterClient = new MasterClient(new URI(masteruri));
+      this.hostName = hostName;
+      this.masterUri = masterUri;
+      masterClient = new MasterClient(new URI(this.masterUri));
       slaveServer = new SlaveServer(rosName.toString(), masterClient, this.hostName, port);
       slaveServer.start();
       log().debug(

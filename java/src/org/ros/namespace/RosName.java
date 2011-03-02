@@ -45,7 +45,7 @@ public class RosName {
       throw new RosNameException(e);
     }
     // trim trailing slashes for canonical representation
-    while (name != Namespace.GLOBAL_NS && name.endsWith("/")) {
+    while (name != RosNamespace.GLOBAL_NS && name.endsWith("/")) {
       name = name.substring(0, name.length() - 1);
     }
     this.name = name;
@@ -115,15 +115,15 @@ public class RosName {
     if (name.length() == 0) {
       return "";
     }
-    if (name.equals(Namespace.GLOBAL_NS)) {
-      return Namespace.GLOBAL_NS;
+    if (name.equals(RosNamespace.GLOBAL_NS)) {
+      return RosNamespace.GLOBAL_NS;
     }
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > 1) {
       return name.substring(0, slashIdx);
     } else {
       if (isGlobal()) { 
-        return Namespace.GLOBAL_NS;
+        return RosNamespace.GLOBAL_NS;
       } else { 
         return "";
       }

@@ -45,11 +45,11 @@ public class ResolverTest extends TestCase {
       fail("should have not raised");
     }
     try {
-      assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
-      assertEquals(Namespace.GLOBAL_NS, r.resolveName("/node", ""));
+      assertEquals(RosNamespace.GLOBAL_NS, r.resolveName(RosNamespace.GLOBAL_NS, ""));
+      assertEquals(RosNamespace.GLOBAL_NS, r.resolveName("/node", ""));
       System.out.println(r.resolveName("/ns1/node", ""));
       assertEquals("/ns1", r.resolveName("/ns1/node", ""));
-      assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
+      assertEquals(RosNamespace.GLOBAL_NS, r.resolveName(RosNamespace.GLOBAL_NS, ""));
       
       // relative namespaces get resolved to default namespace
       assertEquals("/foo", r.resolveName("/", "foo"));
@@ -110,24 +110,24 @@ public class ResolverTest extends TestCase {
   public void testGetDefaultNamespace() {
     try {
       
-      System.clearProperty(Namespace.DEFAULT_NAMESPACE_PROPERTY);
-      assertEquals(Namespace.GLOBAL_NS, Resolver.getDefaultNamespace());
-      System.setProperty(Namespace.DEFAULT_NAMESPACE_PROPERTY, "/");
-      assertEquals(Namespace.GLOBAL_NS, Resolver.getDefaultNamespace());
+      System.clearProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY);
+      assertEquals(RosNamespace.GLOBAL_NS, Resolver.getDefaultNamespace());
+      System.setProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY, "/");
+      assertEquals(RosNamespace.GLOBAL_NS, Resolver.getDefaultNamespace());
       
       
-      System.setProperty(Namespace.DEFAULT_NAMESPACE_PROPERTY, "/foo");
+      System.setProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY, "/foo");
       assertEquals("/foo", Resolver.getDefaultNamespace());
       
       // make sure that the routine returns canonical
-      System.setProperty(Namespace.DEFAULT_NAMESPACE_PROPERTY, "/foo/");
+      System.setProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY, "/foo/");
       assertEquals("/foo", Resolver.getDefaultNamespace());
       
     } catch (RosNameException e) {
       e.printStackTrace();
       fail("could not generate names");
     } finally {
-      System.clearProperty(Namespace.DEFAULT_NAMESPACE_PROPERTY);
+      System.clearProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY);
     }
   }
 
