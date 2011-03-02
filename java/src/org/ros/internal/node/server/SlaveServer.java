@@ -74,20 +74,22 @@ public class SlaveServer extends NodeServer {
       URISyntaxException {
     String topic = publisher.getTopicName();
     publishers.put(topic, publisher);
-    Response.checkOk(master.registerPublisher(name, publisher, getUri()));
+    Response.checkOk(master.registerPublisher(toSlaveIdentifier(), publisher));
   }
 
   public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws RemoteException,
       IOException, URISyntaxException {
     String topic = subscriber.getTopicName();
     subscribers.put(topic, subscriber);
-    Response<List<URI>> response = Response.checkOk(master.registerSubscriber(name, subscriber,
-        getUri()));
+    Response<List<URI>> response =
+        Response.checkOk(master.registerSubscriber(toSlaveIdentifier(), subscriber));
     List<PublisherIdentifier> publishers = Lists.newArrayList();
     for (URI uri : response.getResult()) {
-      SlaveIdentifier slaveIdentifier = new SlaveIdentifier(name, uri);
-      MessageDefinition messageDefinition = MessageDefinition.createMessageDefinition(subscriber
-          .getTopicMessageType());
+      // TODO(damonkohler): What should we supply as the name of this slave?
+      // It's not given to us in the response.
+      SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/unnamed", uri);
+      MessageDefinition messageDefinition =
+          MessageDefinition.createMessageDefinition(subscriber.getTopicMessageType());
       TopicDefinition topicDefinition = new TopicDefinition(topic, messageDefinition);
       publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
     }
@@ -96,12 +98,12 @@ public class SlaveServer extends NodeServer {
 
   /**
    * @param server
-   * @throws MalformedURLException
    * @throws URISyntaxException
+   * @throws MalformedURLException
    */
-  public void addService(ServiceServer<? extends Message> server) throws MalformedURLException,
-      URISyntaxException {
-    master.registerService(name, server, getUri());
+  public void addService(ServiceServer<? extends Message> server) throws URISyntaxException,
+      MalformedURLException {
+    master.registerService(toSlaveIdentifier(), server);
   }
 
   public List<Object> getBusStats(String callerId) {

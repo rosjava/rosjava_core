@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.service.ServiceDefinition;
 import org.ros.internal.service.ServiceServer;
@@ -97,7 +98,7 @@ public class MasterSlaveIntegrationTest {
     slaveServer.addPublisher(publisher);
     publishers = slaveServer.addSubscriber(subscriber);
     PublisherIdentifier publisherDescription =
-        publisher.toPublisherIdentifier(slaveServer.toSlaveIdentifier());
+        publisher.toPublisherIdentifier(new SlaveIdentifier("/unnamed", slaveServer.getUri()));
     assertTrue(publishers.contains(publisherDescription));
 
     Response<List<TopicDefinition>> response =
