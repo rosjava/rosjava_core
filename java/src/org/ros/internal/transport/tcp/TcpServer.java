@@ -49,7 +49,7 @@ public abstract class TcpServer {
     
     @Override
     public void run() {
-      while (!isInterrupted()) {
+      while (!Thread.currentThread().isInterrupted()) {
         try {
           onNewConnection(server.accept());
         } catch (IOException e) {

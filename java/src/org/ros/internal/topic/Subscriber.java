@@ -56,7 +56,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
             log.info("Received message: " + message);
           }
           for (SubscriberListener<MessageType> listener : listeners) {
-            if (isInterrupted()) {
+            if (Thread.currentThread().isInterrupted()) {
               break;
             }
             listener.onNewMessage(message);
