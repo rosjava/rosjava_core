@@ -27,9 +27,9 @@ public class RosPubSub extends RosMain {
   };
 
   @Override
-  public void rosMain(String[] argv) {
+  public void rosMain(String[] argv, RosContext context) {
     try {
-      node = new Node(argv, "rosjava/sample_node");
+      node = new Node(context, "rosjava/sample_node");
       node.init();
       pub = node.createPublisher("~hello", org.ros.message.std.String.class);
       node.createSubscriber("~hello", hello_cb, org.ros.message.std.String.class);
