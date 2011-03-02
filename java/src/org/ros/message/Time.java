@@ -88,6 +88,7 @@ public class Time implements Comparable<Time> {
     return new Time(secs, nsecs);
   }
 
+  @Override
   public String toString() {
     return secs + ":" + nsecs;
   }

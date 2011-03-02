@@ -108,7 +108,7 @@ public class Main extends Activity {
           PoseStamped pose = new PoseStamped();
           pose.header.frame_id = "/map";
           pose.header.seq = seq++;
-          pose.header.stamp = Time.now();
+          pose.header.stamp = Time.fromMillis(System.currentTimeMillis());
           pose.pose.position = origin;
           pose.pose.orientation = orientation;
           publisher.publish(pose);

@@ -65,10 +65,8 @@ public class Subscriber<MessageType extends Message> {
 
   protected void init(SlaveServer server, final MessageListener<MessageType> callback)
       throws InstantiationException, IllegalAccessException, IOException, URISyntaxException {
-
     // Set up topic definition.
-    Message m = (Message) messageClass.newInstance(); // a raw instance of a
-                                                      // message
+    Message m = messageClass.newInstance();
     TopicDefinition topicDefinition;
     topicDefinition = new TopicDefinition(topicName, MessageDefinition.createFromMessage(m));
     // Create a subscriber, and add a listener.

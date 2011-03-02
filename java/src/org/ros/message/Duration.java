@@ -105,6 +105,7 @@ public class Duration implements Comparable<Duration> {
     return totalNsecs() < 0;
   }
 
+  @Override
   public String toString() {
     return secs + ":" + nsecs;
   }
