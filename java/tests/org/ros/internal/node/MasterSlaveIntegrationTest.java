@@ -69,7 +69,7 @@ public class MasterSlaveIntegrationTest {
   @Test
   public void testGetMasterUri() throws IOException, RemoteException, URISyntaxException {
     Response<URI> response = Response.checkOk(slaveClient.getMasterUri());
-    assertEquals(masterServer.getUri(), response.getValue());
+    assertEquals(masterServer.getUri(), response.getResult());
   }
 
   @Test
@@ -81,7 +81,7 @@ public class MasterSlaveIntegrationTest {
     slaveServer.addPublisher(publisher);
     Response<ProtocolDescription> response =
         Response.checkOk(slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS)));
-    assertEquals(response.getValue(), new TcpRosProtocolDescription(publisher.getAddress()));
+    assertEquals(response.getResult(), new TcpRosProtocolDescription(publisher.getAddress()));
   }
 
   @Test
@@ -102,8 +102,8 @@ public class MasterSlaveIntegrationTest {
 
     Response<List<TopicDefinition>> response =
         Response.checkOk(slaveClient.getPublications());
-    assertEquals(1, response.getValue().size());
-    assertTrue(response.getValue().contains(publisher.getTopicDefinition()));
+    assertEquals(1, response.getResult().size());
+    assertTrue(response.getResult().contains(publisher.getTopicDefinition()));
   }
 
   @Test
@@ -122,7 +122,7 @@ public class MasterSlaveIntegrationTest {
         };
     slaveServer.addService(server);
     Response<URI> response = Response.checkOk(masterClient.lookupService("/foo", "/service"));
-    assertEquals(server.getUri(), response.getValue());
+    assertEquals(server.getUri(), response.getResult());
   }
 
 }

@@ -83,7 +83,7 @@ public class Subscriber<MessageType extends Message> {
     slaveClient = new SlaveClient(namespace, server.getUri());
     Response<ProtocolDescription> response = slaveClient.requestTopic(topicName,
         Sets.newHashSet(ProtocolNames.TCPROS));
-    subscriber.start(response.getValue().getAddress());
+    subscriber.start(response.getResult().getAddress());
   }
 
 }

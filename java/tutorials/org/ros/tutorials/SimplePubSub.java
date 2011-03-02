@@ -71,7 +71,7 @@ public class SimplePubSub {
     slaveClient = new SlaveClient("/bar", slaveServer.getUri());
     Response<ProtocolDescription> response = slaveClient.requestTopic("/hello",
         Sets.newHashSet(ProtocolNames.TCPROS));
-    subscriber.start(response.getValue().getAddress());
+    subscriber.start(response.getResult().getAddress());
 
     org.ros.message.std.String message = new org.ros.message.std.String();
     message.data = "Hello, ROS!";

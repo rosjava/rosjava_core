@@ -84,7 +84,7 @@ public class SlaveServer extends NodeServer {
     Response<List<URI>> response = Response.checkOk(master.registerSubscriber(name, subscriber,
         getUri()));
     List<PublisherIdentifier> publishers = Lists.newArrayList();
-    for (URI uri : response.getValue()) {
+    for (URI uri : response.getResult()) {
       SlaveIdentifier slaveIdentifier = new SlaveIdentifier(name, uri);
       MessageDefinition messageDefinition = MessageDefinition.createMessageDefinition(subscriber
           .getTopicMessageType());

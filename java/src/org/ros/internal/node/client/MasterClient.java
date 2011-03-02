@@ -19,6 +19,7 @@ package org.ros.internal.node.client;
 import com.google.common.collect.Lists;
 
 import org.ros.internal.node.Response;
+import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.service.ServiceServer;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.Subscriber;
@@ -43,23 +44,32 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * Register the caller as a provider of the specified service.
    * 
    * @param callerId ROS caller ID
-   * @param service
+   * @param service the {@link ServiceServer} register
    * @param uri XML-RPC URI of caller node
-   * @return
-   * @throws MalformedURLException
-   * @throws URISyntaxException 
+   * @return a {@link Response} with a void result
+   * @throws URISyntaxException
    */
-  public Response<Integer> registerService(String callerId, ServiceServer<?> service, URI uri)
-      throws MalformedURLException, URISyntaxException {
-    List<Object> response = node
-        .registerService(callerId, service.getName(), service.getUri()
-            .toString(), uri.toString());
-    return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
-        (Integer) response.get(2));
+  public Response<Void> registerService(String callerId, ServiceServer<?> service, URI uri)
+      throws URISyntaxException {
+    List<Object> response =
+        node.registerService(callerId, service.getName(), service.getUri().toString(),
+            uri.toString());
+    return new Response<Void>((Integer) response.get(0), (String) response.get(1), null);
   }
 
-  public Response<Integer> unregisterService(String callerId, String service, String serviceApi) {
-    List<Object> response = node.unregisterService(callerId, service, serviceApi);
+  /**
+   * Unregister the caller as a provider of the specified service.
+   * 
+   * @param callerId ROS caller ID
+   * @param service the {@link ServiceServer} to unregister
+   * @return a {@link Response} with the number of unregistered services as the
+   *         result
+   * @throws URISyntaxException
+   */
+  public Response<Integer> unregisterService(String callerId, ServiceServer<?> service)
+      throws URISyntaxException {
+    List<Object> response =
+        node.unregisterService(callerId, service.getName(), service.getUri().toString());
     return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
         (Integer) response.get(2));
   }
@@ -70,16 +80,16 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * of new publishers via the publisherUpdate API.
    * 
    * @param callerId ROS caller ID
-   * @param subscriber
-   * @param callerApi API URI of subscriber to register (used for new publisher
+   * @param subscriber the {@link Subscriber} to register
+   * @param callerApi API URI of the {@link SlaveServer} to register (used for new publisher
    *        notifications)
-   * @return Publishers for topic as a list of XML-RPC API URIs for nodes
-   *         currently publishing the specified topic.
-   * @throws MalformedURLException
-   * @throws URISyntaxException 
+   * @return a {@link Response} with a {@link List} or {@link SlaveServer}
+   *         XML-RPC API URIs for nodes currently publishing the specified
+   *         topic as the result
+   * @throws URISyntaxException
    */
   public Response<List<URI>> registerSubscriber(String callerId, Subscriber<?> subscriber,
-      URI callerApi) throws MalformedURLException, URISyntaxException {
+      URI callerApi) throws URISyntaxException {
     List<Object> response =
         node.registerSubscriber(callerId, subscriber.getTopicName(),
             subscriber.getTopicMessageType(), callerApi.toString());
@@ -91,8 +101,18 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
     return new Response<List<URI>>((Integer) response.get(0), (String) response.get(1), uris);
   }
 
-  public Response<Integer> unregisterSubscriber(String callerId, String topic, String callerApi) {
-    List<Object> response = node.unregisterSubscriber(callerId, topic, callerApi);
+  /**
+   * Unregister the specified subscriber.
+   * 
+   * @param callerId ROS caller ID
+   * @param subscriber the {@link Subscriber} to unregister
+   * @param callerApi 
+   * @return a {@link Response} with the number of unregistered subscribers as the result
+   */
+  public Response<Integer> unregisterSubscriber(String callerId, Subscriber<?> subscriber,
+      String callerApi) {
+    List<Object> response =
+        node.unregisterSubscriber(callerId, subscriber.getTopicName(), callerApi);
     return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
         (Integer) response.get(2));
   }
@@ -105,7 +125,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @param uri API URL of publisher to register
    * @return List of current subscribers of topic in the form of XML-RPC URIs
    * @throws MalformedURLException
-   * @throws URISyntaxException 
+   * @throws URISyntaxException
    */
   public Response<List<URI>> registerPublisher(String callerId, Publisher publisher, URI uri)
       throws MalformedURLException, URISyntaxException {

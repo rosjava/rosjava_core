@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -22,39 +22,39 @@ import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
- *
- * @param <T>
+ * 
+ * @param <ResultType>
  */
-public class Response<T> {
-  
+public class Response<ResultType> {
+
   private final StatusCode statusCode;
   private final String statusMessage;
-  private final T value;
-  
-  public static <T> Response<T> createError(String message, T value) {
-    return new Response<T>(StatusCode.ERROR, message, value);
+  private final ResultType result;
+
+  public static <ResultType> Response<ResultType> createError(String message, ResultType value) {
+    return new Response<ResultType>(StatusCode.ERROR, message, value);
   }
-  
-  public static <T> Response<T> createFailure(String message, T value) {
-    return new Response<T>(StatusCode.FAILURE, message, value);
+
+  public static <ResultType> Response<ResultType> createFailure(String message, ResultType value) {
+    return new Response<ResultType>(StatusCode.FAILURE, message, value);
   }
-  
-  public static <T> Response<T> createSuccess(String message, T value) {
-    return new Response<T>(StatusCode.SUCCESS, message, value);
+
+  public static <ReusltType> Response<ReusltType> createSuccess(String message, ReusltType value) {
+    return new Response<ReusltType>(StatusCode.SUCCESS, message, value);
   }
-  
-  public Response(int statusCode, String statusMessage, T value) {
+
+  public Response(int statusCode, String statusMessage, ResultType value) {
     this(StatusCode.fromInt(statusCode), statusMessage, value);
   }
 
-  public Response(StatusCode statusCode, String statusMessage, T value) {
+  public Response(StatusCode statusCode, String statusMessage, ResultType value) {
     this.statusCode = statusCode;
     this.statusMessage = statusMessage;
-    this.value = value;
+    this.result = value;
   }
-  
+
   public List<Object> toList() {
-    return Lists.newArrayList(statusCode.toInt(), statusMessage, value == null ? "null" : value);
+    return Lists.newArrayList(statusCode.toInt(), statusMessage, result == null ? "null" : result);
   }
 
   public StatusCode getStatusCode() {
@@ -65,16 +65,17 @@ public class Response<T> {
     return statusMessage;
   }
 
-  public T getValue() {
-    return value;
-  }
-  
-  @Override
-  public String toString() {
-    return "Response<" + statusCode + ", " + statusMessage + ", " + value.toString() + ">";
+  public ResultType getResult() {
+    return result;
   }
 
-  public static <T> Response<T> checkOk(Response<T> response) throws RemoteException {
+  @Override
+  public String toString() {
+    return "Response<" + statusCode + ", " + statusMessage + ", " + result.toString() + ">";
+  }
+
+  public static <ResultType> Response<ResultType> checkOk(Response<ResultType> response)
+      throws RemoteException {
     if (response.getStatusCode() != StatusCode.SUCCESS) {
       throw new RemoteException(response.toString());
     }
