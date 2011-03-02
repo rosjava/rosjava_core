@@ -31,6 +31,7 @@ import org.ros.namespace.Resolver;
 import org.ros.namespace.RosName;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
@@ -39,6 +40,7 @@ import java.net.URISyntaxException;
 public class Node implements Namespace {
   /** The node's namespace name. */
   private final RosName rosName;
+  private String hostName;
   /** Port on which the slave server will be initialized on. */
   private final int port;
   /** The master client, used for communicating with an existing master. */
@@ -63,6 +65,10 @@ public class Node implements Namespace {
    * @throws RosNameException
    */
   public Node(String argv[], String name) throws RosNameException {
+    this(name);
+  }
+
+  public Node(String name) throws RosNameException {
     RosName tname = new RosName(name);
     if (!tname.isGlobal()) {
       rosName = new RosName("/" + name); // FIXME Resolve node name from
@@ -86,7 +92,7 @@ public class Node implements Namespace {
       Preconditions.checkNotNull(masterClient);
       Preconditions.checkNotNull(slaveServer);
       Publisher<MessageType> pub = new Publisher<MessageType>(resolveName(topic_name), clazz);
-      pub.start();
+      pub.start(hostName);
       slaveServer.addPublisher(pub.publisher);
       return pub;
     } catch (IOException e) {
@@ -144,9 +150,19 @@ public class Node implements Namespace {
    * @throws RosInitException
    */
   public void init() throws RosInitException {
+
     try {
-      masterClient = new MasterClient(Ros.getMasterUri());
-      slaveServer = new SlaveServer(rosName.toString(), masterClient, Ros.getHostName(), port);
+      init(Ros.getMasterUri().toString(), Ros.getHostName());
+    } catch (URISyntaxException e) {
+      throw new RosInitException(e);
+    }
+  }
+
+  public void init(String masteruri, String hostname) throws RosInitException {
+    try {
+      this.hostName = hostname;
+      masterClient = new MasterClient(new URI(masteruri));
+      slaveServer = new SlaveServer(rosName.toString(), masterClient, this.hostName, port);
       slaveServer.start();
       log().debug(
           "Successfully initiallized " + rosName.toString() + " with:\n\tmaster @"
