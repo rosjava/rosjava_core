@@ -101,8 +101,7 @@ public class MasterSlaveIntegrationTest {
         publisher.toPublisherIdentifier(new SlaveIdentifier("/unnamed", slaveServer.getUri()));
     assertTrue(publishers.contains(publisherDescription));
 
-    Response<List<TopicDefinition>> response =
-        Response.checkOk(slaveClient.getPublications());
+    Response<List<TopicDefinition>> response = Response.checkOk(slaveClient.getPublications());
     assertEquals(1, response.getResult().size());
     assertTrue(response.getResult().contains(publisher.getTopicDefinition()));
   }
@@ -122,7 +121,9 @@ public class MasterSlaveIntegrationTest {
           }
         };
     slaveServer.addService(server);
-    Response<URI> response = Response.checkOk(masterClient.lookupService("/foo", "/service"));
+    Response<URI> response =
+        Response.checkOk(masterClient.lookupService(
+            SlaveIdentifier.createAnonymous(new URI("http://localhost:1234")), "/service"));
     assertEquals(server.getUri(), response.getResult());
   }
 

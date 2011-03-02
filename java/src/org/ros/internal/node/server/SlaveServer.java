@@ -100,10 +100,11 @@ public class SlaveServer extends NodeServer {
    * @param server
    * @throws URISyntaxException
    * @throws MalformedURLException
+   * @throws RemoteException 
    */
   public void addService(ServiceServer<? extends Message> server) throws URISyntaxException,
-      MalformedURLException {
-    master.registerService(toSlaveIdentifier(), server);
+      MalformedURLException, RemoteException {
+    Response.checkOk(master.registerService(toSlaveIdentifier(), server));
   }
 
   public List<Object> getBusStats(String callerId) {

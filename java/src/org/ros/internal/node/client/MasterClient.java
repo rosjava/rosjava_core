@@ -51,7 +51,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   }
 
   /**
-   * Register the caller as a provider of the specified service.
+   * Registers the given {@link ServiceServer}.
    * 
    * @param slave the {@link SlaveIdentifier} where the {@link ServiceServer} is
    *        running
@@ -68,7 +68,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   }
 
   /**
-   * Unregister the caller as a provider of the specified service.
+   * Unregisters the specified {@link ServiceServer}.
    * 
    * @param slave the {@link SlaveIdentifier} where the {@link ServiceServer} is
    *        running
@@ -86,9 +86,10 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   }
 
   /**
-   * Subscribe the caller to the specified topic. In addition to receiving a
-   * list of current publishers, the subscriber will also receive notifications
-   * of new publishers via the publisherUpdate API.
+   * Registers the given {@link Subscriber}. In addition to receiving a list of
+   * current {@link Publisher}s, the {@link Subscriber}s {@link SlaveServer}
+   * will also receive notifications of new {@link Publisher}s via the
+   * publisherUpdate API.
    * 
    * @param slave the {@link SlaveIdentifier} that the {@link Subscriber} is
    *        running on
@@ -112,7 +113,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   }
 
   /**
-   * Unregister the specified subscriber.
+   * Unregisters the specified {@link Subscriber}.
    * 
    * @param slave the {@link SlaveIdentifier} where the subscriber is running
    * @param subscriber the {@link Subscriber} to unregister
@@ -128,7 +129,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   }
 
   /**
-   * Register the specified {@link Publisher}.
+   * Registers the specified {@link Publisher}.
    * 
    * @param slave the {@link SlaveIdentifier} where the {@link Publisher} is
    *        running
@@ -153,12 +154,13 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   }
 
   /**
-   * Unregister the specified {@link Publisher}.
+   * Unregisters the specified {@link Publisher}.
    * 
    * @param slave the {@link SlaveIdentifier} where the {@link Publisher} is
    *        running
    * @param publisher the {@link Publisher} to unregister
-   * @return a {@link Response} with the number of unregistered {@link Publisher}s as the result
+   * @return a {@link Response} with the number of unregistered
+   *         {@link Publisher}s as the result
    */
   public Response<Integer> unregisterPublisher(SlaveIdentifier slave, Publisher publisher) {
     List<Object> response =
@@ -168,30 +170,56 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
         (Integer) response.get(2));
   }
 
-  public Response<URI> lookupNode(String callerId, String nodeName) throws URISyntaxException {
-    List<Object> response = node.lookupNode(callerId, nodeName);
+  /**
+   * Returns the {@link URI} of the {@link SlaveServer} with the given name.
+   * 
+   * @param slave the {@link SlaveIdentifier} of the caller
+   * @param nodeName the name of the {@link SlaveServer} to lookup
+   * @return a {@link Response} with the {@link URI} of the {@link SlaveServer}
+   *         as a result
+   * @throws URISyntaxException
+   */
+  public Response<URI> lookupNode(SlaveIdentifier slave, String nodeName) throws URISyntaxException {
+    List<Object> response = node.lookupNode(slave.getName(), nodeName);
     return new Response<URI>((Integer) response.get(0), (String) response.get(1), new URI(
         (String) response.get(2)));
   }
 
-  public Response<List<TopicDefinition>> getPublishedTopics(String callerId, String subgraph) {
-    throw new UnsupportedOperationException();
-  }
-
-  public Response<Object> getSystemState(String callerId) {
-    throw new UnsupportedOperationException();
-  }
-
-  public Response<URI> getUri(String callerId) throws URISyntaxException {
-    List<Object> response = node.getUri(callerId);
+  /**
+   * Returns the {@link URI} of the {@link MasterServer}.
+   * 
+   * @param slave the {@link SlaveIdentifier} of the caller
+   * @return the {@link URI} of the {@link MasterServer}
+   * @throws URISyntaxException
+   */
+  public Response<URI> getUri(SlaveIdentifier slave) throws URISyntaxException {
+    List<Object> response = node.getUri(slave.getName());
     return new Response<URI>((Integer) response.get(0), (String) response.get(1), new URI(
         (String) response.get(2)));
   }
 
-  public Response<URI> lookupService(String callerId, String service) throws URISyntaxException {
-    List<Object> response = node.lookupService(callerId, service);
+  /**
+   * Returns the {@link URI} of the {@link ServiceServer} with the given name.
+   * 
+   * @param slave the {@link SlaveIdentifier} of the caller
+   * @param serviceName the name of the {@link ServiceServer} to look up
+   * @return a {@link Response} with the {@link URI} of the
+   *         {@link ServiceServer} as a result
+   * @throws URISyntaxException
+   */
+  public Response<URI> lookupService(SlaveIdentifier slave, String serviceName)
+      throws URISyntaxException {
+    List<Object> response = node.lookupService(slave.getName(), serviceName);
     String value = (String) response.get(2);
     return new Response<URI>((Integer) response.get(0), (String) response.get(1), new URI(value));
+  }
+
+  public Response<List<TopicDefinition>> getPublishedTopics(SlaveIdentifier slave, String subgraph) {
+    throw new UnsupportedOperationException();
+  }
+
+  public Response<Object> getSystemState(SlaveIdentifier slave) {
+    throw new UnsupportedOperationException();
   }
 
 }

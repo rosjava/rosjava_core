@@ -39,6 +39,10 @@ public class SlaveIdentifier {
     this.uri = uri;
   }
   
+  public static SlaveIdentifier createAnonymous(URI uri) {
+    return new SlaveIdentifier("/unnamed", uri);
+  }
+  
   @Override
   public String toString() {
     Preconditions.checkNotNull(uri);
