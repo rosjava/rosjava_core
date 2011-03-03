@@ -38,24 +38,24 @@ public class RosCameraNode implements PreviewCallback {
   private static final String ROS_CAMERA_TAG = "RosCamera";
   Node node;
   private Publisher<Image> imagePublisher;
-  private Publisher<org.ros.message.std.String> talker;
-  private int seq;
   private Publisher<CameraInfo> cameraInfoPublisher;
 
   /**
-   * @param node_name
+   * @param masterURI Uri of our ros master to use.
+   * @param node_name The name of this node.
    *          the camera node name
    */
   public RosCameraNode(String masterURI,String node_name) {
-    // Find the total number of cameras available
     try {
-      node = new Node(node_name, Ros.getDefaultContext());
-      Log.i(ROS_CAMERA_TAG, "My name is what? " + Ros.getLocalIpAddress());
+      node = new Node(node_name);
+      String localIp = Ros.getLocalIpAddress();
+      Log.i(ROS_CAMERA_TAG, "My name is what? " + localIp);
       // FIXME resolve rosmaster from some global properties.
-      node.init(masterURI, Ros.getLocalIpAddress());
+      node.init(masterURI,localIp);
+      
+      //create image and camera info topics on local namespace
       imagePublisher = node.createPublisher("~image_raw", Image.class);
       cameraInfoPublisher = node.createPublisher("~camera_info", CameraInfo.class);
-      talker = node.createPublisher("~talker", org.ros.message.std.String.class);
     } catch (RosNameException e) {
       // TODO Auto-generated catch block
       Log.e(ROS_CAMERA_TAG, e.getMessage());
@@ -73,20 +73,17 @@ public class RosCameraNode implements PreviewCallback {
 
   @Override
   public void onPreviewFrame(byte[] data, Camera camera) {
-    org.ros.message.std.String str = new org.ros.message.std.String();
-    str.data = "on new frame!" + seq++;
-    talker.publish(str); // TODO interchange java string with ros String
     Size sz = camera.getParameters().getPreviewSize();
     image.data = data;
-    image.encoding = "8UC1";
+    image.encoding = "8UC1"; //just plain old buffer
     image.step = sz.width;
     image.width = sz.width;
-    image.height = sz.height + sz.height / 2;
+    image.height = sz.height + sz.height / 2; //yuv image, y is top width *height, uv are width*height/2 on the end.
     image.header.stamp = Time.fromMillis(System.currentTimeMillis());
     image.header.frame_id = "android_camera";
     imagePublisher.publish(image);
-    cameraInfo.header.stamp = image.header.stamp;
-    cameraInfo.header.frame_id = "android_camera";
+    cameraInfo.header.stamp = image.header.stamp; //give camera info the same stamp as image
+    cameraInfo.header.frame_id = "android_camera"; //TODO externalize this somehow.
     cameraInfo.width = sz.width;
     cameraInfo.width = sz.height;
     cameraInfoPublisher.publish(cameraInfo);

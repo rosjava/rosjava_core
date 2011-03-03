@@ -15,21 +15,14 @@
  */
 package org.ros.android.camera;
 
-import android.content.Intent;
-
-import android.widget.Toast;
-
-import android.content.DialogInterface;
-
-import android.app.AlertDialog;
-
-import android.hardware.Camera.PreviewCallback;
-
-import android.graphics.ImageFormat;
-
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.ImageFormat;
 import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,9 +35,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,7 +79,7 @@ public class RosCamera extends Activity implements PreviewCallback {
     if (requestCode == 0) {
       if (resultCode == RESULT_OK) {
         String contents = intent.getStringExtra("SCAN_RESULT");
-        String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+        // String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
         masterURI = contents;
         setupNode();
         // Handle successful scan
@@ -99,6 +92,7 @@ public class RosCamera extends Activity implements PreviewCallback {
   }
 
   private void launchUriSelector() {
+    // create a selector gui for picking the ros master url
     final CharSequence[] uriItems = { "From Barcode", "http://localhost:11311",
         "http://10.0.2.2:11311", };
     AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -113,7 +107,7 @@ public class RosCamera extends Activity implements PreviewCallback {
           Toast.makeText(getApplicationContext(), "Please Scan a QR Code with a ROS host URI.",
               Toast.LENGTH_LONG).show();
           masterURI = null;
-        } else {          
+        } else {
           masterURI = (String) uriItems[item];
           setupNode();
         }
@@ -331,7 +325,7 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback {
     Size optimalSize = null;
     double minDiff = Double.MAX_VALUE;
 
-    int targetHeight = h;
+    int targetHeight = Math.min(h,300);
 
     // Try to find an size match aspect ratio and size
     for (Size size : sizes) {
