@@ -172,7 +172,7 @@ public class Node implements RosNamespace {
       slaveServer = new SlaveServer(rosName.toString(), masterClient, this.hostName, port);
       slaveServer.start();
       log().debug(
-          "Successfully initiallized " + rosName.toString() + " with:\n\tmaster @"
+          "Successfully initiallized " + rosName.toString() + " with:\n\tmaster @ "
               + masterClient.getRemoteUri().toString() + "\n\tListening on port: "
               + slaveServer.getUri().toString());
     } catch (IOException e) {
