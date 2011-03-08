@@ -72,6 +72,11 @@ public class MasterSlaveIntegrationTest {
     Response<URI> response = Response.checkOk(slaveClient.getMasterUri());
     assertEquals(masterServer.getUri(), response.getResult());
   }
+  @Test
+  public void testGetPid() throws RemoteException {
+    Response<Integer> response = Response.checkOk(slaveClient.getPid());
+    assertTrue(response.getResult() > 0);
+  }
 
   @Test
   public void testAddPublisher() throws RemoteException, IOException, URISyntaxException {

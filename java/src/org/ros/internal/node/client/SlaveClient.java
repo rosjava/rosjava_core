@@ -65,12 +65,22 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
     throw new UnsupportedOperationException();
   }
 
-  public List<Object> getPid() {
-    throw new UnsupportedOperationException();
+  public Response<Integer> getPid() {
+    List<Object> response = node.getPid(nodeName);
+    return new Response<Integer>((Integer) response.get(0), (String) response.get(1), (Integer) response.get(2));
   }
 
-  public List<Object> getSubscriptions() {
-    throw new UnsupportedOperationException();
+  public Response<List<TopicDefinition>> getSubscriptions() {
+    List<Object> response = node.getSubscriptions(nodeName);
+    List<TopicDefinition> descriptions = Lists.newArrayList();
+    List<Object> topics = Arrays.asList((Object[]) response.get(2));
+    for (Object topic : topics) {
+      String name = (String) ((Object[]) topic)[0];
+      String type = (String) ((Object[]) topic)[1];
+      descriptions.add(new TopicDefinition(name, MessageDefinition.createMessageDefinition(type)));
+    }
+    return new Response<List<TopicDefinition>>((Integer) response.get(0), (String) response.get(1),
+        descriptions);
   }
 
   public Response<List<TopicDefinition>> getPublications() {
@@ -80,11 +90,10 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
     for (Object topic : topics) {
       String name = (String) ((Object[]) topic)[0];
       String type = (String) ((Object[]) topic)[1];
-      descriptions
-          .add(new TopicDefinition(name, MessageDefinition.createMessageDefinition(type)));
+      descriptions.add(new TopicDefinition(name, MessageDefinition.createMessageDefinition(type)));
     }
-    return new Response<List<TopicDefinition>>((Integer) response.get(0),
-        (String) response.get(1), descriptions);
+    return new Response<List<TopicDefinition>>((Integer) response.get(0), (String) response.get(1),
+        descriptions);
   }
 
   public List<Object> paramUpdate(String parameterKey, String parameterValue) {
@@ -96,16 +105,15 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
   }
 
   public Response<ProtocolDescription> requestTopic(String topic, Set<String> requestedProtocols) {
-    List<Object> response =
-        node.requestTopic(nodeName, topic, new Object[][] {requestedProtocols.toArray()});
+    List<Object> response = node.requestTopic(nodeName, topic,
+        new Object[][] { requestedProtocols.toArray() });
     List<Object> protocolParameters = Arrays.asList((Object[]) response.get(2));
     Preconditions.checkState(protocolParameters.size() == 3);
     Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
-    InetSocketAddress address =
-        InetSocketAddress.createUnresolved((String) protocolParameters.get(1),
-            (Integer) protocolParameters.get(2));
+    InetSocketAddress address = InetSocketAddress.createUnresolved(
+        (String) protocolParameters.get(1), (Integer) protocolParameters.get(2));
     return new Response<ProtocolDescription>((Integer) response.get(0), (String) response.get(1),
         new TcpRosProtocolDescription(address));
   }
-  
+
 }

@@ -19,6 +19,8 @@ package org.ros.internal.node.xmlrpc;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import org.ros.internal.topic.Subscriber;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.Response;
@@ -28,6 +30,7 @@ import org.ros.internal.topic.Publisher;
 import org.ros.internal.transport.ProtocolDescription;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
@@ -59,7 +62,8 @@ public class SlaveImpl implements Slave {
    */
   @Override
   public List<Object> getBusInfo(String callerId) {
-    return slave.getBusInfo(callerId);
+    List<Object> busInfo = slave.getBusInfo(callerId);
+    return Response.createSuccess("bus info", busInfo).toList();
   }
 
   /*
@@ -91,7 +95,12 @@ public class SlaveImpl implements Slave {
    */
   @Override
   public List<Object> getPid(String callerId) {
-    return slave.getPid(callerId);
+    try {
+      int pid = slave.getPid(callerId);
+      return Response.createSuccess("pid: " + pid, pid).toList();
+    } catch (UnsupportedOperationException e) {
+      return Response.createFailure("cannot retrieve pid on this platform", -1).toList();
+    }
   }
 
   /*
@@ -101,7 +110,12 @@ public class SlaveImpl implements Slave {
    */
   @Override
   public List<Object> getSubscriptions(String callerId) {
-    throw new UnsupportedOperationException();
+    List<Subscriber<?>> subscribers = slave.getSubscriptions();
+    List<List<String>> subscriptions = Lists.newArrayList();
+    for (Subscriber<?> subscriber : subscribers) {
+      subscriptions.add(subscriber.getTopicDefinitionAsList());
+    }
+    return Response.createSuccess("Success", subscriptions).toList();
   }
 
   /*
@@ -127,7 +141,8 @@ public class SlaveImpl implements Slave {
    */
   @Override
   public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) {
-    throw new UnsupportedOperationException();
+    // TODO(kwc) implement parameter subscriptions (low priority)
+    return Response.createError("paramUpdate is not supported", 0).toList();
   }
 
   /*
@@ -138,7 +153,22 @@ public class SlaveImpl implements Slave {
    */
   @Override
   public List<Object> publisherUpdate(String callerId, String topic, Object[] publishers) {
-    throw new UnsupportedOperationException();
+    try {
+      URI[] publisherUris = new URI[publishers.length];
+      int idx = 0;
+      for (Object publisher : publishers) {
+        publisherUris[idx++] = new URI(publisher.toString());
+      }
+
+      // TODO(kwc) this needs to queue an update in a separate thread to handle
+      // the new list of publishers for a topic. We cannot process inline as
+      // this may incur multiple outbound XMLRPC calls. Main thing here is the
+      // parse publishers[] into an appropriate data structure.
+
+      return Response.createSuccess("publisherUpdate success", 0).toList();
+    } catch (URISyntaxException e) {
+      return Response.createError("invalid URI sent in update", 0).toList();
+    }
   }
 
   /*
