@@ -59,6 +59,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
             if (Thread.currentThread().isInterrupted()) {
               break;
             }
+            // TODO(damonkohler): Recycle Message objects to avoid GC.
             listener.onNewMessage(message);
           }
         }

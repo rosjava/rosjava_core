@@ -90,6 +90,7 @@ public class Publisher extends Topic {
     return server.getAddress();
   }
 
+  // TODO(damonkohler): Recycle Message objects to avoid GC.
   public void publish(Message message) {
     if (DEBUG) {
       log.info("Publishing message: " + message);
