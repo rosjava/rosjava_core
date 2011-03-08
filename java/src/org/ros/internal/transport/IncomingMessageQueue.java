@@ -50,11 +50,6 @@ public abstract class IncomingMessageQueue<MessageType extends Message> {
         while (!Thread.currentThread().isInterrupted()) {
           messages.put(receiveMessage(messageClass, stream));
         }
-      } catch (InterruptedException e) {
-        // Cancelable
-        if (DEBUG) {
-          log.info("Canceled.");
-        }
       } catch (Exception e) {
         throw new RuntimeException(e);
       }

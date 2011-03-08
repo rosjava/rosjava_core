@@ -94,7 +94,7 @@ public class Publisher extends Topic {
     if (DEBUG) {
       log.info("Publishing message: " + message);
     }
-    out.add(message);
+    out.put(message);
   }
 
   @VisibleForTesting

@@ -71,8 +71,8 @@ public abstract class OutgoingMessageQueue {
     thread = new MessageSendingThread();
   }
 
-  public void add(Message message) {
-    messages.add(message);
+  public void put(Message message) {
+    messages.put(message);
   }
 
   public void shutdown() {

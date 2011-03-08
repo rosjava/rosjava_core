@@ -109,7 +109,7 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
       while (!Thread.currentThread().isInterrupted()) {
         try {
           RequestMessageType message = in.take();
-          out.add(buildResponse(message));
+          out.put(buildResponse(message));
         } catch (InterruptedException e) {
           // Cancelable
         }

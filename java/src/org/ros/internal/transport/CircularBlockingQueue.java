@@ -28,11 +28,15 @@ public class CircularBlockingQueue<T> extends LinkedBlockingDeque<T> {
   }
   
   @Override
-  public void put(T entry) throws InterruptedException {
+  public void put(T entry) {
     if (remainingCapacity() == 1) {
       removeLast();
     }
-    super.put(entry);
+    try {
+      super.put(entry);
+    } catch (InterruptedException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
 }

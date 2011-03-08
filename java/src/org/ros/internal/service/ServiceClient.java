@@ -93,7 +93,7 @@ public class ServiceClient<ResponseMessageType extends Message> {
    * @throws InterruptedException 
    */
   public ResponseMessageType call(Message message) throws InterruptedException {
-    out.add(message);
+    out.put(message);
     return in.take();
   }
 

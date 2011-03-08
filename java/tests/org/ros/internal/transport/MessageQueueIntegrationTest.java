@@ -74,7 +74,7 @@ public class MessageQueueIntegrationTest {
     in.start();
     org.ros.message.std.String hello = new org.ros.message.std.String();
     hello.data = "Would you like to play a game?";
-    out.add(hello);
+    out.put(hello);
     assertEquals(in.take(), hello);
   }
 }
