@@ -15,10 +15,8 @@
  */
 package org.ros;
 
-import org.ros.exceptions.RosNameException;
-
 import org.ros.exceptions.RosInitException;
-import org.ros.message.Time;
+import org.ros.exceptions.RosNameException;
 import org.ros.message.geometry.Point;
 import org.ros.message.geometry.PoseStamped;
 import org.ros.message.geometry.Quaternion;

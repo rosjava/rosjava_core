@@ -16,20 +16,16 @@
 
 package org.ros.internal.transport;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import com.google.common.collect.Lists;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.message.Message;
 
-import com.google.common.collect.Lists;
-
-import org.ros.internal.transport.LittleEndianDataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -39,8 +35,10 @@ public abstract class OutgoingMessageQueue {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
 
+  private static final int MESSAGE_BUFFER_CAPACITY = 8192;
+  
   private final Collection<LittleEndianDataOutputStream> streams;
-  private final BlockingQueue<Message> messages;
+  private final CircularBlockingQueue<Message> messages;
   private final MessageSendingThread thread;
 
   private final class MessageSendingThread extends Thread {
@@ -69,7 +67,7 @@ public abstract class OutgoingMessageQueue {
 
   public OutgoingMessageQueue() {
     streams = Lists.newArrayList();
-    messages = new LinkedBlockingQueue<Message>();
+    messages = new CircularBlockingQueue<Message>(MESSAGE_BUFFER_CAPACITY);
     thread = new MessageSendingThread();
   }
 
@@ -94,11 +92,6 @@ public abstract class OutgoingMessageQueue {
     Iterator<LittleEndianDataOutputStream> iterator = streams.iterator();
     while (iterator.hasNext()) {
       LittleEndianDataOutputStream out = iterator.next();
-      if (out == null) {
-        log.warn("out is null, removing from streams!");
-        iterator.remove();
-        continue;
-      }
       try {
         sendMessage(message, out);
         out.flush();
@@ -113,7 +106,7 @@ public abstract class OutgoingMessageQueue {
 
   /**
    * @param message
-   * @param out
+   * @param stream
    * @throws IOException
    */
   protected abstract void sendMessage(Message message, LittleEndianDataOutputStream stream)

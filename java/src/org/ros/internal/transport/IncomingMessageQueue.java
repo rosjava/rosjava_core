@@ -24,8 +24,6 @@ import org.ros.message.Message;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -37,8 +35,10 @@ public abstract class IncomingMessageQueue<MessageType extends Message> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
 
+  private static final int MESSAGE_BUFFER_CAPACITY = 8192;
+  
   private final Class<MessageType> messageClass;
-  private final BlockingQueue<MessageType> messages;
+  private final CircularBlockingQueue<MessageType> messages;
   private final MessageReceivingThread thread;
 
   private LittleEndianDataInputStream stream;
@@ -72,7 +72,7 @@ public abstract class IncomingMessageQueue<MessageType extends Message> {
 
   public IncomingMessageQueue(Class<MessageType> messageClass) {
     this.messageClass = messageClass;
-    messages = new LinkedBlockingQueue<MessageType>();
+    messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
     thread = new MessageReceivingThread();
   }
 
