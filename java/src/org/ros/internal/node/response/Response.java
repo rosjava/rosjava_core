@@ -45,6 +45,20 @@ public class Response<ResultType> {
     return new Response<ResultType>(StatusCode.SUCCESS, message, value);
   }
 
+  /**
+   * Creates a {@link Response} from the {@link List} of {@link Object}s
+   * returned from an XML-RPC call.
+   * 
+   * @param <ResultType>
+   * @param response the {@link List} of {@link Object}s returned from the
+   *        XML-RPC call
+   * @param resultFactory a {@link ResultFactory} that creates a result from the
+   *        third {@link Object} in the {@link Response}
+   * @return a {@link Response} using the specified {@link ResultFactory} to
+   *         generate the result
+   * @throws RemoteException if the {@link Response}'s {@link StatusCode} does
+   *         not indicate success
+   */
   public static <ResultType> Response<ResultType> fromList(List<Object> response,
       ResultFactory<ResultType> resultFactory) throws RemoteException {
     StatusCode statusCode = StatusCode.fromInt((Integer) response.get(0));
