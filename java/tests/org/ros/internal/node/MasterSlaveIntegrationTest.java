@@ -69,12 +69,13 @@ public class MasterSlaveIntegrationTest {
 
   @Test
   public void testGetMasterUri() throws IOException, RemoteException, URISyntaxException {
-    Response<URI> response = Response.checkOk(slaveClient.getMasterUri());
+    Response<URI> response = slaveClient.getMasterUri();
     assertEquals(masterServer.getUri(), response.getResult());
   }
+
   @Test
   public void testGetPid() throws RemoteException {
-    Response<Integer> response = Response.checkOk(slaveClient.getPid());
+    Response<Integer> response = slaveClient.getPid();
     assertTrue(response.getResult() > 0);
   }
 
@@ -86,7 +87,7 @@ public class MasterSlaveIntegrationTest {
     Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
     slaveServer.addPublisher(publisher);
     Response<ProtocolDescription> response =
-        Response.checkOk(slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS)));
+        slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS));
     assertEquals(response.getResult(), new TcpRosProtocolDescription(publisher.getAddress()));
   }
 
@@ -106,7 +107,7 @@ public class MasterSlaveIntegrationTest {
         publisher.toPublisherIdentifier(new SlaveIdentifier("/unnamed", slaveServer.getUri()));
     assertTrue(publishers.contains(publisherDescription));
 
-    Response<List<TopicDefinition>> response = Response.checkOk(slaveClient.getPublications());
+    Response<List<TopicDefinition>> response = slaveClient.getPublications();
     assertEquals(1, response.getResult().size());
     assertTrue(response.getResult().contains(publisher.getTopicDefinition()));
   }
@@ -127,8 +128,8 @@ public class MasterSlaveIntegrationTest {
         };
     slaveServer.addService(server);
     Response<URI> response =
-        Response.checkOk(masterClient.lookupService(
-            SlaveIdentifier.createAnonymous(new URI("http://localhost:1234")), "/service"));
+        masterClient.lookupService(
+            SlaveIdentifier.createAnonymous(new URI("http://localhost:1234")), "/service");
     assertEquals(server.getUri(), response.getResult());
   }
 

@@ -43,6 +43,16 @@ public class Response<ResultType> {
     return new Response<ResultType>(StatusCode.SUCCESS, message, value);
   }
 
+  public static <ResultType> Response<ResultType> fromList(List<Object> response,
+      ResultFactory<ResultType> resultFactory) throws RemoteException {
+    StatusCode statusCode = StatusCode.fromInt((Integer) response.get(0));
+    String message = (String) response.get(1);
+    if (statusCode != StatusCode.SUCCESS) {
+      throw new RemoteException(statusCode, message);
+    }
+    return new Response<ResultType>(statusCode, message, resultFactory.create(response.get(2)));
+  }
+
   public Response(int statusCode, String statusMessage, ResultType value) {
     this(StatusCode.fromInt(statusCode), statusMessage, value);
   }
@@ -72,14 +82,6 @@ public class Response<ResultType> {
   @Override
   public String toString() {
     return "Response<" + statusCode + ", " + statusMessage + ", " + result.toString() + ">";
-  }
-
-  public static <ResultType> Response<ResultType> checkOk(Response<ResultType> response)
-      throws RemoteException {
-    if (response.getStatusCode() != StatusCode.SUCCESS) {
-      throw new RemoteException(response.toString());
-    }
-    return response;
   }
 
 }

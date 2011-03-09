@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -20,6 +20,7 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
 import org.apache.xmlrpc.client.util.ClientFactory;
+import org.ros.internal.node.server.NodeServer;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -27,16 +28,16 @@ import java.net.URI;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <T>
+ * @param <NodeType>
  */
-public class NodeClient<T extends org.ros.internal.node.xmlrpc.Node> {
-  
-  protected final T node;
+public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
+
+  protected final NodeType node;
   private final URI uri;
-  
-  public NodeClient(URI uri, Class<T> interfaceClass) throws MalformedURLException {
+
+  public NodeClient(URI uri, Class<NodeType> interfaceClass) throws MalformedURLException {
     this.uri = uri;
-    
+
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
     config.setServerURL(uri.toURL());
     config.setEnabledForExtensions(true);
@@ -48,11 +49,12 @@ public class NodeClient<T extends org.ros.internal.node.xmlrpc.Node> {
     client.setConfig(config);
 
     ClientFactory factory = new ClientFactory(client);
-    node = interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, ""));
+    node =
+        interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, ""));
   }
 
   /**
-   * @return the URL address of the remote node
+   * @return the {@link URI} of the remote {@link NodeServer}
    */
   public URI getRemoteUri() {
     return uri;

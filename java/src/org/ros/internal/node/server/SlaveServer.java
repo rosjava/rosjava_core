@@ -76,15 +76,14 @@ public class SlaveServer extends NodeServer {
       URISyntaxException {
     String topic = publisher.getTopicName();
     publishers.put(topic, publisher);
-    Response.checkOk(master.registerPublisher(toSlaveIdentifier(), publisher));
+    master.registerPublisher(toSlaveIdentifier(), publisher);
   }
 
   public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws RemoteException,
       IOException, URISyntaxException {
     String topic = subscriber.getTopicName();
     subscribers.put(topic, subscriber);
-    Response<List<URI>> response =
-        Response.checkOk(master.registerSubscriber(toSlaveIdentifier(), subscriber));
+    Response<List<URI>> response = master.registerSubscriber(toSlaveIdentifier(), subscriber);
     List<PublisherIdentifier> publishers = Lists.newArrayList();
     for (URI uri : response.getResult()) {
       // TODO(damonkohler): What should we supply as the name of this slave?
@@ -106,7 +105,7 @@ public class SlaveServer extends NodeServer {
    */
   public void addService(ServiceServer<? extends Message> server) throws URISyntaxException,
       MalformedURLException, RemoteException {
-    Response.checkOk(master.registerService(toSlaveIdentifier(), server));
+    master.registerService(toSlaveIdentifier(), server);
   }
 
   public List<Object> getBusStats(String callerId) {
@@ -185,8 +184,6 @@ public class SlaveServer extends NodeServer {
   }
 
   /**
-   * Returns a {@link SlaveIdentifier} for this {@link SlaveServer}.
-   * 
    * @return a {@link SlaveIdentifier} for this {@link SlaveServer}
    * @throws MalformedURLException
    * @throws URISyntaxException

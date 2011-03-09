@@ -18,6 +18,7 @@ package org.ros;
 
 import com.google.common.collect.Sets;
 
+import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.Response;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.server.SlaveServer;
@@ -64,7 +65,8 @@ public class Subscriber<MessageType extends Message> {
   }
 
   protected void init(SlaveServer server, final MessageListener<MessageType> callback)
-      throws InstantiationException, IllegalAccessException, IOException, URISyntaxException {
+      throws InstantiationException, IllegalAccessException, IOException, URISyntaxException,
+      RemoteException {
     // Set up topic definition.
     Message m = messageClass.newInstance();
     TopicDefinition topicDefinition;
