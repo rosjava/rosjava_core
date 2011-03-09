@@ -14,19 +14,15 @@
  * the License.
  */
 
-package org.ros.internal.transport;
-
-import com.google.common.collect.Sets;
-
-import java.util.Collection;
+package org.ros.internal.node.server;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ProtocolNames {
+public class ServerException extends Exception {
   
-  public static final String TCPROS = "TCPROS";
-  public static final String UDPROS = "UDPROS";
-  public static final Collection<String> SUPPORTED = Sets.newHashSet(TCPROS);
-  
+  public ServerException(String message) {
+    super(message);
+  }
+
 }

@@ -83,15 +83,15 @@ public class SlaveServer extends NodeServer {
       IOException, URISyntaxException {
     String topic = subscriber.getTopicName();
     subscribers.put(topic, subscriber);
-    Response<List<URI>> response = Response.checkOk(master.registerSubscriber(toSlaveIdentifier(),
-        subscriber));
+    Response<List<URI>> response =
+        Response.checkOk(master.registerSubscriber(toSlaveIdentifier(), subscriber));
     List<PublisherIdentifier> publishers = Lists.newArrayList();
     for (URI uri : response.getResult()) {
       // TODO(damonkohler): What should we supply as the name of this slave?
       // It's not given to us in the response.
       SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/unnamed", uri);
-      MessageDefinition messageDefinition = MessageDefinition.createMessageDefinition(subscriber
-          .getTopicMessageType());
+      MessageDefinition messageDefinition =
+          MessageDefinition.createMessageDefinition(subscriber.getTopicMessageType());
       TopicDefinition topicDefinition = new TopicDefinition(topic, messageDefinition);
       publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
     }
@@ -115,7 +115,8 @@ public class SlaveServer extends NodeServer {
 
   public List<Object> getBusInfo(String callerId) {
     // For each publication and subscription (alive and dead):
-    //  ((connection_id, destination_caller_id, direction, transport, topic_name, connected)*)
+    // ((connection_id, destination_caller_id, direction, transport, topic_name,
+    // connected)*)
     // TODO(kwc): returning empty list right now to keep debugging tools happy
     return new ArrayList<Object>();
   }
@@ -131,8 +132,8 @@ public class SlaveServer extends NodeServer {
   /**
    * @param callerId
    * @return PID of node process
-   * @throws UnsupportedOperationException
-   *           If PID cannot be retrieved on this platform.
+   * @throws UnsupportedOperationException If PID cannot be retrieved on this
+   *         platform.
    */
   public Integer getPid(String callerId) {
     // kwc: java has no standard way of getting pid, apparently. This is the
@@ -170,15 +171,23 @@ public class SlaveServer extends NodeServer {
   }
 
   // TODO(damonkohler): Support multiple publishers for a particular topic.
-  public ProtocolDescription requestTopic(String topic, Set<String> protocols) {
-    Preconditions.checkArgument(publishers.containsKey(topic));
-    // TODO(damonkohler): Pull out list of supported protocols.
-    Preconditions.checkArgument(protocols.contains(ProtocolNames.TCPROS));
-    return new TcpRosProtocolDescription(publishers.get(topic).getAddress());
+  public ProtocolDescription requestTopic(String topic, Collection<String> protocols)
+      throws ServerException {
+    if (!publishers.containsKey(topic)) {
+      throw new ServerException("No publishers for topic " + topic);
+    }
+    for (String protocol : protocols) {
+      if (ProtocolNames.SUPPORTED.contains(protocol)) {
+        return new TcpRosProtocolDescription(publishers.get(topic).getAddress());
+      }
+    }
+    throw new ServerException("No supported protocols specified.");
   }
 
   /**
-   * @return
+   * Returns a {@link SlaveIdentifier} for this {@link SlaveServer}.
+   * 
+   * @return a {@link SlaveIdentifier} for this {@link SlaveServer}
    * @throws MalformedURLException
    * @throws URISyntaxException
    */

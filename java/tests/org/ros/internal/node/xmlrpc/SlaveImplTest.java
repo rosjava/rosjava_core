@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.ros.internal.node.StatusCode;
+import org.ros.internal.node.server.ServerException;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.transport.ProtocolNames;
@@ -66,7 +67,7 @@ public class SlaveImplTest {
   }
 
   @Test
-  public void testRequestTopic() {
+  public void testRequestTopic() throws ServerException {
     SlaveServer mockSlave = mock(SlaveServer.class);
     InetSocketAddress localhost = InetSocketAddress.createUnresolved("localhost", 1234);
     TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(localhost);

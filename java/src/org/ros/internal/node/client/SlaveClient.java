@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.ros.internal.node.Response;
+import org.ros.internal.node.StatusCode;
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.TopicDefinition;
 import org.ros.internal.transport.ProtocolDescription;
@@ -67,7 +68,8 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
 
   public Response<Integer> getPid() {
     List<Object> response = node.getPid(nodeName);
-    return new Response<Integer>((Integer) response.get(0), (String) response.get(1), (Integer) response.get(2));
+    return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
+        (Integer) response.get(2));
   }
 
   public Response<List<TopicDefinition>> getSubscriptions() {
@@ -104,7 +106,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
     throw new UnsupportedOperationException();
   }
 
-  public Response<ProtocolDescription> requestTopic(String topic, Set<String> requestedProtocols) {
+  public Response<ProtocolDescription> requestTopic(String topic, Collection<String> requestedProtocols) {
     List<Object> response = node.requestTopic(nodeName, topic,
         new Object[][] { requestedProtocols.toArray() });
     List<Object> protocolParameters = Arrays.asList((Object[]) response.get(2));

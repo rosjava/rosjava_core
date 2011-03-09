@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.Response;
 import org.ros.internal.node.StatusCode;
+import org.ros.internal.node.server.ServerException;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.transport.ProtocolDescription;
@@ -179,7 +180,12 @@ public class SlaveImpl implements Slave {
     for (int i = 0; i < protocols.length; i++) {
       requestedProtocols.add((String) ((Object[]) protocols[i])[0]);
     }
-    ProtocolDescription protocol = slave.requestTopic(topic, requestedProtocols);
+    ProtocolDescription protocol;
+    try {
+      protocol = slave.requestTopic(topic, requestedProtocols);
+    } catch (ServerException e) {
+      return Response.createError(e.getMessage(), null).toList();
+    }
     List<Object> response = Response.createSuccess(protocol.toString(), protocol.toList()).toList();
     if (DEBUG) {
       log.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
