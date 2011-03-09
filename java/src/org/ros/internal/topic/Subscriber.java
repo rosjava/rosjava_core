@@ -30,6 +30,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+import org.ros.MessageListener;
+
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
@@ -41,12 +43,13 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Subscriber.class);
 
-  private final CopyOnWriteArrayList<SubscriberListener<MessageType>> listeners;
+  private final CopyOnWriteArrayList<MessageListener<MessageType>> listeners;
   private final SubscriberMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
   private final ImmutableMap<String, String> header;
 
   private final class MessageReadingThread extends Thread {
+    
     @Override
     public void run() {
       try {
@@ -55,7 +58,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
           if (DEBUG) {
             log.info("Received message: " + message);
           }
-          for (SubscriberListener<MessageType> listener : listeners) {
+          for (MessageListener<MessageType> listener : listeners) {
             if (Thread.currentThread().isInterrupted()) {
               break;
             }
@@ -76,32 +79,55 @@ public class Subscriber<MessageType extends Message> extends Topic {
     }
   }
 
-  public static <S extends Message> Subscriber<S> create(String nodeName, TopicDefinition description,
-      Class<S> messageClass) {
+  public static <S extends Message> Subscriber<S> create(String nodeName,
+      TopicDefinition description, Class<S> messageClass) {
     return new Subscriber<S>(nodeName, description, messageClass);
   }
 
-  private Subscriber(String name, TopicDefinition description, Class<MessageType> messageClass) {
+  private Subscriber(String nodeName, TopicDefinition description, Class<MessageType> messageClass) {
     super(description);
-    this.listeners = new CopyOnWriteArrayList<SubscriberListener<MessageType>>();
+    this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new SubscriberMessageQueue<MessageType>(messageClass);
     thread = new MessageReadingThread();
-    header = ImmutableMap.<String, String>builder()
-        .put(ConnectionHeaderFields.CALLER_ID, name)
-        .putAll(description.toHeader())
-        .build();
+    header = ImmutableMap.<String, String>builder().put(ConnectionHeaderFields.CALLER_ID, nodeName)
+        .putAll(description.toHeader()).build();
   }
 
-  public void addListener(SubscriberListener<MessageType> listener) {
+  public void addMessageListener(MessageListener<MessageType> listener) {
     listeners.add(listener);
+    
+    if (listeners.size() > 0) { 
+      //TODO(kwc): send event to start registration with master.
+    }
   }
 
-  public void start(InetSocketAddress publisher) throws IOException {
+  public void removeMessageListener(MessageListener<MessageType> listener) {
+    listeners.remove(listener);
+
+    // TODO(kwc) : Contracts on who does setup/teardown of resources is really
+    // unclear right now. Also, we need to do much more cleanup than this, such
+    // as unregistering
+    // with the master. Similarly, there needs to be logic in
+    // addMessageCallbackListener to start the thread back up. Also, should we
+    // be using listeners as a proxy for the # of Subscriber handles, or should
+    // we track those explicitly?
+    if (listeners.size() == 0) {
+      thread.interrupt();
+    }
+  }
+
+  public void addPublisher(InetSocketAddress publisher) throws IOException {
+    //TODO(kwc): need to upgrade in to allow multiple sockets. 
+    
     Socket socket = new Socket(publisher.getHostName(), publisher.getPort());
     handshake(socket);
     in.setSocket(socket);
     in.start();
-    thread.start();
+    if (!thread.isAlive()) {
+      //TODO(kwc): race condition if thread is in interrupted state
+      
+      thread.start();
+    }
   }
 
   public void shutdown() {

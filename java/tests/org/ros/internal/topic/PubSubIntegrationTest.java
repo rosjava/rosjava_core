@@ -19,6 +19,8 @@ package org.ros.internal.topic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.ros.MessageListener;
+
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.Subscriber;
@@ -46,10 +48,10 @@ public class PubSubIntegrationTest {
     Subscriber<org.ros.message.std.String> subscriber =
         Subscriber.create("/caller", topicDefinition,
             org.ros.message.std.String.class);
-    subscriber.start(publisher.getAddress());
+    subscriber.addPublisher(publisher.getAddress());
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
-    subscriber.addListener(new SubscriberListener<org.ros.message.std.String>() {
+    subscriber.addMessageListener(new MessageListener<org.ros.message.std.String>() {
       @Override
       public void onNewMessage(org.ros.message.std.String message) {
         assertEquals(message.data, "Hello, ROS!");

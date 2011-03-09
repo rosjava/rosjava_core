@@ -17,6 +17,11 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.topic.MessageDefinition;
+import org.ros.internal.topic.TopicDefinition;
+
+import org.ros.internal.topic.PubSubFactory;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
@@ -31,6 +36,7 @@ import org.ros.namespace.Resolver;
 import org.ros.namespace.RosName;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 /**
@@ -45,12 +51,15 @@ public class Node implements Namespace {
   private MasterClient masterClient;
   /** ... */
   private SlaveServer slaveServer;
+  /** Factory for generating internal Publisher and Subscriber instances. */
+  private PubSubFactory pubSubFactory;
 
   /**
    * The log of this node. This log has the node_name inserted in each message,
    * along with ROS standard logging conventions.
    */
   private RosLog log;
+  private boolean initialized;
 
   /**
    * Create a node, using the command line args which will be mined for ros
@@ -61,8 +70,10 @@ public class Node implements Namespace {
    * @param name
    *          the name, as in namespace of the node
    * @throws RosNameException
+   * @throws RosInitException
    */
-  public Node(String argv[], String name) throws RosNameException {
+  public Node(String argv[], String name) throws RosNameException, RosInitException {
+    initialized = false;
     RosName tname = new RosName(name);
     if (!tname.isGlobal()) {
       rosName = new RosName("/" + name); // FIXME Resolve node name from
@@ -77,11 +88,32 @@ public class Node implements Namespace {
     slaveServer = null;
     // FIXME arg parsing
     log = new RosLog(rosName.toString());
+
+    pubSubFactory = new PubSubFactory(rosName.toString());
+
+    // Initialize handles to master and slave here so that we can perform
+    // configuration on slaveServer prior to actual init().
+    try {
+      masterClient = new MasterClient(Ros.getMasterUri());
+    } catch (MalformedURLException e) {
+      // TODO(kwc) remove chance of URI exceptions using RosContext-based
+      // constructor instead
+      throw new RosInitException("invalid ROS master URI");
+    } catch (URISyntaxException e) {
+      throw new RosInitException("invalid ROS master URI");
+    }
+    slaveServer = new SlaveServer(rosName.toString(), masterClient, Ros.getHostName(), port);
   }
 
   @Override
   public <MessageType extends Message> Publisher<MessageType> createPublisher(String topic_name,
       Class<MessageType> clazz) throws RosInitException, RosNameException {
+    if (!initialized) {
+      // kwc: this is not a permanent constraint. In the future, with more state
+      // tracking, it is possible to allow Publisher handles to be created
+      // before node.init().
+      throw new RosInitException("Please call node.init()");
+    }
     try {
       Preconditions.checkNotNull(masterClient);
       Preconditions.checkNotNull(slaveServer);
@@ -103,24 +135,51 @@ public class Node implements Namespace {
   }
 
   @Override
-  public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topic_name,
-      final MessageListener<MessageType> callback, Class<MessageType> clazz)
+  public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topicName,
+      final MessageListener<MessageType> callback, Class<MessageType> messageClass)
       throws RosInitException, RosNameException {
 
+    if (!initialized) {
+      // kwc: this is not a permanent constraint. In the future, with more state
+      // tracking, it is possible to allow Publisher handles to be created
+      // before node.init().
+      throw new RosInitException("Please call node.init()");
+    }
+
     try {
-      Subscriber<MessageType> sub = new Subscriber<MessageType>(getName(), resolveName(topic_name),
-          clazz);
-      sub.init(slaveServer, callback);
-      return sub;
-    } catch (InstantiationException e) {
-      throw new RosInitException(e);
-    } catch (IllegalAccessException e) {
-      throw new RosInitException(e);
+      Message m = messageClass.newInstance();
+      String resolvedTopicName = resolveName(topicName);
+      TopicDefinition topicDefinition = new TopicDefinition(resolvedTopicName,
+          MessageDefinition.createFromMessage(m));
+
+      org.ros.internal.topic.Subscriber<MessageType> subscriberImpl = pubSubFactory
+          .createSubscriber(topicDefinition, messageClass);
+
+      // Add the callback to the impl.
+      subscriberImpl.addMessageListener(new MessageListener<MessageType>() {
+        @Override
+        public void onNewMessage(MessageType message) {
+          callback.onNewMessage(message);
+        }
+      });
+      // Create the user-facing Subscriber handle. This is little more than a
+      // lightweight wrapper around the internal implementation so that we can
+      // track callback references.
+      Subscriber<MessageType> subscriber = new Subscriber<MessageType>(resolvedTopicName, callback,
+          messageClass, subscriberImpl);
+      // Slave server handles registration with the ROS Master.
+      slaveServer.addSubscriber(subscriberImpl);
+      return subscriber;
+
     } catch (IOException e) {
       throw new RosInitException(e);
     } catch (URISyntaxException e) {
       throw new RosInitException(e);
     } catch (RemoteException e) {
+      throw new RosInitException(e);
+    } catch (InstantiationException e) {
+      throw new RosInitException(e);
+    } catch (IllegalAccessException e) {
       throw new RosInitException(e);
     }
 
@@ -147,13 +206,12 @@ public class Node implements Namespace {
    */
   public void init() throws RosInitException {
     try {
-      masterClient = new MasterClient(Ros.getMasterUri());
-      slaveServer = new SlaveServer(rosName.toString(), masterClient, Ros.getHostName(), port);
       slaveServer.start();
       log().debug(
           "Successfully initiallized " + rosName.toString() + " with:\n\tmaster @"
               + masterClient.getRemoteUri().toString() + "\n\tListening on port: "
               + slaveServer.getUri().toString());
+      initialized = true;
     } catch (IOException e) {
       throw new RosInitException(e);
     } catch (XmlRpcException e) {

@@ -17,6 +17,8 @@ package org.ros.tutorials;
 
 import com.google.common.collect.Sets;
 
+import org.ros.MessageListener;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.MasterClient;
@@ -27,7 +29,6 @@ import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.Subscriber;
-import org.ros.internal.topic.SubscriberListener;
 import org.ros.internal.topic.TopicDefinition;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
@@ -61,7 +62,7 @@ public class SimplePubSub {
 
     Subscriber<org.ros.message.std.String> subscriber = Subscriber.create("/bloop",
         topicDefinition, org.ros.message.std.String.class);
-    subscriber.addListener(new SubscriberListener<org.ros.message.std.String>() {
+    subscriber.addMessageListener(new MessageListener<org.ros.message.std.String>() {
       @Override
       public void onNewMessage(org.ros.message.std.String message) {
         System.out.println("Received message: " + message.data);
@@ -71,7 +72,7 @@ public class SimplePubSub {
     slaveClient = new SlaveClient("/bar", slaveServer.getUri());
     Response<ProtocolDescription> response = slaveClient.requestTopic("/hello",
         Sets.newHashSet(ProtocolNames.TCPROS));
-    subscriber.start(response.getResult().getAddress());
+    subscriber.addPublisher(response.getResult().getAddress());
 
     org.ros.message.std.String message = new org.ros.message.std.String();
     message.data = "Hello, ROS!";

@@ -16,24 +16,11 @@
 
 package org.ros;
 
-import com.google.common.collect.Sets;
 
-import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.client.SlaveClient;
-import org.ros.internal.node.response.Response;
-import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.topic.MessageDefinition;
-import org.ros.internal.topic.SubscriberListener;
-import org.ros.internal.topic.TopicDefinition;
-import org.ros.internal.transport.ProtocolDescription;
-import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.Message;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-
 /**
- * Handle for subscription
+ * Handle to subscription to ROS topic.
  * 
  * @author "Ethan Rublee ethan.rublee@gmail.com"
  * 
@@ -44,48 +31,36 @@ public class Subscriber<MessageType extends Message> {
 
   private final Class<MessageType> messageClass;
   private final String topicName;
-  private final String namespace;
 
-  private SlaveClient slaveClient;
-  private org.ros.internal.topic.Subscriber<MessageType> subscriber;
+  private final org.ros.internal.topic.Subscriber<MessageType> subscriberImpl;
+  /* Callback for new messages. */
+  private final MessageListener<MessageType> messageCallback;
 
-  protected Subscriber(String namespace, String topicName, Class<MessageType> messageClass) {
+  protected Subscriber(String topicName, MessageListener<MessageType> callback,
+      Class<MessageType> messageClass, org.ros.internal.topic.Subscriber<MessageType> subscriberImpl) {
     this.messageClass = messageClass;
     this.topicName = topicName;
-    this.namespace = namespace;
-    subscriber = null;
+    this.messageCallback = callback;
+    this.subscriberImpl = subscriberImpl;
   }
 
   /**
-   * Cancel all callbacks listening on this topic.
+   * Cancel this subscription's callback.
    */
   public void cancel() {
-    // FIXME cancel the subscrition
-    subscriber.shutdown();
+    subscriberImpl.removeMessageListener(messageCallback);
   }
 
-  protected void init(SlaveServer server, final MessageListener<MessageType> callback)
-      throws InstantiationException, IllegalAccessException, IOException, URISyntaxException,
-      RemoteException {
-    // Set up topic definition.
-    Message m = messageClass.newInstance();
-    TopicDefinition topicDefinition;
-    topicDefinition = new TopicDefinition(topicName, MessageDefinition.createFromMessage(m));
-    // Create a subscriber, and add a listener.
-    subscriber = org.ros.internal.topic.Subscriber.create(topicName, topicDefinition, messageClass);
+  public String getTopicName() {
+    return topicName;
+  }
 
-    // pass through the callbacks
-    subscriber.addListener(new SubscriberListener<MessageType>() {
-      @Override
-      public void onNewMessage(MessageType message) {
-        callback.onNewMessage(message);
-      }
-    });
-    // FIXME is this correct? Can we just use the server to request a topic
-    slaveClient = new SlaveClient(namespace, server.getUri());
-    Response<ProtocolDescription> response = slaveClient.requestTopic(topicName,
-        Sets.newHashSet(ProtocolNames.TCPROS));
-    subscriber.start(response.getResult().getAddress());
+  public Class<MessageType> getTopicClass() {
+    return messageClass;
+  }
+
+  public MessageListener<MessageType> getMessageCallback() {
+    return messageCallback;
   }
 
 }

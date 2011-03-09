@@ -49,7 +49,7 @@ public class SlaveApiTestNode {
 
     // Subscribers currently don't work
     Subscriber<org.ros.message.std.String> sub_string =
-        node.createSubscriber("chatter_out", chatter_cb, org.ros.message.std.String.class);
+        node.createSubscriber("chatter_in", chatter_cb, org.ros.message.std.String.class);
 
     // have at least one case of dual pub/sub on same topic
     Publisher<Int64> pub_int64_pubsub = node.createPublisher("int64", Int64.class);
