@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.internal.node.response;
 
 public enum StatusCode {
   ERROR(-1), FAILURE(0), SUCCESS(1);

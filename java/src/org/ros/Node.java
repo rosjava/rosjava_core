@@ -95,9 +95,9 @@ public class Node implements Namespace {
       throw new RosInitException(e);
     } catch (IllegalAccessException e) {
       throw new RosInitException(e);
-    } catch (RemoteException e) {
-      throw new RosInitException(e);
     } catch (URISyntaxException e) {
+      throw new RosInitException(e);
+    } catch (RemoteException e) {
       throw new RosInitException(e);
     }
   }

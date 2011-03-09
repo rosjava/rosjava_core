@@ -14,9 +14,11 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.internal.node.response;
 
 import com.google.common.collect.Lists;
+
+import org.ros.internal.node.RemoteException;
 
 import java.util.List;
 

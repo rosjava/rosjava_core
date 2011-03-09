@@ -19,9 +19,9 @@ import com.google.common.collect.Sets;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.Response;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.SlaveClient;
+import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.topic.MessageDefinition;

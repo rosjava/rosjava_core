@@ -23,8 +23,8 @@ import com.google.common.collect.Maps;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.Response;
 import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.response.Response;
 import org.ros.internal.node.xmlrpc.SlaveImpl;
 import org.ros.internal.service.ServiceServer;
 import org.ros.internal.topic.MessageDefinition;
@@ -71,14 +71,15 @@ public class SlaveServer extends NodeServer {
     super.start(org.ros.internal.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
   }
 
-  public void addPublisher(Publisher publisher) throws MalformedURLException, URISyntaxException {
+  public void addPublisher(Publisher publisher) throws MalformedURLException, URISyntaxException,
+      RemoteException {
     String topic = publisher.getTopicName();
     publishers.put(topic, publisher);
     master.registerPublisher(toSlaveIdentifier(), publisher);
   }
 
   public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws IOException,
-      URISyntaxException {
+      URISyntaxException, RemoteException {
     String topic = subscriber.getTopicName();
     subscribers.put(topic, subscriber);
     Response<List<URI>> response = master.registerSubscriber(toSlaveIdentifier(), subscriber);

@@ -14,17 +14,23 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.internal.node.response;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ResultFactory<ResultType> {
-  
-  /**
-   * @param value
-   * @return a result to be returned as part of a {@link Response}
-   */
-  public ResultType create(Object value);
+public class UriResultFactory implements ResultFactory<URI> {
+
+  @Override
+  public URI create(Object value) {
+    try {
+      return new URI((String) value);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
 }

@@ -14,27 +14,32 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.internal.node.response;
 
-import org.ros.internal.node.response.StatusCode;
+import com.google.common.collect.Lists;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RemoteException extends Exception {
-  
-  private final StatusCode statusCode;
+public class UriListResultFactory implements ResultFactory<List<URI>> {
 
-  public RemoteException(StatusCode statusCode, String message) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-
-  /**
-   * @return the status code
-   */
-  public StatusCode getStatusCode() {
-    return statusCode;
+  @Override
+  public List<URI> create(Object value) {
+    List<Object> values = Arrays.asList((Object[]) value);
+    List<URI> uris = Lists.newArrayList();
+    for (Object uri : values) {
+      try {
+        uris.add(new URI((String) uri));
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return uris;
   }
 
 }

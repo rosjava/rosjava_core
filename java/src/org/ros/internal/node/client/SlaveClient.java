@@ -17,12 +17,13 @@
 package org.ros.internal.node.client;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.Response;
-import org.ros.internal.node.ResultFactory;
-import org.ros.internal.topic.MessageDefinition;
+import org.ros.internal.node.response.IntegerResultFactory;
+import org.ros.internal.node.response.Response;
+import org.ros.internal.node.response.ResultFactory;
+import org.ros.internal.node.response.TopicDefinitionListResultFactory;
+import org.ros.internal.node.response.UriResultFactory;
 import org.ros.internal.topic.TopicDefinition;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
@@ -31,7 +32,6 @@ import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -40,23 +40,6 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> {
-
-  private final class TopicDefinitionListResultFactory
-      implements
-        ResultFactory<List<TopicDefinition>> {
-    @Override
-    public List<TopicDefinition> create(Object value) {
-      List<TopicDefinition> descriptions = Lists.newArrayList();
-      List<Object> topics = Arrays.asList((Object[]) value);
-      for (Object topic : topics) {
-        String name = (String) ((Object[]) topic)[0];
-        String type = (String) ((Object[]) topic)[1];
-        descriptions
-            .add(new TopicDefinition(name, MessageDefinition.createMessageDefinition(type)));
-      }
-      return descriptions;
-    }
-  }
 
   private final String nodeName;
 
@@ -74,16 +57,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
   }
 
   public Response<URI> getMasterUri() throws RemoteException {
-    return Response.fromList(node.getMasterUri(nodeName), new ResultFactory<URI>() {
-      @Override
-      public URI create(Object value) {
-        try {
-          return new URI((String) value);
-        } catch (URISyntaxException e) {
-          throw new RuntimeException(e);
-        }
-      }
-    });
+    return Response.fromList(node.getMasterUri(nodeName), new UriResultFactory());
   }
 
   public List<Object> shutdown(String message) {
@@ -91,12 +65,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
   }
 
   public Response<Integer> getPid() throws RemoteException {
-    return Response.fromList(node.getPid(nodeName), new ResultFactory<Integer>() {
-      @Override
-      public Integer create(Object value) {
-        return (Integer) value;
-      }
-    });
+    return Response.fromList(node.getPid(nodeName), new IntegerResultFactory());
   }
 
   public Response<List<TopicDefinition>> getSubscriptions() throws RemoteException {

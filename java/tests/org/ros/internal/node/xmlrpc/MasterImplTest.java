@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
 
 import org.junit.Test;
 import org.mockito.Matchers;
-import org.ros.internal.node.StatusCode;
+import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.topic.MessageDefinition;

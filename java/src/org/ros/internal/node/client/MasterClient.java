@@ -16,9 +16,12 @@
 
 package org.ros.internal.node.client;
 
-import com.google.common.collect.Lists;
-
-import org.ros.internal.node.Response;
+import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.response.IntegerResultFactory;
+import org.ros.internal.node.response.Response;
+import org.ros.internal.node.response.UriListResultFactory;
+import org.ros.internal.node.response.UriResultFactory;
+import org.ros.internal.node.response.VoidResultFactory;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
@@ -31,7 +34,6 @@ import org.ros.internal.topic.TopicDefinition;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,13 +62,12 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @param service the {@link ServiceServer} to register
    * @return a {@link Response} with a void result
    * @throws URISyntaxException
+   * @throws RemoteException
    */
   public Response<Void> registerService(SlaveIdentifier slave, ServiceServer<?> service)
-      throws URISyntaxException {
-    List<Object> response =
-        node.registerService(slave.getName(), service.getName(), service.getUri().toString(), slave
-            .getUri().toString());
-    return new Response<Void>((Integer) response.get(0), (String) response.get(1), null);
+      throws URISyntaxException, RemoteException {
+    return Response.fromList(node.registerService(slave.getName(), service.getName(), service
+        .getUri().toString(), slave.getUri().toString()), new VoidResultFactory());
   }
 
   /**
@@ -78,13 +79,13 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @return a {@link Response} with the number of unregistered services as the
    *         result
    * @throws URISyntaxException
+   * @throws RemoteException
    */
   public Response<Integer> unregisterService(SlaveIdentifier slave, ServiceServer<?> service)
-      throws URISyntaxException {
-    List<Object> response =
-        node.unregisterService(slave.getName(), service.getName(), service.getUri().toString());
-    return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
-        (Integer) response.get(2));
+      throws URISyntaxException, RemoteException {
+    return Response.fromList(
+        node.unregisterService(slave.getName(), service.getName(), service.getUri().toString()),
+        new IntegerResultFactory());
   }
 
   /**
@@ -100,18 +101,14 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    *         XML-RPC API URIs for nodes currently publishing the specified topic
    *         as the result
    * @throws URISyntaxException
+   * @throws RemoteException
    */
   public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
-      throws URISyntaxException {
-    List<Object> response =
+      throws URISyntaxException, RemoteException {
+    return Response.fromList(
         node.registerSubscriber(slave.getName(), subscriber.getTopicName(),
-            subscriber.getTopicMessageType(), slave.getUri().toString());
-    List<Object> values = Arrays.asList((Object[]) response.get(2));
-    List<URI> uris = Lists.newArrayList();
-    for (Object value : values) {
-      uris.add(new URI((String) value));
-    }
-    return new Response<List<URI>>((Integer) response.get(0), (String) response.get(1), uris);
+            subscriber.getTopicMessageType(), slave.getUri().toString()),
+        new UriListResultFactory());
   }
 
   /**
@@ -121,13 +118,12 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @param subscriber the {@link Subscriber} to unregister
    * @return a {@link Response} with the number of unregistered subscribers as
    *         the result
+   * @throws RemoteException
    */
-  public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber) {
-    List<Object> response =
-        node.unregisterSubscriber(slave.getName(), subscriber.getTopicName(), slave.getUri()
-            .toString());
-    return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
-        (Integer) response.get(2));
+  public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
+      throws RemoteException {
+    return Response.fromList(node.unregisterSubscriber(slave.getName(), subscriber.getTopicName(),
+        slave.getUri().toString()), new IntegerResultFactory());
   }
 
   /**
@@ -140,19 +136,15 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    *         {@link SlaveServer} URIs which have {@link Subscriber}s for the
    *         published {@link Topic}.
    * @throws URISyntaxException
+   * @throws RemoteException
    */
   public Response<List<URI>> registerPublisher(SlaveIdentifier slave, Publisher publisher)
-      throws URISyntaxException {
+      throws URISyntaxException, RemoteException {
     String topicName = publisher.getTopicName();
     String messageType = publisher.getTopicMessageType();
-    List<Object> response =
-        node.registerPublisher(slave.getName(), topicName, messageType, slave.getUri().toString());
-    List<Object> values = Arrays.asList((Object[]) response.get(2));
-    List<URI> uris = Lists.newArrayList();
-    for (Object value : values) {
-      uris.add(new URI((String) value));
-    }
-    return new Response<List<URI>>((Integer) response.get(0), (String) response.get(1), uris);
+    return Response.fromList(
+        node.registerPublisher(slave.getName(), topicName, messageType, slave.getUri().toString()),
+        new UriListResultFactory());
   }
 
   /**
@@ -163,13 +155,12 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @param publisher the {@link Publisher} to unregister
    * @return a {@link Response} with the number of unregistered
    *         {@link Publisher}s as the result
+   * @throws RemoteException
    */
-  public Response<Integer> unregisterPublisher(SlaveIdentifier slave, Publisher publisher) {
-    List<Object> response =
-        node.unregisterPublisher(slave.getName(), publisher.getTopicName(), slave.getUri()
-            .toString());
-    return new Response<Integer>((Integer) response.get(0), (String) response.get(1),
-        (Integer) response.get(2));
+  public Response<Integer> unregisterPublisher(SlaveIdentifier slave, Publisher publisher)
+      throws RemoteException {
+    return Response.fromList(node.unregisterPublisher(slave.getName(), publisher.getTopicName(),
+        slave.getUri().toString()), new IntegerResultFactory());
   }
 
   /**
@@ -180,11 +171,11 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @return a {@link Response} with the {@link URI} of the {@link SlaveServer}
    *         as a result
    * @throws URISyntaxException
+   * @throws RemoteException
    */
-  public Response<URI> lookupNode(SlaveIdentifier slave, String nodeName) throws URISyntaxException {
-    List<Object> response = node.lookupNode(slave.getName(), nodeName);
-    return new Response<URI>((Integer) response.get(0), (String) response.get(1), new URI(
-        (String) response.get(2)));
+  public Response<URI> lookupNode(SlaveIdentifier slave, String nodeName)
+      throws URISyntaxException, RemoteException {
+    return Response.fromList(node.lookupNode(slave.getName(), nodeName), new UriResultFactory());
   }
 
   /**
@@ -193,11 +184,10 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @param slave the {@link SlaveIdentifier} of the caller
    * @return the {@link URI} of the {@link MasterServer}
    * @throws URISyntaxException
+   * @throws RemoteException
    */
-  public Response<URI> getUri(SlaveIdentifier slave) throws URISyntaxException {
-    List<Object> response = node.getUri(slave.getName());
-    return new Response<URI>((Integer) response.get(0), (String) response.get(1), new URI(
-        (String) response.get(2)));
+  public Response<URI> getUri(SlaveIdentifier slave) throws URISyntaxException, RemoteException {
+    return Response.fromList(node.getUri(slave.getName()), new UriResultFactory());
   }
 
   /**
@@ -208,12 +198,12 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @return a {@link Response} with the {@link URI} of the
    *         {@link ServiceServer} as a result
    * @throws URISyntaxException
+   * @throws RemoteException 
    */
   public Response<URI> lookupService(SlaveIdentifier slave, String serviceName)
-      throws URISyntaxException {
-    List<Object> response = node.lookupService(slave.getName(), serviceName);
-    String value = (String) response.get(2);
-    return new Response<URI>((Integer) response.get(0), (String) response.get(1), new URI(value));
+      throws URISyntaxException, RemoteException {
+    return Response.fromList(node.lookupService(slave.getName(), serviceName),
+        new UriResultFactory());
   }
 
   public Response<List<TopicDefinition>> getPublishedTopics(SlaveIdentifier slave, String subgraph) {

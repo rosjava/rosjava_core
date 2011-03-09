@@ -23,8 +23,8 @@ import org.ros.internal.topic.Subscriber;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.internal.node.Response;
-import org.ros.internal.node.StatusCode;
+import org.ros.internal.node.response.Response;
+import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.topic.Publisher;

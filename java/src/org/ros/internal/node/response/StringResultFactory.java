@@ -14,27 +14,16 @@
  * the License.
  */
 
-package org.ros.internal.node;
-
-import org.ros.internal.node.response.StatusCode;
+package org.ros.internal.node.response;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RemoteException extends Exception {
+public class StringResultFactory implements ResultFactory<String> {
   
-  private final StatusCode statusCode;
-
-  public RemoteException(StatusCode statusCode, String message) {
-    super(message);
-    this.statusCode = statusCode;
+  @Override
+  public String create(Object value) {
+    return (String) value;
   }
-
-  /**
-   * @return the status code
-   */
-  public StatusCode getStatusCode() {
-    return statusCode;
-  }
-
+  
 }

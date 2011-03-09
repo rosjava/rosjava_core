@@ -19,8 +19,8 @@ package org.ros;
 import com.google.common.collect.Sets;
 
 import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.Response;
 import org.ros.internal.node.client.SlaveClient;
+import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.SubscriberListener;
