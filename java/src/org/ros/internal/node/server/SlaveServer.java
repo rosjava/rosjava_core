@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -72,15 +71,14 @@ public class SlaveServer extends NodeServer {
     super.start(org.ros.internal.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
   }
 
-  public void addPublisher(Publisher publisher) throws MalformedURLException, RemoteException,
-      URISyntaxException {
+  public void addPublisher(Publisher publisher) throws MalformedURLException, URISyntaxException {
     String topic = publisher.getTopicName();
     publishers.put(topic, publisher);
     master.registerPublisher(toSlaveIdentifier(), publisher);
   }
 
-  public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws RemoteException,
-      IOException, URISyntaxException {
+  public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws IOException,
+      URISyntaxException {
     String topic = subscriber.getTopicName();
     subscribers.put(topic, subscriber);
     Response<List<URI>> response = master.registerSubscriber(toSlaveIdentifier(), subscriber);

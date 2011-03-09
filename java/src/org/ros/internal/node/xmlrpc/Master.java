@@ -16,7 +16,6 @@
 
 package org.ros.internal.node.xmlrpc;
 
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -33,8 +32,7 @@ public interface Master extends Node {
    * @param serviceApi XML-RPC URI of caller node
    * @param callerApi
    * @return ignore
-   * @throws MalformedURLException 
-   * @throws URISyntaxException 
+   * @throws URISyntaxException
    */
   public List<Object> registerService(String callerId, String service, String serviceApi,
       String callerApi) throws URISyntaxException;
@@ -49,14 +47,13 @@ public interface Master extends Node {
    * 
    * @param callerId ROS caller ID
    * @param topic Fully-qualified name of topic
-   * @param topicType Datatype for topic. Must be a package-resource name, i.e.
-   *        the .msg name
+   * @param topicType topic type, must be a package-resource name, i.e. the .msg
+   *        name
    * @param callerApi API URI of subscriber to register. Will be used for new
    *        publisher notifications
    * @return publishers as a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic
-   * @throws MalformedURLException
-   * @throws URISyntaxException 
+   * @throws URISyntaxException
    */
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
       String callerApi) throws URISyntaxException;
@@ -67,13 +64,12 @@ public interface Master extends Node {
    * Register the caller as a publisher the topic.
    * 
    * @param callerId ROS caller ID
-   * @param topic Fully-qualified name of topic to register.
-   * @param topicType Datatype for topic. Must be a package-resource name, i.e.
-   *        the .msg name.
-   * @param callerApi API URI of publisher to register.
-   * @return List of current subscribers of topic in the form of XMLRPC URIs.
-   * @throws MalformedURLException
-   * @throws URISyntaxException 
+   * @param topic fully-qualified name of topic to register
+   * @param topicType topic type, must be a package-resource name, i.e. the .msg
+   *        name.
+   * @param callerApi API URI of publisher to register
+   * @return list of current subscribers of topic in the form of XML-RPC URIs
+   * @throws URISyntaxException
    */
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
       String callerApi) throws URISyntaxException;

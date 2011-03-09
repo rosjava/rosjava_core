@@ -30,7 +30,6 @@ import org.ros.internal.service.ServiceIdentifier;
 
 import org.ros.internal.node.xmlrpc.MasterImpl;
 
-
 import org.apache.xmlrpc.XmlRpcException;
 
 import java.io.IOException;
@@ -115,13 +114,13 @@ public class MasterServer extends NodeServer {
   }
 
   /**
-   * Get the XML-RPC URI of the node with the associated name/caller_id. This
+   * Returns a {@link SlaveIdentifier} for the node with the given name. This
    * API is for looking information about publishers and subscribers. Use
    * lookupService instead to lookup ROS-RPC URIs.
    * 
    * @param callerId ROS caller ID
-   * @param nodeName Name of node to lookup
-   * @return
+   * @param nodeName name of node to lookup
+   * @return a {@link SlaveIdentifier} for the node with the given name
    */
   public SlaveIdentifier lookupNode(String callerId, String nodeName) {
     return slaves.get(nodeName);
