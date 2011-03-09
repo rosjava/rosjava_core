@@ -31,6 +31,7 @@ import org.ros.internal.transport.ProtocolDescription;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -154,18 +155,13 @@ public class SlaveImpl implements Slave {
   @Override
   public List<Object> publisherUpdate(String callerId, String topic, Object[] publishers) {
     try {
-      URI[] publisherUris = new URI[publishers.length];
-      int idx = 0;
+      ArrayList<URI> publisherUris = new ArrayList<URI>(publishers.length);
       for (Object publisher : publishers) {
-        publisherUris[idx++] = new URI(publisher.toString());
+        publisherUris.add(new URI(publisher.toString()));
       }
-
-      // TODO(kwc) this needs to queue an update in a separate thread to handle
-      // the new list of publishers for a topic. We cannot process inline as
-      // this may incur multiple outbound XMLRPC calls. Main thing here is the
-      // parse publishers[] into an appropriate data structure.
-
-      return Response.createSuccess("publisherUpdate success", 0).toList();
+      //TODO(kwc): remove when publisherUpdate is implemented
+      slave.publisherUpdate(callerId, topic, publisherUris);
+      return Response.createFailure("publisherUpdate implementation in progress", 0).toList();
     } catch (URISyntaxException e) {
       return Response.createError("invalid URI sent in update", 0).toList();
     }

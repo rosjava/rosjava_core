@@ -162,8 +162,11 @@ public class SlaveServer extends NodeServer {
     throw new UnsupportedOperationException();
   }
 
-  public List<Object> publisherUpdate(String callerId, String topic, Collection<String> publishers) {
-    throw new UnsupportedOperationException();
+  public void publisherUpdate(String callerId, String topic, Collection<URI> publisherUris) {
+    // TODO(kwc) this needs to queue an update in a separate thread to handle
+    // the new list of publishers for a topic. We cannot process inline as
+    // this may incur multiple outbound XMLRPC calls. Main thing here is the
+    // parse publishers[] into an appropriate data structure.
   }
 
   // TODO(damonkohler): Support multiple publishers for a particular topic.
