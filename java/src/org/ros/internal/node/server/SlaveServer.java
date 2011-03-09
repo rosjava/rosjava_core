@@ -38,9 +38,11 @@ import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.message.Message;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -81,15 +83,15 @@ public class SlaveServer extends NodeServer {
       IOException, URISyntaxException {
     String topic = subscriber.getTopicName();
     subscribers.put(topic, subscriber);
-    Response<List<URI>> response =
-        Response.checkOk(master.registerSubscriber(toSlaveIdentifier(), subscriber));
+    Response<List<URI>> response = Response.checkOk(master.registerSubscriber(toSlaveIdentifier(),
+        subscriber));
     List<PublisherIdentifier> publishers = Lists.newArrayList();
     for (URI uri : response.getResult()) {
       // TODO(damonkohler): What should we supply as the name of this slave?
       // It's not given to us in the response.
       SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/unnamed", uri);
-      MessageDefinition messageDefinition =
-          MessageDefinition.createMessageDefinition(subscriber.getTopicMessageType());
+      MessageDefinition messageDefinition = MessageDefinition.createMessageDefinition(subscriber
+          .getTopicMessageType());
       TopicDefinition topicDefinition = new TopicDefinition(topic, messageDefinition);
       publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
     }
@@ -100,7 +102,7 @@ public class SlaveServer extends NodeServer {
    * @param server
    * @throws URISyntaxException
    * @throws MalformedURLException
-   * @throws RemoteException 
+   * @throws RemoteException
    */
   public void addService(ServiceServer<? extends Message> server) throws URISyntaxException,
       MalformedURLException, RemoteException {
@@ -112,7 +114,10 @@ public class SlaveServer extends NodeServer {
   }
 
   public List<Object> getBusInfo(String callerId) {
-    throw new UnsupportedOperationException();
+    // For each publication and subscription (alive and dead):
+    //  ((connection_id, destination_caller_id, direction, transport, topic_name, connected)*)
+    // TODO(kwc): returning empty list right now to keep debugging tools happy
+    return new ArrayList<Object>();
   }
 
   public URI getMasterUri(String callerId) {
@@ -123,8 +128,26 @@ public class SlaveServer extends NodeServer {
     super.shutdown();
   }
 
-  public List<Object> getPid(String callerId) {
-    throw new UnsupportedOperationException();
+  /**
+   * @param callerId
+   * @return PID of node process
+   * @throws UnsupportedOperationException
+   *           If PID cannot be retrieved on this platform.
+   */
+  public Integer getPid(String callerId) {
+    // kwc: java has no standard way of getting pid, apparently. This is the
+    // recommended solution, but this needs to be tested on Android.
+    // MF.getName() returns '1234@localhost'.
+    String mxName = ManagementFactory.getRuntimeMXBean().getName();
+    int idx = mxName.indexOf('@');
+    if (idx > 0) {
+      try {
+        return Integer.parseInt(mxName.substring(0, idx));
+      } catch (NumberFormatException e) {
+        // handled by exception below
+      }
+    }
+    throw new UnsupportedOperationException("cannot retrieve pid on this platform");
   }
 
   public List<Subscriber<?>> getSubscriptions() {
@@ -139,8 +162,11 @@ public class SlaveServer extends NodeServer {
     throw new UnsupportedOperationException();
   }
 
-  public List<Object> publisherUpdate(String callerId, String topic, Collection<String> publishers) {
-    throw new UnsupportedOperationException();
+  public void publisherUpdate(String callerId, String topic, Collection<URI> publisherUris) {
+    // TODO(kwc) this needs to queue an update in a separate thread to handle
+    // the new list of publishers for a topic. We cannot process inline as
+    // this may incur multiple outbound XMLRPC calls. Main thing here is the
+    // parse publishers[] into an appropriate data structure.
   }
 
   // TODO(damonkohler): Support multiple publishers for a particular topic.

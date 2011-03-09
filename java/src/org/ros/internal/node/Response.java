@@ -39,8 +39,8 @@ public class Response<ResultType> {
     return new Response<ResultType>(StatusCode.FAILURE, message, value);
   }
 
-  public static <ReusltType> Response<ReusltType> createSuccess(String message, ReusltType value) {
-    return new Response<ReusltType>(StatusCode.SUCCESS, message, value);
+  public static <ResultType> Response<ResultType> createSuccess(String message, ResultType value) {
+    return new Response<ResultType>(StatusCode.SUCCESS, message, value);
   }
 
   public Response(int statusCode, String statusMessage, ResultType value) {
