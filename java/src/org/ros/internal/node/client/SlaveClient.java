@@ -16,23 +16,17 @@
 
 package org.ros.internal.node.client;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.IntegerResultFactory;
+import org.ros.internal.node.response.ProtocolDescriptionResultFactory;
 import org.ros.internal.node.response.Response;
-import org.ros.internal.node.response.ResultFactory;
 import org.ros.internal.node.response.TopicDefinitionListResultFactory;
 import org.ros.internal.node.response.UriResultFactory;
 import org.ros.internal.topic.TopicDefinition;
 import org.ros.internal.transport.ProtocolDescription;
-import org.ros.internal.transport.ProtocolNames;
-import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -90,18 +84,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
       Collection<String> requestedProtocols) throws RemoteException {
     return Response.fromList(
         node.requestTopic(nodeName, topic, new Object[][] {requestedProtocols.toArray()}),
-        new ResultFactory<ProtocolDescription>() {
-          @Override
-          public ProtocolDescription create(Object value) {
-            List<Object> protocolParameters = Arrays.asList((Object[]) value);
-            Preconditions.checkState(protocolParameters.size() == 3);
-            Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
-            InetSocketAddress address =
-                InetSocketAddress.createUnresolved((String) protocolParameters.get(1),
-                    (Integer) protocolParameters.get(2));
-            return new TcpRosProtocolDescription(address);
-          }
-        });
+        new ProtocolDescriptionResultFactory());
   }
 
 }
