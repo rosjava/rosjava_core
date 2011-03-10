@@ -59,18 +59,25 @@ public class Ros {
    */
   public static String getLocalIpAddress() {
     try {
+      String address = null;
       for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
           .hasMoreElements();) {
         NetworkInterface intf = en.nextElement();
         for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
             .hasMoreElements();) {
           InetAddress inetAddress = enumIpAddr.nextElement();
+          log.info("Address: " + inetAddress.getHostAddress().toString());
           // IPv4 only for now
           if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
-            return inetAddress.getHostAddress().toString();
+            if(address == null)
+              address =  inetAddress.getHostAddress().toString();
+            
           }
+          
         }
       }
+      if(address != null)
+        return address;
     } catch (SocketException ex) {
       log.error(ex);
     }
