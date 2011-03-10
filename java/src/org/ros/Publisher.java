@@ -62,12 +62,12 @@ public class Publisher<MessageType extends Message> {
    * @throws IllegalAccessException
    * @throws InstantiationException
    */
-  void start() throws IOException, InstantiationException, IllegalAccessException {
+  void start(String hostname) throws IOException, InstantiationException, IllegalAccessException {
     // create an instance of the message of type MessageT
     Message m = messageClass.newInstance();
     TopicDefinition topicDefinition;
     topicDefinition = new TopicDefinition(topicName, MessageDefinition.createFromMessage(m));
-    publisher = new org.ros.internal.topic.Publisher(topicDefinition, Ros.getHostName(), 0);
+    publisher = new org.ros.internal.topic.Publisher(topicDefinition, hostname, 0);
     publisher.start();
   }
 }
