@@ -67,5 +67,35 @@ public class SubscriberIdentifier {
         .putAll(topicDefinition.toHeader())
         .build();
   }
+  
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((slaveIdentifier == null) ? 0 : slaveIdentifier.hashCode());
+    result = prime * result + ((topicDefinition == null) ? 0 : topicDefinition.hashCode());
+    return result;
+  }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    SubscriberIdentifier other = (SubscriberIdentifier) obj;
+    if (slaveIdentifier == null) {
+      if (other.slaveIdentifier != null)
+        return false;
+    } else if (!slaveIdentifier.equals(other.slaveIdentifier))
+      return false;
+    if (topicDefinition == null) {
+      if (other.topicDefinition != null)
+        return false;
+    } else if (!topicDefinition.equals(other.topicDefinition))
+      return false;
+    return true;
+  }
 }

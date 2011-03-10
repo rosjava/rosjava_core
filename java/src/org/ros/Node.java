@@ -68,12 +68,15 @@ public class Node implements Namespace {
    * @param argv
    *          arg parsing
    * @param name
-   *          the name, as in namespace of the node
+   *          Name of the node.
    * @throws RosNameException
    * @throws RosInitException
    */
   public Node(String argv[], String name) throws RosNameException, RosInitException {
     initialized = false;
+    // TODO(kwc): per roscpp/rospy, name should actually be a 'base name', i.e.
+    // it cannot contain any namespace information whatsoever. This restriction
+    // ensures consistency of remapping logic.
     RosName tname = new RosName(name);
     if (!tname.isGlobal()) {
       rosName = new RosName("/" + name); // FIXME Resolve node name from
@@ -89,8 +92,6 @@ public class Node implements Namespace {
     // FIXME arg parsing
     log = new RosLog(rosName.toString());
 
-    pubSubFactory = new PubSubFactory(rosName.toString());
-
     // Initialize handles to master and slave here so that we can perform
     // configuration on slaveServer prior to actual init().
     try {
@@ -102,7 +103,14 @@ public class Node implements Namespace {
     } catch (URISyntaxException e) {
       throw new RosInitException("invalid ROS master URI");
     }
-    slaveServer = new SlaveServer(rosName.toString(), masterClient, Ros.getHostName(), port);
+    try {
+      slaveServer = new SlaveServer(rosName.toString(), masterClient, Ros.getHostName(), port);
+      pubSubFactory = new PubSubFactory(slaveServer.toSlaveIdentifier());
+    } catch (MalformedURLException e) {
+      throw new RosInitException("invalid ROS slave URI");
+    } catch (URISyntaxException e) {
+      throw new RosInitException("invalid ROS slave URI");
+    }
   }
 
   @Override
@@ -156,12 +164,7 @@ public class Node implements Namespace {
           .createSubscriber(topicDefinition, messageClass);
 
       // Add the callback to the impl.
-      subscriberImpl.addMessageListener(new MessageListener<MessageType>() {
-        @Override
-        public void onNewMessage(MessageType message) {
-          callback.onNewMessage(message);
-        }
-      });
+      subscriberImpl.addMessageListener(callback);
       // Create the user-facing Subscriber handle. This is little more than a
       // lightweight wrapper around the internal implementation so that we can
       // track callback references.
@@ -189,8 +192,8 @@ public class Node implements Namespace {
    * @return The current time of the system, using rostime.
    */
   public Time currentTime() {
-    // TODO: need to add in rostime implementation for simulated time in the
-    // event that wallclock is not being used
+    // TODO: need to add in rostime (/Clock) implementation for simulated time
+    // in the event that wallclock is not being used
     return Time.fromMillis(System.currentTimeMillis());
   }
 

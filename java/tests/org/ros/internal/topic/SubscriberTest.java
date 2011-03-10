@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.ros.internal.node.server.SlaveIdentifier;
+
 import org.junit.Test;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -28,6 +30,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
@@ -36,7 +40,7 @@ import java.util.Map;
 public class SubscriberTest {
 
   @Test
-  public void testHandshake() throws IOException {
+  public void testHandshake() throws IOException, URISyntaxException {
     Socket socket = mock(Socket.class);
     Map<String, String> header = new TopicDefinition("/foo",
         MessageDefinition.createFromMessage(new org.ros.message.std.String()))
@@ -48,12 +52,13 @@ public class SubscriberTest {
     outputStream = new ByteArrayOutputStream();
     when(socket.getOutputStream()).thenReturn(outputStream);
 
+    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/caller", new URI("http://fake:1234"));
     Subscriber<org.ros.message.std.String> subscriber = Subscriber.create(
-        "/caller",
+        slaveIdentifier,
         new TopicDefinition("/foo", MessageDefinition
             .createFromMessage(new org.ros.message.std.String())),
         org.ros.message.std.String.class);
-    subscriber.handshake(socket);
+    TcprosConnection.handshake(socket, subscriber.header);
     buffer = outputStream.toByteArray();
     Map<String, String> result = ConnectionHeader.readHeader(new ByteArrayInputStream(buffer));
     assertEquals(result.get(ConnectionHeaderFields.TYPE), header.get(ConnectionHeaderFields.TYPE));

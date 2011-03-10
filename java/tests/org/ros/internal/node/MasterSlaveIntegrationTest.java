@@ -97,8 +97,9 @@ public class MasterSlaveIntegrationTest {
     TopicDefinition topicDefinition =
         new TopicDefinition("/hello",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
+    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/bloop", new URI("http://fake:1234"));
     Subscriber<org.ros.message.std.String> subscriber =
-        Subscriber.create("/bloop", topicDefinition, org.ros.message.std.String.class);
+        Subscriber.create(slaveIdentifier, topicDefinition, org.ros.message.std.String.class);
     List<PublisherIdentifier> publishers = slaveServer.addSubscriber(subscriber);
     assertEquals(0, publishers.size());
     Publisher publisher = new Publisher(topicDefinition, "localhost", 0);

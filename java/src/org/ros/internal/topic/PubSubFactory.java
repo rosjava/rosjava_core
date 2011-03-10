@@ -17,6 +17,8 @@ package org.ros.internal.topic;
 
 import com.google.common.collect.Maps;
 
+import org.ros.internal.node.server.SlaveIdentifier;
+
 import org.ros.message.Message;
 
 import java.util.Map;
@@ -30,11 +32,11 @@ import java.util.Map;
 public class PubSubFactory {
 
   private final Map<String, Subscriber<?>> subscribers;
-  private final String nodeName;
+  private final SlaveIdentifier slaveIdentifier;
 
-  public PubSubFactory(String nodeName) {
+  public PubSubFactory(SlaveIdentifier slaveIdentifier) {
     // TODO(kwc): implement publishers factory
-    this.nodeName = nodeName;
+    this.slaveIdentifier = slaveIdentifier;
     subscribers = Maps.newConcurrentMap();
   }
 
@@ -51,7 +53,7 @@ public class PubSubFactory {
    * @return Internal Subscriber implementation instance.
    */
   @SuppressWarnings("unchecked")
-  public synchronized <S extends Message> Subscriber<S> createSubscriber(
+  public <S extends Message> Subscriber<S> createSubscriber(
       TopicDefinition description, Class<S> messageClass) {
     String topicName = description.getName();
     Subscriber<S> subscriber;
@@ -60,7 +62,7 @@ public class PubSubFactory {
       subscriber = (Subscriber<S>) subscribers.get(topicName);
     } else {
       // Create new singleton for topic subscription.
-      subscriber = Subscriber.create(nodeName, description, messageClass);
+      subscriber = Subscriber.create(slaveIdentifier, description, messageClass);
       subscribers.put(topicName, subscriber);
     }
     return subscriber;

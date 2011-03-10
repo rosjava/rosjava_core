@@ -20,8 +20,6 @@ import org.ros.internal.node.server.SlaveIdentifier;
 
 import java.net.URI;
 
-
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */

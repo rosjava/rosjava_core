@@ -88,11 +88,14 @@ public class SlaveServer extends NodeServer {
       // TODO(damonkohler): What should we supply as the name of this slave?
       // It's not given to us in the response.
       SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/unnamed", uri);
-      MessageDefinition messageDefinition =
-          MessageDefinition.createMessageDefinition(subscriber.getTopicMessageType());
+      MessageDefinition messageDefinition = MessageDefinition.createMessageDefinition(subscriber
+          .getTopicMessageType());
       TopicDefinition topicDefinition = new TopicDefinition(topic, messageDefinition);
       publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
     }
+    // update the subscriber with the new publisher list. This call should be
+    // non-blocking.
+    subscriber.updatePublishers(publishers);
     return publishers;
   }
 
@@ -130,8 +133,8 @@ public class SlaveServer extends NodeServer {
   /**
    * @param callerId
    * @return PID of node process
-   * @throws UnsupportedOperationException If PID cannot be retrieved on this
-   *         platform.
+   * @throws UnsupportedOperationException
+   *           If PID cannot be retrieved on this platform.
    */
   public Integer getPid(String callerId) {
     // kwc: java has no standard way of getting pid, apparently. This is the
