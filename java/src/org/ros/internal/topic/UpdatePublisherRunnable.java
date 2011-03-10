@@ -31,7 +31,7 @@ import java.net.MalformedURLException;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class UpdatePublisherRunnable<MessageType extends Message> implements Runnable {
+class UpdatePublisherRunnable<MessageType extends Message> implements Runnable {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(UpdatePublisherRunnable.class);
@@ -57,7 +57,8 @@ public final class UpdatePublisherRunnable<MessageType extends Message> implemen
           new SlaveClient(publisherIdentifier.getNodeName(), publisherIdentifier.getSlaveUri());
       Response<ProtocolDescription> response =
           slaveClient.requestTopic(this.subscriber.getTopicName(), ProtocolNames.SUPPORTED);
-      // TODO(kwc): all of this logic really belongs in a protocol handler registry.
+      // TODO(kwc): all of this logic really belongs in a protocol handler
+      // registry.
       ProtocolDescription selected = response.getResult();
       if (ProtocolNames.SUPPORTED.contains(selected.getName())) {
         try {
