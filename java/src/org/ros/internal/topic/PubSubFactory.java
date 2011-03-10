@@ -72,21 +72,28 @@ public class PubSubFactory {
       throws IOException, URISyntaxException, RemoteException {
     String topicName = description.getName();
     Subscriber<MessageType> subscriber;
-    if (subscribers.containsKey(topicName)) {
-      // Return existing internal subscriber.
-      subscriber = (Subscriber<MessageType>) subscribers.get(topicName);
-      Preconditions.checkState(subscriber.checkMessageClass(messageClass));
-    } else {
-      // Create new singleton for topic subscription.
-      subscriber = Subscriber.create(slaveIdentifier, description, messageClass, jobQueue);
-      subscribers.put(topicName, subscriber);
+    boolean createdNewSubscriber = false;
 
-      // TODO(kwc): for now we have factory directly trigger the slaveServer to handle
-      // master registration semantics. I'd rather have a listener or other sort
-      // of pattern to consolidate master registration communication in a single
-      // entity.
+    synchronized (subscribers) {
+      if (subscribers.containsKey(topicName)) {
+        // Return existing internal subscriber.
+        subscriber = (Subscriber<MessageType>) subscribers.get(topicName);
+        Preconditions.checkState(subscriber.checkMessageClass(messageClass));
+      } else {
+        // Create new singleton for topic subscription.
+        subscriber = Subscriber.create(slaveIdentifier, description, messageClass, jobQueue);
+        subscribers.put(topicName, subscriber);
+        createdNewSubscriber = true;
+      }
+    }
 
-      // Slave server handles registration with the ROS Master.
+    // TODO(kwc): for now we have factory directly trigger the slaveServer to
+    // handle master registration semantics. I'd rather have a listener or other
+    // sort of pattern to consolidate master registration communication in a
+    // single entity.
+    if (createdNewSubscriber) {
+      // Slave server handles registration of new Subscribers with the
+      // MasterServer.
       slaveServer.addSubscriber(subscriber);
     }
     return subscriber;

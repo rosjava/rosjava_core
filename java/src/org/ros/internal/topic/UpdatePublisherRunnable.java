@@ -40,13 +40,13 @@ public final class UpdatePublisherRunnable<MessageType extends Message> implemen
   private final PublisherIdentifier publisherIdentifier;
 
   /**
-   * @param pubIdentifier
-   * @param subscriber TODO
+   * @param subscriber
+   * @param publisherIdentifier
    */
   public UpdatePublisherRunnable(Subscriber<MessageType> subscriber,
-      PublisherIdentifier pubIdentifier) {
+      PublisherIdentifier publisherIdentifier) {
     this.subscriber = subscriber;
-    this.publisherIdentifier = pubIdentifier;
+    this.publisherIdentifier = publisherIdentifier;
   }
 
   @Override
