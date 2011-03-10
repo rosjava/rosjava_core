@@ -60,8 +60,10 @@ public class Subscriber<MessageType extends Message> extends Topic {
 
   /* current list of publishers for topic */
   private final List<TopicConnectionInfo> connections;
+  private final Class<MessageType> messageClass;
+  private final ConnectionJobQueue jobQueue;
+
   private SubscriberIdentifier identifier;
-  private ConnectionJobQueue jobQueue;
   private Collection<String> supportedProtocols;
 
   private final class MessageReadingThread extends Thread {
@@ -103,13 +105,15 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition description,
       Class<MessageType> messageClass, ConnectionJobQueue jobQueue) {
     super(description);
+    this.messageClass = messageClass;
     this.jobQueue = jobQueue;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new SubscriberMessageQueue<MessageType>(messageClass);
     thread = new MessageReadingThread();
-    header = ImmutableMap.<String, String>builder()
-        .put(ConnectionHeaderFields.CALLER_ID, slaveIdentifier.getName())
-        .putAll(description.toHeader()).build();
+    header =
+        ImmutableMap.<String, String>builder()
+            .put(ConnectionHeaderFields.CALLER_ID, slaveIdentifier.getName())
+            .putAll(description.toHeader()).build();
     connections = new ArrayList<TopicConnectionInfo>();
     identifier = new SubscriberIdentifier(slaveIdentifier, description);
 
@@ -151,8 +155,8 @@ public class Subscriber<MessageType extends Message> extends Topic {
 
   public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
       InetSocketAddress tcprosServerAddress) throws IOException {
-    TcprosConnection socketConnection = TcprosConnection
-        .createOutgoing(tcprosServerAddress, header);
+    TcprosConnection socketConnection =
+        TcprosConnection.createOutgoing(tcprosServerAddress, header);
 
     // TODO(kwc): need to upgrade 'in' to allow multiple sockets.
     // TODO(kwc): cleanup API between Connection and socket abstraction
@@ -178,8 +182,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
    * method is non-blocking (i.e. connections to new publishers are done in
    * background).
    * 
-   * @param publishers
-   *          Full list of publishers for topic.
+   * @param publishers Full list of publishers for topic.
    */
   public synchronized void updatePublishers(List<PublisherIdentifier> publishers) {
     // Find new connections.
@@ -206,8 +209,8 @@ public class Subscriber<MessageType extends Message> extends Topic {
           try {
             slaveClient = new SlaveClient(pubIdentifier.getNodeName(), pubIdentifier.getSlaveUri());
             Collection<String> supported = getSupportedProtocols();
-            Response<ProtocolDescription> response = slaveClient.requestTopic(getTopicName(),
-                supported);
+            Response<ProtocolDescription> response =
+                slaveClient.requestTopic(getTopicName(), supported);
             if (response.getStatusCode() != StatusCode.SUCCESS) {
               log.error("could not negotiate transport with publisher: " + response);
             } else {
@@ -241,5 +244,14 @@ public class Subscriber<MessageType extends Message> extends Topic {
         }
       });
     }
+  }
+
+  /**
+   * @param messageClass
+   * @return <code>true</code> if this {@link Subscriber} instance accepts the
+   *         supplied {@link Message} class
+   */
+  boolean checkMessageClass(Class<? extends Message> messageClass) {
+    return this.messageClass == messageClass;
   }
 }

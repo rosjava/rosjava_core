@@ -16,10 +16,12 @@
 
 package org.ros.internal.topic;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 import org.ros.internal.node.RemoteException;
 
+import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 
 import org.ros.internal.node.ConnectionJobQueue;
@@ -47,42 +49,39 @@ public class PubSubFactory {
   public PubSubFactory(SlaveIdentifier slaveIdentifier, ConnectionJobQueue jobQueue) {
     // TODO(kwc): implement publishers factory
     this.slaveIdentifier = slaveIdentifier;
-    subscribers = Maps.newConcurrentMap();
     this.jobQueue = jobQueue;
+    subscribers = Maps.newConcurrentMap();
   }
 
   /**
-   * Get or create internal Subscriber object. Factory uses a Subscriber
-   * singleton per topic for efficiency. If a new Subscriber is generated,
-   * registration with the Master occurs.
+   * Get or create a {@link Subscriber} instance. {@link Subscriber}s are cached
+   * and reused per topic for efficiency. If a new {@link Subscriber} is
+   * generated, it is registered with the {@link MasterServer}.
    * 
-   * @param topicName
-   *          Name of ROS topic that is subscribed to.
-   * @param topicDefinition
-   *          Description of ROS topic that is subscribed to.
-   * @param messageClass
-   *          Message type class of topic
-   * @return Internal Subscriber implementation instance.
+   * @param <MessageType>
+   * @param description {@link TopicDefinition} that is subscribed to
+   * @param messageClass {@link Message} class for topic
+   * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
    * @throws IOException
    */
   @SuppressWarnings("unchecked")
-  public <S extends Message> Subscriber<S> createSubscriber(SlaveServer slaveServer,
-      TopicDefinition description, Class<S> messageClass) throws IOException, URISyntaxException,
-      RemoteException {
-
+  public <MessageType extends Message> Subscriber<MessageType> createSubscriber(
+      SlaveServer slaveServer, TopicDefinition description, Class<MessageType> messageClass)
+      throws IOException, URISyntaxException, RemoteException {
     String topicName = description.getName();
-    Subscriber<S> subscriber;
+    Subscriber<MessageType> subscriber;
     if (subscribers.containsKey(topicName)) {
       // Return existing internal subscriber.
-      subscriber = (Subscriber<S>) subscribers.get(topicName);
+      subscriber = (Subscriber<MessageType>) subscribers.get(topicName);
+      Preconditions.checkState(subscriber.checkMessageClass(messageClass));
     } else {
       // Create new singleton for topic subscription.
       subscriber = Subscriber.create(slaveIdentifier, description, messageClass, jobQueue);
       subscribers.put(topicName, subscriber);
 
-      // kwc: for now we have factory directly trigger the slaveServer to handle
+      // TODO(kwc): for now we have factory directly trigger the slaveServer to handle
       // master registration semantics. I'd rather have a listener or other sort
       // of pattern to consolidate master registration communication in a single
       // entity.
