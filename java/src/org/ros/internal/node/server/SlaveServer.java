@@ -56,6 +56,16 @@ public class SlaveServer extends NodeServer {
   private final Map<String, Publisher> publishers;
   private final Map<String, Subscriber<?>> subscribers;
 
+  private static final List<PublisherIdentifier> buildPublisherIdentifierList(
+      Collection<URI> publisherUriList, TopicDefinition topicDefinition) {
+    List<PublisherIdentifier> publishers = Lists.newArrayList();
+    for (URI uri : publisherUriList) {
+      SlaveIdentifier slaveIdentifier = new SlaveIdentifier(SlaveIdentifier.UNKNOWN_NAME, uri);
+      publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
+    }
+    return publishers;
+  }
+
   public SlaveServer(String name, MasterClient master, String hostname, int port) {
     super(hostname, port);
     Preconditions.checkNotNull(name);
@@ -77,26 +87,11 @@ public class SlaveServer extends NodeServer {
     master.registerPublisher(toSlaveIdentifier(), publisher);
   }
 
-  /*
-   * Sub-routine of both publisherUpdate and addSubscriber.
-   */
-  private List<PublisherIdentifier> toPublisherIdentifiers(Collection<URI> publisherUriList,
-      TopicDefinition topicDefinition) {
-    List<PublisherIdentifier> publishers = Lists.newArrayList();
-    for (URI uri : publisherUriList) {
-      // TODO(damonkohler): What should we supply as the name of this slave?
-      // It's not given to us in the response.
-      SlaveIdentifier slaveIdentifier = new SlaveIdentifier(SlaveIdentifier.UNKNOWN_NAME, uri);
-      publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
-    }
-    return publishers;
-  }
-
   /**
-   * Inform SlaveServer of new Subscription. If there are multiple subscribers
-   * for the same topic, this should only be called for the first.
+   * Informs this {@link SlaveServer} of a new {@link Subscriber}. If there are multiple
+   * {@link Subscriber}s for the same topic, this should only be called for the first.
    * 
-   * This call blocks on a call to the ROS master.
+   * <p>This call blocks on a call to the ROS master.
    * 
    * @param subscriber
    * @return List of current publisher XML-RPC slave URIs for topic.
@@ -108,8 +103,8 @@ public class SlaveServer extends NodeServer {
       URISyntaxException, RemoteException {
     subscribers.put(subscriber.getTopicName(), subscriber);
     Response<List<URI>> response = master.registerSubscriber(toSlaveIdentifier(), subscriber);
-    List<PublisherIdentifier> publishers = toPublisherIdentifiers(response.getResult(),
-        subscriber.getTopicDefinition());
+    List<PublisherIdentifier> publishers =
+        buildPublisherIdentifierList(response.getResult(), subscriber.getTopicDefinition());
     subscriber.updatePublishers(publishers);
     return publishers;
   }
@@ -148,8 +143,8 @@ public class SlaveServer extends NodeServer {
   /**
    * @param callerId
    * @return PID of node process
-   * @throws UnsupportedOperationException
-   *           If PID cannot be retrieved on this platform.
+   * @throws UnsupportedOperationException If PID cannot be retrieved on this
+   *         platform.
    */
   public Integer getPid(String callerId) {
     // kwc: java has no standard way of getting pid, apparently. This is the
@@ -183,8 +178,8 @@ public class SlaveServer extends NodeServer {
     if (subscribers.containsKey(topic)) {
       Subscriber<?> subscriber = subscribers.get(topic);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
-      List<PublisherIdentifier> pubIdentifiers = toPublisherIdentifiers(publisherUris,
-          topicDefinition);
+      List<PublisherIdentifier> pubIdentifiers =
+          buildPublisherIdentifierList(publisherUris, topicDefinition);
       subscriber.updatePublishers(pubIdentifiers);
     }
   }
