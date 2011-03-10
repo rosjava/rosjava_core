@@ -49,13 +49,16 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Subscriber.class);
 
-  private final CopyOnWriteArrayList<MessageListener<MessageType>> listeners;
-  private final SubscriberMessageQueue<MessageType> in;
-  private final MessageReadingThread thread;
   @VisibleForTesting
   final ImmutableMap<String, String> header;
 
-  /* current list of publishers for topic */
+  private final CopyOnWriteArrayList<MessageListener<MessageType>> listeners;
+  private final SubscriberMessageQueue<MessageType> in;
+  private final MessageReadingThread thread;
+  
+  /**
+   * Current list of publishers for the subscribed topic.
+   */
   private final List<TopicConnectionInfo> connections;
   private final Class<MessageType> messageClass;
   private final ConnectionJobQueue jobQueue;
