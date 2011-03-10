@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -34,9 +34,9 @@ public class SubscriberIdentifier {
 
   public static SubscriberIdentifier createFromHeader(Map<String, String> header) {
     // TODO(damonkohler): Update SlaveIdentifier to handle the case where the
-    // URL is not set.
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier(header.get(ConnectionHeaderFields.CALLER_ID),
-        null);
+    // URI is not set.
+    SlaveIdentifier slaveIdentifier =
+        new SlaveIdentifier(header.get(ConnectionHeaderFields.CALLER_ID), null);
     return new SubscriberIdentifier(slaveIdentifier, TopicDefinition.createFromHeader(header));
   }
 
@@ -62,12 +62,10 @@ public class SubscriberIdentifier {
   }
 
   public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>()
-        .putAll(slaveIdentifier.toHeader())
-        .putAll(topicDefinition.toHeader())
-        .build();
+    return new ImmutableMap.Builder<String, String>().putAll(slaveIdentifier.toHeader())
+        .putAll(topicDefinition.toHeader()).build();
   }
-  
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -79,23 +77,16 @@ public class SubscriberIdentifier {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     SubscriberIdentifier other = (SubscriberIdentifier) obj;
     if (slaveIdentifier == null) {
-      if (other.slaveIdentifier != null)
-        return false;
-    } else if (!slaveIdentifier.equals(other.slaveIdentifier))
-      return false;
+      if (other.slaveIdentifier != null) return false;
+    } else if (!slaveIdentifier.equals(other.slaveIdentifier)) return false;
     if (topicDefinition == null) {
-      if (other.topicDefinition != null)
-        return false;
-    } else if (!topicDefinition.equals(other.topicDefinition))
-      return false;
+      if (other.topicDefinition != null) return false;
+    } else if (!topicDefinition.equals(other.topicDefinition)) return false;
     return true;
   }
 }

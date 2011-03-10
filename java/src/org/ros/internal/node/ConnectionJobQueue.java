@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Thread executor for running queued connection jobs.
  * 
- * @author kwc
+ * @author kwc@willowgarage.com (Ken Conley)
  */
 public class ConnectionJobQueue {
 

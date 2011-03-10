@@ -13,12 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.internal.topic;
+
+package org.ros.internal.transport;
 
 /**
  * Low-level ROS transport connection, e.g. a TCPROS-based socket.
- * @author kwc
- *
+ * 
+ * @author kwc@willowgarage.com (Ken Conley)
  */
 public interface Connection {
 

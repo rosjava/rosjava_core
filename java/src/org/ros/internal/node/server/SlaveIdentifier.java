@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -30,19 +30,26 @@ import java.util.Map;
 public class SlaveIdentifier {
 
   /** Value for name field if URI is known but slave name is not. */
-  public static final String UNKNOWN_NAME = "/unknown";
+  private static final String UNKNOWN_NAME = "/unknown";
+
   private final String name;
   private final URI uri;
 
   public SlaveIdentifier(String name, URI uri) {
     Preconditions.checkNotNull(name);
     Preconditions.checkArgument(name.startsWith("/"));
+    // TODO(damonkohler): URI is optional. There should be a factory method that
+    // creates a SlaveIdentifier without a URI.
     this.name = name;
     this.uri = uri;
   }
 
+  /**
+   * @param uri the {@link URI} of the {@link SlaveServer}
+   * @return a {@link SlaveIdentifier} with a {@link URI} but no name
+   */
   public static SlaveIdentifier createAnonymous(URI uri) {
-    return new SlaveIdentifier("/unnamed", uri);
+    return new SlaveIdentifier(UNKNOWN_NAME, uri);
   }
 
   @Override
@@ -75,23 +82,16 @@ public class SlaveIdentifier {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     SlaveIdentifier other = (SlaveIdentifier) obj;
     if (name == null) {
-      if (other.name != null)
-        return false;
-    } else if (!name.equals(other.name))
-      return false;
+      if (other.name != null) return false;
+    } else if (!name.equals(other.name)) return false;
     if (uri == null) {
-      if (other.uri != null)
-        return false;
-    } else if (!uri.equals(other.uri))
-      return false;
+      if (other.uri != null) return false;
+    } else if (!uri.equals(other.uri)) return false;
     return true;
   }
 

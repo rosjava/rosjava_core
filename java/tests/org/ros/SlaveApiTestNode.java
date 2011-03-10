@@ -26,7 +26,7 @@ import org.ros.message.std.Int64;
  * cd test_ros/test/client_verification/ ./test_slave_api.py --text
  * --profile=rosjava_profile.yaml
  * 
- * @author kwc
+ * @author kwc@willowgarage.com (Ken Conley)
  * 
  */
 public class SlaveApiTestNode {

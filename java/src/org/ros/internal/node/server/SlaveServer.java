@@ -56,11 +56,11 @@ public class SlaveServer extends NodeServer {
   private final Map<String, Publisher> publishers;
   private final Map<String, Subscriber<?>> subscribers;
 
-  private static final List<PublisherIdentifier> buildPublisherIdentifierList(
+  private static List<PublisherIdentifier> buildPublisherIdentifierList(
       Collection<URI> publisherUriList, TopicDefinition topicDefinition) {
     List<PublisherIdentifier> publishers = Lists.newArrayList();
     for (URI uri : publisherUriList) {
-      SlaveIdentifier slaveIdentifier = new SlaveIdentifier(SlaveIdentifier.UNKNOWN_NAME, uri);
+      SlaveIdentifier slaveIdentifier = SlaveIdentifier.createAnonymous(uri);
       publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
     }
     return publishers;
@@ -91,7 +91,7 @@ public class SlaveServer extends NodeServer {
    * Informs this {@link SlaveServer} of a new {@link Subscriber}. If there are multiple
    * {@link Subscriber}s for the same topic, this should only be called for the first.
    * 
-   * <p>This call blocks on a call to the ROS master.
+   * <p>This call blocks on remote call to the {@link MasterServer}.
    * 
    * @param subscriber
    * @return List of current publisher XML-RPC slave URIs for topic.

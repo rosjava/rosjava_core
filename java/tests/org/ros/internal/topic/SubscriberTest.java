@@ -58,7 +58,7 @@ public class SubscriberTest {
         new TopicDefinition("/foo", MessageDefinition
             .createFromMessage(new org.ros.message.std.String())),
         org.ros.message.std.String.class, jobQueue);
-    TcprosConnection.subscriberHandshake(socket, subscriber.header);
+    TcpRosConnection.subscriberHandshake(socket, subscriber.header);
     buffer = outputStream.toByteArray();
     Map<String, String> result = ConnectionHeader.readHeader(new ByteArrayInputStream(buffer));
     assertEquals(result.get(ConnectionHeaderFields.TYPE), header.get(ConnectionHeaderFields.TYPE));

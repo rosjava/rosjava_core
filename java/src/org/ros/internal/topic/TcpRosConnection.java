@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.internal.transport.Connection;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
@@ -35,17 +36,17 @@ import java.util.Map;
  * @author kwc@willowgarage.com (Ken Conley)
  * 
  */
-public class TcprosConnection implements Connection {
+public class TcpRosConnection implements Connection {
 
   private static final boolean DEBUG = false;
   private final Socket socket;
-  private static final Log log = LogFactory.getLog(TcprosConnection.class);
+  private static final Log log = LogFactory.getLog(TcpRosConnection.class);
 
   public Socket getSocket() {
     return socket;
   }
 
-  private TcprosConnection(Socket socket) {
+  private TcpRosConnection(Socket socket) {
     this.socket = socket;
   }
 
@@ -60,11 +61,11 @@ public class TcprosConnection implements Connection {
    *         already exchanged.
    * @throws IOException
    */
-  public static TcprosConnection createOutgoing(InetSocketAddress tcprosServerAddress,
+  public static TcpRosConnection createOutgoing(InetSocketAddress tcprosServerAddress,
       ImmutableMap<String, String> header) throws IOException {
     Socket socket = new Socket(tcprosServerAddress.getHostName(), tcprosServerAddress.getPort());
     subscriberHandshake(socket, header);
-    return new TcprosConnection(socket);
+    return new TcpRosConnection(socket);
   }
 
   /**

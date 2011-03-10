@@ -28,7 +28,6 @@ import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.Message;
@@ -56,9 +55,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private final SubscriberMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
 
-  /**
-   * Current list of publishers for the subscribed topic.
-   */
+  /** Current list of publishers for the subscribed topic. */
   private final List<TopicConnectionInfo> connections;
   private final Class<MessageType> messageClass;
   private final ConnectionJobQueue jobQueue;
@@ -111,11 +108,10 @@ public class Subscriber<MessageType extends Message> extends Topic {
     thread = new MessageReadingThread();
     header =
         ImmutableMap.<String, String>builder()
-            .put(ConnectionHeaderFields.CALLER_ID, slaveIdentifier.getName())
+            .putAll(slaveIdentifier.toHeader())
             .putAll(description.toHeader()).build();
     connections = new ArrayList<TopicConnectionInfo>();
     identifier = new SubscriberIdentifier(slaveIdentifier, description);
-
   }
 
   public Collection<String> getSupportedProtocols() {
@@ -146,8 +142,8 @@ public class Subscriber<MessageType extends Message> extends Topic {
 
   public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
       InetSocketAddress tcprosServerAddress) throws IOException {
-    TcprosConnection socketConnection =
-        TcprosConnection.createOutgoing(tcprosServerAddress, header);
+    TcpRosConnection socketConnection =
+        TcpRosConnection.createOutgoing(tcprosServerAddress, header);
     // TODO(kwc): need to upgrade 'in' to allow multiple sockets.
     // TODO(kwc): cleanup API between Connection and socket abstraction
     // leveling.

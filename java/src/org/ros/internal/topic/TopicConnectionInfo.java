@@ -15,6 +15,8 @@
  */
 package org.ros.internal.topic;
 
+import org.ros.internal.transport.Connection;
+
 /**
  * Data structure for storing identifiers for publisher and subscriber of a
  * connection.
