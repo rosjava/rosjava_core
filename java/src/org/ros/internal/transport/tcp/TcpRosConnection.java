@@ -40,7 +40,7 @@ public class TcpRosConnection implements Connection {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(TcpRosConnection.class);
-  
+
   private final Socket socket;
 
   public Socket getSocket() {
@@ -56,8 +56,7 @@ public class TcpRosConnection implements Connection {
    * initial handshake exchange for the socket.
    * 
    * @param tcprosServerAddress
-   * @param header
-   *          TCPROS connection header.
+   * @param header TCPROS connection header.
    * @return Connection instance. Contains initialized socket with handshake
    *         already exchanged.
    * @throws IOException
@@ -75,7 +74,7 @@ public class TcpRosConnection implements Connection {
    * the subscriber. The subscriber initiates the connection.
    */
   @VisibleForTesting
-  static void subscriberHandshake(Socket socket, ImmutableMap<String, String> header)
+  public static void subscriberHandshake(Socket socket, ImmutableMap<String, String> header)
       throws IOException {
     ConnectionHeader.writeHeader(header, socket.getOutputStream());
     Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
