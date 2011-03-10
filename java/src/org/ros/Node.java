@@ -198,5 +198,10 @@ public class Node implements RosNamespace {
     log.debug("Resolved name " + name + " as " + r);
     return r;
   }
+  
+  public void shutdown() {
+    //todo unregister all publishers, subscribers, etc.
+    slaveServer.shutdown();
+  }
 
 }
