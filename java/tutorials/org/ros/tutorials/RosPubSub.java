@@ -2,7 +2,7 @@ package org.ros.tutorials;
 
 import org.ros.Ros;
 
-import org.ros.RosContext;
+import org.ros.Context;
 
 import org.ros.MessageListener;
 import org.ros.Node;
@@ -31,7 +31,7 @@ public class RosPubSub extends RosMain {
   };
 
   @Override
-  public void rosMain(String[] argv, RosContext context) {
+  public void rosMain(String[] argv, Context context) {
     try {
       node = new Node("rosjava/sample_node", context);
       node.init();

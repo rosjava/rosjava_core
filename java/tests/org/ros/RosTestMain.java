@@ -37,7 +37,7 @@ public class RosTestMain {
     // dynamically at runtime.
     RosLoader rl = new RosLoader();
     RosMain rm = rl.loadClass("org.ros.tutorials.RosPubSub");
-    RosContext context = new RosContext();
+    Context context = new Context();
     String[] strippedArgs = context.init(args);
     rm.rosMain(strippedArgs, context);
   }

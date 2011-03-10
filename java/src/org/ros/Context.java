@@ -24,13 +24,13 @@ import org.ros.namespace.RosResolver;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * 
  */
-public class RosContext {
+public class Context {
   private RosResolver resolver;
 
   /**
    * default context
    */
-  public RosContext() {
+  public Context() {
     resolver = new RosResolver();
   }
 

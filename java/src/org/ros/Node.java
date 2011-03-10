@@ -48,7 +48,7 @@ public class Node implements RosNamespace {
    * The node's context for name resolution and possibly other global
    * configuration issues (rosparam)
    */
-  private final RosContext context;
+  private final Context context;
   /** The node's namespace name. */
   private final RosName rosName;
   private String hostName;
@@ -84,7 +84,7 @@ public class Node implements RosNamespace {
    * #@deprecated #TODO(rublee) are we deprecating this method of node construction?
    */
   public Node(String argv[], String name) throws RosNameException, RosInitException {
-    this.context = new RosContext();
+    this.context = new Context();
     //this does the arg parsing, remapping.
     this.context.init(argv);
     // TODO(kwc): per roscpp/rospy, name should actually be a 'base name', i.e.
@@ -104,7 +104,7 @@ public class Node implements RosNamespace {
    * @param context
    * @throws RosNameException
    */
-  public Node(String name, RosContext context) throws RosNameException {
+  public Node(String name, Context context) throws RosNameException {
     Preconditions.checkNotNull(context);
     Preconditions.checkNotNull(name);
     this.context = context;

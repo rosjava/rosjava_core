@@ -15,7 +15,7 @@
  */
 package org.ros.android.camera;
 
-import org.ros.RosContext;
+import org.ros.Context;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
@@ -49,7 +49,7 @@ public class RosCameraNode implements PreviewCallback {
    */
   public RosCameraNode(String masterURI,String node_name) {
     try {
-      node = new Node(node_name, new RosContext());
+      node = new Node(node_name, new Context());
       String localIp = Ros.getLocalIpAddress();
       Log.i(ROS_CAMERA_TAG, "My name is what? " + localIp);
       // FIXME resolve rosmaster from some global properties.

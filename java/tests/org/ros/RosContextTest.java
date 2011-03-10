@@ -12,7 +12,7 @@ public class RosContextTest {
 
   @Test
   public void testRosContext() {
-    RosContext ctx = new RosContext();
+    Context ctx = new Context();
     try {
       String myname = ctx.getResolver().resolveName("myname");
       assertTrue(myname.equals("/myname"));
@@ -23,7 +23,7 @@ public class RosContextTest {
 
   @Test
   public void testInit() throws RosNameException {
-    RosContext ctx = new RosContext();
+    Context ctx = new Context();
     String args = "name:=/my/name foo:=/my/foo --help";
     String[] stripped = ctx.init(args.split(" "));
     assertTrue(stripped.length == 1);
@@ -40,8 +40,8 @@ public class RosContextTest {
 
   @Test
   public void testGetResolver() throws RosNameException {
-    RosContext ctx = new RosContext();
-    RosContext ctx2 = new RosContext();
+    Context ctx = new Context();
+    Context ctx2 = new Context();
     String args = "name:=/my/name foo:=/my/foo --help";
     ctx.init(args.split(" "));
     RosResolver r = ctx2.getResolver(); // context 2 should be independent from
