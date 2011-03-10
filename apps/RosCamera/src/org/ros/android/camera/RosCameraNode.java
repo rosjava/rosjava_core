@@ -52,10 +52,11 @@ public class RosCameraNode implements PreviewCallback {
       Log.i(ROS_CAMERA_TAG, "My name is what? " + localIp);
       // FIXME resolve rosmaster from some global properties.
       node.init(masterURI,localIp);
-      
+      String camera_ns = node.resolveName("camera");
+     // RosNamespace camera_ns = node.createNamespace("camera");
       //create image and camera info topics on local namespace
-      imagePublisher = node.createPublisher("~image_raw", Image.class);
-      cameraInfoPublisher = node.createPublisher("~camera_info", CameraInfo.class);
+      imagePublisher = node.createPublisher(camera_ns +"/image_raw", Image.class);
+      cameraInfoPublisher = node.createPublisher(camera_ns + "/camera_info", CameraInfo.class);
     } catch (RosNameException e) {
       // TODO Auto-generated catch block
       Log.e(ROS_CAMERA_TAG, e.getMessage());
@@ -88,5 +89,9 @@ public class RosCameraNode implements PreviewCallback {
     cameraInfo.width = sz.height;
     cameraInfoPublisher.publish(cameraInfo);
     // FIXME camera calibration parameters.
+  }
+  public void shutdown()
+  {
+    //node.shutdown();
   }
 }
