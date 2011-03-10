@@ -55,7 +55,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private final CopyOnWriteArrayList<MessageListener<MessageType>> listeners;
   private final SubscriberMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
-  
+
   /**
    * Current list of publishers for the subscribed topic.
    */
@@ -128,9 +128,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
 
   public void addMessageListener(MessageListener<MessageType> listener) {
     listeners.add(listener);
-    if (listeners.size() > 0) {
-      // TODO(kwc): send event to start registration with master.
-    }
+    // TODO(kwc): send event to start registration with master.
   }
 
   public void removeMessageListener(MessageListener<MessageType> listener) {
@@ -139,8 +137,8 @@ public class Subscriber<MessageType extends Message> extends Topic {
     // unclear right now. Also, we need to do much more cleanup than this, such
     // as unregistering with the master. Similarly, there needs to be logic in
     // addMessageCallbackListener to start the thread back up. Also, should we
-    // be using listeners as a proxy for the # of Subscriber handles, or should
-    // we track those explicitly?
+    // be using listeners as a proxy for the number of Subscriber handles, or
+    // should we track those explicitly?
     if (listeners.size() == 0) {
       thread.interrupt();
     }
