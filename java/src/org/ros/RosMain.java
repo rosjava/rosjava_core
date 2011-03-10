@@ -25,6 +25,7 @@ public abstract class RosMain {
    * Called to start your node by some magical ros java file.
    * 
    * @param argv
+   * @param context The ros context with which to the RosMain is assumed to abide by.
    */
-  abstract public void rosMain(String argv[]);
+  abstract public void rosMain(String argv[], RosContext context);
 }

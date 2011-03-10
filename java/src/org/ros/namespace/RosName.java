@@ -25,7 +25,8 @@ import org.ros.exceptions.RosNameException;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * 
  */
-//TODO: kwc: unless this becomes part of the user-facing API, should probably stuff this inside of internal
+// TODO: kwc: unless this becomes part of the user-facing API, should probably
+// stuff this inside of internal
 public class RosName {
   private final String name;
 
@@ -38,17 +39,24 @@ public class RosName {
     try {
       // allow empty name
       if (name.length() > 0) {
-        Preconditions.checkArgument(name.matches("^[\\~\\/A-Za-z][\\w_\\/]*$"),
+        Preconditions.checkArgument(name.matches(getValidRosNamePattern()),
             "Invalid unix name, may not contain special characters.");
       }
     } catch (IllegalArgumentException e) {
       throw new RosNameException(e);
     }
     // trim trailing slashes for canonical representation
-    while (name != Namespace.GLOBAL_NS && name.endsWith("/")) {
+    while (name != RosNamespace.GLOBAL_NS && name.endsWith("/")) {
       name = name.substring(0, name.length() - 1);
     }
     this.name = name;
+  }
+
+  /**
+   * @return A pattern that may be used for verifying if a name is valid.
+   */
+  public static String getValidRosNamePattern() {
+    return "^[\\~\\/A-Za-z][\\w_\\/]*$";
   }
 
   /**
@@ -115,16 +123,16 @@ public class RosName {
     if (name.length() == 0) {
       return "";
     }
-    if (name.equals(Namespace.GLOBAL_NS)) {
-      return Namespace.GLOBAL_NS;
+    if (name.equals(RosNamespace.GLOBAL_NS)) {
+      return RosNamespace.GLOBAL_NS;
     }
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > 1) {
       return name.substring(0, slashIdx);
     } else {
-      if (isGlobal()) { 
-        return Namespace.GLOBAL_NS;
-      } else { 
+      if (isGlobal()) {
+        return RosNamespace.GLOBAL_NS;
+      } else {
         return "";
       }
     }

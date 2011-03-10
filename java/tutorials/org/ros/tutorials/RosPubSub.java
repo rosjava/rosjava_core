@@ -1,5 +1,9 @@
 package org.ros.tutorials;
 
+import org.ros.Ros;
+
+import org.ros.RosContext;
+
 import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.Publisher;
@@ -27,9 +31,9 @@ public class RosPubSub extends RosMain {
   };
 
   @Override
-  public void rosMain(String[] argv) {
+  public void rosMain(String[] argv, RosContext context) {
     try {
-      node = new Node(argv, "rosjava/sample_node");
+      node = new Node("rosjava/sample_node", context);
       node.init();
       pub = node.createPublisher("~hello", org.ros.message.std.String.class);
       node.createSubscriber("~hello", hello_cb, org.ros.message.std.String.class);
@@ -54,7 +58,7 @@ public class RosPubSub extends RosMain {
     // TODO(ethan) this is internal stuff, move away.
     RosLoader rl = new RosLoader();
     RosMain rm = rl.loadClass("org.ros.tutorials.RosPubSub");
-    rm.rosMain(argv);
+    rm.rosMain(argv,Ros.getDefaultContext());
   }
 
 }

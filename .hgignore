@@ -6,5 +6,10 @@ syntax: glob
 *.pyc
 *~
 *.log
+.project
+.classpath
+.cproject
+.settings
 syntax: regexp
 android/(bin|gen)/.*
+apps/.*/(bin|gen)/.*
