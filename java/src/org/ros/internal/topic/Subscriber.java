@@ -23,19 +23,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.MessageListener;
 import org.ros.internal.node.ConnectionJobQueue;
-import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.client.SlaveClient;
-import org.ros.internal.node.response.Response;
-import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosConnection;
 import org.ros.message.Message;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -183,51 +177,8 @@ public class Subscriber<MessageType extends Message> extends Topic {
         toAdd.add(publisherIdentifier);
       }
     }
-
     for (final PublisherIdentifier pubIdentifier : toAdd) {
-      // TODO(kwc): need a job queue to start creating these connections
-      jobQueue.addJob(new Runnable() {
-
-        @Override
-        public void run() {
-          SlaveClient slaveClient;
-          try {
-            slaveClient = new SlaveClient(pubIdentifier.getNodeName(), pubIdentifier.getSlaveUri());
-            Collection<String> supported = getSupportedProtocols();
-            Response<ProtocolDescription> response =
-                slaveClient.requestTopic(getTopicName(), supported);
-            if (response.getStatusCode() != StatusCode.SUCCESS) {
-              log.error("could not negotiate transport with publisher: " + response);
-            } else {
-              // TODO (kwc): all of this logic really belongs in a protocol
-              // handler registry
-              ProtocolDescription selected = response.getResult();
-              boolean isValid = false;
-              for (String valid : supported) {
-                if (selected.getName().equals(valid)) {
-                  isValid = true;
-                  break;
-                }
-              }
-              if (!isValid) {
-                log.error("publisher returned invalid protocol selection: " + response);
-              } else {
-                // assume TCPROS because that's all we support for now
-                try {
-                  addPublisher(pubIdentifier, selected.getAddress());
-                } catch (IOException e) {
-                  log.error(e);
-                }
-              }
-            }
-          } catch (MalformedURLException e) {
-            log.error(e);
-          } catch (RemoteException e) {
-            // TODO(kwc): retry logic. this can happen on a flaky wifi network
-            log.error(e);
-          }
-        }
-      });
+      jobQueue.addJob(new UpdatePublisherRunnable<MessageType>(this, pubIdentifier));
     }
   }
 

@@ -40,7 +40,6 @@ public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
 
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
     config.setServerURL(uri.toURL());
-    config.setEnabledForExtensions(true);
     config.setConnectionTimeout(60 * 1000);
     config.setReplyTimeout(60 * 1000);
 
