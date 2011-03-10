@@ -50,15 +50,14 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private final SubscriberMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
 
-  /** Current list of publishers for the subscribed topic. */
-  private final List<TopicConnectionInfo> connections;
+  /** Collection of connections to publishers for the subscribed topic. */
+  private final Collection<TopicConnectionInfo> connections;
   private final Class<MessageType> messageClass;
   private final ConnectionJobQueue jobQueue;
 
   private SubscriberIdentifier identifier;
 
   private final class MessageReadingThread extends Thread {
-
     @Override
     public void run() {
       try {
@@ -100,13 +99,13 @@ public class Subscriber<MessageType extends Message> extends Topic {
     this.jobQueue = jobQueue;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new SubscriberMessageQueue<MessageType>(messageClass);
-    thread = new MessageReadingThread();
     header =
-        ImmutableMap.<String, String>builder()
-            .putAll(slaveIdentifier.toHeader())
+        ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
             .putAll(description.toHeader()).build();
     connections = new ArrayList<TopicConnectionInfo>();
     identifier = new SubscriberIdentifier(slaveIdentifier, description);
+    thread = new MessageReadingThread();
+    thread.start();
   }
 
   public Collection<String> getSupportedProtocols() {
@@ -144,42 +143,38 @@ public class Subscriber<MessageType extends Message> extends Topic {
     // leveling.
     in.setSocket(socketConnection.getSocket());
     in.start();
-    if (!thread.isAlive()) {
-      // TODO(kwc): race condition if thread is in interrupted state
-      thread.start();
-    }
     connections.add(new TopicConnectionInfo(publisherIdentifier, identifier, socketConnection));
+  }
+
+  /**
+   * Updates the list of {@link Publisher}s for the topic that this
+   * {@link Subscriber} is interested in.
+   * 
+   * @param publishers {@link List} of {@link Publisher}s for the subscribed topic
+   */
+  public synchronized void updatePublishers(List<PublisherIdentifier> publishers) {
+    // Find new connections.
+    ArrayList<PublisherIdentifier> newPublishers = new ArrayList<PublisherIdentifier>();
+    for (PublisherIdentifier publisher : publishers) {
+      boolean newConnection = true;
+      for (TopicConnectionInfo connection : connections) {
+        if (publisher.equals(connection.getPublisherIdentifier())) {
+          newConnection = false;
+          break;
+        }
+      }
+      if (newConnection) {
+        newPublishers.add(publisher);
+      }
+    }
+    for (final PublisherIdentifier publisher : newPublishers) {
+      jobQueue.addJob(new UpdatePublisherRunnable<MessageType>(this, publisher));
+    }
   }
 
   public void shutdown() {
     thread.cancel();
     in.shutdown();
-  }
-
-  /**
-   * Updates list of publishers for topic this subscriber is interested in. This
-   * method is non-blocking (i.e. connections to new publishers are done in
-   * background).
-   * 
-   * @param publishers Full list of publishers for topic.
-   */
-  public synchronized void updatePublishers(List<PublisherIdentifier> publishers) {
-    // Find new connections.
-    ArrayList<PublisherIdentifier> toAdd = new ArrayList<PublisherIdentifier>();
-    for (PublisherIdentifier publisherIdentifier : publishers) {
-      boolean newConnection = true;
-      for (TopicConnectionInfo connection : connections) {
-        if (publisherIdentifier.equals(connection.getPublisherIdentifier())) {
-          newConnection = false;
-        }
-      }
-      if (newConnection) {
-        toAdd.add(publisherIdentifier);
-      }
-    }
-    for (final PublisherIdentifier pubIdentifier : toAdd) {
-      jobQueue.addJob(new UpdatePublisherRunnable<MessageType>(this, pubIdentifier));
-    }
   }
 
   /**
