@@ -30,6 +30,7 @@ import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
+import org.ros.internal.transport.tcp.TcpRosConnection;
 import org.ros.message.Message;
 
 import java.io.IOException;

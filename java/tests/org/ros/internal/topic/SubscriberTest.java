@@ -25,6 +25,7 @@ import org.ros.internal.node.ConnectionJobQueue;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.internal.transport.tcp.TcpRosConnection;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

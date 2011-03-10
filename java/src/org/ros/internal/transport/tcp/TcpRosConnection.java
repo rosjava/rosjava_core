@@ -13,7 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.internal.topic;
+
+package org.ros.internal.transport.tcp;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -34,7 +35,6 @@ import java.util.Map;
  * Store connection for a TCPROS socket-based connection.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
- * 
  */
 public class TcpRosConnection implements Connection {
 
