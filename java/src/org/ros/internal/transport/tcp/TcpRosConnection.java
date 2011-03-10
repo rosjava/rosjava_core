@@ -39,8 +39,9 @@ import java.util.Map;
 public class TcpRosConnection implements Connection {
 
   private static final boolean DEBUG = false;
-  private final Socket socket;
   private static final Log log = LogFactory.getLog(TcpRosConnection.class);
+  
+  private final Socket socket;
 
   public Socket getSocket() {
     return socket;
