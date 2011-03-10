@@ -27,7 +27,6 @@ import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.xmlrpc.SlaveImpl;
 import org.ros.internal.service.ServiceServer;
-import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.PublisherIdentifier;
 import org.ros.internal.topic.Subscriber;
@@ -78,23 +77,39 @@ public class SlaveServer extends NodeServer {
     master.registerPublisher(toSlaveIdentifier(), publisher);
   }
 
-  public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws IOException,
-      URISyntaxException, RemoteException {
-    String topic = subscriber.getTopicName();
-    subscribers.put(topic, subscriber);
-    Response<List<URI>> response = master.registerSubscriber(toSlaveIdentifier(), subscriber);
+  /*
+   * Sub-routine of both publisherUpdate and addSubscriber.
+   */
+  private List<PublisherIdentifier> toPublisherIdentifiers(Collection<URI> publisherUriList,
+      TopicDefinition topicDefinition) {
     List<PublisherIdentifier> publishers = Lists.newArrayList();
-    for (URI uri : response.getResult()) {
+    for (URI uri : publisherUriList) {
       // TODO(damonkohler): What should we supply as the name of this slave?
       // It's not given to us in the response.
-      SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/unnamed", uri);
-      MessageDefinition messageDefinition = MessageDefinition.createMessageDefinition(subscriber
-          .getTopicMessageType());
-      TopicDefinition topicDefinition = new TopicDefinition(topic, messageDefinition);
+      SlaveIdentifier slaveIdentifier = new SlaveIdentifier(SlaveIdentifier.UNKNOWN_NAME, uri);
       publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
     }
-    // update the subscriber with the new publisher list. This call should be
-    // non-blocking.
+    return publishers;
+  }
+
+  /**
+   * Inform SlaveServer of new Subscription. If there are multiple subscribers
+   * for the same topic, this should only be called for the first.
+   * 
+   * This call blocks on a call to the ROS master.
+   * 
+   * @param subscriber
+   * @return List of current publisher XML-RPC slave URIs for topic.
+   * @throws IOException
+   * @throws URISyntaxException
+   * @throws RemoteException
+   */
+  public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws IOException,
+      URISyntaxException, RemoteException {
+    subscribers.put(subscriber.getTopicName(), subscriber);
+    Response<List<URI>> response = master.registerSubscriber(toSlaveIdentifier(), subscriber);
+    List<PublisherIdentifier> publishers = toPublisherIdentifiers(response.getResult(),
+        subscriber.getTopicDefinition());
     subscriber.updatePublishers(publishers);
     return publishers;
   }
@@ -165,10 +180,13 @@ public class SlaveServer extends NodeServer {
   }
 
   public void publisherUpdate(String callerId, String topic, Collection<URI> publisherUris) {
-    // TODO(kwc) this needs to queue an update in a separate thread to handle
-    // the new list of publishers for a topic. We cannot process inline as
-    // this may incur multiple outbound XMLRPC calls. Main thing here is the
-    // parse publishers[] into an appropriate data structure.
+    if (subscribers.containsKey(topic)) {
+      Subscriber<?> subscriber = subscribers.get(topic);
+      TopicDefinition topicDefinition = subscriber.getTopicDefinition();
+      List<PublisherIdentifier> pubIdentifiers = toPublisherIdentifiers(publisherUris,
+          topicDefinition);
+      subscriber.updatePublishers(pubIdentifiers);
+    }
   }
 
   // TODO(damonkohler): Support multiple publishers for a particular topic.

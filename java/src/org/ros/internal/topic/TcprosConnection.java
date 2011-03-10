@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * Store connection for a TCPROS socket-based connection.
  * 
- * @author kwc
+ * @author kwc@willowgarage.com (Ken Conley)
  * 
  */
 public class TcprosConnection implements Connection {
@@ -40,7 +40,7 @@ public class TcprosConnection implements Connection {
   private static final boolean DEBUG = false;
   private final Socket socket;
   private static final Log log = LogFactory.getLog(TcprosConnection.class);
-  
+
   public Socket getSocket() {
     return socket;
   }
@@ -49,21 +49,37 @@ public class TcprosConnection implements Connection {
     this.socket = socket;
   }
 
-  public static TcprosConnection createOutgoing(InetSocketAddress tcprosServerAddress, ImmutableMap<String, String> header) throws IOException {
-
+  /**
+   * Create connection to TCPROS TCP/IP server of publisher. This also does the
+   * initial handshake exchange for the socket.
+   * 
+   * @param tcprosServerAddress
+   * @param header
+   *          TCPROS connection header.
+   * @return Connection instance. Contains initialized socket with handshake
+   *         already exchanged.
+   * @throws IOException
+   */
+  public static TcprosConnection createOutgoing(InetSocketAddress tcprosServerAddress,
+      ImmutableMap<String, String> header) throws IOException {
     Socket socket = new Socket(tcprosServerAddress.getHostName(), tcprosServerAddress.getPort());
-    handshake(socket, header);
+    subscriberHandshake(socket, header);
     return new TcprosConnection(socket);
   }
 
+  /**
+   * Implements the subscriber-side of a TCPROS handshake. The handshake is an
+   * initial exchange over the TCP/IP socket created between the publisher and
+   * the subscriber. The subscriber initiates the connection.
+   */
   @VisibleForTesting
-  static
-  void handshake(Socket socket, ImmutableMap<String, String> header) throws IOException {
+  static void subscriberHandshake(Socket socket, ImmutableMap<String, String> header)
+      throws IOException {
     ConnectionHeader.writeHeader(header, socket.getOutputStream());
     Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
     if (DEBUG) {
-      log.info("Sent handshake header: " + header);
-      log.info("Received handshake header: " + incomingHeader);
+      log.info("Sent sub handshake header: " + header);
+      log.info("Received sub handshake header: " + incomingHeader);
     }
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
         header.get(ConnectionHeaderFields.TYPE)));

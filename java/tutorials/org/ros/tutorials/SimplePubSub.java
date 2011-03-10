@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.MessageListener;
+import org.ros.internal.node.ConnectionJobQueue;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.SlaveClient;
@@ -55,6 +56,7 @@ public class SimplePubSub {
     masterClient = new MasterClient(masterServer.getUri());
     slaveServer = new SlaveServer("/foo", masterClient, "localhost", 0);
     slaveServer.start();
+    ConnectionJobQueue jobQueue = new ConnectionJobQueue();
 
     TopicDefinition topicDefinition = new TopicDefinition("/hello",
         MessageDefinition.createFromMessage(new org.ros.message.std.String()));
@@ -67,7 +69,7 @@ public class SimplePubSub {
 
     SlaveIdentifier subSlaveIdentifier = new SlaveIdentifier("/bloop", new URI("http://fake:5678"));
     Subscriber<org.ros.message.std.String> subscriber = Subscriber.create(subSlaveIdentifier,
-        topicDefinition, org.ros.message.std.String.class);
+        topicDefinition, org.ros.message.std.String.class, jobQueue);
     subscriber.addMessageListener(new MessageListener<org.ros.message.std.String>() {
       @Override
       public void onNewMessage(org.ros.message.std.String message) {

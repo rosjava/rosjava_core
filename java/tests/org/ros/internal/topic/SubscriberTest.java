@@ -20,9 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.ros.internal.node.server.SlaveIdentifier;
-
 import org.junit.Test;
+import org.ros.internal.node.ConnectionJobQueue;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
@@ -41,10 +41,10 @@ public class SubscriberTest {
 
   @Test
   public void testHandshake() throws IOException, URISyntaxException {
+    ConnectionJobQueue jobQueue = new ConnectionJobQueue();
     Socket socket = mock(Socket.class);
     Map<String, String> header = new TopicDefinition("/foo",
-        MessageDefinition.createFromMessage(new org.ros.message.std.String()))
-        .toHeader();
+        MessageDefinition.createFromMessage(new org.ros.message.std.String())).toHeader();
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     ConnectionHeader.writeHeader(header, outputStream);
     byte[] buffer = outputStream.toByteArray();
@@ -57,11 +57,12 @@ public class SubscriberTest {
         slaveIdentifier,
         new TopicDefinition("/foo", MessageDefinition
             .createFromMessage(new org.ros.message.std.String())),
-        org.ros.message.std.String.class);
-    TcprosConnection.handshake(socket, subscriber.header);
+        org.ros.message.std.String.class, jobQueue);
+    TcprosConnection.subscriberHandshake(socket, subscriber.header);
     buffer = outputStream.toByteArray();
     Map<String, String> result = ConnectionHeader.readHeader(new ByteArrayInputStream(buffer));
     assertEquals(result.get(ConnectionHeaderFields.TYPE), header.get(ConnectionHeaderFields.TYPE));
-    assertEquals(result.get(ConnectionHeaderFields.MD5_CHECKSUM), header.get(ConnectionHeaderFields.MD5_CHECKSUM));
+    assertEquals(result.get(ConnectionHeaderFields.MD5_CHECKSUM),
+        header.get(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 }

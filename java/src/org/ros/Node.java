@@ -17,17 +17,17 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.topic.MessageDefinition;
-import org.ros.internal.topic.TopicDefinition;
-
-import org.ros.internal.topic.PubSubFactory;
-
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.ConnectionJobQueue;
 import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.topic.MessageDefinition;
+import org.ros.internal.topic.PubSubFactory;
+import org.ros.internal.topic.TopicDefinition;
 import org.ros.logging.RosLog;
 import org.ros.message.Message;
 import org.ros.message.Time;
@@ -60,6 +60,7 @@ public class Node implements Namespace {
    */
   private RosLog log;
   private boolean initialized;
+  private ConnectionJobQueue jobQueue;
 
   /**
    * Create a node, using the command line args which will be mined for ros
@@ -91,26 +92,6 @@ public class Node implements Namespace {
     slaveServer = null;
     // FIXME arg parsing
     log = new RosLog(rosName.toString());
-
-    // Initialize handles to master and slave here so that we can perform
-    // configuration on slaveServer prior to actual init().
-    try {
-      masterClient = new MasterClient(Ros.getMasterUri());
-    } catch (MalformedURLException e) {
-      // TODO(kwc) remove chance of URI exceptions using RosContext-based
-      // constructor instead
-      throw new RosInitException("invalid ROS master URI");
-    } catch (URISyntaxException e) {
-      throw new RosInitException("invalid ROS master URI");
-    }
-    try {
-      slaveServer = new SlaveServer(rosName.toString(), masterClient, Ros.getHostName(), port);
-      pubSubFactory = new PubSubFactory(slaveServer.toSlaveIdentifier());
-    } catch (MalformedURLException e) {
-      throw new RosInitException("invalid ROS slave URI");
-    } catch (URISyntaxException e) {
-      throw new RosInitException("invalid ROS slave URI");
-    }
   }
 
   @Override
@@ -161,7 +142,7 @@ public class Node implements Namespace {
           MessageDefinition.createFromMessage(m));
 
       org.ros.internal.topic.Subscriber<MessageType> subscriberImpl = pubSubFactory
-          .createSubscriber(topicDefinition, messageClass);
+          .createSubscriber(slaveServer, topicDefinition, messageClass);
 
       // Add the callback to the impl.
       subscriberImpl.addMessageListener(callback);
@@ -170,8 +151,6 @@ public class Node implements Namespace {
       // track callback references.
       Subscriber<MessageType> subscriber = new Subscriber<MessageType>(resolvedTopicName, callback,
           messageClass, subscriberImpl);
-      // Slave server handles registration with the ROS Master.
-      slaveServer.addSubscriber(subscriberImpl);
       return subscriber;
 
     } catch (IOException e) {
@@ -209,17 +188,41 @@ public class Node implements Namespace {
    */
   public void init() throws RosInitException {
     try {
-      slaveServer.start();
-      log().debug(
-          "Successfully initiallized " + rosName.toString() + " with:\n\tmaster @"
-              + masterClient.getRemoteUri().toString() + "\n\tListening on port: "
-              + slaveServer.getUri().toString());
+      // Create handle to master.
+      try {
+        masterClient = new MasterClient(Ros.getMasterUri());
+      } catch (MalformedURLException e) {
+        // TODO(kwc) remove chance of URI exceptions using RosContext-based
+        // constructor instead
+        throw new RosInitException("invalid ROS master URI");
+      } catch (URISyntaxException e) {
+        throw new RosInitException("invalid ROS master URI");
+      }
+      // Start up XML-RPC Slave server.
+      SlaveIdentifier slaveIdentifier;
+      try {
+        slaveServer = new SlaveServer(rosName.toString(), masterClient, Ros.getHostName(), port);
+        slaveServer.start();
+        log().debug(
+            "Successfully initiallized " + rosName.toString() + " with:\n\tmaster @"
+                + masterClient.getRemoteUri().toString() + "\n\tListening on port: "
+                + slaveServer.getUri().toString());
+
+        slaveIdentifier = slaveServer.toSlaveIdentifier();
+      } catch (MalformedURLException e) {
+        throw new RosInitException("invalid ROS slave URI");
+      } catch (URISyntaxException e) {
+        throw new RosInitException("invalid ROS slave URI");
+      }
+
+      // Create factory and job queue for generating publisher/subscriber impls.
+      jobQueue = new ConnectionJobQueue();
+      pubSubFactory = new PubSubFactory(slaveIdentifier, jobQueue);
+
       initialized = true;
     } catch (IOException e) {
       throw new RosInitException(e);
     } catch (XmlRpcException e) {
-      throw new RosInitException(e);
-    } catch (URISyntaxException e) {
       throw new RosInitException(e);
     }
   }

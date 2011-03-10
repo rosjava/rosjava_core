@@ -28,21 +28,23 @@ import java.util.Map;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class SlaveIdentifier {
-  
+
+  /** Value for name field if URI is known but slave name is not. */
+  public static final String UNKNOWN_NAME = "/unknown";
   private final String name;
   private final URI uri;
-  
+
   public SlaveIdentifier(String name, URI uri) {
     Preconditions.checkNotNull(name);
     Preconditions.checkArgument(name.startsWith("/"));
     this.name = name;
     this.uri = uri;
   }
-  
+
   public static SlaveIdentifier createAnonymous(URI uri) {
     return new SlaveIdentifier("/unnamed", uri);
   }
-  
+
   @Override
   public String toString() {
     Preconditions.checkNotNull(uri);
@@ -52,17 +54,16 @@ public class SlaveIdentifier {
   public String getName() {
     return name;
   }
-  
+
   public URI getUri() {
     return uri;
   }
 
   public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.CALLER_ID, name)
+    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.CALLER_ID, name)
         .build();
   }
-  
+
   @Override
   public int hashCode() {
     final int prime = 31;

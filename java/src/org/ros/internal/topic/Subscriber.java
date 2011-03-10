@@ -18,17 +18,29 @@ package org.ros.internal.topic;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+
+import org.ros.internal.node.response.StatusCode;
+
+import org.ros.internal.node.response.Response;
+import org.ros.internal.transport.ProtocolDescription;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.MessageListener;
+import org.ros.internal.node.ConnectionJobQueue;
+import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.Message;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -49,6 +61,8 @@ public class Subscriber<MessageType extends Message> extends Topic {
   /* current list of publishers for topic */
   private final List<TopicConnectionInfo> connections;
   private SubscriberIdentifier identifier;
+  private ConnectionJobQueue jobQueue;
+  private Collection<String> supportedProtocols;
 
   private final class MessageReadingThread extends Thread {
 
@@ -82,13 +96,14 @@ public class Subscriber<MessageType extends Message> extends Topic {
   }
 
   public static <S extends Message> Subscriber<S> create(SlaveIdentifier slaveIdentifier,
-      TopicDefinition description, Class<S> messageClass) {
-    return new Subscriber<S>(slaveIdentifier, description, messageClass);
+      TopicDefinition description, Class<S> messageClass, ConnectionJobQueue jobQueue) {
+    return new Subscriber<S>(slaveIdentifier, description, messageClass, jobQueue);
   }
 
   private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition description,
-      Class<MessageType> messageClass) {
+      Class<MessageType> messageClass, ConnectionJobQueue jobQueue) {
     super(description);
+    this.jobQueue = jobQueue;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new SubscriberMessageQueue<MessageType>(messageClass);
     thread = new MessageReadingThread();
@@ -97,6 +112,18 @@ public class Subscriber<MessageType extends Message> extends Topic {
         .putAll(description.toHeader()).build();
     connections = new ArrayList<TopicConnectionInfo>();
     identifier = new SubscriberIdentifier(slaveIdentifier, description);
+
+    // in roscpp, the user can provide transport hints that change these. For
+    // now, these are basically static.
+    supportedProtocols = Sets.newHashSet(ProtocolNames.TCPROS);
+  }
+
+  public Collection<String> getSupportedProtocols() {
+    // TODO(kwc) client is allowed to send parameter arguments with the
+    // supported protocols as well (e.g. to test for shared memory
+    // compatibility), so not sufficient to represent as a list of
+    // Strings.
+    return supportedProtocols;
   }
 
   public void addMessageListener(MessageListener<MessageType> listener) {
@@ -155,7 +182,6 @@ public class Subscriber<MessageType extends Message> extends Topic {
    *          Full list of publishers for topic.
    */
   public synchronized void updatePublishers(List<PublisherIdentifier> publishers) {
-
     // Find new connections.
     ArrayList<PublisherIdentifier> toAdd = new ArrayList<PublisherIdentifier>();
     for (PublisherIdentifier publisherIdentifier : publishers) {
@@ -169,7 +195,51 @@ public class Subscriber<MessageType extends Message> extends Topic {
         toAdd.add(publisherIdentifier);
       }
     }
-    // TODO: need a job queue to start creating these connections
-  }
 
+    for (final PublisherIdentifier pubIdentifier : toAdd) {
+      // TODO: need a job queue to start creating these connections
+      jobQueue.addJob(new Runnable() {
+
+        @Override
+        public void run() {
+          SlaveClient slaveClient;
+          try {
+            slaveClient = new SlaveClient(pubIdentifier.getNodeName(), pubIdentifier.getSlaveUri());
+            Collection<String> supported = getSupportedProtocols();
+            Response<ProtocolDescription> response = slaveClient.requestTopic(getTopicName(),
+                supported);
+            if (response.getStatusCode() != StatusCode.SUCCESS) {
+              log.error("could not negotiate transport with publisher: " + response);
+            } else {
+              // TODO (kwc): all of this logic really belongs in a protocol
+              // handler registry
+              ProtocolDescription selected = response.getResult();
+              boolean isValid = false;
+              for (String valid : supported) {
+                if (selected.getName().equals(valid)) {
+                  isValid = true;
+                  break;
+                }
+              }
+              if (!isValid) {
+                log.error("publisher returned invalid protocol selection: " + response);
+              } else {
+                // assume TCPROS because that's all we support for now
+                try {
+                  addPublisher(pubIdentifier, selected.getAddress());
+                } catch (IOException e) {
+                  log.error(e);
+                }
+              }
+            }
+          } catch (MalformedURLException e) {
+            log.error(e);
+          } catch (RemoteException e) {
+            // TODO retry logic. this can happen on a flaky wifi network
+            log.error(e);
+          }
+        }
+      });
+    }
+  }
 }

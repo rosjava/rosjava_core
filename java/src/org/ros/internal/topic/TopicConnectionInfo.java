@@ -19,7 +19,7 @@ package org.ros.internal.topic;
  * Data structure for storing identifiers for publisher and subscriber of a
  * connection.
  * 
- * @author kwc
+ * @author kwc@willowgarage.com (Ken Conley)
  * 
  */
 public class TopicConnectionInfo {

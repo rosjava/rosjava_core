@@ -102,6 +102,7 @@ public class Publisher extends Topic {
 
   @VisibleForTesting
   void handshake(Socket socket) throws IOException {
+    //TODO(kwc): move to TcpRosConnection
     Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
     Map<String, String> header = getTopicDefinitionHeader();
     if (DEBUG) {

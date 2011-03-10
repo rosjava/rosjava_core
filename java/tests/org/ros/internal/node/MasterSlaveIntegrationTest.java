@@ -82,31 +82,30 @@ public class MasterSlaveIntegrationTest {
 
   @Test
   public void testAddPublisher() throws RemoteException, IOException, URISyntaxException {
-    TopicDefinition topicDefinition =
-        new TopicDefinition("/hello",
-            MessageDefinition.createFromMessage(new org.ros.message.std.String()));
+    TopicDefinition topicDefinition = new TopicDefinition("/hello",
+        MessageDefinition.createFromMessage(new org.ros.message.std.String()));
     Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
     slaveServer.addPublisher(publisher);
-    Response<ProtocolDescription> response =
-        slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS));
+    Response<ProtocolDescription> response = slaveClient.requestTopic("/hello",
+        Sets.newHashSet(ProtocolNames.TCPROS));
     assertEquals(response.getResult(), new TcpRosProtocolDescription(publisher.getAddress()));
   }
 
   @Test
   public void testAddSubscriber() throws RemoteException, IOException, URISyntaxException {
-    TopicDefinition topicDefinition =
-        new TopicDefinition("/hello",
-            MessageDefinition.createFromMessage(new org.ros.message.std.String()));
+    ConnectionJobQueue jobQueue = new ConnectionJobQueue();
+    TopicDefinition topicDefinition = new TopicDefinition("/hello",
+        MessageDefinition.createFromMessage(new org.ros.message.std.String()));
     SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/bloop", new URI("http://fake:1234"));
-    Subscriber<org.ros.message.std.String> subscriber =
-        Subscriber.create(slaveIdentifier, topicDefinition, org.ros.message.std.String.class);
+    Subscriber<org.ros.message.std.String> subscriber = Subscriber.create(slaveIdentifier,
+        topicDefinition, org.ros.message.std.String.class, jobQueue);
     List<PublisherIdentifier> publishers = slaveServer.addSubscriber(subscriber);
     assertEquals(0, publishers.size());
     Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
     slaveServer.addPublisher(publisher);
     publishers = slaveServer.addSubscriber(subscriber);
-    PublisherIdentifier publisherDescription =
-        publisher.toPublisherIdentifier(new SlaveIdentifier("/unnamed", slaveServer.getUri()));
+    PublisherIdentifier publisherDescription = publisher.toPublisherIdentifier(new SlaveIdentifier(
+        SlaveIdentifier.UNKNOWN_NAME, slaveServer.getUri()));
     assertTrue(publishers.contains(publisherDescription));
 
     Response<List<TopicDefinition>> response = slaveClient.getPublications();
@@ -116,22 +115,20 @@ public class MasterSlaveIntegrationTest {
 
   @Test
   public void testAddService() throws IOException, RemoteException, URISyntaxException {
-    ServiceDefinition serviceDefinition =
-        new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
-    ServiceServer<AddTwoInts.Request> server =
-        new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/service",
-            serviceDefinition, "localhost", 0) {
-          @Override
-          public Message buildResponse(AddTwoInts.Request requestMessage) {
-            AddTwoInts.Response response = new AddTwoInts.Response();
-            response.sum = requestMessage.a + requestMessage.b;
-            return response;
-          }
-        };
+    ServiceDefinition serviceDefinition = new ServiceDefinition(AddTwoInts.__s_getDataType(),
+        AddTwoInts.__s_getMD5Sum());
+    ServiceServer<AddTwoInts.Request> server = new ServiceServer<AddTwoInts.Request>(
+        AddTwoInts.Request.class, "/service", serviceDefinition, "localhost", 0) {
+      @Override
+      public Message buildResponse(AddTwoInts.Request requestMessage) {
+        AddTwoInts.Response response = new AddTwoInts.Response();
+        response.sum = requestMessage.a + requestMessage.b;
+        return response;
+      }
+    };
     slaveServer.addService(server);
-    Response<URI> response =
-        masterClient.lookupService(
-            SlaveIdentifier.createAnonymous(new URI("http://localhost:1234")), "/service");
+    Response<URI> response = masterClient.lookupService(
+        SlaveIdentifier.createAnonymous(new URI("http://localhost:1234")), "/service");
     assertEquals(server.getUri(), response.getResult());
   }
 

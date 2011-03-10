@@ -19,6 +19,8 @@ package org.ros.internal.topic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.ros.internal.node.ConnectionJobQueue;
+
 import org.ros.internal.node.server.SlaveIdentifier;
 
 import org.ros.MessageListener;
@@ -43,6 +45,7 @@ public class PubSubIntegrationTest {
 
   @Test
   public void testPubSub() throws IOException, InterruptedException, URISyntaxException {
+    ConnectionJobQueue jobQueue = new ConnectionJobQueue();
     TopicDefinition topicDefinition =
         new TopicDefinition("/foo",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
@@ -54,7 +57,7 @@ public class PubSubIntegrationTest {
     SlaveIdentifier subSlaveIdentifier = new SlaveIdentifier("/caller", new URI("http://fake:1234"));
     Subscriber<org.ros.message.std.String> subscriber =
         Subscriber.create(subSlaveIdentifier, topicDefinition,
-            org.ros.message.std.String.class);
+            org.ros.message.std.String.class, jobQueue);
     subscriber.addPublisher(publisherIdentifier, publisher.getAddress());
 
     final CountDownLatch messageReceived = new CountDownLatch(1);

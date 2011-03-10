@@ -26,7 +26,7 @@ public class SampleNode {
   public static void main(String[] argv) throws RosInitException, RosNameException {
     // Node node = new Node(argv, "sample_node"); this crashes when topic is
     // subscribed to
-    Node node = new Node(argv, "/rosjava/sample_node");
+    Node node = new Node(argv, "sample_rosjava_node");
     node.init();
 
     Publisher<PoseStamped> pub_pose = node.createPublisher("pose", PoseStamped.class);

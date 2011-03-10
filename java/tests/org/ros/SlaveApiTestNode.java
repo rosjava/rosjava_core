@@ -38,18 +38,17 @@ public class SlaveApiTestNode {
     node.init();
 
     // basic chatter in/out test
-    Publisher<org.ros.message.std.String> pub_string =
-        node.createPublisher("chatter_out", org.ros.message.std.String.class);
-    MessageListener<org.ros.message.std.String> chatter_cb =
-        new MessageListener<org.ros.message.std.String>() {
-          @Override
-          public void onNewMessage(org.ros.message.std.String m) {
-          }
-        };
+    Publisher<org.ros.message.std.String> pub_string = node.createPublisher("chatter_out",
+        org.ros.message.std.String.class);
+    MessageListener<org.ros.message.std.String> chatter_cb = new MessageListener<org.ros.message.std.String>() {
+      @Override
+      public void onNewMessage(org.ros.message.std.String m) {
+        System.out.println("String: " + m.data);
+      }
+    };
 
     // Subscribers currently don't work
-    Subscriber<org.ros.message.std.String> sub_string =
-        node.createSubscriber("chatter_in", chatter_cb, org.ros.message.std.String.class);
+    node.createSubscriber("chatter_in", chatter_cb, org.ros.message.std.String.class);
 
     // have at least one case of dual pub/sub on same topic
     Publisher<Int64> pub_int64_pubsub = node.createPublisher("int64", Int64.class);
@@ -58,8 +57,8 @@ public class SlaveApiTestNode {
       public void onNewMessage(Int64 m) {
       }
     };
-    
-    Subscriber<Int64> sub_int64_pubsub = node.createSubscriber("int64", int64_cb, Int64.class);
+
+    node.createSubscriber("int64", int64_cb, Int64.class);
 
     // don't do any performance optimizations here, want to make sure that
     // gc/etc... is working.
