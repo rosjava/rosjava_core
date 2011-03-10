@@ -13,17 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
 import org.ros.message.Message;
 
 /**
- * Callback for new messages received on a topic.
+ * Listener for new messages received on a topic.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  *
- * @param <MessageType> Topic type.
+ * @param <MessageType> {@link Message} type
  */
 public interface MessageListener<MessageType extends Message> {
+  
   public void onNewMessage(MessageType message);
+  
 }
