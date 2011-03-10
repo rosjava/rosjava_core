@@ -69,8 +69,7 @@ public class Publisher extends Topic {
     super(description);
     out = new PublisherMessageQueue();
     subscribers = Lists.newArrayList();
-
-    // TODO(kwc) we only need one TCPROS server for the entire node.
+    // TODO(kwc): we only need one TCPROS server for the entire node.
     server = new Server(hostname, port);
   }
 

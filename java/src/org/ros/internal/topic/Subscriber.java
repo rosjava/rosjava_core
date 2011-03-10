@@ -18,12 +18,6 @@ package org.ros.internal.topic;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-
-import org.ros.internal.node.response.StatusCode;
-
-import org.ros.internal.node.response.Response;
-import org.ros.internal.transport.ProtocolDescription;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,8 +25,11 @@ import org.ros.MessageListener;
 import org.ros.internal.node.ConnectionJobQueue;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.SlaveClient;
+import org.ros.internal.node.response.Response;
+import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.Message;
 
@@ -64,7 +61,6 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private final ConnectionJobQueue jobQueue;
 
   private SubscriberIdentifier identifier;
-  private Collection<String> supportedProtocols;
 
   private final class MessageReadingThread extends Thread {
 
@@ -117,22 +113,18 @@ public class Subscriber<MessageType extends Message> extends Topic {
     connections = new ArrayList<TopicConnectionInfo>();
     identifier = new SubscriberIdentifier(slaveIdentifier, description);
 
-    // in roscpp, the user can provide transport hints that change these. For
-    // now, these are basically static.
-    supportedProtocols = Sets.newHashSet(ProtocolNames.TCPROS);
   }
 
   public Collection<String> getSupportedProtocols() {
-    // TODO(kwc) client is allowed to send parameter arguments with the
+    // TODO(kwc): the client is allowed to send parameter arguments with the
     // supported protocols as well (e.g. to test for shared memory
     // compatibility), so not sufficient to represent as a list of
     // Strings.
-    return supportedProtocols;
+    return ProtocolNames.SUPPORTED;
   }
 
   public void addMessageListener(MessageListener<MessageType> listener) {
     listeners.add(listener);
-
     if (listeners.size() > 0) {
       // TODO(kwc): send event to start registration with master.
     }
@@ -140,11 +132,9 @@ public class Subscriber<MessageType extends Message> extends Topic {
 
   public void removeMessageListener(MessageListener<MessageType> listener) {
     listeners.remove(listener);
-
-    // TODO(kwc) : Contracts on who does setup/teardown of resources is really
+    // TODO(kwc): Contracts on who does setup/teardown of resources is really
     // unclear right now. Also, we need to do much more cleanup than this, such
-    // as unregistering
-    // with the master. Similarly, there needs to be logic in
+    // as unregistering with the master. Similarly, there needs to be logic in
     // addMessageCallbackListener to start the thread back up. Also, should we
     // be using listeners as a proxy for the # of Subscriber handles, or should
     // we track those explicitly?
@@ -157,7 +147,6 @@ public class Subscriber<MessageType extends Message> extends Topic {
       InetSocketAddress tcprosServerAddress) throws IOException {
     TcprosConnection socketConnection =
         TcprosConnection.createOutgoing(tcprosServerAddress, header);
-
     // TODO(kwc): need to upgrade 'in' to allow multiple sockets.
     // TODO(kwc): cleanup API between Connection and socket abstraction
     // leveling.
@@ -165,10 +154,8 @@ public class Subscriber<MessageType extends Message> extends Topic {
     in.start();
     if (!thread.isAlive()) {
       // TODO(kwc): race condition if thread is in interrupted state
-
       thread.start();
     }
-
     connections.add(new TopicConnectionInfo(publisherIdentifier, identifier, socketConnection));
   }
 
@@ -200,7 +187,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
     }
 
     for (final PublisherIdentifier pubIdentifier : toAdd) {
-      // TODO: need a job queue to start creating these connections
+      // TODO(kwc): need a job queue to start creating these connections
       jobQueue.addJob(new Runnable() {
 
         @Override
@@ -238,7 +225,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
           } catch (MalformedURLException e) {
             log.error(e);
           } catch (RemoteException e) {
-            // TODO retry logic. this can happen on a flaky wifi network
+            // TODO(kwc): retry logic. this can happen on a flaky wifi network
             log.error(e);
           }
         }
