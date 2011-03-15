@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
+import org.ros.internal.namespace.RosName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -30,13 +31,13 @@ import org.ros.internal.topic.TopicDefinition;
 import org.ros.logging.RosLog;
 import org.ros.message.Message;
 import org.ros.message.Time;
+import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
-import org.ros.namespace.Resolver;
-import org.ros.namespace.RosName;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -45,8 +46,14 @@ import java.util.concurrent.Executors;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
 public class Node implements Namespace {
+  /**
+   * The node's context for name resolution and possibly other global
+   * configuration issues (rosparam)
+   */
+  private final NodeContext context;
   /** The node's namespace name. */
-  private final RosName rosName;
+  private final RosName nodeName;
+  private String hostName;
   /** Port on which the slave server will be initialized on. */
   private final int port;
   /** The master client, used for communicating with an existing master. */
@@ -57,43 +64,28 @@ public class Node implements Namespace {
   private PubSubFactory pubSubFactory;
 
   /**
-   * The log of this node. This log has the node_name inserted in each message,
-   * along with ROS standard logging conventions.
+   * The log of this node. This log has the node's name inserted in each
+   * message, along with ROS standard logging conventions.
    */
   private RosLog log;
   private boolean initialized;
   private Executor executor;
+  private String masterUri;
 
   /**
-   * Create a node, using the command line args which will be mined for ros
-   * specific tags.
-   * 
-   * @param argv
-   *          arg parsing
    * @param name
-   *          Name of the node.
+   * @param context
    * @throws RosNameException
-   * @throws RosInitException
    */
-  public Node(String argv[], String name) throws RosNameException, RosInitException {
-    initialized = false;
-    // TODO(kwc): per roscpp/rospy, name should actually be a 'base name', i.e.
-    // it cannot contain any namespace information whatsoever. This restriction
-    // ensures consistency of remapping logic.
-    RosName tname = new RosName(name);
-    if (!tname.isGlobal()) {
-      rosName = new RosName("/" + name); // FIXME Resolve node name from
-                                         // args remappings or pushdown,
-                                         // what have you.
-    } else {
-      rosName = tname;
-    }
-
+  public Node(String name, NodeContext context) throws RosNameException {
+    Preconditions.checkNotNull(context);
+    Preconditions.checkNotNull(name);
+    this.context = context;
+    nodeName = new RosName(this.context.getResolver().resolveName(name));
     port = 0; // default port
     masterClient = null;
     slaveServer = null;
-    // FIXME arg parsing
-    log = new RosLog(rosName.toString());
+    log = new RosLog(nodeName.toString());
   }
 
   @Override
@@ -181,19 +173,38 @@ public class Node implements Namespace {
 
   @Override
   public String getName() {
-    return rosName.toString();
+    return nodeName.toString();
   }
 
   /**
-   * This starts up a connection with the master and gets the juices flowing
+   * This starts up a connection with the master and gets the juices flowing.
    * 
    * @throws RosInitException
    */
   public void init() throws RosInitException {
     try {
+      init(Ros.getMasterUri().toString(), Ros.getHostName());
+    } catch (URISyntaxException e) {
+      throw new RosInitException(e);
+    }
+  }
+
+  /**
+   * @param masterUri
+   *          The uri of the rosmaster, typically "http://localhost:11311", or
+   *          "http://remotehost.com:11311"
+   * @param hostName
+   *          The host of this node.
+   * @throws RosInitException
+   */
+  public void init(String masterUri, String hostName) throws RosInitException {
+    try {
+      this.hostName = hostName;
+      this.masterUri = masterUri;
+
       // Create handle to master.
       try {
-        masterClient = new MasterClient(Ros.getMasterUri());
+        masterClient = new MasterClient(new URI(this.masterUri));
       } catch (MalformedURLException e) {
         // TODO(kwc) remove chance of URI exceptions using RosContext-based
         // constructor instead
@@ -204,10 +215,10 @@ public class Node implements Namespace {
       // Start up XML-RPC Slave server.
       SlaveIdentifier slaveIdentifier;
       try {
-        slaveServer = new SlaveServer(rosName.toString(), masterClient, Ros.getHostName(), port);
+        slaveServer = new SlaveServer(nodeName.toString(), masterClient, this.hostName, port);
         slaveServer.start();
         log().debug(
-            "Successfully initiallized " + rosName.toString() + " with:\n\tmaster @"
+            "Successfully initiallized " + nodeName.toString() + " with:\n\tmaster @ "
                 + masterClient.getRemoteUri().toString() + "\n\tListening on port: "
                 + slaveServer.getUri().toString());
 
@@ -240,10 +251,15 @@ public class Node implements Namespace {
 
   @Override
   public String resolveName(String name) throws RosNameException {
-    Resolver resolver = Resolver.getDefault();
+    NameResolver resolver = context.getResolver();
     String r = resolver.resolveName(getName(), name);
     log.debug("Resolved name " + name + " as " + r);
     return r;
+  }
+
+  public void shutdown() {
+    // todo unregister all publishers, subscribers, etc.
+    slaveServer.shutdown();
   }
 
 }

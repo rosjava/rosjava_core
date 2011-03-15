@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.namespace;
+package org.ros.internal.namespace;
 
 import junit.framework.TestCase;
 import org.junit.After;
@@ -21,7 +21,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.exceptions.RosNameException;
 
-public class NameTest extends TestCase {
+/**
+ * @author kwc@willowgarage.com (Ken Conley)
+ */
+public class RosNameTest extends TestCase {
 
   @Before
   public void setUp() throws Exception {
@@ -39,7 +42,8 @@ public class NameTest extends TestCase {
         assertEquals(c, new RosName(c).toString());
       }
       // test canonicalization
-      System.out.println(new RosName("/foo/").toString());
+      assertEquals("", new RosName("").toString());
+      assertEquals("/", new RosName("/").toString());
       assertEquals("/foo", new RosName("/foo/").toString());
       assertEquals("foo", new RosName("foo/").toString());
       assertEquals("foo/bar", new RosName("foo/bar/").toString());
@@ -118,25 +122,22 @@ public class NameTest extends TestCase {
 
   @Test
   public void testGetParent() throws RosNameException {
+    RosName global = new RosName("/");
+    RosName empty = new RosName("");
     // parent of empty is empty, just like dirname
-    assertEquals("", new RosName("").getParent());
+    assertEquals(empty, new RosName("").getParent());
     // parent of global is global, just like dirname
-    assertEquals("/", new RosName("/").getParent());
+    assertEquals(global, new RosName("/").getParent().toString());
 
     // test with global names
-    assertEquals("/wg", new RosName("/wg/name").getParent());
-    assertEquals("/wg", new RosName("/wg/name/").getParent());
-    System.out.println(new RosName("/wg/").getParent());
-    System.out.println(new RosName("/wg/").isGlobal());
-    System.out.println(new RosName("/wg/").toString());
-    assertEquals("/", new RosName("/wg/").getParent());
-    assertEquals("/", new RosName("/wg").getParent());
+    assertEquals(new RosName("/wg"), new RosName("/wg/name").getParent());
+    assertEquals(new RosName("/wg"), new RosName("/wg/name/").getParent());
+    assertEquals(global, new RosName("/wg/").getParent());
+    assertEquals(global, new RosName("/wg").getParent());
 
     // test with relative names
-    System.out.println(new RosName("wg/name").getParent());
-    assertEquals("wg", new RosName("wg/name").getParent());
-    System.out.println(new RosName("wg/").getParent());
-    assertEquals("", new RosName("wg/").getParent());
+    assertEquals(new RosName("wg"), new RosName("wg/name").getParent());
+    assertEquals(empty, new RosName("wg/").getParent());
   }
 
 }

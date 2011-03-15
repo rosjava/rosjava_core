@@ -15,12 +15,18 @@
  */
 package org.ros;
 
-/**Prototype class loader for
- *         finding RosMain's from manifests,launch files, etc.. This might be an
- *         internal thing.. just playing with it for now.
+import org.ros.exceptions.RosInitException;
+
+/**
+ * Prototype class loader for finding RosMain's from manifests,launch files,
+ * etc.. This might be an internal thing.. just playing with it for now.
+ * 
  * @author Ethan Rublee (ethan.rublee@gmail.com)
  */
-public class RosLoader {
+public abstract class RosLoader {
+
+  public abstract NodeContext createContext() throws RosInitException;
+
   /**
    * @param name
    *          The name of the class

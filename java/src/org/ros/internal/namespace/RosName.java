@@ -13,11 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.namespace;
+package org.ros.internal.namespace;
 
 import com.google.common.base.Preconditions;
 
 import org.ros.exceptions.RosNameException;
+import org.ros.namespace.Namespace;
 
 /**
  * A simple class for handling name rules.
@@ -25,8 +26,8 @@ import org.ros.exceptions.RosNameException;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * 
  */
-//TODO: kwc: unless this becomes part of the user-facing API, should probably stuff this inside of internal
 public class RosName {
+  private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
   private final String name;
 
   /**
@@ -35,24 +36,43 @@ public class RosName {
    */
   public RosName(String name) throws RosNameException {
     Preconditions.checkNotNull(name);
-    try {
-      // allow empty name
-      if (name.length() > 0) {
-        Preconditions.checkArgument(name.matches("^[\\~\\/A-Za-z][\\w_\\/]*$"),
-            "Invalid unix name, may not contain special characters.");
+    validateName(name);
+    // intern all ROS names as there is not likely to be much variety.
+    this.name = canonicalizeName(name).intern();
+  }
+
+  public static boolean validateName(String name) throws RosNameException {
+    // allow empty name
+    if (name.length() > 0) {
+      if (!name.matches(VALID_ROS_NAME_PATTERN)) {
+        throw new RosNameException("Invalid unix name, may not contain special characters.");
       }
-    } catch (IllegalArgumentException e) {
-      throw new RosNameException(e);
     }
+    return true;
+  }
+
+  /**
+   * Convert name into canonical representation. Canonical representation has no
+   * trailing slashes. Canonical names can be global, private, or relative.
+   * 
+   * @param name
+   * @return
+   * @throws RosNameException
+   */
+  public static String canonicalizeName(String name) throws RosNameException {
+    validateName(name);
     // trim trailing slashes for canonical representation
     while (name != Namespace.GLOBAL_NS && name.endsWith("/")) {
       name = name.substring(0, name.length() - 1);
     }
-    this.name = name;
+    if (name.startsWith("~/")) {
+      name = "~" + name.substring(2);
+    }
+    return name;
   }
 
   /**
-   * This is a /global/name
+   * This is a /global/name.
    * 
    * <ul>
    * <li>
@@ -68,12 +88,13 @@ public class RosName {
    * 
    * @return If this name is a global name then return true.
    */
-  public Boolean isGlobal() {
+  public boolean isGlobal() {
     return name.startsWith("/");
   }
 
   /**
-   * This is a ~private/name
+   * Is this a ~private/name.
+   * 
    * <ul>
    * <li>
    * If node node1 in the global / namespace accesses the resource ~bar, that
@@ -87,12 +108,13 @@ public class RosName {
    * 
    * @return true if the name is a private name.
    */
-  public Boolean isPrivate() {
+  public boolean isPrivate() {
     return name.startsWith("~");
   }
 
   /**
-   * This is a relative/name
+   * Is this a relative/name.
+   * 
    * <ul>
    * <li>If node node1 in the global / namespace accesses the resource ~bar,
    * that will resolve to the name /node1/bar.
@@ -104,29 +126,35 @@ public class RosName {
    * 
    * @return true if the name is a relative name.
    */
-  public Boolean isRelative() {
+  public boolean isRelative() {
     return !isPrivate() && !isGlobal();
   }
 
   /**
-   * @return Gets the parent of this name, may be empty if there is no parent.
+   * @return Gets the parent of this name in canonical representation. This may
+   *         return an empty name if there is no parent.
    */
-  public String getParent() {
-    if (name.length() == 0) {
-      return "";
-    }
-    if (name.equals(Namespace.GLOBAL_NS)) {
-      return Namespace.GLOBAL_NS;
-    }
-    int slashIdx = name.lastIndexOf('/');
-    if (slashIdx > 1) {
-      return name.substring(0, slashIdx);
-    } else {
-      if (isGlobal()) { 
-        return Namespace.GLOBAL_NS;
-      } else { 
-        return "";
+  public RosName getParent() {
+    try {
+      if (name.length() == 0) {
+        return new RosName("");
       }
+      if (name.equals(Namespace.GLOBAL_NS)) {
+        return new RosName(Namespace.GLOBAL_NS);
+      }
+      int slashIdx = name.lastIndexOf('/');
+      if (slashIdx > 1) {
+        return new RosName(name.substring(0, slashIdx));
+      } else {
+        if (isGlobal()) {
+          return new RosName(Namespace.GLOBAL_NS);
+        } else {
+          return new RosName("");
+        }
+      }
+    } catch (RosNameException e) {
+      // This should be not occur as all substrings of names are valid names.
+      return null;
     }
   }
 
@@ -146,15 +174,34 @@ public class RosName {
   }
 
   /**
-   * Remove the first character from the name.
+   * Convert name to a relative name representation. This does not take any
+   * namespace into account; it simply strips any preceding characters for
+   * global or private name representation.
    * 
    * @return a string with the first
    */
-  public String removeFrontDecorator() {
-    if (isPrivate() || isGlobal())
+  public String toRelative() {
+    if (isPrivate() || isGlobal()) {
       return name.substring(1);
-    else
+    } else {
       return name;
+    }
+  }
+
+  /**
+   * Convert name to a global name representation. This does not take any
+   * namespace into account; it simply adds in the global prefix "/" if missing.
+   * 
+   * @return a string with the first
+   */
+  public String toGlobal() {
+    if (isGlobal()) {
+      return name;
+    } else if (isPrivate()) {
+      return "/" + name.substring(1);
+    } else {
+      return "/" + name;
+    }
   }
 
 }

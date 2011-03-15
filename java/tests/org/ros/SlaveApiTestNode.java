@@ -34,7 +34,8 @@ public class SlaveApiTestNode {
   public static void main(java.lang.String[] argv) throws RosInitException, RosNameException {
     // Node node = new Node(argv, "sample_node"); this crashes when topic is
     // subscribed to
-    Node node = new Node(argv, "test_node");
+    NodeContext nodeContext = new CommandLineLoader(argv).createContext();
+    Node node = new Node("test_node", nodeContext);
     node.init();
 
     // basic chatter in/out test

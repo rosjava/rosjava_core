@@ -13,22 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.namespace;
+package org.ros.internal.loader;
 
-import org.ros.internal.namespace.RosNameTest;
+/**
+ * ROS environment variables.
+ * 
+ * @author kwc@willowgarage.com (Ken Conley)
+ */
+public interface EnvironmentVariables {
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+  public static String ROS_MASTER_URI = "ROS_MASTER_URI";
+  public static String ROS_IP = "ROS_IP";
+  public static String ROS_HOSTNAME = "ROS_HOSTNAME";
+  public static String ROS_NAMESPACE = "ROS_NAMESPACE";
+  public static String ROS_ROOT = "ROS_ROOT";
+  public static String ROS_PACKAGE_PATH = "ROS_PACKAGE_PATH";
 
-public class AllTests {
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite(AllTests.class.getName());
-    //$JUnit-BEGIN$
-    suite.addTestSuite(ResolverTest.class);
-    suite.addTestSuite(RosNameTest.class);
-    //$JUnit-END$
-    return suite;
-  }
 
 }

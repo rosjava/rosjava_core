@@ -15,12 +15,18 @@
  */
 package org.ros.namespace;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+
+import org.ros.internal.namespace.RosName;
 
 import org.ros.exceptions.RosNameException;
 
+import java.util.HashMap;
+
 /**
- * See the rules for names - http://www.ros.org/wiki/Names
+ * See the rules for names - http://www.ros.org/wiki/Names The resolver will do
+ * ros name remappings for the user, if it has been initialized.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee), kwc@willowgarage.com (Ken
  *         Conley)
@@ -29,36 +35,30 @@ import org.ros.exceptions.RosNameException;
 // TODO need to implement ROS namespace remapping. Resolver seems to be the
 // right place to do this as it is already aware of default namespace and is
 // contained within the Node implementation.
-public class Resolver {
+public class NameResolver {
 
-  private static Resolver s_default = new Resolver();
-
-  public static Resolver getDefault() {
-    return s_default;
-  }
+  private final HashMap<RosName, RosName> remappings;
+  private final String namespace;
 
   /**
-   * 
-   * @return The default namespace of this process.
+   * @param remappings
    * @throws RosNameException
-   *           If default namespace is set to invalid name.
+   * 
    */
-  public static String getDefaultNamespace() throws RosNameException {
-    // Resolution rules: ROS defines two methods for setting the namespace (in
-    // order of precedence)
-    // 1) The __ns:= command line argument
-    // 2) the ROS_NAMESPACE environment variable
-    // It is the responsibility of the loader to obey this contract and set the
-    // rosNamespace system property
+  public NameResolver(String namespace, HashMap<RosName, RosName> remappings) throws RosNameException {
+    this.remappings = remappings;
+    this.namespace = RosName.canonicalizeName(namespace);
+  }
 
-    // This routine does not need to be high performance.
-    return new RosName(
-        System.getProperty(Namespace.DEFAULT_NAMESPACE_PROPERTY, Namespace.GLOBAL_NS)).toString();
+  public String getNamespace() {
+    return namespace;
   }
 
   /**
    * Resolve name relative to namespace. If namespace is not global, it will
    * first be resolved to a global name.
+   * 
+   * This does all remappings of both the namespace and name.
    * 
    * @param namespace
    * @param name
@@ -67,23 +67,53 @@ public class Resolver {
    *           Will throw on a poorly formated name.
    */
   public String resolveName(String namespace, String name) throws RosNameException {
-    RosName ns = new RosName(namespace);
+    RosName ns = lookUpRemapping(new RosName(namespace));
     Preconditions.checkArgument(ns.isGlobal(), "namespace must be global");
-    RosName n = new RosName(name);
+    RosName n = lookUpRemapping(new RosName(name));
     if (n.isGlobal()) {
       return n.toString();
     }
     if (n.isRelative()) {
-      return join(new RosName(ns.getParent()), n);
+      return join(ns.getParent(), n);
     } else if (n.isPrivate()) {
-      String s = n.removeFrontDecorator();
+      String s = n.toRelative();
       // allow ~/foo
-      if (s.startsWith("/")) { 
+      if (s.startsWith("/")) {
         s = s.substring(1);
       }
       return join(ns, new RosName(s));
     }
     throw new RosNameException("Bad name: " + name);
+  }
+
+  /**
+   * Convenience function for looking up a remapping.
+   * 
+   * @param name
+   *          The name to lookup.
+   * @return The name if it is not remapped, otherwise the remapped name.
+   */
+  private RosName lookUpRemapping(RosName name) {
+    RosName rmname = name;
+    if (remappings.containsKey(name)) {
+      rmname = remappings.get(name);
+    }
+    return rmname;
+  }
+
+  @VisibleForTesting
+  public HashMap<RosName, RosName> getRemappings() {
+    return remappings;
+  }
+
+  /**
+   * @param name
+   *          Name to resolve
+   * @return The name resolved relative to the default namespace.
+   * @throws RosNameException
+   */
+  public String resolveName(String name) throws RosNameException {
+    return resolveName(namespace, name);
   }
 
   /**
@@ -93,7 +123,7 @@ public class Resolver {
    *          ROS name to join to.
    * @param name2
    *          ROS name to join. Must be relative.
-   * @return
+   * @return A concatination of the two names
    * @throws RosNameException
    *           If name1 or name2 is an illegal name
    * @throws IllegalArgumentException
@@ -110,7 +140,7 @@ public class Resolver {
    *          ROS name to join to.
    * @param name2
    *          ROS name to join. Must be relative.
-   * @return
+   * @return A concatenation of the two names.
    * @throws RosNameException
    *           If name1 or name2 is an illegal name
    * @throws IllegalArgumentException
