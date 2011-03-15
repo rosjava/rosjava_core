@@ -15,6 +15,8 @@
  */
 package org.ros;
 
+import org.ros.internal.loader.CommandLine;
+
 import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
@@ -126,9 +128,6 @@ public class CommandLineLoaderTest extends TestCase {
     assertEquals(defaultRosRoot, nodeContext.getRosRoot());
     assertEquals("192.168.0.1", nodeContext.getAddressOverride());
     assertEquals("/foo/bar", nodeContext.getResolver().getNamespace());
-    for (String s : nodeContext.getRosPackagePath()) {
-      System.out.println(s);
-    }
     Assert.assertArrayEquals(rosPackagePathArray, nodeContext.getRosPackagePath());
 
     // Test ROS namespace resolution and canonicalization
@@ -143,9 +142,55 @@ public class CommandLineLoaderTest extends TestCase {
     loader = new CommandLineLoader(new String[] {}, env);
     nodeContext = loader.createContext();
     assertEquals(canonical, nodeContext.getResolver().getNamespace());
+  }
 
-    //TODO: test command line args
-    // TODO: test precedence
+  @Test
+  public void testCreateContextCommandLine() throws RosInitException, URISyntaxException,
+      RosNameException {
+    Map<String, String> env = getDefaultEnv();
+
+    // Test ROS_MASTER_URI from command-line
+    String[] args = { CommandLine.ROS_MASTER_URI + ":=http://override:22622" };
+    NodeContext nodeContext = new CommandLineLoader(args, env).createContext();
+    assertEquals(new URI("http://override:22622"), nodeContext.getRosMasterUri());
+
+    // Test again with env var removed, make sure that it still behaves the
+    // same.
+    env.remove(EnvironmentVariables.ROS_MASTER_URI);
+    nodeContext = new CommandLineLoader(args, env).createContext();
+    assertEquals(new URI("http://override:22622"), nodeContext.getRosMasterUri());
+
+    // Test ROS namespace resolution and canonicalization
+    String canonical = new RosName("/baz/bar").toString();
+    env = getDefaultEnv();
+    args = new String[] { CommandLine.ROS_NAMESPACE + ":=baz/bar" };
+    nodeContext = new CommandLineLoader(args, env).createContext();
+    assertEquals(canonical, nodeContext.getResolver().getNamespace());
+
+    args = new String[] { CommandLine.ROS_NAMESPACE + ":=baz/bar/" };
+    nodeContext = new CommandLineLoader(args, env).createContext();
+    assertEquals(canonical, nodeContext.getResolver().getNamespace());
+
+    // Verify precedence of command-line __ns over environment.
+    env.put(EnvironmentVariables.ROS_NAMESPACE, "wrong/answer/");
+    nodeContext = new CommandLineLoader(args, env).createContext();
+    assertEquals(canonical, nodeContext.getResolver().getNamespace());
+
+    // Verify address override.
+    env = getDefaultEnv();
+    args = new String[] { CommandLine.ROS_IP + ":=192.168.0.2" };
+    nodeContext = new CommandLineLoader(args, env).createContext();
+    assertEquals("192.168.0.2", nodeContext.getAddressOverride());
+
+    // Verify multiple options work together.
+    env = getDefaultEnv();
+    args = new String[] { CommandLine.ROS_NAMESPACE + ":=baz/bar/", "ignore",
+        CommandLine.ROS_MASTER_URI + ":=http://override:22622", "--bad",
+        CommandLine.ROS_IP + ":=192.168.0.2" };
+    nodeContext = new CommandLineLoader(args, env).createContext();
+    assertEquals(new URI("http://override:22622"), nodeContext.getRosMasterUri());
+    assertEquals("192.168.0.2", nodeContext.getAddressOverride());
+    assertEquals(canonical, nodeContext.getResolver().getNamespace());
   }
 
   private HashMap<String, String> getDefaultEnv() {
@@ -197,7 +242,5 @@ public class CommandLineLoaderTest extends TestCase {
       assertTrue(r.resolveName("foo").equals("/my/foo"));
       assertTrue(r.resolveName("/my/name").equals("/my/name"));
     }
-
-    // TODO: test ROS_NS, __ns
   }
 }
