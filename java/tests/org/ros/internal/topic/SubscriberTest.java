@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
-import org.ros.internal.node.ConnectionJobQueue;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -34,6 +33,8 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -42,7 +43,7 @@ public class SubscriberTest {
 
   @Test
   public void testHandshake() throws IOException, URISyntaxException {
-    ConnectionJobQueue jobQueue = new ConnectionJobQueue();
+    Executor executor = Executors.newCachedThreadPool();
     Socket socket = mock(Socket.class);
     Map<String, String> header = new TopicDefinition("/foo",
         MessageDefinition.createFromMessage(new org.ros.message.std.String())).toHeader();
@@ -58,12 +59,13 @@ public class SubscriberTest {
         slaveIdentifier,
         new TopicDefinition("/foo", MessageDefinition
             .createFromMessage(new org.ros.message.std.String())),
-        org.ros.message.std.String.class, jobQueue);
-    TcpRosConnection.subscriberHandshake(socket, subscriber.header);
+        org.ros.message.std.String.class, executor);
+    TcpRosConnection.subscriberHandshake(socket, subscriber.getHeader());
     buffer = outputStream.toByteArray();
     Map<String, String> result = ConnectionHeader.readHeader(new ByteArrayInputStream(buffer));
     assertEquals(result.get(ConnectionHeaderFields.TYPE), header.get(ConnectionHeaderFields.TYPE));
     assertEquals(result.get(ConnectionHeaderFields.MD5_CHECKSUM),
         header.get(ConnectionHeaderFields.MD5_CHECKSUM));
   }
+  
 }

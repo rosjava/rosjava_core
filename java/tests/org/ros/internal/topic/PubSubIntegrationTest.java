@@ -19,24 +19,17 @@ package org.ros.internal.topic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.ros.internal.node.ConnectionJobQueue;
-
-import org.ros.internal.node.server.SlaveIdentifier;
-
-import org.ros.MessageListener;
-
-import org.ros.internal.topic.MessageDefinition;
-import org.ros.internal.topic.Publisher;
-import org.ros.internal.topic.Subscriber;
-import org.ros.internal.topic.TopicDefinition;
-
 import org.junit.Test;
+import org.ros.MessageListener;
+import org.ros.internal.node.server.SlaveIdentifier;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,7 +39,7 @@ public class PubSubIntegrationTest {
 
   @Test
   public void testPubSub() throws IOException, InterruptedException, URISyntaxException {
-    ConnectionJobQueue jobQueue = new ConnectionJobQueue();
+    Executor executor = Executors.newCachedThreadPool();
     TopicDefinition topicDefinition =
         new TopicDefinition("/foo",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
@@ -58,7 +51,7 @@ public class PubSubIntegrationTest {
     SlaveIdentifier subSlaveIdentifier = new SlaveIdentifier("/caller", new URI("http://fake:1234"));
     Subscriber<org.ros.message.std.String> subscriber =
         Subscriber.create(subSlaveIdentifier, topicDefinition,
-            org.ros.message.std.String.class, jobQueue);
+            org.ros.message.std.String.class, executor);
     subscriber.addPublisher(publisherIdentifier, publisher.getAddress());
 
     final CountDownLatch messageReceived = new CountDownLatch(1);

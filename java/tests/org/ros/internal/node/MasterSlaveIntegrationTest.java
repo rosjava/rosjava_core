@@ -48,6 +48,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -100,14 +101,13 @@ public class MasterSlaveIntegrationTest {
 
   @Test
   public void testAddSubscriber() throws RemoteException, IOException, URISyntaxException {
-    ConnectionJobQueue jobQueue = new ConnectionJobQueue();
     TopicDefinition topicDefinition =
         new TopicDefinition("/hello",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
     SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/bloop", new URI("http://fake:1234"));
     Subscriber<org.ros.message.std.String> subscriber =
         Subscriber.create(slaveIdentifier, topicDefinition, org.ros.message.std.String.class,
-            jobQueue);
+            Executors.newCachedThreadPool());
     List<PublisherIdentifier> publishers = slaveServer.addSubscriber(subscriber);
     assertEquals(0, publishers.size());
     Publisher publisher = new Publisher(topicDefinition);

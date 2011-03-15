@@ -16,13 +16,11 @@
 
 package org.ros.internal.topic;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.MessageListener;
-import org.ros.internal.node.ConnectionJobQueue;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosConnection;
@@ -34,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -43,9 +42,8 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Subscriber.class);
 
-  @VisibleForTesting
-  final ImmutableMap<String, String> header;
-
+  private final Executor executor;
+  private final ImmutableMap<String, String> header;
   private final CopyOnWriteArrayList<MessageListener<MessageType>> listeners;
   private final SubscriberMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
@@ -53,7 +51,6 @@ public class Subscriber<MessageType extends Message> extends Topic {
   /** Collection of connections to publishers for the subscribed topic. */
   private final Collection<TopicConnectionInfo> connections;
   private final Class<MessageType> messageClass;
-  private final ConnectionJobQueue jobQueue;
 
   private SubscriberIdentifier identifier;
 
@@ -88,15 +85,15 @@ public class Subscriber<MessageType extends Message> extends Topic {
   }
 
   public static <S extends Message> Subscriber<S> create(SlaveIdentifier slaveIdentifier,
-      TopicDefinition description, Class<S> messageClass, ConnectionJobQueue jobQueue) {
-    return new Subscriber<S>(slaveIdentifier, description, messageClass, jobQueue);
+      TopicDefinition description, Class<S> messageClass, Executor executor) {
+    return new Subscriber<S>(slaveIdentifier, description, messageClass, executor);
   }
 
   private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition description,
-      Class<MessageType> messageClass, ConnectionJobQueue jobQueue) {
+      Class<MessageType> messageClass, Executor executor) {
     super(description);
     this.messageClass = messageClass;
-    this.jobQueue = jobQueue;
+    this.executor = executor;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new SubscriberMessageQueue<MessageType>(messageClass);
     header =
@@ -137,7 +134,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
   public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
       InetSocketAddress tcprosServerAddress) throws IOException {
     TcpRosConnection socketConnection =
-        TcpRosConnection.createOutgoing(tcprosServerAddress, header);
+        TcpRosConnection.createOutgoing(tcprosServerAddress, getHeader());
     // TODO(kwc): need to upgrade 'in' to allow multiple sockets.
     // TODO(kwc): cleanup API between Connection and socket abstraction
     // leveling.
@@ -168,7 +165,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
       }
     }
     for (final PublisherIdentifier publisher : newPublishers) {
-      jobQueue.addJob(new UpdatePublisherRunnable<MessageType>(this, publisher));
+      executor.execute(new UpdatePublisherRunnable<MessageType>(this, publisher));
     }
   }
 
@@ -178,6 +175,13 @@ public class Subscriber<MessageType extends Message> extends Topic {
   }
 
   /**
+   * @return this {@link Subscriber}'s connection header as an {@link ImmutableMap}
+   */
+  public ImmutableMap<String, String> getHeader() {
+    return header;
+  }
+  
+  /**
    * @param messageClass
    * @return <code>true</code> if this {@link Subscriber} instance accepts the
    *         supplied {@link Message} class
@@ -185,4 +189,5 @@ public class Subscriber<MessageType extends Message> extends Topic {
   boolean checkMessageClass(Class<? extends Message> messageClass) {
     return this.messageClass == messageClass;
   }
+
 }

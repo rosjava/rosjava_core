@@ -20,19 +20,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 import org.ros.internal.node.RemoteException;
-
 import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.server.SlaveServer;
-
-import org.ros.internal.node.ConnectionJobQueue;
-
 import org.ros.internal.node.server.SlaveIdentifier;
-
+import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.Message;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Factory for generating both user-facing and internal Publisher and Subscriber
@@ -44,12 +40,12 @@ public class PubSubFactory {
 
   private final Map<String, Subscriber<?>> subscribers;
   private final SlaveIdentifier slaveIdentifier;
-  private ConnectionJobQueue jobQueue;
+  private final Executor executor;
 
-  public PubSubFactory(SlaveIdentifier slaveIdentifier, ConnectionJobQueue jobQueue) {
+  public PubSubFactory(SlaveIdentifier slaveIdentifier, Executor executor) {
     // TODO(kwc): implement publishers factory
     this.slaveIdentifier = slaveIdentifier;
-    this.jobQueue = jobQueue;
+    this.executor = executor;
     subscribers = Maps.newConcurrentMap();
   }
 
@@ -81,7 +77,7 @@ public class PubSubFactory {
         Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
         // Create new singleton for topic subscription.
-        subscriber = Subscriber.create(slaveIdentifier, description, messageClass, jobQueue);
+        subscriber = Subscriber.create(slaveIdentifier, description, messageClass, executor);
         subscribers.put(topicName, subscriber);
         createdNewSubscriber = true;
       }

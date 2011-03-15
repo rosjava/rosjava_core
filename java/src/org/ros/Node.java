@@ -21,7 +21,6 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.ConnectionJobQueue;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
@@ -39,6 +38,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -61,7 +62,7 @@ public class Node implements Namespace {
    */
   private RosLog log;
   private boolean initialized;
-  private ConnectionJobQueue jobQueue;
+  private Executor executor;
 
   /**
    * Create a node, using the command line args which will be mined for ros
@@ -218,8 +219,8 @@ public class Node implements Namespace {
       }
 
       // Create factory and job queue for generating publisher/subscriber impls.
-      jobQueue = new ConnectionJobQueue();
-      pubSubFactory = new PubSubFactory(slaveIdentifier, jobQueue);
+      executor = Executors.newCachedThreadPool();
+      pubSubFactory = new PubSubFactory(slaveIdentifier, executor);
 
       initialized = true;
     } catch (IOException e) {
