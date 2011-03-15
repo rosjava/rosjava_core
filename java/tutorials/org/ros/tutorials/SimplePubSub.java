@@ -36,6 +36,7 @@ import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -63,8 +64,8 @@ public class SimplePubSub {
     SlaveIdentifier pubSlaveIdentifer = new SlaveIdentifier("/pub", new URI("http://fake:1234"));
     PublisherIdentifier publisherIdentifier = new PublisherIdentifier(pubSlaveIdentifer,
         topicDefinition);
-    Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
-    publisher.start();
+    Publisher publisher = new Publisher(topicDefinition);
+    publisher.start(new InetSocketAddress(0));
     slaveServer.addPublisher(publisher);
 
     SlaveIdentifier subSlaveIdentifier = new SlaveIdentifier("/bloop", new URI("http://fake:5678"));

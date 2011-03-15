@@ -1,0 +1,860 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory">Chapter 1. Getting Started</title><link rel="stylesheet" href="css/jbossorg.css" type="text/css"/><meta xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" name="generator" content="DocBook XSL Stylesheets V1.74.0"/><link rel="home" href="index.html" title="The Netty Project 3.2 User Guide"/><link rel="up" href="index.html" title="The Netty Project 3.2 User Guide"/><link rel="prev" href="preface.html" title="Preface"/><link rel="next" href="architecture.html" title="Chapter 2. Architectural Overview"/></head><body><div xmlns="" class="navheader"><table width="100%" summary="Navigation header"><tr><td width="20%" align="left" class="previous"><a accesskey="p" href="preface.html">Prev</a> </td><td width="60%" align="center"> </td><td width="20%" align="right" class="next"> <a accesskey="n" href="architecture.html">Next</a></td></tr></table></div><div class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="start"/>Chapter 1. Getting Started</h2></div></div></div><div class="toc"><dl><dt><span class="section"><a href="start.html#d0e51">1.1. Before Getting Started</a></span></dt><dt><span class="section"><a href="start.html#d0e64">1.2. Writing a Discard Server</a></span></dt><dt><span class="section"><a href="start.html#d0e290">1.3. Looking into the Received Data</a></span></dt><dt><span class="section"><a href="start.html#d0e375">1.4. Writing an Echo Server</a></span></dt><dt><span class="section"><a href="start.html#d0e440">1.5. Writing a Time Server</a></span></dt><dt><span class="section"><a href="start.html#d0e656">1.6. Writing a Time Client</a></span></dt><dt><span class="section"><a href="start.html#d0e794">1.7. 
+      Dealing with a Stream-based Transport
+    </a></span></dt><dd><dl><dt><span class="section"><a href="start.html#d0e797">1.7.1. 
+        One Small Caveat of Socket Buffer
+      </a></span></dt><dt><span class="section"><a href="start.html#d0e815">1.7.2. 
+        The First Solution
+      </a></span></dt><dt><span class="section"><a href="start.html#d0e898">1.7.3. 
+        The Second Solution
+      </a></span></dt></dl></dd><dt><span class="section"><a href="start.html#start.pojo">1.8. 
+      Speaking in POJO instead of ChannelBuffer
+    </a></span></dt><dt><span class="section"><a href="start.html#d0e1372">1.9. 
+      Shutting Down Your Application
+    </a></span></dt><dt><span class="section"><a href="start.html#d0e1715">1.10. 
+      Summary
+    </a></span></dt></dl></div><p>
+    This chapter tours around the core constructs of Netty with simple
+    examples to let you get started quickly.  You will be able to write a
+    client and a server on top of Netty right away when you are at the
+    end of this chapter.
+  </p><p>
+    If you prefer top-down approach in learning something, you might want to
+    start from <a class="xref" href="architecture.html" title="Chapter 2. Architectural Overview">Chapter 2, <i>Architectural Overview</i></a> and get back here.
+  </p><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="d0e51"/>1.1. Before Getting Started</h2></div></div></div><p>
+      The minimum requirements to run the examples which are introduced in
+      this chapter are only two; the latest version of Netty and JDK 1.5 or
+      above.  The latest version of Netty is available in
+      <a class="ulink" href="http://www.jboss.org/netty/downloads.html">the project download page</a>.  To download
+      the right version of JDK, please refer to your preferred JDK vendor's web
+      site.
+    </p><p>
+      As you read, you might have more questions about the classes introduced
+      in this chapter.  Please refer to the API reference whenever you want to
+      know more about them.  All class names in this document are linked to the
+      online API reference for your convenience.  Also, please don't hesitate to
+      <a class="ulink" href="http://www.jboss.org/netty/community.html">contact the Netty project community</a> and
+      let us know if there's any incorrect information, errors in grammar and
+      typo, and if you have a good idea to improve the documentation.
+    </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="d0e64"/>1.2. Writing a Discard Server</h2></div></div></div><p>
+      The most simplistic protocol in the world is not 'Hello, World!' but 
+      <a class="ulink" href="http://tools.ietf.org/html/rfc863">DISCARD</a>.  It's
+      a protocol which discards any received data without any response.
+    </p><p>
+      To implement the DISCARD protocol, the only thing you need to do is
+      to ignore all received data.  Let us start straight from the handler
+      implementation, which handles I/O events generated by Netty.
+    </p><pre class="programlisting">package org.jboss.netty.example.discard;
+
+public class DiscardServerHandler extends <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/SimpleChannelHandler.html"><code class="classname">SimpleChannelHandler</code></a> {<a id="example.discard.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/>
+
+    @Override
+    public void messageReceived(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a> e) {<a id="example.discard.co2"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/>
+    }
+
+    @Override
+    public void exceptionCaught(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ExceptionEvent.html"><code class="interfacename">ExceptionEvent</code></a> e) {<a id="example.discard.co3"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/>
+        e.getCause().printStackTrace();
+        
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> ch = e.getChannel();
+        ch.close();
+    }
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.discard.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          <code class="classname">DiscardServerHandler</code> extends
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/SimpleChannelHandler.html"><code class="classname">SimpleChannelHandler</code></a>, which is an implementation of
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandler.html"><code class="interfacename">ChannelHandler</code></a>.  <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/SimpleChannelHandler.html"><code class="classname">SimpleChannelHandler</code></a> provides various event
+          handler methods that you can override.  For now, it is just enough
+          to extend <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/SimpleChannelHandler.html"><code class="classname">SimpleChannelHandler</code></a> rather than to implement
+          the handler interfaces by yourself.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.discard.co2"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          We override the <code class="methodname">messageReceived</code> event
+          handler method here.  This method is called with a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a>,
+          which contains the received data, whenever new data is received
+          from a client.  In this example, we ignore the received data by doing
+          nothing to implement the DISCARD protocol.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.discard.co3"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          <code class="methodname">exceptionCaught</code> event handler method is
+          called with an <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ExceptionEvent.html"><code class="interfacename">ExceptionEvent</code></a> when an exception was raised by
+          Netty due to I/O error or by a handler implementation due to the
+          exception thrown while processing events.  In most cases, the
+          caught exception should be logged and its associated channel
+          should be closed here, although the implementation of this method
+          can be different depending on what you want to do to deal with an
+          exceptional situation.  For example, you might want to send a
+          response message with an error code before closing the connection.
+        </p></td></tr></table></div><p>
+      So far so good.  We have implemented the first half of the DISCARD server.
+      What's left now is to write the <code class="methodname">main</code> method
+      which starts the server with the <code class="classname">DiscardServerHandler</code>.
+    </p><pre class="programlisting">package org.jboss.netty.example.discard;
+
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
+
+public class DiscardServer {
+
+    public static void main(String[] args) throws Exception {
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a> factory =
+            new <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/nio/NioServerSocketChannelFactory.html"><code class="classname">NioServerSocketChannelFactory</code></a><a id="example.discard2.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/>(
+                    Executors.newCachedThreadPool(),
+                    Executors.newCachedThreadPool());
+
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ServerBootstrap.html"><code class="classname">ServerBootstrap</code></a> bootstrap = new <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ServerBootstrap.html"><code class="classname">ServerBootstrap</code></a><a id="example.discard2.co2"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/>(factory);
+
+        bootstrap.setPipelineFactory(new <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipelineFactory.html"><code class="interfacename">ChannelPipelineFactory</code></a>() {<a id="example.discard2.co3"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/>
+            public <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html"><code class="interfacename">ChannelPipeline</code></a> getPipeline() {
+                return <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channels.html"><code class="classname">Channels</code></a>.pipeline(new DiscardServerHandler());
+            }
+        });
+
+        bootstrap.setOption("child.tcpNoDelay", true);<a id="example.discard2.co4"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/>
+        bootstrap.setOption("child.keepAlive", true);
+
+        bootstrap.bind(new InetSocketAddress(8080));<a id="example.discard2.co5"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/5.png" alt="5" border="0" height="17px" width="17px"/>
+    }
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.discard2.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a> is a factory which creates and manages <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>s
+          and its related resources.  It processes all I/O requests and
+          performs I/O to generate <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelEvent.html"><code class="interfacename">ChannelEvent</code></a>s.  Netty provides various
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a> implementations.  We are implementing a server-side
+          application in this example, and therefore
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/nio/NioServerSocketChannelFactory.html"><code class="classname">NioServerSocketChannelFactory</code></a> was used.  Another thing to note is
+          that it does not create I/O threads by itself.  It is supposed to
+          acquire threads from the thread pool you specified in the
+          constructor, and it gives you more control over how threads should
+          be managed in the environment where your application runs, such as
+          an application server with a security manager.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.discard2.co2"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ServerBootstrap.html"><code class="classname">ServerBootstrap</code></a> is a helper class that sets up a server. You can
+          set up the server using a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> directly.  However, please note
+          that this is a tedious process and you do not need to do that in most
+          cases.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.discard2.co3"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          Here, we configure the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipelineFactory.html"><code class="interfacename">ChannelPipelineFactory</code></a>.  Whenever a new
+          connection is accepted by the server, a new <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html"><code class="interfacename">ChannelPipeline</code></a> will be
+          created by the specified <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipelineFactory.html"><code class="interfacename">ChannelPipelineFactory</code></a>.  The new pipeline
+          contains the <code class="classname">DiscardServerHandler</code>.  As the
+          application gets complicated, it is likely that you will add more
+          handlers to the pipeline and extract this anonymous class into a top
+          level class eventually.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.discard2.co4"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          You can also set the parameters which are specific to the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>
+          implementation.  We are writing a TCP/IP server, so we are allowed
+          to set the socket options such as <code class="literal">tcpNoDelay</code> and
+          <code class="literal">keepAlive</code>.  Please note that the
+          <code class="literal">"child."</code> prefix was added to all options.  It
+          means the options will be applied to the accepted <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>s instead
+          of the options of the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/ServerSocketChannel.html"><code class="interfacename">ServerSocketChannel</code></a>.  You could do the
+          following to set the options of the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/ServerSocketChannel.html"><code class="interfacename">ServerSocketChannel</code></a>:
+          </p><pre class="programlisting">bootstrap.setOption("reuseAddress", true);</pre><p>
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.discard2.co5"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/5.png" alt="5" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          We are ready to go now.  What's left is to bind to the port and to
+          start the server.  Here, we bind to the port <code class="literal">8080</code>
+          of all NICs (network interface cards) in the machine.  You can now
+          call the <code class="methodname">bind</code> method as many times as
+          you want (with different bind addresses.) 
+        </p></td></tr></table></div><p>
+      Congratulations!  You've just finished your first server on top of Netty.
+    </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="d0e290"/>1.3. Looking into the Received Data</h2></div></div></div><p>
+      Now that we have written our first server, we need to test if it really
+      works.  The easiest way to test it is to use the <code class="command">telnet</code>
+      command.  For example, you could enter "<code class="command">telnet localhost
+      8080</code>" in the command line and type something.
+    </p><p>
+      However, can we say that the server is working fine?  We cannot really
+      know that because it is a discard server.  You will not get any response
+      at all.  To prove it is really working, let us modify the server to print
+      what it has received.
+    </p><p>
+      We already know that <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a> is generated whenever data is
+      received and the <code class="methodname">messageReceived</code> handler method
+      will be invoked.  Let us put some code into the
+      <code class="methodname">messageReceived</code> method of the
+      <code class="classname">DiscardServerHandler</code>: 
+    </p><pre class="programlisting">@Override
+public void messageReceived(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a> e) {
+    <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a><a id="example.discard3.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/> buf = (ChannelBuffer) e.getMessage();
+    while(buf.readable()) {
+        System.out.println((char) buf.readByte());
+        System.out.flush();
+    }
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.discard3.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          It is safe to assume the message type in socket transports is always
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>.  <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> is a fundamental data structure
+          which stores a sequence of bytes in Netty.  It's similar to NIO
+          <code class="classname">ByteBuffer</code>, but it is easier to use and more
+          flexible.  For example, Netty allows you to create a composite
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> which combines multiple <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>s reducing
+          the number of unnecessary memory copy.
+        </p><p>
+          Although it resembles to NIO <code class="classname">ByteBuffer</code> a lot,
+          it is highly recommended to refer to the API reference.  Learning how
+          to use <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> correctly is a critical step in using Netty
+          without difficulty.  
+        </p></td></tr></table></div><p>
+      If you run the <code class="command">telnet</code> command again, you will see the
+      server prints what has received.
+    </p><p>
+      The full source code of the discard server is located in the
+      <code class="literal">org.jboss.netty.example.discard</code> package of the
+      distribution.
+    </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="d0e375"/>1.4. Writing an Echo Server</h2></div></div></div><p>
+      So far, we have been consuming data without responding at all.  A server,
+      however, is usually supposed to respond to a request.  Let us learn how to
+      write a response message to a client by implementing the 
+      <a class="ulink" href="http://tools.ietf.org/html/rfc862">ECHO</a> protocol,
+      where any received data is sent back. 
+    </p><p>
+      The only difference from the discard server we have implemented in the
+      previous sections is that it sends the received data back instead of
+      printing the received data out to the console.  Therefore, it is enough
+      again to modify the <code class="methodname">messageReceived</code> method:
+    </p><pre class="programlisting">@Override
+public void messageReceived(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a> e) {
+    <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a><a id="example.echo.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/> ch = e.getChannel();
+    ch.write(e.getMessage());
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.echo.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          A <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelEvent.html"><code class="interfacename">ChannelEvent</code></a> object has a reference to its associated <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>.
+          Here, the returned <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> represents the connection which received
+          the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a>.  We can get the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> and call the
+          <code class="methodname">write</code> method to write something back to
+          the remote peer. 
+        </p></td></tr></table></div><p>
+      If you run the <code class="command">telnet</code> command again, you will see the
+      server sends back whatever you have sent to it.
+    </p><p>
+      The full source code of the echo server is located in the
+      <code class="literal">org.jboss.netty.example.echo</code> package of the
+      distribution.
+    </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="d0e440"/>1.5. Writing a Time Server</h2></div></div></div><p>
+      The protocol to implement in this section is the
+      <a class="ulink" href="http://tools.ietf.org/html/rfc868">TIME</a> protocol.
+      It is different from the previous examples in that it sends a message,
+      which contains a 32-bit integer, without receiving any requests and 
+      loses the connection once the message is sent.  In this example, you
+      will learn how to construct and send a message, and to close the
+      connection on completion.
+    </p><p>
+      Because we are going to ignore any received data but to send a message
+      as soon as a connection is established, we cannot use the
+      <code class="methodname">messageReceived</code> method this time.  Instead,
+      we should override the <code class="methodname">channelConnected</code> method.
+      The following is the implementation:
+    </p><pre class="programlisting">package org.jboss.netty.example.time;
+
+public class TimeServerHandler extends <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/SimpleChannelHandler.html"><code class="classname">SimpleChannelHandler</code></a> {
+
+    @Override
+    public void channelConnected(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelStateEvent.html"><code class="interfacename">ChannelStateEvent</code></a> e) {<a id="example.time.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/>
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> ch = e.getChannel();
+        
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> time = <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffers.html"><code class="classname">ChannelBuffers</code></a>.buffer(4);<a id="example.time.co2"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/>
+        time.writeInt(System.currentTimeMillis() / 1000);
+        
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a> f = ch.write(time);<a id="example.time.co3"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/>
+        
+        f.addListener(new <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFutureListener.html"><code class="interfacename">ChannelFutureListener</code></a>() {<a id="example.time.co4"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/>
+            public void operationComplete(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a> future) {
+                <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> ch = future.getChannel();
+                ch.close();
+            }
+        });
+    }
+
+    @Override
+    public void exceptionCaught(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ExceptionEvent.html"><code class="interfacename">ExceptionEvent</code></a> e) {
+        e.getCause().printStackTrace();
+        e.getChannel().close();
+    }
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.time.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          As explained, <code class="methodname">channelConnected</code> method will
+          be invoked when a connection is established.  Let us write the 32-bit
+          integer that represents the current time in seconds here.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time.co2"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          To send a new message, we need to allocate a new buffer which will
+          contain the message.  We are going to write a 32-bit integer, and
+          therefore we need a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> whose capacity is
+          <code class="literal">4</code> bytes.  The <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffers.html"><code class="classname">ChannelBuffers</code></a> helper class is
+          used to allocate a new buffer.  Besides the
+          <code class="methodname">buffer</code> method, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffers.html"><code class="classname">ChannelBuffers</code></a> provides a
+          lot of useful methods related to the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>.  For more
+          information, please refer to the API reference.
+        </p><p>
+          On the other hand, it is a good idea to use static imports for
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffers.html"><code class="classname">ChannelBuffers</code></a>:
+          </p><pre class="programlisting">import static org.jboss.netty.buffer.<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffers.html"><code class="classname">ChannelBuffers</code></a>.*;
+...
+<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>  dynamicBuf = dynamicBuffer(256);
+<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> ordinaryBuf = buffer(1024);</pre><p>
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time.co3"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          As usual, we write the constructed message.
+        </p><p>
+          But wait, where's the <code class="methodname">flip</code>?  Didn't we used
+          to call <code class="methodname">ByteBuffer.flip()</code> before sending a
+          message in NIO?  <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> does not have such a method because
+          it has two pointers; one for read operations and the other for write
+          operations.  The writer index increases when you write something to
+          a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> while the reader index does not change.  The reader
+          index and the writer index represents where the message starts and
+          ends respectively.
+        </p><p>
+          In contrast, NIO buffer does not provide a clean way to figure out
+          where the message content starts and ends without calling the
+          <code class="methodname">flip</code> method.  You will be in trouble when
+          you forget to flip the buffer because nothing or incorrect data will
+          be sent.  Such an error does not happen in Netty because we have
+          different pointer for different operation types.  You will find it
+          makes your life much easier as you get used to it -- a life without
+          flipping out!
+        </p><p>
+          Another point to note is that the <code class="methodname">write</code>
+          method returns a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a>.  A <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a> represents an
+          I/O operation which has not yet occurred.  It means, any requested
+          operation might not have been performed yet because all operations
+          are asynchronous in Netty.  For example, the following code might
+          close the connection even before a message is sent:
+        </p><pre class="programlisting"><a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> ch = ...;
+ch.write(message);
+ch.close();</pre><p>
+          Therefore, you need to call the <code class="methodname">close</code>
+          method after the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a>, which was returned by the
+          <code class="methodname">write</code> method, notifies you when the write
+          operation has been done.  Please note that, <code class="methodname">close</code>
+          also might not close the connection immediately, and it returns a
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a>.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time.co4"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          How do we get notified when the write request is finished then?
+          This is as simple as adding a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFutureListener.html"><code class="interfacename">ChannelFutureListener</code></a> to the returned
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a>.  Here, we created a new anonymous <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFutureListener.html"><code class="interfacename">ChannelFutureListener</code></a>
+          which closes the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> when the operation is done.
+        </p><p>
+          Alternatively, you could simplify the code using a pre-defined
+          listener:
+          </p><pre class="programlisting">f.addListener(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFutureListener.html"><code class="interfacename">ChannelFutureListener</code></a>.CLOSE);</pre><p>
+        </p></td></tr></table></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="d0e656"/>1.6. Writing a Time Client</h2></div></div></div><p>
+      Unlike DISCARD and ECHO servers, we need a client for the TIME protocol
+      because a human cannot translate a 32-bit binary data into a date on a
+      calendar.  In this section, we discuss how to make sure the server works
+      correctly and learn how to write a client with Netty.
+    </p><p>
+      The biggest and only difference between a server and a client in Netty
+      is that different <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/Bootstrap.html"><code class="classname">Bootstrap</code></a> and <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a> are required.  Please
+      take a look at the following code:
+    </p><pre class="programlisting">package org.jboss.netty.example.time;
+
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
+
+public class TimeClient {
+
+    public static void main(String[] args) throws Exception {
+        String host = args[0];
+        int port = Integer.parseInt(args[1]);
+
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a> factory =
+            new <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/nio/NioClientSocketChannelFactory.html"><code class="classname">NioClientSocketChannelFactory</code></a><a id="example.time2.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/>(
+                    Executors.newCachedThreadPool(),
+                    Executors.newCachedThreadPool());
+
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ClientBootstrap.html"><code class="classname">ClientBootstrap</code></a> bootstrap = new <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ClientBootstrap.html"><code class="classname">ClientBootstrap</code></a><a id="example.time2.co2"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/>(factory);
+
+        bootstrap.setPipelineFactory(new <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipelineFactory.html"><code class="interfacename">ChannelPipelineFactory</code></a>() {
+            public <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html"><code class="interfacename">ChannelPipeline</code></a> getPipeline() {
+                return <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channels.html"><code class="classname">Channels</code></a>.pipeline(new TimeClientHandler());
+            }
+        });
+        
+        bootstrap.setOption("tcpNoDelay"<a id="example.time2.co3"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/>, true);
+        bootstrap.setOption("keepAlive", true);
+
+        bootstrap.connect<a id="example.time2.co4"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/>(new InetSocketAddress(host, port));
+    }
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.time2.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/nio/NioClientSocketChannelFactory.html"><code class="classname">NioClientSocketChannelFactory</code></a>, instead of <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/nio/NioServerSocketChannelFactory.html"><code class="classname">NioServerSocketChannelFactory</code></a>
+           was used to create a client-side <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>. 
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time2.co2"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ClientBootstrap.html"><code class="classname">ClientBootstrap</code></a> is a client-side counterpart of <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ServerBootstrap.html"><code class="classname">ServerBootstrap</code></a>.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time2.co3"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          Please note that there's no <code class="literal">"child."</code> prefix.
+          A client-side <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/SocketChannel.html"><code class="interfacename">SocketChannel</code></a> does not have a parent.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time2.co4"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          We should call the <code class="methodname">connect</code> method instead of
+          the <code class="methodname">bind</code> method.  
+        </p></td></tr></table></div><p>
+      As you can see, it is not really different from the server side startup.
+      What about the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandler.html"><code class="interfacename">ChannelHandler</code></a> implementation?  It should receive a
+      32-bit integer from the server, translate it into a human readable format,
+      print the translated time, and close the connection:
+    </p><pre class="programlisting">package org.jboss.netty.example.time;
+
+import java.util.Date;
+
+public class TimeClientHandler extends <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/SimpleChannelHandler.html"><code class="classname">SimpleChannelHandler</code></a> {
+
+    @Override
+    public void messageReceived(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a> e) {
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> buf = (<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>) e.getMessage();
+        long currentTimeMillis = buf.readInt() * 1000L;
+        System.out.println(new Date(currentTimeMillis));
+        e.getChannel().close();
+    }
+
+    @Override
+    public void exceptionCaught(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ExceptionEvent.html"><code class="interfacename">ExceptionEvent</code></a> e) {
+        e.getCause().printStackTrace();
+        e.getChannel().close();
+    }
+}</pre><p>
+      It looks very simple and does not look any different from the server side
+      example.  However, this handler sometimes will refuse to work raising an
+      <code class="exceptionname">IndexOutOfBoundsException</code>.  We discuss why
+      this happens in the next section.
+    </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="d0e794"/>1.7. 
+      Dealing with a Stream-based Transport
+    </h2></div></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a id="d0e797"/>1.7.1. 
+        One Small Caveat of Socket Buffer
+      </h3></div></div></div><p>
+        In a stream-based transport such as TCP/IP, received data is stored
+        into a socket receive buffer.  Unfortunately, the buffer of a
+        stream-based transport is not a queue of packets but a queue of bytes.
+        It means, even if you sent two messages as two independent packets, an
+        operating system will not treat them as two messages but as just a
+        bunch of bytes.  Therefore, there is no guarantee that what you read
+        is exactly what your remote peer wrote.  For example, let us assume
+        that the TCP/IP stack of an operating system has received three packets:
+      </p><pre class="programlisting">+-----+-----+-----+
+| ABC | DEF | GHI |
++-----+-----+-----+</pre><p>
+        Because of this general property of a stream-based protocol, there's
+        high chance of reading them in the following fragmented form in your
+        application:
+      </p><pre class="programlisting">+----+-------+---+---+
+| AB | CDEFG | H | I |
++----+-------+---+---+</pre><p>
+        Therefore, a receiving part, regardless it is server-side or
+        client-side, should defrag the received data into one or more meaningful
+        <em class="firstterm">frames</em> that could be easily understood by the
+        application logic.  In case of the example above, the received data
+        should be framed like the following:
+      </p><pre class="programlisting">+-----+-----+-----+
+| ABC | DEF | GHI |
++-----+-----+-----+</pre></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a id="d0e815"/>1.7.2. 
+        The First Solution
+      </h3></div></div></div><p>
+        Now let us get back to the TIME client example.  We have the same
+        problem here.  A 32-bit integer is a very small amount of data, and it
+        is not likely to be fragmented often.  However, the problem is that it
+        <span class="emphasis"><em>can</em></span> be fragmented, and the possibility of
+        fragmentation will increase as the traffic increases.
+      </p><p>
+        The simplistic solution is to create an internal cumulative buffer and
+        wait until all 4 bytes are received into the internal buffer.  The
+        following is the modified <code class="classname">TimeClientHandler</code>
+        implementation that fixes the problem:
+      </p><pre class="programlisting">package org.jboss.netty.example.time;
+
+import static org.jboss.netty.buffer.<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffers.html"><code class="classname">ChannelBuffers</code></a>.*;
+
+import java.util.Date;
+
+public class TimeClientHandler extends <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/SimpleChannelHandler.html"><code class="classname">SimpleChannelHandler</code></a> {
+
+    private final <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> buf = dynamicBuffer();<a id="example.time3.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/>
+
+    @Override
+    public void messageReceived(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a> e) {
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> m = (<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>) e.getMessage();
+        buf.writeBytes(m);<a id="example.time3.co2"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/>
+        
+        if (buf.readableBytes() &gt;= 4) {<a id="example.time3.co3"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/>
+            long currentTimeMillis = buf.readInt() * 1000L;
+            System.out.println(new Date(currentTimeMillis));
+            e.getChannel().close();
+        }
+    }
+
+    @Override
+    public void exceptionCaught(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ExceptionEvent.html"><code class="interfacename">ExceptionEvent</code></a> e) {
+        e.getCause().printStackTrace();
+        e.getChannel().close();
+    }
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.time3.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+            A <em class="firstterm">dynamic buffer</em> is a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> which
+            increases its capacity on demand.  It's very useful when you don't
+            know the length of the message.
+          </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time3.co2"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+            First, all received data should be cumulated into
+            <code class="varname">buf</code>.
+          </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time3.co3"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+            And then, the handler must check if <code class="varname">buf</code> has enough
+            data, 4 bytes in this example, and proceed to the actual business
+            logic.  Otherwise, Netty will call the
+            <code class="methodname">messageReceived</code> method again when more
+            data arrives, and eventually all 4 bytes will be cumulated.
+          </p></td></tr></table></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a id="d0e898"/>1.7.3. 
+        The Second Solution
+      </h3></div></div></div><p>
+        Although the first solution has resolved the problem with the TIME
+        client, the modified handler does not look that clean.  Imagine a more
+        complicated protocol which is composed of multiple fields such as a
+        variable length field.  Your <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandler.html"><code class="interfacename">ChannelHandler</code></a> implementation will
+        become unmaintainable very quickly.
+      </p><p>
+        As you may have noticed, you can add more than one <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandler.html"><code class="interfacename">ChannelHandler</code></a> to
+        a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html"><code class="interfacename">ChannelPipeline</code></a>, and therefore, you can split one monolithic
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandler.html"><code class="interfacename">ChannelHandler</code></a> into multiple modular ones to reduce the complexity of
+        your application.  For example, you could split
+        <code class="classname">TimeClientHandler</code> into two handlers:
+        </p><div class="itemizedlist"><ul><li><p>
+              <code class="classname">TimeDecoder</code> which deals with the
+              fragmentation issue, and
+            </p></li><li><p>
+              the initial simple version of <code class="classname">TimeClientHandler</code>.
+            </p></li></ul></div><p>
+      </p><p>
+        Fortunately, Netty provides an extensible class which helps you write
+        the first one out of the box:
+      </p><pre class="programlisting">package org.jboss.netty.example.time;
+
+public class TimeDecoder extends <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/frame/FrameDecoder.html"><code class="classname">FrameDecoder</code></a><a id="example.time4.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/> {
+
+    @Override
+    protected Object decode(
+            <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> channel, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> buffer)<a id="example.time4.co2"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/> {
+            
+        if (buffer.readableBytes() &lt; 4) {
+            return null; <a id="example.time4.co3"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/>
+        }
+        
+        return buffer.readBytes(4);<a id="example.time4.co4"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/>
+    }
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.time4.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+            <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/frame/FrameDecoder.html"><code class="classname">FrameDecoder</code></a> is an implementation of <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandler.html"><code class="interfacename">ChannelHandler</code></a> which
+            makes it easy to which deals with the fragmentation issue.
+          </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time4.co2"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+            <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/frame/FrameDecoder.html"><code class="classname">FrameDecoder</code></a> calls <code class="methodname">decode</code> method with
+            an internally maintained cumulative buffer whenever new data is
+            received.
+          </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time4.co3"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+            If <code class="literal">null</code> is returned, it means there's not 
+            enough data yet.  <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/frame/FrameDecoder.html"><code class="classname">FrameDecoder</code></a> will call again when there is a
+            sufficient amount of data.
+          </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time4.co4"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+            If non-<code class="literal">null</code> is returned, it means the
+            <code class="methodname">decode</code> method has decoded a message
+            successfully.  <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/frame/FrameDecoder.html"><code class="classname">FrameDecoder</code></a> will discard the read part of its
+            internal cumulative buffer.  Please remember that you don't need
+            to decode multiple messages.  <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/frame/FrameDecoder.html"><code class="classname">FrameDecoder</code></a> will keep calling
+            the <code class="methodname">decoder</code> method until it returns
+            <code class="literal">null</code>.
+          </p></td></tr></table></div><p>
+        Now that we have another handler to insert into the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html"><code class="interfacename">ChannelPipeline</code></a>,
+        we should modify the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipelineFactory.html"><code class="interfacename">ChannelPipelineFactory</code></a> implementation in the
+        <code class="classname">TimeClient</code>:
+      </p><pre class="programlisting">        bootstrap.setPipelineFactory(new <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipelineFactory.html"><code class="interfacename">ChannelPipelineFactory</code></a>() {
+            public <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html"><code class="interfacename">ChannelPipeline</code></a> getPipeline() {
+                return <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channels.html"><code class="classname">Channels</code></a>.pipeline(
+                        new TimeDecoder(),
+                        new TimeClientHandler());
+            }
+        });</pre><p>
+        If you are an adventurous person, you might want to try the
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/replay/ReplayingDecoder.html"><code class="classname">ReplayingDecoder</code></a> which simplifies the decoder even more.  You will
+        need to consult the API reference for more information though.
+      </p><pre class="programlisting">package org.jboss.netty.example.time;
+
+public class TimeDecoder extends <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/replay/ReplayingDecoder.html"><code class="classname">ReplayingDecoder</code></a>&lt;<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/replay/VoidEnum.html"><code class="classname">VoidEnum</code></a>&gt; {
+
+    @Override
+    protected Object decode(
+            <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> channel,
+            <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> buffer, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/replay/VoidEnum.html"><code class="classname">VoidEnum</code></a> state) {
+            
+        return buffer.readBytes(4);
+    }
+}</pre><p>
+        Additionally, Netty provides out-of-the-box decoders which enables
+        you to implement most protocols very easily and helps you avoid from
+        ending up with a monolithic unmaintainable handler implementation.
+        Please refer to the following packages for more detailed examples:
+        </p><div class="itemizedlist"><ul><li><p>
+              <code class="literal">org.jboss.netty.example.factorial</code> for
+              a binary protocol, and
+            </p></li><li><p>
+              <code class="literal">org.jboss.netty.example.telnet</code> for
+              a text line-based protocol.
+            </p></li></ul></div><p>
+      </p></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="start.pojo"/>1.8. 
+      Speaking in POJO instead of ChannelBuffer
+    </h2></div></div></div><p>
+      All the examples we have reviewed so far used a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> as a
+      primary data structure of a protocol message.  In this section, we will
+      improve the TIME protocol client and server example to use a 
+      <a class="ulink" href="http://en.wikipedia.org/wiki/POJO">POJO</a> instead of a
+      <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>.
+    </p><p>
+      The advantage of using a POJO in your <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandler.html"><code class="interfacename">ChannelHandler</code></a> is obvious;
+      your handler becomes more maintainable and reusable by separating the
+      code which extracts information from <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> out from the
+      handler.  In the TIME client and server examples, we read only one
+      32-bit integer and it is not a major issue to use <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> directly.
+      However, you will find it is necessary to make the separation as you
+      implement a real world protocol.
+    </p><p>
+      First, let us define a new type called <code class="classname">UnixTime</code>.
+    </p><pre class="programlisting">package org.jboss.netty.example.time;
+
+import java.util.Date;
+
+public class UnixTime {
+    private final int value;
+    
+    public UnixTime(int value) {
+        this.value = value;
+    }
+    
+    public int getValue() {
+        return value;
+    }
+    
+    @Override
+    public String toString() {
+        return new Date(value * 1000L).toString();
+    }
+}</pre><p>
+      We can now revise the <code class="classname">TimeDecoder</code> to return
+      a <code class="classname">UnixTime</code> instead of a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>. 
+    </p><pre class="programlisting">@Override
+protected Object decode(
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> channel, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> buffer) {
+    if (buffer.readableBytes() &lt; 4) {
+        return null;
+    }
+
+    return new UnixTime(buffer.readInt());<a id="example.time5.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/>
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.time5.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/frame/FrameDecoder.html"><code class="classname">FrameDecoder</code></a> and <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/handler/codec/replay/ReplayingDecoder.html"><code class="classname">ReplayingDecoder</code></a> allow you to return an object
+          of any type.  If they were restricted to return only a
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>, we would have to insert another <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandler.html"><code class="interfacename">ChannelHandler</code></a>
+          which transforms a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> into a
+          <code class="classname">UnixTime</code>.
+        </p></td></tr></table></div><p>
+      With the updated decoder, the <code class="classname">TimeClientHandler</code>
+      does not use <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> anymore:
+    </p><pre class="programlisting">@Override
+public void messageReceived(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a> e) {
+    UnixTime m = (UnixTime) e.getMessage();
+    System.out.println(m);
+    e.getChannel().close();
+}</pre><p>
+      Much simpler and elegant, right?  The same technique can be applied on
+      the server side.  Let us update the
+      <code class="classname">TimeServerHandler</code> first this time:
+    </p><pre class="programlisting">@Override
+public void channelConnected(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelStateEvent.html"><code class="interfacename">ChannelStateEvent</code></a> e) {
+    UnixTime time = new UnixTime(System.currentTimeMillis() / 1000);
+    <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a> f = e.getChannel().write(time);
+    f.addListener(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFutureListener.html"><code class="interfacename">ChannelFutureListener</code></a>.CLOSE);
+}</pre><p>
+      Now, the only missing piece is an encoder, which is an implementation of
+      <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandler.html"><code class="interfacename">ChannelHandler</code></a> that translates a <code class="classname">UnixTime</code> back
+      into a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>.  It's much simpler than writing a decoder because
+      there's no need to deal with packet fragmentation and assembly when
+      encoding a message.
+    </p><pre class="programlisting">package org.jboss.netty.example.time;
+    
+import static org.jboss.netty.buffer.<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffers.html"><code class="classname">ChannelBuffers</code></a>.*;
+
+public class TimeEncoder extends <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/SimpleChannelHandler.html"><code class="classname">SimpleChannelHandler</code></a> {
+
+    public void writeRequested(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a><a id="example.time6.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/> e) {
+        UnixTime time = (UnixTime) e.getMessage();
+        
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a> buf = buffer(4);
+        buf.writeInt(time.getValue());
+        
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channels.html"><code class="classname">Channels</code></a>.write(ctx, e.getFuture(), buf);<a id="example.time6.co2"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/>
+    }
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.time6.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          An encoder overrides the <code class="methodname">writeRequested</code>
+          method to intercept a write request.  Please note that the
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a> parameter here is the same type which was specified
+          in <code class="methodname">messageReceived</code> but they are interpreted
+          differently.  A <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelEvent.html"><code class="interfacename">ChannelEvent</code></a> can be either an
+          <em class="firstterm">upstream</em> or <em class="firstterm">downstream</em>
+          event depending on the direction where the event flows.
+          For instance, a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a> can be an upstream event when called
+          for <code class="methodname">messageReceived</code> or a downstream event
+          when called for <code class="methodname">writeRequested</code>.
+          Please refer to the API reference to learn more about the difference
+          between a upstream event and a downstream event.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time6.co2"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          Once done with transforming a POJO into a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/buffer/ChannelBuffer.html"><code class="interfacename">ChannelBuffer</code></a>, you should
+          forward the new buffer to the previous <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelDownstreamHandler.html"><code class="interfacename">ChannelDownstreamHandler</code></a> in
+          the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html"><code class="interfacename">ChannelPipeline</code></a>.  <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channels.html"><code class="classname">Channels</code></a> provides various helper methods
+          which generates and sends a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelEvent.html"><code class="interfacename">ChannelEvent</code></a>.  In this example,
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channels.html"><code class="classname">Channels</code></a><code class="literal">.write(...)</code> method creates a new
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/MessageEvent.html"><code class="interfacename">MessageEvent</code></a> and sends it to the previous <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelDownstreamHandler.html"><code class="interfacename">ChannelDownstreamHandler</code></a>
+          in the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html"><code class="interfacename">ChannelPipeline</code></a>.
+        </p><p>
+          On the other hand, it is a good idea to use static imports for
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channels.html"><code class="classname">Channels</code></a>:
+          </p><pre class="programlisting">import static org.jboss.netty.channel.<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channels.html"><code class="classname">Channels</code></a>.*;
+...
+<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html"><code class="interfacename">ChannelPipeline</code></a> pipeline = pipeline();
+write(ctx, e.getFuture(), buf);
+fireChannelDisconnected(ctx);</pre><p>
+        </p></td></tr></table></div><p>
+      The last task left is to insert a <code class="classname">TimeEncoder</code>
+      into the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html"><code class="interfacename">ChannelPipeline</code></a> on the server side, and it is left as a
+      trivial exercise.
+    </p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="d0e1372"/>1.9. 
+      Shutting Down Your Application
+    </h2></div></div></div><p>
+      If you ran the <code class="classname">TimeClient</code>, you must have noticed
+      that the application doesn't exit but just keep running doing nothing.
+      Looking from the full stack trace, you will also find a couple I/O threads
+      are running.  To shut down the I/O threads and let the application exit
+      gracefully, you need to release the resources allocated by <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a>.
+    </p><p>
+      The shutdown process of a typical network application is composed of the
+      following three steps:
+      </p><div xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" class="orderedlist"><ol><li><p>
+            Close all server sockets if there are any,
+          </p></li><li><p>
+            Close all non-server sockets (i.e. client sockets and accepted
+            sockets) if there are any, and
+          </p></li><li><p>
+            Release all resources used by <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a>.
+          </p></li></ol></div><p>
+    </p><p>
+      To apply the three steps above to the <code class="classname">TimeClient</code>,
+      <code class="methodname">TimeClient.main()</code> could shut itself down
+      gracefully by closing the only one client connection and releasing all
+      resources used by <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a>:
+    </p><pre class="programlisting">package org.jboss.netty.example.time;
+
+public class TimeClient {
+    public static void main(String[] args) throws Exception {
+        ...
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a> factory = ...;
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ClientBootstrap.html"><code class="classname">ClientBootstrap</code></a> bootstrap = ...;
+        ...
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a> future<a id="example.time7.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/> = bootstrap.connect(...);
+        future.awaitUninterruptibly();<a id="example.time7.co2"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/>
+        if (!future.isSuccess()) {
+            future.getCause().printStackTrace();<a id="example.time7.co3"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/>
+        }
+        future.getChannel().getCloseFuture().awaitUninterruptibly();<a id="example.time7.co4"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/>
+        factory.releaseExternalResources();<a id="example.time7.co5"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/5.png" alt="5" border="0" height="17px" width="17px"/>
+    }
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.time7.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          The <code class="methodname">connect</code> method of <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ClientBootstrap.html"><code class="classname">ClientBootstrap</code></a>
+          returns a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a> which notifies when a connection attempt
+          succeeds or fails.  It also has a reference to the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> which
+          is associated with the connection attempt.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time7.co2"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          Wait for the returned <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a> to determine if the connection
+          attempt was successful or not.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time7.co3"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          If failed, we print the cause of the failure to know why it failed.
+          the <code class="methodname">getCause()</code> method of <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a> will
+          return the cause of the failure if the connection attempt was neither
+          successful nor cancelled.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time7.co4"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          Now that the connection attempt is over, we need to wait until the
+          connection is closed by waiting for the <code class="varname">closeFuture</code>
+          of the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>.  Every <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> has its own <code class="varname">closeFuture</code>
+          so that you are notified and can perform a certain action on closure.
+        </p><p>
+          Even if the connection attempt has failed the <code class="varname">closeFuture</code>
+          will be notified because the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> will be closed automatically
+          when the connection attempt fails.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time7.co5"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/5.png" alt="5" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          All connections have been closed at this point.  The only task left
+          is to release the resources being used by <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a>.  It is as
+          simple as calling its <code class="methodname">releaseExternalResources()</code>
+          method.  All resources including the NIO <code class="classname">Selector</code>s
+          and thread pools will be shut down and terminated automatically.
+        </p></td></tr></table></div><p>
+      Shutting down a client was pretty easy, but how about shutting down a
+      server?  You need to unbind from the port and close all open accepted
+      connections.  To do this, you need a data structure that keeps track of
+      the list of active connections, and it's not a trivial task.  Fortunately,
+      there is a solution, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroup.html"><code class="interfacename">ChannelGroup</code></a>.
+    </p><p>
+      <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroup.html"><code class="interfacename">ChannelGroup</code></a> is a special extension of Java collections API which
+      represents a set of open <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>s.  If a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> is added to a
+      <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroup.html"><code class="interfacename">ChannelGroup</code></a> and the added <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> is closed, the closed <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>
+      is removed from its <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroup.html"><code class="interfacename">ChannelGroup</code></a> automatically.  You can also perform
+      an operation on all <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>s in the same group.  For instance, you can
+      close all <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>s in a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroup.html"><code class="interfacename">ChannelGroup</code></a> when you shut down your server.
+    </p><p>
+      To keep track of open sockets, you need to modify the
+      <code class="classname">TimeServerHandler</code> to add a new open <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> to
+      the global <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroup.html"><code class="interfacename">ChannelGroup</code></a>, <code class="varname">TimeServer.allChannels</code>:
+    </p><pre class="programlisting">@Override
+public void channelOpen(<a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelHandlerContext.html"><code class="interfacename">ChannelHandlerContext</code></a> ctx, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelStateEvent.html"><code class="interfacename">ChannelStateEvent</code></a> e) {
+    TimeServer.allChannels.add(e.getChannel());<a id="example.time8.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/>
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.time8.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          Yes, <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroup.html"><code class="interfacename">ChannelGroup</code></a> is thread-safe.
+        </p></td></tr></table></div><p>
+      Now that the list of all active <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>s are maintained automatically,
+      shutting down a server is as easy as shutting down a client:
+    </p><pre class="programlisting">package org.jboss.netty.example.time;
+
+public class TimeServer {
+
+    static final <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroup.html"><code class="interfacename">ChannelGroup</code></a> allChannels = new <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/DefaultChannelGroup.html"><code class="classname">DefaultChannelGroup</code></a>("time-server"<a id="example.time9.co1"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/>);
+
+    public static void main(String[] args) throws Exception {
+        ...
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFactory.html"><code class="interfacename">ChannelFactory</code></a> factory = ...;
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ServerBootstrap.html"><code class="classname">ServerBootstrap</code></a> bootstrap = ...;
+        ...
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> channel<a id="example.time9.co2"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/> = bootstrap.bind(...);
+        allChannels.add(channel);<a id="example.time9.co3"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/>
+        waitForShutdownCommand();<a id="example.time9.co4"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/>
+        <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroupFuture.html"><code class="interfacename">ChannelGroupFuture</code></a> future = allChannels.close();<a id="example.time9.co5"/><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/5.png" alt="5" border="0" height="17px" width="17px"/>
+        future.awaitUninterruptibly();
+        factory.releaseExternalResources();
+    }
+}</pre><div class="calloutlist"><table border="0" summary="Callout list"><tr><td width="5%" valign="top" align="left"><p><a href="#example.time9.co1"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/1.png" alt="1" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/DefaultChannelGroup.html"><code class="classname">DefaultChannelGroup</code></a> requires the name of the group as a constructor
+          parameter.  The group name is solely used to distinguish one group
+          from others.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time9.co2"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/2.png" alt="2" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          The <code class="methodname">bind</code> method of <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/bootstrap/ServerBootstrap.html"><code class="classname">ServerBootstrap</code></a>
+          returns a server side <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> which is bound to the specified
+          local address.  Calling the <code class="methodname">close()</code> method
+          of the returned <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> will make the <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> unbind from the
+          bound local address.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time9.co3"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/3.png" alt="3" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          Any type of <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>s can be added to a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroup.html"><code class="interfacename">ChannelGroup</code></a> regardless if
+          it is either server side, client-side, or accepted.  Therefore,
+          you can close the bound <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> along with the accepted <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a>s
+          in one shot when the server shuts down.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time9.co4"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/4.png" alt="4" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          <code class="methodname">waitForShutdownCommand()</code> is an imaginary
+          method that waits for the shutdown signal.  You could wait for a
+          message from a privileged client or the JVM shutdown hook.
+        </p></td></tr><tr><td width="5%" valign="top" align="left"><p><a href="#example.time9.co5"><img xmlns="" xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" src="images/community/docbook/callouts/5.png" alt="5" border="0" height="17px" width="17px"/></a> </p></td><td valign="top" align="left"><p>
+          You can perform the same operation on all channels in the same 
+          <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroup.html"><code class="interfacename">ChannelGroup</code></a>.  In this case, we close all channels, which means
+          the bound server-side <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/Channel.html"><code class="interfacename">Channel</code></a> will be unbound and all accepted
+          connections will be closed asynchronously.  To notify when all
+          connections were closed successfully, it returns a <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/group/ChannelGroupFuture.html"><code class="interfacename">ChannelGroupFuture</code></a>
+          which has a similar role with <a class="ulink" href="http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelFuture.html"><code class="interfacename">ChannelFuture</code></a>.
+        </p></td></tr></table></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a id="d0e1715"/>1.10. 
+      Summary
+    </h2></div></div></div><p>
+      In this chapter, we had a quick tour of Netty with a demonstration on how
+      to write a fully working network application on top of Netty.  More
+      questions you may have will be covered in the upcoming chapters and the
+      revised version of this chapter.  Please also note that the
+      <a class="ulink" href="http://www.jboss.org/netty/community.html">community</a> is always waiting for your
+      questions and ideas to help you and keep improving Netty based on your
+      feed back.
+    </p></div></div><div xmlns="" class="navfooter"><table width="100%" summary="Navigation footer"><tr><td width="25%" align="left" class="previous"><a accesskey="p" href="preface.html">Prev</a> </td><td width="25%" align="right" class="up"> </td><td width="25%" align="left" class="home"><a accesskey="h" href="index.html">Front page</a></td><td width="25%" align="right" class="next"> <a accesskey="n" href="architecture.html">Next</a></td></tr><tr><td align="left" valign="top"> </td><td align="right" valign="top"> </td></tr></table></div></body></html>

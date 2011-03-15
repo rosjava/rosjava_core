@@ -18,60 +18,51 @@ package org.ros.internal.transport;
 
 import static org.junit.Assert.assertEquals;
 
-import org.ros.internal.topic.PublisherMessageQueue;
-import org.ros.internal.topic.SubscriberMessageQueue;
-
-
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.SimpleChannelHandler;
+import org.junit.Before;
 import org.junit.Test;
+import org.ros.internal.topic.SubscriberMessageQueue;
+import org.ros.internal.transport.tcp.NettyTcpServer;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MessageQueueIntegrationTest {
 
-  private final class ServerThread extends Thread {
-    public Socket server;
-    private final ServerSocket serverSocket;
-    private final CountDownLatch latch;
+  private NettyOutgoingMessageQueue out;
 
-    private ServerThread(ServerSocket serverSocket, CountDownLatch latch) {
-      this.serverSocket = serverSocket;
-      this.latch = latch;
-    }
-
+  private class ServerHandler extends SimpleChannelHandler {
     @Override
-    public void run() {
-      try {
-        server = serverSocket.accept();
-        latch.countDown();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
+      Channel channel = e.getChannel();
+      out.addChannel(channel);
     }
+  }
+
+  @Before
+  public void setup() {
+    out = new NettyOutgoingMessageQueue();
+    out.start();
   }
 
   @Test
   public void testSendAndReceiveMessage() throws IOException, InterruptedException {
-    final CountDownLatch latch = new CountDownLatch(1);
-    final ServerSocket serverSocket = new ServerSocket(0);
-    ServerThread serverThread = new ServerThread(serverSocket, latch);
-    serverThread.start();
-    Socket client = new Socket(serverSocket.getInetAddress(), serverSocket.getLocalPort());
-    latch.await(3, TimeUnit.SECONDS);
-    PublisherMessageQueue out = new PublisherMessageQueue();
-    out.addSocket(serverThread.server);
+    NettyTcpServer server = new NettyTcpServer(new ServerHandler());
+    server.start(new InetSocketAddress(0));
+    
+    Socket client = new Socket(server.getAddress().getHostName(), server.getAddress().getPort());
     SubscriberMessageQueue<org.ros.message.std.String> in =
         new SubscriberMessageQueue<org.ros.message.std.String>(org.ros.message.std.String.class);
     in.setSocket(client);
-
-    out.start();
     in.start();
+    
     org.ros.message.std.String hello = new org.ros.message.std.String();
     hello.data = "Would you like to play a game?";
     out.put(hello);

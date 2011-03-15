@@ -36,6 +36,7 @@ import org.ros.namespace.Resolver;
 import org.ros.namespace.RosName;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
@@ -107,7 +108,8 @@ public class Node implements Namespace {
       Preconditions.checkNotNull(masterClient);
       Preconditions.checkNotNull(slaveServer);
       Publisher<MessageType> pub = new Publisher<MessageType>(resolveName(topic_name), clazz);
-      pub.start();
+      // TODO(damonkohler): Allow passing in an address to bind to?
+      pub.start(new InetSocketAddress(0));
       slaveServer.addPublisher(pub.publisher);
       return pub;
     } catch (IOException e) {

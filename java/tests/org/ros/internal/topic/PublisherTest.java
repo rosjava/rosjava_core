@@ -17,18 +17,13 @@
 package org.ros.internal.topic;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.junit.Test;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.internal.transport.NettyConnectionHeader;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.Socket;
 import java.util.Map;
 
 /**
@@ -37,8 +32,7 @@ import java.util.Map;
 public class PublisherTest {
 
   @Test
-  public void testHandshake() throws IOException {
-    Socket socket = mock(Socket.class);
+  public void testHandshake() {
     TopicDefinition topicDefinition =
         new TopicDefinition("/topic",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
@@ -46,17 +40,11 @@ public class PublisherTest {
     SubscriberIdentifier subscriberDescription =
         new SubscriberIdentifier(slaveIdentifier, topicDefinition);
     Map<String, String> header = subscriberDescription.toHeader();
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    ConnectionHeader.writeHeader(header, outputStream);
-    byte[] buffer = outputStream.toByteArray();
-    when(socket.getInputStream()).thenReturn(new ByteArrayInputStream(buffer));
-    outputStream = new ByteArrayOutputStream();
-    when(socket.getOutputStream()).thenReturn(outputStream);
+    ChannelBuffer subscriberHeader = NettyConnectionHeader.encode(header);
 
-    Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
-    publisher.handshake(socket);
-    buffer = outputStream.toByteArray();
-    Map<String, String> result = ConnectionHeader.readHeader(new ByteArrayInputStream(buffer));
+    Publisher publisher = new Publisher(topicDefinition);
+    ChannelBuffer publisherHeader = publisher.handshake(subscriberHeader);
+    Map<String, String> result = NettyConnectionHeader.decode(publisherHeader);
     assertEquals(result.get(ConnectionHeaderFields.TYPE), header.get(ConnectionHeaderFields.TYPE));
     assertEquals(result.get(ConnectionHeaderFields.MD5_CHECKSUM),
         header.get(ConnectionHeaderFields.MD5_CHECKSUM));

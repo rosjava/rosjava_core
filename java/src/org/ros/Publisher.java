@@ -20,6 +20,7 @@ import org.ros.internal.topic.TopicDefinition;
 import org.ros.message.Message;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 
 /**
  * A handle for publishing messages of a particular type on a given topic.
@@ -58,16 +59,17 @@ public class Publisher<MessageType extends Message> {
   /**
    * This starts up the topic
    * 
+   * @param address 
    * @throws IOException
    * @throws IllegalAccessException
    * @throws InstantiationException
    */
-  void start() throws IOException, InstantiationException, IllegalAccessException {
+  void start(SocketAddress address) throws IOException, InstantiationException, IllegalAccessException {
     // create an instance of the message of type MessageT
     Message m = messageClass.newInstance();
     TopicDefinition topicDefinition;
     topicDefinition = new TopicDefinition(topicName, MessageDefinition.createFromMessage(m));
-    publisher = new org.ros.internal.topic.Publisher(topicDefinition, Ros.getHostName(), 0);
-    publisher.start();
+    publisher = new org.ros.internal.topic.Publisher(topicDefinition);
+    publisher.start(address);
   }
 }

@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en_US" lang="en_US">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>FileRegion xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../api/org/jboss/netty/channel/FileRegion.html">View Javadoc</a></div><pre>
+
+<a class="jxr_linenumber" name="1" href="#1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="2" href="#2">2</a>   <em class="jxr_comment"> * Copyright 2010 Red Hat, Inc.</em>
+<a class="jxr_linenumber" name="3" href="#3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="4" href="#4">4</a>   <em class="jxr_comment"> * Red Hat licenses this file to you under the Apache License, version 2.0</em>
+<a class="jxr_linenumber" name="5" href="#5">5</a>   <em class="jxr_comment"> * (the "License"); you may not use this file except in compliance with the</em>
+<a class="jxr_linenumber" name="6" href="#6">6</a>   <em class="jxr_comment"> * License.  You may obtain a copy of the License at:</em>
+<a class="jxr_linenumber" name="7" href="#7">7</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="8" href="#8">8</a>   <em class="jxr_comment"> *    <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="9" href="#9">9</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="10" href="#10">10</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="11" href="#11">11</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT</em>
+<a class="jxr_linenumber" name="12" href="#12">12</a>  <em class="jxr_comment"> * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the</em>
+<a class="jxr_linenumber" name="13" href="#13">13</a>  <em class="jxr_comment"> * License for the specific language governing permissions and limitations</em>
+<a class="jxr_linenumber" name="14" href="#14">14</a>  <em class="jxr_comment"> * under the License.</em>
+<a class="jxr_linenumber" name="15" href="#15">15</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="16" href="#16">16</a>  <strong class="jxr_keyword">package</strong> org.jboss.netty.channel;
+<a class="jxr_linenumber" name="17" href="#17">17</a>  
+<a class="jxr_linenumber" name="18" href="#18">18</a>  <strong class="jxr_keyword">import</strong> java.io.IOException;
+<a class="jxr_linenumber" name="19" href="#19">19</a>  <strong class="jxr_keyword">import</strong> java.nio.channels.FileChannel;
+<a class="jxr_linenumber" name="20" href="#20">20</a>  <strong class="jxr_keyword">import</strong> java.nio.channels.WritableByteChannel;
+<a class="jxr_linenumber" name="21" href="#21">21</a>  
+<a class="jxr_linenumber" name="22" href="#22">22</a>  <strong class="jxr_keyword">import</strong> org.jboss.netty.util.ExternalResourceReleasable;
+<a class="jxr_linenumber" name="23" href="#23">23</a>  
+<a class="jxr_linenumber" name="24" href="#24">24</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="25" href="#25">25</a>  <em class="jxr_javadoccomment"> * A region of a file that is sent via a {@link Channel} which supports</em>
+<a class="jxr_linenumber" name="26" href="#26">26</a>  <em class="jxr_javadoccomment"> * &lt;a href="<a href="http://en.wikipedia.org/wiki/Zero-copy" target="alexandria_uri">http://en.wikipedia.org/wiki/Zero-copy</a>"&gt;zero-copy file transfer&lt;/a&gt;.</em>
+<a class="jxr_linenumber" name="27" href="#27">27</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="28" href="#28">28</a>  <em class="jxr_javadoccomment"> * &lt;h3&gt;Upgrade your JDK / JRE&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="29" href="#29">29</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="30" href="#30">30</a>  <em class="jxr_javadoccomment"> * {@link FileChannel#transferTo(long, long, WritableByteChannel)} has at least</em>
+<a class="jxr_linenumber" name="31" href="#31">31</a>  <em class="jxr_javadoccomment"> * four known bugs in the old versions of Sun JDK and perhaps its derived ones.</em>
+<a class="jxr_linenumber" name="32" href="#32">32</a>  <em class="jxr_javadoccomment"> * Please upgrade your JDK to 1.6.0_18 or later version if you are going to use</em>
+<a class="jxr_linenumber" name="33" href="#33">33</a>  <em class="jxr_javadoccomment"> * zero-copy file transfer.</em>
+<a class="jxr_linenumber" name="34" href="#34">34</a>  <em class="jxr_javadoccomment"> * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="35" href="#35">35</a>  <em class="jxr_javadoccomment"> * &lt;li&gt;&lt;a href="<a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5103988" target="alexandria_uri">http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5103988</a>"&gt;5103988&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="36" href="#36">36</a>  <em class="jxr_javadoccomment"> *   - FileChannel.transferTo() should return -1 for EAGAIN instead throws IOException&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="37" href="#37">37</a>  <em class="jxr_javadoccomment"> * &lt;li&gt;&lt;a href="<a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6253145" target="alexandria_uri">http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6253145</a>"&gt;6253145&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="38" href="#38">38</a>  <em class="jxr_javadoccomment"> *   - FileChannel.transferTo() on Linux fails when going beyond 2GB boundary&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="39" href="#39">39</a>  <em class="jxr_javadoccomment"> * &lt;li&gt;&lt;a href="<a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6427312" target="alexandria_uri">http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6427312</a>"&gt;6427312&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="40" href="#40">40</a>  <em class="jxr_javadoccomment"> *   - FileChannel.transferTo() throws IOException "system call interrupted"&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="41" href="#41">41</a>  <em class="jxr_javadoccomment"> * &lt;li&gt;&lt;a href="<a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6524172" target="alexandria_uri">http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6524172</a>"&gt;6470086&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="42" href="#42">42</a>  <em class="jxr_javadoccomment"> *   - FileChannel.transferTo(2147483647, 1, channel) causes "Value too large" exception&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="43" href="#43">43</a>  <em class="jxr_javadoccomment"> * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="44" href="#44">44</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="45" href="#45">45</a>  <em class="jxr_javadoccomment"> * &lt;h3&gt;Check your operating system and JDK / JRE&lt;/h3&gt;</em>
+<a class="jxr_linenumber" name="46" href="#46">46</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="47" href="#47">47</a>  <em class="jxr_javadoccomment"> * If your operating system (or JDK / JRE) does not support zero-copy file</em>
+<a class="jxr_linenumber" name="48" href="#48">48</a>  <em class="jxr_javadoccomment"> * transfer, sending a file with {@link FileRegion} might fail or yield worse</em>
+<a class="jxr_linenumber" name="49" href="#49">49</a>  <em class="jxr_javadoccomment"> * performance.  For example, sending a large file doesn't work well in Windows.</em>
+<a class="jxr_linenumber" name="50" href="#50">50</a>  <em class="jxr_javadoccomment"> *</em>
+<a class="jxr_linenumber" name="51" href="#51">51</a>  <em class="jxr_javadoccomment"> * @author &lt;a href="<a href="http://www.jboss.org/netty/" target="alexandria_uri">http://www.jboss.org/netty/</a>"&gt;The Netty Project&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="52" href="#52">52</a>  <em class="jxr_javadoccomment"> * @author &lt;a href="<a href="http://gleamynode.net/" target="alexandria_uri">http://gleamynode.net/</a>"&gt;Trustin Lee&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="53" href="#53">53</a>  <em class="jxr_javadoccomment"> * @version $Rev: 2080 $, $Date: 2010-01-26 18:04:19 +0900 (Tue, 26 Jan 2010) $</em>
+<a class="jxr_linenumber" name="54" href="#54">54</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="55" href="#55">55</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../org/jboss/netty/channel/FileRegion.html">FileRegion</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../org/jboss/netty/util/ExternalResourceReleasable.html">ExternalResourceReleasable</a> {
+<a class="jxr_linenumber" name="56" href="#56">56</a>  
+<a class="jxr_linenumber" name="57" href="#57">57</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="58" href="#58">58</a>  <em class="jxr_javadoccomment">     * Returns the offset in the file where the transfer began.</em>
+<a class="jxr_linenumber" name="59" href="#59">59</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="60" href="#60">60</a>      <strong class="jxr_keyword">long</strong> getPosition();
+<a class="jxr_linenumber" name="61" href="#61">61</a>  
+<a class="jxr_linenumber" name="62" href="#62">62</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="63" href="#63">63</a>  <em class="jxr_javadoccomment">     * Returns the number of bytes to transfer.</em>
+<a class="jxr_linenumber" name="64" href="#64">64</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="65" href="#65">65</a>      <strong class="jxr_keyword">long</strong> getCount();
+<a class="jxr_linenumber" name="66" href="#66">66</a>  
+<a class="jxr_linenumber" name="67" href="#67">67</a>      <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="68" href="#68">68</a>  <em class="jxr_javadoccomment">     * Transfers the content of this file region to the specified channel.</em>
+<a class="jxr_linenumber" name="69" href="#69">69</a>  <em class="jxr_javadoccomment">     *</em>
+<a class="jxr_linenumber" name="70" href="#70">70</a>  <em class="jxr_javadoccomment">     * @param target    the destination of the transfer</em>
+<a class="jxr_linenumber" name="71" href="#71">71</a>  <em class="jxr_javadoccomment">     * @param position  the relative offset of the file where the transfer</em>
+<a class="jxr_linenumber" name="72" href="#72">72</a>  <em class="jxr_javadoccomment">     *                  begins from.  For example, &lt;tt&gt;0&lt;/tt&gt; will make the</em>
+<a class="jxr_linenumber" name="73" href="#73">73</a>  <em class="jxr_javadoccomment">     *                  transfer start from {@link #getPosition()}th byte and</em>
+<a class="jxr_linenumber" name="74" href="#74">74</a>  <em class="jxr_javadoccomment">     *                  &lt;tt&gt;{@link #getCount()} - 1&lt;/tt&gt; will make the last</em>
+<a class="jxr_linenumber" name="75" href="#75">75</a>  <em class="jxr_javadoccomment">     *                  byte of the region transferred.</em>
+<a class="jxr_linenumber" name="76" href="#76">76</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="77" href="#77">77</a>      <strong class="jxr_keyword">long</strong> transferTo(WritableByteChannel target, <strong class="jxr_keyword">long</strong> position) <strong class="jxr_keyword">throws</strong> IOException;
+<a class="jxr_linenumber" name="78" href="#78">78</a>  }
+</pre>
+<hr/><div id="footer">This page was automatically generated by <a href="http://maven.apache.org/">Maven</a></div></body>
+</html>
+

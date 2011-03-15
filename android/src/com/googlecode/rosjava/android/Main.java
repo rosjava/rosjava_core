@@ -33,6 +33,7 @@ import org.ros.message.geometry.PoseStamped;
 import org.ros.message.geometry.Quaternion;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -70,13 +71,8 @@ public class Main extends Activity {
             MessageDefinition
                 .createFromMessage(new org.ros.message.geometry.PoseStamped()));
     final Publisher publisher;
-    try {
-      publisher = new Publisher(topicDefinition, "192.168.1.141", 7332);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return;
-    }
-    publisher.start();
+    publisher = new Publisher(topicDefinition);
+    publisher.start(new InetSocketAddress(0));
 
     SlaveServer slave = new SlaveServer("/android", master, "192.168.1.141", 7331);
     try {

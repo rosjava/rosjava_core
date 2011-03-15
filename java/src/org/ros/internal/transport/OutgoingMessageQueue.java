@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.netty.channel.Channel;
 import org.ros.message.Message;
 
 import java.io.IOException;
@@ -88,6 +89,13 @@ public abstract class OutgoingMessageQueue {
     streams.add(out);
   }
 
+  /**
+   * @param channel
+   */
+  public void addChannel(Channel channel) {
+    
+  }
+  
   private void sendMessageToAllStreams(Message message) {
     Iterator<LittleEndianDataOutputStream> iterator = streams.iterator();
     while (iterator.hasNext()) {

@@ -44,6 +44,7 @@ import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -85,11 +86,16 @@ public class MasterSlaveIntegrationTest {
     TopicDefinition topicDefinition =
         new TopicDefinition("/hello",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
-    Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
-    slaveServer.addPublisher(publisher);
-    Response<ProtocolDescription> response =
-        slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS));
-    assertEquals(response.getResult(), new TcpRosProtocolDescription(publisher.getAddress()));
+    Publisher publisher = new Publisher(topicDefinition);
+    publisher.start(new InetSocketAddress(0));
+    try {
+      slaveServer.addPublisher(publisher);
+      Response<ProtocolDescription> response =
+          slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS));
+      assertEquals(new TcpRosProtocolDescription(publisher.getAddress()), response.getResult());
+    } finally {
+      publisher.shutdown();
+    }
   }
 
   @Test
@@ -104,7 +110,7 @@ public class MasterSlaveIntegrationTest {
             jobQueue);
     List<PublisherIdentifier> publishers = slaveServer.addSubscriber(subscriber);
     assertEquals(0, publishers.size());
-    Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
+    Publisher publisher = new Publisher(topicDefinition);
     slaveServer.addPublisher(publisher);
     publishers = slaveServer.addSubscriber(subscriber);
     PublisherIdentifier publisherDescription =

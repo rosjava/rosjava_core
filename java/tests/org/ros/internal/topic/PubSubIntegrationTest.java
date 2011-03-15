@@ -33,6 +33,7 @@ import org.ros.internal.topic.TopicDefinition;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
@@ -51,8 +52,8 @@ public class PubSubIntegrationTest {
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
     SlaveIdentifier pubSlaveIdentifier = new SlaveIdentifier("/receiver", new URI("http://fake:5678"));
     PublisherIdentifier publisherIdentifier = new PublisherIdentifier(pubSlaveIdentifier, topicDefinition);
-    Publisher publisher = new Publisher(topicDefinition, "localhost", 0);
-    publisher.start();
+    Publisher publisher = new Publisher(topicDefinition);
+    publisher.start(new InetSocketAddress(0));
 
     SlaveIdentifier subSlaveIdentifier = new SlaveIdentifier("/caller", new URI("http://fake:1234"));
     Subscriber<org.ros.message.std.String> subscriber =
@@ -72,6 +73,6 @@ public class PubSubIntegrationTest {
     org.ros.message.std.String message = new org.ros.message.std.String();
     message.data = "Hello, ROS!";
     publisher.publish(message);
-    assertTrue(messageReceived.await(3, TimeUnit.SECONDS));
+    assertTrue(messageReceived.await(30, TimeUnit.SECONDS));
   }
 }

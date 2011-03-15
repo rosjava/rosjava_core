@@ -20,20 +20,24 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import org.ros.internal.transport.tcp.TcpServer;
-
-import org.ros.internal.transport.ConnectionHeader;
-import org.ros.internal.transport.ConnectionHeaderFields;
-
-import org.ros.internal.node.server.SlaveIdentifier;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.ExceptionEvent;
+import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.SimpleChannelHandler;
+import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.internal.transport.NettyConnectionHeader;
+import org.ros.internal.transport.NettyOutgoingMessageQueue;
+import org.ros.internal.transport.tcp.NettyTcpServer;
 import org.ros.message.Message;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
 
@@ -45,42 +49,53 @@ public class Publisher extends Topic {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
-  private final PublisherMessageQueue out;
+  private final NettyOutgoingMessageQueue out;
   private final List<SubscriberIdentifier> subscribers;
-  private final TcpServer server;
+  private final NettyTcpServer server;
 
-  private class Server extends TcpServer {
-    public Server(String hostname, int port) throws IOException {
-      super(hostname, port);
+  private class PublisherServerHandler extends SimpleChannelHandler {
+
+    @Override
+    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
+      Channel channel = e.getChannel();
+      out.addChannel(channel);
     }
 
     @Override
-    protected void onNewConnection(Socket socket) {
-      try {
-        handshake(socket);
-        out.addSocket(socket);
-      } catch (IOException e) {
-        log.error("Failed to accept connection.", e);
-      }
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+      ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
+      ChannelBuffer outgoingBuffer = handshake(incomingBuffer);
+      Channel channel = ctx.getChannel();
+      channel.write(outgoingBuffer);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
+      log.error("Incomming connection failed.", e.getCause());
+      e.getChannel().close();
     }
   }
 
-  public Publisher(TopicDefinition description, String hostname, int port) throws IOException {
+  public Publisher(TopicDefinition description) {
     super(description);
-    out = new PublisherMessageQueue();
+    out = new NettyOutgoingMessageQueue();
     subscribers = Lists.newArrayList();
-    // TODO(kwc): we only need one TCPROS server for the entire node.
-    server = new Server(hostname, port);
+    // TODO(kwc): We only need one TCPROS server for the entire node.
+    server = new NettyTcpServer(new PublisherServerHandler());
   }
 
-  public void start() {
-    server.start();
+  public void start(SocketAddress address) {
+    server.start(address);
     out.start();
   }
 
   public void shutdown() {
+    try {
+      out.shutdown();
+    } catch (InterruptedException e) {
+      log.error("Failed to shutdown outgoing message queue.", e);
+    }
     server.shutdown();
-    out.shutdown();
   }
 
   public PublisherIdentifier toPublisherIdentifier(SlaveIdentifier description) {
@@ -100,21 +115,21 @@ public class Publisher extends Topic {
   }
 
   @VisibleForTesting
-  void handshake(Socket socket) throws IOException {
-    //TODO(kwc): move to TcpRosConnection
-    Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
+  ChannelBuffer handshake(ChannelBuffer buffer) {
+    Map<String, String> incomingHeader = NettyConnectionHeader.decode(buffer);
     Map<String, String> header = getTopicDefinitionHeader();
     if (DEBUG) {
-      log.info("Incoming handshake header: " + incomingHeader);
-      log.info("Expected handshake header: " + header);
+      log.info("Subscriber handshake header: " + incomingHeader);
+      log.info("Publisher handshake header: " + header);
     }
+    // TODO(damonkohler): Return error to the subscriber over the wire?
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
         header.get(ConnectionHeaderFields.TYPE)));
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
     SubscriberIdentifier subscriber = SubscriberIdentifier.createFromHeader(incomingHeader);
     subscribers.add(subscriber);
-    ConnectionHeader.writeHeader(header, socket.getOutputStream());
+    return NettyConnectionHeader.encode(header);
   }
 
 }

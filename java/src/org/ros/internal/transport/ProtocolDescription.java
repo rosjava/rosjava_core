@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -28,10 +28,12 @@ public class ProtocolDescription {
 
   private final String name;
   private final InetSocketAddress address;
-  
+
   public ProtocolDescription(String name, InetSocketAddress address) {
     this.name = name;
-    this.address = address;
+    // Copying the InetSocketAddress like this is necessary in order to support
+    // serializing and deserializing ProtocolDescriptions as pairs of Strings.
+    this.address = new InetSocketAddress(address.getHostName(), address.getPort());
   }
 
   public String getName() {
@@ -45,13 +47,15 @@ public class ProtocolDescription {
   public List<Object> toList() {
     return Lists.newArrayList((Object) name, address.getHostName(), address.getPort());
   }
-  
+
   @Override
   public String toString() {
-    return "Protocol<" + name + ", " + getAddress() + ">";    
+    return "Protocol<" + name + ", " + getAddress() + ">";
   }
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -63,7 +67,9 @@ public class ProtocolDescription {
     return result;
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
