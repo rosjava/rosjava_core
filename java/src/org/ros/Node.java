@@ -17,6 +17,8 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.namespace.RosName;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
@@ -31,9 +33,8 @@ import org.ros.internal.topic.TopicDefinition;
 import org.ros.logging.RosLog;
 import org.ros.message.Message;
 import org.ros.message.Time;
-import org.ros.namespace.RosName;
-import org.ros.namespace.RosNamespace;
-import org.ros.namespace.RosResolver;
+import org.ros.namespace.Namespace;
+import org.ros.namespace.NameResolver;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -43,14 +44,14 @@ import java.net.URISyntaxException;
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
-public class Node implements RosNamespace {
+public class Node implements Namespace {
   /**
    * The node's context for name resolution and possibly other global
    * configuration issues (rosparam)
    */
-  private final Context context;
+  private final NodeContext context;
   /** The node's namespace name. */
-  private final RosName rosName;
+  private final RosName nodeName;
   private String hostName;
   /** Port on which the slave server will be initialized on. */
   private final int port;
@@ -72,47 +73,19 @@ public class Node implements RosNamespace {
   private String masterUri;
 
   /**
-   * Create a node, using the command line args which will be mined for ros
-   * specific tags.
-   * 
-   * @param argv
-   *          arg parsing
-   * @param name
-   *          Name of the node.
-   * @throws RosNameException
-   * @throws RosInitException
-   * #@deprecated #TODO(rublee) are we deprecating this method of node construction?
-   */
-  public Node(String argv[], String name) throws RosNameException, RosInitException {
-    this.context = new Context();
-    //this does the arg parsing, remapping.
-    this.context.init(argv);
-    // TODO(kwc): per roscpp/rospy, name should actually be a 'base name', i.e.
-    // it cannot contain any namespace information whatsoever. This restriction
-    // ensures consistency of remapping logic.
-    rosName = new RosName(this.context.getResolver().resolveName(name));
-    initialized = false;
-
-    port = 0; // default port
-    masterClient = null;
-    slaveServer = null;
-    log = new RosLog(rosName.toString());
-  }
-
-  /**
    * @param name
    * @param context
    * @throws RosNameException
    */
-  public Node(String name, Context context) throws RosNameException {
+  public Node(String name, NodeContext context) throws RosNameException {
     Preconditions.checkNotNull(context);
     Preconditions.checkNotNull(name);
     this.context = context;
-    rosName = new RosName(this.context.getResolver().resolveName(name));
+    nodeName = new RosName(this.context.getResolver().resolveName(name));
     port = 0; // default port
     masterClient = null;
     slaveServer = null;
-    log = new RosLog(rosName.toString());
+    log = new RosLog(nodeName.toString());
   }
 
   @Override
@@ -199,7 +172,7 @@ public class Node implements RosNamespace {
 
   @Override
   public String getName() {
-    return rosName.toString();
+    return nodeName.toString();
   }
 
   /**
@@ -242,10 +215,10 @@ public class Node implements RosNamespace {
       // Start up XML-RPC Slave server.
       SlaveIdentifier slaveIdentifier;
       try {
-        slaveServer = new SlaveServer(rosName.toString(), masterClient, this.hostName, port);
+        slaveServer = new SlaveServer(nodeName.toString(), masterClient, this.hostName, port);
         slaveServer.start();
         log().debug(
-            "Successfully initiallized " + rosName.toString() + " with:\n\tmaster @ "
+            "Successfully initiallized " + nodeName.toString() + " with:\n\tmaster @ "
                 + masterClient.getRemoteUri().toString() + "\n\tListening on port: "
                 + slaveServer.getUri().toString());
         slaveIdentifier = slaveServer.toSlaveIdentifier();
@@ -277,7 +250,7 @@ public class Node implements RosNamespace {
 
   @Override
   public String resolveName(String name) throws RosNameException {
-    RosResolver resolver = context.getResolver();
+    NameResolver resolver = context.getResolver();
     String r = resolver.resolveName(getName(), name);
     log.debug("Resolved name " + name + " as " + r);
     return r;

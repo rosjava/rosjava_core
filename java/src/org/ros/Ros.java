@@ -87,10 +87,10 @@ public class Ros {
   /**
    * @return The default roscontext, with is a global context.
    */
-  public static Context getDefaultContext() {
+  public static NodeContext getDefaultContext() {
     // TODO Auto-generated method stub
     return defaultContext;
   }
   
-  static private Context defaultContext = new Context();
+  static private NodeContext defaultContext = new NodeContext();
 }

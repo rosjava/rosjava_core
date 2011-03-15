@@ -13,22 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.namespace;
+package org.ros.internal.loader;
 
-import org.ros.internal.namespace.RosNameTest;
+/**
+ * Remapping keys used to override ROS environment and other configuration
+ * settings. As of ROS 1.4, only __ns is required to be supported.
+ * 
+ * @author kwc@willowgarage.com (Ken Conley)
+ */
+public interface CommandLine {
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-public class AllTests {
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite(AllTests.class.getName());
-    //$JUnit-BEGIN$
-    suite.addTestSuite(ResolverTest.class);
-    suite.addTestSuite(RosNameTest.class);
-    //$JUnit-END$
-    return suite;
-  }
+  public static String ROS_NAMESPACE = "__ns";
+  public static String ROS_IP = "__ip";
+  public static String ROS_MASTER_URI = "__master";
+  public static String TCPROS_PORT = "__tcpros_server_port";
 
 }

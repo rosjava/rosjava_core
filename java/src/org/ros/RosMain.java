@@ -27,5 +27,5 @@ public abstract class RosMain {
    * @param argv
    * @param context The ros context with which to the RosMain is assumed to abide by.
    */
-  abstract public void rosMain(String argv[], Context context);
+  abstract public void rosMain(String argv[], NodeContext context);
 }

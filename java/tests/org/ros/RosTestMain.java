@@ -15,7 +15,7 @@
  */
 package org.ros;
 
-import org.ros.exceptions.RosNameException;
+import org.ros.exceptions.RosInitException;
 
 /**
  * A test of dynamic loading for ros classes.
@@ -29,17 +29,15 @@ public class RosTestMain {
    * @throws IllegalAccessException
    * @throws InstantiationException
    * @throws ClassNotFoundException
-   * @throws RosNameException
+   * @throws RosInitException 
    */
   public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, RosNameException {
+      IllegalAccessException, RosInitException {
     // Example of using a string based class loader so that we can load classes
     // dynamically at runtime.
-    RosLoader rl = new RosLoader();
-    RosMain rm = rl.loadClass("org.ros.tutorials.RosPubSub");
-    Context context = new Context();
-    String[] strippedArgs = context.init(args);
-    rm.rosMain(strippedArgs, context);
+    CommandLineLoader loader = new CommandLineLoader(args);
+    RosMain rm = loader.loadClass("org.ros.tutorials.RosPubSub");
+    rm.rosMain(loader.getCleanCommandLineArgs(), loader.createContext());
   }
 
 }

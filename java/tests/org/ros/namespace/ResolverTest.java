@@ -15,7 +15,10 @@
  */
 package org.ros.namespace;
 
-import static org.junit.Assert.assertTrue;
+import org.ros.internal.namespace.RosName;
+
+import java.util.HashMap;
+
 import org.ros.exceptions.RosNameException;
 
 import junit.framework.TestCase;
@@ -26,8 +29,11 @@ import org.junit.Test;
 
 public class ResolverTest extends TestCase {
 
+  private HashMap<RosName, RosName> emptyRemappings;
+
   @Before
   public void setUp() throws Exception {
+    emptyRemappings = new HashMap<RosName, RosName>();
   }
 
   @After
@@ -35,47 +41,47 @@ public class ResolverTest extends TestCase {
   }
 
   @Test
-  public void testResolveName() {
+  public void testResolveName() throws RosNameException {
     // these tests are based on test_roslib_names.py
-    RosResolver r = RosResolver.getDefault();
-    try { 
+    NameResolver r = new NameResolver(Namespace.GLOBAL_NS, emptyRemappings);
+    try {
       r.resolveName("foo", "bar");
       fail("should have raised");
-    } catch (IllegalArgumentException e) { 
+    } catch (IllegalArgumentException e) {
     } catch (RosNameException e) {
       fail("should have not raised");
     }
     try {
-      assertEquals(RosNamespace.GLOBAL_NS, r.resolveName(RosNamespace.GLOBAL_NS, ""));
-      assertEquals(RosNamespace.GLOBAL_NS, r.resolveName("/node", ""));
+      assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
+      assertEquals(Namespace.GLOBAL_NS, r.resolveName("/node", ""));
       System.out.println(r.resolveName("/ns1/node", ""));
       assertEquals("/ns1", r.resolveName("/ns1/node", ""));
-      assertEquals(RosNamespace.GLOBAL_NS, r.resolveName(RosNamespace.GLOBAL_NS, ""));
-      
+      assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
+
       // relative namespaces get resolved to default namespace
       assertEquals("/foo", r.resolveName("/", "foo"));
       assertEquals("/foo", r.resolveName("/", "foo/"));
       assertEquals("/foo", r.resolveName("/", "/foo"));
       assertEquals("/foo", r.resolveName("/", "/foo/"));
-      
+
       assertEquals("/ns1/foo", r.resolveName("/ns1/ns2", "foo"));
       assertEquals("/ns1/foo", r.resolveName("/ns1/ns2", "foo/"));
       assertEquals("/ns1/foo", r.resolveName("/ns1/ns2/", "foo"));
       assertEquals("/foo", r.resolveName("/ns1/ns2", "/foo/"));
-      
+
       assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2/ns3", "foo"));
       assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2/ns3/", "foo"));
       assertEquals("/foo", r.resolveName("/", "/foo/"));
-      
+
       assertEquals("/ns1/foo/bar", r.resolveName("/ns1/ns2", "foo/bar"));
       assertEquals("/ns1/ns2/foo/bar", r.resolveName("/ns1/ns2/ns3", "foo/bar"));
-      
+
       assertEquals("/foo", r.resolveName("/", "~foo"));
       assertEquals("/node/foo", r.resolveName("/node", "~foo"));
       assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "~foo"));
       assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "~foo/"));
       assertEquals("/ns1/ns2/foo/bar", r.resolveName("/ns1/ns2", "~foo/bar"));
-      
+
       // https://code.ros.org/trac/ros/ticket/3044
       assertEquals("/foo", r.resolveName("/", "~/foo"));
       assertEquals("/node/foo", r.resolveName("/node", "~/foo"));
@@ -84,67 +90,46 @@ public class ResolverTest extends TestCase {
     } catch (RosNameException e) {
       fail("should not be any invalid names in this test");
     }
-      /*
-     //ns join tests
-     *     # private and global names cannot be joined
-    self.assertEquals('~name', ns_join('/foo', '~name'))
-    self.assertEquals('/name', ns_join('/foo', '/name'))
-    self.assertEquals('~name', ns_join('~', '~name'))
-    self.assertEquals('/name', ns_join('/', '/name'))
-
-    # ns can be '~' or '/'
-    self.assertEquals('~name', ns_join('~', 'name'))
-    self.assertEquals('/name', ns_join('/', 'name'))
-
-    self.assertEquals('/ns/name', ns_join('/ns', 'name'))
-    self.assertEquals('/ns/name', ns_join('/ns/', 'name'))    
-    self.assertEquals('/ns/ns2/name', ns_join('/ns', 'ns2/name'))
-    self.assertEquals('/ns/ns2/name', ns_join('/ns/', 'ns2/name'))
-
-    # allow ns to be empty
-    self.assertEquals('name', ns_join('', 'name'))
-
+    /*
+     * //ns join tests # private and global names cannot be joined
+     * self.assertEquals('~name', ns_join('/foo', '~name'))
+     * self.assertEquals('/name', ns_join('/foo', '/name'))
+     * self.assertEquals('~name', ns_join('~', '~name'))
+     * self.assertEquals('/name', ns_join('/', '/name'))
+     * 
+     * # ns can be '~' or '/' self.assertEquals('~name', ns_join('~', 'name'))
+     * self.assertEquals('/name', ns_join('/', 'name'))
+     * 
+     * self.assertEquals('/ns/name', ns_join('/ns', 'name'))
+     * self.assertEquals('/ns/name', ns_join('/ns/', 'name'))
+     * self.assertEquals('/ns/ns2/name', ns_join('/ns', 'ns2/name'))
+     * self.assertEquals('/ns/ns2/name', ns_join('/ns/', 'ns2/name'))
+     * 
+     * # allow ns to be empty self.assertEquals('name', ns_join('', 'name'))
      */
   }
+
+  /**
+   * Test resolveName with name remapping active.
+   * 
+   * @throws RosNameException
+   */
   @Test
-  public void testArgRemapping() throws RosNameException
-  {
-    String args = "name:=/my/name foo:=/my/foo --help";
-    RosResolver r = new RosResolver();
-    String[] stripped = r.initRemapping(args.split(" "));
-    assertTrue(stripped.length == 1);
-    assertTrue(stripped[0].equals("--help"));
+  public void testResolveNameRemapping() throws RosNameException {
+    HashMap<RosName, RosName> remappings = new HashMap<RosName, RosName>();
+    remappings.put(new RosName("name"), new RosName("/my/name"));
+    remappings.put(new RosName("foo"), new RosName("/my/foo"));
+
+    NameResolver r = new NameResolver(Namespace.GLOBAL_NS, remappings);
+
     String n = r.resolveName("name");
     System.out.print(n);
     assertTrue(n.equals("/my/name"));
     assertTrue(r.resolveName("/name").equals("/name"));
     assertTrue(r.resolveName("foo").equals("/my/foo"));
     assertTrue(r.resolveName("/my/name").equals("/my/name"));
-  }
 
-  @Test
-  public void testGetDefaultNamespace() {
-    try {
-      
-      System.clearProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY);
-      assertEquals(RosNamespace.GLOBAL_NS, RosResolver.getDefaultNamespace());
-      System.setProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY, "/");
-      assertEquals(RosNamespace.GLOBAL_NS, RosResolver.getDefaultNamespace());
-      
-      
-      System.setProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY, "/foo");
-      assertEquals("/foo", RosResolver.getDefaultNamespace());
-      
-      // make sure that the routine returns canonical
-      System.setProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY, "/foo/");
-      assertEquals("/foo", RosResolver.getDefaultNamespace());
-      
-    } catch (RosNameException e) {
-      e.printStackTrace();
-      fail("could not generate names");
-    } finally {
-      System.clearProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY);
-    }
+    // TODO: not enough tests here.
   }
 
 }

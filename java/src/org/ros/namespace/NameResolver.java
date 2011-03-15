@@ -15,12 +15,14 @@
  */
 package org.ros.namespace;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+
+import org.ros.internal.namespace.RosName;
 
 import org.ros.exceptions.RosNameException;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 
 /**
  * See the rules for names - http://www.ros.org/wiki/Names The resolver will do
@@ -33,95 +35,31 @@ import java.util.LinkedList;
 // TODO need to implement ROS namespace remapping. Resolver seems to be the
 // right place to do this as it is already aware of default namespace and is
 // contained within the Node implementation.
-public class RosResolver {
+public class NameResolver {
 
-  private static RosResolver s_default = new RosResolver();
-
-  HashMap<String, String> remappings;
-
-  /**
-   * 
-   */
-  public RosResolver() {
-    remappings = new HashMap<String, String>();
-  }
-
-  /**
-   * Takes the given args and strips them of ros remappings, e.g.
-   * name:=/remapped/name.
-   * 
-   * @param args
-   * @return The stripped array of args.
-   * @throws RosNameException
-   */
-  public String[] initRemapping(String[] args) throws RosNameException {
-    HashMap<String, String> remappings = new HashMap<String, String>();
-    LinkedList<String> stripped = new LinkedList<String>();
-    String pattern = ".*:=.*";
-    for (String x : args) {
-      if (x.matches(pattern)) {
-        String remap[] = x.split(":=");
-        remappings.put(remap[0], remap[1]);
-      } else {
-        stripped.add(x);
-      }
-    }
-    initRemapping(remappings);
-    return stripped.toArray(new String[0]);
-  }
+  private final HashMap<RosName, RosName> remappings;
+  private final String namespace;
 
   /**
    * @param remappings
    * @throws RosNameException
-   */
-  public void initRemapping(final HashMap<String, String> remappings) throws RosNameException {
-
-    this.remappings.clear();
-    this.remappings.putAll(remappings);
-    verifyRemappings();
-  }
-
-  private void verifyRemappings() throws RosNameException {
-    for (String x : remappings.keySet()) {
-      new RosName(x);
-    }
-    for (String x : remappings.values()) {
-      new RosName(x);
-    }
-
-  }
-
-  /**
-   * @return The default resolver.
-   */
-  public static RosResolver getDefault() {
-    return s_default;
-  }
-
-  /**
    * 
-   * @return The default namespace of this process.
-   * @throws RosNameException
-   *           If default namespace is set to invalid name.
    */
-  public static String getDefaultNamespace() throws RosNameException {
-    // Resolution rules: ROS defines two methods for setting the namespace (in
-    // order of precedence)
-    // 1) The __ns:= command line argument
-    // 2) the ROS_NAMESPACE environment variable
-    // It is the responsibility of the loader to obey this contract and set the
-    // rosNamespace system property
+  public NameResolver(String namespace, HashMap<RosName, RosName> remappings) throws RosNameException {
+    this.remappings = remappings;
+    this.namespace = RosName.canonicalizeName(namespace);
+  }
 
-    // This routine does not need to be high performance.
-    return new RosName(System.getProperty(RosNamespace.DEFAULT_NAMESPACE_PROPERTY,
-        RosNamespace.GLOBAL_NS)).toString();
+  public String getNamespace() {
+    return namespace;
   }
 
   /**
    * Resolve name relative to namespace. If namespace is not global, it will
    * first be resolved to a global name.
    * 
-   * This does all remappings of both the namespace and name. 
+   * This does all remappings of both the namespace and name.
+   * 
    * @param namespace
    * @param name
    * @return the fully resolved name relative to the given namespace.
@@ -129,16 +67,16 @@ public class RosResolver {
    *           Will throw on a poorly formated name.
    */
   public String resolveName(String namespace, String name) throws RosNameException {
-    RosName ns = new RosName(lookUpRemapping(namespace));
+    RosName ns = lookUpRemapping(new RosName(namespace));
     Preconditions.checkArgument(ns.isGlobal(), "namespace must be global");
-    RosName n = new RosName(lookUpRemapping(name));
+    RosName n = lookUpRemapping(new RosName(name));
     if (n.isGlobal()) {
       return n.toString();
     }
     if (n.isRelative()) {
-      return join(new RosName(ns.getParent()), n);
+      return join(ns.getParent(), n);
     } else if (n.isPrivate()) {
-      String s = n.removeFrontDecorator();
+      String s = n.toRelative();
       // allow ~/foo
       if (s.startsWith("/")) {
         s = s.substring(1);
@@ -148,16 +86,24 @@ public class RosResolver {
     throw new RosNameException("Bad name: " + name);
   }
 
-  /** Convenience function for looking up a remapping.
-   * @param name The name to lookup.
+  /**
+   * Convenience function for looking up a remapping.
+   * 
+   * @param name
+   *          The name to lookup.
    * @return The name if it is not remapped, otherwise the remapped name.
    */
-  private String lookUpRemapping(String name) {
-    String rmname = name;
+  private RosName lookUpRemapping(RosName name) {
+    RosName rmname = name;
     if (remappings.containsKey(name)) {
       rmname = remappings.get(name);
     }
     return rmname;
+  }
+
+  @VisibleForTesting
+  public HashMap<RosName, RosName> getRemappings() {
+    return remappings;
   }
 
   /**
@@ -167,7 +113,7 @@ public class RosResolver {
    * @throws RosNameException
    */
   public String resolveName(String name) throws RosNameException {
-    return resolveName(getDefaultNamespace(), name);
+    return resolveName(namespace, name);
   }
 
   /**
@@ -204,8 +150,8 @@ public class RosResolver {
     // TODO: review - another possible behavior is to just return name2
     Preconditions.checkArgument(name2.isRelative(),
         "name2 cannot be joined as it is global or private");
-    if (name1.equals(RosNamespace.GLOBAL_NS)) {
-      return RosNamespace.GLOBAL_NS + name2.toString();
+    if (name1.equals(Namespace.GLOBAL_NS)) {
+      return Namespace.GLOBAL_NS + name2.toString();
     } else {
       return new RosName(name1.toString() + "/" + name2.toString()).toString();
     }
