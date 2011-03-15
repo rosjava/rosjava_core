@@ -15,13 +15,12 @@
  */
 package org.ros;
 
-import org.ros.internal.loader.CommandLine;
-
 import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
+import org.ros.internal.loader.CommandLine;
 import org.ros.internal.loader.EnvironmentVariables;
 import org.ros.internal.namespace.RosName;
 import org.ros.namespace.NameResolver;
