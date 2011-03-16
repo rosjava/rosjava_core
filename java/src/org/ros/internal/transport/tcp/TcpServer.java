@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,71 +16,93 @@
 
 package org.ros.internal.transport.tcp;
 
+import com.google.common.base.Preconditions;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.buffer.HeapChannelBufferFactory;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFactory;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.ExceptionEvent;
+import org.jboss.netty.channel.SimpleChannelHandler;
+import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.group.ChannelGroupFuture;
+import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.ByteOrder;
+import java.util.concurrent.Executors;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class TcpServer {
-  
+public class TcpServer {
+
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(TcpServer.class);
 
-  private final InetSocketAddress address;
-  private final ServerThread thread;
-  private final ServerSocket server;
-  
-  public TcpServer(String hostname, int port) throws IOException {
-    server = new ServerSocket(port);
-    address = InetSocketAddress.createUnresolved(hostname, server.getLocalPort());
-    thread = new ServerThread();
-  }
+  private final ChannelGroup channelGroup;
+  private final ChannelFactory channelFactory;
+  private final ServerBootstrap bootstrap;
 
-  // TODO(damonkohler): Change to composition?
-  protected abstract void onNewConnection(Socket socket);
+  private Channel channel;
 
-  private final class ServerThread extends Thread {
+  private final class ConnectionTrackingHandler extends SimpleChannelHandler {
+    @Override
+    public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
+      channelGroup.add(e.getChannel());
+    }
     
     @Override
-    public void run() {
-      while (!Thread.currentThread().isInterrupted()) {
-        try {
-          onNewConnection(server.accept());
-        } catch (IOException e) {
-          log.error("Connection failed.", e);
-        }
-      }
-    }
-
-    public void cancel() {
-      interrupt();
-      try {
-        server.close();
-      } catch (IOException e) {
-        log.error("Server shutdown failed.", e);
-      }
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+      e.getChannel().close();
+      throw new RuntimeException(e.getCause());
     }
   }
 
-  public void start() {
-    thread.start();
+  public TcpServer(ChannelPipelineFactory factory) {
+    channelGroup = new DefaultChannelGroup();
+    channelFactory =
+        new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
+            Executors.newCachedThreadPool());
+    bootstrap = new ServerBootstrap(channelFactory);
+    bootstrap.setOption("child.bufferFactory",
+        new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    bootstrap.setPipelineFactory(factory);
+    try {
+      factory.getPipeline().addLast("Connection Tracking Handler", new ConnectionTrackingHandler());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void start(SocketAddress address) {
+    channel = bootstrap.bind(address);
     if (DEBUG) {
       log.info("TCP server bound to: " + getAddress());
     }
   }
 
   public void shutdown() {
-    thread.cancel();
+    if (DEBUG) {
+      log.info("TCP server shutting down." + getAddress());
+    }
+    ChannelGroupFuture future = channelGroup.close();
+    future.awaitUninterruptibly();
+    channelFactory.releaseExternalResources();
+    bootstrap.releaseExternalResources();
   }
 
   public InetSocketAddress getAddress() {
-    return address;
+    Preconditions
+        .checkNotNull(channel, "Calling getAddress() is only valid after calling start().");
+    return (InetSocketAddress) channel.getLocalAddress();
   }
 
 }

@@ -25,7 +25,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.topic.SubscriberMessageQueue;
-import org.ros.internal.transport.tcp.NettyTcpServer;
+import org.ros.internal.transport.tcp.TcpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -36,7 +36,7 @@ import java.net.Socket;
  */
 public class MessageQueueIntegrationTest {
 
-  private NettyOutgoingMessageQueue out;
+  private OutgoingMessageQueue out;
 
   private class ServerHandler extends SimpleChannelHandler {
     @Override
@@ -48,7 +48,7 @@ public class MessageQueueIntegrationTest {
 
   @Before
   public void setup() {
-    out = new NettyOutgoingMessageQueue();
+    out = new OutgoingMessageQueue();
     out.start();
   }
 
@@ -56,7 +56,7 @@ public class MessageQueueIntegrationTest {
   public void testSendAndReceiveMessage() throws IOException, InterruptedException {
     SimplePipelineFactory factory = new SimplePipelineFactory();
     factory.getPipeline().addLast("Server Handler", new ServerHandler());
-    NettyTcpServer server = new NettyTcpServer(factory);
+    TcpServer server = new TcpServer(factory);
     server.start(new InetSocketAddress(0));
 
     Socket client = new Socket(server.getAddress().getHostName(), server.getAddress().getPort());

@@ -34,7 +34,7 @@ import org.ros.internal.topic.Publisher;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.NettyConnectionHeader;
 import org.ros.internal.transport.SimplePipelineFactory;
-import org.ros.internal.transport.tcp.NettyTcpServer;
+import org.ros.internal.transport.tcp.TcpServer;
 import org.ros.message.Message;
 
 import java.net.InetSocketAddress;
@@ -54,7 +54,7 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
 
   private static final int ESTIMATED_RESPONSE_SIZE = 8192;
 
-  private final NettyTcpServer server;
+  private final TcpServer server;
   private final Class<RequestMessageType> requestMessageClass;
   private final ServiceDefinition definition;
   private final Map<String, String> header;
@@ -122,7 +122,7 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
     this.definition = definition;
     SimplePipelineFactory factory = new SimplePipelineFactory();
     factory.getPipeline().addLast("Handshake Handler", new HandshakeHandler());
-    server = new NettyTcpServer(factory);
+    server = new TcpServer(factory);
     header =
         ImmutableMap.<String, String>builder().put(ConnectionHeaderFields.SERVICE, name)
             .putAll(definition.toHeader()).build();

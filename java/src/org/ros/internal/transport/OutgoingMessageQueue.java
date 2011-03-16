@@ -29,7 +29,7 @@ import java.nio.ByteOrder;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class NettyOutgoingMessageQueue {
+public class OutgoingMessageQueue {
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
@@ -59,7 +59,7 @@ public class NettyOutgoingMessageQueue {
     }
   }
 
-  public NettyOutgoingMessageQueue() {
+  public OutgoingMessageQueue() {
     channelGroup = new DefaultChannelGroup();
     messages = new CircularBlockingQueue<Message>(MESSAGE_BUFFER_CAPACITY);
     thread = new MessageSendingThread();
@@ -78,7 +78,7 @@ public class NettyOutgoingMessageQueue {
   }
 
   /**
-   * @param channel added to this {@link NettyOutgoingMessageQueue}'s
+   * @param channel added to this {@link OutgoingMessageQueue}'s
    *        {@link ChannelGroup}
    */
   public void addChannel(Channel channel) {

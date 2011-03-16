@@ -32,9 +32,9 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.NettyConnectionHeader;
-import org.ros.internal.transport.NettyOutgoingMessageQueue;
+import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.internal.transport.SimplePipelineFactory;
-import org.ros.internal.transport.tcp.NettyTcpServer;
+import org.ros.internal.transport.tcp.TcpServer;
 import org.ros.message.Message;
 
 import java.net.InetSocketAddress;
@@ -50,9 +50,9 @@ public class Publisher extends Topic {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
-  private final NettyOutgoingMessageQueue out;
+  private final OutgoingMessageQueue out;
   private final List<SubscriberIdentifier> subscribers;
-  private final NettyTcpServer server;
+  private final TcpServer server;
 
   class HandshakeHandler extends SimpleChannelHandler {
 
@@ -81,12 +81,12 @@ public class Publisher extends Topic {
 
   public Publisher(TopicDefinition description) {
     super(description);
-    out = new NettyOutgoingMessageQueue();
+    out = new OutgoingMessageQueue();
     subscribers = Lists.newArrayList();
     // TODO(kwc): We only need one TCPROS server for the entire node.
     SimplePipelineFactory factory = new SimplePipelineFactory();
     factory.getPipeline().addLast("HandshakeHandler", new HandshakeHandler());
-    server = new NettyTcpServer(factory);
+    server = new TcpServer(factory);
   }
 
   public void start(SocketAddress address) {
