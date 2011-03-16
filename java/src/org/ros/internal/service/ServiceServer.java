@@ -19,25 +19,32 @@ package org.ros.internal.service;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-
-import org.ros.internal.transport.tcp.TcpServer;
-
-import org.ros.internal.transport.ConnectionHeader;
-import org.ros.internal.transport.ConnectionHeaderFields;
-
-import org.ros.internal.topic.Publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.channel.Channels;
+import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.SimpleChannelHandler;
+import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
+import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.ros.internal.topic.Publisher;
+import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.internal.transport.NettyConnectionHeader;
+import org.ros.internal.transport.SimplePipelineFactory;
+import org.ros.internal.transport.tcp.NettyTcpServer;
 import org.ros.message.Message;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
+import java.nio.ByteOrder;
 import java.util.Map;
 
 /**
@@ -48,128 +55,109 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
-  private final TcpServer server;
+  private static final int ESTIMATED_RESPONSE_SIZE = 8192;
+
+  private final NettyTcpServer server;
   private final Class<RequestMessageType> requestMessageClass;
-  private final Collection<PersistentSession> persistentSessions;
   private final ServiceDefinition definition;
   private final Map<String, String> header;
   private final String name;
 
-  private class Server extends TcpServer {
-    public Server(String hostname, int port) throws IOException {
-      super(hostname, port);
-    }
-
+  private final class ResponseEncoder extends OneToOneEncoder {
     @Override
-    protected void onNewConnection(Socket socket) {
-      try {
-        handshake(socket);
-        PersistentSession session = new PersistentSession(socket);
-        persistentSessions.add(session);
-        session.start();
-      } catch (IOException e) {
-        log.error("Failed to accept connection.", e);
-      }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.ros.transport.tcp.TcpServer#shutdown()
-     */
-    @Override
-    public void shutdown() {
-      super.shutdown();
-      for (PersistentSession session : persistentSessions) {
-        session.cancel();
+    protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg)
+        throws Exception {
+      if (msg instanceof ServiceServerResponse) {
+        ServiceServerResponse response = (ServiceServerResponse) msg;
+        ChannelBuffer buffer =
+            ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, ESTIMATED_RESPONSE_SIZE);
+        buffer.writeByte(response.getErrorCode());
+        buffer.writeInt(response.getMessageLength());
+        buffer.writeBytes(response.getMessage());
+        return buffer;
+      } else {
+        return msg;
       }
     }
   }
 
-  private class PersistentSession extends Thread {
-    private final ServiceServerOutgoingMessageQueue out;
-    private final ServiceServerIncomingMessageQueue<RequestMessageType> in;
-
-    public PersistentSession(Socket socket) throws IOException {
-      in = new ServiceServerIncomingMessageQueue<RequestMessageType>(requestMessageClass);
-      in.setSocket(socket);
-      out = new ServiceServerOutgoingMessageQueue();
-      out.addSocket(socket);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Thread#run()
-     */
+  private final class HandshakeHandler extends SimpleChannelHandler {
     @Override
-    public void run() {
-      in.start();
-      out.start();
-      while (!Thread.currentThread().isInterrupted()) {
-        try {
-          RequestMessageType message = in.take();
-          out.put(buildResponse(message));
-        } catch (InterruptedException e) {
-          // Cancelable
-        }
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+      ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
+      ChannelBuffer outgoingBuffer = handshake(incomingBuffer);
+      if (outgoingBuffer == null) {
+        // This is just a probe.
+        e.getChannel().close();
+      } else {
+        e.getChannel().write(outgoingBuffer);
+        ChannelPipeline pipeline = e.getChannel().getPipeline();
+        pipeline.replace(SimplePipelineFactory.LENGTH_FIELD_PREPENDER, "Response Encoder",
+            new ResponseEncoder());
+        pipeline.replace(this, "Request Handler", new RequestHandler());
       }
     }
+  }
 
-    public void cancel() {
-      interrupt();
-      server.shutdown();
-      in.shutdown();
-      out.shutdown();
+  private final class RequestHandler extends SimpleChannelHandler {
+    @Override
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+      RequestMessageType request = requestMessageClass.newInstance();
+      ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
+      request.deserialize(buffer.toByteBuffer());
+      Message responseMessage = buildResponse(request);
+      // TODO(damonkohler): Support sequence number.
+      ChannelBuffer responseBuffer =
+          ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, responseMessage.serialize(0));
+      ServiceServerResponse response = new ServiceServerResponse();
+      // TODO(damonkohler): Support changing error code.
+      response.setErrorCode(1);
+      response.setMessageLength(responseBuffer.readableBytes());
+      response.setMessage(responseBuffer);
+      ctx.getChannel().write(response);
     }
   }
 
   public ServiceServer(Class<RequestMessageType> requestMessageClass, String name,
-      ServiceDefinition definition, String hostname, int port) throws IOException {
+      ServiceDefinition definition) {
     this.requestMessageClass = requestMessageClass;
     this.name = name;
     this.definition = definition;
-    server = new Server(hostname, port);
-    persistentSessions = Lists.newArrayList();
-    header = ImmutableMap.<String, String>builder()
-        .put(ConnectionHeaderFields.SERVICE, name)
-        .putAll(definition.toHeader()).build();
+    SimplePipelineFactory factory = new SimplePipelineFactory();
+    factory.getPipeline().addLast("Handshake Handler", new HandshakeHandler());
+    server = new NettyTcpServer(factory);
+    header =
+        ImmutableMap.<String, String>builder().put(ConnectionHeaderFields.SERVICE, name)
+            .putAll(definition.toHeader()).build();
   }
 
-  /**
-   * @param requestMessage
-   * @return
-   */
   public abstract Message buildResponse(RequestMessageType requestMessage);
 
   @VisibleForTesting
-  void handshake(Socket socket) throws IOException {
-    Map<String, String> incomingHeader = ConnectionHeader.readHeader(socket.getInputStream());
+  ChannelBuffer handshake(ChannelBuffer buffer) {
+    Map<String, String> incomingHeader = NettyConnectionHeader.decode(buffer);
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
       log.info("Outgoing handshake header: " + header);
     }
     if (incomingHeader.containsKey(ConnectionHeaderFields.PROBE)) {
-      // TODO(damonkohler): Either return a bool or handle the closed socket later.
-      socket.close();
-      return;
+      // TODO(damonkohler): This is kind of a lousy way to pass back the
+      // information that this is a probe.
+      return null;
     }
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
-    ConnectionHeader.writeHeader(header, socket.getOutputStream());
+    return NettyConnectionHeader.encode(header);
   }
 
-  public void start() {
-    server.start();
+  public void start(SocketAddress address) {
+    server.start(address);
   }
 
   public void shutdown() {
     server.shutdown();
   }
 
-  /**
-   * @return
-   */
   public InetSocketAddress getAddress() {
     return server.getAddress();
   }
@@ -179,16 +167,10 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
         + server.getAddress().getPort());
   }
 
-  /**
-   * @return
-   */
   public ServiceDefinition getServiceDefinition() {
     return definition;
   }
 
-  /**
-   * @return
-   */
   public String getName() {
     return name;
   }

@@ -25,17 +25,14 @@ import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.Channels;
+import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
-import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -61,32 +58,28 @@ public class NettyTcpServer {
     public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
       channelGroup.add(e.getChannel());
     }
-  }
-
-  private final class PipelineFactory implements ChannelPipelineFactory {
-    private final ChannelPipeline pipeline;
-
-    public PipelineFactory(SimpleChannelHandler channelHandler) {
-      pipeline =
-          Channels.pipeline(new ConnectionTrackingHandler(), new LengthFieldBasedFrameDecoder(
-              Integer.MAX_VALUE, 0, 4, 0, 4), new LengthFieldPrepender(4), channelHandler);
-    }
-
+    
     @Override
-    public ChannelPipeline getPipeline() {
-      return pipeline;
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+      e.getChannel().close();
+      throw new RuntimeException(e.getCause());
     }
   }
 
-  public NettyTcpServer(SimpleChannelHandler channelHandler) {
+  public NettyTcpServer(ChannelPipelineFactory factory) {
     channelGroup = new DefaultChannelGroup();
     channelFactory =
         new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
     bootstrap = new ServerBootstrap(channelFactory);
-    bootstrap.setPipelineFactory(new PipelineFactory(channelHandler));
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    bootstrap.setPipelineFactory(factory);
+    try {
+      factory.getPipeline().addLast("Connection Tracking Handler", new ConnectionTrackingHandler());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void start(SocketAddress address) {
@@ -103,6 +96,7 @@ public class NettyTcpServer {
     ChannelGroupFuture future = channelGroup.close();
     future.awaitUninterruptibly();
     channelFactory.releaseExternalResources();
+    bootstrap.releaseExternalResources();
   }
 
   public InetSocketAddress getAddress() {

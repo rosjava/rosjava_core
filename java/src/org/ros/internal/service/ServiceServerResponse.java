@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,29 +16,39 @@
 
 package org.ros.internal.service;
 
-import org.ros.internal.transport.LittleEndianDataOutputStream;
-import org.ros.internal.transport.OutgoingMessageQueue;
-
-import org.ros.message.Message;
-
-import java.io.IOException;
+import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceClientOutgoingMessageQueue extends OutgoingMessageQueue {
+class ServiceServerResponse {
+  
+  private ChannelBuffer message;
+  private int errorCode;
+  private int messageLength;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * org.ros.transport.OutgoingMessageQueue#sendMessage(org.ros.message.Message,
-   * org.ros.transport.LittleEndianDataOutputStream)
-   */
-  @Override
-  protected void sendMessage(Message message, LittleEndianDataOutputStream stream)
-      throws IOException {
-    byte[] data = message.serialize(0 /* unused seq */);
-    stream.writeField(data);
+  public void setErrorCode(int errorCode) {
+    this.errorCode = errorCode;
   }
+
+  public int getErrorCode() {
+    return errorCode;
+  }
+
+  public void setMessage(ChannelBuffer buffer) {
+    message = buffer;
+  }
+
+  public ChannelBuffer getMessage() {
+    return message;
+  }
+
+  public void setMessageLength(int messageLength) {
+    this.messageLength = messageLength;
+  }
+
+  public int getMessageLength() {
+    return messageLength;
+  }
+
 }
