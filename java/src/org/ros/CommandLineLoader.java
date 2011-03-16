@@ -84,6 +84,7 @@ public class CommandLineLoader extends RosLoader {
    * Create NodeContext according to ROS command-line and environment
    * specification.
    */
+  @Override
   public NodeContext createContext() throws RosInitException {
     try {
       Map<String, String> specialRemappings = getSpecialRemappings(commandLineArgs);
