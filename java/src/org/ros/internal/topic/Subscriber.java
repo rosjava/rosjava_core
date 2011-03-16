@@ -170,6 +170,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
 
   public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
       SocketAddress address) {
+    // TODO(damonkohler): Release bootstrap resources on shutdown.
     ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
     SimplePipelineFactory factory = new SimplePipelineFactory();
     factory.getPipeline().addLast("Handshake Handler", new HandshakeHandler());
