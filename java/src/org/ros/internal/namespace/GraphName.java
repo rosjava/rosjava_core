@@ -21,12 +21,14 @@ import org.ros.exceptions.RosNameException;
 import org.ros.namespace.Namespace;
 
 /**
- * A simple class for handling name rules.
+ * ROS graph resource name.
+ * 
+ * http://www.ros.org/wiki/Names
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * 
  */
-public class RosName {
+public class GraphName {
   private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
   private final String name;
 
@@ -34,7 +36,7 @@ public class RosName {
    * @param name
    * @throws RosNameException
    */
-  public RosName(String name) throws RosNameException {
+  public GraphName(String name) throws RosNameException {
     Preconditions.checkNotNull(name);
     validateName(name);
     // intern all ROS names as there is not likely to be much variety.
@@ -134,22 +136,22 @@ public class RosName {
    * @return Gets the parent of this name in canonical representation. This may
    *         return an empty name if there is no parent.
    */
-  public RosName getParent() {
+  public GraphName getParent() {
     try {
       if (name.length() == 0) {
-        return new RosName("");
+        return new GraphName("");
       }
       if (name.equals(Namespace.GLOBAL_NS)) {
-        return new RosName(Namespace.GLOBAL_NS);
+        return new GraphName(Namespace.GLOBAL_NS);
       }
       int slashIdx = name.lastIndexOf('/');
       if (slashIdx > 1) {
-        return new RosName(name.substring(0, slashIdx));
+        return new GraphName(name.substring(0, slashIdx));
       } else {
         if (isGlobal()) {
-          return new RosName(Namespace.GLOBAL_NS);
+          return new GraphName(Namespace.GLOBAL_NS);
         } else {
-          return new RosName("");
+          return new GraphName("");
         }
       }
     } catch (RosNameException e) {

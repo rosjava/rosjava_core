@@ -22,13 +22,15 @@ import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.loader.CommandLine;
 import org.ros.internal.loader.EnvironmentVariables;
-import org.ros.internal.namespace.RosName;
+import org.ros.internal.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
 
 import java.io.File;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,10 +82,11 @@ public class CommandLineLoaderTest extends TestCase {
    * @throws RosInitException
    * @throws RosNameException
    * @throws URISyntaxException
+   * @throws UnknownHostException
    */
   @Test
   public void testCreateContextEnvironment() throws RosInitException, RosNameException,
-      URISyntaxException {
+      URISyntaxException, UnknownHostException {
     // Construct artificial environment. Test failure without required settings.
     // Failure: ROS_ROOT not set.
     String tmpDir = System.getProperty("java.io.tmpdir");
@@ -112,8 +115,9 @@ public class CommandLineLoaderTest extends TestCase {
     NodeContext nodeContext = loader.createContext();
     assertEquals(defaultMasterUri, nodeContext.getRosMasterUri());
     assertEquals(defaultRosRoot, nodeContext.getRosRoot());
-    assertEquals(null, nodeContext.getAddressOverride());
     assertEquals(Namespace.GLOBAL_NS, nodeContext.getResolver().getNamespace());
+    // Default is the hostname + FQDN.
+    assertEquals(InetAddress.getLocalHost().getCanonicalHostName(), nodeContext.getHostName());
 
     // Construct artificial environment. Set optional environment variables.
     env = getDefaultEnv();
@@ -125,12 +129,12 @@ public class CommandLineLoaderTest extends TestCase {
 
     assertEquals(defaultMasterUri, nodeContext.getRosMasterUri());
     assertEquals(defaultRosRoot, nodeContext.getRosRoot());
-    assertEquals("192.168.0.1", nodeContext.getAddressOverride());
+    assertEquals("192.168.0.1", nodeContext.getHostName());
     assertEquals("/foo/bar", nodeContext.getResolver().getNamespace());
     Assert.assertArrayEquals(rosPackagePathArray, nodeContext.getRosPackagePath());
 
     // Test ROS namespace resolution and canonicalization
-    String canonical = new RosName("/baz/bar").toString();
+    String canonical = new GraphName("/baz/bar").toString();
     env = getDefaultEnv();
     env.put(EnvironmentVariables.ROS_NAMESPACE, "baz/bar");
     loader = new CommandLineLoader(new String[] {}, env);
@@ -160,7 +164,7 @@ public class CommandLineLoaderTest extends TestCase {
     assertEquals(new URI("http://override:22622"), nodeContext.getRosMasterUri());
 
     // Test ROS namespace resolution and canonicalization
-    String canonical = new RosName("/baz/bar").toString();
+    String canonical = new GraphName("/baz/bar").toString();
     env = getDefaultEnv();
     args = new String[] { CommandLine.ROS_NAMESPACE + ":=baz/bar" };
     nodeContext = new CommandLineLoader(args, env).createContext();
@@ -179,7 +183,7 @@ public class CommandLineLoaderTest extends TestCase {
     env = getDefaultEnv();
     args = new String[] { CommandLine.ROS_IP + ":=192.168.0.2" };
     nodeContext = new CommandLineLoader(args, env).createContext();
-    assertEquals("192.168.0.2", nodeContext.getAddressOverride());
+    assertEquals("192.168.0.2", nodeContext.getHostName());
 
     // Verify multiple options work together.
     env = getDefaultEnv();
@@ -188,7 +192,7 @@ public class CommandLineLoaderTest extends TestCase {
         CommandLine.ROS_IP + ":=192.168.0.2" };
     nodeContext = new CommandLineLoader(args, env).createContext();
     assertEquals(new URI("http://override:22622"), nodeContext.getRosMasterUri());
-    assertEquals("192.168.0.2", nodeContext.getAddressOverride());
+    assertEquals("192.168.0.2", nodeContext.getHostName());
     assertEquals(canonical, nodeContext.getResolver().getNamespace());
   }
 

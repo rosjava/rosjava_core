@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
-import org.ros.internal.namespace.RosName;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -35,9 +35,9 @@ import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -52,8 +52,7 @@ public class Node implements Namespace {
    */
   private final NodeContext context;
   /** The node's namespace name. */
-  private final RosName nodeName;
-  private String hostName;
+  private final GraphName nodeName;
   /** Port on which the slave server will be initialized on. */
   private final int port;
   /** The master client, used for communicating with an existing master. */
@@ -70,7 +69,6 @@ public class Node implements Namespace {
   private RosLog log;
   private boolean initialized;
   private Executor executor;
-  private String masterUri;
 
   /**
    * @param name
@@ -81,7 +79,7 @@ public class Node implements Namespace {
     Preconditions.checkNotNull(context);
     Preconditions.checkNotNull(name);
     this.context = context;
-    nodeName = new RosName(this.context.getResolver().resolveName(name));
+    nodeName = new GraphName(this.context.getResolver().resolveName(name));
     port = 0; // default port
     masterClient = null;
     slaveServer = null;
@@ -101,8 +99,14 @@ public class Node implements Namespace {
       Preconditions.checkNotNull(masterClient);
       Preconditions.checkNotNull(slaveServer);
       Publisher<MessageType> pub = new Publisher<MessageType>(resolveName(topic_name), clazz);
-      // TODO(damonkohler): Allow passing in an address to bind to?
-      pub.start(new InetSocketAddress(0));
+
+      if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
+        // If we are advertising as localhost, explicitly bind to loopback-only.
+        // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
+        pub.start(new InetSocketAddress(InetAddress.getByName("localhost"), context.getTcpRosPort()));
+      } else {
+        pub.start(new InetSocketAddress(context.getTcpRosPort()));
+      }
       slaveServer.addPublisher(pub.publisher);
       return pub;
     } catch (IOException e) {
@@ -177,52 +181,25 @@ public class Node implements Namespace {
   }
 
   /**
-   * This starts up a connection with the master and gets the juices flowing.
+   * This starts up a connection with the master.
    * 
    * @throws RosInitException
    */
   public void init() throws RosInitException {
     try {
-      init(Ros.getMasterUri().toString(), Ros.getHostName());
-    } catch (URISyntaxException e) {
-      throw new RosInitException(e);
-    }
-  }
+      masterClient = new MasterClient(context.getRosMasterUri());
 
-  /**
-   * @param masterUri
-   *          The uri of the rosmaster, typically "http://localhost:11311", or
-   *          "http://remotehost.com:11311"
-   * @param hostName
-   *          The host of this node.
-   * @throws RosInitException
-   */
-  public void init(String masterUri, String hostName) throws RosInitException {
-    try {
-      this.hostName = hostName;
-      this.masterUri = masterUri;
-
-      // Create handle to master.
-      try {
-        masterClient = new MasterClient(new URI(this.masterUri));
-      } catch (MalformedURLException e) {
-        // TODO(kwc) remove chance of URI exceptions using RosContext-based
-        // constructor instead
-        throw new RosInitException("invalid ROS master URI");
-      } catch (URISyntaxException e) {
-        throw new RosInitException("invalid ROS master URI");
-      }
       // Start up XML-RPC Slave server.
       SlaveIdentifier slaveIdentifier;
       try {
-        slaveServer = new SlaveServer(nodeName.toString(), masterClient, this.hostName, port);
+        slaveServer = new SlaveServer(nodeName.toString(), masterClient, context.getHostName(),
+            port);
         slaveServer.start();
+        slaveIdentifier = slaveServer.toSlaveIdentifier();
         log().debug(
-            "Successfully initiallized " + nodeName.toString() + " with:\n\tmaster @ "
+            "Successfully initialized " + nodeName.toString() + " with:\n\tmaster @ "
                 + masterClient.getRemoteUri().toString() + "\n\tListening on port: "
                 + slaveServer.getUri().toString());
-
-        slaveIdentifier = slaveServer.toSlaveIdentifier();
       } catch (MalformedURLException e) {
         throw new RosInitException("invalid ROS slave URI");
       } catch (URISyntaxException e) {

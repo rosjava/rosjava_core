@@ -20,24 +20,25 @@ import java.net.URI;
 import org.ros.namespace.NameResolver;
 
 /**
- * A context that allows nodeless api, and allows for flexible name resolution,
- * and FIXME fillin...
+ * Stores contextual information about a ROS node, including common ROS
+ * configuration like the master URI.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
- * 
  */
 public class NodeContext {
   private NameResolver resolver;
   private URI rosMasterUri;
-  private String addressOverride;
+  private String hostName;
   private String rosRoot;
   private String[] rosPackagePath;
+  private int tcpRosPort;
 
   /**
    * default context
    */
   public NodeContext() {
     resolver = null;
+    tcpRosPort = 0;
   }
 
   /**
@@ -61,17 +62,6 @@ public class NodeContext {
     this.rosMasterUri = rosMasterUri;
   }
 
-  /**
-   * @return Address to use when binding interfaces or null if default.
-   */
-  public String getAddressOverride() {
-    return addressOverride;
-  }
-
-  public void setAddressOverride(String addressOverride) {
-    this.addressOverride = addressOverride;
-  }
-
   public String getRosRoot() {
     return rosRoot;
   }
@@ -91,4 +81,35 @@ public class NodeContext {
   public void setRosPackagePath(String[] rosPackagePath) {
     this.rosPackagePath = rosPackagePath;
   }
+
+  /**
+   * @return host name/address to use when advertising this node via URLs.
+   */
+  public String getHostName() {
+    return hostName;
+  }
+
+  /**
+   * Set host name/address to use when advertising this node via URLs.
+   * 
+   * @param hostName
+   */
+  public void setHostName(String hostName) {
+    this.hostName = hostName;
+  }
+
+  /**
+   * @return Port to bind TCPROS server to, or 0 to bind to any open port.
+   */
+  public int getTcpRosPort() {
+    return tcpRosPort;
+  }
+
+  /**
+   * Set port to bind TCPROS server to. 0 binds to any open port.
+   */
+  public void setTcpRosPort(int tcpRosPort) {
+    this.tcpRosPort = tcpRosPort;
+  }
+
 }

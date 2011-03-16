@@ -15,7 +15,7 @@
  */
 package org.ros.namespace;
 
-import org.ros.internal.namespace.RosName;
+import org.ros.internal.namespace.GraphName;
 
 import java.util.HashMap;
 
@@ -29,11 +29,11 @@ import org.junit.Test;
 
 public class ResolverTest extends TestCase {
 
-  private HashMap<RosName, RosName> emptyRemappings;
+  private HashMap<GraphName, GraphName> emptyRemappings;
 
   @Before
   public void setUp() throws Exception {
-    emptyRemappings = new HashMap<RosName, RosName>();
+    emptyRemappings = new HashMap<GraphName, GraphName>();
   }
 
   @After
@@ -116,9 +116,9 @@ public class ResolverTest extends TestCase {
    */
   @Test
   public void testResolveNameRemapping() throws RosNameException {
-    HashMap<RosName, RosName> remappings = new HashMap<RosName, RosName>();
-    remappings.put(new RosName("name"), new RosName("/my/name"));
-    remappings.put(new RosName("foo"), new RosName("/my/foo"));
+    HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
+    remappings.put(new GraphName("name"), new GraphName("/my/name"));
+    remappings.put(new GraphName("foo"), new GraphName("/my/foo"));
 
     NameResolver r = new NameResolver(Namespace.GLOBAL_NS, remappings);
 

@@ -18,7 +18,7 @@ package org.ros.namespace;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.namespace.RosName;
+import org.ros.internal.namespace.GraphName;
 
 import org.ros.exceptions.RosNameException;
 
@@ -37,7 +37,7 @@ import java.util.HashMap;
 // contained within the Node implementation.
 public class NameResolver {
 
-  private final HashMap<RosName, RosName> remappings;
+  private final HashMap<GraphName, GraphName> remappings;
   private final String namespace;
 
   /**
@@ -45,9 +45,9 @@ public class NameResolver {
    * @throws RosNameException
    * 
    */
-  public NameResolver(String namespace, HashMap<RosName, RosName> remappings) throws RosNameException {
+  public NameResolver(String namespace, HashMap<GraphName, GraphName> remappings) throws RosNameException {
     this.remappings = remappings;
-    this.namespace = RosName.canonicalizeName(namespace);
+    this.namespace = GraphName.canonicalizeName(namespace);
   }
 
   public String getNamespace() {
@@ -67,9 +67,9 @@ public class NameResolver {
    *           Will throw on a poorly formated name.
    */
   public String resolveName(String namespace, String name) throws RosNameException {
-    RosName ns = lookUpRemapping(new RosName(namespace));
+    GraphName ns = lookUpRemapping(new GraphName(namespace));
     Preconditions.checkArgument(ns.isGlobal(), "namespace must be global");
-    RosName n = lookUpRemapping(new RosName(name));
+    GraphName n = lookUpRemapping(new GraphName(name));
     if (n.isGlobal()) {
       return n.toString();
     }
@@ -81,7 +81,7 @@ public class NameResolver {
       if (s.startsWith("/")) {
         s = s.substring(1);
       }
-      return join(ns, new RosName(s));
+      return join(ns, new GraphName(s));
     }
     throw new RosNameException("Bad name: " + name);
   }
@@ -93,8 +93,8 @@ public class NameResolver {
    *          The name to lookup.
    * @return The name if it is not remapped, otherwise the remapped name.
    */
-  private RosName lookUpRemapping(RosName name) {
-    RosName rmname = name;
+  private GraphName lookUpRemapping(GraphName name) {
+    GraphName rmname = name;
     if (remappings.containsKey(name)) {
       rmname = remappings.get(name);
     }
@@ -102,7 +102,7 @@ public class NameResolver {
   }
 
   @VisibleForTesting
-  public HashMap<RosName, RosName> getRemappings() {
+  public HashMap<GraphName, GraphName> getRemappings() {
     return remappings;
   }
 
@@ -130,7 +130,7 @@ public class NameResolver {
    *           If name2 is not a relative name
    */
   public static String join(String name1, String name2) throws RosNameException {
-    return join(new RosName(name1), new RosName(name2));
+    return join(new GraphName(name1), new GraphName(name2));
   }
 
   /**
@@ -146,14 +146,14 @@ public class NameResolver {
    * @throws IllegalArgumentException
    *           If name2 is not a relative name.
    */
-  public static String join(RosName name1, RosName name2) throws RosNameException {
+  public static String join(GraphName name1, GraphName name2) throws RosNameException {
     // TODO: review - another possible behavior is to just return name2
     Preconditions.checkArgument(name2.isRelative(),
         "name2 cannot be joined as it is global or private");
     if (name1.equals(Namespace.GLOBAL_NS)) {
       return Namespace.GLOBAL_NS + name2.toString();
     } else {
-      return new RosName(name1.toString() + "/" + name2.toString()).toString();
+      return new GraphName(name1.toString() + "/" + name2.toString()).toString();
     }
   }
 }

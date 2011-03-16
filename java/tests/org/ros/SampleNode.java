@@ -27,7 +27,8 @@ public class SampleNode {
     // Node node = new Node(argv, "sample_node"); this crashes when topic is
     // subscribed to
     // Node node = new Node(argv, "sample_rosjava_node");
-    Node node = new Node("sample_rosjava_node", Ros.getDefaultContext());
+    RosLoader loader = new CommandLineLoader(argv);
+    Node node = new Node("sample_rosjava_node", loader.createContext());
     node.init();
 
     Publisher<PoseStamped> pub_pose = node.createPublisher("pose", PoseStamped.class);

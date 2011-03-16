@@ -42,17 +42,17 @@ public class NodeServer {
 
   private final String hostname;
   private final WebServer server;
-  
+
   private boolean running;
-  
+
   public NodeServer(String hostname, int port) {
     this.hostname = hostname;
     server = new WebServer(port);
     running = false;
   }
 
-  public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass,
-      T instance) throws XmlRpcException, IOException, URISyntaxException {
+  public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass, T instance)
+      throws XmlRpcException, IOException, URISyntaxException {
     Preconditions.checkState(!running);
     XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
     PropertyHandlerMapping phm = new PropertyHandlerMapping();
@@ -73,9 +73,10 @@ public class NodeServer {
     Preconditions.checkState(running);
     server.shutdown();
   }
-  
+
   public URI getUri() throws MalformedURLException, URISyntaxException {
     Preconditions.checkState(running);
     return new URL("http", hostname, server.getPort(), "").toURI();
   }
+
 }

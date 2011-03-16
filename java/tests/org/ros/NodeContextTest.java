@@ -21,7 +21,7 @@ import org.ros.exceptions.RosNameException;
 
 import java.util.HashMap;
 
-import org.ros.internal.namespace.RosName;
+import org.ros.internal.namespace.GraphName;
 
 import org.ros.namespace.NameResolver;
 
@@ -40,7 +40,7 @@ public class NodeContextTest {
     NodeContext nodeContext = new NodeContext();
     assertEquals(null, nodeContext.getResolver());
 
-    NameResolver resolver = new NameResolver("/test", new HashMap<RosName, RosName>());
+    NameResolver resolver = new NameResolver("/test", new HashMap<GraphName, GraphName>());
     nodeContext.setResolver(resolver);
     assertEquals(resolver, nodeContext.getResolver());
   }
