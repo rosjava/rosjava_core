@@ -33,7 +33,6 @@ import java.net.MalformedURLException;
  */
 class UpdatePublisherRunnable<MessageType extends Message> implements Runnable {
 
-  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(UpdatePublisherRunnable.class);
 
   private final Subscriber<MessageType> subscriber;

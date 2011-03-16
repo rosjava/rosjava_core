@@ -45,9 +45,6 @@ public class ServiceDefinition {
         .build();
   }
 
-  /**
-   * @return
-   */
   public String getType() {
     return type;
   }

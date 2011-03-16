@@ -39,25 +39,16 @@ public class ServiceIdentifier {
     this.serviceDefinition = serviceDefinition;
   }
 
-  /**
-   * @return
-   */
   public Map<String, String> toHeader() {
     return ImmutableMap.<String, String>builder()
         .put(ConnectionHeaderFields.SERVICE, name)
         .putAll(serviceDefinition.toHeader()).build();
   }
 
-  /**
-   * @return
-   */
   public String getName() {
     return serviceDefinition.getType();
   }
 
-  /**
-   * @return
-   */
   public URI getUri() {
     return uri;
   }
