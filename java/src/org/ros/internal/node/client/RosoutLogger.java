@@ -18,7 +18,6 @@ package org.ros.internal.node.client;
 import org.ros.Publisher;
 
 import org.apache.commons.logging.Log;
-import org.ros.TimeProvider;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

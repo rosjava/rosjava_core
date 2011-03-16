@@ -40,7 +40,7 @@ public class NodeServer {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(NodeServer.class);
 
-  private final String hostname;
+  protected final String hostname;
   private final WebServer server;
 
   private boolean running;

@@ -38,6 +38,7 @@ import org.ros.message.Message;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -88,10 +89,12 @@ public class SlaveServer extends NodeServer {
   }
 
   /**
-   * Informs this {@link SlaveServer} of a new {@link Subscriber}. If there are multiple
-   * {@link Subscriber}s for the same topic, this should only be called for the first.
+   * Informs this {@link SlaveServer} of a new {@link Subscriber}. If there are
+   * multiple {@link Subscriber}s for the same topic, this should only be called
+   * for the first.
    * 
-   * <p>This call blocks on remote call to the {@link MasterServer}.
+   * <p>
+   * This call blocks on remote call to the {@link MasterServer}.
    * 
    * @param subscriber
    * @return List of current publisher XML-RPC slave URIs for topic.
@@ -103,8 +106,8 @@ public class SlaveServer extends NodeServer {
       URISyntaxException, RemoteException {
     subscribers.put(subscriber.getTopicName(), subscriber);
     Response<List<URI>> response = master.registerSubscriber(toSlaveIdentifier(), subscriber);
-    List<PublisherIdentifier> publishers =
-        buildPublisherIdentifierList(response.getResult(), subscriber.getTopicDefinition());
+    List<PublisherIdentifier> publishers = buildPublisherIdentifierList(response.getResult(),
+        subscriber.getTopicDefinition());
     subscriber.updatePublishers(publishers);
     return publishers;
   }
@@ -143,8 +146,8 @@ public class SlaveServer extends NodeServer {
   /**
    * @param callerId
    * @return PID of node process
-   * @throws UnsupportedOperationException If PID cannot be retrieved on this
-   *         platform.
+   * @throws UnsupportedOperationException
+   *           If PID cannot be retrieved on this platform.
    */
   public Integer getPid(String callerId) {
     // kwc: java has no standard way of getting pid, apparently. This is the
@@ -178,8 +181,8 @@ public class SlaveServer extends NodeServer {
     if (subscribers.containsKey(topic)) {
       Subscriber<?> subscriber = subscribers.get(topic);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
-      List<PublisherIdentifier> pubIdentifiers =
-          buildPublisherIdentifierList(publisherUris, topicDefinition);
+      List<PublisherIdentifier> pubIdentifiers = buildPublisherIdentifierList(publisherUris,
+          topicDefinition);
       subscriber.updatePublishers(pubIdentifiers);
     }
   }
@@ -192,7 +195,11 @@ public class SlaveServer extends NodeServer {
     }
     for (String protocol : protocols) {
       if (ProtocolNames.SUPPORTED.contains(protocol)) {
-        return new TcpRosProtocolDescription(publishers.get(topic).getAddress());
+        // Override address that TCPROS server reports with the hostname/IP
+        // address that we've been configured to report.
+        InetSocketAddress publicAddress = new InetSocketAddress(hostname, publishers.get(topic)
+            .getAddress().getPort());
+        return new TcpRosProtocolDescription(publicAddress);
       }
     }
     throw new ServerException("No supported protocols specified.");

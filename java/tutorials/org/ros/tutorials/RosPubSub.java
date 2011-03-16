@@ -15,20 +15,10 @@
  */
 package org.ros.tutorials;
 
-import org.ros.internal.loader.EnvironmentVariables;
-
-import java.util.HashMap;
-
-import org.ros.exceptions.RosInitException;
-
-import org.ros.CommandLineLoader;
-
-import org.ros.NodeContext;
-
 import org.ros.MessageListener;
 import org.ros.Node;
+import org.ros.NodeContext;
 import org.ros.Publisher;
-import org.ros.RosLoader;
 import org.ros.RosMain;
 
 /**
@@ -37,13 +27,12 @@ import org.ros.RosMain;
  * 
  * @author "Ethan Rublee ethan.rublee@gmail.com"
  */
-public class RosPubSub extends RosMain {
+public class RosPubSub implements RosMain {
   Node node;
-  // FIXME ugly huge expansion of message name due to String class?
   Publisher<org.ros.message.std.String> pub;
 
   // callback for string messages
-  MessageListener<org.ros.message.std.String> hello_cb = new MessageListener<org.ros.message.std.String>() {
+  MessageListener<org.ros.message.std.String> helloCallback = new MessageListener<org.ros.message.std.String>() {
 
     @Override
     public void onNewMessage(org.ros.message.std.String m) {
@@ -54,10 +43,10 @@ public class RosPubSub extends RosMain {
   @Override
   public void rosMain(String[] argv, NodeContext context) {
     try {
-      node = new Node("rosjava/sample_node", context);
+      node = new Node("rosjava_sample_node", context);
       node.init();
       pub = node.createPublisher("~hello", org.ros.message.std.String.class);
-      node.createSubscriber("~hello", hello_cb, org.ros.message.std.String.class);
+      node.createSubscriber("~hello", helloCallback, org.ros.message.std.String.class);
 
       int seq = 0;
       while (true) {
@@ -71,17 +60,4 @@ public class RosPubSub extends RosMain {
     }
   }
 
-  public static void main(String[] argv) throws ClassNotFoundException, InstantiationException,
-      IllegalAccessException, RosInitException {
-
-    // Example of using a string based class loader so that we can load classes
-    // dynamically at runtime.
-    // TODO(ethan) this is internal stuff, move away.
-    HashMap<String, String> fakeEnv = new HashMap<String, String>();
-    fakeEnv.put(EnvironmentVariables.ROS_MASTER_URI, "http://localhost:11311");
-    RosLoader rl = new CommandLineLoader(argv, fakeEnv);
-    NodeContext nodeContext = rl.createContext();
-    RosMain rm = rl.loadClass("org.ros.tutorials.RosPubSub");
-    rm.rosMain(argv, nodeContext);
-  }
 }

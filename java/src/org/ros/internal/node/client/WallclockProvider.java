@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros;
+package org.ros.internal.node.client;
 
 import org.ros.message.Time;
 

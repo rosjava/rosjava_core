@@ -15,17 +15,24 @@
  */
 package org.ros;
 
+import org.ros.exceptions.RosInitException;
+import org.ros.exceptions.RosNameException;
+
 /**
  * A simple interface for entry points into your app.
  * 
  * @author "Ethan Rublee ethan.rublee@gmail.com"
  */
-public abstract class RosMain {
+public interface RosMain {
+
   /**
    * Called to start your node by some magical ros java file.
    * 
    * @param argv
-   * @param context The ros context with which to the RosMain is assumed to abide by.
+   * @param context
+   *          The ros context with which to the RosMain is assumed to abide by.
    */
-  abstract public void rosMain(String argv[], NodeContext context);
+  public void rosMain(String argv[], NodeContext nodeContext) throws RosInitException,
+      RosNameException;
+
 }

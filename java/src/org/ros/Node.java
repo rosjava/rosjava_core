@@ -17,6 +17,9 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.node.client.TimeProvider;
+import org.ros.internal.node.client.WallclockProvider;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
@@ -109,6 +112,8 @@ public class Node implements Namespace {
       Preconditions.checkNotNull(slaveServer);
       Publisher<MessageType> pub = new Publisher<MessageType>(resolveName(topic_name), clazz);
 
+      // TODO(kwc): this starts multiple TCPROS servers. Need to de-couple from
+      // actual Publisher factory.
       if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.

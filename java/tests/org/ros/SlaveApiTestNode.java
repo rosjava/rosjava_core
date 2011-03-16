@@ -29,13 +29,13 @@ import org.ros.message.std.Int64;
  * @author kwc@willowgarage.com (Ken Conley)
  * 
  */
-public class SlaveApiTestNode {
+public class SlaveApiTestNode implements RosMain {
 
-  public static void main(java.lang.String[] argv) throws RosInitException, RosNameException {
-    // Node node = new Node(argv, "sample_node"); this crashes when topic is
-    // subscribed to
-    NodeContext nodeContext = new CommandLineLoader(argv).createContext();
-    Node node = new Node("test_node", nodeContext);
+  @Override
+  public void rosMain(String[] argv, NodeContext nodeContext) throws RosNameException,
+      RosInitException {
+    Node node;
+    node = new Node("test_node", nodeContext);
     node.init();
 
     // basic chatter in/out test

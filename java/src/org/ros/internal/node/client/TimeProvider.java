@@ -1,4 +1,4 @@
-package org.ros;
+package org.ros.internal.node.client;
 
 import org.ros.message.Time;
 
