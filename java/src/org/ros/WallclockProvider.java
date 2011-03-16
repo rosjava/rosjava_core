@@ -13,29 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.logging;
+package org.ros;
 
-import org.apache.commons.logging.impl.SimpleLog;
+import org.ros.message.Time;
 
-/** A Ros implementation of the commons logging.
- * FIXME Make it a full implementation that barfs to /rosout.
- * @author ethan.rublee@gmail.com (Ethan Rublee)
- *
+/**
+ * Provides wallclock (actual) time.
+ * 
+ * @author kwc@willowgarage.com (Ken Conley)
  */
-public class RosLog extends SimpleLog {
+public class WallclockProvider implements TimeProvider {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * @param nodeName This will be added as the tag to all log messages.
-   */
-  public RosLog(String nodeName) {
-    super(nodeName);
-    setLevel(LOG_LEVEL_DEBUG);
+  @Override
+  public Time currentTime() {
+    return Time.fromMillis(System.currentTimeMillis());
   }
-
 
 }

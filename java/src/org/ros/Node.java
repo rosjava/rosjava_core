@@ -17,21 +17,22 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.client.RosoutLogger;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.PubSubFactory;
 import org.ros.internal.topic.TopicDefinition;
-import org.ros.logging.RosLog;
 import org.ros.message.Message;
 import org.ros.message.Time;
-import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
 
 import java.io.IOException;
@@ -63,12 +64,16 @@ public class Node implements Namespace {
   private PubSubFactory pubSubFactory;
 
   /**
-   * The log of this node. This log has the node's name inserted in each
-   * message, along with ROS standard logging conventions.
+   * Log for client. This will send messages to /rosout.
    */
-  private RosLog log;
+  private RosoutLogger log;
+  /**
+   * Log for internal messages only.
+   */
+  private Log internalLog = LogFactory.getLog(Node.class);
   private boolean initialized;
   private Executor executor;
+  private TimeProvider timeProvider;
 
   /**
    * @param name
@@ -83,7 +88,11 @@ public class Node implements Namespace {
     port = 0; // default port
     masterClient = null;
     slaveServer = null;
-    log = new RosLog(nodeName.toString());
+
+    // TODO (kwc): implement simulated time.
+    timeProvider = new WallclockProvider();
+    // Log for /rosout.
+    log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
   }
 
   @Override
@@ -167,12 +176,14 @@ public class Node implements Namespace {
   }
 
   /**
-   * @return The current time of the system, using rostime.
+   * Provide the current time. In ROS, time can be wallclock (actual) or
+   * simulated, so it is important to use currentTime() instead of normal Java
+   * routines for determining the current time.
+   * 
+   * @return Current ROS clock time.
    */
   public Time currentTime() {
-    // TODO: need to add in rostime (/Clock) implementation for simulated time
-    // in the event that wallclock is not being used
-    return Time.fromMillis(System.currentTimeMillis());
+    return timeProvider.currentTime();
   }
 
   @Override
@@ -196,10 +207,9 @@ public class Node implements Namespace {
             port);
         slaveServer.start();
         slaveIdentifier = slaveServer.toSlaveIdentifier();
-        log().debug(
-            "Successfully initialized " + nodeName.toString() + " with:\n\tmaster @ "
-                + masterClient.getRemoteUri().toString() + "\n\tListening on port: "
-                + slaveServer.getUri().toString());
+        internalLog.debug("Successfully initialized " + nodeName.toString() + " with:\n\tmaster @ "
+            + masterClient.getRemoteUri().toString() + "\n\tListening on port: "
+            + slaveServer.getUri().toString());
       } catch (MalformedURLException e) {
         throw new RosInitException("invalid ROS slave URI");
       } catch (URISyntaxException e) {
@@ -211,31 +221,35 @@ public class Node implements Namespace {
       pubSubFactory = new PubSubFactory(slaveIdentifier, executor);
 
       initialized = true;
+
+      // initialized must be true to start creating publishers.
+      Publisher<org.ros.message.rosgraph.Log> rosoutPublisher = createPublisher("/rosout",
+          org.ros.message.rosgraph.Log.class);
+      log.setRosoutPublisher(rosoutPublisher);
+
     } catch (IOException e) {
       throw new RosInitException(e);
     } catch (XmlRpcException e) {
+      throw new RosInitException(e);
+    } catch (RosNameException e) {
       throw new RosInitException(e);
     }
   }
 
   /**
-   * @return This is this nodes logger, and may be used to pump messages to
-   *         rosout.
+   * @return Logger for this node, which will also perform logging to /rosout.
    */
-  public RosLog log() {
+  public Log getLog() {
     return log;
   }
 
   @Override
   public String resolveName(String name) throws RosNameException {
-    NameResolver resolver = context.getResolver();
-    String r = resolver.resolveName(getName(), name);
-    log.debug("Resolved name " + name + " as " + r);
-    return r;
+    return context.getResolver().resolveName(getName(), name);
   }
 
   public void shutdown() {
-    // todo unregister all publishers, subscribers, etc.
+    // TODO unregister all publishers, subscribers, etc.
     slaveServer.shutdown();
   }
 

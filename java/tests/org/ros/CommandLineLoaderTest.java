@@ -93,6 +93,10 @@ public class CommandLineLoaderTest extends TestCase {
     String rosPackagePath = tmpDir + File.pathSeparator + defaultRosRoot;
     String[] rosPackagePathArray = new String[] { tmpDir, defaultRosRoot };
     Map<String, String> env = new HashMap<String, String>();
+    CommandLineLoader loader = null;
+    /*
+     * In the future, ROS_ROOT may become required again (e.g. class loader).
+     * 
     env.put(EnvironmentVariables.ROS_MASTER_URI, defaultMasterUri.toString());
     CommandLineLoader loader = new CommandLineLoader(new String[] {}, env);
     try {
@@ -100,6 +104,8 @@ public class CommandLineLoaderTest extends TestCase {
       fail("should have raised RosInitException: no ROS_ROOT");
     } catch (RosInitException e) {
     }
+    
+    */
     env = new HashMap<String, String>();
     env.put(EnvironmentVariables.ROS_ROOT, defaultRosRoot);
     loader = new CommandLineLoader(new String[] {}, env);

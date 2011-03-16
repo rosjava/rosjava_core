@@ -206,7 +206,9 @@ public class CommandLineLoader extends RosLoader {
     if (env.containsKey(EnvironmentVariables.ROS_ROOT)) {
       return env.get(EnvironmentVariables.ROS_ROOT);
     } else {
-      throw new RosInitException("ROS_ROOT is not set");
+      // For now, this is not required as we are not doing anything (e.g.
+      // ClassLoader) that requires it. In the future, this may become required.
+      return null;
     }
   }
 

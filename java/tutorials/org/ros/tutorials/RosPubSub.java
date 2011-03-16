@@ -15,6 +15,10 @@
  */
 package org.ros.tutorials;
 
+import org.ros.internal.loader.EnvironmentVariables;
+
+import java.util.HashMap;
+
 import org.ros.exceptions.RosInitException;
 
 import org.ros.CommandLineLoader;
@@ -43,7 +47,7 @@ public class RosPubSub extends RosMain {
 
     @Override
     public void onNewMessage(org.ros.message.std.String m) {
-      node.log().info(m.data);
+      node.getLog().info(m.data);
     }
   };
 
@@ -63,7 +67,7 @@ public class RosPubSub extends RosMain {
         Thread.sleep(100);
       }
     } catch (Exception e) {
-      node.log().fatal(e);
+      node.getLog().fatal(e);
     }
   }
 
@@ -73,10 +77,11 @@ public class RosPubSub extends RosMain {
     // Example of using a string based class loader so that we can load classes
     // dynamically at runtime.
     // TODO(ethan) this is internal stuff, move away.
-    RosLoader rl = new CommandLineLoader(argv);
+    HashMap<String, String> fakeEnv = new HashMap<String, String>();
+    fakeEnv.put(EnvironmentVariables.ROS_MASTER_URI, "http://localhost:11311");
+    RosLoader rl = new CommandLineLoader(argv, fakeEnv);
     NodeContext nodeContext = rl.createContext();
     RosMain rm = rl.loadClass("org.ros.tutorials.RosPubSub");
     rm.rosMain(argv, nodeContext);
   }
-
 }
