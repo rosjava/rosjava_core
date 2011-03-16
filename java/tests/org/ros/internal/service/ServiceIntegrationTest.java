@@ -17,19 +17,16 @@
 package org.ros.internal.service;
 
 import static org.junit.Assert.assertEquals;
-
-import org.ros.internal.service.ServiceClient;
-import org.ros.internal.service.ServiceDefinition;
-import org.ros.internal.service.ServiceIdentifier;
-import org.ros.internal.service.ServiceServer;
-
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
 
-import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -37,13 +34,13 @@ import java.net.URISyntaxException;
 public class ServiceIntegrationTest {
 
   @Test
-  public void PesistentServiceConnectionTest() throws IOException, InterruptedException,
+  public void PesistentServiceConnectionTest() throws InterruptedException,
       URISyntaxException {
     ServiceDefinition definition = new ServiceDefinition(AddTwoInts.__s_getDataType(),
         AddTwoInts.__s_getMD5Sum());
 
     ServiceServer<AddTwoInts.Request> server = new ServiceServer<AddTwoInts.Request>(
-        AddTwoInts.Request.class, "/server", definition, "localhost", 0) {
+        AddTwoInts.Request.class, "/server", definition) {
       @Override
       public Message buildResponse(AddTwoInts.Request request) {
         AddTwoInts.Response response = new AddTwoInts.Response();
@@ -51,16 +48,24 @@ public class ServiceIntegrationTest {
         return response;
       }
     };
-    server.start();
+    server.start(new InetSocketAddress(0));
 
     ServiceClient<AddTwoInts.Response> client = ServiceClient.create(AddTwoInts.Response.class,
         "/client", new ServiceIdentifier("add_two_ints", server.getUri(), definition));
-    client.start(server.getAddress());
+    client.connect(server.getAddress());
 
     AddTwoInts.Request request = new AddTwoInts.Request();
     request.a = 2;
     request.b = 2;
-    assertEquals(client.call(request).sum, 4);
+    final CountDownLatch latch = new CountDownLatch(1);
+    client.call(request, new ServiceCallback<AddTwoInts.Response>() {
+      @Override
+      public void run(AddTwoInts.Response response) {
+        assertEquals(response.sum, 4);
+        latch.countDown();
+      }
+    });
+    assertTrue(latch.await(300, TimeUnit.SECONDS));
   }
 
 }

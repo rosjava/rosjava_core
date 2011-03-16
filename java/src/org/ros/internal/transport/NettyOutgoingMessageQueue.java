@@ -16,8 +16,6 @@
 
 package org.ros.internal.transport;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -32,9 +30,6 @@ import java.nio.ByteOrder;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class NettyOutgoingMessageQueue {
-
-  private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(NettyOutgoingMessageQueue.class);
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 

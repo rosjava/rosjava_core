@@ -54,15 +54,21 @@ public class MessageQueueIntegrationTest {
 
   @Test
   public void testSendAndReceiveMessage() throws IOException, InterruptedException {
-    NettyTcpServer server = new NettyTcpServer(new ServerHandler());
+    SimplePipelineFactory factory = new SimplePipelineFactory();
+    factory.getPipeline().addLast("Server Handler", new ServerHandler());
+    NettyTcpServer server = new NettyTcpServer(factory);
     server.start(new InetSocketAddress(0));
-    
+
     Socket client = new Socket(server.getAddress().getHostName(), server.getAddress().getPort());
     SubscriberMessageQueue<org.ros.message.std.String> in =
         new SubscriberMessageQueue<org.ros.message.std.String>(org.ros.message.std.String.class);
     in.setSocket(client);
     in.start();
-    
+
+    // TODO(damonkohler): There is a race here that makes this test flaky. Once
+    // the IncomingMessageQueue is ported to Netty, we can wait for a successful
+    // connection before putting the message on the outgoing queue. That should
+    // fix the problem.
     org.ros.message.std.String hello = new org.ros.message.std.String();
     hello.data = "Would you like to play a game?";
     out.put(hello);

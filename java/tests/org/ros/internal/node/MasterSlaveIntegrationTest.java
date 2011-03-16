@@ -128,7 +128,7 @@ public class MasterSlaveIntegrationTest {
         new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
     ServiceServer<AddTwoInts.Request> server =
         new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/service",
-            serviceDefinition, "localhost", 0) {
+            serviceDefinition) {
           @Override
           public Message buildResponse(AddTwoInts.Request requestMessage) {
             AddTwoInts.Response response = new AddTwoInts.Response();
@@ -136,6 +136,7 @@ public class MasterSlaveIntegrationTest {
             return response;
           }
         };
+    server.start(new InetSocketAddress(0));
     slaveServer.addService(server);
     Response<URI> response =
         masterClient.lookupService(

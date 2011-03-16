@@ -33,6 +33,7 @@ import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.NettyConnectionHeader;
 import org.ros.internal.transport.NettyOutgoingMessageQueue;
+import org.ros.internal.transport.SimplePipelineFactory;
 import org.ros.internal.transport.tcp.NettyTcpServer;
 import org.ros.message.Message;
 
@@ -53,7 +54,7 @@ public class Publisher extends Topic {
   private final List<SubscriberIdentifier> subscribers;
   private final NettyTcpServer server;
 
-  private class PublisherServerHandler extends SimpleChannelHandler {
+  class HandshakeHandler extends SimpleChannelHandler {
 
     @Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
@@ -67,6 +68,8 @@ public class Publisher extends Topic {
       ChannelBuffer outgoingBuffer = handshake(incomingBuffer);
       Channel channel = ctx.getChannel();
       channel.write(outgoingBuffer);
+      // TODO(damonkohler): Replace this handler with a discard handler in the
+      // pipeline.
     }
 
     @Override
@@ -81,7 +84,9 @@ public class Publisher extends Topic {
     out = new NettyOutgoingMessageQueue();
     subscribers = Lists.newArrayList();
     // TODO(kwc): We only need one TCPROS server for the entire node.
-    server = new NettyTcpServer(new PublisherServerHandler());
+    SimplePipelineFactory factory = new SimplePipelineFactory();
+    factory.getPipeline().addLast("HandshakeHandler", new HandshakeHandler());
+    server = new NettyTcpServer(factory);
   }
 
   public void start(SocketAddress address) {
