@@ -16,79 +16,44 @@
 
 package org.ros.internal.transport;
 
-import com.google.common.base.Preconditions;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.ChannelHandler;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.message.Message;
-
-import java.io.IOException;
-import java.net.Socket;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
- * 
- * @param <MessageType>
  */
-public abstract class IncomingMessageQueue<MessageType extends Message> {
-
-  private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
+public class IncomingMessageQueue<MessageType extends Message> {
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
-  
+
   private final Class<MessageType> messageClass;
   private final CircularBlockingQueue<MessageType> messages;
-  private final MessageReceivingThread thread;
 
-  private LittleEndianDataInputStream stream;
-
-  private final class MessageReceivingThread extends Thread {
+  private final class MessageHandler extends SimpleChannelHandler {
     @Override
-    public void run() {
-      try {
-        while (!Thread.currentThread().isInterrupted()) {
-          messages.put(receiveMessage(messageClass, stream));
-        }
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    public void cancel() {
-      interrupt();
-      try {
-        stream.close();
-      } catch (IOException e) {
-        log.error("Failed to close stream.", e);
-      }
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+      ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
+      MessageType message = messageClass.newInstance();      
+      message.deserialize(buffer.toByteBuffer());
+      messages.put(message);
     }
   }
 
   public IncomingMessageQueue(Class<MessageType> messageClass) {
     this.messageClass = messageClass;
     messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
-    thread = new MessageReceivingThread();
-  }
-
-  public void setSocket(Socket socket) throws IOException {
-    stream = new LittleEndianDataInputStream(socket.getInputStream());
   }
 
   public MessageType take() throws InterruptedException {
     return messages.take();
   }
-
-  public void shutdown() {
-    thread.cancel();
+ 
+  public ChannelHandler createChannelHandler() {
+    return new MessageHandler();
   }
 
-  public void start() {
-    Preconditions.checkState(stream != null);
-    thread.start();
-  }
-
-  protected abstract MessageType receiveMessage(Class<MessageType> messageClass,
-      LittleEndianDataInputStream stream) throws IOException, InstantiationException,
-      IllegalAccessException;
 }

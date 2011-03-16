@@ -25,13 +25,12 @@ import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
-import org.ros.internal.transport.NettyConnectionHeader;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.internal.transport.SimplePipelineFactory;
 import org.ros.internal.transport.tcp.TcpServer;
@@ -57,17 +56,13 @@ public class Publisher extends Topic {
   class HandshakeHandler extends SimpleChannelHandler {
 
     @Override
-    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
-      Channel channel = e.getChannel();
-      out.addChannel(channel);
-    }
-
-    @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
       ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
       ChannelBuffer outgoingBuffer = handshake(incomingBuffer);
       Channel channel = ctx.getChannel();
-      channel.write(outgoingBuffer);
+      channel.write(outgoingBuffer).await();
+      // TODO(damonkohler): What happens if the client doesn't like the handshake?
+      out.addChannel(channel);
       // TODO(damonkohler): Replace this handler with a discard handler in the
       // pipeline.
     }
@@ -121,7 +116,7 @@ public class Publisher extends Topic {
 
   @VisibleForTesting
   ChannelBuffer handshake(ChannelBuffer buffer) {
-    Map<String, String> incomingHeader = NettyConnectionHeader.decode(buffer);
+    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
     Map<String, String> header = getTopicDefinitionHeader();
     if (DEBUG) {
       log.info("Subscriber handshake header: " + incomingHeader);
@@ -134,7 +129,7 @@ public class Publisher extends Topic {
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
     SubscriberIdentifier subscriber = SubscriberIdentifier.createFromHeader(incomingHeader);
     subscribers.add(subscriber);
-    return NettyConnectionHeader.encode(header);
+    return ConnectionHeader.encode(header);
   }
 
 }

@@ -36,7 +36,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 import org.ros.internal.transport.ConnectionHeaderFields;
-import org.ros.internal.transport.NettyConnectionHeader;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.SimplePipelineFactory;
 import org.ros.message.Message;
 
@@ -114,8 +114,6 @@ public class ServiceClient<ResponseMessageType extends Message> {
       pipeline.addLast("Response Decoder", new ResponseDecoder());
       pipeline.addLast("Response Handler", new ResponseHandler());
     }
-    
-    
   }
   
   private final class ResponseHandler extends SimpleChannelHandler {
@@ -165,7 +163,7 @@ public class ServiceClient<ResponseMessageType extends Message> {
     } else {
       throw new RuntimeException(future.getCause());
     }
-    ChannelBuffer encodedHeader = NettyConnectionHeader.encode(header);
+    ChannelBuffer encodedHeader = ConnectionHeader.encode(header);
     channel.write(encodedHeader).awaitUninterruptibly();
   }
 
@@ -176,7 +174,7 @@ public class ServiceClient<ResponseMessageType extends Message> {
   }
 
   private void handshake(ChannelBuffer buffer) {
-    Map<String, String> incomingHeader = NettyConnectionHeader.decode(buffer);
+    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
       log.info("Expected handshake header: " + header);

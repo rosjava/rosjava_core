@@ -16,23 +16,44 @@
 
 package org.ros.internal.topic;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.netty.bootstrap.ClientBootstrap;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.HeapChannelBufferFactory;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFactory;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.SimpleChannelHandler;
+import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.MessageListener;
 import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.internal.transport.IncomingMessageQueue;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ProtocolNames;
-import org.ros.internal.transport.tcp.TcpRosConnection;
+import org.ros.internal.transport.SimplePipelineFactory;
 import org.ros.message.Message;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -45,14 +66,13 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private final Executor executor;
   private final ImmutableMap<String, String> header;
   private final CopyOnWriteArrayList<MessageListener<MessageType>> listeners;
-  private final SubscriberMessageQueue<MessageType> in;
+  private final IncomingMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
-
-  /** Collection of connections to publishers for the subscribed topic. */
-  private final Collection<TopicConnectionInfo> connections;
+  private final ChannelFactory channelFactory;
+  private final ClientBootstrap bootstrap;
+  private final ChannelGroup channelGroup;
+  private final Set<PublisherIdentifier> knownPublishers;
   private final Class<MessageType> messageClass;
-
-  private SubscriberIdentifier identifier;
 
   private final class MessageReadingThread extends Thread {
     @Override
@@ -84,6 +104,20 @@ public class Subscriber<MessageType extends Message> extends Topic {
     }
   }
 
+  private final class HandshakeHandler extends SimpleChannelHandler {
+    @Override
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+      ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
+      // TODO(damonkohler): Handle handshake errors.
+      handshake(incomingBuffer);
+      Channel channel = e.getChannel();
+      channelGroup.add(channel);
+      ChannelPipeline pipeline = channel.getPipeline();
+      pipeline.remove(this);
+      pipeline.addLast("Message Handler", in.createChannelHandler());
+    }
+  }
+
   public static <S extends Message> Subscriber<S> create(SlaveIdentifier slaveIdentifier,
       TopicDefinition description, Class<S> messageClass, Executor executor) {
     return new Subscriber<S>(slaveIdentifier, description, messageClass, executor);
@@ -95,12 +129,23 @@ public class Subscriber<MessageType extends Message> extends Topic {
     this.messageClass = messageClass;
     this.executor = executor;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
-    this.in = new SubscriberMessageQueue<MessageType>(messageClass);
-    header =
-        ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
-            .putAll(description.toHeader()).build();
-    connections = new ArrayList<TopicConnectionInfo>();
-    identifier = new SubscriberIdentifier(slaveIdentifier, description);
+    this.in = new IncomingMessageQueue<MessageType>(messageClass);
+    header = ImmutableMap.<String, String>builder()
+        .putAll(slaveIdentifier.toHeader())
+        .putAll(description.toHeader())
+        .build();
+    knownPublishers = Sets.newHashSet();
+    channelGroup = new DefaultChannelGroup();
+    channelFactory =
+        new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
+            Executors.newCachedThreadPool());
+    bootstrap = new ClientBootstrap(channelFactory);
+    // TODO(damonkohler): This won't work for more than one connection. Future
+    // connections will not have the required HandshakeHandler in the pipeline.
+    SimplePipelineFactory factory = new SimplePipelineFactory();
+    factory.getPipeline().addLast("Handshake Handler", new HandshakeHandler());
+    bootstrap.setPipelineFactory(factory);
+    bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     thread = new MessageReadingThread();
     thread.start();
   }
@@ -132,35 +177,32 @@ public class Subscriber<MessageType extends Message> extends Topic {
   }
 
   public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
-      InetSocketAddress tcprosServerAddress) throws IOException {
-    TcpRosConnection socketConnection =
-        TcpRosConnection.createOutgoing(tcprosServerAddress, getHeader());
-    // TODO(kwc): need to upgrade 'in' to allow multiple sockets.
-    // TODO(kwc): cleanup API between Connection and socket abstraction
-    // leveling.
-    in.setSocket(socketConnection.getSocket());
-    in.start();
-    connections.add(new TopicConnectionInfo(publisherIdentifier, identifier, socketConnection));
+      SocketAddress address) {
+    // TODO(damonkohler): Add timeouts.
+    ChannelFuture future = bootstrap.connect(address).awaitUninterruptibly();
+    if (!future.isSuccess()) {
+      throw new RuntimeException(future.getCause());
+    }
+    Channel channel = future.getChannel();
+    channel.write(ConnectionHeader.encode(header)).awaitUninterruptibly();
+    if (DEBUG) {
+      log.info("Connected to: " + channel.getRemoteAddress());
+    }
+    knownPublishers.add(publisherIdentifier);
   }
 
   /**
    * Updates the list of {@link Publisher}s for the topic that this
    * {@link Subscriber} is interested in.
    * 
-   * @param publishers {@link List} of {@link Publisher}s for the subscribed topic
+   * @param publishers {@link List} of {@link Publisher}s for the subscribed
+   *        topic
    */
-  public synchronized void updatePublishers(List<PublisherIdentifier> publishers) {
+  public synchronized void updatePublishers(Collection<PublisherIdentifier> publishers) {
     // Find new connections.
     ArrayList<PublisherIdentifier> newPublishers = new ArrayList<PublisherIdentifier>();
     for (PublisherIdentifier publisher : publishers) {
-      boolean newConnection = true;
-      for (TopicConnectionInfo connection : connections) {
-        if (publisher.equals(connection.getPublisherIdentifier())) {
-          newConnection = false;
-          break;
-        }
-      }
-      if (newConnection) {
+      if (!knownPublishers.contains(publisher)) {
         newPublishers.add(publisher);
       }
     }
@@ -171,16 +213,16 @@ public class Subscriber<MessageType extends Message> extends Topic {
 
   public void shutdown() {
     thread.cancel();
-    in.shutdown();
   }
 
   /**
-   * @return this {@link Subscriber}'s connection header as an {@link ImmutableMap}
+   * @return this {@link Subscriber}'s connection header as an
+   *         {@link ImmutableMap}
    */
   public ImmutableMap<String, String> getHeader() {
     return header;
   }
-  
+
   /**
    * @param messageClass
    * @return <code>true</code> if this {@link Subscriber} instance accepts the
@@ -188,6 +230,18 @@ public class Subscriber<MessageType extends Message> extends Topic {
    */
   boolean checkMessageClass(Class<? extends Message> messageClass) {
     return this.messageClass == messageClass;
+  }
+
+  private void handshake(ChannelBuffer buffer) {
+    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
+    if (DEBUG) {
+      log.info("Outgoing handshake header: " + header);
+      log.info("Incoming handshake header: " + incomingHeader);
+    }
+    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
+        header.get(ConnectionHeaderFields.TYPE)));
+    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
+        header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
   }
 
 }

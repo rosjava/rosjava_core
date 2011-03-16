@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.ros.MessageListener;
 import org.ros.internal.node.server.SlaveIdentifier;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,34 +37,43 @@ import java.util.concurrent.TimeUnit;
 public class PubSubIntegrationTest {
 
   @Test
-  public void testPubSub() throws IOException, InterruptedException, URISyntaxException {
+  public void testPubSub() throws InterruptedException, URISyntaxException {
     Executor executor = Executors.newCachedThreadPool();
     TopicDefinition topicDefinition =
         new TopicDefinition("/foo",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
-    SlaveIdentifier pubSlaveIdentifier = new SlaveIdentifier("/receiver", new URI("http://fake:5678"));
-    PublisherIdentifier publisherIdentifier = new PublisherIdentifier(pubSlaveIdentifier, topicDefinition);
+    SlaveIdentifier pubSlaveIdentifier =
+        new SlaveIdentifier("/receiver", new URI("http://fake:5678"));
+    PublisherIdentifier publisherIdentifier =
+        new PublisherIdentifier(pubSlaveIdentifier, topicDefinition);
     Publisher publisher = new Publisher(topicDefinition);
     publisher.start(new InetSocketAddress(0));
 
-    SlaveIdentifier subSlaveIdentifier = new SlaveIdentifier("/caller", new URI("http://fake:1234"));
+    SlaveIdentifier subSlaveIdentifier =
+        new SlaveIdentifier("/caller", new URI("http://fake:1234"));
     Subscriber<org.ros.message.std.String> subscriber =
-        Subscriber.create(subSlaveIdentifier, topicDefinition,
-            org.ros.message.std.String.class, executor);
+        Subscriber.create(subSlaveIdentifier, topicDefinition, org.ros.message.std.String.class,
+            executor);
     subscriber.addPublisher(publisherIdentifier, publisher.getAddress());
+
+    final org.ros.message.std.String helloMessage = new org.ros.message.std.String();
+    helloMessage.data = "Hello, ROS!";
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
     subscriber.addMessageListener(new MessageListener<org.ros.message.std.String>() {
       @Override
       public void onNewMessage(org.ros.message.std.String message) {
-        assertEquals(message.data, "Hello, ROS!");
+        assertEquals(helloMessage, message);
         messageReceived.countDown();
       }
     });
 
-    org.ros.message.std.String message = new org.ros.message.std.String();
-    message.data = "Hello, ROS!";
-    publisher.publish(message);
-    assertTrue(messageReceived.await(30, TimeUnit.SECONDS));
+    // TODO(damonkohler): This is terrible. However currently I have no reason
+    // to add the ability to wait for a handshake to complete other than for
+    // this test.
+    Thread.sleep(100);
+
+    publisher.publish(helloMessage);
+    assertTrue(messageReceived.await(3, TimeUnit.SECONDS));
   }
 }

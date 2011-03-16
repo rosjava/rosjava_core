@@ -25,7 +25,6 @@ import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.Message;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 
 /**
@@ -60,11 +59,7 @@ class UpdatePublisherRunnable<MessageType extends Message> implements Runnable {
       // registry.
       ProtocolDescription selected = response.getResult();
       if (ProtocolNames.SUPPORTED.contains(selected.getName())) {
-        try {
-          subscriber.addPublisher(publisherIdentifier, selected.getAddress());
-        } catch (IOException e) {
-          log.error(e);
-        }
+        subscriber.addPublisher(publisherIdentifier, selected.getAddress());
       } else {
         log.error("Publisher returned unsupported protocol selection: " + response);
       }

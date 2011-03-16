@@ -32,7 +32,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.transport.ConnectionHeaderFields;
-import org.ros.internal.transport.NettyConnectionHeader;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.SimplePipelineFactory;
 import org.ros.internal.transport.tcp.TcpServer;
 import org.ros.message.Message;
@@ -132,7 +132,7 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
 
   @VisibleForTesting
   ChannelBuffer handshake(ChannelBuffer buffer) {
-    Map<String, String> incomingHeader = NettyConnectionHeader.decode(buffer);
+    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
     if (DEBUG) {
       log.info("Incoming handshake header: " + incomingHeader);
       log.info("Outgoing handshake header: " + header);
@@ -144,7 +144,7 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
     }
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
-    return NettyConnectionHeader.encode(header);
+    return ConnectionHeader.encode(header);
   }
 
   public void start(SocketAddress address) {
