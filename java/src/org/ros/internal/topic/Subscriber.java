@@ -69,7 +69,6 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private final IncomingMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
   private final ChannelFactory channelFactory;
-  private final ClientBootstrap bootstrap;
   private final ChannelGroup channelGroup;
   private final Set<PublisherIdentifier> knownPublishers;
   private final Class<MessageType> messageClass;
@@ -139,13 +138,6 @@ public class Subscriber<MessageType extends Message> extends Topic {
     channelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
-    bootstrap = new ClientBootstrap(channelFactory);
-    // TODO(damonkohler): This won't work for more than one connection. Future
-    // connections will not have the required HandshakeHandler in the pipeline.
-    SimplePipelineFactory factory = new SimplePipelineFactory();
-    factory.getPipeline().addLast("Handshake Handler", new HandshakeHandler());
-    bootstrap.setPipelineFactory(factory);
-    bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     thread = new MessageReadingThread();
     thread.start();
   }
@@ -178,6 +170,11 @@ public class Subscriber<MessageType extends Message> extends Topic {
 
   public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
       SocketAddress address) {
+    ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
+    SimplePipelineFactory factory = new SimplePipelineFactory();
+    factory.getPipeline().addLast("Handshake Handler", new HandshakeHandler());
+    bootstrap.setPipelineFactory(factory);
+    bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     // TODO(damonkohler): Add timeouts.
     ChannelFuture future = bootstrap.connect(address).awaitUninterruptibly();
     if (!future.isSuccess()) {
