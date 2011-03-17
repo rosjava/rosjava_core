@@ -13,3 +13,4 @@ syntax: glob
 syntax: regexp
 android/(bin|gen)/.*
 apps/.*/(bin|gen)/.*
+java/(build|dist)/.*
