@@ -196,6 +196,9 @@ public class Node implements Namespace {
    * @throws RosInitException
    */
   public void init() throws RosInitException {
+    if (initialized) { 
+      throw new RosInitException("already initialized");
+    }
     try {
       masterClient = new MasterClient(context.getRosMasterUri());
 

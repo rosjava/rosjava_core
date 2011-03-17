@@ -16,7 +16,12 @@
 
 package org.ros.internal.transport.tcp;
 
+import static org.jboss.netty.channel.Channels.pipeline;
+
 import com.google.common.base.Preconditions;
+
+import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
+import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +30,7 @@ import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -34,7 +40,6 @@ import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.ros.internal.topic.TopicManager;
-import org.ros.internal.transport.SimplePipelineFactory;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -68,13 +73,35 @@ public class TcpServer {
     }
   }
 
-  public TcpServer(ChannelPipelineFactory pipelineFactory, TopicManager topicManager) {
-    HandshakeHandler handshakeHandler = new HandshakeHandler(topicManager);
-    try {
-      pipelineFactory.getPipeline().addLast("HandshakeHandler", handshakeHandler);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+  private class TcpRosPipelineFactory implements ChannelPipelineFactory {
+
+    private static final String LENGTH_FIELD_BASED_FRAME_DECODER = "Length Field Based Frame Decoder";
+    private static final String LENGTH_FIELD_PREPENDER = "Length Field Prepender";
+
+    private final TopicManager topicManager;
+
+    public TcpRosPipelineFactory(TopicManager topicManager) {
+      this.topicManager = topicManager;
     }
+
+    @Override
+    public ChannelPipeline getPipeline() throws Exception {
+      ChannelPipeline pipeline = pipeline();
+
+      pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));
+      pipeline.addLast(LENGTH_FIELD_BASED_FRAME_DECODER, new LengthFieldBasedFrameDecoder(
+          Integer.MAX_VALUE, 0, 4, 0, 4));
+
+      pipeline.addLast("HandshakeHandler", new HandshakeHandler(topicManager));
+      pipeline.addLast("Connection Tracking Handler", new ConnectionTrackingHandler());
+      return pipeline;
+    }
+
+  }
+
+  public TcpServer(TopicManager topicManager) {
+    TcpRosPipelineFactory pipelineFactory = new TcpRosPipelineFactory(topicManager);
+
     channelGroup = new DefaultChannelGroup();
     channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
         Executors.newCachedThreadPool());
@@ -82,16 +109,6 @@ public class TcpServer {
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     bootstrap.setPipelineFactory(pipelineFactory);
-    try {
-      pipelineFactory.getPipeline().addLast("Connection Tracking Handler",
-          new ConnectionTrackingHandler());
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public TcpServer(TopicManager topicManager) {
-    this(new SimplePipelineFactory(), topicManager);
   }
 
   public void start(SocketAddress address) {
