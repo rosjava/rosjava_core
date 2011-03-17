@@ -21,15 +21,12 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.transport.tcp.TcpServer;
-
-import org.ros.message.std.Int64;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.MessageListener;
 import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.transport.tcp.TcpServer;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -45,24 +42,23 @@ public class PubSubIntegrationTest {
 
   private TopicDefinition topicDefinition;
 
-  class PublisherServer {
+  private final class PublisherServer {
     final TcpServer tcpServer;
-    final Publisher<?> publisher;
+    final Publisher<org.ros.message.std.String> publisher;
 
-    public PublisherServer(Publisher<?> publisher, TcpServer tcpServer) {
+    public PublisherServer(Publisher<org.ros.message.std.String> publisher, TcpServer tcpServer) {
       this.tcpServer = tcpServer;
       this.publisher = publisher;
     }
   }
 
   private PublisherServer createPublisherServer() {
-    // Create a new tcpRosServer for each publisher so that we can test multiple
-    // connections.
     TopicManager topicManager = new TopicManager();
     ServiceManager serviceManager = new ServiceManager();
     TcpServer tcpServer = new TcpServer(topicManager, serviceManager);
     tcpServer.start(new InetSocketAddress(0));
-    Publisher<Int64> publisher = new Publisher<Int64>(topicDefinition, Int64.class);
+    Publisher<org.ros.message.std.String> publisher =
+        new Publisher<org.ros.message.std.String>(topicDefinition, org.ros.message.std.String.class);
     topicManager.putPublisher(topicDefinition.getName(), publisher);
     publisher.start();
     return new PublisherServer(publisher, tcpServer);

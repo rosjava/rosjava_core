@@ -123,7 +123,6 @@ public class PubSubFactory {
       slaveServer.addPublisher(publisher);
       publisher.start();
     }
-
     return publisher;
   }
 
@@ -135,7 +134,6 @@ public class PubSubFactory {
       throw new RosInitException(e);
     }
     server.start(tcpRosServerAddress);
-
     // Override address that TCPROS server reports with the hostname/IP
     // address that we've been configured to report.
     return new InetSocketAddress(publicHostname, server.getAddress().getPort());

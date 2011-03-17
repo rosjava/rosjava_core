@@ -16,18 +16,22 @@
 
 package org.ros.internal.topic;
 
+import org.ros.message.Message;
+
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Topic {
+public class Topic<MessageType extends Message> {
 
   private final TopicDefinition description;
+  private final Class<MessageType> messageClass;
 
-  public Topic(TopicDefinition description) {
+  public Topic(TopicDefinition description, Class<MessageType> messageClass) {
     this.description = description;
+    this.messageClass = messageClass;
   }
   
   public TopicDefinition getTopicDefinition() {
@@ -50,4 +54,13 @@ public class Topic {
     return description.toHeader();
   }
   
+  /**
+   * @param messageClass
+   * @return <code>true</code> if this {@link Subscriber} instance accepts the
+   *         supplied {@link Message} class
+   */
+  public boolean checkMessageClass(Class<? extends Message> messageClass) {
+    return this.messageClass == messageClass;
+  }
+
 }

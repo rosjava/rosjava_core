@@ -58,7 +58,7 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Subscriber<MessageType extends Message> extends Topic {
+public class Subscriber<MessageType extends Message> extends Topic<MessageType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Subscriber.class);
@@ -71,7 +71,6 @@ public class Subscriber<MessageType extends Message> extends Topic {
   private final ChannelFactory channelFactory;
   private final ChannelGroup channelGroup;
   private final Set<PublisherIdentifier> knownPublishers;
-  private final Class<MessageType> messageClass;
 
   private final class MessageReadingThread extends Thread {
     @Override
@@ -113,7 +112,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
       channelGroup.add(channel);
       ChannelPipeline pipeline = channel.getPipeline();
       pipeline.remove(this);
-      pipeline.addLast("Message Handler", in.createChannelHandler());
+      pipeline.addLast("MessageHandler", in.createChannelHandler());
     }
   }
 
@@ -124,8 +123,7 @@ public class Subscriber<MessageType extends Message> extends Topic {
 
   private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition description,
       Class<MessageType> messageClass, Executor executor) {
-    super(description);
-    this.messageClass = messageClass;
+    super(description, messageClass);
     this.executor = executor;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new IncomingMessageQueue<MessageType>(messageClass);
@@ -219,15 +217,6 @@ public class Subscriber<MessageType extends Message> extends Topic {
    */
   public ImmutableMap<String, String> getHeader() {
     return header;
-  }
-
-  /**
-   * @param messageClass
-   * @return <code>true</code> if this {@link Subscriber} instance accepts the
-   *         supplied {@link Message} class
-   */
-  boolean checkMessageClass(Class<? extends Message> messageClass) {
-    return this.messageClass == messageClass;
   }
 
   private void handshake(ChannelBuffer buffer) {

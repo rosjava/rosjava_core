@@ -27,6 +27,7 @@ import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.service.ServiceServer;
 import org.ros.internal.topic.Publisher;
+import org.ros.internal.topic.PublisherIdentifier;
 import org.ros.internal.topic.Subscriber;
 import org.ros.internal.topic.Topic;
 import org.ros.internal.topic.TopicDefinition;
@@ -127,40 +128,35 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   }
 
   /**
-   * Registers the specified {@link Publisher}.
+   * Registers the specified {@link PublisherIdentifier}.
    * 
-   * @param slave the {@link SlaveIdentifier} where the {@link Publisher} is
-   *        running
-   * @param publisher the publisher to register
+   * @param publisher the {@link PublisherIdentifier} of the {@link Publisher} to register
    * @return a {@link Response} with a {@link List} of the current
    *         {@link SlaveServer} URIs which have {@link Subscriber}s for the
    *         published {@link Topic}.
    * @throws URISyntaxException
    * @throws RemoteException
    */
-  public Response<List<URI>> registerPublisher(SlaveIdentifier slave, Publisher publisher)
+  public Response<List<URI>> registerPublisher(PublisherIdentifier publisher)
       throws URISyntaxException, RemoteException {
-    String topicName = publisher.getTopicName();
-    String messageType = publisher.getTopicMessageType();
     return Response.fromList(
-        node.registerPublisher(slave.getName(), topicName, messageType, slave.getUri().toString()),
+        node.registerPublisher(publisher.getNodeName(), publisher.getTopicName(),
+            publisher.getTopicMessageType(), publisher.getSlaveUri().toString()),
         new UriListResultFactory());
   }
 
   /**
-   * Unregisters the specified {@link Publisher}.
+   * Unregisters the specified {@link PublisherIdentifier}.
    * 
-   * @param slave the {@link SlaveIdentifier} where the {@link Publisher} is
-   *        running
-   * @param publisher the {@link Publisher} to unregister
+   * @param publisher the {@link PublisherIdentifier} of the {@link Publisher} to unregister
    * @return a {@link Response} with the number of unregistered
    *         {@link Publisher}s as the result
    * @throws RemoteException
    */
-  public Response<Integer> unregisterPublisher(SlaveIdentifier slave, Publisher publisher)
+  public Response<Integer> unregisterPublisher(PublisherIdentifier publisher)
       throws RemoteException {
-    return Response.fromList(node.unregisterPublisher(slave.getName(), publisher.getTopicName(),
-        slave.getUri().toString()), new IntegerResultFactory());
+    return Response.fromList(node.unregisterPublisher(publisher.getNodeName(),
+        publisher.getTopicName(), publisher.getSlaveUri().toString()), new IntegerResultFactory());
   }
 
   /**
@@ -198,7 +194,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @return a {@link Response} with the {@link URI} of the
    *         {@link ServiceServer} as a result
    * @throws URISyntaxException
-   * @throws RemoteException 
+   * @throws RemoteException
    */
   public Response<URI> lookupService(SlaveIdentifier slave, String serviceName)
       throws URISyntaxException, RemoteException {

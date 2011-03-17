@@ -48,6 +48,10 @@ public class PublisherIdentifier {
   public String getTopicName() {
     return topicDefinition.getName();
   }
+  
+  public String getTopicMessageType() {
+    return topicDefinition.getMessageType();
+  }
 
   @Override
   public String toString() {

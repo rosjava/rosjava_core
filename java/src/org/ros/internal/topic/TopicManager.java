@@ -19,6 +19,8 @@ package org.ros.internal.topic;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
+import org.ros.message.Message;
+
 import java.util.List;
 import java.util.Map;
 
@@ -29,8 +31,8 @@ import java.util.Map;
  */
 public class TopicManager {
 
-  private final Map<String, Subscriber<?>> subscribers;
-  private final Map<String, Publisher<?>> publishers;
+  private final Map<String, Subscriber<? extends Message>> subscribers;
+  private final Map<String, Publisher<? extends Message>> publishers;
 
   public TopicManager() {
     publishers = Maps.newConcurrentMap();
@@ -45,15 +47,15 @@ public class TopicManager {
     return publishers.containsKey(topicName);
   }
 
-  public Publisher<?> getPublisher(String topicName) {
+  public Publisher<? extends Message> getPublisher(String topicName) {
     return publishers.get(topicName);
   }
 
-  public Subscriber<?> getSubscriber(String topicName) {
+  public Subscriber<? extends Message> getSubscriber(String topicName) {
     return subscribers.get(topicName);
   }
 
-  public void putPublisher(String topicName, Publisher<?> publisher) {
+  public void putPublisher(String topicName, Publisher<? extends Message> publisher) {
     publishers.put(topicName, publisher);
   }
 
@@ -61,11 +63,11 @@ public class TopicManager {
     subscribers.put(topicName, subscriber);
   }
 
-  public List<Subscriber<?>> getSubscribers() {
+  public List<Subscriber<? extends Message>> getSubscribers() {
     return ImmutableList.copyOf(subscribers.values());
   }
 
-  public List<Publisher<?>> getPublishers() {
+  public List<Publisher<? extends Message>> getPublishers() {
     return ImmutableList.copyOf(publishers.values());
   }
 

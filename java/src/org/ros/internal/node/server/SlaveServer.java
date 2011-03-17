@@ -86,7 +86,7 @@ public class SlaveServer extends NodeServer {
   public void addPublisher(Publisher<?> publisher) throws MalformedURLException,
       URISyntaxException, RemoteException {
     topicManager.putPublisher(publisher.getTopicName(), publisher);
-    master.registerPublisher(toSlaveIdentifier(), publisher);
+    master.registerPublisher(publisher.toPublisherIdentifier(toSlaveIdentifier()));
   }
 
   /**
@@ -180,7 +180,7 @@ public class SlaveServer extends NodeServer {
 
   public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
     if (topicManager.hasSubscriber(topicName)) {
-      Subscriber<?> subscriber = topicManager.getSubscriber(topicName);
+      Subscriber<? extends Message> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
       List<PublisherIdentifier> pubIdentifiers = buildPublisherIdentifierList(publisherUris,
           topicDefinition);

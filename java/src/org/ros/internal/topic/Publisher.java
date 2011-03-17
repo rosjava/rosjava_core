@@ -35,21 +35,21 @@ import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ *
+ * @param <MessageType>
  */
-public class Publisher<MessageType extends Message> extends Topic {
+public class Publisher<MessageType extends Message> extends Topic<MessageType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final OutgoingMessageQueue out;
   private final List<SubscriberIdentifier> subscribers;
-  private final Class<MessageType> messageClass;
 
   public Publisher(TopicDefinition description, Class<MessageType> messageClass) {
-    super(description);
+    super(description, messageClass);
     out = new OutgoingMessageQueue();
     subscribers = Lists.newArrayList();
-    this.messageClass = messageClass;
   }
 
   public void start() {
@@ -69,20 +69,11 @@ public class Publisher<MessageType extends Message> extends Topic {
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
-  public void publish(Message message) {
+  public void publish(MessageType message) {
     if (DEBUG) {
       log.info("Publishing message: " + message);
     }
     out.put(message);
-  }
-
-  /**
-   * @param messageClass
-   * @return <code>true</code> if this {@link Publisher} instance accepts the
-   *         supplied {@link Message} class
-   */
-  boolean checkMessageClass(Class<? extends Message> messageClass) {
-    return this.messageClass == messageClass;
   }
 
   /**
