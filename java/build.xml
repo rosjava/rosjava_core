@@ -28,7 +28,6 @@
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
     <path id="java.classpath">
-        <pathelement location="bin"/>
         <pathelement location="lib/commons-codec-1.3.jar"/>
         <pathelement location="lib/commons-httpclient-3.1.jar"/>
         <pathelement location="lib/commons-logging-1.1.1.jar"/>
@@ -62,6 +61,13 @@
 
     <target name="compile" depends="init, msg_gen">
         <echo message="${ant.project.name}: ${ant.file}"/>
+        
+        <copy todir="${build-xmlrpc}">
+            <!-- copy properties file -->
+            <fileset dir="apache-xmlrpc-3.1.3-src/client/src/main/java">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
         <javac debug="true" debuglevel="${debuglevel}" destdir="${build-xmlrpc}" source="${source}" target="${target}">
             <classpath refid="java.classpath"/>
             <src path="ws-commons-util-1.0.2-src/src/main/java"/>
@@ -75,8 +81,20 @@
             <exclude name="org/apache/xmlrpc/webserver/ServletWebServer.java"/>
             <exclude name="org/apache/xmlrpc/webserver/XmlRpcServlet.java"/>
             <exclude name="org/apache/xmlrpc/webserver/XmlRpcServletServer.java"/>
-
         </javac>
+
+        <!-- build rosjava src, tests, and tutorials together -->
+        <copy todir="${build-rosjava}">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+            <fileset dir="tutorials">
+                <exclude name="**/*.java"/>
+            </fileset>
+            <fileset dir="tests">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
         <javac debug="true" debuglevel="${debuglevel}" destdir="${build-rosjava}" source="${source}" target="${target}">
             <src path="src"/>
             <classpath refid="java.classpath"/>
