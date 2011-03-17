@@ -48,7 +48,6 @@ import org.jboss.netty.channel.SimpleChannelHandler;
  *         Conley)
  */
 public class HandshakeHandler extends SimpleChannelHandler {
-  private static boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(HandshakeHandler.class);
   private final TopicManager topicManager;
 

@@ -21,13 +21,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.ros.exceptions.RosNameException;
-
-import org.ros.internal.namespace.GraphName;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
+import org.ros.exceptions.RosNameException;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
@@ -57,8 +53,6 @@ import java.util.Map;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class SlaveServer extends NodeServer {
-  private final boolean DEBUG = false;
-  private final Log log = LogFactory.getLog(SlaveServer.class);
   private final String name;
   private final MasterClient master;
   private final Map<String, Publisher<?>> publishers;
