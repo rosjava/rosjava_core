@@ -23,16 +23,15 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
+import org.apache.xmlrpc.XmlRpcException;
+import org.ros.internal.node.xmlrpc.MasterImpl;
+import org.ros.internal.service.ServiceIdentifier;
 import org.ros.internal.topic.PublisherIdentifier;
 import org.ros.internal.topic.SubscriberIdentifier;
 
-import org.ros.internal.service.ServiceIdentifier;
-
-import org.ros.internal.node.xmlrpc.MasterImpl;
-
-import org.apache.xmlrpc.XmlRpcException;
-
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +46,8 @@ public class MasterServer extends NodeServer {
   private final Multimap<String, PublisherIdentifier> publishers;
   private final Multimap<String, SubscriberIdentifier> subscribers;
 
-  public MasterServer(String hostname, int port) {
-    super(hostname, port);
+  public MasterServer(SocketAddress address) {
+    super((InetSocketAddress) address);
     slaves = Maps.newConcurrentMap();
     services = Maps.newConcurrentMap();
     publishers =

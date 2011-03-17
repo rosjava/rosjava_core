@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
@@ -21,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -33,7 +35,6 @@ import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.TopicManager;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
-import org.ros.internal.transport.SimplePipelineFactory;
 import org.ros.message.Message;
 
 import java.util.Map;
@@ -42,14 +43,14 @@ import java.util.Map;
  * @author damonkohler@google.com (Damon Kohler)
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class HandshakeHandler extends SimpleChannelHandler {
+public class TcpServerHandshakeHandler extends SimpleChannelHandler {
   
-  private static final Log log = LogFactory.getLog(HandshakeHandler.class);
+  private static final Log log = LogFactory.getLog(TcpServerHandshakeHandler.class);
   
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
 
-  public HandshakeHandler(TopicManager topicManager, ServiceManager serviceManager) {
+  public TcpServerHandshakeHandler(TopicManager topicManager, ServiceManager serviceManager) {
     this.topicManager = topicManager;
     this.serviceManager = serviceManager;
   }
@@ -74,9 +75,9 @@ public class HandshakeHandler extends SimpleChannelHandler {
       } else {
         e.getChannel().write(outgoingBuffer);
         ChannelPipeline pipeline = e.getChannel().getPipeline();
-        pipeline.replace(SimplePipelineFactory.LENGTH_FIELD_PREPENDER, "Response Encoder",
+        pipeline.replace(TcpServerPipelineFactory.LENGTH_FIELD_PREPENDER, "ResponseEncoder",
             new ServiceResponseEncoder());
-        pipeline.replace(this, "Request Handler", serviceServer.createRequestHandler());
+        pipeline.replace(this, "RequestHandler", serviceServer.createRequestHandler());
       }
     } else {
       String topicName = incomingHeader.get(ConnectionHeaderFields.TOPIC);
@@ -84,7 +85,10 @@ public class HandshakeHandler extends SimpleChannelHandler {
       Publisher<? extends Message> publisher = topicManager.getPublisher(topicName);
       ChannelBuffer outgoingBuffer = publisher.finishHandshake(incomingHeader);
       Channel channel = ctx.getChannel();
-      channel.write(outgoingBuffer).await();
+      ChannelFuture future = channel.write(outgoingBuffer).await();
+      if (!future.isSuccess()) {
+        throw new RuntimeException(future.getCause());
+      }
       publisher.addChannel(channel);
     }
 

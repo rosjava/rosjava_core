@@ -14,34 +14,30 @@
  * the License.
  */
 
-package org.ros.internal.transport;
+package org.ros.internal.transport.tcp;
+
+import static org.jboss.netty.channel.Channels.pipeline;
 
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SimplePipelineFactory implements ChannelPipelineFactory {
-  
+public class TcpClientPipelineFactory implements ChannelPipelineFactory {
+
   public static final String LENGTH_FIELD_BASED_FRAME_DECODER = "LengthFieldBasedFrameDecoder";
   public static final String LENGTH_FIELD_PREPENDER = "LengthFieldPrepender";
-  
-  private final ChannelPipeline pipeline;
-
-  public SimplePipelineFactory() {
-    pipeline = Channels.pipeline();
-    pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));
-    pipeline.addLast(LENGTH_FIELD_BASED_FRAME_DECODER, new LengthFieldBasedFrameDecoder(
-        Integer.MAX_VALUE, 0, 4, 0, 4));
-  }
 
   @Override
   public ChannelPipeline getPipeline() {
+    ChannelPipeline pipeline = pipeline();
+    pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));
+    pipeline.addLast(LENGTH_FIELD_BASED_FRAME_DECODER, new LengthFieldBasedFrameDecoder(
+        Integer.MAX_VALUE, 0, 4, 0, 4));
     return pipeline;
   }
-  
+
 }

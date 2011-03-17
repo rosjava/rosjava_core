@@ -57,10 +57,10 @@ public class SimplePubSub {
 
   public static void main(String[] args) throws XmlRpcException, IOException, RemoteException,
       InterruptedException, URISyntaxException {
-    masterServer = new MasterServer("localhost", 0);
+    masterServer = new MasterServer(new InetSocketAddress(0));
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
-    slaveServer = new SlaveServer("/foo", masterClient, "localhost", 0);
+    slaveServer = new SlaveServer("/foo", masterClient, new InetSocketAddress(0));
     slaveServer.start();
     Executor executor = Executors.newCachedThreadPool();
 

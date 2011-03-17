@@ -16,12 +16,8 @@
 
 package org.ros.internal.transport.tcp;
 
-import static org.jboss.netty.channel.Channels.pipeline;
 
 import com.google.common.base.Preconditions;
-
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
-import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,12 +25,6 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
@@ -61,53 +51,16 @@ public class TcpServer {
 
   private Channel channel;
 
-  private final class ConnectionTrackingHandler extends SimpleChannelHandler {
-    @Override
-    public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
-      channelGroup.add(e.getChannel());
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-      e.getChannel().close();
-      throw new RuntimeException(e.getCause());
-    }
-  }
-
-  private class TcpRosPipelineFactory implements ChannelPipelineFactory {
-
-    private static final String LENGTH_FIELD_BASED_FRAME_DECODER = "LengthFieldBasedFrameDecoder";
-    private static final String LENGTH_FIELD_PREPENDER = "LengthFieldPrepender";
-
-    private final TopicManager topicManager;
-    private final ServiceManager serviceManager;
-
-    public TcpRosPipelineFactory(TopicManager topicManager, ServiceManager serviceManager) {
-      this.topicManager = topicManager;
-      this.serviceManager = serviceManager;
-    }
-
-    @Override
-    public ChannelPipeline getPipeline() throws Exception {
-      ChannelPipeline pipeline = pipeline();
-      pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));
-      pipeline.addLast(LENGTH_FIELD_BASED_FRAME_DECODER, new LengthFieldBasedFrameDecoder(
-          Integer.MAX_VALUE, 0, 4, 0, 4));
-      pipeline.addLast("ConnectionTrackingHandler", new ConnectionTrackingHandler());
-      pipeline.addLast("HandshakeHandler", new HandshakeHandler(topicManager, serviceManager));
-      return pipeline;
-    }
-
-  }
-
   public TcpServer(TopicManager topicManager, ServiceManager serviceManager) {
     channelGroup = new DefaultChannelGroup();
-    channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
-        Executors.newCachedThreadPool());
+    channelFactory =
+        new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
+            Executors.newCachedThreadPool());
     bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-    TcpRosPipelineFactory pipelineFactory = new TcpRosPipelineFactory(topicManager, serviceManager);
+    TcpServerPipelineFactory pipelineFactory =
+        new TcpServerPipelineFactory(channelGroup, topicManager, serviceManager);
     bootstrap.setPipelineFactory(pipelineFactory);
   }
 

@@ -16,10 +16,11 @@
 
 package org.ros.internal.transport;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-
 import com.google.common.collect.Lists;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -40,7 +41,7 @@ public class ProtocolDescription {
     return name;
   }
 
-  public InetSocketAddress getAddress() {
+  public SocketAddress getAddress() {
     return address;
   }
 

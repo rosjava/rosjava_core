@@ -35,9 +35,9 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
-import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.ConnectionHeader;
-import org.ros.internal.transport.SimplePipelineFactory;
+import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.Message;
 
 import java.net.SocketAddress;
@@ -109,13 +109,13 @@ public class ServiceClient<ResponseMessageType extends Message> {
       // TODO(damonkohler): Handle handshake errors.
       handshake(incomingBuffer);
       ChannelPipeline pipeline = e.getChannel().getPipeline();
-      pipeline.remove(SimplePipelineFactory.LENGTH_FIELD_BASED_FRAME_DECODER);
+      pipeline.remove(TcpClientPipelineFactory.LENGTH_FIELD_BASED_FRAME_DECODER);
       pipeline.remove(this);
-      pipeline.addLast("Response Decoder", new ResponseDecoder());
-      pipeline.addLast("Response Handler", new ResponseHandler());
+      pipeline.addLast("ResponseDecoder", new ResponseDecoder());
+      pipeline.addLast("ResponseHandler", new ResponseHandler());
     }
   }
-  
+
   private final class ResponseHandler extends SimpleChannelHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
@@ -146,8 +146,8 @@ public class ServiceClient<ResponseMessageType extends Message> {
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
     bootstrap = new ClientBootstrap(channelFactory);
-    SimplePipelineFactory factory = new SimplePipelineFactory();
-    factory.getPipeline().addLast("Handshake Handler", new HandshakeHandler());
+    TcpClientPipelineFactory factory = new TcpClientPipelineFactory();
+    factory.getPipeline().addLast("HandshakeHandler", new HandshakeHandler());
     bootstrap.setPipelineFactory(factory);
     bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
   }

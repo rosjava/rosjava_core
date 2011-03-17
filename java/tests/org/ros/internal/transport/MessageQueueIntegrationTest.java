@@ -24,15 +24,19 @@ import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.topic.TopicManager;
-import org.ros.internal.transport.tcp.HandshakeHandler;
+import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
+import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
@@ -61,17 +65,9 @@ public class MessageQueueIntegrationTest {
 
   @Test
   public void testSendAndReceiveMessage() throws InterruptedException {
+    ChannelGroup serverChannelGroup = new DefaultChannelGroup();
     TopicManager topicManager = new TopicManager();
     ServiceManager serviceManager = new ServiceManager();
-
-    // Reproduces the pipeline that TcpServer sets up, with the exception of the
-    // ConnectionTrackingHandler.
-    SimplePipelineFactory serverPipelineFactory = new SimplePipelineFactory();
-    serverPipelineFactory.getPipeline().addLast("ServerHandler", new ServerHandler());
-    serverPipelineFactory.getPipeline().addLast("HandshakeHandler",
-        new HandshakeHandler(topicManager, serviceManager));
-    // serverPipelineFactory.getPipeline().addLast("Connection Tracking Handler",
-    // new ConnectionTrackingHandler());
 
     NioServerSocketChannelFactory channelFactory =
         new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
@@ -79,30 +75,45 @@ public class MessageQueueIntegrationTest {
     ServerBootstrap bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    TcpServerPipelineFactory serverPipelineFactory =
+        new TcpServerPipelineFactory(serverChannelGroup, topicManager, serviceManager) {
+          @Override
+          public ChannelPipeline getPipeline() {
+            ChannelPipeline pipeline = super.getPipeline();
+            pipeline.remove(TcpServerPipelineFactory.HANDSHAKE_HANDLER);
+            pipeline.addLast("ServerHandler", new ServerHandler());
+            return pipeline;
+          }
+        };
     bootstrap.setPipelineFactory(serverPipelineFactory);
     Channel serverChannel = bootstrap.bind(new InetSocketAddress(0));
 
     // TODO(damonkohler): Test connecting multiple incoming queues to single
     // outgoing queue and visa versa.
-    IncomingMessageQueue<org.ros.message.std.String> in =
+    final IncomingMessageQueue<org.ros.message.std.String> in =
         new IncomingMessageQueue<org.ros.message.std.String>(org.ros.message.std.String.class);
 
     ChannelFactory clientChannelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
     ClientBootstrap clientBootstrap = new ClientBootstrap(clientChannelFactory);
-
-    SimplePipelineFactory clientPipelineFactory = new SimplePipelineFactory();
-    clientPipelineFactory.getPipeline().addLast("ClientHandler", in.createChannelHandler());
-    clientBootstrap.setPipelineFactory(clientPipelineFactory);
     clientBootstrap.setOption("bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    TcpClientPipelineFactory clientPipelineFactory = new TcpClientPipelineFactory() {
+      @Override
+      public ChannelPipeline getPipeline() {
+        ChannelPipeline pipeline = super.getPipeline();
+        pipeline.addLast("ClientHandler", in.createChannelHandler());
+        return pipeline;
+      }
+    };
+    clientBootstrap.setPipelineFactory(clientPipelineFactory);
     clientBootstrap.connect(serverChannel.getLocalAddress()).awaitUninterruptibly();
 
-    // TODO(damonkohler): There is a race here that makes this test flaky. Once
-    // the IncomingMessageQueue is ported to Netty, we can wait for a successful
-    // connection before putting the message on the outgoing queue. That should
-    // fix the problem.
+    // TODO(damonkohler): Ugly hack because we can't yet determine when the
+    // connection has been established.
+    Thread.sleep(100);
+
     org.ros.message.std.String hello = new org.ros.message.std.String();
     hello.data = "Would you like to play a game?";
     out.put(hello);

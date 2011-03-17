@@ -37,11 +37,11 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.MessageListener;
 import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
-import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ProtocolNames;
-import org.ros.internal.transport.SimplePipelineFactory;
+import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.Message;
 
 import java.net.SocketAddress;
@@ -127,10 +127,9 @@ public class Subscriber<MessageType extends Message> extends Topic<MessageType> 
     this.executor = executor;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new IncomingMessageQueue<MessageType>(messageClass);
-    header = ImmutableMap.<String, String>builder()
-        .putAll(slaveIdentifier.toHeader())
-        .putAll(description.toHeader())
-        .build();
+    header =
+        ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
+            .putAll(description.toHeader()).build();
     knownPublishers = Sets.newHashSet();
     channelGroup = new DefaultChannelGroup();
     channelFactory =
@@ -170,8 +169,14 @@ public class Subscriber<MessageType extends Message> extends Topic<MessageType> 
       SocketAddress address) {
     // TODO(damonkohler): Release bootstrap resources on shutdown.
     ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
-    SimplePipelineFactory factory = new SimplePipelineFactory();
-    factory.getPipeline().addLast("Handshake Handler", new HandshakeHandler());
+    TcpClientPipelineFactory factory = new TcpClientPipelineFactory() {
+      @Override
+      public ChannelPipeline getPipeline() {
+        ChannelPipeline pipeline = super.getPipeline();
+        pipeline.addLast("HandshakeHandler", new HandshakeHandler());
+        return pipeline;
+      }
+    };
     bootstrap.setPipelineFactory(factory);
     bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     // TODO(damonkohler): Add timeouts.
@@ -180,7 +185,10 @@ public class Subscriber<MessageType extends Message> extends Topic<MessageType> 
       throw new RuntimeException(future.getCause());
     }
     Channel channel = future.getChannel();
-    channel.write(ConnectionHeader.encode(header)).awaitUninterruptibly();
+    future = channel.write(ConnectionHeader.encode(header)).awaitUninterruptibly();
+    if (!future.isSuccess()) {
+      throw new RuntimeException(future.getCause());
+    }
     if (DEBUG) {
       log.info("Connected to: " + channel.getRemoteAddress());
     }

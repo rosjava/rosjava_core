@@ -43,16 +43,13 @@ public class Publisher<MessageType extends Message> extends Topic<MessageType> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
-  private final OutgoingMessageQueue out;
   private final List<SubscriberIdentifier> subscribers;
+  private final OutgoingMessageQueue out;
 
   public Publisher(TopicDefinition description, Class<MessageType> messageClass) {
     super(description, messageClass);
-    out = new OutgoingMessageQueue();
     subscribers = Lists.newArrayList();
-  }
-
-  public void start() {
+    out = new OutgoingMessageQueue();
     out.start();
   }
 

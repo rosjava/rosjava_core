@@ -71,7 +71,7 @@ public class ServiceIntegrationTest {
         latch.countDown();
       }
     });
-    assertTrue(latch.await(300, TimeUnit.SECONDS));
+    assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 
 }

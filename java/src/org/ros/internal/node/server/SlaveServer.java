@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -69,11 +70,11 @@ public class SlaveServer extends NodeServer {
     return publishers;
   }
 
-  public SlaveServer(String name, MasterClient master, String hostname, int port) {
-    super(hostname, port);
-    Preconditions.checkNotNull(name);
-    Preconditions.checkArgument(name.startsWith("/"));
-    this.name = name;
+  public SlaveServer(String nodeName, MasterClient master, SocketAddress address) {
+    super(address);
+    Preconditions.checkNotNull(nodeName);
+    Preconditions.checkArgument(nodeName.startsWith("/"));
+    this.name = nodeName;
     this.master = master;
     this.topicManager = new TopicManager();
     tcpRosServerAddress = null;

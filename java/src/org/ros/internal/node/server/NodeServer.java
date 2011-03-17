@@ -27,7 +27,9 @@ import org.apache.xmlrpc.server.XmlRpcServerConfigImpl;
 import org.apache.xmlrpc.webserver.WebServer;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -40,14 +42,16 @@ public class NodeServer {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(NodeServer.class);
 
-  protected final String hostname;
+  private final InetSocketAddress address;
   private final WebServer server;
 
   private boolean running;
 
-  public NodeServer(String hostname, int port) {
-    this.hostname = hostname;
-    server = new WebServer(port);
+  public NodeServer(SocketAddress address) {
+    // TODO(damonkohler): Since this address is the one we bind to, it doesn't
+    // necessarily have the right port information.
+    this.address = (InetSocketAddress) address;
+    server = new WebServer(this.address.getPort(), this.address.getAddress());
     running = false;
   }
 
@@ -69,14 +73,14 @@ public class NodeServer {
     }
   }
 
-  public void shutdown() {
+  void shutdown() {
     Preconditions.checkState(running);
     server.shutdown();
   }
 
   public URI getUri() throws MalformedURLException, URISyntaxException {
     Preconditions.checkState(running);
-    return new URL("http", hostname, server.getPort(), "").toURI();
+    return new URL("http", address.getHostName(), server.getPort(), "").toURI();
   }
 
 }
