@@ -17,9 +17,6 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.node.client.TimeProvider;
-import org.ros.internal.node.client.WallclockProvider;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
@@ -29,6 +26,8 @@ import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.RosoutLogger;
+import org.ros.internal.node.client.TimeProvider;
+import org.ros.internal.node.client.WallclockProvider;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.topic.MessageDefinition;
@@ -99,39 +98,34 @@ public class Node implements Namespace {
   }
 
   @Override
-  public <MessageType extends Message> Publisher<MessageType> createPublisher(String topic_name,
-      Class<MessageType> clazz) throws RosInitException, RosNameException {
+  public <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
+      Class<MessageType> messageClass) throws RosInitException, RosNameException {
     if (!initialized) {
       // kwc: this is not a permanent constraint. In the future, with more state
       // tracking, it is possible to allow Publisher handles to be created
       // before node.init().
       throw new RosInitException("Please call node.init()");
     }
+    Preconditions.checkNotNull(masterClient);
+    Preconditions.checkNotNull(slaveServer);
     try {
-      Preconditions.checkNotNull(masterClient);
-      Preconditions.checkNotNull(slaveServer);
-      Publisher<MessageType> pub = new Publisher<MessageType>(resolveName(topic_name), clazz);
+      String resolvedTopicName = resolveName(topicName);
+      Message m = messageClass.newInstance();
+      TopicDefinition topicDefinition = new TopicDefinition(resolvedTopicName,
+          MessageDefinition.createFromMessage(m));
 
-      // TODO(kwc): this starts multiple TCPROS servers. Need to de-couple from
-      // actual Publisher factory.
-      if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
-        // If we are advertising as localhost, explicitly bind to loopback-only.
-        // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
-        pub.start(new InetSocketAddress(InetAddress.getByName("localhost"), context.getTcpRosPort()));
-      } else {
-        pub.start(new InetSocketAddress(context.getTcpRosPort()));
-      }
-      slaveServer.addPublisher(pub.publisher);
-      return pub;
+      org.ros.internal.topic.Publisher<MessageType> publisherImpl = pubSubFactory.createPublisher(
+          slaveServer, topicDefinition, messageClass);
+      return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (IOException e) {
-      throw new RosInitException(e);
-    } catch (InstantiationException e) {
-      throw new RosInitException(e);
-    } catch (IllegalAccessException e) {
       throw new RosInitException(e);
     } catch (URISyntaxException e) {
       throw new RosInitException(e);
     } catch (RemoteException e) {
+      throw new RosInitException(e);
+    } catch (InstantiationException e) {
+      throw new RosInitException(e);
+    } catch (IllegalAccessException e) {
       throw new RosInitException(e);
     }
   }
@@ -221,9 +215,23 @@ public class Node implements Namespace {
         throw new RosInitException("invalid ROS slave URI");
       }
 
+      InetSocketAddress tcpRosServerAddress;
+      if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
+        // If we are advertising as localhost, explicitly bind to loopback-only.
+        // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
+        tcpRosServerAddress = new InetSocketAddress(InetAddress.getByName("localhost"),
+            context.getTcpRosPort());
+      } else {
+        tcpRosServerAddress = new InetSocketAddress(context.getTcpRosPort());
+      }
+
       // Create factory and job queue for generating publisher/subscriber impls.
       executor = Executors.newCachedThreadPool();
       pubSubFactory = new PubSubFactory(slaveIdentifier, executor);
+      // Explicitly start TCPROS resources for now.
+      InetSocketAddress tcpRosPublicAddress = pubSubFactory.startTcpRosServer(tcpRosServerAddress,
+          context.getHostName());
+      slaveServer.setTcpRosServerAddress(tcpRosPublicAddress);
 
       initialized = true;
 
@@ -255,7 +263,10 @@ public class Node implements Namespace {
 
   public void shutdown() {
     // TODO unregister all publishers, subscribers, etc.
-    slaveServer.shutdown();
+    if (initialized) {
+      slaveServer.shutdown();
+      pubSubFactory.stopTcpRosServer();
+    }
   }
 
 }

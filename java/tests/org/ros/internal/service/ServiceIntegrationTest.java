@@ -19,6 +19,10 @@ package org.ros.internal.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.ros.internal.topic.TopicManager;
+
+import org.ros.internal.transport.tcp.TcpServer;
+
 import org.junit.Test;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
@@ -34,8 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class ServiceIntegrationTest {
 
   @Test
-  public void PesistentServiceConnectionTest() throws InterruptedException,
-      URISyntaxException {
+  public void PesistentServiceConnectionTest() throws InterruptedException, URISyntaxException {
     ServiceDefinition definition = new ServiceDefinition(AddTwoInts.__s_getDataType(),
         AddTwoInts.__s_getMD5Sum());
 
@@ -48,11 +51,15 @@ public class ServiceIntegrationTest {
         return response;
       }
     };
-    server.start(new InetSocketAddress(0));
+    TopicManager topicManager = new TopicManager();
+    topicManager.setService("/add_two_ints", server);
+    TcpServer tcpServer = new TcpServer(topicManager);
+    tcpServer.start(new InetSocketAddress(0));
+    server.setAddress(tcpServer.getAddress());
 
     ServiceClient<AddTwoInts.Response> client = ServiceClient.create(AddTwoInts.Response.class,
-        "/client", new ServiceIdentifier("add_two_ints", server.getUri(), definition));
-    client.connect(server.getAddress());
+        "/client", new ServiceIdentifier("/add_two_ints", server.getUri(), definition));
+    client.connect(tcpServer.getAddress());
 
     AddTwoInts.Request request = new AddTwoInts.Request();
     request.a = 2;

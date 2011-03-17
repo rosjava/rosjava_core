@@ -15,12 +15,7 @@
  */
 package org.ros;
 
-import org.ros.internal.topic.MessageDefinition;
-import org.ros.internal.topic.TopicDefinition;
 import org.ros.message.Message;
-
-import java.io.IOException;
-import java.net.SocketAddress;
 
 /**
  * A handle for publishing messages of a particular type on a given topic.
@@ -31,7 +26,7 @@ import java.net.SocketAddress;
  *          messages of this type.
  */
 public class Publisher<MessageType extends Message> {
-  org.ros.internal.topic.Publisher publisher;
+  org.ros.internal.topic.Publisher<MessageType> publisher;
   String topicName;
   // deal with type erasure for generics
   Class<MessageType> messageClass;
@@ -42,9 +37,11 @@ public class Publisher<MessageType extends Message> {
    * @param topicName
    * @param messageClass
    */
-  Publisher(String topicName, Class<MessageType> messageClass) {
+  Publisher(String topicName, Class<MessageType> messageClass,
+      org.ros.internal.topic.Publisher<MessageType> publisher) {
     this.topicName = topicName;
     this.messageClass = messageClass;
+    this.publisher = publisher;
   }
 
   /**
@@ -53,23 +50,10 @@ public class Publisher<MessageType extends Message> {
    *          topic that this Publisher has been associated with.
    */
   public void publish(MessageType m) {
-    publisher.publish(m);
+    // publisher is shared across multiple publisher instances, so lock access.
+    synchronized (this) {
+      publisher.publish(m);
+    }
   }
 
-  /**
-   * This starts up the topic
-   * 
-   * @param address 
-   * @throws IOException
-   * @throws IllegalAccessException
-   * @throws InstantiationException
-   */
-  void start(SocketAddress address) throws IOException, InstantiationException, IllegalAccessException {
-    // create an instance of the message of type MessageT
-    Message m = messageClass.newInstance();
-    TopicDefinition topicDefinition;
-    topicDefinition = new TopicDefinition(topicName, MessageDefinition.createFromMessage(m));
-    publisher = new org.ros.internal.topic.Publisher(topicDefinition);
-    publisher.start(address);
-  }
 }

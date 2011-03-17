@@ -21,6 +21,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.ros.exceptions.RosNameException;
+
+import org.ros.internal.namespace.GraphName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.MasterClient;
@@ -51,11 +57,17 @@ import java.util.Map;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class SlaveServer extends NodeServer {
-
+  private final boolean DEBUG = false;
+  private final Log log = LogFactory.getLog(SlaveServer.class);
   private final String name;
   private final MasterClient master;
-  private final Map<String, Publisher> publishers;
+  private final Map<String, Publisher<?>> publishers;
   private final Map<String, Subscriber<?>> subscribers;
+  private InetSocketAddress tcpRosServerAddress;
+
+  public void setTcpRosServerAddress(InetSocketAddress tcpRosServerAddress) {
+    this.tcpRosServerAddress = tcpRosServerAddress;
+  }
 
   private static List<PublisherIdentifier> buildPublisherIdentifierList(
       Collection<URI> publisherUriList, TopicDefinition topicDefinition) {
@@ -75,16 +87,18 @@ public class SlaveServer extends NodeServer {
     this.master = master;
     publishers = Maps.newConcurrentMap();
     subscribers = Maps.newConcurrentMap();
+    tcpRosServerAddress = null;
   }
 
   public void start() throws XmlRpcException, IOException, URISyntaxException {
     super.start(org.ros.internal.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
   }
 
-  public void addPublisher(Publisher publisher) throws MalformedURLException, URISyntaxException,
-      RemoteException {
-    String topic = publisher.getTopicName();
-    publishers.put(topic, publisher);
+  public void addPublisher(Publisher<?> publisher) throws MalformedURLException,
+      URISyntaxException, RemoteException {
+    // TODO (kwc): the publishers/subscribers data structure is the same data as
+    // TopicManager. It may be better just to reference that instead.
+    publishers.put(publisher.getTopicName(), publisher);
     master.registerPublisher(toSlaveIdentifier(), publisher);
   }
 
@@ -169,7 +183,7 @@ public class SlaveServer extends NodeServer {
     return ImmutableList.copyOf(subscribers.values());
   }
 
-  public List<Publisher> getPublications() {
+  public List<Publisher<?>> getPublications() {
     return ImmutableList.copyOf(publishers.values());
   }
 
@@ -190,16 +204,19 @@ public class SlaveServer extends NodeServer {
   // TODO(damonkohler): Support multiple publishers for a particular topic.
   public ProtocolDescription requestTopic(String topic, Collection<String> protocols)
       throws ServerException {
+    try {
+      // canonicalize topic name.
+      topic = new GraphName(topic).toGlobal();
+    } catch (RosNameException e) {
+      throw new ServerException("Invalid topic name");
+    }
     if (!publishers.containsKey(topic)) {
       throw new ServerException("No publishers for topic " + topic);
     }
+    Preconditions.checkState(tcpRosServerAddress != null);
     for (String protocol : protocols) {
       if (ProtocolNames.SUPPORTED.contains(protocol)) {
-        // Override address that TCPROS server reports with the hostname/IP
-        // address that we've been configured to report.
-        InetSocketAddress publicAddress = new InetSocketAddress(hostname, publishers.get(topic)
-            .getAddress().getPort());
-        return new TcpRosProtocolDescription(publicAddress);
+        return new TcpRosProtocolDescription(tcpRosServerAddress);
       }
     }
     throw new ServerException("No supported protocols specified.");

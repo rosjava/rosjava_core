@@ -46,6 +46,7 @@ public class OutgoingMessageQueue {
           byte[] serializedMessage = messages.take().serialize(0);
           ChannelBuffer message =
               ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, serializedMessage);
+          
           channelGroup.write(message);
         }
       } catch (InterruptedException e) {

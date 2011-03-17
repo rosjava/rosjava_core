@@ -21,6 +21,12 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 
+import org.ros.internal.topic.TopicManager;
+
+import org.ros.internal.transport.tcp.TcpServer;
+
+import org.ros.message.std.Int64;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,6 +65,8 @@ public class MasterSlaveIntegrationTest {
   private MasterClient masterClient;
   private SlaveServer slaveServer;
   private SlaveClient slaveClient;
+  private TopicManager topicManager;
+  private TcpServer tcpServer;
 
   @Before
   public void setUp() throws XmlRpcException, IOException, URISyntaxException {
@@ -67,6 +75,11 @@ public class MasterSlaveIntegrationTest {
     masterClient = new MasterClient(masterServer.getUri());
     slaveServer = new SlaveServer("/foo", masterClient, "localhost", 0);
     slaveServer.start();
+    topicManager = new TopicManager();
+    tcpServer = new TcpServer(topicManager);
+    tcpServer.start(new InetSocketAddress(0));
+    slaveServer.setTcpRosServerAddress(tcpServer.getAddress());
+    
     slaveClient = new SlaveClient("/bar", slaveServer.getUri());
   }
 
@@ -83,17 +96,17 @@ public class MasterSlaveIntegrationTest {
   }
 
   @Test
-  public void testAddPublisher() throws RemoteException, IOException, URISyntaxException {
+  public void testAddPublisher() throws Exception {
     TopicDefinition topicDefinition =
         new TopicDefinition("/hello",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
-    Publisher publisher = new Publisher(topicDefinition);
-    publisher.start(new InetSocketAddress(0));
+    Publisher<Int64> publisher = new Publisher<Int64>(topicDefinition, Int64.class);
+    topicManager.setPublisher(topicDefinition.getName(), publisher);
     try {
       slaveServer.addPublisher(publisher);
       Response<ProtocolDescription> response =
           slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS));
-      assertEquals(new TcpRosProtocolDescription(publisher.getAddress()), response.getResult());
+      assertEquals(new TcpRosProtocolDescription(tcpServer.getAddress()), response.getResult());
     } finally {
       publisher.shutdown();
     }
@@ -108,10 +121,12 @@ public class MasterSlaveIntegrationTest {
     Subscriber<org.ros.message.std.String> subscriber =
         Subscriber.create(slaveIdentifier, topicDefinition, org.ros.message.std.String.class,
             Executors.newCachedThreadPool());
+    topicManager.setSubscriber(topicDefinition.getName(), subscriber);
     List<PublisherIdentifier> publishers = slaveServer.addSubscriber(subscriber);
     assertEquals(0, publishers.size());
-    Publisher publisher = new Publisher(topicDefinition);
+    Publisher<Int64> publisher = new Publisher<Int64>(topicDefinition, Int64.class);
     slaveServer.addPublisher(publisher);
+    topicManager.setPublisher(topicDefinition.getName(), publisher);
     publishers = slaveServer.addSubscriber(subscriber);
     PublisherIdentifier publisherDescription =
         publisher.toPublisherIdentifier(SlaveIdentifier.createAnonymous(slaveServer.getUri()));
@@ -136,7 +151,11 @@ public class MasterSlaveIntegrationTest {
             return response;
           }
         };
-    server.start(new InetSocketAddress(0));
+    TopicManager topicManager = new TopicManager();
+    TcpServer tcpServer = new TcpServer(topicManager );
+    tcpServer.start(new InetSocketAddress(0));
+    server.setAddress(tcpServer.getAddress());
+    topicManager.setService("/service", server);
     slaveServer.addService(server);
     Response<URI> response =
         masterClient.lookupService(

@@ -17,17 +17,18 @@
 package org.ros.internal.topic;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
+import org.ros.exceptions.RosInitException;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.transport.tcp.TcpServer;
 import org.ros.message.Message;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -38,15 +39,15 @@ import java.util.concurrent.Executor;
  */
 public class PubSubFactory {
 
-  private final Map<String, Subscriber<?>> subscribers;
   private final SlaveIdentifier slaveIdentifier;
   private final Executor executor;
+  private TcpServer server;
+  private final TopicManager manager;
 
   public PubSubFactory(SlaveIdentifier slaveIdentifier, Executor executor) {
-    // TODO(kwc): implement publishers factory
     this.slaveIdentifier = slaveIdentifier;
     this.executor = executor;
-    subscribers = Maps.newConcurrentMap();
+    manager = new TopicManager();
   }
 
   /**
@@ -55,8 +56,10 @@ public class PubSubFactory {
    * generated, it is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param description {@link TopicDefinition} that is subscribed to
-   * @param messageClass {@link Message} class for topic
+   * @param topicDefinition
+   *          {@link TopicDefinition} that is subscribed to
+   * @param messageClass
+   *          {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -64,21 +67,21 @@ public class PubSubFactory {
    */
   @SuppressWarnings("unchecked")
   public <MessageType extends Message> Subscriber<MessageType> createSubscriber(
-      SlaveServer slaveServer, TopicDefinition description, Class<MessageType> messageClass)
+      SlaveServer slaveServer, TopicDefinition topicDefinition, Class<MessageType> messageClass)
       throws IOException, URISyntaxException, RemoteException {
-    String topicName = description.getName();
+    String topicName = topicDefinition.getName();
     Subscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
 
-    synchronized (subscribers) {
-      if (subscribers.containsKey(topicName)) {
+    synchronized (manager) {
+      if (manager.hasSubscriber(topicName)) {
         // Return existing internal subscriber.
-        subscriber = (Subscriber<MessageType>) subscribers.get(topicName);
+        subscriber = (Subscriber<MessageType>) manager.getSubscriber(topicName);
         Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
-        // Create new singleton for topic subscription.
-        subscriber = Subscriber.create(slaveIdentifier, description, messageClass, executor);
-        subscribers.put(topicName, subscriber);
+        // Create new underlying implementation for topic subscription.
+        subscriber = Subscriber.create(slaveIdentifier, topicDefinition, messageClass, executor);
+        manager.setSubscriber(topicName, subscriber);
         createdNewSubscriber = true;
       }
     }
@@ -88,11 +91,57 @@ public class PubSubFactory {
     // sort of pattern to consolidate master registration communication in a
     // single entity.
     if (createdNewSubscriber) {
-      // Slave server handles registration of new Subscribers with the
-      // MasterServer.
       slaveServer.addSubscriber(subscriber);
     }
     return subscriber;
   }
 
+  @SuppressWarnings("unchecked")
+  public <MessageType extends Message> Publisher<MessageType> createPublisher(
+      SlaveServer slaveServer, TopicDefinition topicDefinition, Class<MessageType> messageClass)
+      throws IOException, URISyntaxException, RemoteException {
+    String topicName = topicDefinition.getName();
+    Publisher<MessageType> publisher;
+    boolean createdNewPublisher = false;
+
+    synchronized (manager) {
+      if (manager.hasPublisher(topicName)) {
+        // Return existing internal subscriber.
+        publisher = (Publisher<MessageType>) manager.getPublisher(topicName);
+        Preconditions.checkState(publisher.checkMessageClass(messageClass));
+      } else {
+        // Create new underlying implementation for topic subscription.
+        publisher = new Publisher<MessageType>(topicDefinition, messageClass);
+        manager.setPublisher(topicName, publisher);
+        createdNewPublisher = true;
+      }
+    }
+
+    if (createdNewPublisher) {
+      slaveServer.addPublisher(publisher);
+      // Start the publisher thread.
+      publisher.start();
+    }
+
+    return publisher;
+  }
+
+  public InetSocketAddress startTcpRosServer(InetSocketAddress tcpRosServerAddress,
+      String publicHostname) throws RosInitException {
+    try {
+      server = new TcpServer(manager);
+    } catch (Exception e) {
+      throw new RosInitException(e);
+    }
+    server.start(tcpRosServerAddress);
+
+    // Override address that TCPROS server reports with the hostname/IP
+    // address that we've been configured to report.
+    return new InetSocketAddress(publicHostname, server.getAddress().getPort());
+  }
+
+  public void stopTcpRosServer() {
+    server.shutdown();
+    server = null;
+  }
 }

@@ -18,6 +18,8 @@ package org.ros.internal.transport;
 
 import static org.junit.Assert.assertEquals;
 
+import org.ros.internal.topic.TopicManager;
+
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
@@ -59,17 +61,17 @@ public class MessageQueueIntegrationTest {
   public void testSendAndReceiveMessage() throws InterruptedException {
     SimplePipelineFactory serverPipelineFactory = new SimplePipelineFactory();
     serverPipelineFactory.getPipeline().addLast("Server Handler", new ServerHandler());
-    TcpServer server = new TcpServer(serverPipelineFactory);
+    TopicManager topicManager = new TopicManager();
+    TcpServer server = new TcpServer(serverPipelineFactory, topicManager);
     server.start(new InetSocketAddress(0));
 
     // TODO(damonkohler): Test connecting multiple incoming queues to single
     // outgoing queue and visa versa.
-    IncomingMessageQueue<org.ros.message.std.String> in =
-        new IncomingMessageQueue<org.ros.message.std.String>(org.ros.message.std.String.class);
+    IncomingMessageQueue<org.ros.message.std.String> in = new IncomingMessageQueue<org.ros.message.std.String>(
+        org.ros.message.std.String.class);
 
-    ChannelFactory channelFactory =
-        new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool());
+    ChannelFactory channelFactory = new NioClientSocketChannelFactory(
+        Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
     ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
     SimplePipelineFactory clientPipelineFactory = new SimplePipelineFactory();
     clientPipelineFactory.getPipeline().addLast("Client Handler", in.createChannelHandler());

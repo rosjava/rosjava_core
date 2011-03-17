@@ -17,6 +17,10 @@ package org.ros.tutorials;
 
 import com.google.common.collect.Sets;
 
+import org.ros.internal.topic.TopicManager;
+
+import org.ros.internal.transport.tcp.TcpServer;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.MessageListener;
 import org.ros.internal.node.RemoteException;
@@ -60,18 +64,24 @@ public class SimplePubSub {
     slaveServer.start();
     Executor executor = Executors.newCachedThreadPool();
 
+    TopicManager topicManager = new TopicManager();
+    TcpServer tcpServer = new TcpServer(topicManager);
+    tcpServer.start(new InetSocketAddress(0));
+    slaveServer.setTcpRosServerAddress(tcpServer.getAddress());
+    
     TopicDefinition topicDefinition = new TopicDefinition("/hello",
         MessageDefinition.createFromMessage(new org.ros.message.std.String()));
     SlaveIdentifier pubSlaveIdentifer = new SlaveIdentifier("/pub", new URI("http://fake:1234"));
     PublisherIdentifier publisherIdentifier = new PublisherIdentifier(pubSlaveIdentifer,
         topicDefinition);
-    Publisher publisher = new Publisher(topicDefinition);
-    publisher.start(new InetSocketAddress(0));
+    Publisher<org.ros.message.std.String> publisher = new Publisher<org.ros.message.std.String>(topicDefinition, org.ros.message.std.String.class);
+    topicManager.setPublisher(topicDefinition.getName(), publisher);
     slaveServer.addPublisher(publisher);
 
     SlaveIdentifier subSlaveIdentifier = new SlaveIdentifier("/bloop", new URI("http://fake:5678"));
     Subscriber<org.ros.message.std.String> subscriber = Subscriber.create(subSlaveIdentifier,
         topicDefinition, org.ros.message.std.String.class, executor);
+    topicManager.setSubscriber(topicDefinition.getName(), subscriber);
     subscriber.addMessageListener(new MessageListener<org.ros.message.std.String>() {
       @Override
       public void onNewMessage(org.ros.message.std.String message) {

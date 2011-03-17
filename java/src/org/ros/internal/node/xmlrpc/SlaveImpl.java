@@ -127,9 +127,9 @@ public class SlaveImpl implements Slave {
    */
   @Override
   public List<Object> getPublications(String callerId) {
-    List<Publisher> publishers = slave.getPublications();
+    List<Publisher<?>> publishers = slave.getPublications();
     List<List<String>> publications = Lists.newArrayList();
-    for (Publisher publisher : publishers) {
+    for (Publisher<?> publisher : publishers) {
       publications.add(publisher.getTopicDefinitionAsList());
     }
     return Response.createSuccess("Success", publications).toList();

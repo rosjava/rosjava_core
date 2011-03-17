@@ -16,76 +16,43 @@
 
 package org.ros.internal.topic;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+
+import org.jboss.netty.channel.Channel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.OutgoingMessageQueue;
-import org.ros.internal.transport.SimplePipelineFactory;
-import org.ros.internal.transport.tcp.TcpServer;
 import org.ros.message.Message;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Publisher extends Topic {
+public class Publisher<MessageType extends Message> extends Topic {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final OutgoingMessageQueue out;
   private final List<SubscriberIdentifier> subscribers;
-  private final TcpServer server;
+  private final Class<MessageType> messageClass;
 
-  class HandshakeHandler extends SimpleChannelHandler {
-
-    @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-      ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
-      ChannelBuffer outgoingBuffer = handshake(incomingBuffer);
-      Channel channel = ctx.getChannel();
-      channel.write(outgoingBuffer).await();
-      // TODO(damonkohler): What happens if the client doesn't like the handshake?
-      out.addChannel(channel);
-      // TODO(damonkohler): Replace this handler with a discard handler in the
-      // pipeline.
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-      log.error("Incomming connection failed.", e.getCause());
-      e.getChannel().close();
-    }
-  }
-
-  public Publisher(TopicDefinition description) {
+  public Publisher(TopicDefinition description, Class<MessageType> messageClass) {
     super(description);
     out = new OutgoingMessageQueue();
     subscribers = Lists.newArrayList();
-    // TODO(kwc): We only need one TCPROS server for the entire node.
-    SimplePipelineFactory factory = new SimplePipelineFactory();
-    factory.getPipeline().addLast("HandshakeHandler", new HandshakeHandler());
-    server = new TcpServer(factory);
+    this.messageClass = messageClass;
   }
 
-  public void start(SocketAddress address) {
-    server.start(address);
+  public void start() {
     out.start();
   }
 
@@ -95,15 +62,10 @@ public class Publisher extends Topic {
     } catch (InterruptedException e) {
       log.error("Failed to shutdown outgoing message queue.", e);
     }
-    server.shutdown();
   }
 
   public PublisherIdentifier toPublisherIdentifier(SlaveIdentifier description) {
     return new PublisherIdentifier(description, getTopicDefinition());
-  }
-
-  public InetSocketAddress getAddress() {
-    return server.getAddress();
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
@@ -114,9 +76,24 @@ public class Publisher extends Topic {
     out.put(message);
   }
 
-  @VisibleForTesting
-  ChannelBuffer handshake(ChannelBuffer buffer) {
-    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
+  /**
+   * @param messageClass
+   * @return <code>true</code> if this {@link Publisher} instance accepts the
+   *         supplied {@link Message} class
+   */
+  boolean checkMessageClass(Class<? extends Message> messageClass) {
+    return this.messageClass == messageClass;
+  }
+
+  /**
+   * Complete connection handshake on buffer. This generates the connection
+   * header for this publisher to send and also updates the connection state of
+   * this publisher.
+   * 
+   * @param buffer
+   * @return Connection header from subscriber.
+   */
+  public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
     Map<String, String> header = getTopicDefinitionHeader();
     if (DEBUG) {
       log.info("Subscriber handshake header: " + incomingHeader);
@@ -130,6 +107,13 @@ public class Publisher extends Topic {
     SubscriberIdentifier subscriber = SubscriberIdentifier.createFromHeader(incomingHeader);
     subscribers.add(subscriber);
     return ConnectionHeader.encode(header);
+  }
+
+  public void addChannel(Channel channel) {
+    if (DEBUG) {
+      System.out.println("Publisher: adding channel");
+    }
+    out.addChannel(channel);
   }
 
 }

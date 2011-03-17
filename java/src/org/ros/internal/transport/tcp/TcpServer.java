@@ -33,6 +33,8 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.ros.internal.topic.TopicManager;
+import org.ros.internal.transport.SimplePipelineFactory;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -58,7 +60,7 @@ public class TcpServer {
     public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
       channelGroup.add(e.getChannel());
     }
-    
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
       e.getChannel().close();
@@ -66,20 +68,30 @@ public class TcpServer {
     }
   }
 
-  public TcpServer(ChannelPipelineFactory factory) {
-    channelGroup = new DefaultChannelGroup();
-    channelFactory =
-        new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool());
-    bootstrap = new ServerBootstrap(channelFactory);
-    bootstrap.setOption("child.bufferFactory",
-        new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-    bootstrap.setPipelineFactory(factory);
+  public TcpServer(ChannelPipelineFactory pipelineFactory, TopicManager topicManager) {
+    HandshakeHandler handshakeHandler = new HandshakeHandler(topicManager);
     try {
-      factory.getPipeline().addLast("Connection Tracking Handler", new ConnectionTrackingHandler());
+      pipelineFactory.getPipeline().addLast("HandshakeHandler", handshakeHandler);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    channelGroup = new DefaultChannelGroup();
+    channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
+        Executors.newCachedThreadPool());
+    bootstrap = new ServerBootstrap(channelFactory);
+    bootstrap.setOption("child.bufferFactory",
+        new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    bootstrap.setPipelineFactory(pipelineFactory);
+    try {
+      pipelineFactory.getPipeline().addLast("Connection Tracking Handler",
+          new ConnectionTrackingHandler());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public TcpServer(TopicManager topicManager) {
+    this(new SimplePipelineFactory(), topicManager);
   }
 
   public void start(SocketAddress address) {

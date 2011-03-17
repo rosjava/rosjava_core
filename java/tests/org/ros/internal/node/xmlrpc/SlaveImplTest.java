@@ -43,7 +43,7 @@ public class SlaveImplTest {
   @Test
   public void testGetPublicationsEmptyList() {
     SlaveServer mockSlave = mock(SlaveServer.class);
-    when(mockSlave.getPublications()).thenReturn(Lists.<Publisher>newArrayList());
+    when(mockSlave.getPublications()).thenReturn(Lists.<Publisher<?>>newArrayList());
     SlaveImpl slave = new SlaveImpl(mockSlave);
     List<Object> response = slave.getPublications("/foo");
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
@@ -53,8 +53,8 @@ public class SlaveImplTest {
   @Test
   public void testGetPublications() {
     SlaveServer mockSlave = mock(SlaveServer.class);
-    Publisher mockPublisher = mock(Publisher.class);
-    when(mockSlave.getPublications()).thenReturn(Lists.newArrayList(mockPublisher));
+    Publisher<?> mockPublisher = mock(Publisher.class);
+    when(mockSlave.getPublications()).thenReturn(Lists.<Publisher<?>>newArrayList(mockPublisher));
     when(mockPublisher.getTopicName()).thenReturn("/bar");
     when(mockPublisher.getTopicMessageType()).thenReturn("/baz");
     when(mockPublisher.getTopicDefinitionAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));
