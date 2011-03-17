@@ -24,11 +24,9 @@ import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.RosoutLogger;
 import org.ros.internal.node.client.TimeProvider;
 import org.ros.internal.node.client.WallclockProvider;
-import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.topic.MessageDefinition;
 import org.ros.internal.topic.TopicDefinition;
 import org.ros.message.Message;
@@ -42,6 +40,7 @@ import java.net.URISyntaxException;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
+ * @author kwc@willowgarage.com (Ken Conley)
  */
 public class Node implements Namespace {
   /**
@@ -51,12 +50,6 @@ public class Node implements Namespace {
   private final NodeContext context;
   /** The node's namespace name. */
   private final GraphName nodeName;
-  /** Port on which the slave server will be initialized on. */
-  private final int port;
-  /** The master client, used for communicating with an existing master. */
-  private MasterClient masterClient;
-  /** ... */
-  private SlaveServer slaveServer;
   /** Factory for generating internal Publisher and Subscriber instances. */
   private org.ros.internal.node.Node node;
 
@@ -64,10 +57,6 @@ public class Node implements Namespace {
    * Log for client. This will send messages to /rosout.
    */
   private RosoutLogger log;
-  /**
-   * Log for internal messages only.
-   */
-  private Log internalLog = LogFactory.getLog(Node.class);
   private boolean initialized;
   private TimeProvider timeProvider;
 
@@ -81,9 +70,6 @@ public class Node implements Namespace {
     Preconditions.checkNotNull(name);
     this.context = context;
     nodeName = new GraphName(this.context.getResolver().resolveName(name));
-    port = 0; // default port
-    masterClient = null;
-    slaveServer = null;
 
     // TODO (kwc): implement simulated time.
     timeProvider = new WallclockProvider();
@@ -94,21 +80,19 @@ public class Node implements Namespace {
   @Override
   public <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
       Class<MessageType> messageClass) throws RosInitException, RosNameException {
-    if (!initialized) {
+    if (!initialized || node == null) {
       // kwc: this is not a permanent constraint. In the future, with more state
       // tracking, it is possible to allow Publisher handles to be created
       // before node.init().
       throw new RosInitException("Please call node.init()");
     }
-    Preconditions.checkNotNull(masterClient);
-    Preconditions.checkNotNull(slaveServer);
     try {
       String resolvedTopicName = resolveName(topicName);
       Message m = messageClass.newInstance();
-      TopicDefinition topicDefinition =
-          new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(m));
-      org.ros.internal.topic.Publisher<MessageType> publisherImpl =
-          node.createPublisher(topicDefinition, messageClass);
+      TopicDefinition topicDefinition = new TopicDefinition(resolvedTopicName,
+          MessageDefinition.createFromMessage(m));
+      org.ros.internal.topic.Publisher<MessageType> publisherImpl = node.createPublisher(
+          topicDefinition, messageClass);
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (RosNameException e) {
       throw e;
@@ -122,7 +106,7 @@ public class Node implements Namespace {
       final MessageListener<MessageType> callback, Class<MessageType> messageClass)
       throws RosInitException, RosNameException {
 
-    if (!initialized) {
+    if (!initialized || node == null) {
       // kwc: this is not a permanent constraint. In the future, with more state
       // tracking, it is possible to allow Publisher handles to be created
       // before node.init().
@@ -132,18 +116,18 @@ public class Node implements Namespace {
     try {
       Message m = messageClass.newInstance();
       String resolvedTopicName = resolveName(topicName);
-      TopicDefinition topicDefinition =
-          new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(m));
-      org.ros.internal.topic.Subscriber<MessageType> subscriberImpl =
-          node.createSubscriber(topicDefinition, messageClass);
+      TopicDefinition topicDefinition = new TopicDefinition(resolvedTopicName,
+          MessageDefinition.createFromMessage(m));
+      org.ros.internal.topic.Subscriber<MessageType> subscriberImpl = node.createSubscriber(
+          topicDefinition, messageClass);
 
       // Add the callback to the impl.
       subscriberImpl.addMessageListener(callback);
       // Create the user-facing Subscriber handle. This is little more than a
       // lightweight wrapper around the internal implementation so that we can
       // track callback references.
-      Subscriber<MessageType> subscriber =
-          new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriberImpl);
+      Subscriber<MessageType> subscriber = new Subscriber<MessageType>(resolvedTopicName, callback,
+          messageClass, subscriberImpl);
       return subscriber;
 
     } catch (IOException e) {
@@ -157,7 +141,6 @@ public class Node implements Namespace {
     } catch (IllegalAccessException e) {
       throw new RosInitException(e);
     }
-
   }
 
   /**
@@ -186,28 +169,27 @@ public class Node implements Namespace {
       throw new RosInitException("already initialized");
     }
     try {
-      InetSocketAddress serverAddress;
+      InetSocketAddress tcpRosServerBindAddress;
       if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
-        serverAddress =
-            new InetSocketAddress(InetAddress.getByName("localhost"), context.getTcpRosPort());
+        tcpRosServerBindAddress = new InetSocketAddress(InetAddress.getByName("localhost"),
+            context.getTcpRosPort());
       } else {
-        serverAddress = new InetSocketAddress(context.getTcpRosPort());
+        tcpRosServerBindAddress = new InetSocketAddress(context.getTcpRosPort());
       }
 
       // Create factory and job queue for generating publisher/subscriber impls.
-      node =
-          new org.ros.internal.node.Node(nodeName.toString(), context.getRosMasterUri(),
-              new InetSocketAddress(context.getHostName(), context.getTcpRosPort()));
+      node = new org.ros.internal.node.Node(nodeName.toString(), context.getRosMasterUri(),
+          new InetSocketAddress(context.getHostName(), context.getXmlRpcPort()));
       // Explicitly start TCPROS resources for now.
-      node.start(serverAddress);
+      node.start(context.getHostName(), tcpRosServerBindAddress);
 
       initialized = true;
 
       // initialized must be true to start creating publishers.
-      Publisher<org.ros.message.rosgraph.Log> rosoutPublisher =
-          createPublisher("/rosout", org.ros.message.rosgraph.Log.class);
+      Publisher<org.ros.message.rosgraph.Log> rosoutPublisher = createPublisher("/rosout",
+          org.ros.message.rosgraph.Log.class);
       log.setRosoutPublisher(rosoutPublisher);
 
     } catch (IOException e) {
@@ -234,7 +216,6 @@ public class Node implements Namespace {
   }
 
   public void shutdown() {
-    // TODO unregister all publishers, subscribers, etc.
     if (initialized) {
       node.stop();
     }

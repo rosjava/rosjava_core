@@ -24,6 +24,7 @@ import org.ros.namespace.NameResolver;
  * configuration like the master URI.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
+ * @author kwc@willowgarage.com (Ken Conley)
  */
 public class NodeContext {
   private NameResolver resolver;
@@ -32,6 +33,7 @@ public class NodeContext {
   private String rosRoot;
   private String[] rosPackagePath;
   private int tcpRosPort;
+  private int xmlRpcPort;
 
   /**
    * default context
@@ -39,10 +41,11 @@ public class NodeContext {
   public NodeContext() {
     resolver = null;
     tcpRosPort = 0;
+    xmlRpcPort = 0;
   }
 
   /**
-   * @return The RosResolver fo this context, this should be used to resolve
+   * @return The RosResolver for this context, this should be used to resolve
    *         names that have been remapped.
    * @see NameResolver
    */
@@ -110,6 +113,20 @@ public class NodeContext {
    */
   public void setTcpRosPort(int tcpRosPort) {
     this.tcpRosPort = tcpRosPort;
+  }
+
+  /**
+   * @return Port to bind XMLRPC server to, or 0 to bind to any open port.
+   */
+  public int getXmlRpcPort() {
+    return xmlRpcPort;
+  }
+
+  /**
+   * Set port to bind XMLRPC server to. 0 binds to any open port.
+   */
+  public void setXmlRpcPort(int xmlRpcPort) {
+    this.xmlRpcPort = xmlRpcPort;
   }
 
 }

@@ -60,14 +60,12 @@ public class SimplePubSub {
     masterServer = new MasterServer(new InetSocketAddress(0));
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
-    slaveServer = new SlaveServer("/foo", masterClient, new InetSocketAddress(0));
-    slaveServer.start();
-    Executor executor = Executors.newCachedThreadPool();
-
     TopicManager topicManager = new TopicManager();
     TcpServer tcpServer = new TcpServer(topicManager, new ServiceManager());
     tcpServer.start(new InetSocketAddress(0));
-    slaveServer.setTcpRosServerAddress(tcpServer.getAddress());
+    slaveServer = new SlaveServer("/foo", masterClient, new InetSocketAddress(0));
+    slaveServer.start(tcpServer.getAddress());
+    Executor executor = Executors.newCachedThreadPool();
 
     TopicDefinition topicDefinition =
         new TopicDefinition("/hello",

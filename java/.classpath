@@ -5,7 +5,6 @@
 	<classpathentry kind="src" path="apache-xmlrpc-3.1.3-src/common/src/main/java"/>
 	<classpathentry excluding="org/apache/xmlrpc/webserver/HttpServletRequestImpl.java|org/apache/xmlrpc/webserver/HttpServletResponseImpl.java|org/apache/xmlrpc/webserver/ServletConnection.java|org/apache/xmlrpc/webserver/ServletOutputStreamImpl.java|org/apache/xmlrpc/webserver/ServletWebServer.java|org/apache/xmlrpc/webserver/XmlRpcServlet.java|org/apache/xmlrpc/webserver/XmlRpcServletServer.java" kind="src" path="apache-xmlrpc-3.1.3-src/server/src/main/java"/>
 	<classpathentry kind="src" path="ws-commons-util-1.0.2-src/src/main/java"/>
-	<classpathentry kind="src" path="commons-httpclient-3.1-src/src/java"/>
 	<classpathentry kind="src" path="tests"/>
 	<classpathentry kind="src" path="tutorials"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
@@ -16,5 +15,6 @@
 	<classpathentry kind="lib" path="lib/junit-4.8.2.jar"/>
 	<classpathentry kind="lib" path="lib/mockito-all-1.8.5.jar"/>
 	<classpathentry kind="lib" path="lib/netty-3.2.4.Final.jar"/>
+	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

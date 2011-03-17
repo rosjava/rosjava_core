@@ -32,6 +32,7 @@ import org.ros.internal.transport.tcp.TcpServer;
 import org.ros.message.Message;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.SocketAddress;
 import java.net.URI;
@@ -40,8 +41,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
- * Factory for generating both user-facing and internal Publisher and Subscriber
- * instances.
+ * Implementation of a ROS node. This implementation is responsible for the
+ * managing the various node resources, including XMLRPC and TCPROS servers and
+ * topic/service instances.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
@@ -53,15 +55,18 @@ public class Node {
   private final Executor executor;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
-  private final TcpServer server;
+  private final TcpServer tcpServer;
+  private boolean started;
 
-  public Node(String nodeName, URI masterUri, SocketAddress address) throws MalformedURLException {
+  public Node(String nodeName, URI masterUri, SocketAddress xmlRpcServerAddress)
+      throws MalformedURLException {
     master = new MasterClient(masterUri);
-    slave = new SlaveServer(nodeName, master, address);
+    slave = new SlaveServer(nodeName, master, xmlRpcServerAddress);
     executor = Executors.newCachedThreadPool();
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    server = new TcpServer(topicManager, serviceManager);
+    tcpServer = new TcpServer(topicManager, serviceManager);
+    started = false;
   }
 
   /**
@@ -70,8 +75,10 @@ public class Node {
    * generated, it is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition {@link TopicDefinition} that is subscribed to
-   * @param messageClass {@link Message} class for topic
+   * @param topicDefinition
+   *          {@link TopicDefinition} that is subscribed to
+   * @param messageClass
+   *          {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -81,6 +88,7 @@ public class Node {
   public <MessageType extends Message> Subscriber<MessageType> createSubscriber(
       TopicDefinition topicDefinition, Class<MessageType> messageClass) throws IOException,
       URISyntaxException, RemoteException {
+    Preconditions.checkState(started, "Node has not been started yet");
     String topicName = topicDefinition.getName();
     Subscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
@@ -92,8 +100,8 @@ public class Node {
         Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
         // Create new underlying implementation for topic subscription.
-        subscriber =
-            Subscriber.create(slave.toSlaveIdentifier(), topicDefinition, messageClass, executor);
+        subscriber = Subscriber.create(slave.toSlaveIdentifier(), topicDefinition, messageClass,
+            executor);
         topicManager.putSubscriber(topicName, subscriber);
         createdNewSubscriber = true;
       }
@@ -109,6 +117,7 @@ public class Node {
   public <MessageType extends Message> Publisher<MessageType> createPublisher(
       TopicDefinition topicDefinition, Class<MessageType> messageClass) throws IOException,
       URISyntaxException, RemoteException {
+    Preconditions.checkState(started, "Node has not been started yet");
     String topicName = topicDefinition.getName();
     Publisher<MessageType> publisher;
     boolean createdNewPublisher = false;
@@ -130,23 +139,39 @@ public class Node {
     return publisher;
   }
 
-  public void start(SocketAddress address) throws XmlRpcException, IOException, URISyntaxException {
-    server.start(address);
-    slave.setTcpRosServerAddress(server.getAddress());
-    slave.start();
+  /**
+   * Start I/O resources.
+   * 
+   * @param publicHostName
+   *          Hostname/address to use to report to public resources.
+   * @param tcpRosServerBindAddress
+   *          Address to bind TCPROS server to.
+   * @throws XmlRpcException
+   * @throws IOException
+   * @throws URISyntaxException
+   */
+  public void start(String publicHostName, InetSocketAddress tcpRosServerBindAddress)
+      throws XmlRpcException, IOException, URISyntaxException {
+    tcpServer.start(tcpRosServerBindAddress);
+    // compute the public-facing address for this server.
+    InetSocketAddress publicTcpRosServerAddress = new InetSocketAddress(publicHostName, tcpServer
+        .getAddress().getPort());
+    slave.start(publicTcpRosServerAddress);
+    started = true;
   }
 
   public void stop() {
-    server.shutdown();
-    // TODO(damonkohler): Shutdown SlaveServer, etc.
+    tcpServer.shutdown();
+    slave.shutdown();
+    // TODO(damonkohler): make sure shutdown stops all threads, I/O, etc...
   }
 
   // TODO(damonkohler): Possibly add some normalization here like in
   // ProtocolDescription?
   public SocketAddress getAddress() {
-    return server.getAddress();
+    return tcpServer.getAddress();
   }
-  
+
   public SlaveIdentifier getSlaveIdentifier() throws MalformedURLException, URISyntaxException {
     return slave.toSlaveIdentifier();
   }

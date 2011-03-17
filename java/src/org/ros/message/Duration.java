@@ -41,7 +41,8 @@ package org.ros.message;
  * 
  * http://www.ros.org/wiki/msg
  * 
- * @author Jason Wolfe, kwc@willowgarage.com (Ken Conley)
+ * @author Jason Wolfe
+ * @author kwc@willowgarage.com (Ken Conley)
  * 
  */
 public class Duration implements Comparable<Duration> {

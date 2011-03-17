@@ -28,13 +28,9 @@ import java.util.HashMap;
  * See the rules for names - http://www.ros.org/wiki/Names The resolver will do
  * ros name remappings for the user, if it has been initialized.
  * 
- * @author ethan.rublee@gmail.com (Ethan Rublee), kwc@willowgarage.com (Ken
- *         Conley)
- * 
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
+ * @author kwc@willowgarage.com (Ken Conley)
  */
-// TODO need to implement ROS namespace remapping. Resolver seems to be the
-// right place to do this as it is already aware of default namespace and is
-// contained within the Node implementation.
 public class NameResolver {
 
   private final HashMap<GraphName, GraphName> remappings;
@@ -45,7 +41,8 @@ public class NameResolver {
    * @throws RosNameException
    * 
    */
-  public NameResolver(String namespace, HashMap<GraphName, GraphName> remappings) throws RosNameException {
+  public NameResolver(String namespace, HashMap<GraphName, GraphName> remappings)
+      throws RosNameException {
     this.remappings = remappings;
     this.namespace = GraphName.canonicalizeName(namespace);
   }

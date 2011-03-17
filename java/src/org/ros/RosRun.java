@@ -79,8 +79,10 @@ public class RosRun {
       rm.rosMain(argv, nodeContext);
     } catch (RosInitException e) {
       e.printStackTrace();
+      System.exit(6);
     } catch (RosNameException e) {
       System.err.println(e.toString());
+      System.exit(7);
     }
   }
 

@@ -56,10 +56,6 @@ public class SlaveServer extends NodeServer {
   private final TopicManager topicManager;
   private InetSocketAddress tcpRosServerAddress;
 
-  public void setTcpRosServerAddress(InetSocketAddress tcpRosServerAddress) {
-    this.tcpRosServerAddress = tcpRosServerAddress;
-  }
-
   private static List<PublisherIdentifier> buildPublisherIdentifierList(
       Collection<URI> publisherUriList, TopicDefinition topicDefinition) {
     List<PublisherIdentifier> publishers = Lists.newArrayList();
@@ -70,18 +66,42 @@ public class SlaveServer extends NodeServer {
     return publishers;
   }
 
-  public SlaveServer(String nodeName, MasterClient master, SocketAddress address) {
-    super(address);
+  public SlaveServer(String nodeName, MasterClient master, SocketAddress xmlRpcServerAddress) {
+    super(xmlRpcServerAddress);
     Preconditions.checkNotNull(nodeName);
     Preconditions.checkArgument(nodeName.startsWith("/"));
     this.name = nodeName;
     this.master = master;
     this.topicManager = new TopicManager();
-    tcpRosServerAddress = null;
+    this.tcpRosServerAddress = null;
   }
 
-  public void start() throws XmlRpcException, IOException, URISyntaxException {
+  /**
+   * Start the XML-RPC server. This start() routine requires that the
+   * {@link TcpServer} is initialized first so that the slave server returns
+   * correct information when topics are requested.
+   * 
+   * @param tcpRosServerAddress
+   *          Address of TCPROS server.
+   * @throws XmlRpcException
+   * @throws IOException
+   * @throws URISyntaxException
+   */
+  // TODO: passing in the tcpRosServerAddress is temporary. It was too easy to
+  // create a SlaveServer without setting this crucial bit of information.
+  public void start(InetSocketAddress tcpRosServerAddress) throws XmlRpcException, IOException,
+      URISyntaxException {
     super.start(org.ros.internal.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
+    // kwc: in the future, tcpRosServerAddress would likely be part of a
+    // protocol handler implementation instead and opaque to the slave server,
+    // but for now I am keeping it an explicit start parameter so this is always
+    // set correctly.
+    this.tcpRosServerAddress = tcpRosServerAddress;
+  }
+
+  @Override
+  public void shutdown() {
+    super.shutdown();
   }
 
   public void addPublisher(Publisher<?> publisher) throws MalformedURLException,
