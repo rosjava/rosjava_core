@@ -17,9 +17,7 @@
 package org.ros.internal.node.server;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosNameException;
@@ -33,6 +31,7 @@ import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.PublisherIdentifier;
 import org.ros.internal.topic.Subscriber;
 import org.ros.internal.topic.TopicDefinition;
+import org.ros.internal.topic.TopicManager;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
@@ -44,10 +43,8 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -55,8 +52,7 @@ import java.util.Map;
 public class SlaveServer extends NodeServer {
   private final String name;
   private final MasterClient master;
-  private final Map<String, Publisher<?>> publishers;
-  private final Map<String, Subscriber<?>> subscribers;
+  private final TopicManager topicManager;
   private InetSocketAddress tcpRosServerAddress;
 
   public void setTcpRosServerAddress(InetSocketAddress tcpRosServerAddress) {
@@ -79,8 +75,7 @@ public class SlaveServer extends NodeServer {
     Preconditions.checkArgument(name.startsWith("/"));
     this.name = name;
     this.master = master;
-    publishers = Maps.newConcurrentMap();
-    subscribers = Maps.newConcurrentMap();
+    this.topicManager = new TopicManager();
     tcpRosServerAddress = null;
   }
 
@@ -90,9 +85,7 @@ public class SlaveServer extends NodeServer {
 
   public void addPublisher(Publisher<?> publisher) throws MalformedURLException,
       URISyntaxException, RemoteException {
-    // TODO (kwc): the publishers/subscribers data structure is the same data as
-    // TopicManager. It may be better just to reference that instead.
-    publishers.put(publisher.getTopicName(), publisher);
+    topicManager.putPublisher(publisher.getTopicName(), publisher);
     master.registerPublisher(toSlaveIdentifier(), publisher);
   }
 
@@ -112,7 +105,7 @@ public class SlaveServer extends NodeServer {
    */
   public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws IOException,
       URISyntaxException, RemoteException {
-    subscribers.put(subscriber.getTopicName(), subscriber);
+    topicManager.putSubscriber(subscriber.getTopicName(), subscriber);
     Response<List<URI>> response = master.registerSubscriber(toSlaveIdentifier(), subscriber);
     List<PublisherIdentifier> publishers = buildPublisherIdentifierList(response.getResult(),
         subscriber.getTopicDefinition());
@@ -140,7 +133,7 @@ public class SlaveServer extends NodeServer {
     // ((connection_id, destination_caller_id, direction, transport, topic_name,
     // connected)*)
     // TODO(kwc): returning empty list right now to keep debugging tools happy
-    return new ArrayList<Object>();
+    return Lists.newArrayList();
   }
 
   public URI getMasterUri(String callerId) {
@@ -174,20 +167,20 @@ public class SlaveServer extends NodeServer {
   }
 
   public List<Subscriber<?>> getSubscriptions() {
-    return ImmutableList.copyOf(subscribers.values());
+    return topicManager.getSubscribers();
   }
 
   public List<Publisher<?>> getPublications() {
-    return ImmutableList.copyOf(publishers.values());
+    return topicManager.getPublishers();
   }
 
   public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) {
     throw new UnsupportedOperationException();
   }
 
-  public void publisherUpdate(String callerId, String topic, Collection<URI> publisherUris) {
-    if (subscribers.containsKey(topic)) {
-      Subscriber<?> subscriber = subscribers.get(topic);
+  public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
+    if (topicManager.hasSubscriber(topicName)) {
+      Subscriber<?> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
       List<PublisherIdentifier> pubIdentifiers = buildPublisherIdentifierList(publisherUris,
           topicDefinition);
@@ -196,16 +189,16 @@ public class SlaveServer extends NodeServer {
   }
 
   // TODO(damonkohler): Support multiple publishers for a particular topic.
-  public ProtocolDescription requestTopic(String topic, Collection<String> protocols)
+  public ProtocolDescription requestTopic(String topicName, Collection<String> protocols)
       throws ServerException {
     try {
-      // canonicalize topic name.
-      topic = new GraphName(topic).toGlobal();
+      // Canonicalize topic name.
+      topicName = new GraphName(topicName).toGlobal();
     } catch (RosNameException e) {
-      throw new ServerException("Invalid topic name");
+      throw new ServerException("Invalid topic name.");
     }
-    if (!publishers.containsKey(topic)) {
-      throw new ServerException("No publishers for topic " + topic);
+    if (!topicManager.hasPublisher(topicName)) {
+      throw new ServerException("No publishers for topic: " + topicName);
     }
     Preconditions.checkState(tcpRosServerAddress != null);
     for (String protocol : protocols) {

@@ -21,12 +21,6 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 
-import org.ros.internal.topic.TopicManager;
-
-import org.ros.internal.transport.tcp.TcpServer;
-
-import org.ros.message.std.Int64;
-
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +28,7 @@ import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.service.ServiceDefinition;
@@ -43,11 +38,14 @@ import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.PublisherIdentifier;
 import org.ros.internal.topic.Subscriber;
 import org.ros.internal.topic.TopicDefinition;
+import org.ros.internal.topic.TopicManager;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
+import org.ros.internal.transport.tcp.TcpServer;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
+import org.ros.message.std.Int64;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -66,6 +64,7 @@ public class MasterSlaveIntegrationTest {
   private SlaveServer slaveServer;
   private SlaveClient slaveClient;
   private TopicManager topicManager;
+  private ServiceManager serviceManager;
   private TcpServer tcpServer;
 
   @Before
@@ -76,10 +75,10 @@ public class MasterSlaveIntegrationTest {
     slaveServer = new SlaveServer("/foo", masterClient, "localhost", 0);
     slaveServer.start();
     topicManager = new TopicManager();
-    tcpServer = new TcpServer(topicManager);
+    serviceManager = new ServiceManager();
+    tcpServer = new TcpServer(topicManager, serviceManager);
     tcpServer.start(new InetSocketAddress(0));
     slaveServer.setTcpRosServerAddress(tcpServer.getAddress());
-    
     slaveClient = new SlaveClient("/bar", slaveServer.getUri());
   }
 
@@ -101,7 +100,7 @@ public class MasterSlaveIntegrationTest {
         new TopicDefinition("/hello",
             MessageDefinition.createFromMessage(new org.ros.message.std.String()));
     Publisher<Int64> publisher = new Publisher<Int64>(topicDefinition, Int64.class);
-    topicManager.setPublisher(topicDefinition.getName(), publisher);
+    topicManager.putPublisher(topicDefinition.getName(), publisher);
     try {
       slaveServer.addPublisher(publisher);
       Response<ProtocolDescription> response =
@@ -121,12 +120,12 @@ public class MasterSlaveIntegrationTest {
     Subscriber<org.ros.message.std.String> subscriber =
         Subscriber.create(slaveIdentifier, topicDefinition, org.ros.message.std.String.class,
             Executors.newCachedThreadPool());
-    topicManager.setSubscriber(topicDefinition.getName(), subscriber);
+    topicManager.putSubscriber(topicDefinition.getName(), subscriber);
     List<PublisherIdentifier> publishers = slaveServer.addSubscriber(subscriber);
     assertEquals(0, publishers.size());
     Publisher<Int64> publisher = new Publisher<Int64>(topicDefinition, Int64.class);
     slaveServer.addPublisher(publisher);
-    topicManager.setPublisher(topicDefinition.getName(), publisher);
+    topicManager.putPublisher(topicDefinition.getName(), publisher);
     publishers = slaveServer.addSubscriber(subscriber);
     PublisherIdentifier publisherDescription =
         publisher.toPublisherIdentifier(SlaveIdentifier.createAnonymous(slaveServer.getUri()));
@@ -151,12 +150,14 @@ public class MasterSlaveIntegrationTest {
             return response;
           }
         };
-    TopicManager topicManager = new TopicManager();
-    TcpServer tcpServer = new TcpServer(topicManager );
+        
+    ServiceManager serviceManager = new ServiceManager();
+    TcpServer tcpServer = new TcpServer(new TopicManager(), serviceManager);
     tcpServer.start(new InetSocketAddress(0));
     server.setAddress(tcpServer.getAddress());
-    topicManager.setService("/service", server);
+    serviceManager.putService("/service", server);
     slaveServer.addService(server);
+    
     Response<URI> response =
         masterClient.lookupService(
             SlaveIdentifier.createAnonymous(new URI("http://localhost:1234")), "/service");

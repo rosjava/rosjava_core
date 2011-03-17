@@ -13,12 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.internal.topic;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-import org.ros.internal.service.ServiceServer;
-
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,12 +31,10 @@ public class TopicManager {
 
   private final Map<String, Subscriber<?>> subscribers;
   private final Map<String, Publisher<?>> publishers;
-  private final Map<String, ServiceServer<?>> services;
 
   public TopicManager() {
     publishers = Maps.newConcurrentMap();
     subscribers = Maps.newConcurrentMap();
-    services = Maps.newConcurrentMap();
   }
 
   public boolean hasSubscriber(String topicName) {
@@ -46,31 +45,28 @@ public class TopicManager {
     return publishers.containsKey(topicName);
   }
 
-  public boolean hasService(String serviceName) {
-    return services.containsKey(serviceName);
-  }
-
   public Publisher<?> getPublisher(String topicName) {
     return publishers.get(topicName);
-  }
-
-  public void setPublisher(String topicName, Publisher<?> publisher) {
-    publishers.put(topicName, publisher);
   }
 
   public Subscriber<?> getSubscriber(String topicName) {
     return subscribers.get(topicName);
   }
 
-  public void setSubscriber(String topicName, Subscriber<?> subscriber) {
+  public void putPublisher(String topicName, Publisher<?> publisher) {
+    publishers.put(topicName, publisher);
+  }
+
+  public void putSubscriber(String topicName, Subscriber<?> subscriber) {
     subscribers.put(topicName, subscriber);
   }
 
-  public void setService(String serviceName, ServiceServer<?> serviceServer) {
-    services.put(serviceName, serviceServer);
+  public List<Subscriber<?>> getSubscribers() {
+    return ImmutableList.copyOf(subscribers.values());
   }
 
-  public ServiceServer<?> getService(String serviceName) {
-    return services.get(serviceName);
+  public List<Publisher<?>> getPublishers() {
+    return ImmutableList.copyOf(publishers.values());
   }
+
 }

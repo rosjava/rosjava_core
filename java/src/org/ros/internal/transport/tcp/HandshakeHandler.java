@@ -17,42 +17,40 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.transport.ConnectionHeader;
-
-import org.ros.internal.service.ServiceResponseEncoder;
-
-import org.jboss.netty.channel.ChannelPipeline;
-import org.ros.internal.transport.SimplePipelineFactory;
-
-import org.ros.internal.service.ServiceServer;
-
-import org.ros.internal.transport.ConnectionHeaderFields;
-
-import org.ros.internal.topic.TopicManager;
-
-import java.util.Map;
-
-import org.ros.internal.topic.Publisher;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.ros.internal.node.server.ServiceManager;
+import org.ros.internal.service.ServiceResponseEncoder;
+import org.ros.internal.service.ServiceServer;
+import org.ros.internal.topic.Publisher;
+import org.ros.internal.topic.TopicManager;
+import org.ros.internal.transport.ConnectionHeader;
+import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.internal.transport.SimplePipelineFactory;
+
+import java.util.Map;
 
 /**
- * @author damonkohler@google.com (Damon Kohler), kwc@willowgarage.com (Ken
- *         Conley)
+ * @author damonkohler@google.com (Damon Kohler)
+ * @author kwc@willowgarage.com (Ken Conley)
  */
 public class HandshakeHandler extends SimpleChannelHandler {
+  
   private static final Log log = LogFactory.getLog(HandshakeHandler.class);
+  
   private final TopicManager topicManager;
+  private final ServiceManager serviceManager;
 
-  public HandshakeHandler(TopicManager topicManager) {
+  public HandshakeHandler(TopicManager topicManager, ServiceManager serviceManager) {
     this.topicManager = topicManager;
+    this.serviceManager = serviceManager;
   }
 
   @Override
@@ -65,8 +63,8 @@ public class HandshakeHandler extends SimpleChannelHandler {
 
     if (incomingHeader.containsKey(ConnectionHeaderFields.SERVICE)) {
       String serviceName = incomingHeader.get(ConnectionHeaderFields.SERVICE);
-      Preconditions.checkState(topicManager.hasService(serviceName));
-      ServiceServer<?> serviceServer = topicManager.getService(serviceName);
+      Preconditions.checkState(serviceManager.hasService(serviceName));
+      ServiceServer<?> serviceServer = serviceManager.getService(serviceName);
 
       ChannelBuffer outgoingBuffer = serviceServer.finishHandshake(incomingHeader);
       if (outgoingBuffer == null) {

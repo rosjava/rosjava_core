@@ -19,11 +19,10 @@ package org.ros.internal.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.ros.internal.topic.TopicManager;
-
-import org.ros.internal.transport.tcp.TcpServer;
-
 import org.junit.Test;
+import org.ros.internal.node.server.ServiceManager;
+import org.ros.internal.topic.TopicManager;
+import org.ros.internal.transport.tcp.TcpServer;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
 
@@ -51,9 +50,9 @@ public class ServiceIntegrationTest {
         return response;
       }
     };
-    TopicManager topicManager = new TopicManager();
-    topicManager.setService("/add_two_ints", server);
-    TcpServer tcpServer = new TcpServer(topicManager);
+    ServiceManager serviceManager = new ServiceManager();
+    serviceManager.putService("/add_two_ints", server);
+    TcpServer tcpServer = new TcpServer(new TopicManager(), serviceManager);
     tcpServer.start(new InetSocketAddress(0));
     server.setAddress(tcpServer.getAddress());
 

@@ -90,8 +90,7 @@ public class Publisher<MessageType extends Message> extends Topic {
    * header for this publisher to send and also updates the connection state of
    * this publisher.
    * 
-   * @param buffer
-   * @return Connection header from subscriber.
+   * @return encoded connection header from subscriber
    */
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
     Map<String, String> header = getTopicDefinitionHeader();
@@ -111,7 +110,7 @@ public class Publisher<MessageType extends Message> extends Topic {
 
   public void addChannel(Channel channel) {
     if (DEBUG) {
-      System.out.println("Publisher: adding channel");
+      log.info("Adding channel: " + channel);
     }
     out.addChannel(channel);
   }

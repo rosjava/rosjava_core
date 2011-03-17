@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import org.ros.exceptions.RosInitException;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.transport.tcp.TcpServer;
@@ -41,13 +42,16 @@ public class PubSubFactory {
 
   private final SlaveIdentifier slaveIdentifier;
   private final Executor executor;
+  private final TopicManager topicManager;
+  private final ServiceManager serviceManager;
+  
   private TcpServer server;
-  private final TopicManager manager;
 
   public PubSubFactory(SlaveIdentifier slaveIdentifier, Executor executor) {
     this.slaveIdentifier = slaveIdentifier;
     this.executor = executor;
-    manager = new TopicManager();
+    topicManager = new TopicManager();
+    serviceManager = new ServiceManager();
   }
 
   /**
@@ -73,15 +77,15 @@ public class PubSubFactory {
     Subscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
 
-    synchronized (manager) {
-      if (manager.hasSubscriber(topicName)) {
+    synchronized (topicManager) {
+      if (topicManager.hasSubscriber(topicName)) {
         // Return existing internal subscriber.
-        subscriber = (Subscriber<MessageType>) manager.getSubscriber(topicName);
+        subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
         Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
         // Create new underlying implementation for topic subscription.
         subscriber = Subscriber.create(slaveIdentifier, topicDefinition, messageClass, executor);
-        manager.setSubscriber(topicName, subscriber);
+        topicManager.putSubscriber(topicName, subscriber);
         createdNewSubscriber = true;
       }
     }
@@ -104,22 +108,19 @@ public class PubSubFactory {
     Publisher<MessageType> publisher;
     boolean createdNewPublisher = false;
 
-    synchronized (manager) {
-      if (manager.hasPublisher(topicName)) {
-        // Return existing internal subscriber.
-        publisher = (Publisher<MessageType>) manager.getPublisher(topicName);
+    synchronized (topicManager) {
+      if (topicManager.hasPublisher(topicName)) {
+        publisher = (Publisher<MessageType>) topicManager.getPublisher(topicName);
         Preconditions.checkState(publisher.checkMessageClass(messageClass));
       } else {
-        // Create new underlying implementation for topic subscription.
         publisher = new Publisher<MessageType>(topicDefinition, messageClass);
-        manager.setPublisher(topicName, publisher);
+        topicManager.putPublisher(topicName, publisher);
         createdNewPublisher = true;
       }
     }
 
     if (createdNewPublisher) {
       slaveServer.addPublisher(publisher);
-      // Start the publisher thread.
       publisher.start();
     }
 
@@ -129,7 +130,7 @@ public class PubSubFactory {
   public InetSocketAddress startTcpRosServer(InetSocketAddress tcpRosServerAddress,
       String publicHostname) throws RosInitException {
     try {
-      server = new TcpServer(manager);
+      server = new TcpServer(topicManager, serviceManager);
     } catch (Exception e) {
       throw new RosInitException(e);
     }

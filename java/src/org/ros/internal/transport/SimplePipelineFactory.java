@@ -27,8 +27,8 @@ import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
  */
 public class SimplePipelineFactory implements ChannelPipelineFactory {
   
-  public static final String LENGTH_FIELD_BASED_FRAME_DECODER = "Length Field Based Frame Decoder";
-  public static final String LENGTH_FIELD_PREPENDER = "Length Field Prepender";
+  public static final String LENGTH_FIELD_BASED_FRAME_DECODER = "LengthFieldBasedFrameDecoder";
+  public static final String LENGTH_FIELD_PREPENDER = "LengthFieldPrepender";
   
   private final ChannelPipeline pipeline;
 

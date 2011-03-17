@@ -39,6 +39,7 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.topic.TopicManager;
 
 import java.net.InetSocketAddress;
@@ -75,39 +76,38 @@ public class TcpServer {
 
   private class TcpRosPipelineFactory implements ChannelPipelineFactory {
 
-    private static final String LENGTH_FIELD_BASED_FRAME_DECODER = "Length Field Based Frame Decoder";
-    private static final String LENGTH_FIELD_PREPENDER = "Length Field Prepender";
+    private static final String LENGTH_FIELD_BASED_FRAME_DECODER = "LengthFieldBasedFrameDecoder";
+    private static final String LENGTH_FIELD_PREPENDER = "LengthFieldPrepender";
 
     private final TopicManager topicManager;
+    private final ServiceManager serviceManager;
 
-    public TcpRosPipelineFactory(TopicManager topicManager) {
+    public TcpRosPipelineFactory(TopicManager topicManager, ServiceManager serviceManager) {
       this.topicManager = topicManager;
+      this.serviceManager = serviceManager;
     }
 
     @Override
     public ChannelPipeline getPipeline() throws Exception {
       ChannelPipeline pipeline = pipeline();
-
       pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));
       pipeline.addLast(LENGTH_FIELD_BASED_FRAME_DECODER, new LengthFieldBasedFrameDecoder(
           Integer.MAX_VALUE, 0, 4, 0, 4));
-
-      pipeline.addLast("HandshakeHandler", new HandshakeHandler(topicManager));
-      pipeline.addLast("Connection Tracking Handler", new ConnectionTrackingHandler());
+      pipeline.addLast("ConnectionTrackingHandler", new ConnectionTrackingHandler());
+      pipeline.addLast("HandshakeHandler", new HandshakeHandler(topicManager, serviceManager));
       return pipeline;
     }
 
   }
 
-  public TcpServer(TopicManager topicManager) {
-    TcpRosPipelineFactory pipelineFactory = new TcpRosPipelineFactory(topicManager);
-
+  public TcpServer(TopicManager topicManager, ServiceManager serviceManager) {
     channelGroup = new DefaultChannelGroup();
     channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
         Executors.newCachedThreadPool());
     bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    TcpRosPipelineFactory pipelineFactory = new TcpRosPipelineFactory(topicManager, serviceManager);
     bootstrap.setPipelineFactory(pipelineFactory);
   }
 

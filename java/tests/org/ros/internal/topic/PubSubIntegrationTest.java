@@ -28,6 +28,7 @@ import org.ros.message.std.Int64;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.MessageListener;
+import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.server.SlaveIdentifier;
 
 import java.net.InetSocketAddress;
@@ -58,18 +59,20 @@ public class PubSubIntegrationTest {
     // Create a new tcpRosServer for each publisher so that we can test multiple
     // connections.
     TopicManager topicManager = new TopicManager();
-    TcpServer tcpServer = new TcpServer(topicManager);
+    ServiceManager serviceManager = new ServiceManager();
+    TcpServer tcpServer = new TcpServer(topicManager, serviceManager);
     tcpServer.start(new InetSocketAddress(0));
     Publisher<Int64> publisher = new Publisher<Int64>(topicDefinition, Int64.class);
-    topicManager.setPublisher(topicDefinition.getName(), publisher);
+    topicManager.putPublisher(topicDefinition.getName(), publisher);
     publisher.start();
     return new PublisherServer(publisher, tcpServer);
   }
 
   @Before
   public void setup() {
-    topicDefinition = new TopicDefinition("/foo",
-        MessageDefinition.createFromMessage(new org.ros.message.std.String()));
+    topicDefinition =
+        new TopicDefinition("/foo",
+            MessageDefinition.createFromMessage(new org.ros.message.std.String()));
   }
 
   @Test
@@ -79,16 +82,19 @@ public class PubSubIntegrationTest {
       publisherServers.add(createPublisherServer());
     }
 
-    SlaveIdentifier subSlaveIdentifier = new SlaveIdentifier("/caller", new URI("http://fake:1234"));
-    Subscriber<org.ros.message.std.String> subscriber = Subscriber.create(subSlaveIdentifier,
-        topicDefinition, org.ros.message.std.String.class, Executors.newCachedThreadPool());
+    SlaveIdentifier subSlaveIdentifier =
+        new SlaveIdentifier("/caller", new URI("http://fake:1234"));
+    Subscriber<org.ros.message.std.String> subscriber =
+        Subscriber.create(subSlaveIdentifier, topicDefinition, org.ros.message.std.String.class,
+            Executors.newCachedThreadPool());
 
     for (PublisherServer publisherServer : publisherServers) {
-      SlaveIdentifier publisherSlaveIdentifier = new SlaveIdentifier("/receiver", new URI(
-          "http://fake:5678"));
-      PublisherIdentifier publisherIdentifier = new PublisherIdentifier(publisherSlaveIdentifier,
-          topicDefinition);
-      InetSocketAddress publisherAddress = new InetSocketAddress("localhost", publisherServer.tcpServer.getAddress().getPort());
+      SlaveIdentifier publisherSlaveIdentifier =
+          new SlaveIdentifier("/receiver", new URI("http://fake:5678"));
+      PublisherIdentifier publisherIdentifier =
+          new PublisherIdentifier(publisherSlaveIdentifier, topicDefinition);
+      InetSocketAddress publisherAddress =
+          new InetSocketAddress("localhost", publisherServer.tcpServer.getAddress().getPort());
       subscriber.addPublisher(publisherIdentifier, publisherAddress);
     }
 
