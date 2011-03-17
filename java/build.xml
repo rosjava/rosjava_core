@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="compile" name="rosjava">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+
+    <!-- directories -->
+    <property name="pwd" location="."/>
+    <property name="build" location="build"/>
+    <property name="build-rosjava" location="${build}/rosjava"/>
+    <property name="build-xmlrpc" location="${build}/xmlrpc"/>
+    <property name="dist" location="dist"/>
+    <property name="msg_gen" location="msg_gen"/>
+    
+    <!-- msg packages to build -->
+    <path id="ros.packages.msg">
+        <pathelement location="rosgraph_msgs" />
+        <pathelement location="std_msgs" />
+        <pathelement location="joy" />
+        <pathelement location="geometry_msgs" />
+        <pathelement location="nav_msgs" />
+        <pathelement location="sensor_msgs" />
+        <pathelement location="test_ros" />
+    </path>
+
+    <property name="jar.xmlrpc" location="${dist}/apache-xmlrpc-3.1.3rosjava.jar" />
+    <property name="jar.rosjava" location="${dist}/rosjava.jar" />
+
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+    <path id="java.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="lib/commons-codec-1.3.jar"/>
+        <pathelement location="lib/commons-httpclient-3.1.jar"/>
+        <pathelement location="lib/commons-logging-1.1.1.jar"/>
+        <pathelement location="lib/guava-r07.jar"/>
+        <pathelement location="lib/mockito-all-1.8.5.jar"/>
+        <pathelement location="lib/netty-3.2.4.Final.jar"/>
+        <pathelement location="lib/junit-4.8.2.jar"/>
+    </path>
+    <path id="rosjava.classpath">
+        <pathelement location="${build-xmlrpc}"/>
+    </path>
+
+    <target name="init">
+        <mkdir dir="${build}"/>
+        <mkdir dir="${build-rosjava}"/>
+        <mkdir dir="${build-xmlrpc}"/>
+    </target>
+    <target name="clean">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+    <target name="msg_gen" depends="init">
+        <echo message="building commonly used ROS messages"/>        
+        <pathconvert pathsep="," property="ros.msg_gen.msglist" refid="ros.packages.msg">
+            <map from="${pwd}/" to="" />
+        </pathconvert>
+        <echo message="${ros.msg_gen.msglist}"/>          
+        <!-- TODO(kwc) call actual msg generator -->
+    </target>
+
+    <target name="compile" depends="init, msg_gen">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="${build-xmlrpc}" source="${source}" target="${target}">
+            <classpath refid="java.classpath"/>
+            <src path="ws-commons-util-1.0.2-src/src/main/java"/>
+            <src path="apache-xmlrpc-3.1.3-src/client/src/main/java"/>
+            <src path="apache-xmlrpc-3.1.3-src/common/src/main/java"/>
+            <src path="apache-xmlrpc-3.1.3-src/server/src/main/java"/>
+            <exclude name="org/apache/xmlrpc/webserver/HttpServletRequestImpl.java"/>
+            <exclude name="org/apache/xmlrpc/webserver/HttpServletResponseImpl.java"/>
+            <exclude name="org/apache/xmlrpc/webserver/ServletConnection.java"/>
+            <exclude name="org/apache/xmlrpc/webserver/ServletOutputStreamImpl.java"/>
+            <exclude name="org/apache/xmlrpc/webserver/ServletWebServer.java"/>
+            <exclude name="org/apache/xmlrpc/webserver/XmlRpcServlet.java"/>
+            <exclude name="org/apache/xmlrpc/webserver/XmlRpcServletServer.java"/>
+
+        </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="${build-rosjava}" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="java.classpath"/>
+            <classpath refid="rosjava.classpath"/>
+        </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="${build-rosjava}" source="${source}" target="${target}">
+            <src path="tests"/>
+            <classpath refid="java.classpath"/>
+            <classpath refid="rosjava.classpath"/>
+        </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="${build-rosjava}" source="${source}" target="${target}">
+            <src path="tutorials"/>
+            <classpath refid="java.classpath"/>
+            <classpath refid="rosjava.classpath"/>
+        </javac>
+    </target>
+
+    <!-- TODO: don't package xmlrpc and ws-commons-util in the same rosjava.jar -->
+    <target name="dist-init" depends="compile">
+        <mkdir dir="${dist}"/>
+    </target>
+    
+    <target name="rosjava-jar" depends="dist-init, xmlrpc-jar">
+        <manifestclasspath property="jar.rosjava.classpath" jarfile="${jar.rosjava}">
+            <classpath>
+                <pathelement location="${jar.xmlrpc}"/>
+                <path refid="java.classpath"/>
+            </classpath>
+        </manifestclasspath>  
+
+        <jar destfile="${jar.rosjava}">
+            <manifest>
+                <attribute name="Main-Class" value="org.ros.RosRun"/>
+                <attribute name="Class-Path" value="${jar.rosjava.classpath}"/>
+            </manifest>
+            <fileset dir="${build-rosjava}"/>
+        </jar>
+    </target>
+
+    <target name="xmlrpc-jar" depends="dist-init">
+        <manifestclasspath property="jar.xmlrpc.classpath" jarfile="${jar.xmlrpc}">
+            <classpath refid="java.classpath"/>
+        </manifestclasspath>  
+        <jar destfile="${jar.xmlrpc}">
+            <manifest>
+                <attribute name="Main-Class" value="org.ros.RosRun"/>
+                <attribute name="Class-Path" value="${jar.xmlrpc.classpath}"/>
+            </manifest>
+            <fileset dir="${build-xmlrpc}"/>
+        </jar>
+    </target>
+    
+    <target name="dist" depends="rosjava-jar, xmlrpc-jar"/>
+
+</project>

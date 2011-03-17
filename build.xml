@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="compile" name="rosjava">
+  
+  <target name="init">
+      <ant dir="java" target="init" />
+  </target>
+
+  <target name="msg_gen">
+      <ant dir="java" target="msg_gen" />
+  </target>
+
+  <target name="compile">
+      <ant dir="java" target="compile" />
+  </target>
+
+  <target name="clean">    
+      <ant dir="java" target="clean" />
+  </target>
+
+  <target name="dist">    
+      <ant dir="java" target="dist" />
+  </target>
+
+</project>
