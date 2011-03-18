@@ -56,14 +56,14 @@ public class TopicIntegrationTest {
     Node publisherNode =
         new Node("/publisher", masterServer.getUri(), new InetSocketAddress(0),
             new InetSocketAddress(0));
-    publisherNode.start("localhost");
+    publisherNode.start();
     Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.createPublisher(topicDefinition, org.ros.message.std_msgs.String.class);
 
     Node subscriberNode =
         new Node("/subscriber", masterServer.getUri(), new InetSocketAddress(0),
             new InetSocketAddress(0));
-    subscriberNode.start("localhost");
+    subscriberNode.start();
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         publisherNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class);
 

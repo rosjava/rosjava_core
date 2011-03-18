@@ -38,10 +38,10 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TcpServer {
+public class TcpRosServer {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(TcpServer.class);
+  private static final Log log = LogFactory.getLog(TcpRosServer.class);
 
   private final InetSocketAddress bindAddress;
   private final ChannelGroup channelGroup;
@@ -50,8 +50,8 @@ public class TcpServer {
 
   private Channel channel;
 
-  public TcpServer(TopicManager topicManager, ServiceManager serviceManager,
-      InetSocketAddress bindAddress) {
+  public TcpRosServer(InetSocketAddress bindAddress, TopicManager topicManager,
+      ServiceManager serviceManager) {
     this.bindAddress = bindAddress;
     channelGroup = new DefaultChannelGroup();
     channelFactory =

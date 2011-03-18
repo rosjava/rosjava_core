@@ -185,7 +185,7 @@ public class Node implements Namespace {
               new InetSocketAddress(context.getHostName(), context.getXmlRpcPort()),
               tcpRosServerBindAddress);
       // Explicitly start TCPROS resources for now.
-      node.start(context.getHostName());
+      node.start();
 
       initialized = true;
 

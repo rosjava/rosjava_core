@@ -35,12 +35,11 @@ import org.ros.internal.topic.TopicManager;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
-import org.ros.internal.transport.tcp.TcpServer;
+import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.SocketAddress;
 import java.net.URI;
@@ -57,8 +56,7 @@ public class SlaveServer extends NodeServer {
   private final MasterClient masterClient;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
-
-  private InetSocketAddress tcpRosServerAddress;
+  private final TcpRosServer tcpRosServer;
 
   private static List<PublisherIdentifier> buildPublisherIdentifierList(
       Collection<URI> publisherUriList, TopicDefinition topicDefinition) {
@@ -71,7 +69,7 @@ public class SlaveServer extends NodeServer {
   }
 
   public SlaveServer(String nodeName, SocketAddress xmlRpcServerAddress, MasterClient master,
-      TopicManager topicManager, ServiceManager serviceManager) {
+      TopicManager topicManager, ServiceManager serviceManager, TcpRosServer tcpRosServer) {
     super(xmlRpcServerAddress);
     Preconditions.checkNotNull(nodeName);
     Preconditions.checkArgument(nodeName.startsWith("/"));
@@ -79,29 +77,22 @@ public class SlaveServer extends NodeServer {
     this.masterClient = master;
     this.topicManager = topicManager;
     this.serviceManager = serviceManager;
-    this.tcpRosServerAddress = null;
+    this.tcpRosServer = tcpRosServer;
   }
 
   /**
    * Start the XML-RPC server. This start() routine requires that the
-   * {@link TcpServer} is initialized first so that the slave server returns
+   * {@link TcpRosServer} is initialized first so that the slave server returns
    * correct information when topics are requested.
    * 
-   * @param tcpRosServerAddress Address of TCPROS server.
    * @throws XmlRpcException
    * @throws IOException
    * @throws URISyntaxException
    */
-  // TODO: passing in the tcpRosServerAddress is temporary. It was too easy to
-  // create a SlaveServer without setting this crucial bit of information.
-  public void start(InetSocketAddress tcpRosServerAddress) throws XmlRpcException, IOException,
+  public void start() throws XmlRpcException, IOException,
       URISyntaxException {
     super.start(org.ros.internal.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
-    // kwc: in the future, tcpRosServerAddress would likely be part of a
-    // protocol handler implementation instead and opaque to the slave server,
-    // but for now I am keeping it an explicit start parameter so this is always
-    // set correctly.
-    this.tcpRosServerAddress = tcpRosServerAddress;
+    tcpRosServer.start();
   }
 
   @Override
@@ -169,6 +160,7 @@ public class SlaveServer extends NodeServer {
 
   public void shutdown(String callerId, String message) {
     super.shutdown();
+    tcpRosServer.shutdown();
   }
 
   /**
@@ -227,10 +219,9 @@ public class SlaveServer extends NodeServer {
     if (!topicManager.hasPublisher(topicName)) {
       throw new ServerException("No publishers for topic: " + topicName);
     }
-    Preconditions.checkState(tcpRosServerAddress != null);
     for (String protocol : protocols) {
-      if (ProtocolNames.SUPPORTED.contains(protocol)) {
-        return new TcpRosProtocolDescription(tcpRosServerAddress);
+      if (protocol.equals(ProtocolNames.TCPROS)) {
+        return new TcpRosProtocolDescription(tcpRosServer.getAddress());
       }
     }
     throw new ServerException("No supported protocols specified.");

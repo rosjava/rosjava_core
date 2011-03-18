@@ -28,13 +28,12 @@ import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.Subscriber;
 import org.ros.internal.topic.TopicDefinition;
 import org.ros.internal.topic.TopicManager;
-import org.ros.internal.transport.tcp.TcpServer;
+import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.Executor;
@@ -50,23 +49,25 @@ import java.util.concurrent.Executors;
  */
 public class Node {
 
-  private final MasterClient master;
+  private final MasterClient masterClient;
   private final SlaveServer slave;
   private final Executor executor;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
-  private final TcpServer tcpServer;
+  private final TcpRosServer tcpRosServer;
 
   private boolean started;
 
   public Node(String nodeName, URI masterUri, InetSocketAddress xmlRpcBindAddress,
       InetSocketAddress tcpRosBindAddress) throws MalformedURLException {
-    master = new MasterClient(masterUri);
+    masterClient = new MasterClient(masterUri);
     executor = Executors.newCachedThreadPool();
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    slave = new SlaveServer(nodeName, xmlRpcBindAddress, master, topicManager, serviceManager);
-    tcpServer = new TcpServer(topicManager, serviceManager, tcpRosBindAddress);
+    tcpRosServer = new TcpRosServer(tcpRosBindAddress, topicManager, serviceManager);
+    slave =
+        new SlaveServer(nodeName, xmlRpcBindAddress, masterClient, topicManager, serviceManager,
+            tcpRosServer);
     started = false;
   }
 
@@ -137,36 +138,19 @@ public class Node {
   }
 
   /**
-   * Start I/O resources.
+   * Start the node.
    * 
-   * @param publicHostName Hostname/address to use to report to public
-   *        resources.
    * @throws XmlRpcException
    * @throws IOException
    * @throws URISyntaxException
    */
-  public void start(String publicHostName) throws XmlRpcException, IOException, URISyntaxException {
-    tcpServer.start();
-    // compute the public-facing address for this server.
-    InetSocketAddress publicTcpRosServerAddress =
-        new InetSocketAddress(publicHostName, tcpServer.getAddress().getPort());
-    slave.start(publicTcpRosServerAddress);
+  public void start() throws XmlRpcException, IOException, URISyntaxException {
+    slave.start();
     started = true;
   }
 
   public void stop() {
-    tcpServer.shutdown();
     slave.shutdown();
-    // TODO(damonkohler): Make sure shutdown stops all threads, I/O, etc...
   }
 
-  // TODO(damonkohler): Possibly add some normalization here like in
-  // ProtocolDescription?
-  public InetSocketAddress getAddress() {
-    return tcpServer.getAddress();
-  }
-
-  public SlaveIdentifier getSlaveIdentifier() throws MalformedURLException, URISyntaxException {
-    return slave.toSlaveIdentifier();
-  }
 }

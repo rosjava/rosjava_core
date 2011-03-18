@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.topic.TopicManager;
-import org.ros.internal.transport.tcp.TcpServer;
+import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
 
@@ -52,8 +52,8 @@ public class ServiceIntegrationTest {
         };
     ServiceManager serviceManager = new ServiceManager();
     serviceManager.putService("/add_two_ints", server);
-    TcpServer tcpServer =
-        new TcpServer(new TopicManager(), serviceManager, new InetSocketAddress(0));
+    TcpRosServer tcpServer =
+        new TcpRosServer(new InetSocketAddress(0), new TopicManager(), serviceManager);
     tcpServer.start();
     server.setAddress(tcpServer.getAddress());
 

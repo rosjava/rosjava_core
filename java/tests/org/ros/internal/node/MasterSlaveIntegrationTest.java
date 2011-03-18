@@ -42,7 +42,7 @@ import org.ros.internal.topic.TopicManager;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
-import org.ros.internal.transport.tcp.TcpServer;
+import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
 import org.ros.message.std_msgs.Int64;
@@ -65,7 +65,7 @@ public class MasterSlaveIntegrationTest {
   private SlaveClient slaveClient;
   private TopicManager topicManager;
   private ServiceManager serviceManager;
-  private TcpServer tcpServer;
+  private TcpRosServer tcpRosServer;
 
   @Before
   public void setUp() throws XmlRpcException, IOException, URISyntaxException {
@@ -74,12 +74,11 @@ public class MasterSlaveIntegrationTest {
     masterClient = new MasterClient(masterServer.getUri());
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    tcpServer = new TcpServer(topicManager, serviceManager, new InetSocketAddress(0));
-    tcpServer.start();
+    tcpRosServer = new TcpRosServer(new InetSocketAddress(0), topicManager, serviceManager);
     slaveServer =
         new SlaveServer("/foo", new InetSocketAddress(0), masterClient, topicManager,
-            serviceManager);
-    slaveServer.start(tcpServer.getAddress());
+            serviceManager, tcpRosServer);
+    slaveServer.start();
     slaveClient = new SlaveClient("/bar", slaveServer.getUri());
   }
 
@@ -106,7 +105,7 @@ public class MasterSlaveIntegrationTest {
       slaveServer.addPublisher(publisher);
       Response<ProtocolDescription> response =
           slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS));
-      assertEquals(new TcpRosProtocolDescription(tcpServer.getAddress()), response.getResult());
+      assertEquals(new TcpRosProtocolDescription(tcpRosServer.getAddress()), response.getResult());
     } finally {
       publisher.shutdown();
     }
@@ -153,8 +152,8 @@ public class MasterSlaveIntegrationTest {
         };
 
     ServiceManager serviceManager = new ServiceManager();
-    TcpServer tcpServer =
-        new TcpServer(new TopicManager(), serviceManager, new InetSocketAddress(0));
+    TcpRosServer tcpServer =
+        new TcpRosServer(new InetSocketAddress(0), new TopicManager(), serviceManager);
     tcpServer.start();
     server.setAddress(tcpServer.getAddress());
     serviceManager.putService("/service", server);
