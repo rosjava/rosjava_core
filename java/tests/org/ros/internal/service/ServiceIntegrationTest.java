@@ -38,26 +38,28 @@ public class ServiceIntegrationTest {
 
   @Test
   public void PesistentServiceConnectionTest() throws InterruptedException, URISyntaxException {
-    ServiceDefinition definition = new ServiceDefinition(AddTwoInts.__s_getDataType(),
-        AddTwoInts.__s_getMD5Sum());
+    ServiceDefinition definition =
+        new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
 
-    ServiceServer<AddTwoInts.Request> server = new ServiceServer<AddTwoInts.Request>(
-        AddTwoInts.Request.class, "/server", definition) {
-      @Override
-      public Message buildResponse(AddTwoInts.Request request) {
-        AddTwoInts.Response response = new AddTwoInts.Response();
-        response.sum = request.a + request.b;
-        return response;
-      }
-    };
+    ServiceServer<AddTwoInts.Request> server =
+        new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/server", definition) {
+          @Override
+          public Message buildResponse(AddTwoInts.Request request) {
+            AddTwoInts.Response response = new AddTwoInts.Response();
+            response.sum = request.a + request.b;
+            return response;
+          }
+        };
     ServiceManager serviceManager = new ServiceManager();
     serviceManager.putService("/add_two_ints", server);
-    TcpServer tcpServer = new TcpServer(new TopicManager(), serviceManager);
-    tcpServer.start(new InetSocketAddress(0));
+    TcpServer tcpServer =
+        new TcpServer(new TopicManager(), serviceManager, new InetSocketAddress(0));
+    tcpServer.start();
     server.setAddress(tcpServer.getAddress());
 
-    ServiceClient<AddTwoInts.Response> client = ServiceClient.create(AddTwoInts.Response.class,
-        "/client", new ServiceIdentifier("/add_two_ints", server.getUri(), definition));
+    ServiceClient<AddTwoInts.Response> client =
+        ServiceClient.create(AddTwoInts.Response.class, "/client", new ServiceIdentifier(
+            "/add_two_ints", server.getUri(), definition));
     client.connect(tcpServer.getAddress());
 
     AddTwoInts.Request request = new AddTwoInts.Request();

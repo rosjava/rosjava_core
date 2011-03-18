@@ -53,13 +53,17 @@ public class TopicIntegrationTest {
         new TopicDefinition("/foo",
             MessageDefinition.createFromMessage(new org.ros.message.std_msgs.String()));
 
-    Node publisherNode = new Node("/publisher", masterServer.getUri(), new InetSocketAddress(0));
-    publisherNode.start("localhost", new InetSocketAddress(0));
+    Node publisherNode =
+        new Node("/publisher", masterServer.getUri(), new InetSocketAddress(0),
+            new InetSocketAddress(0));
+    publisherNode.start("localhost");
     Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.createPublisher(topicDefinition, org.ros.message.std_msgs.String.class);
 
-    Node subscriberNode = new Node("/subscriber", masterServer.getUri(), new InetSocketAddress(0));
-    subscriberNode.start("localhost", new InetSocketAddress(0));
+    Node subscriberNode =
+        new Node("/subscriber", masterServer.getUri(), new InetSocketAddress(0),
+            new InetSocketAddress(0));
+    subscriberNode.start("localhost");
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         publisherNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class);
 

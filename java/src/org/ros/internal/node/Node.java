@@ -56,16 +56,17 @@ public class Node {
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
   private final TcpServer tcpServer;
+
   private boolean started;
 
-  public Node(String nodeName, URI masterUri, SocketAddress xmlRpcServerAddress)
-      throws MalformedURLException {
+  public Node(String nodeName, URI masterUri, InetSocketAddress xmlRpcBindAddress,
+      InetSocketAddress tcpRosBindAddress) throws MalformedURLException {
     master = new MasterClient(masterUri);
     executor = Executors.newCachedThreadPool();
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    slave = new SlaveServer(nodeName, xmlRpcServerAddress, master, topicManager, serviceManager);
-    tcpServer = new TcpServer(topicManager, serviceManager);
+    slave = new SlaveServer(nodeName, xmlRpcBindAddress, master, topicManager, serviceManager);
+    tcpServer = new TcpServer(topicManager, serviceManager, tcpRosBindAddress);
     started = false;
   }
 
@@ -75,10 +76,8 @@ public class Node {
    * generated, it is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition
-   *          {@link TopicDefinition} that is subscribed to
-   * @param messageClass
-   *          {@link Message} class for topic
+   * @param topicDefinition {@link TopicDefinition} that is subscribed to
+   * @param messageClass {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -100,8 +99,8 @@ public class Node {
         Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
         // Create new underlying implementation for topic subscription.
-        subscriber = Subscriber.create(slave.toSlaveIdentifier(), topicDefinition, messageClass,
-            executor);
+        subscriber =
+            Subscriber.create(slave.toSlaveIdentifier(), topicDefinition, messageClass, executor);
         createdNewSubscriber = true;
       }
     }
@@ -140,20 +139,17 @@ public class Node {
   /**
    * Start I/O resources.
    * 
-   * @param publicHostName
-   *          Hostname/address to use to report to public resources.
-   * @param tcpRosServerBindAddress
-   *          Address to bind TCPROS server to.
+   * @param publicHostName Hostname/address to use to report to public
+   *        resources.
    * @throws XmlRpcException
    * @throws IOException
    * @throws URISyntaxException
    */
-  public void start(String publicHostName, InetSocketAddress tcpRosServerBindAddress)
-      throws XmlRpcException, IOException, URISyntaxException {
-    tcpServer.start(tcpRosServerBindAddress);
+  public void start(String publicHostName) throws XmlRpcException, IOException, URISyntaxException {
+    tcpServer.start();
     // compute the public-facing address for this server.
-    InetSocketAddress publicTcpRosServerAddress = new InetSocketAddress(publicHostName, tcpServer
-        .getAddress().getPort());
+    InetSocketAddress publicTcpRosServerAddress =
+        new InetSocketAddress(publicHostName, tcpServer.getAddress().getPort());
     slave.start(publicTcpRosServerAddress);
     started = true;
   }
@@ -161,12 +157,12 @@ public class Node {
   public void stop() {
     tcpServer.shutdown();
     slave.shutdown();
-    // TODO(damonkohler): make sure shutdown stops all threads, I/O, etc...
+    // TODO(damonkohler): Make sure shutdown stops all threads, I/O, etc...
   }
 
   // TODO(damonkohler): Possibly add some normalization here like in
   // ProtocolDescription?
-  public SocketAddress getAddress() {
+  public InetSocketAddress getAddress() {
     return tcpServer.getAddress();
   }
 

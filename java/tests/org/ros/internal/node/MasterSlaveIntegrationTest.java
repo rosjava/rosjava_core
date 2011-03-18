@@ -72,10 +72,10 @@ public class MasterSlaveIntegrationTest {
     masterServer = new MasterServer(new InetSocketAddress(0));
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
-    tcpServer = new TcpServer(topicManager, serviceManager);
-    tcpServer.start(new InetSocketAddress(0));
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
+    tcpServer = new TcpServer(topicManager, serviceManager, new InetSocketAddress(0));
+    tcpServer.start();
     slaveServer =
         new SlaveServer("/foo", new InetSocketAddress(0), masterClient, topicManager,
             serviceManager);
@@ -153,8 +153,9 @@ public class MasterSlaveIntegrationTest {
         };
 
     ServiceManager serviceManager = new ServiceManager();
-    TcpServer tcpServer = new TcpServer(new TopicManager(), serviceManager);
-    tcpServer.start(new InetSocketAddress(0));
+    TcpServer tcpServer =
+        new TcpServer(new TopicManager(), serviceManager, new InetSocketAddress(0));
+    tcpServer.start();
     server.setAddress(tcpServer.getAddress());
     serviceManager.putService("/service", server);
     slaveServer.addService(server);

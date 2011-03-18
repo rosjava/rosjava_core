@@ -35,6 +35,7 @@ import org.ros.internal.topic.TopicManager;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
+import org.ros.internal.transport.tcp.TcpServer;
 import org.ros.message.Message;
 
 import java.io.IOException;
