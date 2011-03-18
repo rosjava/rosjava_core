@@ -12,6 +12,7 @@ syntax: glob
 .cproject
 .settings
 syntax: regexp
+build/.*
 android/(bin|gen)/.*
 apps/.*/(bin|gen)/.*
 java/(bin|build|dist|msg_gen)/.*
