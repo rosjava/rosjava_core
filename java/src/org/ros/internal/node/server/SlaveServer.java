@@ -40,8 +40,8 @@ import org.ros.message.Message;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -68,7 +68,7 @@ public class SlaveServer extends NodeServer {
     return publishers;
   }
 
-  public SlaveServer(String nodeName, SocketAddress xmlRpcServerAddress, MasterClient master,
+  public SlaveServer(String nodeName, InetSocketAddress xmlRpcServerAddress, MasterClient master,
       TopicManager topicManager, ServiceManager serviceManager, TcpRosServer tcpRosServer) {
     super(xmlRpcServerAddress);
     Preconditions.checkNotNull(nodeName);

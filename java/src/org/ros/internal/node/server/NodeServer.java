@@ -16,8 +16,6 @@
 
 package org.ros.internal.node.server;
 
-import com.google.common.base.Preconditions;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
@@ -29,7 +27,6 @@ import org.apache.xmlrpc.webserver.WebServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -42,22 +39,16 @@ public class NodeServer {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(NodeServer.class);
 
-  private final InetSocketAddress address;
+  private final InetSocketAddress bindAddress;
   private final WebServer server;
 
-  private boolean running;
-
-  public NodeServer(SocketAddress address) {
-    // TODO(damonkohler): Since this address is the one we bind to, it doesn't
-    // necessarily have the right port information.
-    this.address = (InetSocketAddress) address;
-    server = new WebServer(this.address.getPort(), this.address.getAddress());
-    running = false;
+  public NodeServer(InetSocketAddress bindAddress) {
+    this.bindAddress = bindAddress;
+    server = new WebServer(bindAddress.getPort(), bindAddress.getAddress());
   }
 
   public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass, T instance)
       throws XmlRpcException, IOException, URISyntaxException {
-    Preconditions.checkState(!running);
     XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
     PropertyHandlerMapping phm = new PropertyHandlerMapping();
     phm.setRequestProcessorFactoryFactory(new NodeRequestProcessorFactoryFactory<T>(instance));
@@ -67,14 +58,12 @@ public class NodeServer {
     serverConfig.setEnabledForExtensions(false);
     serverConfig.setContentLengthOptional(false);
     server.start();
-    running = true;
     if (DEBUG) {
-      log.info("Slave node bound to: " + getUri());
+      log.info("Bound to: " + getUri());
     }
   }
 
   void shutdown() {
-    Preconditions.checkState(running);
     server.shutdown();
   }
 
@@ -82,8 +71,7 @@ public class NodeServer {
   // hostname without the user having to specify it. If that fails, we should
   // add hostname to the NodeServer constructor.
   public URI getUri() throws MalformedURLException, URISyntaxException {
-    Preconditions.checkState(running);
-    return new URL("http", address.getHostName(), server.getPort(), "").toURI();
+    return new URL("http", bindAddress.getHostName(), server.getPort(), "").toURI();
   }
 
 }
