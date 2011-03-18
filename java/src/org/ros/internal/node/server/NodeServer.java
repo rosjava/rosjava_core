@@ -78,6 +78,9 @@ public class NodeServer {
     server.shutdown();
   }
 
+  // TODO(damonkohler): Using getHostName() here should return the public
+  // hostname without the user having to specify it. If that fails, we should
+  // add hostname to the NodeServer constructor.
   public URI getUri() throws MalformedURLException, URISyntaxException {
     Preconditions.checkState(running);
     return new URL("http", address.getHostName(), server.getPort(), "").toURI();
