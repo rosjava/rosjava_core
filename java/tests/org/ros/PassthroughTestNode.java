@@ -29,7 +29,7 @@ public class PassthroughTestNode implements RosMain {
   @Override
   public void rosMain(String[] argv, NodeContext nodeContext) throws RosNameException,
       RosInitException {
-    Node node;
+    final Node node;
     node = new Node("test_node", nodeContext);
     node.init();
 
@@ -65,13 +65,15 @@ public class PassthroughTestNode implements RosMain {
     MessageListener<org.ros.message.test_ros.TestHeader> header_cb = new MessageListener<org.ros.message.test_ros.TestHeader>() {
       @Override
       public void onNewMessage(org.ros.message.test_ros.TestHeader m) {
+        m.orig_caller_id = m.caller_id;
+        m.caller_id = node.getName();
         pub_header.publish(m);
       }
     };
     node.createSubscriber("test_header_in", header_cb, org.ros.message.test_ros.TestHeader.class);
 
     //TestComposite pass through
-    final Publisher<org.ros.message.test_ros.Composite> pub_composite = node.createPublisher("test_composite_out",
+    final Publisher<org.ros.message.test_ros.Composite> pub_composite = node.createPublisher("composite_out",
         org.ros.message.test_ros.Composite.class);
     MessageListener<org.ros.message.test_ros.Composite> composite_cb = new MessageListener<org.ros.message.test_ros.Composite>() {
       @Override
@@ -79,7 +81,7 @@ public class PassthroughTestNode implements RosMain {
         pub_composite.publish(m);
       }
     };
-    node.createSubscriber("test_composite_in", composite_cb, org.ros.message.test_ros.Composite.class);
+    node.createSubscriber("composite_in", composite_cb, org.ros.message.test_ros.Composite.class);
     
     // just spin until exit
     while (true) {

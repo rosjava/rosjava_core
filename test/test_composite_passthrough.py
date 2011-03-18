@@ -34,66 +34,71 @@
 # Revision $Id: test_empty_service.py 3803 2009-02-11 02:04:39Z rob_wheeler $
 
 PKG = 'rosjava'
-NAME = 'int64_passthrough'
+NAME = 'composite_passthrough'
 import roslib; roslib.load_manifest(PKG)
 
 from ros import rospy
-from ros import std_msgs
+from ros import test_ros
 from ros import rostest
 
 import sys
 import time
 import unittest
 
-from std_msgs.msg import Int64
+from test_ros.msg import Composite
 
-class TestInt64Passthrough(unittest.TestCase):
+class CompositePassthrough(unittest.TestCase):
         
     def setUp(self):
         rospy.init_node(NAME)
         
-        # keep track of Nth and (N-1)th message
-        self.fixture_prev = self.fixture_curr = None
-        self.test_prev = self.test_curr = None
+        self.fixture_curr = None
+        self.test_curr = None
         
-        rospy.Subscriber('int64_in', Int64, self.cb_from_fixture)
-        rospy.Subscriber('int64_out', Int64, self.cb_from_test)
+        rospy.Subscriber('composite_in', Composite, self.cb_from_fixture)
+        rospy.Subscriber('composite_out', Composite, self.cb_from_test)
         
     def cb_from_fixture(self, msg):
-        self.fixture_prev = self.fixture_curr
         self.fixture_curr = msg
 
     def cb_from_test(self, msg):
-        self.test_prev = self.test_curr
         self.test_curr = msg
 
     def test_string_passthrough(self):
         # 20 seconds to validate fixture
         timeout_t = time.time() + 20.
         print "waiting for 20 seconds for fixture to verify"
-        while self.fixture_prev is None and \
+        while self.fixture_curr is None and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
         self.failIf(timeout_t < time.time(), "timeout exceeded")
         self.failIf(rospy.is_shutdown(), "node shutdown")            
-        self.failIf(self.fixture_prev is None, "no data from fixture")
         self.failIf(self.fixture_curr is None, "no data from fixture")
-        self.assertEquals(self.fixture_prev.data + 1, self.fixture_curr.data, "fixture should incr by one")
+        m = self.fixture_curr
+        self.assertAlmostEquals(m.a.x, m.b.x)
+        self.assertAlmostEquals(m.a.y, m.b.y)
+        self.assertAlmostEquals(m.a.z, m.b.z)
 
         # another 20 seconds to validate client
         timeout_t = time.time() + 20.
         print "waiting for 20 seconds for client to verify"
-        while self.test_prev is None and \
+        while self.test_curr is None and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
-        self.failIf(self.test_prev is None, "no data from test")
-        self.assertEquals(self.test_prev.data + 1, self.test_curr.data, "test does not appear to match fixture data")
+        self.failIf(self.test_curr is None, "no data from test")
+        m = self.test_curr
+        self.assertAlmostEquals(m.a.x, m.b.x)
+        self.assertAlmostEquals(m.a.y, m.b.y)
+        self.assertAlmostEquals(m.a.z, m.b.z)
 
+        # a.w = a.x + a.y + a.z.  Just make sure we're in the ballpark
+        a = self.test_curr.a
+        self.assert_(abs(a.x + a.y + a.z - a.w) < 10.)
 
 if __name__ == '__main__':
     import rostest
-    rostest.run(PKG, NAME, TestInt64Passthrough, sys.argv)
+    rostest.run(PKG, NAME, CompositePassthrough, sys.argv)
