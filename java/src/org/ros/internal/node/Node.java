@@ -61,10 +61,10 @@ public class Node {
   public Node(String nodeName, URI masterUri, SocketAddress xmlRpcServerAddress)
       throws MalformedURLException {
     master = new MasterClient(masterUri);
-    slave = new SlaveServer(nodeName, master, xmlRpcServerAddress);
     executor = Executors.newCachedThreadPool();
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
+    slave = new SlaveServer(nodeName, xmlRpcServerAddress, master, topicManager, serviceManager);
     tcpServer = new TcpServer(topicManager, serviceManager);
     started = false;
   }
@@ -102,7 +102,6 @@ public class Node {
         // Create new underlying implementation for topic subscription.
         subscriber = Subscriber.create(slave.toSlaveIdentifier(), topicDefinition, messageClass,
             executor);
-        topicManager.putSubscriber(topicName, subscriber);
         createdNewSubscriber = true;
       }
     }
@@ -128,7 +127,6 @@ public class Node {
         Preconditions.checkState(publisher.checkMessageClass(messageClass));
       } else {
         publisher = new Publisher<MessageType>(topicDefinition, messageClass);
-        topicManager.putPublisher(topicName, publisher);
         createdNewPublisher = true;
       }
     }

@@ -51,9 +51,12 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class SlaveServer extends NodeServer {
-  private final String name;
-  private final MasterClient master;
+
+  private final String nodeName;
+  private final MasterClient masterClient;
   private final TopicManager topicManager;
+  private final ServiceManager serviceManager;
+
   private InetSocketAddress tcpRosServerAddress;
 
   private static List<PublisherIdentifier> buildPublisherIdentifierList(
@@ -66,13 +69,15 @@ public class SlaveServer extends NodeServer {
     return publishers;
   }
 
-  public SlaveServer(String nodeName, MasterClient master, SocketAddress xmlRpcServerAddress) {
+  public SlaveServer(String nodeName, SocketAddress xmlRpcServerAddress, MasterClient master,
+      TopicManager topicManager, ServiceManager serviceManager) {
     super(xmlRpcServerAddress);
     Preconditions.checkNotNull(nodeName);
     Preconditions.checkArgument(nodeName.startsWith("/"));
-    this.name = nodeName;
-    this.master = master;
-    this.topicManager = new TopicManager();
+    this.nodeName = nodeName;
+    this.masterClient = master;
+    this.topicManager = topicManager;
+    this.serviceManager = serviceManager;
     this.tcpRosServerAddress = null;
   }
 
@@ -81,8 +86,7 @@ public class SlaveServer extends NodeServer {
    * {@link TcpServer} is initialized first so that the slave server returns
    * correct information when topics are requested.
    * 
-   * @param tcpRosServerAddress
-   *          Address of TCPROS server.
+   * @param tcpRosServerAddress Address of TCPROS server.
    * @throws XmlRpcException
    * @throws IOException
    * @throws URISyntaxException
@@ -107,7 +111,7 @@ public class SlaveServer extends NodeServer {
   public void addPublisher(Publisher<?> publisher) throws MalformedURLException,
       URISyntaxException, RemoteException {
     topicManager.putPublisher(publisher.getTopicName(), publisher);
-    master.registerPublisher(publisher.toPublisherIdentifier(toSlaveIdentifier()));
+    masterClient.registerPublisher(publisher.toPublisherIdentifier(toSlaveIdentifier()));
   }
 
   /**
@@ -127,9 +131,9 @@ public class SlaveServer extends NodeServer {
   public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws IOException,
       URISyntaxException, RemoteException {
     topicManager.putSubscriber(subscriber.getTopicName(), subscriber);
-    Response<List<URI>> response = master.registerSubscriber(toSlaveIdentifier(), subscriber);
-    List<PublisherIdentifier> publishers = buildPublisherIdentifierList(response.getResult(),
-        subscriber.getTopicDefinition());
+    Response<List<URI>> response = masterClient.registerSubscriber(toSlaveIdentifier(), subscriber);
+    List<PublisherIdentifier> publishers =
+        buildPublisherIdentifierList(response.getResult(), subscriber.getTopicDefinition());
     subscriber.updatePublishers(publishers);
     return publishers;
   }
@@ -142,7 +146,7 @@ public class SlaveServer extends NodeServer {
    */
   public void addService(ServiceServer<? extends Message> server) throws URISyntaxException,
       MalformedURLException, RemoteException {
-    master.registerService(toSlaveIdentifier(), server);
+    masterClient.registerService(toSlaveIdentifier(), server);
   }
 
   public List<Object> getBusStats(String callerId) {
@@ -158,7 +162,7 @@ public class SlaveServer extends NodeServer {
   }
 
   public URI getMasterUri(String callerId) {
-    return master.getRemoteUri();
+    return masterClient.getRemoteUri();
   }
 
   public void shutdown(String callerId, String message) {
@@ -168,8 +172,8 @@ public class SlaveServer extends NodeServer {
   /**
    * @param callerId
    * @return PID of node process
-   * @throws UnsupportedOperationException
-   *           If PID cannot be retrieved on this platform.
+   * @throws UnsupportedOperationException If PID cannot be retrieved on this
+   *         platform.
    */
   public Integer getPid(String callerId) {
     // kwc: java has no standard way of getting pid, apparently. This is the
@@ -203,8 +207,8 @@ public class SlaveServer extends NodeServer {
     if (topicManager.hasSubscriber(topicName)) {
       Subscriber<? extends Message> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
-      List<PublisherIdentifier> pubIdentifiers = buildPublisherIdentifierList(publisherUris,
-          topicDefinition);
+      List<PublisherIdentifier> pubIdentifiers =
+          buildPublisherIdentifierList(publisherUris, topicDefinition);
       subscriber.updatePublishers(pubIdentifiers);
     }
   }
@@ -236,7 +240,7 @@ public class SlaveServer extends NodeServer {
    * @throws URISyntaxException
    */
   public SlaveIdentifier toSlaveIdentifier() throws URISyntaxException, MalformedURLException {
-    return new SlaveIdentifier(name, getUri());
+    return new SlaveIdentifier(nodeName, getUri());
   }
 
 }

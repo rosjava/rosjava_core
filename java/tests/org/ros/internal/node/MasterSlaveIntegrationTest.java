@@ -74,11 +74,12 @@ public class MasterSlaveIntegrationTest {
     masterClient = new MasterClient(masterServer.getUri());
     tcpServer = new TcpServer(topicManager, serviceManager);
     tcpServer.start(new InetSocketAddress(0));
-    slaveServer = new SlaveServer("/foo", masterClient, new InetSocketAddress(0));
-    slaveServer.start(tcpServer.getAddress());
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    
+    slaveServer =
+        new SlaveServer("/foo", new InetSocketAddress(0), masterClient, topicManager,
+            serviceManager);
+    slaveServer.start(tcpServer.getAddress());
     slaveClient = new SlaveClient("/bar", slaveServer.getUri());
   }
 
@@ -150,14 +151,14 @@ public class MasterSlaveIntegrationTest {
             return response;
           }
         };
-        
+
     ServiceManager serviceManager = new ServiceManager();
     TcpServer tcpServer = new TcpServer(new TopicManager(), serviceManager);
     tcpServer.start(new InetSocketAddress(0));
     server.setAddress(tcpServer.getAddress());
     serviceManager.putService("/service", server);
     slaveServer.addService(server);
-    
+
     Response<URI> response =
         masterClient.lookupService(
             SlaveIdentifier.createAnonymous(new URI("http://localhost:1234")), "/service");
