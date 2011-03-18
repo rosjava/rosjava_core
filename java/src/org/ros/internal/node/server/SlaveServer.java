@@ -207,7 +207,6 @@ public class SlaveServer extends NodeServer {
     }
   }
 
-  // TODO(damonkohler): Support multiple publishers for a particular topic.
   public ProtocolDescription requestTopic(String topicName, Collection<String> protocols)
       throws ServerException {
     try {

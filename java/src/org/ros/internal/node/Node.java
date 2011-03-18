@@ -48,12 +48,10 @@ import java.util.concurrent.Executors;
  */
 public class Node {
 
-  /**
-   * 
-   */
   private static final String LOOPBACK = "127.0.0.1";
+
   private final MasterClient masterClient;
-  private final SlaveServer slave;
+  private final SlaveServer slaveServer;
   private final Executor executor;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
@@ -84,7 +82,7 @@ public class Node {
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     tcpRosServer = new TcpRosServer(tcpRosBindAddress, topicManager, serviceManager);
-    slave =
+    slaveServer =
         new SlaveServer(nodeName, xmlRpcBindAddress, masterClient, topicManager, serviceManager,
             tcpRosServer);
   }
@@ -112,19 +110,18 @@ public class Node {
 
     synchronized (topicManager) {
       if (topicManager.hasSubscriber(topicName)) {
-        // Return existing internal subscriber.
         subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
         Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
-        // Create new underlying implementation for topic subscription.
         subscriber =
-            Subscriber.create(slave.toSlaveIdentifier(), topicDefinition, messageClass, executor);
+            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
+                executor);
         createdNewSubscriber = true;
       }
     }
 
     if (createdNewSubscriber) {
-      slave.addSubscriber(subscriber);
+      slaveServer.addSubscriber(subscriber);
     }
     return subscriber;
   }
@@ -148,7 +145,7 @@ public class Node {
     }
 
     if (createdNewPublisher) {
-      slave.addPublisher(publisher);
+      slaveServer.addPublisher(publisher);
     }
     return publisher;
   }
@@ -161,11 +158,11 @@ public class Node {
    * @throws URISyntaxException
    */
   public void start() throws XmlRpcException, IOException, URISyntaxException {
-    slave.start();
+    slaveServer.start();
   }
 
   public void stop() {
-    slave.shutdown();
+    slaveServer.shutdown();
   }
 
 }
