@@ -50,9 +50,9 @@ public class Node {
 
   private static final String LOOPBACK = "127.0.0.1";
 
+  private final Executor executor;
   private final MasterClient masterClient;
   private final SlaveServer slaveServer;
-  private final Executor executor;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
   private final TcpRosServer tcpRosServer;
@@ -77,8 +77,8 @@ public class Node {
 
   Node(String nodeName, URI masterUri, InetSocketAddress xmlRpcBindAddress,
       InetSocketAddress tcpRosBindAddress) throws MalformedURLException {
-    masterClient = new MasterClient(masterUri);
     executor = Executors.newCachedThreadPool();
+    masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     tcpRosServer = new TcpRosServer(tcpRosBindAddress, topicManager, serviceManager);
