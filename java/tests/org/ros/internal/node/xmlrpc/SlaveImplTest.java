@@ -28,7 +28,7 @@ import org.mockito.Matchers;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
 import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.topic.Publisher;
+import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 

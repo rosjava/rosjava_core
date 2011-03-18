@@ -18,7 +18,7 @@ package org.ros.internal.node.server;
 
 import com.google.common.collect.Maps;
 
-import org.ros.internal.service.ServiceServer;
+import org.ros.internal.node.service.ServiceServer;
 import org.ros.message.Message;
 
 import java.util.Map;

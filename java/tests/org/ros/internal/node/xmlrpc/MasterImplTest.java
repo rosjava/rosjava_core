@@ -27,10 +27,10 @@ import org.mockito.Matchers;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.topic.MessageDefinition;
-import org.ros.internal.topic.PublisherIdentifier;
-import org.ros.internal.topic.SubscriberIdentifier;
-import org.ros.internal.topic.TopicDefinition;
+import org.ros.internal.node.topic.MessageDefinition;
+import org.ros.internal.node.topic.PublisherIdentifier;
+import org.ros.internal.node.topic.SubscriberIdentifier;
+import org.ros.internal.node.topic.TopicDefinition;
 
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.service;
+package org.ros.internal.node.service;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 

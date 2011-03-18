@@ -26,7 +26,7 @@ import org.ros.message.Message;
  *          messages of this type.
  */
 public class Publisher<MessageType extends Message> {
-  org.ros.internal.topic.Publisher<MessageType> publisher;
+  org.ros.internal.node.topic.Publisher<MessageType> publisher;
   String topicName;
   // deal with type erasure for generics
   Class<MessageType> messageClass;
@@ -38,7 +38,7 @@ public class Publisher<MessageType extends Message> {
    * @param messageClass
    */
   Publisher(String topicName, Class<MessageType> messageClass,
-      org.ros.internal.topic.Publisher<MessageType> publisher) {
+      org.ros.internal.node.topic.Publisher<MessageType> publisher) {
     this.topicName = topicName;
     this.messageClass = messageClass;
     this.publisher = publisher;

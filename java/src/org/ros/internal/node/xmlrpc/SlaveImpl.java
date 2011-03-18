@@ -19,7 +19,6 @@ package org.ros.internal.node.xmlrpc;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import org.ros.internal.topic.Subscriber;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +26,8 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
 import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.topic.Publisher;
+import org.ros.internal.node.topic.Publisher;
+import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.transport.ProtocolDescription;
 
 import java.net.URI;

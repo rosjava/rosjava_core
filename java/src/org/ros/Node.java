@@ -27,8 +27,8 @@ import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.RosoutLogger;
 import org.ros.internal.node.client.TimeProvider;
 import org.ros.internal.node.client.WallclockProvider;
-import org.ros.internal.topic.MessageDefinition;
-import org.ros.internal.topic.TopicDefinition;
+import org.ros.internal.node.topic.MessageDefinition;
+import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.message.Message;
 import org.ros.message.Time;
 import org.ros.namespace.Namespace;
@@ -91,7 +91,7 @@ public class Node implements Namespace {
       Message m = messageClass.newInstance();
       TopicDefinition topicDefinition =
           new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(m));
-      org.ros.internal.topic.Publisher<MessageType> publisherImpl =
+      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
           node.createPublisher(topicDefinition, messageClass);
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (RosNameException e) {
@@ -118,7 +118,7 @@ public class Node implements Namespace {
       String resolvedTopicName = resolveName(topicName);
       TopicDefinition topicDefinition =
           new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(m));
-      org.ros.internal.topic.Subscriber<MessageType> subscriberImpl =
+      org.ros.internal.node.topic.Subscriber<MessageType> subscriberImpl =
           node.createSubscriber(topicDefinition, messageClass);
 
       // Add the callback to the impl.

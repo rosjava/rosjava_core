@@ -21,12 +21,12 @@ import com.google.common.collect.Lists;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.service.ServiceDefinition;
-import org.ros.internal.service.ServiceIdentifier;
-import org.ros.internal.topic.MessageDefinition;
-import org.ros.internal.topic.PublisherIdentifier;
-import org.ros.internal.topic.SubscriberIdentifier;
-import org.ros.internal.topic.TopicDefinition;
+import org.ros.internal.node.service.ServiceDefinition;
+import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.internal.node.topic.MessageDefinition;
+import org.ros.internal.node.topic.PublisherIdentifier;
+import org.ros.internal.node.topic.SubscriberIdentifier;
+import org.ros.internal.node.topic.TopicDefinition;
 
 import java.net.URI;
 import java.net.URISyntaxException;

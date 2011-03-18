@@ -25,12 +25,12 @@ import org.ros.internal.node.response.VoidResultFactory;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.service.ServiceServer;
-import org.ros.internal.topic.Publisher;
-import org.ros.internal.topic.PublisherIdentifier;
-import org.ros.internal.topic.Subscriber;
-import org.ros.internal.topic.Topic;
-import org.ros.internal.topic.TopicDefinition;
+import org.ros.internal.node.service.ServiceServer;
+import org.ros.internal.node.topic.Publisher;
+import org.ros.internal.node.topic.PublisherIdentifier;
+import org.ros.internal.node.topic.Subscriber;
+import org.ros.internal.node.topic.Topic;
+import org.ros.internal.node.topic.TopicDefinition;
 
 import java.net.MalformedURLException;
 import java.net.URI;

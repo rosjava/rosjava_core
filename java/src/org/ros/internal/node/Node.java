@@ -23,10 +23,10 @@ import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.topic.Publisher;
-import org.ros.internal.topic.Subscriber;
-import org.ros.internal.topic.TopicDefinition;
-import org.ros.internal.topic.TopicManager;
+import org.ros.internal.node.topic.Publisher;
+import org.ros.internal.node.topic.Subscriber;
+import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 

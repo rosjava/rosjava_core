@@ -32,12 +32,12 @@ public class Subscriber<MessageType extends Message> {
   private final Class<MessageType> messageClass;
   private final String topicName;
 
-  private final org.ros.internal.topic.Subscriber<MessageType> subscriberImpl;
+  private final org.ros.internal.node.topic.Subscriber<MessageType> subscriberImpl;
   /* Callback for new messages. */
   private final MessageListener<MessageType> messageCallback;
 
   protected Subscriber(String topicName, MessageListener<MessageType> callback,
-      Class<MessageType> messageClass, org.ros.internal.topic.Subscriber<MessageType> subscriberImpl) {
+      Class<MessageType> messageClass, org.ros.internal.node.topic.Subscriber<MessageType> subscriberImpl) {
     this.messageClass = messageClass;
     this.topicName = topicName;
     this.messageCallback = callback;

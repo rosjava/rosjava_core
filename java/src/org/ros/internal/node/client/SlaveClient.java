@@ -22,7 +22,7 @@ import org.ros.internal.node.response.ProtocolDescriptionResultFactory;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.TopicDefinitionListResultFactory;
 import org.ros.internal.node.response.UriResultFactory;
-import org.ros.internal.topic.TopicDefinition;
+import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.transport.ProtocolDescription;
 
 import java.net.MalformedURLException;

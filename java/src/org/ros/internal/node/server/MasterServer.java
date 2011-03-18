@@ -24,10 +24,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.internal.node.topic.PublisherIdentifier;
+import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.xmlrpc.MasterImpl;
-import org.ros.internal.service.ServiceIdentifier;
-import org.ros.internal.topic.PublisherIdentifier;
-import org.ros.internal.topic.SubscriberIdentifier;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

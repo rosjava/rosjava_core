@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.service;
+package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
@@ -28,7 +28,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
-import org.ros.internal.topic.Publisher;
+import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.message.Message;

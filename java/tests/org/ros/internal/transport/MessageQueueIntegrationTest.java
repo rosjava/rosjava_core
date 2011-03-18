@@ -34,7 +34,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.node.server.ServiceManager;
-import org.ros.internal.topic.TopicManager;
+import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 

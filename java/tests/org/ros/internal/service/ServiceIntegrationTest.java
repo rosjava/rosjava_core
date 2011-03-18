@@ -21,7 +21,12 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.ros.internal.node.server.ServiceManager;
-import org.ros.internal.topic.TopicManager;
+import org.ros.internal.node.service.ServiceCallback;
+import org.ros.internal.node.service.ServiceClient;
+import org.ros.internal.node.service.ServiceDefinition;
+import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.internal.node.service.ServiceServer;
+import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;

@@ -14,21 +14,33 @@
  * the License.
  */
 
-package org.ros.internal.topic;
+package org.ros.internal.node.topic;
+
+import com.google.common.collect.ImmutableMap;
 
 import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.transport.ConnectionHeaderFields;
 
 import java.net.URI;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PublisherIdentifier {
+public class SubscriberIdentifier {
 
   private final SlaveIdentifier slaveIdentifier;
   private final TopicDefinition topicDefinition;
 
-  public PublisherIdentifier(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition) {
+  public static SubscriberIdentifier createFromHeader(Map<String, String> header) {
+    // TODO(damonkohler): Update SlaveIdentifier to handle the case where the
+    // URI is not set.
+    SlaveIdentifier slaveIdentifier =
+        new SlaveIdentifier(header.get(ConnectionHeaderFields.CALLER_ID), null);
+    return new SubscriberIdentifier(slaveIdentifier, TopicDefinition.createFromHeader(header));
+  }
+
+  public SubscriberIdentifier(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition) {
     this.slaveIdentifier = slaveIdentifier;
     this.topicDefinition = topicDefinition;
   }
@@ -48,15 +60,10 @@ public class PublisherIdentifier {
   public String getTopicName() {
     return topicDefinition.getName();
   }
-  
-  public String getTopicMessageType() {
-    return topicDefinition.getMessageType();
-  }
 
-  @Override
-  public String toString() {
-    return "PublisherIdentifier<" + slaveIdentifier.toString() + ", "
-        + topicDefinition.toString() + ">";
+  public Map<String, String> toHeader() {
+    return new ImmutableMap.Builder<String, String>().putAll(slaveIdentifier.toHeader())
+        .putAll(topicDefinition.toHeader()).build();
   }
 
   @Override
@@ -73,7 +80,7 @@ public class PublisherIdentifier {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    PublisherIdentifier other = (PublisherIdentifier) obj;
+    SubscriberIdentifier other = (SubscriberIdentifier) obj;
     if (slaveIdentifier == null) {
       if (other.slaveIdentifier != null) return false;
     } else if (!slaveIdentifier.equals(other.slaveIdentifier)) return false;
@@ -82,5 +89,4 @@ public class PublisherIdentifier {
     } else if (!topicDefinition.equals(other.topicDefinition)) return false;
     return true;
   }
-
 }
