@@ -48,7 +48,6 @@ public class SlaveApiTestNode implements RosMain {
       }
     };
 
-    // Subscribers currently don't work
     node.createSubscriber("chatter_in", chatter_cb, org.ros.message.std_msgs.String.class);
 
     // have at least one case of dual pub/sub on same topic
