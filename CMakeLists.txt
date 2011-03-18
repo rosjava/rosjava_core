@@ -7,5 +7,6 @@ rosbuild_init()
 
 # integration tests
 rosbuild_add_rostest(test/slave_api.rostest)
+rosbuild_add_rostest(test/slave_api_simtime.rostest)
 rosbuild_add_rostest(test/string_passthrough.rostest)
 rosbuild_add_rostest(test/int64_passthrough.rostest)

@@ -20,11 +20,7 @@ import org.ros.exceptions.RosNameException;
 import org.ros.message.std_msgs.Int64;
 
 /**
- * This node is used to test the slave API externally using integration tests in
- * the test_ros package.
- * 
- * cd test_ros/test/client_verification/ ./test_slave_api.py --text
- * --profile=rosjava_profile.yaml
+ * This node is used to test the slave API externally using rostest.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  * 
