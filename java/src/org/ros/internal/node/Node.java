@@ -22,7 +22,6 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.ServiceManager;
-import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.topic.Publisher;
 import org.ros.internal.topic.Subscriber;
@@ -49,6 +48,10 @@ import java.util.concurrent.Executors;
  */
 public class Node {
 
+  /**
+   * 
+   */
+  private static final String LOOPBACK = "127.0.0.1";
   private final MasterClient masterClient;
   private final SlaveServer slave;
   private final Executor executor;
@@ -56,9 +59,25 @@ public class Node {
   private final ServiceManager serviceManager;
   private final TcpRosServer tcpRosServer;
 
-  private boolean started;
+  public static Node createPublic(String nodeName, URI masterUri, int xmlRpcBindPort,
+      int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
+    Node node =
+        new Node(nodeName, masterUri, new InetSocketAddress(xmlRpcBindPort), new InetSocketAddress(
+            tcpRosBindPort));
+    node.start();
+    return node;
+  }
 
-  public Node(String nodeName, URI masterUri, InetSocketAddress xmlRpcBindAddress,
+  public static Node createPrivate(String nodeName, URI masterUri, int xmlRpcBindPort,
+      int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
+    Node node =
+        new Node(nodeName, masterUri, new InetSocketAddress(LOOPBACK, xmlRpcBindPort),
+            new InetSocketAddress(LOOPBACK, tcpRosBindPort));
+    node.start();
+    return node;
+  }
+
+  Node(String nodeName, URI masterUri, InetSocketAddress xmlRpcBindAddress,
       InetSocketAddress tcpRosBindAddress) throws MalformedURLException {
     masterClient = new MasterClient(masterUri);
     executor = Executors.newCachedThreadPool();
@@ -68,7 +87,6 @@ public class Node {
     slave =
         new SlaveServer(nodeName, xmlRpcBindAddress, masterClient, topicManager, serviceManager,
             tcpRosServer);
-    started = false;
   }
 
   /**
@@ -88,7 +106,6 @@ public class Node {
   public <MessageType extends Message> Subscriber<MessageType> createSubscriber(
       TopicDefinition topicDefinition, Class<MessageType> messageClass) throws IOException,
       URISyntaxException, RemoteException {
-    Preconditions.checkState(started, "Node has not been started yet");
     String topicName = topicDefinition.getName();
     Subscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
@@ -116,7 +133,6 @@ public class Node {
   public <MessageType extends Message> Publisher<MessageType> createPublisher(
       TopicDefinition topicDefinition, Class<MessageType> messageClass) throws IOException,
       URISyntaxException, RemoteException {
-    Preconditions.checkState(started, "Node has not been started yet");
     String topicName = topicDefinition.getName();
     Publisher<MessageType> publisher;
     boolean createdNewPublisher = false;
@@ -146,7 +162,6 @@ public class Node {
    */
   public void start() throws XmlRpcException, IOException, URISyntaxException {
     slave.start();
-    started = true;
   }
 
   public void stop() {

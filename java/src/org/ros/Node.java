@@ -169,23 +169,17 @@ public class Node implements Namespace {
       throw new RosInitException("already initialized");
     }
     try {
-      InetSocketAddress tcpRosServerBindAddress;
       if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
-        tcpRosServerBindAddress =
-            new InetSocketAddress(InetAddress.getByName("localhost"), context.getTcpRosPort());
+        node =
+            org.ros.internal.node.Node.createPrivate(nodeName.toString(),
+                context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
       } else {
-        tcpRosServerBindAddress = new InetSocketAddress(context.getTcpRosPort());
+        node =
+            org.ros.internal.node.Node.createPublic(nodeName.toString(),
+                context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
       }
-
-      // Create factory and job queue for generating publisher/subscriber impls.
-      node =
-          new org.ros.internal.node.Node(nodeName.toString(), context.getRosMasterUri(),
-              new InetSocketAddress(context.getHostName(), context.getXmlRpcPort()),
-              tcpRosServerBindAddress);
-      // Explicitly start TCPROS resources for now.
-      node.start();
 
       initialized = true;
 
