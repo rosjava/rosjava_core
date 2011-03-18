@@ -19,6 +19,7 @@ package org.ros.internal.node.server;
 import com.google.common.collect.Maps;
 
 import org.ros.internal.service.ServiceServer;
+import org.ros.message.Message;
 
 import java.util.Map;
 
@@ -27,7 +28,7 @@ import java.util.Map;
  */
 public class ServiceManager {
 
-  private final Map<String, ServiceServer<?>> services;
+  private final Map<String, ServiceServer<? extends Message>> services;
   
   public ServiceManager() {
     services = Maps.newConcurrentMap();
@@ -37,11 +38,11 @@ public class ServiceManager {
     return services.containsKey(serviceName);
   }
 
-  public void putService(String serviceName, ServiceServer<?> serviceServer) {
+  public void putService(String serviceName, ServiceServer<? extends Message> serviceServer) {
     services.put(serviceName, serviceServer);
   }
 
-  public ServiceServer<?> getService(String serviceName) {
+  public ServiceServer<? extends Message> getService(String serviceName) {
     return services.get(serviceName);
   }
   
