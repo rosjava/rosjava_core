@@ -19,8 +19,6 @@ package org.ros.internal.node;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.Sets;
-
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,30 +27,14 @@ import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.ServiceManager;
-import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.node.service.ServiceDefinition;
-import org.ros.internal.node.service.ServiceServer;
-import org.ros.internal.node.topic.MessageDefinition;
-import org.ros.internal.node.topic.Publisher;
-import org.ros.internal.node.topic.PublisherIdentifier;
-import org.ros.internal.node.topic.Subscriber;
-import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
-import org.ros.internal.transport.ProtocolDescription;
-import org.ros.internal.transport.ProtocolNames;
-import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
-import org.ros.message.Message;
-import org.ros.message.srv.AddTwoInts;
-import org.ros.message.std_msgs.Int64;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.concurrent.Executors;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -63,21 +45,18 @@ public class MasterSlaveIntegrationTest {
   private MasterClient masterClient;
   private SlaveServer slaveServer;
   private SlaveClient slaveClient;
-  private TopicManager topicManager;
-  private ServiceManager serviceManager;
-  private TcpRosServer tcpRosServer;
 
   @Before
   public void setUp() throws XmlRpcException, IOException, URISyntaxException {
     masterServer = new MasterServer(new InetSocketAddress(0));
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
-    topicManager = new TopicManager();
-    serviceManager = new ServiceManager();
-    tcpRosServer = new TcpRosServer(new InetSocketAddress(0), topicManager, serviceManager);
+    TopicManager topicManager = new TopicManager();
+    ServiceManager serviceManager = new ServiceManager();
     slaveServer =
         new SlaveServer("/foo", new InetSocketAddress(0), masterClient, topicManager,
-            serviceManager, tcpRosServer);
+            serviceManager,
+            new TcpRosServer(new InetSocketAddress(0), topicManager, serviceManager));
     slaveServer.start();
     slaveClient = new SlaveClient("/bar", slaveServer.getUri());
   }
@@ -92,77 +71,6 @@ public class MasterSlaveIntegrationTest {
   public void testGetPid() throws RemoteException {
     Response<Integer> response = slaveClient.getPid();
     assertTrue(response.getResult() > 0);
-  }
-
-  @Test
-  public void testAddPublisher() throws Exception {
-    TopicDefinition topicDefinition =
-        new TopicDefinition("/hello",
-            MessageDefinition.createFromMessage(new org.ros.message.std_msgs.String()));
-    Publisher<Int64> publisher = new Publisher<Int64>(topicDefinition, Int64.class);
-    topicManager.putPublisher(topicDefinition.getName(), publisher);
-    try {
-      slaveServer.addPublisher(publisher);
-      Response<ProtocolDescription> response =
-          slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS));
-      assertEquals(new TcpRosProtocolDescription(tcpRosServer.getAddress()), response.getResult());
-    } finally {
-      publisher.shutdown();
-    }
-  }
-
-  @Test
-  public void testAddSubscriber() throws RemoteException, IOException, URISyntaxException {
-    TopicDefinition topicDefinition =
-        new TopicDefinition("/hello",
-            MessageDefinition.createFromMessage(new org.ros.message.std_msgs.String()));
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/bloop", new URI("http://fake:1234"));
-    Subscriber<org.ros.message.std_msgs.String> subscriber =
-        Subscriber.create(slaveIdentifier, topicDefinition, org.ros.message.std_msgs.String.class,
-            Executors.newCachedThreadPool());
-    topicManager.putSubscriber(topicDefinition.getName(), subscriber);
-    List<PublisherIdentifier> publishers = slaveServer.addSubscriber(subscriber);
-    assertEquals(0, publishers.size());
-    Publisher<Int64> publisher = new Publisher<Int64>(topicDefinition, Int64.class);
-    slaveServer.addPublisher(publisher);
-    topicManager.putPublisher(topicDefinition.getName(), publisher);
-    publishers = slaveServer.addSubscriber(subscriber);
-    PublisherIdentifier publisherDescription =
-        publisher.toPublisherIdentifier(SlaveIdentifier.createAnonymous(slaveServer.getUri()));
-    assertTrue(publishers.contains(publisherDescription));
-
-    Response<List<TopicDefinition>> response = slaveClient.getPublications();
-    assertEquals(1, response.getResult().size());
-    assertTrue(response.getResult().contains(publisher.getTopicDefinition()));
-  }
-
-  @Test
-  public void testAddService() throws IOException, RemoteException, URISyntaxException {
-    ServiceDefinition serviceDefinition =
-        new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
-    ServiceServer<AddTwoInts.Request> server =
-        new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/service",
-            serviceDefinition) {
-          @Override
-          public Message buildResponse(AddTwoInts.Request requestMessage) {
-            AddTwoInts.Response response = new AddTwoInts.Response();
-            response.sum = requestMessage.a + requestMessage.b;
-            return response;
-          }
-        };
-
-    ServiceManager serviceManager = new ServiceManager();
-    TcpRosServer tcpServer =
-        new TcpRosServer(new InetSocketAddress(0), new TopicManager(), serviceManager);
-    tcpServer.start();
-    server.setAddress(tcpServer.getAddress());
-    serviceManager.putService("/service", server);
-    slaveServer.addService(server);
-
-    Response<URI> response =
-        masterClient.lookupService(
-            SlaveIdentifier.createAnonymous(new URI("http://localhost:1234")), "/service");
-    assertEquals(server.getUri(), response.getResult());
   }
 
 }

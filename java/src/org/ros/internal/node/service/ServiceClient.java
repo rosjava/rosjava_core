@@ -35,6 +35,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
+import org.ros.MessageListener;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
@@ -54,8 +55,8 @@ public class ServiceClient<ResponseMessageType extends Message> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
 
-  private final Queue<ServiceCallback<ResponseMessageType>> callbacks;
-  final Class<ResponseMessageType> responseMessageClass;
+  private final Queue<MessageListener<ResponseMessageType>> messageListeners;
+  private final Class<ResponseMessageType> responseMessageClass;
   private final Map<String, String> header;
   private final ChannelFactory channelFactory;
   private final ClientBootstrap bootstrap;
@@ -119,12 +120,12 @@ public class ServiceClient<ResponseMessageType extends Message> {
   private final class ResponseHandler extends SimpleChannelHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-      ServiceCallback<ResponseMessageType> callback = callbacks.poll();
-      Preconditions.checkNotNull(callback);
+      MessageListener<ResponseMessageType> listener = messageListeners.poll();
+      Preconditions.checkNotNull(listener);
       ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
       ResponseMessageType message = responseMessageClass.newInstance();
       message.deserialize(response.getMessage().toByteBuffer());
-      callback.run(message);
+      listener.onNewMessage(message);
     }
   }
 
@@ -138,16 +139,25 @@ public class ServiceClient<ResponseMessageType extends Message> {
     Preconditions.checkNotNull(nodeName);
     Preconditions.checkArgument(nodeName.startsWith("/"));
     this.responseMessageClass = responseMessageClass;
-    callbacks = Lists.newLinkedList();
-    header = ImmutableMap.<String, String>builder().put(ConnectionHeaderFields.CALLER_ID, nodeName)
-    // TODO(damonkohler): Support non-persistent connections.
-        .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceIdentifier.toHeader()).build();
+    messageListeners = Lists.newLinkedList();
+    header = ImmutableMap.<String, String>builder()
+        .put(ConnectionHeaderFields.CALLER_ID, nodeName)
+        // TODO(damonkohler): Support non-persistent connections.
+        .put(ConnectionHeaderFields.PERSISTENT, "1")
+        .putAll(serviceIdentifier.toHeader())
+        .build();
     channelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
     bootstrap = new ClientBootstrap(channelFactory);
-    TcpClientPipelineFactory factory = new TcpClientPipelineFactory();
-    factory.getPipeline().addLast("HandshakeHandler", new HandshakeHandler());
+    TcpClientPipelineFactory factory = new TcpClientPipelineFactory() {
+      @Override
+      public ChannelPipeline getPipeline() {
+        ChannelPipeline pipeline = super.getPipeline();
+        pipeline.addLast("HandshakeHandler", new HandshakeHandler());
+        return pipeline;
+      }
+    };
     bootstrap.setPipelineFactory(factory);
     bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
   }
@@ -188,11 +198,11 @@ public class ServiceClient<ResponseMessageType extends Message> {
   /**
    * @param message
    */
-  public void call(Message message, ServiceCallback<ResponseMessageType> callback) {
+  public void call(Message message, MessageListener<ResponseMessageType> listener) {
     // TODO(damonkohler): Make use of sequence number.
     ChannelBuffer buffer =
         ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, message.serialize(0));
-    callbacks.add(callback);
+    messageListeners.add(listener);
     channel.write(buffer);
   }
 

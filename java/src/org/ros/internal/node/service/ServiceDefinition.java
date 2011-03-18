@@ -29,10 +29,12 @@ import java.util.Map;
  */
 public class ServiceDefinition {
 
+  private final String name;
   private final String type;
   private final String md5Checksum;
   
-  public ServiceDefinition(String type, String md5Checksum) {
+  public ServiceDefinition(String name, String type, String md5Checksum) {
+    this.name = name;
     this.type = type;
     this.md5Checksum = md5Checksum;
   }
@@ -48,4 +50,9 @@ public class ServiceDefinition {
   public String getType() {
     return type;
   }
+  
+  public String getName() {
+    return name;
+  }
+  
 }

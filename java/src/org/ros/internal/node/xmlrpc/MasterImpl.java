@@ -43,66 +43,32 @@ public class MasterImpl implements Master {
     this.master = master;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#getPublishedTopics(java.lang.String,
-   * java.lang.String)
-   */
   @Override
   public List<Object> getPublishedTopics(String callerId, String subgraph) {
     throw new UnsupportedOperationException();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#getSystemState(java.lang.String)
-   */
   @Override
   public List<Object> getSystemState(String callerId) {
     throw new UnsupportedOperationException();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#getUri(java.lang.String)
-   */
   @Override
   public List<Object> getUri(String callerId) {
     throw new UnsupportedOperationException();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#lookupNode(java.lang.String,
-   * java.lang.String)
-   */
   @Override
   public List<Object> lookupNode(String callerId, String nodeName) {
     throw new UnsupportedOperationException();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#lookupService(java.lang.String,
-   * java.lang.String)
-   */
   @Override
   public List<Object> lookupService(String callerId, String service) {
     ServiceIdentifier identifier = master.lookupService(callerId, service);
     return Response.createSuccess("Success", identifier.getUri().toString()).toList();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#registerPublisher(java.lang.String,
-   * java.lang.String, java.lang.String, java.lang.String)
-   */
   @Override
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
       String callerApi) throws URISyntaxException {
@@ -118,28 +84,17 @@ public class MasterImpl implements Master {
     return Response.createSuccess("Success", urls).toList();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#registerService(java.lang.String,
-   * java.lang.String, java.lang.String, java.lang.String)
-   */
   @Override
-  public List<Object> registerService(String callerId, String service, String serviceApi,
+  public List<Object> registerService(String callerId, String serviceName, String serviceApi,
       String callerApi) throws URISyntaxException {
-    // TODO(damonkohler): Pull out factory methods to avoid passing in the null md5Checksum here.
+    // TODO(damonkohler): Pull out factory methods to avoid passing in the null
+    // type and md5Checksum here.
     ServiceIdentifier description =
-        new ServiceIdentifier(service, new URI(serviceApi), new ServiceDefinition(service, null));
+        new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(serviceName, null, null));
     master.registerService(description);
     return Response.createSuccess("Success", 0).toList();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#registerSubscriber(java.lang.String,
-   * java.lang.String, java.lang.String, java.lang.String)
-   */
   @Override
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
       String callerApi) throws URISyntaxException {
@@ -155,34 +110,16 @@ public class MasterImpl implements Master {
     return Response.createSuccess("Success", urls).toList();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#unregisterPublisher(java.lang.String,
-   * java.lang.String, java.lang.String)
-   */
   @Override
   public List<Object> unregisterPublisher(String callerId, String topic, String callerApi) {
     throw new UnsupportedOperationException();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#unregisterService(java.lang.String,
-   * java.lang.String, java.lang.String)
-   */
   @Override
   public List<Object> unregisterService(String callerId, String service, String serviceApi) {
     throw new UnsupportedOperationException();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Master#unregisterSubscriber(java.lang.String,
-   * java.lang.String, java.lang.String)
-   */
   @Override
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi) {
     throw new UnsupportedOperationException();

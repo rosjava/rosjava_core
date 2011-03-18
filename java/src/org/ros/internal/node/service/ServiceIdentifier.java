@@ -29,24 +29,22 @@ import java.util.Map;
  */
 public class ServiceIdentifier {
 
-  private final String name;
   private final URI uri;
   private final ServiceDefinition serviceDefinition;
 
-  public ServiceIdentifier(String name, URI uri, ServiceDefinition serviceDefinition) {
-    this.name = name;
+  public ServiceIdentifier(URI uri, ServiceDefinition serviceDefinition) {
     this.uri = uri;
     this.serviceDefinition = serviceDefinition;
   }
 
   public Map<String, String> toHeader() {
     return ImmutableMap.<String, String>builder()
-        .put(ConnectionHeaderFields.SERVICE, name)
+        .put(ConnectionHeaderFields.SERVICE, serviceDefinition.getName())
         .putAll(serviceDefinition.toHeader()).build();
   }
 
   public String getName() {
-    return serviceDefinition.getType();
+    return serviceDefinition.getName();
   }
 
   public URI getUri() {

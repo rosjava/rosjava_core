@@ -23,6 +23,11 @@ import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.service.ServiceClient;
+import org.ros.internal.node.service.ServiceDefinition;
+import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.internal.node.service.ServiceResponseBuilder;
+import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
@@ -51,11 +56,13 @@ public class Node {
   private static final String LOOPBACK = "127.0.0.1";
 
   private final Executor executor;
+  private final String nodeName;
   private final MasterClient masterClient;
   private final SlaveServer slaveServer;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
   private final TcpRosServer tcpRosServer;
+
 
   public static Node createPublic(String nodeName, URI masterUri, int xmlRpcBindPort,
       int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
@@ -77,6 +84,7 @@ public class Node {
 
   Node(String nodeName, URI masterUri, InetSocketAddress xmlRpcBindAddress,
       InetSocketAddress tcpRosBindAddress) throws MalformedURLException {
+    this.nodeName = nodeName;
     executor = Executors.newCachedThreadPool();
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
@@ -148,6 +156,44 @@ public class Node {
       slaveServer.addPublisher(publisher);
     }
     return publisher;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <RequestMessageType extends Message> ServiceServer<RequestMessageType> createServiceServer(
+      ServiceDefinition serviceDefinition, Class<RequestMessageType> requestMessageClass,
+      ServiceResponseBuilder<RequestMessageType> responseBuilder) throws MalformedURLException,
+      URISyntaxException, RemoteException {
+    ServiceServer<RequestMessageType> serviceServer;
+    String name = serviceDefinition.getName();
+    boolean createdNewService = false;
+
+    synchronized (serviceManager) {
+      if (serviceManager.hasService(name)) {
+        serviceServer = (ServiceServer<RequestMessageType>) serviceManager.getService(name);
+        Preconditions.checkState(serviceServer.checkMessageClass(requestMessageClass));
+      } else {
+        serviceServer =
+            new ServiceServer<RequestMessageType>(serviceDefinition, requestMessageClass,
+                responseBuilder);
+        serviceServer.setAddress(tcpRosServer.getAddress());
+        createdNewService = true;
+      }
+    }
+
+    if (createdNewService) {
+      slaveServer.addService(serviceServer);
+    }
+    return serviceServer;
+  }
+
+  // TODO(damonkohler): Cache clients.
+  public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
+      ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
+    ServiceClient<ResponseMessageType> serviceClient =
+        ServiceClient.create(responseMessageClass, nodeName, serviceIdentifier);
+    URI uri = serviceIdentifier.getUri();
+    serviceClient.connect(new InetSocketAddress(uri.getHost(), uri.getPort()));
+    return serviceClient;
   }
 
   /**

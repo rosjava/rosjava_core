@@ -31,6 +31,7 @@ import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.message.Message;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -65,8 +66,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @throws URISyntaxException
    * @throws RemoteException
    */
-  public Response<Void> registerService(SlaveIdentifier slave, ServiceServer<?> service)
-      throws URISyntaxException, RemoteException {
+  public Response<Void> registerService(SlaveIdentifier slave,
+      ServiceServer<? extends Message> service) throws URISyntaxException, RemoteException {
     return Response.fromList(node.registerService(slave.getName(), service.getName(), service
         .getUri().toString(), slave.getUri().toString()), new VoidResultFactory());
   }
@@ -82,8 +83,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @throws URISyntaxException
    * @throws RemoteException
    */
-  public Response<Integer> unregisterService(SlaveIdentifier slave, ServiceServer<?> service)
-      throws URISyntaxException, RemoteException {
+  public Response<Integer> unregisterService(SlaveIdentifier slave,
+      ServiceServer<? extends Message> service) throws URISyntaxException, RemoteException {
     return Response.fromList(
         node.unregisterService(slave.getName(), service.getName(), service.getUri().toString()),
         new IntegerResultFactory());
@@ -130,7 +131,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   /**
    * Registers the specified {@link PublisherIdentifier}.
    * 
-   * @param publisher the {@link PublisherIdentifier} of the {@link Publisher} to register
+   * @param publisher the {@link PublisherIdentifier} of the {@link Publisher}
+   *        to register
    * @return a {@link Response} with a {@link List} of the current
    *         {@link SlaveServer} URIs which have {@link Subscriber}s for the
    *         published {@link Topic}.
@@ -148,7 +150,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   /**
    * Unregisters the specified {@link PublisherIdentifier}.
    * 
-   * @param publisher the {@link PublisherIdentifier} of the {@link Publisher} to unregister
+   * @param publisher the {@link PublisherIdentifier} of the {@link Publisher}
+   *        to unregister
    * @return a {@link Response} with the number of unregistered
    *         {@link Publisher}s as the result
    * @throws RemoteException

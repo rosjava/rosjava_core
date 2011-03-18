@@ -19,19 +19,19 @@ package org.ros.internal.node.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.xmlrpc.XmlRpcException;
+import org.junit.Before;
 import org.junit.Test;
-import org.ros.internal.node.server.ServiceManager;
-import org.ros.internal.node.service.ServiceCallback;
-import org.ros.internal.node.service.ServiceClient;
-import org.ros.internal.node.service.ServiceDefinition;
-import org.ros.internal.node.service.ServiceIdentifier;
-import org.ros.internal.node.service.ServiceServer;
-import org.ros.internal.node.topic.TopicManager;
-import org.ros.internal.transport.tcp.TcpRosServer;
+import org.ros.MessageListener;
+import org.ros.internal.node.Node;
+import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.server.MasterServer;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -41,44 +41,49 @@ import java.util.concurrent.TimeUnit;
  */
 public class ServiceIntegrationTest {
 
+  private MasterServer masterServer;
+
+  @Before
+  public void setUp() throws URISyntaxException, XmlRpcException, IOException {
+    masterServer = new MasterServer(new InetSocketAddress(0));
+    masterServer.start();
+  }
+
   @Test
-  public void PesistentServiceConnectionTest() throws InterruptedException, URISyntaxException {
+  public void PesistentServiceConnectionTest() throws InterruptedException, URISyntaxException,
+      MalformedURLException, XmlRpcException, IOException, RemoteException {
     ServiceDefinition definition =
-        new ServiceDefinition(AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum());
+        new ServiceDefinition("/add_two_ints", AddTwoInts.__s_getDataType(),
+            AddTwoInts.__s_getMD5Sum());
 
+    Node serverNode = Node.createPrivate("/server", masterServer.getUri(), 0, 0);
     ServiceServer<AddTwoInts.Request> server =
-        new ServiceServer<AddTwoInts.Request>(AddTwoInts.Request.class, "/server", definition) {
-          @Override
-          public Message buildResponse(AddTwoInts.Request request) {
-            AddTwoInts.Response response = new AddTwoInts.Response();
-            response.sum = request.a + request.b;
-            return response;
-          }
-        };
-    ServiceManager serviceManager = new ServiceManager();
-    serviceManager.putService("/add_two_ints", server);
-    TcpRosServer tcpServer =
-        new TcpRosServer(new InetSocketAddress(0), new TopicManager(), serviceManager);
-    tcpServer.start();
-    server.setAddress(tcpServer.getAddress());
+        serverNode.createServiceServer(definition, AddTwoInts.Request.class,
+            new ServiceResponseBuilder<AddTwoInts.Request>() {
+              @Override
+              public Message build(AddTwoInts.Request request) {
+                AddTwoInts.Response response = new AddTwoInts.Response();
+                response.sum = request.a + request.b;
+                return response;
+              }
+            });
 
+    Node clientNode = Node.createPrivate("/client", masterServer.getUri(), 0, 0);
     ServiceClient<AddTwoInts.Response> client =
-        ServiceClient.create(AddTwoInts.Response.class, "/client", new ServiceIdentifier(
-            "/add_two_ints", server.getUri(), definition));
-    client.connect(tcpServer.getAddress());
+        clientNode.createServiceClient(new ServiceIdentifier(server.getUri(), definition),
+            AddTwoInts.Response.class);
 
     AddTwoInts.Request request = new AddTwoInts.Request();
     request.a = 2;
     request.b = 2;
     final CountDownLatch latch = new CountDownLatch(1);
-    client.call(request, new ServiceCallback<AddTwoInts.Response>() {
+    client.call(request, new MessageListener<AddTwoInts.Response>() {
       @Override
-      public void run(AddTwoInts.Response response) {
-        assertEquals(response.sum, 4);
+      public void onNewMessage(AddTwoInts.Response message) {
+        assertEquals(message.sum, 4);
         latch.countDown();
       }
     });
-    assertTrue(latch.await(1, TimeUnit.SECONDS));
+    assertTrue(latch.await(1000, TimeUnit.SECONDS));
   }
-
 }

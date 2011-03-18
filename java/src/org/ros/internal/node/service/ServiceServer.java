@@ -42,15 +42,16 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class ServiceServer<RequestMessageType extends Message> {
+public class ServiceServer<RequestMessageType extends Message> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final Class<RequestMessageType> requestMessageClass;
+  private final ServiceResponseBuilder<RequestMessageType> responseBuilder;
   private final ServiceDefinition definition;
   private final Map<String, String> header;
-  private final String name;
+
   private InetSocketAddress address;
 
   public final class RequestHandler extends SimpleChannelHandler {
@@ -59,10 +60,10 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
       RequestMessageType request = requestMessageClass.newInstance();
       ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
       request.deserialize(buffer.toByteBuffer());
-      Message responseMessage = buildResponse(request);
+      Message responseMessage = responseBuilder.build(request);
       // TODO(damonkohler): Support sequence number.
-      ChannelBuffer responseBuffer = ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN,
-          responseMessage.serialize(0));
+      ChannelBuffer responseBuffer =
+          ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, responseMessage.serialize(0));
       ServiceServerResponse response = new ServiceServerResponse();
       // TODO(damonkohler): Support changing error code.
       response.setErrorCode(1);
@@ -72,16 +73,16 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
     }
   }
 
-  public ServiceServer(Class<RequestMessageType> requestMessageClass, String name,
-      ServiceDefinition definition) {
+  public ServiceServer(ServiceDefinition definition, Class<RequestMessageType> requestMessageClass,
+      ServiceResponseBuilder<RequestMessageType> responseBuilder) {
     this.requestMessageClass = requestMessageClass;
-    this.name = name;
+    this.responseBuilder = responseBuilder;
     this.definition = definition;
-    header = ImmutableMap.<String, String>builder().put(ConnectionHeaderFields.SERVICE, name)
-        .putAll(definition.toHeader()).build();
+    header =
+        ImmutableMap.<String, String>builder()
+            .put(ConnectionHeaderFields.SERVICE, definition.getName())
+            .putAll(definition.toHeader()).build();
   }
-
-  public abstract Message buildResponse(RequestMessageType requestMessage);
 
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
     if (DEBUG) {
@@ -107,15 +108,15 @@ public abstract class ServiceServer<RequestMessageType extends Message> {
     return new URI("rosrpc://" + address.getHostName() + ":" + address.getPort());
   }
 
-  public ServiceDefinition getServiceDefinition() {
-    return definition;
-  }
-
   public String getName() {
-    return name;
+    return definition.getName();
   }
 
   public ChannelHandler createRequestHandler() {
     return new RequestHandler();
+  }
+  
+  public boolean checkMessageClass(Class<RequestMessageType> expectedRequestMessageClass) {
+    return expectedRequestMessageClass == requestMessageClass;
   }
 }
