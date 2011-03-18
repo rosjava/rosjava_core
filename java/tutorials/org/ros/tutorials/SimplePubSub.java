@@ -69,23 +69,23 @@ public class SimplePubSub {
 
     TopicDefinition topicDefinition =
         new TopicDefinition("/hello",
-            MessageDefinition.createFromMessage(new org.ros.message.std.String()));
+            MessageDefinition.createFromMessage(new org.ros.message.std_msgs.String()));
     SlaveIdentifier pubSlaveIdentifer = new SlaveIdentifier("/pub", new URI("http://fake:1234"));
     PublisherIdentifier publisherIdentifier =
         new PublisherIdentifier(pubSlaveIdentifer, topicDefinition);
-    Publisher<org.ros.message.std.String> publisher =
-        new Publisher<org.ros.message.std.String>(topicDefinition, org.ros.message.std.String.class);
+    Publisher<org.ros.message.std_msgs.String> publisher =
+        new Publisher<org.ros.message.std_msgs.String>(topicDefinition, org.ros.message.std_msgs.String.class);
     topicManager.putPublisher(topicDefinition.getName(), publisher);
     slaveServer.addPublisher(publisher);
 
     SlaveIdentifier subSlaveIdentifier = new SlaveIdentifier("/bloop", new URI("http://fake:5678"));
-    Subscriber<org.ros.message.std.String> subscriber =
-        Subscriber.create(subSlaveIdentifier, topicDefinition, org.ros.message.std.String.class,
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        Subscriber.create(subSlaveIdentifier, topicDefinition, org.ros.message.std_msgs.String.class,
             executor);
     topicManager.putSubscriber(topicDefinition.getName(), subscriber);
-    subscriber.addMessageListener(new MessageListener<org.ros.message.std.String>() {
+    subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
       @Override
-      public void onNewMessage(org.ros.message.std.String message) {
+      public void onNewMessage(org.ros.message.std_msgs.String message) {
         System.out.println("Received message: " + message.data);
       }
     });
@@ -95,7 +95,7 @@ public class SimplePubSub {
         slaveClient.requestTopic("/hello", Sets.newHashSet(ProtocolNames.TCPROS));
     subscriber.addPublisher(publisherIdentifier, response.getResult().getAddress());
 
-    org.ros.message.std.String message = new org.ros.message.std.String();
+    org.ros.message.std_msgs.String message = new org.ros.message.std_msgs.String();
     message.data = "Hello, ROS!";
 
     while (true) {

@@ -90,8 +90,8 @@ public class MessageQueueIntegrationTest {
 
     // TODO(damonkohler): Test connecting multiple incoming queues to single
     // outgoing queue and visa versa.
-    final IncomingMessageQueue<org.ros.message.std.String> in =
-        new IncomingMessageQueue<org.ros.message.std.String>(org.ros.message.std.String.class);
+    final IncomingMessageQueue<org.ros.message.std_msgs.String> in =
+        new IncomingMessageQueue<org.ros.message.std_msgs.String>(org.ros.message.std_msgs.String.class);
 
     ChannelFactory clientChannelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
@@ -114,7 +114,7 @@ public class MessageQueueIntegrationTest {
     // connection has been established.
     Thread.sleep(100);
 
-    org.ros.message.std.String hello = new org.ros.message.std.String();
+    org.ros.message.std_msgs.String hello = new org.ros.message.std_msgs.String();
     hello.data = "Would you like to play a game?";
     out.put(hello);
     assertEquals(in.take(), hello);

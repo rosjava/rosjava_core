@@ -45,7 +45,7 @@ import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpServer;
 import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
-import org.ros.message.std.Int64;
+import org.ros.message.std_msgs.Int64;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -98,7 +98,7 @@ public class MasterSlaveIntegrationTest {
   public void testAddPublisher() throws Exception {
     TopicDefinition topicDefinition =
         new TopicDefinition("/hello",
-            MessageDefinition.createFromMessage(new org.ros.message.std.String()));
+            MessageDefinition.createFromMessage(new org.ros.message.std_msgs.String()));
     Publisher<Int64> publisher = new Publisher<Int64>(topicDefinition, Int64.class);
     topicManager.putPublisher(topicDefinition.getName(), publisher);
     try {
@@ -115,10 +115,10 @@ public class MasterSlaveIntegrationTest {
   public void testAddSubscriber() throws RemoteException, IOException, URISyntaxException {
     TopicDefinition topicDefinition =
         new TopicDefinition("/hello",
-            MessageDefinition.createFromMessage(new org.ros.message.std.String()));
+            MessageDefinition.createFromMessage(new org.ros.message.std_msgs.String()));
     SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/bloop", new URI("http://fake:1234"));
-    Subscriber<org.ros.message.std.String> subscriber =
-        Subscriber.create(slaveIdentifier, topicDefinition, org.ros.message.std.String.class,
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        Subscriber.create(slaveIdentifier, topicDefinition, org.ros.message.std_msgs.String.class,
             Executors.newCachedThreadPool());
     topicManager.putSubscriber(topicDefinition.getName(), subscriber);
     List<PublisherIdentifier> publishers = slaveServer.addSubscriber(subscriber);

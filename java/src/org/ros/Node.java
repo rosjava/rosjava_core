@@ -188,8 +188,8 @@ public class Node implements Namespace {
       initialized = true;
 
       // initialized must be true to start creating publishers.
-      Publisher<org.ros.message.rosgraph.Log> rosoutPublisher = createPublisher("/rosout",
-          org.ros.message.rosgraph.Log.class);
+      Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher = createPublisher("/rosout",
+          org.ros.message.rosgraph_msgs.Log.class);
       log.setRosoutPublisher(rosoutPublisher);
 
     } catch (IOException e) {

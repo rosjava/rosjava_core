@@ -58,7 +58,7 @@ NAME="java_msgs.py"
 # top-level java package namespace to generate messages into
 JAVA_PACKAGE = 'org.ros.message.'
 # name of Header message class
-HEADER = '%sstd.Header'%JAVA_PACKAGE
+HEADER = '%sstd_msgs.Header'%JAVA_PACKAGE
 # name of Message base class
 MESSAGE_CLASS = 'org.ros.message.Message'
 
@@ -337,6 +337,7 @@ def write_constant_declarations(s, spec):
     
 def write_clone_methods(s, spec):
     s.write("""
+  @Override
   public %(type)s clone() {
     %(type)s c = new %(type)s();
     c.deserialize(serialize(0));
@@ -344,6 +345,7 @@ def write_clone_methods(s, spec):
   }
 """ % {'type': spec.short_name})
     s.write("""
+  @Override
   public void setTo(%s m) {
     deserialize(m.serialize(0));
   }
@@ -351,6 +353,7 @@ def write_clone_methods(s, spec):
 
 def write_serialization_length(s, spec):
     s.write("""
+  @Override
   public int serializationLength() {
     int __l = 0;
 """)
@@ -394,6 +397,7 @@ def write_serialization_length(s, spec):
 
 def write_serialization_method(s, spec):
     s.write("""
+  @Override
   public void serialize(ByteBuffer bb, int seq) {
 """)
     for field in spec.parsed_fields():
@@ -436,6 +440,7 @@ def write_serialization_method(s, spec):
 
 def write_deserialization_method(s, spec):
     s.write("""
+  @Override
   public void deserialize(ByteBuffer bb) {
 """)
     for field in spec.parsed_fields():
@@ -507,6 +512,7 @@ def write_serialization_methods(s, spec):
 
 def write_msg_metadata_method(s, name, return_value):
     s.write('  public static java.lang.String __s_get%s() { return %s; }\n' % (name, return_value))
+    s.write('  @Override')
     s.write('  public java.lang.String get%(name)s() { return __s_get%(name)s(); }\n'
             % {'name': name})
 
@@ -654,7 +660,7 @@ def generate_messages(argv):
         usage()
     for p in packages:
         print "generating messages for package [%s]"%(p)
-        output_dir = generate(p, output_dir=options.output_dir)
+        output_dir = generate(p, output_dir=options.output_dir.strip())
         print "generated messages for package [%s] to [%s]"%(p, output_dir)
 
 if __name__ == "__main__":

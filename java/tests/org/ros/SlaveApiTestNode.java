@@ -17,7 +17,7 @@ package org.ros;
 
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
-import org.ros.message.std.Int64;
+import org.ros.message.std_msgs.Int64;
 
 /**
  * This node is used to test the slave API externally using integration tests in
@@ -39,17 +39,17 @@ public class SlaveApiTestNode implements RosMain {
     node.init();
 
     // basic chatter in/out test
-    Publisher<org.ros.message.std.String> pub_string = node.createPublisher("chatter_out",
-        org.ros.message.std.String.class);
-    MessageListener<org.ros.message.std.String> chatter_cb = new MessageListener<org.ros.message.std.String>() {
+    Publisher<org.ros.message.std_msgs.String> pub_string = node.createPublisher("chatter_out",
+        org.ros.message.std_msgs.String.class);
+    MessageListener<org.ros.message.std_msgs.String> chatter_cb = new MessageListener<org.ros.message.std_msgs.String>() {
       @Override
-      public void onNewMessage(org.ros.message.std.String m) {
+      public void onNewMessage(org.ros.message.std_msgs.String m) {
         System.out.println("String: " + m.data);
       }
     };
 
     // Subscribers currently don't work
-    node.createSubscriber("chatter_in", chatter_cb, org.ros.message.std.String.class);
+    node.createSubscriber("chatter_in", chatter_cb, org.ros.message.std_msgs.String.class);
 
     // have at least one case of dual pub/sub on same topic
     Publisher<Int64> pub_int64_pubsub = node.createPublisher("int64", Int64.class);
@@ -64,7 +64,7 @@ public class SlaveApiTestNode implements RosMain {
     // don't do any performance optimizations here, want to make sure that
     // gc/etc... is working.
     while (true) {
-      org.ros.message.std.String chatter = new org.ros.message.std.String();
+      org.ros.message.std_msgs.String chatter = new org.ros.message.std_msgs.String();
       chatter.data = "hello " + System.currentTimeMillis();
       pub_string.publish(chatter);
 

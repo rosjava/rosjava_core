@@ -51,25 +51,25 @@ public class TopicIntegrationTest {
       IOException, InterruptedException, XmlRpcException {
     TopicDefinition topicDefinition =
         new TopicDefinition("/foo",
-            MessageDefinition.createFromMessage(new org.ros.message.std.String()));
+            MessageDefinition.createFromMessage(new org.ros.message.std_msgs.String()));
 
     Node publisherNode = new Node("/publisher", masterServer.getUri(), new InetSocketAddress(0));
     publisherNode.start("localhost", new InetSocketAddress(0));
-    Publisher<org.ros.message.std.String> publisher =
-        publisherNode.createPublisher(topicDefinition, org.ros.message.std.String.class);
+    Publisher<org.ros.message.std_msgs.String> publisher =
+        publisherNode.createPublisher(topicDefinition, org.ros.message.std_msgs.String.class);
 
     Node subscriberNode = new Node("/subscriber", masterServer.getUri(), new InetSocketAddress(0));
     subscriberNode.start("localhost", new InetSocketAddress(0));
-    Subscriber<org.ros.message.std.String> subscriber =
-        publisherNode.createSubscriber(topicDefinition, org.ros.message.std.String.class);
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        publisherNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class);
 
-    final org.ros.message.std.String helloMessage = new org.ros.message.std.String();
+    final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
     helloMessage.data = "Hello, ROS!";
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
-    subscriber.addMessageListener(new MessageListener<org.ros.message.std.String>() {
+    subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
       @Override
-      public void onNewMessage(org.ros.message.std.String message) {
+      public void onNewMessage(org.ros.message.std_msgs.String message) {
         assertEquals(helloMessage, message);
         messageReceived.countDown();
       }

@@ -17,9 +17,9 @@ package org.ros;
 
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
-import org.ros.message.geometry.Point;
-import org.ros.message.geometry.PoseStamped;
-import org.ros.message.geometry.Quaternion;
+import org.ros.message.geometry_msgs.Point;
+import org.ros.message.geometry_msgs.PoseStamped;
+import org.ros.message.geometry_msgs.Quaternion;
 
 public class SampleNode {
 

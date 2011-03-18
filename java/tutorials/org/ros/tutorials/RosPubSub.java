@@ -29,13 +29,13 @@ import org.ros.RosMain;
  */
 public class RosPubSub implements RosMain {
   Node node;
-  Publisher<org.ros.message.std.String> pub;
+  Publisher<org.ros.message.std_msgs.String> pub;
 
   // callback for string messages
-  MessageListener<org.ros.message.std.String> helloCallback = new MessageListener<org.ros.message.std.String>() {
+  MessageListener<org.ros.message.std_msgs.String> helloCallback = new MessageListener<org.ros.message.std_msgs.String>() {
 
     @Override
-    public void onNewMessage(org.ros.message.std.String m) {
+    public void onNewMessage(org.ros.message.std_msgs.String m) {
       node.getLog().info(m.data);
     }
   };
@@ -45,12 +45,12 @@ public class RosPubSub implements RosMain {
     try {
       node = new Node("rosjava_sample_node", context);
       node.init();
-      pub = node.createPublisher("~hello", org.ros.message.std.String.class);
-      node.createSubscriber("~hello", helloCallback, org.ros.message.std.String.class);
+      pub = node.createPublisher("~hello", org.ros.message.std_msgs.String.class);
+      node.createSubscriber("~hello", helloCallback, org.ros.message.std_msgs.String.class);
 
       int seq = 0;
       while (true) {
-        org.ros.message.std.String str = new org.ros.message.std.String();
+        org.ros.message.std_msgs.String str = new org.ros.message.std_msgs.String();
         str.data = "Hello " + seq++;
         pub.publish(str);
         Thread.sleep(100);

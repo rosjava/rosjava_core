@@ -31,7 +31,7 @@ import java.util.ArrayList;
  */
 public class RosoutLogger implements Log {
 
-  private Publisher<org.ros.message.rosgraph.Log> rosoutPublisher;
+  private Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher;
   private final Log log;
   private final TimeProvider timeProvider;
 
@@ -40,7 +40,7 @@ public class RosoutLogger implements Log {
     this.timeProvider = timeProvider;
   }
 
-  public void setRosoutPublisher(Publisher<org.ros.message.rosgraph.Log> rosoutPublisher) {
+  public void setRosoutPublisher(Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher) {
     this.rosoutPublisher = rosoutPublisher;
   }
 
@@ -52,7 +52,7 @@ public class RosoutLogger implements Log {
   }
 
   private void publishToRosout(Object message) {
-    org.ros.message.rosgraph.Log m = new org.ros.message.rosgraph.Log();
+    org.ros.message.rosgraph_msgs.Log m = new org.ros.message.rosgraph_msgs.Log();
     m.msg = message.toString();
     m.header.stamp = timeProvider.currentTime();
     m.topics = getTopics();
