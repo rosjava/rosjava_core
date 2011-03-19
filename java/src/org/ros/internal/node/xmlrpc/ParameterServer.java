@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ParameterServer {
+public interface ParameterServer extends Node {
 
   public List<Object> deleteParam(String callerId, String key);
 

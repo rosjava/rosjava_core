@@ -68,7 +68,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<Void> registerService(SlaveIdentifier slave,
       ServiceServer<? extends Message> service) throws URISyntaxException, RemoteException {
-    return Response.fromList(node.registerService(slave.getName(), service.getName(), service
+    return Response.fromListChecked(node.registerService(slave.getName(), service.getName(), service
         .getUri().toString(), slave.getUri().toString()), new VoidResultFactory());
   }
 
@@ -85,7 +85,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<Integer> unregisterService(SlaveIdentifier slave,
       ServiceServer<? extends Message> service) throws URISyntaxException, RemoteException {
-    return Response.fromList(
+    return Response.fromListChecked(
         node.unregisterService(slave.getName(), service.getName(), service.getUri().toString()),
         new IntegerResultFactory());
   }
@@ -107,7 +107,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
       throws URISyntaxException, RemoteException {
-    return Response.fromList(
+    return Response.fromListChecked(
         node.registerSubscriber(slave.getName(), subscriber.getTopicName(),
             subscriber.getTopicMessageType(), slave.getUri().toString()),
         new UriListResultFactory());
@@ -124,7 +124,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
       throws RemoteException {
-    return Response.fromList(node.unregisterSubscriber(slave.getName(), subscriber.getTopicName(),
+    return Response.fromListChecked(node.unregisterSubscriber(slave.getName(), subscriber.getTopicName(),
         slave.getUri().toString()), new IntegerResultFactory());
   }
 
@@ -141,7 +141,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<List<URI>> registerPublisher(PublisherIdentifier publisher)
       throws URISyntaxException, RemoteException {
-    return Response.fromList(
+    return Response.fromListChecked(
         node.registerPublisher(publisher.getNodeName(), publisher.getTopicName(),
             publisher.getTopicMessageType(), publisher.getSlaveUri().toString()),
         new UriListResultFactory());
@@ -158,7 +158,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<Integer> unregisterPublisher(PublisherIdentifier publisher)
       throws RemoteException {
-    return Response.fromList(node.unregisterPublisher(publisher.getNodeName(),
+    return Response.fromListChecked(node.unregisterPublisher(publisher.getNodeName(),
         publisher.getTopicName(), publisher.getSlaveUri().toString()), new IntegerResultFactory());
   }
 
@@ -174,7 +174,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<URI> lookupNode(SlaveIdentifier slave, String nodeName)
       throws URISyntaxException, RemoteException {
-    return Response.fromList(node.lookupNode(slave.getName(), nodeName), new UriResultFactory());
+    return Response.fromListChecked(node.lookupNode(slave.getName(), nodeName), new UriResultFactory());
   }
 
   /**
@@ -186,7 +186,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @throws RemoteException
    */
   public Response<URI> getUri(SlaveIdentifier slave) throws URISyntaxException, RemoteException {
-    return Response.fromList(node.getUri(slave.getName()), new UriResultFactory());
+    return Response.fromListChecked(node.getUri(slave.getName()), new UriResultFactory());
   }
 
   /**
@@ -201,7 +201,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<URI> lookupService(SlaveIdentifier slave, String serviceName)
       throws URISyntaxException, RemoteException {
-    return Response.fromList(node.lookupService(slave.getName(), serviceName),
+    return Response.fromListChecked(node.lookupService(slave.getName(), serviceName),
         new UriResultFactory());
   }
 

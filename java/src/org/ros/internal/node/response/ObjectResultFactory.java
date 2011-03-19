@@ -13,22 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.namespace;
 
-import org.ros.internal.namespace.RosNameTest;
+package org.ros.internal.node.response;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+/**
+ * @author kwc@willowgarage.com (Ken Conley)
+ */
+public class ObjectResultFactory implements ResultFactory<Object> {
 
-public class AllTests {
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite(AllTests.class.getName());
-    //$JUnit-BEGIN$
-    suite.addTestSuite(NameResolverTest.class);
-    suite.addTestSuite(RosNameTest.class);
-    //$JUnit-END$
-    return suite;
+  @Override
+  public Object create(Object value) {
+    return value;
   }
 
 }

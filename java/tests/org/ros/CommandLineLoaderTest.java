@@ -121,7 +121,7 @@ public class CommandLineLoaderTest extends TestCase {
     NodeContext nodeContext = loader.createContext();
     assertEquals(defaultMasterUri, nodeContext.getRosMasterUri());
     assertEquals(defaultRosRoot, nodeContext.getRosRoot());
-    assertEquals(Namespace.GLOBAL_NS, nodeContext.getResolver().getNamespace());
+    assertEquals(Namespace.GLOBAL_NS, nodeContext.getParentResolver().getNamespace());
     // Default is the hostname + FQDN.
     assertEquals(InetAddress.getLocalHost().getCanonicalHostName(), nodeContext.getHostName());
 
@@ -136,7 +136,7 @@ public class CommandLineLoaderTest extends TestCase {
     assertEquals(defaultMasterUri, nodeContext.getRosMasterUri());
     assertEquals(defaultRosRoot, nodeContext.getRosRoot());
     assertEquals("192.168.0.1", nodeContext.getHostName());
-    assertEquals("/foo/bar", nodeContext.getResolver().getNamespace());
+    assertEquals("/foo/bar", nodeContext.getParentResolver().getNamespace());
     Assert.assertArrayEquals(rosPackagePathArray, nodeContext.getRosPackagePath());
 
     // Test ROS namespace resolution and canonicalization
@@ -145,12 +145,12 @@ public class CommandLineLoaderTest extends TestCase {
     env.put(EnvironmentVariables.ROS_NAMESPACE, "baz/bar");
     loader = new CommandLineLoader(new String[] {}, env);
     nodeContext = loader.createContext();
-    assertEquals(canonical, nodeContext.getResolver().getNamespace());
+    assertEquals(canonical, nodeContext.getParentResolver().getNamespace());
     env = getDefaultEnv();
     env.put(EnvironmentVariables.ROS_NAMESPACE, "baz/bar/");
     loader = new CommandLineLoader(new String[] {}, env);
     nodeContext = loader.createContext();
-    assertEquals(canonical, nodeContext.getResolver().getNamespace());
+    assertEquals(canonical, nodeContext.getParentResolver().getNamespace());
   }
 
   @Test
@@ -174,16 +174,16 @@ public class CommandLineLoaderTest extends TestCase {
     env = getDefaultEnv();
     args = new String[] { CommandLine.ROS_NAMESPACE + ":=baz/bar" };
     nodeContext = new CommandLineLoader(args, env).createContext();
-    assertEquals(canonical, nodeContext.getResolver().getNamespace());
+    assertEquals(canonical, nodeContext.getParentResolver().getNamespace());
 
     args = new String[] { CommandLine.ROS_NAMESPACE + ":=baz/bar/" };
     nodeContext = new CommandLineLoader(args, env).createContext();
-    assertEquals(canonical, nodeContext.getResolver().getNamespace());
+    assertEquals(canonical, nodeContext.getParentResolver().getNamespace());
 
     // Verify precedence of command-line __ns over environment.
     env.put(EnvironmentVariables.ROS_NAMESPACE, "wrong/answer/");
     nodeContext = new CommandLineLoader(args, env).createContext();
-    assertEquals(canonical, nodeContext.getResolver().getNamespace());
+    assertEquals(canonical, nodeContext.getParentResolver().getNamespace());
 
     // Verify address override.
     env = getDefaultEnv();
@@ -199,7 +199,7 @@ public class CommandLineLoaderTest extends TestCase {
     nodeContext = new CommandLineLoader(args, env).createContext();
     assertEquals(new URI("http://override:22622"), nodeContext.getRosMasterUri());
     assertEquals("192.168.0.2", nodeContext.getHostName());
-    assertEquals(canonical, nodeContext.getResolver().getNamespace());
+    assertEquals(canonical, nodeContext.getParentResolver().getNamespace());
   }
 
   private HashMap<String, String> getDefaultEnv() {
@@ -225,14 +225,14 @@ public class CommandLineLoaderTest extends TestCase {
     // Test with no args.
     CommandLineLoader loader = new CommandLineLoader(new String[] {}, env);
     NodeContext nodeContext = loader.createContext();
-    nodeContext.getResolver().getRemappings();
+    nodeContext.getParentResolver().getRemappings();
     nodeContext = loader.createContext();
 
     // Test with no remappings.
     String[] commandLineArgs = new String[] { "foo", "--bar" };
     loader = new CommandLineLoader(commandLineArgs, env);
     nodeContext = loader.createContext();
-    NameResolver resolver = nodeContext.getResolver();
+    NameResolver resolver = nodeContext.getParentResolver();
     assertTrue(resolver.getRemappings().isEmpty());
 
     // test with actual remappings. All of these tests are equivalent.
@@ -244,7 +244,7 @@ public class CommandLineLoaderTest extends TestCase {
       nodeContext = loader.createContext();
 
       // Test that our remappings loaded.
-      NameResolver r = nodeContext.getResolver();
+      NameResolver r = nodeContext.getParentResolver();
       String n = r.resolveName("name");
       assertTrue(n.equals("/my/name"));
       assertTrue(r.resolveName("/name").equals("/name"));

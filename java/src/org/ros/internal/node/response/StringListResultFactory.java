@@ -13,22 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.namespace;
 
-import org.ros.internal.namespace.RosNameTest;
+package org.ros.internal.node.response;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.google.common.collect.Lists;
 
-public class AllTests {
+import java.util.Arrays;
+import java.util.List;
 
-  public static Test suite() {
-    TestSuite suite = new TestSuite(AllTests.class.getName());
-    //$JUnit-BEGIN$
-    suite.addTestSuite(NameResolverTest.class);
-    suite.addTestSuite(RosNameTest.class);
-    //$JUnit-END$
-    return suite;
+/**
+ * @author kwc@willowgarage.com (Ken Conley)
+ */
+public class StringListResultFactory implements ResultFactory<List<String>> {
+
+  @Override
+  public List<String> create(Object value) {
+    List<String> strings = Lists.newArrayList();
+    List<Object> objects = Arrays.asList((Object[]) value);
+    for (Object topic : objects) {
+      strings.add((String) topic);
+    }
+    return strings;
   }
 
 }

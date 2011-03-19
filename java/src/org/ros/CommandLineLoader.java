@@ -93,7 +93,7 @@ public class CommandLineLoader extends RosLoader {
       NameResolver resolver = new NameResolver(namespace, remappings);
 
       NodeContext context = new NodeContext();
-      context.setResolver(resolver);
+      context.setParentResolver(resolver);
       context.setRosRoot(getRosRoot(specialRemappings, env));
       context.setRosPackagePath(getRosPackagePath(specialRemappings, env));
       context.setRosMasterUri(getRosMasterUri(specialRemappings, env));

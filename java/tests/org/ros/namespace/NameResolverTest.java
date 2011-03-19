@@ -27,15 +27,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ResolverTest extends TestCase {
+public class NameResolverTest extends TestCase {
 
   private HashMap<GraphName, GraphName> emptyRemappings;
 
+  @Override
   @Before
   public void setUp() throws Exception {
     emptyRemappings = new HashMap<GraphName, GraphName>();
   }
 
+  @Override
   @After
   public void tearDown() throws Exception {
   }

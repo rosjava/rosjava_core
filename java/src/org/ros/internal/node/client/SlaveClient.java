@@ -51,7 +51,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
   }
 
   public Response<URI> getMasterUri() throws RemoteException {
-    return Response.fromList(node.getMasterUri(nodeName), new UriResultFactory());
+    return Response.fromListChecked(node.getMasterUri(nodeName), new UriResultFactory());
   }
 
   public List<Object> shutdown(String message) {
@@ -59,17 +59,17 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
   }
 
   public Response<Integer> getPid() throws RemoteException {
-    return Response.fromList(node.getPid(nodeName), new IntegerResultFactory());
+    return Response.fromListChecked(node.getPid(nodeName), new IntegerResultFactory());
   }
 
   public Response<List<TopicDefinition>> getSubscriptions() throws RemoteException {
-    return Response.fromList(node.getSubscriptions(nodeName),
+    return Response.fromListChecked(node.getSubscriptions(nodeName),
         new TopicDefinitionListResultFactory());
   }
 
   public Response<List<TopicDefinition>> getPublications() throws RemoteException {
     return Response
-        .fromList(node.getPublications(nodeName), new TopicDefinitionListResultFactory());
+        .fromListChecked(node.getPublications(nodeName), new TopicDefinitionListResultFactory());
   }
 
   public List<Object> paramUpdate(String parameterKey, String parameterValue) {
@@ -82,7 +82,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
 
   public Response<ProtocolDescription> requestTopic(String topic,
       Collection<String> requestedProtocols) throws RemoteException {
-    return Response.fromList(
+    return Response.fromListChecked(
         node.requestTopic(nodeName, topic, new Object[][] {requestedProtocols.toArray()}),
         new ProtocolDescriptionResultFactory());
   }

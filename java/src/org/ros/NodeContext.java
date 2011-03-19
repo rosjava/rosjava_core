@@ -45,15 +45,14 @@ public class NodeContext {
   }
 
   /**
-   * @return The RosResolver for this context, this should be used to resolve
-   *         names that have been remapped.
+   * @return The RosResolver for a {@link Node}'s parent namespace. 
    * @see NameResolver
    */
-  public NameResolver getResolver() {
+  public NameResolver getParentResolver() {
     return resolver;
   }
 
-  public void setResolver(NameResolver resolver) {
+  public void setParentResolver(NameResolver resolver) {
     this.resolver = resolver;
   }
 

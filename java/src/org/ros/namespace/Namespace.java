@@ -31,9 +31,8 @@ import org.ros.message.Message;
  */
 public interface Namespace {
 
-  /** Name of Java system property for setting default namespace */
-  public final static String DEFAULT_NAMESPACE_PROPERTY = "rosNamespace";
-  /** This is the global namespace, think root "/". 
+  /**
+   * This is the global namespace, think root "/".
    */
   public final static String GLOBAL_NS = "/";
 
@@ -97,4 +96,10 @@ public interface Namespace {
    * @throws RosNameException
    */
   public String resolveName(String name) throws RosNameException;
+
+  /**
+   * @return {@link NameResolver} for this namespace.
+   */
+  public NameResolver getResolver();
+
 }

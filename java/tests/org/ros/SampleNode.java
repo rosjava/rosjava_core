@@ -27,6 +27,7 @@ public class SampleNode {
     // Node node = new Node(argv, "sample_node"); this crashes when topic is
     // subscribed to
     // Node node = new Node(argv, "sample_rosjava_node");
+    
     RosLoader loader = new CommandLineLoader(argv);
     Node node = new Node("sample_rosjava_node", loader.createContext());
     node.init();

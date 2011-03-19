@@ -32,17 +32,17 @@ public class NodeContextTest {
   @Test
   public void testNodeContext() {
     NodeContext nodeContext = new NodeContext();
-    assertEquals(null, nodeContext.getResolver());
+    assertEquals(null, nodeContext.getParentResolver());
   }
 
   @Test
   public void testResolver() throws RosNameException {
     NodeContext nodeContext = new NodeContext();
-    assertEquals(null, nodeContext.getResolver());
+    assertEquals(null, nodeContext.getParentResolver());
 
     NameResolver resolver = new NameResolver("/test", new HashMap<GraphName, GraphName>());
-    nodeContext.setResolver(resolver);
-    assertEquals(resolver, nodeContext.getResolver());
+    nodeContext.setParentResolver(resolver);
+    assertEquals(resolver, nodeContext.getParentResolver());
   }
 
 }

@@ -78,6 +78,7 @@ public class NameResolver {
       if (s.startsWith("/")) {
         s = s.substring(1);
       }
+      System.out.println("join:" + namespace + " " + ns + "," + s);
       return join(ns, new GraphName(s));
     }
     throw new RosNameException("Bad name: " + name);
@@ -120,7 +121,7 @@ public class NameResolver {
    *          ROS name to join to.
    * @param name2
    *          ROS name to join. Must be relative.
-   * @return A concatination of the two names
+   * @return A concatenation of the two names
    * @throws RosNameException
    *           If name1 or name2 is an illegal name
    * @throws IllegalArgumentException
@@ -152,5 +153,20 @@ public class NameResolver {
     } else {
       return new GraphName(name1.toString() + "/" + name2.toString()).toString();
     }
+  }
+
+  /**
+   * Construct a new {@link NameResolver} with a copy of this resolver's
+   * remappings. The namespace of the new resolver will be the value of the name
+   * parameter resolved in this namespace.
+   * 
+   * @param name
+   * @return {@link NameResolver} relative to the current namespace.
+   * @throws RosNameException
+   */
+  @SuppressWarnings("unchecked")
+  public NameResolver createResolver(String name) throws RosNameException {
+    String resolverNamespace = resolveName(name);
+    return new NameResolver(resolverNamespace, (HashMap<GraphName, GraphName>) remappings.clone());
   }
 }

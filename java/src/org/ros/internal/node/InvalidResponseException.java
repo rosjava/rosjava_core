@@ -13,22 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.namespace;
 
-import org.ros.internal.namespace.RosNameTest;
+package org.ros.internal.node;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+/**
+ * {@link RuntimeException} indicating that an invalid response was received to
+ * a remote call.
+ * 
+ * @author kwc@willowgarage.com (Ken Conley)
+ */
+public class InvalidResponseException extends RuntimeException {
 
-public class AllTests {
-
-  public static Test suite() {
-    TestSuite suite = new TestSuite(AllTests.class.getName());
-    //$JUnit-BEGIN$
-    suite.addTestSuite(NameResolverTest.class);
-    suite.addTestSuite(RosNameTest.class);
-    //$JUnit-END$
-    return suite;
+  public InvalidResponseException(String message) {
+    super(message);
   }
 
 }
