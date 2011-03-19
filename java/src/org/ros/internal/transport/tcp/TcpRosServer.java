@@ -18,6 +18,8 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.node.NodeSocketAddress;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -43,25 +45,24 @@ public class TcpRosServer {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(TcpRosServer.class);
 
-  private final InetSocketAddress bindAddress;
+  private final NodeSocketAddress bindAddress;
   private final ChannelGroup channelGroup;
   private final ChannelFactory channelFactory;
   private final ServerBootstrap bootstrap;
 
   private Channel channel;
 
-  public TcpRosServer(InetSocketAddress bindAddress, TopicManager topicManager,
+  public TcpRosServer(NodeSocketAddress bindAddress, TopicManager topicManager,
       ServiceManager serviceManager) {
     this.bindAddress = bindAddress;
     channelGroup = new DefaultChannelGroup();
-    channelFactory =
-        new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool());
+    channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
+        Executors.newCachedThreadPool());
     bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-    TcpServerPipelineFactory pipelineFactory =
-        new TcpServerPipelineFactory(channelGroup, topicManager, serviceManager);
+    TcpServerPipelineFactory pipelineFactory = new TcpServerPipelineFactory(channelGroup,
+        topicManager, serviceManager);
     bootstrap.setPipelineFactory(pipelineFactory);
   }
 
@@ -80,12 +81,12 @@ public class TcpRosServer {
     future.awaitUninterruptibly();
     channelFactory.releaseExternalResources();
     bootstrap.releaseExternalResources();
+    channel = null;
   }
 
-  public InetSocketAddress getAddress() {
+  public NodeSocketAddress getAddress() {
     Preconditions
         .checkNotNull(channel, "Calling getAddress() is only valid after calling start().");
-    return (InetSocketAddress) channel.getLocalAddress();
+    return new NodeSocketAddress((InetSocketAddress) channel.getLocalAddress(), bindAddress.getPublicHostname());
   }
-
 }

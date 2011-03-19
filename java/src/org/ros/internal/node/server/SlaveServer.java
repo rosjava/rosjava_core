@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
+import org.ros.internal.node.NodeSocketAddress;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
@@ -40,7 +41,6 @@ import org.ros.message.Message;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -68,7 +68,7 @@ public class SlaveServer extends NodeServer {
     return publishers;
   }
 
-  public SlaveServer(String nodeName, InetSocketAddress xmlRpcServerAddress, MasterClient master,
+  public SlaveServer(String nodeName, NodeSocketAddress xmlRpcServerAddress, MasterClient master,
       TopicManager topicManager, ServiceManager serviceManager, TcpRosServer tcpRosServer) {
     super(xmlRpcServerAddress);
     Preconditions.checkNotNull(nodeName);

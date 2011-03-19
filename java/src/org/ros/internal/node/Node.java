@@ -16,6 +16,7 @@
 
 package org.ros.internal.node;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import org.apache.xmlrpc.XmlRpcException;
@@ -58,41 +59,45 @@ public class Node {
   private final Executor executor;
   private final String nodeName;
   private final MasterClient masterClient;
-  private final SlaveServer slaveServer;
+  @VisibleForTesting
+  final SlaveServer slaveServer;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
-  private final TcpRosServer tcpRosServer;
+  @VisibleForTesting
+  final TcpRosServer tcpRosServer;
 
-
-  public static Node createPublic(String nodeName, URI masterUri, int xmlRpcBindPort,
-      int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
-    Node node =
-        new Node(nodeName, masterUri, new InetSocketAddress(xmlRpcBindPort), new InetSocketAddress(
-            tcpRosBindPort));
+  public static Node createPublic(String nodeName, URI masterUri, String publicHostname,
+      int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
+      URISyntaxException {
+    Node node = new Node(nodeName, masterUri, new NodeSocketAddress(new InetSocketAddress(
+        xmlRpcBindPort), publicHostname), new NodeSocketAddress(new InetSocketAddress(
+        tcpRosBindPort), publicHostname));
     node.start();
     return node;
   }
 
-  public static Node createPrivate(String nodeName, URI masterUri, int xmlRpcBindPort,
-      int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
-    Node node =
-        new Node(nodeName, masterUri, new InetSocketAddress(LOOPBACK, xmlRpcBindPort),
-            new InetSocketAddress(LOOPBACK, tcpRosBindPort));
+  public static Node createPrivate(String nodeName, URI masterUri, 
+      int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
+      URISyntaxException {
+    // Public hostname is automatically set to "localhost" in private mode.
+    String publicHostname = "localhost";
+    Node node = new Node(nodeName, masterUri, new NodeSocketAddress(new InetSocketAddress(LOOPBACK,
+        xmlRpcBindPort), publicHostname), new NodeSocketAddress(new InetSocketAddress(LOOPBACK,
+        tcpRosBindPort), publicHostname));
     node.start();
     return node;
   }
 
-  Node(String nodeName, URI masterUri, InetSocketAddress xmlRpcBindAddress,
-      InetSocketAddress tcpRosBindAddress) throws MalformedURLException {
+  Node(String nodeName, URI masterUri, NodeSocketAddress xmlRpcBindAddress,
+      NodeSocketAddress tcpRosBindAddress) throws MalformedURLException {
     this.nodeName = nodeName;
     executor = Executors.newCachedThreadPool();
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     tcpRosServer = new TcpRosServer(tcpRosBindAddress, topicManager, serviceManager);
-    slaveServer =
-        new SlaveServer(nodeName, xmlRpcBindAddress, masterClient, topicManager, serviceManager,
-            tcpRosServer);
+    slaveServer = new SlaveServer(nodeName, xmlRpcBindAddress, masterClient, topicManager,
+        serviceManager, tcpRosServer);
   }
 
   /**
@@ -101,8 +106,10 @@ public class Node {
    * generated, it is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition {@link TopicDefinition} that is subscribed to
-   * @param messageClass {@link Message} class for topic
+   * @param topicDefinition
+   *          {@link TopicDefinition} that is subscribed to
+   * @param messageClass
+   *          {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -121,9 +128,8 @@ public class Node {
         subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
         Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
-        subscriber =
-            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
-                executor);
+        subscriber = Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition,
+            messageClass, executor);
         createdNewSubscriber = true;
       }
     }
@@ -172,9 +178,8 @@ public class Node {
         serviceServer = (ServiceServer<RequestMessageType>) serviceManager.getService(name);
         Preconditions.checkState(serviceServer.checkMessageClass(requestMessageClass));
       } else {
-        serviceServer =
-            new ServiceServer<RequestMessageType>(serviceDefinition, requestMessageClass,
-                responseBuilder);
+        serviceServer = new ServiceServer<RequestMessageType>(serviceDefinition,
+            requestMessageClass, responseBuilder);
         serviceServer.setAddress(tcpRosServer.getAddress());
         createdNewService = true;
       }
@@ -189,8 +194,8 @@ public class Node {
   // TODO(damonkohler): Cache clients.
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
-    ServiceClient<ResponseMessageType> serviceClient =
-        ServiceClient.create(responseMessageClass, nodeName, serviceIdentifier);
+    ServiceClient<ResponseMessageType> serviceClient = ServiceClient.create(responseMessageClass,
+        nodeName, serviceIdentifier);
     URI uri = serviceIdentifier.getUri();
     serviceClient.connect(new InetSocketAddress(uri.getHost(), uri.getPort()));
     return serviceClient;

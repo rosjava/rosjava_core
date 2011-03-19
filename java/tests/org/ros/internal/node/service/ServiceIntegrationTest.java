@@ -19,6 +19,8 @@ package org.ros.internal.node.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.ros.internal.node.NodeSocketAddress;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +32,6 @@ import org.ros.message.Message;
 import org.ros.message.srv.AddTwoInts;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
@@ -45,7 +46,7 @@ public class ServiceIntegrationTest {
 
   @Before
   public void setUp() throws URISyntaxException, XmlRpcException, IOException {
-    masterServer = new MasterServer(new InetSocketAddress(0));
+    masterServer = new MasterServer(NodeSocketAddress.createDefault(0));
     masterServer.start();
   }
 

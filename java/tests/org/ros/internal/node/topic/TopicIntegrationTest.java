@@ -24,11 +24,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.MessageListener;
 import org.ros.internal.node.Node;
+import org.ros.internal.node.NodeSocketAddress;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.server.MasterServer;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +42,7 @@ public class TopicIntegrationTest {
 
   @Before
   public void setUp() throws URISyntaxException, XmlRpcException, IOException {
-    masterServer = new MasterServer(new InetSocketAddress(0));
+    masterServer = new MasterServer(NodeSocketAddress.createDefault(0));
     masterServer.start();
   }
 

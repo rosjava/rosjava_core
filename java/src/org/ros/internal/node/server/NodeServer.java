@@ -23,9 +23,9 @@ import org.apache.xmlrpc.server.PropertyHandlerMapping;
 import org.apache.xmlrpc.server.XmlRpcServer;
 import org.apache.xmlrpc.server.XmlRpcServerConfigImpl;
 import org.apache.xmlrpc.webserver.WebServer;
+import org.ros.internal.node.NodeSocketAddress;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -39,10 +39,10 @@ public class NodeServer {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(NodeServer.class);
 
-  private final InetSocketAddress bindAddress;
+  private final NodeSocketAddress bindAddress;
   private final WebServer server;
 
-  public NodeServer(InetSocketAddress bindAddress) {
+  public NodeServer(NodeSocketAddress bindAddress) {
     this.bindAddress = bindAddress;
     server = new WebServer(bindAddress.getPort(), bindAddress.getAddress());
   }
@@ -67,11 +67,8 @@ public class NodeServer {
     server.shutdown();
   }
 
-  // TODO(damonkohler): Using getHostName() here should return the public
-  // hostname without the user having to specify it. If that fails, we should
-  // add hostname to the NodeServer constructor.
   public URI getUri() throws MalformedURLException, URISyntaxException {
-    return new URL("http", bindAddress.getHostName(), server.getPort(), "").toURI();
+    return new URL("http", bindAddress.getPublicHostname(), server.getPort(), "").toURI();
   }
 
 }
