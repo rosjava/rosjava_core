@@ -15,6 +15,8 @@
  */
 package org.ros.namespace;
 
+import org.ros.ParameterClient;
+
 import org.ros.exceptions.RosNameException;
 
 import org.ros.MessageListener;
@@ -80,6 +82,15 @@ public interface Namespace {
   public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topic_name,
       MessageListener<MessageType> callback, Class<MessageType> clazz) throws RosInitException,
       RosNameException;
+
+  /**
+   * Create a {@link ParameterClient} to query and set parameters on the ROS
+   * parameter server.
+   * 
+   * @return {@link ParameterClient} with {@link NameResolver} in this
+   *         namespace.
+   */
+  public ParameterClient createParameterClient();
 
   /**
    * @return The fully resolved name of this namespace, e.g. "/foo/bar/boop".

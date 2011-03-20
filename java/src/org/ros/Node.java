@@ -230,14 +230,12 @@ public class Node implements Namespace {
     return context.getRosMasterUri();
   }
 
-  /**
-   * @return {@link NameResolver} for this namespace.
-   */
   @Override
   public NameResolver getResolver() {
     return resolver;
   }
 
+  @Override
   public ParameterClient createParameterClient() {
     // TODO(kwc) allow user to specify an additional namespace when creating a
     // parameter client.
