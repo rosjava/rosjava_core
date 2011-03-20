@@ -16,23 +16,13 @@
 package org.ros.internal.namespace;
 
 import junit.framework.TestCase;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.ros.exceptions.RosNameException;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class RosNameTest extends TestCase {
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
+public class GraphNameTest extends TestCase {
 
   @Test
   public void testToString() {
@@ -138,6 +128,31 @@ public class RosNameTest extends TestCase {
     // test with relative names
     assertEquals(new GraphName("wg"), new GraphName("wg/name").getParent());
     assertEquals(empty, new GraphName("wg/").getParent());
+  }
+  
+  @Test
+  public void testCanonicalizeName() throws RosNameException {
+    assertEquals("", GraphName.canonicalizeName(""));
+    assertEquals("/", GraphName.canonicalizeName("/"));
+    assertEquals("/", GraphName.canonicalizeName("//"));
+    assertEquals("/", GraphName.canonicalizeName("///"));
+    
+    assertEquals("foo", GraphName.canonicalizeName("foo"));
+    assertEquals("foo", GraphName.canonicalizeName("foo/"));
+    assertEquals("foo", GraphName.canonicalizeName("foo//"));
+    
+    assertEquals("/foo", GraphName.canonicalizeName("/foo"));
+    assertEquals("/foo", GraphName.canonicalizeName("/foo/"));
+    assertEquals("/foo", GraphName.canonicalizeName("/foo//"));
+    
+    assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar"));
+    assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar/"));
+    assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar//"));
+    
+    assertEquals("~foo", GraphName.canonicalizeName("~foo"));
+    assertEquals("~foo", GraphName.canonicalizeName("~foo/"));
+    assertEquals("~foo", GraphName.canonicalizeName("~foo//"));
+    assertEquals("~foo", GraphName.canonicalizeName("~/foo")); 
   }
 
 }

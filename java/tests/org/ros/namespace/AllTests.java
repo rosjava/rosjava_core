@@ -15,7 +15,7 @@
  */
 package org.ros.namespace;
 
-import org.ros.internal.namespace.RosNameTest;
+import org.ros.internal.namespace.GraphNameTest;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -26,7 +26,7 @@ public class AllTests {
     TestSuite suite = new TestSuite(AllTests.class.getName());
     //$JUnit-BEGIN$
     suite.addTestSuite(NameResolverTest.class);
-    suite.addTestSuite(RosNameTest.class);
+    suite.addTestSuite(GraphNameTest.class);
     //$JUnit-END$
     return suite;
   }

@@ -15,6 +15,8 @@
  */
 package org.ros;
 
+import org.ros.message.test_ros.Composite;
+
 import org.ros.message.std_msgs.Float64;
 
 import org.ros.namespace.NameResolver;
@@ -63,6 +65,11 @@ public class ParameterServerTestNode implements RosMain {
       Float64 float_m = new org.ros.message.std_msgs.Float64();
       float_m.data = (Float) param.getParam(resolver.resolveName("float"));
 
+      Composite composite_m = new org.ros.message.test_ros.Composite();
+      Object data = param.getParam(resolver.resolveName("composite"));
+      
+      System.out.println("data: "+data);
+      
       try {
         while (true) {
           pub_string.publish(string_m);

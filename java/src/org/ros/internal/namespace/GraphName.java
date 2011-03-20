@@ -64,7 +64,7 @@ public class GraphName {
   public static String canonicalizeName(String name) throws RosNameException {
     validateName(name);
     // trim trailing slashes for canonical representation
-    while (name != Namespace.GLOBAL_NS && name.endsWith("/")) {
+    while (!name.equals(Namespace.GLOBAL_NS) && name.endsWith("/")) {
       name = name.substring(0, name.length() - 1);
     }
     if (name.startsWith("~/")) {

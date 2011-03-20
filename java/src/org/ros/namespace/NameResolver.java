@@ -65,7 +65,7 @@ public class NameResolver {
    */
   public String resolveName(String namespace, String name) throws RosNameException {
     GraphName ns = lookUpRemapping(new GraphName(namespace));
-    Preconditions.checkArgument(ns.isGlobal(), "namespace must be global");
+    Preconditions.checkArgument(ns.isGlobal(), "namespace must be global: "+ns.toString());
     GraphName n = lookUpRemapping(new GraphName(name));
     if (n.isGlobal()) {
       return n.toString();

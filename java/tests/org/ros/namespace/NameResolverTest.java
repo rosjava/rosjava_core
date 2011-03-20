@@ -55,6 +55,9 @@ public class NameResolverTest extends TestCase {
     }
     try {
       assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
+      assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, Namespace.GLOBAL_NS));
+      assertEquals(Namespace.GLOBAL_NS, r.resolveName("/anything/bar", Namespace.GLOBAL_NS));
+      
       assertEquals(Namespace.GLOBAL_NS, r.resolveName("/node", ""));
       System.out.println(r.resolveName("/ns1/node", ""));
       assertEquals("/ns1", r.resolveName("/ns1/node", ""));
