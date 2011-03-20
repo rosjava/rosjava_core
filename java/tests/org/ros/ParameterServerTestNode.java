@@ -15,6 +15,8 @@
  */
 package org.ros;
 
+import java.util.Map;
+
 import org.ros.message.test_ros.Composite;
 
 import org.ros.message.std_msgs.Float64;
@@ -35,6 +37,7 @@ import org.ros.message.std_msgs.Int64;
  */
 public class ParameterServerTestNode implements RosMain {
 
+  @SuppressWarnings("rawtypes")
   @Override
   public void rosMain(String[] argv, NodeContext nodeContext) throws RosNameException,
       RosInitException {
@@ -50,7 +53,9 @@ public class ParameterServerTestNode implements RosMain {
       Publisher<Bool> pub_bool = node.createPublisher("bool", org.ros.message.std_msgs.Bool.class);
       Publisher<Float64> pub_float = node.createPublisher("float",
           org.ros.message.std_msgs.Float64.class);
-
+      Publisher<Composite> pub_composite = node.createPublisher("composite",
+          org.ros.message.test_ros.Composite.class);
+      
       ParameterClient param = node.createParameterClient();
 
       String paramNamespace = (String) param.getParam("parameterNamespace");
@@ -63,12 +68,17 @@ public class ParameterServerTestNode implements RosMain {
       Bool bool_m = new org.ros.message.std_msgs.Bool();
       bool_m.data = (Boolean) param.getParam(resolver.resolveName("bool"));
       Float64 float_m = new org.ros.message.std_msgs.Float64();
-      float_m.data = (Float) param.getParam(resolver.resolveName("float"));
+      float_m.data = (Double) param.getParam(resolver.resolveName("float"));
 
       Composite composite_m = new org.ros.message.test_ros.Composite();
-      Object data = param.getParam(resolver.resolveName("composite"));
-      
-      System.out.println("data: "+data);
+      Map data = (Map) param.getParam(resolver.resolveName("composite"));
+      composite_m.a.w = (Double) ((Map)data.get("a")).get("w");
+      composite_m.a.x = (Double) ((Map)data.get("a")).get("x");
+      composite_m.a.y = (Double) ((Map)data.get("a")).get("y");
+      composite_m.a.z = (Double) ((Map)data.get("a")).get("z");
+      composite_m.b.x = (Double) ((Map)data.get("b")).get("x");
+      composite_m.b.y = (Double) ((Map)data.get("b")).get("y");
+      composite_m.b.z = (Double) ((Map)data.get("b")).get("z");
       
       try {
         while (true) {
@@ -76,7 +86,7 @@ public class ParameterServerTestNode implements RosMain {
           pub_int.publish(int_m);
           pub_bool.publish(bool_m);
           pub_float.publish(float_m);
-
+          pub_composite.publish(composite_m);
           Thread.sleep(100);
         }
       } catch (InterruptedException e) {
