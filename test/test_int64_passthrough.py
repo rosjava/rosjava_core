@@ -67,7 +67,7 @@ class TestInt64Passthrough(unittest.TestCase):
         self.test_prev = self.test_curr
         self.test_curr = msg
 
-    def test_string_passthrough(self):
+    def test_int64_passthrough(self):
         # 20 seconds to validate fixture
         timeout_t = time.time() + 20.
         print "waiting for 20 seconds for fixture to verify"
