@@ -38,6 +38,7 @@ public class Talker implements NodeMain {
     try {
       node = new Node("talker", context);
       node.init();
+      
       Publisher<org.ros.message.std_msgs.String> publisher =
           node.createPublisher("chatter", org.ros.message.std_msgs.String.class);
 
