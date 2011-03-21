@@ -26,6 +26,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 
+// TODO(damonkohler): This should be wrapped up in the Node already with a
+// getter. That way things like getTopics() will fell natural in this class and
+// we can get rid of setRosoutPublisher() which is probably error prone.
 /**
  * Logger that logs to both an underlying Apache Commons Log as well as /rosout.
  * 
