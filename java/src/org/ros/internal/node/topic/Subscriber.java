@@ -44,7 +44,7 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.Message;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -166,7 +166,8 @@ public class Subscriber<MessageType extends Message> extends Topic<MessageType> 
   }
 
   public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
-      SocketAddress address) {
+      InetSocketAddress address) {  
+    
     // TODO(damonkohler): Release bootstrap resources on shutdown.
     ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
     TcpClientPipelineFactory factory = new TcpClientPipelineFactory() {

@@ -19,7 +19,7 @@ package org.ros.internal.node.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.ros.internal.node.NodeSocketAddress;
+import org.ros.internal.node.NodeBindAddress;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
@@ -46,7 +46,7 @@ public class ServiceIntegrationTest {
 
   @Before
   public void setUp() throws URISyntaxException, XmlRpcException, IOException {
-    masterServer = new MasterServer(NodeSocketAddress.createDefault(0));
+    masterServer = new MasterServer(NodeBindAddress.createDefault(0));
     masterServer.start();
   }
 

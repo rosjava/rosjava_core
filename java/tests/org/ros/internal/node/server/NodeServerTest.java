@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Test;
-import org.ros.internal.node.NodeSocketAddress;
+import org.ros.internal.node.NodeBindAddress;
 import org.ros.internal.node.xmlrpc.Node;
 
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class NodeServerTest {
 
   @Test
   public void testGetUri() throws URISyntaxException, XmlRpcException, IOException {
-    NodeSocketAddress bindAddress = new NodeSocketAddress(new InetSocketAddress(0), "override");
+    NodeBindAddress bindAddress = new NodeBindAddress(new InetSocketAddress(0), "override");
     NodeServer nodeServer = new NodeServer(bindAddress);
     try {
       nodeServer.getUri();
@@ -57,7 +57,7 @@ public class NodeServerTest {
     nodeServer.shutdown();
 
     // Test with loopback binding.
-    bindAddress = new NodeSocketAddress(new InetSocketAddress("127.0.0.1", 0), "override2");
+    bindAddress = new NodeBindAddress(new InetSocketAddress("127.0.0.1", 0), "override2");
     nodeServer = new NodeServer(bindAddress);
     try {
       nodeServer.getUri();

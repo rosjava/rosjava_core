@@ -67,8 +67,8 @@ public class Node {
   public static Node createPublic(String nodeName, URI masterUri, String publicHostname,
       int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
       URISyntaxException {
-    Node node = new Node(nodeName, masterUri, new NodeSocketAddress(new InetSocketAddress(
-        xmlRpcBindPort), publicHostname), new NodeSocketAddress(new InetSocketAddress(
+    Node node = new Node(nodeName, masterUri, new NodeBindAddress(new InetSocketAddress(
+        xmlRpcBindPort), publicHostname), new NodeBindAddress(new InetSocketAddress(
         tcpRosBindPort), publicHostname));
     node.start();
     return node;
@@ -78,15 +78,15 @@ public class Node {
       int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
     // Public hostname is automatically set to "localhost" in private mode.
     String publicHostname = "localhost";
-    Node node = new Node(nodeName, masterUri, new NodeSocketAddress(new InetSocketAddress(LOOPBACK,
-        xmlRpcBindPort), publicHostname), new NodeSocketAddress(new InetSocketAddress(LOOPBACK,
+    Node node = new Node(nodeName, masterUri, new NodeBindAddress(new InetSocketAddress(LOOPBACK,
+        xmlRpcBindPort), publicHostname), new NodeBindAddress(new InetSocketAddress(LOOPBACK,
         tcpRosBindPort), publicHostname));
     node.start();
     return node;
   }
 
-  Node(String nodeName, URI masterUri, NodeSocketAddress xmlRpcBindAddress,
-      NodeSocketAddress tcpRosBindAddress) throws MalformedURLException {
+  Node(String nodeName, URI masterUri, NodeBindAddress xmlRpcBindAddress,
+      NodeBindAddress tcpRosBindAddress) throws MalformedURLException {
     this.nodeName = nodeName;
     executor = Executors.newCachedThreadPool();
     masterClient = new MasterClient(masterUri);
@@ -177,7 +177,7 @@ public class Node {
       } else {
         serviceServer = new ServiceServer<RequestMessageType>(serviceDefinition,
             requestMessageClass, responseBuilder);
-        serviceServer.setAddress(tcpRosServer.getAddress());
+        serviceServer.setAddress(tcpRosServer.getPublicAddress());
         createdNewService = true;
       }
     }

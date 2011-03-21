@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.ros.internal.node.server.MasterServer;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -34,20 +35,20 @@ public class NodeTest {
 
   @Test
   public void testCreatePublic() throws XmlRpcException, IOException, URISyntaxException {
-    MasterServer masterServer = new MasterServer(NodeSocketAddress.createDefault(0));
+    MasterServer masterServer = new MasterServer(NodeBindAddress.createDefault(0));
     masterServer.start();
-    
+
     Node node = Node.createPublic("/node_name", masterServer.getUri(), "publicname", 0, 0);
     node.start();
-    
-    NodeSocketAddress address = node.getTcpRosServer().getAddress();
+
+    InetSocketAddress address = node.getTcpRosServer().getPublicAddress();
     assertTrue(address.getPort() > 0);
-    assertEquals("publicname", address.getPublicHostname());
-    
+    assertEquals("publicname", address.getHostName());
+
     URI uri = node.getSlaveServer().getUri();
     assertTrue(uri.getPort() > 0);
     assertEquals("publicname", uri.getHost());
-    
+
     node.stop();
   }
 }

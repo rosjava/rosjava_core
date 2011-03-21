@@ -31,15 +31,17 @@ public class NodeSocketAddressTest {
   @Test
   public void testGetPublicHostname() throws UnknownHostException {
 
-    NodeSocketAddress address = new NodeSocketAddress(new InetSocketAddress(1234), "override");
-    assertEquals("override", address.getPublicHostname());
+    NodeBindAddress address = new NodeBindAddress(new InetSocketAddress(1234), "override");
+    assertEquals(address, new NodeBindAddress(new InetSocketAddress(1234), "override"));
+    assertEquals("override", address.getPublicHostName());
     assertEquals(1234, address.getPort());
-    assertEquals(new InetSocketAddress(1234).getAddress(), address.getAddress());
+    assertEquals(new InetSocketAddress(1234), address.getBindAddress());
 
-    address = new NodeSocketAddress(new InetSocketAddress("localhost", 1234), "override");
-    assertEquals("override", address.getPublicHostname());
+    address = new NodeBindAddress(new InetSocketAddress("localhost", 1234), "override");
+    assertEquals(address, new NodeBindAddress(new InetSocketAddress("localhost", 1234), "override"));
+    assertEquals("override", address.getPublicHostName());
     assertEquals(1234, address.getPort());
-    assertEquals(new InetSocketAddress("localhost", 1234).getAddress(), address.getAddress());
+    assertEquals(new InetSocketAddress("localhost", 1234), address.getBindAddress());
 
   }
 }

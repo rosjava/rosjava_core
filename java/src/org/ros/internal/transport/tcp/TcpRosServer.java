@@ -18,7 +18,7 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.node.NodeSocketAddress;
+import org.ros.internal.node.NodeBindAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,14 +45,14 @@ public class TcpRosServer {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(TcpRosServer.class);
 
-  private final NodeSocketAddress bindAddress;
+  private final NodeBindAddress bindAddress;
   private final ChannelGroup channelGroup;
   private final ChannelFactory channelFactory;
   private final ServerBootstrap bootstrap;
 
   private Channel channel;
 
-  public TcpRosServer(NodeSocketAddress bindAddress, TopicManager topicManager,
+  public TcpRosServer(NodeBindAddress bindAddress, TopicManager topicManager,
       ServiceManager serviceManager) {
     this.bindAddress = bindAddress;
     channelGroup = new DefaultChannelGroup();
@@ -67,15 +67,15 @@ public class TcpRosServer {
   }
 
   public void start() {
-    channel = bootstrap.bind(bindAddress);
+    channel = bootstrap.bind(bindAddress.getBindAddress());
     if (DEBUG) {
-      log.info("Bound to: " + getAddress());
+      log.info("Bound to: " + getPublicAddress());
     }
   }
 
   public void shutdown() {
     if (DEBUG) {
-      log.info("Shutting down: " + getAddress());
+      log.info("Shutting down: " + getPublicAddress());
     }
     ChannelGroupFuture future = channelGroup.close();
     future.awaitUninterruptibly();
@@ -84,9 +84,10 @@ public class TcpRosServer {
     channel = null;
   }
 
-  public NodeSocketAddress getAddress() {
+  public InetSocketAddress getPublicAddress() {
     Preconditions
         .checkNotNull(channel, "Calling getAddress() is only valid after calling start().");
-    return new NodeSocketAddress((InetSocketAddress) channel.getLocalAddress(), bindAddress.getPublicHostname());
+    int port = ((InetSocketAddress) channel.getLocalAddress()).getPort();
+    return InetSocketAddress.createUnresolved(bindAddress.getPublicHostName(), port);
   }
 }

@@ -24,7 +24,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
 import org.apache.xmlrpc.XmlRpcException;
-import org.ros.internal.node.NodeSocketAddress;
+import org.ros.internal.node.NodeBindAddress;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
@@ -45,7 +45,7 @@ public class MasterServer extends NodeServer {
   private final Multimap<String, PublisherIdentifier> publishers;
   private final Multimap<String, SubscriberIdentifier> subscribers;
 
-  public MasterServer(NodeSocketAddress address) {
+  public MasterServer(NodeBindAddress address) {
     super(address);
     slaves = Maps.newConcurrentMap();
     services = Maps.newConcurrentMap();

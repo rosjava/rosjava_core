@@ -23,7 +23,7 @@ import org.apache.xmlrpc.server.PropertyHandlerMapping;
 import org.apache.xmlrpc.server.XmlRpcServer;
 import org.apache.xmlrpc.server.XmlRpcServerConfigImpl;
 import org.apache.xmlrpc.webserver.WebServer;
-import org.ros.internal.node.NodeSocketAddress;
+import org.ros.internal.node.NodeBindAddress;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -39,12 +39,12 @@ public class NodeServer {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(NodeServer.class);
 
-  private final NodeSocketAddress bindAddress;
+  private final NodeBindAddress bindAddress;
   private final WebServer server;
 
-  public NodeServer(NodeSocketAddress bindAddress) {
+  public NodeServer(NodeBindAddress bindAddress) {
     this.bindAddress = bindAddress;
-    server = new WebServer(bindAddress.getPort(), bindAddress.getAddress());
+    server = new WebServer(bindAddress.getPort(), bindAddress.getBindAddress().getAddress());
   }
 
   public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass, T instance)
@@ -69,7 +69,7 @@ public class NodeServer {
 
   public URI getUri() {
     try {
-      return new URL("http", bindAddress.getPublicHostname(), server.getPort(), "").toURI();
+      return new URL("http", bindAddress.getPublicHostName(), server.getPort(), "").toURI();
     } catch (MalformedURLException e) {
       // TODO(kwc): better unchecked exception across APIs that signify bugs in
       // the internal implementation rather than user-facing errors.

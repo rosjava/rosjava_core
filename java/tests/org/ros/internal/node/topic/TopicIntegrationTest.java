@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.MessageListener;
 import org.ros.internal.node.Node;
-import org.ros.internal.node.NodeSocketAddress;
+import org.ros.internal.node.NodeBindAddress;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.server.MasterServer;
 
@@ -42,7 +42,7 @@ public class TopicIntegrationTest {
 
   @Before
   public void setUp() throws URISyntaxException, XmlRpcException, IOException {
-    masterServer = new MasterServer(NodeSocketAddress.createDefault(0));
+    masterServer = new MasterServer(NodeBindAddress.createDefault(0));
     masterServer.start();
   }
 

@@ -70,13 +70,14 @@ public class SlaveImplTest {
   public void testRequestTopic() throws ServerException {
     SlaveServer mockSlave = mock(SlaveServer.class);
     InetSocketAddress localhost = InetSocketAddress.createUnresolved("localhost", 1234);
+
     TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(localhost);
     when(
         mockSlave.requestTopic(Matchers.<String>any(),
             Matchers.eq(Sets.newHashSet(ProtocolNames.TCPROS, ProtocolNames.UDPROS)))).thenReturn(
         protocol);
     SlaveImpl slave = new SlaveImpl(mockSlave);
-    Object[][] protocols = new Object[][] { {ProtocolNames.TCPROS}, {ProtocolNames.UDPROS}};
+    Object[][] protocols = new Object[][] { { ProtocolNames.TCPROS }, { ProtocolNames.UDPROS } };
     List<Object> response = slave.requestTopic("/foo", "/bar", protocols);
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
     assertEquals(response.get(2), protocol.toList());

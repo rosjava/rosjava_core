@@ -24,7 +24,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Test;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
-import org.ros.internal.node.NodeSocketAddress;
+import org.ros.internal.node.NodeBindAddress;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
@@ -46,6 +46,7 @@ import java.util.Map;
 public class NodeTest {
 
   void checkHostName(String hostName) {
+    System.out.println(hostName);
     assertTrue(!hostName.equals("0.0.0.0"));
     assertTrue(!hostName.equals("0:0:0:0:0:0:0:0"));
   }
@@ -53,7 +54,7 @@ public class NodeTest {
   @Test
   public void testPublicAddresses() throws RosInitException, RosNameException, RemoteException,
       XmlRpcException, IOException, URISyntaxException {
-    MasterServer master = new MasterServer(NodeSocketAddress.createDefault(0));
+    MasterServer master = new MasterServer(NodeBindAddress.createDefault(0));
     master.start();
     URI masterUri = master.getUri();
     checkHostName(masterUri.getHost());
@@ -79,7 +80,7 @@ public class NodeTest {
     Response<ProtocolDescription> response = slaveClient.requestTopic("test_addresses_pub",
         Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();
-    InetSocketAddress tcpRosAddress = (InetSocketAddress) result.getAddress();
+    InetSocketAddress tcpRosAddress = result.getAddress();
     checkHostName(tcpRosAddress.getHostName());
   }
 }

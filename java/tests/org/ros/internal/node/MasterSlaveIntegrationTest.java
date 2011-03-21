@@ -48,12 +48,12 @@ public class MasterSlaveIntegrationTest {
 
   @Before
   public void setUp() throws XmlRpcException, IOException, URISyntaxException {
-    masterServer = new MasterServer(NodeSocketAddress.createDefault(0));
+    masterServer = new MasterServer(NodeBindAddress.createDefault(0));
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
     TopicManager topicManager = new TopicManager();
     ServiceManager serviceManager = new ServiceManager();
-    NodeSocketAddress bindAddress = new NodeSocketAddress(new InetSocketAddress(0), "localhost");
+    NodeBindAddress bindAddress = new NodeBindAddress(new InetSocketAddress(0), "localhost");
     slaveServer =
         new SlaveServer("/foo", bindAddress, masterClient, topicManager,
             serviceManager,

@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-import org.ros.internal.node.NodeSocketAddress;
+import org.ros.internal.node.NodeBindAddress;
 
 import org.junit.Test;
 import org.ros.internal.node.server.ServiceManager;
@@ -42,28 +42,28 @@ public class TcpRosServerTest {
     TopicManager topicManagerMock = mock(TopicManager.class);
     ServiceManager serviceManagerMock = mock(ServiceManager.class);
     InetSocketAddress bindAddress = new InetSocketAddress(0);
-    TcpRosServer tcpRosServer = new TcpRosServer(new NodeSocketAddress(bindAddress, "override"),
+    TcpRosServer tcpRosServer = new TcpRosServer(new NodeBindAddress(bindAddress, "override"),
         topicManagerMock, serviceManagerMock);
 
     // Not really sure of the right behavior here, but getAddress() raises
     // before start and should also raise after shutdown.
     try {
-      tcpRosServer.getAddress();
+      tcpRosServer.getPublicAddress();
       fail("getAddress() should raise before start");
     } catch (RuntimeException e) {
     }
 
     tcpRosServer.start();
 
-    NodeSocketAddress address = tcpRosServer.getAddress();
+    InetSocketAddress address = tcpRosServer.getPublicAddress();
     assertTrue(address.getPort() > 0);
-    assertEquals("override", address.getPublicHostname());
+    assertEquals("override", address.getHostName());
 
     tcpRosServer.shutdown();
     // Not really sure of the right behavior here, but getAddress() raises
     // before start and should also raise after shutdown.
     try {
-      tcpRosServer.getAddress();
+      tcpRosServer.getPublicAddress();
       fail("getAddress() should raise after shutdown");
     } catch (RuntimeException e) {
     }
