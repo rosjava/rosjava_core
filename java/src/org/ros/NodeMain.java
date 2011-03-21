@@ -13,26 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
-import org.ros.exceptions.RosInitException;
-import org.ros.exceptions.RosNameException;
+import java.util.List;
 
 /**
- * A simple interface for entry points into your app.
+ * Defines a {@link Node} entry point.
  * 
- * @author "Ethan Rublee ethan.rublee@gmail.com"
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
-public interface RosMain {
+public interface NodeMain {
 
   /**
-   * Called to start your node by some magical ros java file.
+   * Called to start your {@link Node}.
    * 
    * @param argv
-   * @param context
-   *          The ros context with which to the RosMain is assumed to abide by.
+   * @param nodeContext the {@link NodeContext} that will be passed to the {@link Node}
    */
-  public void rosMain(String argv[], NodeContext nodeContext) throws RosInitException,
-      RosNameException;
+  public void run(List<String> argv, NodeContext nodeContext) throws Exception;
 
 }

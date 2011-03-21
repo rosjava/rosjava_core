@@ -59,12 +59,10 @@ public class Node {
   private final Executor executor;
   private final String nodeName;
   private final MasterClient masterClient;
-  @VisibleForTesting
-  final SlaveServer slaveServer;
+  private final SlaveServer slaveServer;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
-  @VisibleForTesting
-  final TcpRosServer tcpRosServer;
+  private final TcpRosServer tcpRosServer;
 
   public static Node createPublic(String nodeName, URI masterUri, String publicHostname,
       int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
@@ -214,6 +212,22 @@ public class Node {
 
   public void stop() {
     slaveServer.shutdown();
+  }
+
+  /**
+   * @return the {@link TcpRosServer}
+   */
+  @VisibleForTesting
+  TcpRosServer getTcpRosServer() {
+    return tcpRosServer;
+  }
+
+  /**
+   * @return the {@link SlaveServer}
+   */
+  @VisibleForTesting
+  SlaveServer getSlaveServer() {
+    return slaveServer;
   }
 
 }

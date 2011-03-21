@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
 import org.ros.exceptions.RosInitException;
@@ -34,7 +35,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 /**
- * Create NodeContext instances using ROS command-line and environment
+ * Create {@link NodeContext} instances using a ROS command-line and environment
  * specification.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
@@ -43,32 +44,28 @@ public class CommandLineLoader extends RosLoader {
 
   private final String[] cleanCommandLineArgs;
   private final String[] commandLineArgs;
-  private final Map<String, String> env;
+  private final Map<String, String> environment;
 
   /**
-   * Create new CommandLineLoader with specified command-line arguments.
+   * Create new {@link CommandLineLoader} with specified command-line arguments.
    * Environment variables will be pulled from default {@link System}
    * environment variables.
    * 
-   * @param commandLineArgs
-   *          Command-line arguments to node.
-   * @param commandLineArgs
+   * @param commandLineArgs command-line arguments
    */
   public CommandLineLoader(String[] commandLineArgs) {
     this(commandLineArgs, System.getenv());
   }
 
   /**
-   * Create new CommandLineLoader with specified command-line arguments and
-   * environment variables.
+   * Create new {@link CommandLineLoader} with specified command-line arguments
+   * and environment variables.
    * 
-   * @param commandLineArgs
-   *          Command-line arguments to node.
-   * @param env
-   *          Environment variables.
+   * @param commandLineArgs command-line arguments
+   * @param env environment variables
    */
   public CommandLineLoader(String[] commandLineArgs, Map<String, String> env) {
-    this.env = env;
+    this.environment = env;
     this.commandLineArgs = commandLineArgs;
 
     LinkedList<String> clean = new LinkedList<String>();
@@ -88,16 +85,16 @@ public class CommandLineLoader extends RosLoader {
   public NodeContext createContext() throws RosInitException {
     try {
       Map<String, String> specialRemappings = getSpecialRemappings(commandLineArgs);
-      String namespace = getNamespace(specialRemappings, env);
+      String namespace = getNamespace(specialRemappings, environment);
       HashMap<GraphName, GraphName> remappings = parseRemappings(commandLineArgs);
       NameResolver resolver = new NameResolver(namespace, remappings);
 
       NodeContext context = new NodeContext();
       context.setParentResolver(resolver);
-      context.setRosRoot(getRosRoot(specialRemappings, env));
-      context.setRosPackagePath(getRosPackagePath(specialRemappings, env));
-      context.setRosMasterUri(getRosMasterUri(specialRemappings, env));
-      String addressOverride = getAddressOverride(specialRemappings, env);
+      context.setRosRoot(getRosRoot(specialRemappings, environment));
+      context.setRosPackagePath(getRosPackagePath(specialRemappings, environment));
+      context.setRosMasterUri(getRosMasterUri(specialRemappings, environment));
+      String addressOverride = getAddressOverride(specialRemappings, environment);
       if (addressOverride != null) {
         context.setHostName(addressOverride);
       } else {
@@ -115,14 +112,14 @@ public class CommandLineLoader extends RosLoader {
   }
 
   /**
-   * @return Command-line arguments without ROS remapping arguments.
+   * @return command-line arguments without ROS remapping arguments
    */
   public String[] getCleanCommandLineArgs() {
     return cleanCommandLineArgs;
   }
 
   /**
-   * @return Original command-line arguments.
+   * @return the original command-line arguments
    */
   public String[] getCommandLineArgs() {
     return commandLineArgs;
@@ -169,8 +166,8 @@ public class CommandLineLoader extends RosLoader {
 
     String namespace = Namespace.GLOBAL_NS;
     if (specialRemappings.containsKey(CommandLine.ROS_NAMESPACE)) {
-      namespace = new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal()
-          .toString();
+      namespace =
+          new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal().toString();
     } else if (env.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
       namespace = new GraphName(env.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal().toString();
     }
@@ -202,8 +199,7 @@ public class CommandLineLoader extends RosLoader {
     }
   }
 
-  private String getRosRoot(Map<String, String> specialRemappings, Map<String, String> env)
-      throws RosInitException {
+  private String getRosRoot(Map<String, String> specialRemappings, Map<String, String> env) {
     if (env.containsKey(EnvironmentVariables.ROS_ROOT)) {
       return env.get(EnvironmentVariables.ROS_ROOT);
     } else {
@@ -236,4 +232,5 @@ public class CommandLineLoader extends RosLoader {
     }
     return remappings;
   }
+
 }

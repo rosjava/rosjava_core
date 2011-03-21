@@ -13,8 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
+import java.util.List;
 import java.util.Map;
 
 import org.ros.message.test_ros.Composite;
@@ -35,16 +37,15 @@ import org.ros.message.std_msgs.Int64;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class ParameterServerTestNode implements RosMain {
+public class ParameterServerTestNode implements NodeMain {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void rosMain(String[] argv, NodeContext nodeContext) throws RosNameException,
+  public void run(List<String> argv, NodeContext nodeContext) throws RosNameException,
       RosInitException {
     try {
       // Node is only used to publish results.
-      final Node node;
-      node = new Node("test_node", nodeContext);
+      final Node node = new Node("test_node", nodeContext);
       node.init();
 
       Publisher<org.ros.message.std_msgs.String> pub_string = node.createPublisher("string",
@@ -95,4 +96,5 @@ public class ParameterServerTestNode implements RosMain {
       e.printStackTrace();
     }
   }
+  
 }

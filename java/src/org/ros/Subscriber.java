@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,51 +16,58 @@
 
 package org.ros;
 
-
 import org.ros.message.Message;
 
 /**
- * Handle to subscription to ROS topic.
+ * Handles a subscription to a ROS topic.
  * 
- * @author "Ethan Rublee ethan.rublee@gmail.com"
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
  * 
  * @param <MessageType>
- * 
  */
 public class Subscriber<MessageType extends Message> {
 
   private final Class<MessageType> messageClass;
   private final String topicName;
 
-  private final org.ros.internal.node.topic.Subscriber<MessageType> subscriberImpl;
-  /* Callback for new messages. */
-  private final MessageListener<MessageType> messageCallback;
+  private final org.ros.internal.node.topic.Subscriber<MessageType> subscriber;
+  private final MessageListener<MessageType> messageListener;
 
-  protected Subscriber(String topicName, MessageListener<MessageType> callback,
-      Class<MessageType> messageClass, org.ros.internal.node.topic.Subscriber<MessageType> subscriberImpl) {
+  protected Subscriber(String topicName, MessageListener<MessageType> messageListener,
+      Class<MessageType> messageClass,
+      org.ros.internal.node.topic.Subscriber<MessageType> subscriber) {
     this.messageClass = messageClass;
     this.topicName = topicName;
-    this.messageCallback = callback;
-    this.subscriberImpl = subscriberImpl;
+    this.messageListener = messageListener;
+    this.subscriber = subscriber;
   }
 
   /**
-   * Cancel this subscription's callback.
+   * Cancels this subscription.
    */
   public void cancel() {
-    subscriberImpl.removeMessageListener(messageCallback);
+    subscriber.removeMessageListener(messageListener);
   }
 
+  /**
+   * @return the name of the subscribed topic
+   */
   public String getTopicName() {
     return topicName;
   }
 
-  public Class<MessageType> getTopicClass() {
+  /**
+   * @return the {@link Message} class literal for the subscribed topic
+   */
+  public Class<MessageType> getTopicMessageClass() {
     return messageClass;
   }
 
-  public MessageListener<MessageType> getMessageCallback() {
-    return messageCallback;
+  /**
+   * @return the {@link MessageListener} for this {@link Subscriber}
+   */
+  public MessageListener<MessageType> getMessageListener() {
+    return messageListener;
   }
 
 }

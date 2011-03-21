@@ -13,19 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
+import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 
-import org.ros.exceptions.RosInitException;
+import java.util.Arrays;
 
 /**
- * [Unstable] rosrun-compatible loader for rosjava-based nodes. This is a work
- * in progress. Important questions, such as how to configure a Java classpath
- * in a ROS-based environment are important to determining the final API and
- * behavior of this interface.
+ * This is a rosrun-compatible loader for rosjava-based nodes.
  * 
- * @author kwc
+ * @author kwc@willowgarage.com (Ken Conley)
  */
 public class RosRun {
 
@@ -33,35 +32,38 @@ public class RosRun {
     System.err.println("Usage: java -jar rosjava.jar org.foo.MyNode [args]");
   }
 
-  // TODO(kwc): in the future, will need some sort of classpath bootstrapping
+  // TODO(kwc): In the future, will need some sort of classpath bootstrapping.
   /**
    * Usage: rosrun rosjava run org.foo.Node [args]
    * 
    * @param argv
-   * @throws RosInitException
+   * @throws Exception
    */
-  public static void main(String[] argv) {
+  public static void main(String[] argv) throws Exception {
     if (argv.length == 0) {
       printUsage();
       System.exit(1);
     }
+    
     String nodeClassName = argv[0];
     String[] nodeArgs = new String[argv.length - 1];
 
-    System.out.println("loading node class: " + nodeClassName);
+    // TODO(damonkohler): Use commons logging?
+    System.out.println("Loading node class: " + nodeClassName);
     System.arraycopy(argv, 1, nodeArgs, 0, nodeArgs.length);
 
-    RosLoader rl = new CommandLineLoader(nodeArgs);
+    RosLoader rosLoader = new CommandLineLoader(nodeArgs);
     NodeContext nodeContext = null;
     try {
-      nodeContext = rl.createContext();
+      nodeContext = rosLoader.createContext();
     } catch (RosInitException e1) {
       e1.printStackTrace();
       System.exit(2);
     }
-    RosMain rm = null;
+
+    NodeMain nodeMain = null;
     try {
-      rm = rl.loadClass(nodeClassName);
+      nodeMain = rosLoader.loadClass(nodeClassName);
     } catch (ClassNotFoundException e) {
       System.err.println("Unable to locate node: " + nodeClassName);
       System.exit(3);
@@ -76,7 +78,7 @@ public class RosRun {
     }
 
     try {
-      rm.rosMain(argv, nodeContext);
+      nodeMain.run(Arrays.asList(argv), nodeContext);
     } catch (RosInitException e) {
       e.printStackTrace();
       System.exit(6);

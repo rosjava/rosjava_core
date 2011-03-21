@@ -18,9 +18,10 @@ package org.ros.namespace;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.namespace.GraphName;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ros.exceptions.RosNameException;
+import org.ros.internal.namespace.GraphName;
 
 import java.util.HashMap;
 
@@ -32,6 +33,9 @@ import java.util.HashMap;
  * @author kwc@willowgarage.com (Ken Conley)
  */
 public class NameResolver {
+
+  private static final boolean DEBUG = false;
+  private static final Log log = LogFactory.getLog(NameResolver.class);
 
   private final HashMap<GraphName, GraphName> remappings;
   private final String namespace;
@@ -78,7 +82,9 @@ public class NameResolver {
       if (s.startsWith("/")) {
         s = s.substring(1);
       }
-      System.out.println("join:" + namespace + " " + ns + "," + s);
+      if (DEBUG) {
+        log.info("Join: " + namespace + " " + ns + ", " + s);
+      }
       return join(ns, new GraphName(s));
     }
     throw new RosNameException("Bad name: " + name);

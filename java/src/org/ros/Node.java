@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
 import com.google.common.base.Preconditions;
@@ -26,7 +27,7 @@ import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.client.RosoutLogger;
+import org.ros.internal.node.RosoutLogger;
 import org.ros.internal.node.client.TimeProvider;
 import org.ros.internal.node.client.WallclockProvider;
 import org.ros.internal.node.topic.MessageDefinition;
@@ -45,6 +46,7 @@ import java.net.URISyntaxException;
  * @author kwc@willowgarage.com (Ken Conley)
  */
 public class Node implements Namespace {
+
   /**
    * The node's context for name resolution and possibly other global
    * configuration issues (rosparam)
@@ -53,7 +55,7 @@ public class Node implements Namespace {
   private final NameResolver resolver;
   /** The node's namespace name. */
   private final GraphName nodeName;
-  /** Factory for generating internal Publisher and Subscriber instances. */
+
   private org.ros.internal.node.Node node;
 
   /**
@@ -64,11 +66,10 @@ public class Node implements Namespace {
   private TimeProvider timeProvider;
 
   /**
-   * @param name
-   *          Node name. This identifies this node to the rest of the ROS graph.
+   * @param name Node name. This identifies this node to the rest of the ROS
+   *        graph.
    * @param context
-   * @throws RosNameException
-   *           If node name is invalid.
+   * @throws RosNameException If node name is invalid.
    */
   public Node(String name, NodeContext context) throws RosNameException {
     Preconditions.checkNotNull(context);
@@ -96,10 +97,10 @@ public class Node implements Namespace {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message m = messageClass.newInstance();
-      TopicDefinition topicDefinition = new TopicDefinition(resolvedTopicName,
-          MessageDefinition.createFromMessage(m));
-      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl = node.createPublisher(
-          topicDefinition, messageClass);
+      TopicDefinition topicDefinition =
+          new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(m));
+      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
+          node.createPublisher(topicDefinition, messageClass);
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (RosNameException e) {
       throw e;
@@ -123,18 +124,18 @@ public class Node implements Namespace {
     try {
       Message m = messageClass.newInstance();
       String resolvedTopicName = resolveName(topicName);
-      TopicDefinition topicDefinition = new TopicDefinition(resolvedTopicName,
-          MessageDefinition.createFromMessage(m));
-      org.ros.internal.node.topic.Subscriber<MessageType> subscriberImpl = node.createSubscriber(
-          topicDefinition, messageClass);
+      TopicDefinition topicDefinition =
+          new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(m));
+      org.ros.internal.node.topic.Subscriber<MessageType> subscriberImpl =
+          node.createSubscriber(topicDefinition, messageClass);
 
       // Add the callback to the impl.
       subscriberImpl.addMessageListener(callback);
       // Create the user-facing Subscriber handle. This is little more than a
       // lightweight wrapper around the internal implementation so that we can
       // track callback references.
-      Subscriber<MessageType> subscriber = new Subscriber<MessageType>(resolvedTopicName, callback,
-          messageClass, subscriberImpl);
+      Subscriber<MessageType> subscriber =
+          new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriberImpl);
       return subscriber;
 
     } catch (IOException e) {
@@ -179,19 +180,20 @@ public class Node implements Namespace {
       if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
-        node = org.ros.internal.node.Node.createPrivate(nodeName.toString(),
-            context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
+        node =
+            org.ros.internal.node.Node.createPrivate(nodeName.toString(),
+                context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
       } else {
-        node = org.ros.internal.node.Node.createPublic(nodeName.toString(),
-            context.getRosMasterUri(), context.getHostName(), context.getXmlRpcPort(),
-            context.getTcpRosPort());
+        node =
+            org.ros.internal.node.Node.createPublic(nodeName.toString(), context.getRosMasterUri(),
+                context.getHostName(), context.getXmlRpcPort(), context.getTcpRosPort());
       }
 
       initialized = true;
 
-      // initialized must be true to start creating publishers.
-      Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher = createPublisher("/rosout",
-          org.ros.message.rosgraph_msgs.Log.class);
+      // Initialized must be true to start creating publishers.
+      Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
+          createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
       log.setRosoutPublisher(rosoutPublisher);
 
     } catch (IOException e) {

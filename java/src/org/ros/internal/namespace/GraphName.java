@@ -23,13 +23,14 @@ import org.ros.namespace.Namespace;
 /**
  * ROS graph resource name.
  * 
- * http://www.ros.org/wiki/Names
+ * @see "http://www.ros.org/wiki/Names"
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
- * 
  */
 public class GraphName {
+  
   private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
+  
   private final String name;
 
   /**

@@ -13,9 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.internal.node.client;
+
+package org.ros.internal.node;
 
 import org.ros.Publisher;
+import org.ros.internal.node.client.TimeProvider;
 
 import org.apache.commons.logging.Log;
 

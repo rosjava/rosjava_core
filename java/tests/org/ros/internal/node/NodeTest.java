@@ -40,11 +40,11 @@ public class NodeTest {
     Node node = Node.createPublic("/node_name", masterServer.getUri(), "publicname", 0, 0);
     node.start();
     
-    NodeSocketAddress address = node.tcpRosServer.getAddress();
+    NodeSocketAddress address = node.getTcpRosServer().getAddress();
     assertTrue(address.getPort() > 0);
     assertEquals("publicname", address.getPublicHostname());
     
-    URI uri = node.slaveServer.getUri();
+    URI uri = node.getSlaveServer().getUri();
     assertTrue(uri.getPort() > 0);
     assertEquals("publicname", uri.getHost());
     
