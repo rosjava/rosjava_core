@@ -74,9 +74,8 @@ public class Node {
     return node;
   }
 
-  public static Node createPrivate(String nodeName, URI masterUri, 
-      int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
-      URISyntaxException {
+  public static Node createPrivate(String nodeName, URI masterUri, int xmlRpcBindPort,
+      int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
     // Public hostname is automatically set to "localhost" in private mode.
     String publicHostname = "localhost";
     Node node = new Node(nodeName, masterUri, new NodeSocketAddress(new InetSocketAddress(LOOPBACK,
@@ -228,6 +227,13 @@ public class Node {
   @VisibleForTesting
   SlaveServer getSlaveServer() {
     return slaveServer;
+  }
+
+  /**
+   * @return {@link URI} of the Node server (XML-RPC).
+   */
+  public URI getUri() {
+    return slaveServer.getUri();
   }
 
 }

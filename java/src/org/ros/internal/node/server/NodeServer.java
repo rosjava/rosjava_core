@@ -48,7 +48,7 @@ public class NodeServer {
   }
 
   public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass, T instance)
-      throws XmlRpcException, IOException, URISyntaxException {
+      throws XmlRpcException, IOException {
     XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
     PropertyHandlerMapping phm = new PropertyHandlerMapping();
     phm.setRequestProcessorFactoryFactory(new NodeRequestProcessorFactoryFactory<T>(instance));
@@ -67,8 +67,16 @@ public class NodeServer {
     server.shutdown();
   }
 
-  public URI getUri() throws MalformedURLException, URISyntaxException {
-    return new URL("http", bindAddress.getPublicHostname(), server.getPort(), "").toURI();
+  public URI getUri() {
+    try {
+      return new URL("http", bindAddress.getPublicHostname(), server.getPort(), "").toURI();
+    } catch (MalformedURLException e) {
+      // TODO(kwc): better unchecked exception across APIs that signify bugs in
+      // the internal implementation rather than user-facing errors.
+      throw new RuntimeException(e);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }
