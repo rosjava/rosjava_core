@@ -19,34 +19,34 @@ import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 import org.ros.message.std_msgs.Int64;
 
+import java.util.List;
+
 /**
  * This node is used to test the slave API externally using rostest.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
- * 
  */
-public class SlaveApiTestNode implements RosMain {
+public class SlaveApiTestNode implements NodeMain {
 
   @Override
-  public void rosMain(String[] argv, NodeContext nodeContext) throws RosNameException,
+  public void run(List<String> argv, NodeContext nodeContext) throws RosNameException,
       RosInitException {
-    Node node;
-    node = new Node("test_node", nodeContext);
-    node.init();
+    final Node node = new Node("test_node", nodeContext);
 
-    // basic chatter in/out test
-    Publisher<org.ros.message.std_msgs.String> pub_string = node.createPublisher("chatter_out",
-        org.ros.message.std_msgs.String.class);
-    MessageListener<org.ros.message.std_msgs.String> chatter_cb = new MessageListener<org.ros.message.std_msgs.String>() {
-      @Override
-      public void onNewMessage(org.ros.message.std_msgs.String m) {
-        System.out.println("String: " + m.data);
-      }
-    };
+    // Basic chatter in/out test.
+    Publisher<org.ros.message.std_msgs.String> pub_string =
+        node.createPublisher("chatter_out", org.ros.message.std_msgs.String.class);
+    MessageListener<org.ros.message.std_msgs.String> chatter_cb =
+        new MessageListener<org.ros.message.std_msgs.String>() {
+          @Override
+          public void onNewMessage(org.ros.message.std_msgs.String m) {
+            System.out.println("String: " + m.data);
+          }
+        };
 
     node.createSubscriber("chatter_in", chatter_cb, org.ros.message.std_msgs.String.class);
 
-    // have at least one case of dual pub/sub on same topic
+    // Have at least one case of dual pub/sub on the same topic.
     Publisher<Int64> pub_int64_pubsub = node.createPublisher("int64", Int64.class);
     MessageListener<Int64> int64_cb = new MessageListener<Int64>() {
       @Override
@@ -56,8 +56,8 @@ public class SlaveApiTestNode implements RosMain {
 
     node.createSubscriber("int64", int64_cb, Int64.class);
 
-    // don't do any performance optimizations here, want to make sure that
-    // gc/etc... is working.
+    // Don't do any performance optimizations here. We want to make sure that
+    // GC, etc. is working.
     while (true) {
       org.ros.message.std_msgs.String chatter = new org.ros.message.std_msgs.String();
       chatter.data = "hello " + System.currentTimeMillis();
@@ -72,6 +72,6 @@ public class SlaveApiTestNode implements RosMain {
         e.printStackTrace();
       }
     }
-
   }
+
 }

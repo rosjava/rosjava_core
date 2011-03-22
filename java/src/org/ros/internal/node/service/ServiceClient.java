@@ -41,7 +41,8 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.Message;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
+import java.net.URI;
 import java.nio.ByteOrder;
 import java.util.Map;
 import java.util.Queue;
@@ -129,13 +130,13 @@ public class ServiceClient<ResponseMessageType extends Message> {
     }
   }
 
-  public static <S extends Message> ServiceClient<S> create(Class<S> incomingMessageClass,
-      String name, ServiceIdentifier serviceIdentifier) {
-    return new ServiceClient<S>(incomingMessageClass, name, serviceIdentifier);
+  public static <S extends Message> ServiceClient<S> create(String nodeName,
+      ServiceIdentifier serviceIdentifier, Class<S> incomingMessageClass) {
+    return new ServiceClient<S>(nodeName, serviceIdentifier, incomingMessageClass);
   }
 
-  private ServiceClient(Class<ResponseMessageType> responseMessageClass, String nodeName,
-      ServiceIdentifier serviceIdentifier) {
+  private ServiceClient(String nodeName, ServiceIdentifier serviceIdentifier,
+      Class<ResponseMessageType> responseMessageClass) {
     Preconditions.checkNotNull(nodeName);
     Preconditions.checkArgument(nodeName.startsWith("/"));
     this.responseMessageClass = responseMessageClass;
@@ -162,7 +163,9 @@ public class ServiceClient<ResponseMessageType extends Message> {
     bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
   }
 
-  public void connect(SocketAddress address) {
+  public void connect(URI uri) {
+    Preconditions.checkArgument(uri.getScheme().equals("rosrpc"));
+    InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
     // TODO(damonkohler): Add timeouts.
     ChannelFuture future = bootstrap.connect(address).awaitUninterruptibly();
     if (future.isSuccess()) {
@@ -206,4 +209,8 @@ public class ServiceClient<ResponseMessageType extends Message> {
     channel.write(buffer);
   }
 
+  public boolean checkMessageClass(Class<ResponseMessageType> expectedResponseMessageClass) {
+    return expectedResponseMessageClass == responseMessageClass;
+  }
+  
 }

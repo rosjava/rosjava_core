@@ -13,22 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.namespace;
 
-import org.ros.internal.namespace.GraphNameTest;
+package org.ros;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
 
-public class AllTests {
+/**
+ * Defines a {@link Node} entry point.
+ * 
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
+ */
+public interface NodeMain {
 
-  public static Test suite() {
-    TestSuite suite = new TestSuite(AllTests.class.getName());
-    //$JUnit-BEGIN$
-    suite.addTestSuite(NameResolverTest.class);
-    suite.addTestSuite(GraphNameTest.class);
-    //$JUnit-END$
-    return suite;
-  }
+  /**
+   * Called to start your {@link Node}.
+   * 
+   * @param argv
+   * @param nodeContext the {@link NodeContext} that will be passed to the {@link Node}
+   */
+  public void run(List<String> argv, NodeContext nodeContext) throws Exception;
 
 }

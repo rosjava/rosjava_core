@@ -19,13 +19,14 @@ package org.ros.internal.node;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Test;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 
-import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
@@ -33,21 +34,25 @@ import java.net.URISyntaxException;
 public class NodeTest {
 
   @Test
-  public void testCreatePublic() throws XmlRpcException, IOException, URISyntaxException {
-    MasterServer masterServer = new MasterServer(NodeSocketAddress.createDefault(0));
+  public void testCreatePublic() throws Exception {
+    MasterServer masterServer =
+        new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    
-    Node node = Node.createPublic("/node_name", masterServer.getUri(), "publicname", 0, 0);
+
+    Node node = Node.createPublic("/node_name", masterServer.getUri(), 0, 0);
     node.start();
-    
-    NodeSocketAddress address = node.tcpRosServer.getAddress();
-    assertTrue(address.getPort() > 0);
-    assertEquals("publicname", address.getPublicHostname());
-    
-    URI uri = node.slaveServer.getUri();
+
+    String hostName = InetAddress.getLocalHost().getCanonicalHostName();
+
+    InetSocketAddress tcpRosAddress = node.getTcpRosServer().getAddress();
+    assertTrue(tcpRosAddress.getPort() > 0);
+    assertEquals(tcpRosAddress.getHostName(), hostName);
+
+    URI uri = node.getSlaveServer().getUri();
     assertTrue(uri.getPort() > 0);
-    assertEquals("publicname", uri.getHost());
-    
+    assertEquals(hostName, uri.getHost());
+
     node.stop();
   }
+
 }

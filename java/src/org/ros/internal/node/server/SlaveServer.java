@@ -22,8 +22,9 @@ import com.google.common.collect.Lists;
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.NodeSocketAddress;
 import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.service.ServiceServer;
@@ -68,9 +69,12 @@ public class SlaveServer extends NodeServer {
     return publishers;
   }
 
-  public SlaveServer(String nodeName, NodeSocketAddress xmlRpcServerAddress, MasterClient master,
-      TopicManager topicManager, ServiceManager serviceManager, TcpRosServer tcpRosServer) {
-    super(xmlRpcServerAddress);
+  public SlaveServer(String nodeName, BindAddress xmlRpcServerAddress,
+      AdvertiseAddress advertiseAddress, MasterClient master, TopicManager topicManager,
+      ServiceManager serviceManager, TcpRosServer tcpRosServer) {
+    super(xmlRpcServerAddress, advertiseAddress);
+    // TODO(damonkohler): nodeName should be wrapped up in a class that
+    // guarantees these symantics.
     Preconditions.checkNotNull(nodeName);
     Preconditions.checkArgument(nodeName.startsWith("/"));
     this.nodeName = nodeName;
@@ -89,8 +93,7 @@ public class SlaveServer extends NodeServer {
    * @throws IOException
    * @throws URISyntaxException
    */
-  public void start() throws XmlRpcException, IOException,
-      URISyntaxException {
+  public void start() throws XmlRpcException, IOException, URISyntaxException {
     super.start(org.ros.internal.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
     tcpRosServer.start();
   }
@@ -138,7 +141,7 @@ public class SlaveServer extends NodeServer {
    */
   public void addService(ServiceServer<? extends Message> server) throws URISyntaxException,
       MalformedURLException, RemoteException {
-    serviceManager.putService(server.getName(), server);
+    serviceManager.putServiceServer(server.getName(), server);
     masterClient.registerService(toSlaveIdentifier(), server);
   }
 
@@ -220,7 +223,11 @@ public class SlaveServer extends NodeServer {
     }
     for (String protocol : protocols) {
       if (protocol.equals(ProtocolNames.TCPROS)) {
-        return new TcpRosProtocolDescription(tcpRosServer.getAddress());
+        try {
+          return new TcpRosProtocolDescription(tcpRosServer.getAddress());
+        } catch (Exception e) {
+          throw new ServerException(e);
+        }
       }
     }
     throw new ServerException("No supported protocols specified.");

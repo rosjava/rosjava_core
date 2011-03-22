@@ -13,9 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.internal.node.client;
+
+package org.ros.internal.node;
 
 import org.ros.Publisher;
+import org.ros.internal.node.client.TimeProvider;
 
 import org.apache.commons.logging.Log;
 
@@ -24,6 +26,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 
+// TODO(damonkohler): This should be wrapped up in the Node already with a
+// getter. That way things like getTopics() will fell natural in this class and
+// we can get rid of setRosoutPublisher() which is probably error prone.
 /**
  * Logger that logs to both an underlying Apache Commons Log as well as /rosout.
  * 
@@ -54,7 +59,7 @@ public class RosoutLogger implements Log {
   private void publishToRosout(Object message) {
     org.ros.message.rosgraph_msgs.Log m = new org.ros.message.rosgraph_msgs.Log();
     m.msg = message.toString();
-    m.header.stamp = timeProvider.currentTime();
+    m.header.stamp = timeProvider.getCurrentTime();
     m.topics = getTopics();
     rosoutPublisher.publish(m);
   }

@@ -30,16 +30,16 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ProtocolDescriptionResultFactory implements ResultFactory<ProtocolDescription> {
-  
+
   @Override
   public ProtocolDescription create(Object value) {
     List<Object> protocolParameters = Arrays.asList((Object[]) value);
     Preconditions.checkState(protocolParameters.size() == 3);
     Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
-    InetSocketAddress address =
-        InetSocketAddress.createUnresolved((String) protocolParameters.get(1),
-            (Integer) protocolParameters.get(2));
+    String hostName = (String) protocolParameters.get(1);
+    InetSocketAddress address = InetSocketAddress.createUnresolved(hostName,
+        (Integer) protocolParameters.get(2));
     return new TcpRosProtocolDescription(address);
   }
-  
+
 }

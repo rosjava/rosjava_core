@@ -25,4 +25,11 @@ public class ServerException extends Exception {
     super(message);
   }
 
+  /**
+   * @param e the wrapped {@link Exception}
+   */
+  public ServerException(Exception e) {
+    super(e);
+  }
+
 }

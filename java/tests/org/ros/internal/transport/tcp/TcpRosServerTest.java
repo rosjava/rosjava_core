@@ -21,12 +21,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-import org.ros.internal.node.NodeSocketAddress;
-
 import org.junit.Test;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 /**
@@ -34,38 +35,40 @@ import java.net.InetSocketAddress;
  */
 public class TcpRosServerTest {
 
+  /**
+   * Basic test to exercise getAddress() semantics. Higher-level integration
+   * tests are dependent on consistent behavior here.
+   */
   @Test
-  public void testGetAddress() {
-    // Basic test to exercise getAddress() semantics. Higher-level integration
-    // tests are dependent on consistent behavior here.
-
+  public void testGetAddress() throws Exception {
     TopicManager topicManagerMock = mock(TopicManager.class);
     ServiceManager serviceManagerMock = mock(ServiceManager.class);
-    InetSocketAddress bindAddress = new InetSocketAddress(0);
-    TcpRosServer tcpRosServer = new TcpRosServer(new NodeSocketAddress(bindAddress, "override"),
-        topicManagerMock, serviceManagerMock);
+    TcpRosServer tcpRosServer =
+        new TcpRosServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic(),
+            topicManagerMock, serviceManagerMock);
 
     // Not really sure of the right behavior here, but getAddress() raises
     // before start and should also raise after shutdown.
     try {
       tcpRosServer.getAddress();
-      fail("getAddress() should raise before start");
+      fail();
     } catch (RuntimeException e) {
     }
 
     tcpRosServer.start();
 
-    NodeSocketAddress address = tcpRosServer.getAddress();
+    InetSocketAddress address = tcpRosServer.getAddress();
     assertTrue(address.getPort() > 0);
-    assertEquals("override", address.getPublicHostname());
+    assertEquals(InetAddress.getLocalHost().getCanonicalHostName(), address.getHostName());
 
     tcpRosServer.shutdown();
     // Not really sure of the right behavior here, but getAddress() raises
     // before start and should also raise after shutdown.
     try {
       tcpRosServer.getAddress();
-      fail("getAddress() should raise after shutdown");
+      fail();
     } catch (RuntimeException e) {
     }
   }
+
 }

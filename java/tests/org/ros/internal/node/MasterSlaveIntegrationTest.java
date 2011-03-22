@@ -22,6 +22,8 @@ import static org.junit.Assert.assertTrue;
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
@@ -32,7 +34,6 @@ import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.tcp.TcpRosServer;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -48,22 +49,22 @@ public class MasterSlaveIntegrationTest {
 
   @Before
   public void setUp() throws XmlRpcException, IOException, URISyntaxException {
-    masterServer = new MasterServer(NodeSocketAddress.createDefault(0));
+    masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
     TopicManager topicManager = new TopicManager();
     ServiceManager serviceManager = new ServiceManager();
-    NodeSocketAddress bindAddress = new NodeSocketAddress(new InetSocketAddress(0), "localhost");
     slaveServer =
-        new SlaveServer("/foo", bindAddress, masterClient, topicManager,
-            serviceManager,
-            new TcpRosServer(bindAddress, topicManager, serviceManager));
+        new SlaveServer("/foo", BindAddress.createPublic(0), AdvertiseAddress.createPublic(),
+            masterClient, topicManager, serviceManager, new TcpRosServer(
+                BindAddress.createPublic(0), AdvertiseAddress.createPublic(), topicManager,
+                serviceManager));
     slaveServer.start();
     slaveClient = new SlaveClient("/bar", slaveServer.getUri());
   }
 
   @Test
-  public void testGetMasterUri() throws IOException, RemoteException, URISyntaxException {
+  public void testGetMasterUri() throws RemoteException {
     Response<URI> response = slaveClient.getMasterUri();
     assertEquals(masterServer.getUri(), response.getResult());
   }

@@ -19,23 +19,21 @@ package org.ros.internal.node.service;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-import org.jboss.netty.channel.ChannelHandler;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.message.Message;
 
-import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteOrder;
 import java.util.Map;
 
@@ -47,12 +45,11 @@ public class ServiceServer<RequestMessageType extends Message> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
+  private final AdvertiseAddress advertiseAddress;
   private final Class<RequestMessageType> requestMessageClass;
   private final ServiceResponseBuilder<RequestMessageType> responseBuilder;
   private final ServiceDefinition definition;
   private final Map<String, String> header;
-
-  private InetSocketAddress address;
 
   public final class RequestHandler extends SimpleChannelHandler {
     @Override
@@ -74,10 +71,11 @@ public class ServiceServer<RequestMessageType extends Message> {
   }
 
   public ServiceServer(ServiceDefinition definition, Class<RequestMessageType> requestMessageClass,
-      ServiceResponseBuilder<RequestMessageType> responseBuilder) {
+      ServiceResponseBuilder<RequestMessageType> responseBuilder, AdvertiseAddress advertiseAddress) {
     this.requestMessageClass = requestMessageClass;
     this.responseBuilder = responseBuilder;
     this.definition = definition;
+    this.advertiseAddress = advertiseAddress;
     header =
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.SERVICE, definition.getName())
@@ -99,13 +97,8 @@ public class ServiceServer<RequestMessageType extends Message> {
     }
   }
 
-  public void setAddress(InetSocketAddress address) {
-    this.address = address;
-  }
-
-  public URI getUri() throws URISyntaxException {
-    Preconditions.checkState(address != null);
-    return new URI("rosrpc://" + address.getHostName() + ":" + address.getPort());
+  public URI getUri() {
+    return advertiseAddress.toUri("rosrpc");
   }
 
   public String getName() {
@@ -115,8 +108,9 @@ public class ServiceServer<RequestMessageType extends Message> {
   public ChannelHandler createRequestHandler() {
     return new RequestHandler();
   }
-  
+
   public boolean checkMessageClass(Class<RequestMessageType> expectedRequestMessageClass) {
     return expectedRequestMessageClass == requestMessageClass;
   }
+  
 }

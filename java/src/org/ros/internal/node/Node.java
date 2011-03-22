@@ -20,8 +20,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.NodeServer;
 import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceClient;
@@ -37,7 +40,6 @@ import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,7 +48,7 @@ import java.util.concurrent.Executors;
 
 /**
  * Implementation of a ROS node. This implementation is responsible for the
- * managing the various node resources, including XMLRPC and TCPROS servers and
+ * managing the various node resources including XML-RPC, TCPROS servers, and
  * topic/service instances.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
@@ -54,62 +56,57 @@ import java.util.concurrent.Executors;
  */
 public class Node {
 
-  private static final String LOOPBACK = "127.0.0.1";
-
   private final Executor executor;
   private final String nodeName;
   private final MasterClient masterClient;
-  @VisibleForTesting
-  final SlaveServer slaveServer;
+  private final SlaveServer slaveServer;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
-  @VisibleForTesting
-  final TcpRosServer tcpRosServer;
+  private final TcpRosServer tcpRosServer;
 
-  public static Node createPublic(String nodeName, URI masterUri, String publicHostname,
-      int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
-      URISyntaxException {
-    Node node = new Node(nodeName, masterUri, new NodeSocketAddress(new InetSocketAddress(
-        xmlRpcBindPort), publicHostname), new NodeSocketAddress(new InetSocketAddress(
-        tcpRosBindPort), publicHostname));
+  public static Node createPublic(String nodeName, URI masterUri, int xmlRpcBindPort,
+      int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
+    Node node =
+        new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
+            AdvertiseAddress.createPublic(), BindAddress.createPublic(xmlRpcBindPort),
+            AdvertiseAddress.createPublic());
     node.start();
     return node;
   }
 
-  public static Node createPrivate(String nodeName, URI masterUri, 
-      int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
-      URISyntaxException {
-    // Public hostname is automatically set to "localhost" in private mode.
-    String publicHostname = "localhost";
-    Node node = new Node(nodeName, masterUri, new NodeSocketAddress(new InetSocketAddress(LOOPBACK,
-        xmlRpcBindPort), publicHostname), new NodeSocketAddress(new InetSocketAddress(LOOPBACK,
-        tcpRosBindPort), publicHostname));
+  public static Node createPrivate(String nodeName, URI masterUri, int xmlRpcBindPort,
+      int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
+    Node node =
+        new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
+            AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
+            AdvertiseAddress.createPrivate());
     node.start();
     return node;
   }
 
-  Node(String nodeName, URI masterUri, NodeSocketAddress xmlRpcBindAddress,
-      NodeSocketAddress tcpRosBindAddress) throws MalformedURLException {
+  Node(String nodeName, URI masterUri, BindAddress tcpRosBindAddress,
+      AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
+      AdvertiseAddress xmlRpcAdvertiseAddress) throws MalformedURLException {
     this.nodeName = nodeName;
     executor = Executors.newCachedThreadPool();
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    tcpRosServer = new TcpRosServer(tcpRosBindAddress, topicManager, serviceManager);
-    slaveServer = new SlaveServer(nodeName, xmlRpcBindAddress, masterClient, topicManager,
-        serviceManager, tcpRosServer);
+    tcpRosServer =
+        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
+    slaveServer =
+        new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress, masterClient,
+            topicManager, serviceManager, tcpRosServer);
   }
 
   /**
-   * Get or create a {@link Subscriber} instance. {@link Subscriber}s are cached
-   * and reused per topic for efficiency. If a new {@link Subscriber} is
-   * generated, it is registered with the {@link MasterServer}.
+   * Gets or creates a {@link Subscriber} instance. {@link Subscriber}s are
+   * cached and reused per topic. When a new {@link Subscriber} is generated, it
+   * is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition
-   *          {@link TopicDefinition} that is subscribed to
-   * @param messageClass
-   *          {@link Message} class for topic
+   * @param topicDefinition {@link TopicDefinition} that is subscribed to
+   * @param messageClass {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -128,8 +125,9 @@ public class Node {
         subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
         Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
-        subscriber = Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition,
-            messageClass, executor);
+        subscriber =
+            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
+                executor);
         createdNewSubscriber = true;
       }
     }
@@ -140,6 +138,19 @@ public class Node {
     return subscriber;
   }
 
+  /**
+   * Gets or creates a {@link Publisher} instance. {@link Publisher}s are cached
+   * and reused per topic. When a new {@link Publisher} is generated, it is
+   * registered with the {@link MasterServer}.
+   * 
+   * @param <MessageType>
+   * @param topicDefinition {@link TopicDefinition} that is being published
+   * @param messageClass {@link Message} class for topic
+   * @return a {@link Subscriber} instance
+   * @throws RemoteException
+   * @throws URISyntaxException
+   * @throws IOException
+   */
   @SuppressWarnings("unchecked")
   public <MessageType extends Message> Publisher<MessageType> createPublisher(
       TopicDefinition topicDefinition, Class<MessageType> messageClass) throws IOException,
@@ -164,23 +175,36 @@ public class Node {
     return publisher;
   }
 
+  /**
+   * Gets or creates a {@link ServiceServer} instance. {@link ServiceServer}s
+   * are cached and reused per service. When a new {@link ServiceServer} is
+   * generated, it is registered with the {@link MasterServer}.
+   * 
+   * @param <RequestMessageType>
+   * @param serviceDefinition the {@link ServiceDefinition} that is being served
+   * @param requestMessageClass the {@link Message} class that is used for
+   *        requests
+   * @param responseBuilder the {@link ServiceResponseBuilder} that is used to
+   *        build responses
+   * @return a {@link ServiceServer} instance
+   * @throws Exception
+   */
   @SuppressWarnings("unchecked")
   public <RequestMessageType extends Message> ServiceServer<RequestMessageType> createServiceServer(
       ServiceDefinition serviceDefinition, Class<RequestMessageType> requestMessageClass,
-      ServiceResponseBuilder<RequestMessageType> responseBuilder) throws MalformedURLException,
-      URISyntaxException, RemoteException {
+      ServiceResponseBuilder<RequestMessageType> responseBuilder) throws Exception {
     ServiceServer<RequestMessageType> serviceServer;
     String name = serviceDefinition.getName();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
-      if (serviceManager.hasService(name)) {
-        serviceServer = (ServiceServer<RequestMessageType>) serviceManager.getService(name);
+      if (serviceManager.hasServiceServer(name)) {
+        serviceServer = (ServiceServer<RequestMessageType>) serviceManager.getServiceServer(name);
         Preconditions.checkState(serviceServer.checkMessageClass(requestMessageClass));
       } else {
-        serviceServer = new ServiceServer<RequestMessageType>(serviceDefinition,
-            requestMessageClass, responseBuilder);
-        serviceServer.setAddress(tcpRosServer.getAddress());
+        serviceServer =
+            new ServiceServer<RequestMessageType>(serviceDefinition, requestMessageClass,
+                responseBuilder, tcpRosServer.getAdvertiseAddress());
         createdNewService = true;
       }
     }
@@ -191,29 +215,66 @@ public class Node {
     return serviceServer;
   }
 
-  // TODO(damonkohler): Cache clients.
+  /**
+   * Gets or creates a {@link ServiceClient} instance. {@link ServiceClient}s
+   * are cached and reused per service. When a new {@link ServiceClient} is
+   * created, it is connected to the {@link ServiceServer}.
+   * 
+   * @param <ResponseMessageType>
+   * @param serviceIdentifier the {@link ServiceIdentifier} of the server
+   * @param responseMessageClass the {@link Message} class that is used for
+   *        responses
+   * @return a {@link ServiceClient} instance
+   */
+  @SuppressWarnings("unchecked")
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
-    ServiceClient<ResponseMessageType> serviceClient = ServiceClient.create(responseMessageClass,
-        nodeName, serviceIdentifier);
-    URI uri = serviceIdentifier.getUri();
-    serviceClient.connect(new InetSocketAddress(uri.getHost(), uri.getPort()));
+    ServiceClient<ResponseMessageType> serviceClient;
+    String name = serviceIdentifier.getName();
+    boolean createdNewService = false;
+
+    synchronized (serviceManager) {
+      if (serviceManager.hasServiceClient(name)) {
+        serviceClient = (ServiceClient<ResponseMessageType>) serviceManager.getServiceClient(name);
+        Preconditions.checkState(serviceClient.checkMessageClass(responseMessageClass));
+      } else {
+        serviceClient = ServiceClient.create(nodeName, serviceIdentifier, responseMessageClass);
+        createdNewService = true;
+      }
+    }
+
+    if (createdNewService) {
+      serviceClient.connect(serviceIdentifier.getUri());
+    }
     return serviceClient;
   }
 
-  /**
-   * Start the node.
-   * 
-   * @throws XmlRpcException
-   * @throws IOException
-   * @throws URISyntaxException
-   */
-  public void start() throws XmlRpcException, IOException, URISyntaxException {
+  void start() throws XmlRpcException, IOException, URISyntaxException {
     slaveServer.start();
   }
 
+  /**
+   * Stops the node.
+   */
   public void stop() {
     slaveServer.shutdown();
+  }
+
+  @VisibleForTesting
+  TcpRosServer getTcpRosServer() {
+    return tcpRosServer;
+  }
+
+  @VisibleForTesting
+  SlaveServer getSlaveServer() {
+    return slaveServer;
+  }
+
+  /**
+   * @return the {@link URI} of the {@link NodeServer}
+   */
+  public URI getUri() {
+    return slaveServer.getUri();
   }
 
 }

@@ -13,32 +13,32 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
 import org.ros.exceptions.RosInitException;
 
 /**
- * Prototype class loader for finding RosMain's from manifests,launch files,
- * etc.. This might be an internal thing.. just playing with it for now.
+ * Class loader for finding {@link NodeMain}s given manifests, launch files,
+ * etc.
  * 
- * @author Ethan Rublee (ethan.rublee@gmail.com)
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
 public abstract class RosLoader {
 
   public abstract NodeContext createContext() throws RosInitException;
 
   /**
-   * @param name
-   *          The name of the class
-   * @return an instance of a RosMain, may be run.
+   * @param name the name of the class
+   * @return an instance of {@link NodeMain}
    * @throws ClassNotFoundException
    * @throws InstantiationException
    * @throws IllegalAccessException
    */
-  public RosMain loadClass(String name) throws ClassNotFoundException, InstantiationException,
+  public NodeMain loadClass(String name) throws ClassNotFoundException, InstantiationException,
       IllegalAccessException {
     Class<?> clazz = getClass().getClassLoader().loadClass(name);
-
-    return RosMain.class.cast(clazz.newInstance());
+    return NodeMain.class.cast(clazz.newInstance());
   }
+
 }

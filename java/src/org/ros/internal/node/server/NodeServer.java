@@ -23,13 +23,13 @@ import org.apache.xmlrpc.server.PropertyHandlerMapping;
 import org.apache.xmlrpc.server.XmlRpcServer;
 import org.apache.xmlrpc.server.XmlRpcServerConfigImpl;
 import org.apache.xmlrpc.webserver.WebServer;
-import org.ros.internal.node.NodeSocketAddress;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.util.concurrent.Callable;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -39,16 +39,23 @@ public class NodeServer {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(NodeServer.class);
 
-  private final NodeSocketAddress bindAddress;
   private final WebServer server;
+  private final AdvertiseAddress advertiseAddress;
 
-  public NodeServer(NodeSocketAddress bindAddress) {
-    this.bindAddress = bindAddress;
-    server = new WebServer(bindAddress.getPort(), bindAddress.getAddress());
+  public NodeServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
+    InetSocketAddress address = bindAddress.toInetSocketAddress();
+    server = new WebServer(address.getPort(), address.getAddress());
+    this.advertiseAddress = advertiseAddress;
+    this.advertiseAddress.setPortCallable(new Callable<Integer>() {
+      @Override
+      public Integer call() throws Exception {
+        return server.getPort();
+      }
+    });
   }
 
   public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass, T instance)
-      throws XmlRpcException, IOException, URISyntaxException {
+      throws XmlRpcException, IOException {
     XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
     PropertyHandlerMapping phm = new PropertyHandlerMapping();
     phm.setRequestProcessorFactoryFactory(new NodeRequestProcessorFactoryFactory<T>(instance));
@@ -67,8 +74,8 @@ public class NodeServer {
     server.shutdown();
   }
 
-  public URI getUri() throws MalformedURLException, URISyntaxException {
-    return new URL("http", bindAddress.getPublicHostname(), server.getPort(), "").toURI();
+  public URI getUri() {
+    return advertiseAddress.toUri("http");
   }
 
 }
