@@ -39,7 +39,6 @@ import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -55,7 +54,6 @@ import java.util.concurrent.Executors;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Node {
-
 
   private final Executor executor;
   private final String nodeName;
@@ -172,8 +170,8 @@ public class Node {
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
-      if (serviceManager.hasService(name)) {
-        serviceServer = (ServiceServer<RequestMessageType>) serviceManager.getService(name);
+      if (serviceManager.hasServiceServer(name)) {
+        serviceServer = (ServiceServer<RequestMessageType>) serviceManager.getServiceServer(name);
         Preconditions.checkState(serviceServer.checkMessageClass(requestMessageClass));
       } else {
         serviceServer =
@@ -189,13 +187,26 @@ public class Node {
     return serviceServer;
   }
 
-  // TODO(damonkohler): Cache clients.
+  @SuppressWarnings("unchecked")
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
-    ServiceClient<ResponseMessageType> serviceClient =
-        ServiceClient.create(responseMessageClass, nodeName, serviceIdentifier);
-    URI uri = serviceIdentifier.getUri();
-    serviceClient.connect(new InetSocketAddress(uri.getHost(), uri.getPort()));
+    ServiceClient<ResponseMessageType> serviceClient;
+    String name = serviceIdentifier.getName();
+    boolean createdNewService = false;
+
+    synchronized (serviceManager) {
+      if (serviceManager.hasServiceClient(name)) {
+        serviceClient = (ServiceClient<ResponseMessageType>) serviceManager.getServiceClient(name);
+        Preconditions.checkState(serviceClient.checkMessageClass(responseMessageClass));
+      } else {
+        serviceClient = ServiceClient.create(nodeName, serviceIdentifier, responseMessageClass);
+        createdNewService = true;
+      }
+    }
+
+    if (createdNewService) {
+      serviceClient.connect(serviceIdentifier.getUri());
+    }
     return serviceClient;
   }
 
@@ -206,7 +217,7 @@ public class Node {
    * @throws IOException
    * @throws URISyntaxException
    */
-  public void start() throws XmlRpcException, IOException, URISyntaxException {
+  void start() throws XmlRpcException, IOException, URISyntaxException {
     slaveServer.start();
   }
 

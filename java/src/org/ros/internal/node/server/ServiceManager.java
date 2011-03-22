@@ -18,6 +18,7 @@ package org.ros.internal.node.server;
 
 import com.google.common.collect.Maps;
 
+import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.message.Message;
 
@@ -28,22 +29,36 @@ import java.util.Map;
  */
 public class ServiceManager {
 
-  private final Map<String, ServiceServer<? extends Message>> services;
-  
+  private final Map<String, ServiceServer<? extends Message>> serviceServers;
+  private final Map<String, ServiceClient<? extends Message>> serviceClients;
+
   public ServiceManager() {
-    services = Maps.newConcurrentMap();
-  }
-  
-  public boolean hasService(String serviceName) {
-    return services.containsKey(serviceName);
+    serviceServers = Maps.newConcurrentMap();
+    serviceClients = Maps.newConcurrentMap();
   }
 
-  public void putService(String serviceName, ServiceServer<? extends Message> serviceServer) {
-    services.put(serviceName, serviceServer);
+  public boolean hasServiceServer(String serviceName) {
+    return serviceServers.containsKey(serviceName);
   }
 
-  public ServiceServer<? extends Message> getService(String serviceName) {
-    return services.get(serviceName);
+  public void putServiceServer(String serviceName, ServiceServer<? extends Message> serviceServer) {
+    serviceServers.put(serviceName, serviceServer);
   }
-  
+
+  public ServiceServer<? extends Message> getServiceServer(String serviceName) {
+    return serviceServers.get(serviceName);
+  }
+
+  public boolean hasServiceClient(String serviceName) {
+    return serviceClients.containsKey(serviceName);
+  }
+
+  public void putServiceClient(String serviceName, ServiceClient<? extends Message> serviceClient) {
+    serviceClients.put(serviceName, serviceClient);
+  }
+
+  public ServiceClient<? extends Message> getServiceClient(String serviceName) {
+    return serviceClients.get(serviceName);
+  }
+
 }

@@ -112,4 +112,5 @@ public class ServiceServer<RequestMessageType extends Message> {
   public boolean checkMessageClass(Class<RequestMessageType> expectedRequestMessageClass) {
     return expectedRequestMessageClass == requestMessageClass;
   }
+  
 }

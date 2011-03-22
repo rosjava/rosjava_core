@@ -141,7 +141,7 @@ public class SlaveServer extends NodeServer {
    */
   public void addService(ServiceServer<? extends Message> server) throws URISyntaxException,
       MalformedURLException, RemoteException {
-    serviceManager.putService(server.getName(), server);
+    serviceManager.putServiceServer(server.getName(), server);
     masterClient.registerService(toSlaveIdentifier(), server);
   }
 
