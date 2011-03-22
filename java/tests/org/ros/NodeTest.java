@@ -24,8 +24,9 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Test;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
-import org.ros.internal.node.NodeBindAddress;
 import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
@@ -36,7 +37,6 @@ import org.ros.message.std_msgs.Int64;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,8 +53,9 @@ public class NodeTest {
 
   @Test
   public void testPublicAddresses() throws RosInitException, RosNameException, RemoteException,
-      XmlRpcException, IOException, URISyntaxException {
-    MasterServer master = new MasterServer(NodeBindAddress.createDefault(0));
+      XmlRpcException, IOException {
+    MasterServer master =
+        new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     master.start();
     URI masterUri = master.getUri();
     checkHostName(masterUri.getHost());
@@ -77,8 +78,8 @@ public class NodeTest {
 
     // check the TCPROS server address via the XMLRPC api.
     SlaveClient slaveClient = new SlaveClient("test_addresses", uri);
-    Response<ProtocolDescription> response = slaveClient.requestTopic("test_addresses_pub",
-        Lists.newArrayList(ProtocolNames.TCPROS));
+    Response<ProtocolDescription> response =
+        slaveClient.requestTopic("test_addresses_pub", Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();
     InetSocketAddress tcpRosAddress = result.getAddress();
     checkHostName(tcpRosAddress.getHostName());

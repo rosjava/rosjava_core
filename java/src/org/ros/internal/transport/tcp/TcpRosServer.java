@@ -16,10 +16,6 @@
 
 package org.ros.internal.transport.tcp;
 
-import com.google.common.base.Preconditions;
-
-import org.ros.internal.node.NodeBindAddress;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -30,11 +26,14 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
 /**
@@ -45,37 +44,47 @@ public class TcpRosServer {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(TcpRosServer.class);
 
-  private final NodeBindAddress bindAddress;
+  private final BindAddress bindAddress;
+  private final AdvertiseAddress advertiseAddress;
   private final ChannelGroup channelGroup;
   private final ChannelFactory channelFactory;
   private final ServerBootstrap bootstrap;
 
   private Channel channel;
 
-  public TcpRosServer(NodeBindAddress bindAddress, TopicManager topicManager,
-      ServiceManager serviceManager) {
+  public TcpRosServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress,
+      TopicManager topicManager, ServiceManager serviceManager) {
     this.bindAddress = bindAddress;
+    this.advertiseAddress = advertiseAddress;
     channelGroup = new DefaultChannelGroup();
-    channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
-        Executors.newCachedThreadPool());
+    channelFactory =
+        new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
+            Executors.newCachedThreadPool());
     bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-    TcpServerPipelineFactory pipelineFactory = new TcpServerPipelineFactory(channelGroup,
-        topicManager, serviceManager);
+    TcpServerPipelineFactory pipelineFactory =
+        new TcpServerPipelineFactory(channelGroup, topicManager, serviceManager);
     bootstrap.setPipelineFactory(pipelineFactory);
   }
 
   public void start() {
-    channel = bootstrap.bind(bindAddress.getBindAddress());
+    channel = bootstrap.bind(bindAddress.toInetSocketAddress());
+    advertiseAddress.setPortCallable(new Callable<Integer>() {
+      @Override
+      public Integer call() throws Exception {
+        return ((InetSocketAddress) channel.getLocalAddress()).getPort();
+      }
+    });
     if (DEBUG) {
-      log.info("Bound to: " + getPublicAddress());
+      log.info("Bound to: " + bindAddress);
+      log.info("Advertising: " + advertiseAddress);
     }
   }
 
   public void shutdown() {
     if (DEBUG) {
-      log.info("Shutting down: " + getPublicAddress());
+      log.info("Shutting down: " + getAddress());
     }
     ChannelGroupFuture future = channelGroup.close();
     future.awaitUninterruptibly();
@@ -84,10 +93,15 @@ public class TcpRosServer {
     channel = null;
   }
 
-  public InetSocketAddress getPublicAddress() {
-    Preconditions
-        .checkNotNull(channel, "Calling getAddress() is only valid after calling start().");
-    int port = ((InetSocketAddress) channel.getLocalAddress()).getPort();
-    return InetSocketAddress.createUnresolved(bindAddress.getPublicHostName(), port);
+  /**
+   * @return the advertisable address of this {@link TcpRosServer}
+   */
+  public InetSocketAddress getAddress() {
+    try {
+      return advertiseAddress.toInetSocketAddress();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
+  
 }

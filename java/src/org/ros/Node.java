@@ -184,8 +184,7 @@ public class Node implements Namespace {
             context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
       } else {
         node = org.ros.internal.node.Node.createPublic(nodeName.toString(),
-            context.getRosMasterUri(), context.getHostName(), context.getXmlRpcPort(),
-            context.getTcpRosPort());
+            context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
       }
 
       initialized = true;

@@ -14,22 +14,14 @@
  * the License.
  */
 
-package org.ros.internal.node.server;
+package org.ros.internal.node.address;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServerException extends Exception {
+public interface Address {
   
-  public ServerException(String message) {
-    super(message);
-  }
-
-  /**
-   * @param e the wrapped {@link Exception}
-   */
-  public ServerException(Exception e) {
-    super(e);
-  }
+  public static final String LOOPBACK = "127.0.0.1";
+  public static final String LOCALHOST = "localhost";
 
 }

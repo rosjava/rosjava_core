@@ -22,8 +22,9 @@ import com.google.common.collect.Lists;
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.NodeBindAddress;
 import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.service.ServiceServer;
@@ -68,9 +69,12 @@ public class SlaveServer extends NodeServer {
     return publishers;
   }
 
-  public SlaveServer(String nodeName, NodeBindAddress xmlRpcServerAddress, MasterClient master,
-      TopicManager topicManager, ServiceManager serviceManager, TcpRosServer tcpRosServer) {
-    super(xmlRpcServerAddress);
+  public SlaveServer(String nodeName, BindAddress xmlRpcServerAddress,
+      AdvertiseAddress advertiseAddress, MasterClient master, TopicManager topicManager,
+      ServiceManager serviceManager, TcpRosServer tcpRosServer) {
+    super(xmlRpcServerAddress, advertiseAddress);
+    // TODO(damonkohler): nodeName should be wrapped up in a class that
+    // guarantees these symantics.
     Preconditions.checkNotNull(nodeName);
     Preconditions.checkArgument(nodeName.startsWith("/"));
     this.nodeName = nodeName;
@@ -123,8 +127,8 @@ public class SlaveServer extends NodeServer {
       URISyntaxException, RemoteException {
     topicManager.putSubscriber(subscriber.getTopicName(), subscriber);
     Response<List<URI>> response = masterClient.registerSubscriber(toSlaveIdentifier(), subscriber);
-    List<PublisherIdentifier> publishers = buildPublisherIdentifierList(response.getResult(),
-        subscriber.getTopicDefinition());
+    List<PublisherIdentifier> publishers =
+        buildPublisherIdentifierList(response.getResult(), subscriber.getTopicDefinition());
     subscriber.updatePublishers(publishers);
     return publishers;
   }
@@ -165,8 +169,8 @@ public class SlaveServer extends NodeServer {
   /**
    * @param callerId
    * @return PID of node process
-   * @throws UnsupportedOperationException
-   *           If PID cannot be retrieved on this platform.
+   * @throws UnsupportedOperationException If PID cannot be retrieved on this
+   *         platform.
    */
   public Integer getPid(String callerId) {
     // kwc: java has no standard way of getting pid, apparently. This is the
@@ -200,8 +204,8 @@ public class SlaveServer extends NodeServer {
     if (topicManager.hasSubscriber(topicName)) {
       Subscriber<? extends Message> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
-      List<PublisherIdentifier> pubIdentifiers = buildPublisherIdentifierList(publisherUris,
-          topicDefinition);
+      List<PublisherIdentifier> pubIdentifiers =
+          buildPublisherIdentifierList(publisherUris, topicDefinition);
       subscriber.updatePublishers(pubIdentifiers);
     }
   }
@@ -219,7 +223,11 @@ public class SlaveServer extends NodeServer {
     }
     for (String protocol : protocols) {
       if (protocol.equals(ProtocolNames.TCPROS)) {
-        return new TcpRosProtocolDescription(tcpRosServer.getPublicAddress());
+        try {
+          return new TcpRosProtocolDescription(tcpRosServer.getAddress());
+        } catch (Exception e) {
+          throw new ServerException(e);
+        }
       }
     }
     throw new ServerException("No supported protocols specified.");

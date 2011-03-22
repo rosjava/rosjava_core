@@ -24,8 +24,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.MessageListener;
 import org.ros.internal.node.Node;
-import org.ros.internal.node.NodeBindAddress;
 import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 
 import java.io.IOException;
@@ -41,8 +42,8 @@ public class TopicIntegrationTest {
   private MasterServer masterServer;
 
   @Before
-  public void setUp() throws URISyntaxException, XmlRpcException, IOException {
-    masterServer = new MasterServer(NodeBindAddress.createDefault(0));
+  public void setUp() throws XmlRpcException, IOException {
+    masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
   }
 

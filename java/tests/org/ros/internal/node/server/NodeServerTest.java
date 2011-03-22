@@ -17,18 +17,18 @@
 package org.ros.internal.node.server;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Test;
-import org.ros.internal.node.NodeBindAddress;
+import org.ros.internal.node.address.Address;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.xmlrpc.Node;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
@@ -36,41 +36,42 @@ import java.net.URISyntaxException;
 public class NodeServerTest {
 
   class FakeNode implements Node {
-
   }
 
   @Test
-  public void testGetUri() throws URISyntaxException, XmlRpcException, IOException {
-    NodeBindAddress bindAddress = new NodeBindAddress(new InetSocketAddress(0), "override");
-    NodeServer nodeServer = new NodeServer(bindAddress);
+  public void testGetPublicUri() throws XmlRpcException, IOException {
+    BindAddress bindAddress = BindAddress.createPublic(0);
+    NodeServer nodeServer = new NodeServer(bindAddress, new AdvertiseAddress("override"));
     try {
       nodeServer.getUri();
-      fail("should not have succeeded before startup");
+      fail("Should not have succeeded before startup.");
     } catch (RuntimeException e) {
     }
 
     nodeServer.start(FakeNode.class, new FakeNode());
     URI uri = nodeServer.getUri();
-    assertEquals(uri.getHost(), "override");
-    assertFalse(uri.getPort() == 0);
+    assertEquals("override", uri.getHost());
+    assertTrue(uri.getPort() > 0);
 
     nodeServer.shutdown();
-
-    // Test with loopback binding.
-    bindAddress = new NodeBindAddress(new InetSocketAddress("127.0.0.1", 0), "override2");
-    nodeServer = new NodeServer(bindAddress);
+  }
+  
+  @Test
+  public void testGetPrivateUri() throws XmlRpcException, IOException {
+    BindAddress bindAddress = BindAddress.createPrivate(0);
+    NodeServer nodeServer = new NodeServer(bindAddress, AdvertiseAddress.createPrivate());
     try {
       nodeServer.getUri();
-      fail("should not have succeeded before startup");
+      fail("Should not have succeeded before startup.");
     } catch (RuntimeException e) {
     }
 
     nodeServer.start(FakeNode.class, new FakeNode());
-    uri = nodeServer.getUri();
-    assertEquals(uri.getHost(), "override2");
-    assertFalse(uri.getPort() == 0);
+    URI uri = nodeServer.getUri();
+    assertEquals(Address.LOOPBACK, uri.getHost());
+    assertTrue(uri.getPort() > 0);
 
     nodeServer.shutdown();
-
   }
+  
 }

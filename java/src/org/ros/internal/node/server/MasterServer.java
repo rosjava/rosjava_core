@@ -24,14 +24,14 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
 import org.apache.xmlrpc.XmlRpcException;
-import org.ros.internal.node.NodeBindAddress;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.xmlrpc.MasterImpl;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -45,8 +45,8 @@ public class MasterServer extends NodeServer {
   private final Multimap<String, PublisherIdentifier> publishers;
   private final Multimap<String, SubscriberIdentifier> subscribers;
 
-  public MasterServer(NodeBindAddress address) {
-    super(address);
+  public MasterServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
+    super(bindAddress, advertiseAddress);
     slaves = Maps.newConcurrentMap();
     services = Maps.newConcurrentMap();
     publishers =
@@ -55,7 +55,7 @@ public class MasterServer extends NodeServer {
         Multimaps.synchronizedMultimap(ArrayListMultimap.<String, SubscriberIdentifier>create());
   }
 
-  public void start() throws XmlRpcException, IOException, URISyntaxException {
+  public void start() throws XmlRpcException, IOException {
     super.start(org.ros.internal.node.xmlrpc.MasterImpl.class, new MasterImpl(this));
   }
 
