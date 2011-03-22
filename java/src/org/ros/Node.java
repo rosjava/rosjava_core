@@ -45,6 +45,8 @@ import java.net.URI;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  */
+// TODO(kwc): add createNamespace method to enable creation of new Namespace
+// handles.
 public class Node implements Namespace {
 
   private final NodeContext context;
@@ -66,7 +68,14 @@ public class Node implements Namespace {
     Preconditions.checkNotNull(name);
     this.context = context;
     NameResolver parentResolver = context.getParentResolver();
-    nodeName = new GraphName(parentResolver.resolveName(name));
+    String baseName;
+    String nodeNameOverride = context.getNodeNameOverride();
+    if (nodeNameOverride != null) {
+      baseName = nodeNameOverride;
+    } else {
+      baseName = name;
+    }
+    nodeName = new GraphName(NameResolver.join(parentResolver.getNamespace(), baseName));
     resolver = parentResolver.createResolver(nodeName.toString());
 
     // TODO (kwc): implement simulated time.
@@ -78,13 +87,11 @@ public class Node implements Namespace {
       if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
-        node =
-            org.ros.internal.node.Node.createPrivate(nodeName.toString(),
-                context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
+        node = org.ros.internal.node.Node.createPrivate(nodeName.toString(),
+            context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
       } else {
-        node =
-            org.ros.internal.node.Node.createPublic(nodeName.toString(), context.getRosMasterUri(),
-                context.getXmlRpcPort(), context.getTcpRosPort());
+        node = org.ros.internal.node.Node.createPublic(nodeName.toString(),
+            context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
       }
     } catch (Exception e) {
       throw new RosInitException(e);
@@ -92,8 +99,8 @@ public class Node implements Namespace {
 
     // TODO(damonkohler): Move the creation and management of the RosoutLogger
     // into the internal.Node class.
-    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
-        createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
+    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher = createPublisher("/rosout",
+        org.ros.message.rosgraph_msgs.Log.class);
     log.setRosoutPublisher(rosoutPublisher);
   }
 
@@ -103,10 +110,10 @@ public class Node implements Namespace {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message m = messageClass.newInstance();
-      TopicDefinition topicDefinition =
-          new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(m));
-      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
-          node.createPublisher(topicDefinition, messageClass);
+      TopicDefinition topicDefinition = new TopicDefinition(resolvedTopicName,
+          MessageDefinition.createFromMessage(m));
+      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl = node.createPublisher(
+          topicDefinition, messageClass);
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (RosNameException e) {
       throw e;
@@ -122,18 +129,18 @@ public class Node implements Namespace {
     try {
       Message m = messageClass.newInstance();
       String resolvedTopicName = resolveName(topicName);
-      TopicDefinition topicDefinition =
-          new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(m));
-      org.ros.internal.node.topic.Subscriber<MessageType> subscriberImpl =
-          node.createSubscriber(topicDefinition, messageClass);
+      TopicDefinition topicDefinition = new TopicDefinition(resolvedTopicName,
+          MessageDefinition.createFromMessage(m));
+      org.ros.internal.node.topic.Subscriber<MessageType> subscriberImpl = node.createSubscriber(
+          topicDefinition, messageClass);
 
       // Add the callback to the impl.
       subscriberImpl.addMessageListener(callback);
       // Create the user-facing Subscriber handle. This is little more than a
       // lightweight wrapper around the internal implementation so that we can
       // track callback references.
-      Subscriber<MessageType> subscriber =
-          new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriberImpl);
+      Subscriber<MessageType> subscriber = new Subscriber<MessageType>(resolvedTopicName, callback,
+          messageClass, subscriberImpl);
       return subscriber;
     } catch (RosNameException e) {
       throw e;
@@ -201,8 +208,6 @@ public class Node implements Namespace {
 
   @Override
   public ParameterClient createParameterClient() {
-    // TODO(kwc) allow user to specify an additional namespace when creating a
-    // parameter client.
     try {
       return ParameterClient.createFromNode(this);
     } catch (MalformedURLException e) {

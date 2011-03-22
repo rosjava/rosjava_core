@@ -17,7 +17,9 @@ package org.ros.internal.loader;
 
 /**
  * Remapping keys used to override ROS environment and other configuration
- * settings. As of ROS 1.4, only __ns is required to be supported.
+ * settings from a command-line-based executation of a node. As of ROS 1.4, only
+ * {@code CommandLine.NODE_NAME} and {@code CommandLine.ROS_NAMESPACE} are
+ * required.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
@@ -27,5 +29,6 @@ public interface CommandLine {
   public static String ROS_IP = "__ip";
   public static String ROS_MASTER_URI = "__master";
   public static String TCPROS_PORT = "__tcpros_server_port";
+  public static String NODE_NAME = "__name";
 
 }

@@ -94,18 +94,6 @@ public class CommandLineLoaderTest extends TestCase {
     String[] rosPackagePathArray = new String[] { tmpDir, defaultRosRoot };
     Map<String, String> env = new HashMap<String, String>();
     CommandLineLoader loader = null;
-    /*
-     * In the future, ROS_ROOT may become required again (e.g. class loader).
-     * 
-    env.put(EnvironmentVariables.ROS_MASTER_URI, defaultMasterUri.toString());
-    CommandLineLoader loader = new CommandLineLoader(new String[] {}, env);
-    try {
-      loader.createContext();
-      fail("should have raised RosInitException: no ROS_ROOT");
-    } catch (RosInitException e) {
-    }
-    
-    */
     env = new HashMap<String, String>();
     env.put(EnvironmentVariables.ROS_ROOT, defaultRosRoot);
     loader = new CommandLineLoader(new String[] {}, env);
@@ -158,9 +146,16 @@ public class CommandLineLoaderTest extends TestCase {
       RosNameException {
     Map<String, String> env = getDefaultEnv();
 
+    // Test __name override
+    NodeContext nodeContext = new CommandLineLoader(new String[] {}, env).createContext();
+    assertEquals(null, nodeContext.getNodeNameOverride());
+    String[] args = { "__name:=newname" };
+    nodeContext = new CommandLineLoader(args, env).createContext();
+    assertEquals("newname", nodeContext.getNodeNameOverride());
+
     // Test ROS_MASTER_URI from command-line
-    String[] args = { CommandLine.ROS_MASTER_URI + ":=http://override:22622" };
-    NodeContext nodeContext = new CommandLineLoader(args, env).createContext();
+    args = new String[] { CommandLine.ROS_MASTER_URI + ":=http://override:22622" };
+    nodeContext = new CommandLineLoader(args, env).createContext();
     assertEquals(new URI("http://override:22622"), nodeContext.getRosMasterUri());
 
     // Test again with env var removed, make sure that it still behaves the

@@ -94,6 +94,10 @@ public class CommandLineLoader extends RosLoader {
       context.setRosRoot(getRosRoot(specialRemappings, environment));
       context.setRosPackagePath(getRosPackagePath(specialRemappings, environment));
       context.setRosMasterUri(getRosMasterUri(specialRemappings, environment));
+
+      if (specialRemappings.containsKey(CommandLine.NODE_NAME)) {
+        context.setNodeNameOverride(specialRemappings.get(CommandLine.NODE_NAME));
+      }
       String addressOverride = getAddressOverride(specialRemappings, environment);
       if (addressOverride != null) {
         context.setHostName(addressOverride);
@@ -166,8 +170,8 @@ public class CommandLineLoader extends RosLoader {
 
     String namespace = Namespace.GLOBAL_NS;
     if (specialRemappings.containsKey(CommandLine.ROS_NAMESPACE)) {
-      namespace =
-          new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal().toString();
+      namespace = new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal()
+          .toString();
     } else if (env.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
       namespace = new GraphName(env.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal().toString();
     }

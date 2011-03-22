@@ -34,6 +34,7 @@ public class NodeContext {
   private String[] rosPackagePath;
   private int tcpRosPort;
   private int xmlRpcPort;
+  private String nodeNameOverride;
 
   /**
    * default context
@@ -45,7 +46,7 @@ public class NodeContext {
   }
 
   /**
-   * @return The RosResolver for a {@link Node}'s parent namespace. 
+   * @return The {@link NameResolver} for a {@link Node}'s parent namespace.
    * @see NameResolver
    */
   public NameResolver getParentResolver() {
@@ -126,6 +127,17 @@ public class NodeContext {
    */
   public void setXmlRpcPort(int xmlRpcPort) {
     this.xmlRpcPort = xmlRpcPort;
+  }
+
+  /**
+   * @return Override for Node name or null if no override.
+   */
+  public String getNodeNameOverride() {
+    return nodeNameOverride;
+  }
+
+  public void setNodeNameOverride(String nodeNameOverride) {
+    this.nodeNameOverride = nodeNameOverride;
   }
 
 }
