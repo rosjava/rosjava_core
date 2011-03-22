@@ -24,6 +24,11 @@ import org.ros.MessageListener;
 import org.ros.Publisher;
 import org.ros.Subscriber;
 import org.ros.exceptions.RosInitException;
+import org.ros.internal.node.service.ServiceClient;
+import org.ros.internal.node.service.ServiceDefinition;
+import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.internal.node.service.ServiceResponseBuilder;
+import org.ros.internal.node.service.ServiceServer;
 import org.ros.message.Message;
 
 /**
@@ -39,45 +44,34 @@ public interface Namespace {
   public final static String GLOBAL_NS = "/";
 
   /**
-   * @param <MessageType>
-   *          The message type to create the publisher for
-   * @param topic_name
-   *          the topic name, will be pushed down under this namespace unless
-   *          '/' is prepended
-   * @param clazz
-   *          the Class object used to deal with type eraser
+   * @param <MessageType> The message type to create the publisher for
+   * @param topic_name the topic name, will be pushed down under this namespace
+   *        unless '/' is prepended
+   * @param clazz the Class object used to deal with type eraser
    * @return A handle to a publisher that may be used to publish messages of
    *         type MessageType
-   * @throws RosInitException
-   *           May throw if the system is not in a proper state.
-   * @throws RosNameException
-   *           May throw if the name is invalid.
+   * @throws RosInitException May throw if the system is not in a proper state.
+   * @throws RosNameException May throw if the name is invalid.
    */
   public <MessageType extends Message> Publisher<MessageType> createPublisher(String topic_name,
       Class<MessageType> clazz) throws RosInitException, RosNameException;
 
   /**
    * 
-   * @param <MessageType>
-   *          The message type to create the Subscriber for.
-   * @param topic_name
-   *          The topic name to be subscribed to. This may be "bar" "/foo/bar"
-   *          "~my" and will be auto resolved.
-   * @param callback
-   *          The callback to be registered to this subscription. This will be
-   *          called asynchronously any time that a message is published on the
-   *          topic.
-   * @param clazz
-   *          The class of the message type that is being published on the
-   *          topic.
+   * @param <MessageType> The message type to create the Subscriber for.
+   * @param topic_name The topic name to be subscribed to. This may be "bar"
+   *        "/foo/bar" "~my" and will be auto resolved.
+   * @param callback The callback to be registered to this subscription. This
+   *        will be called asynchronously any time that a message is published
+   *        on the topic.
+   * @param clazz The class of the message type that is being published on the
+   *        topic.
    * @return A handle to a Subscriber that may be used to subscribe messages of
    *         type MessageType.
-   * @throws RosInitException
-   *           The subscriber may fail if the Ros system has not been
-   *           initialized or other wackyness. TODO specify exceptions that
-   *           might be thrown here.
-   * @throws RosNameException
-   *           May throw if the topic name is invalid.
+   * @throws RosInitException The subscriber may fail if the Ros system has not
+   *         been initialized or other wackyness. TODO specify exceptions that
+   *         might be thrown here.
+   * @throws RosNameException May throw if the topic name is invalid.
    */
   public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topic_name,
       MessageListener<MessageType> callback, Class<MessageType> clazz) throws RosInitException,
@@ -101,8 +95,7 @@ public interface Namespace {
    * Resolve the given name, using ROS conventions, into a full ROS namespace
    * name. Will be relative to the current namespace unless the name is global.
    * 
-   * @param name
-   *          The name to resolve.
+   * @param name The name to resolve.
    * @return Fully resolved ros namespace name.
    * @throws RosNameException
    */
@@ -112,5 +105,24 @@ public interface Namespace {
    * @return {@link NameResolver} for this namespace.
    */
   public NameResolver getResolver();
+
+  /**
+   * @param serviceDefinition
+   * @param requestMessageClass
+   * @param responseBuilder
+   * @return
+   * @throws Exception
+   */
+  public <RequestMessageType extends Message> ServiceServer<RequestMessageType> createServiceServer(
+      ServiceDefinition serviceDefinition, Class<RequestMessageType> requestMessageClass,
+      ServiceResponseBuilder<RequestMessageType> responseBuilder) throws Exception;
+
+  /**
+   * @param serviceIdentifier
+   * @param responseMessageClass
+   * @return
+   */
+  public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
+      ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass);
 
 }

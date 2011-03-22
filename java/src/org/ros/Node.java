@@ -26,6 +26,11 @@ import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RosoutLogger;
 import org.ros.internal.node.client.TimeProvider;
 import org.ros.internal.node.client.WallclockProvider;
+import org.ros.internal.node.service.ServiceClient;
+import org.ros.internal.node.service.ServiceDefinition;
+import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.internal.node.service.ServiceResponseBuilder;
+import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.MessageDefinition;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.message.Message;
@@ -85,6 +90,8 @@ public class Node implements Namespace {
       throw new RosInitException(e);
     }
 
+    // TODO(damonkohler): Move the creation and management of the RosoutLogger
+    // into the internal.Node class.
     Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
         createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
     log.setRosoutPublisher(rosoutPublisher);
@@ -133,6 +140,19 @@ public class Node implements Namespace {
     } catch (Exception e) {
       throw new RosInitException(e);
     }
+  }
+
+  @Override
+  public <RequestMessageType extends Message> ServiceServer<RequestMessageType> createServiceServer(
+      ServiceDefinition serviceDefinition, Class<RequestMessageType> requestMessageClass,
+      ServiceResponseBuilder<RequestMessageType> responseBuilder) throws Exception {
+    return node.createServiceServer(serviceDefinition, requestMessageClass, responseBuilder);
+  }
+
+  @Override
+  public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
+      ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
+    return node.createServiceClient(serviceIdentifier, responseMessageClass);
   }
 
   /**
