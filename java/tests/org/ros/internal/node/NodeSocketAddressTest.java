@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
@@ -29,18 +28,16 @@ import java.net.UnknownHostException;
 public class NodeSocketAddressTest {
 
   @Test
-  public void testGetPublicHostname() throws UnknownHostException {
+  public void testGetPublicHostname() {
 
     NodeBindAddress address = new NodeBindAddress(new InetSocketAddress(1234), "override");
     assertEquals(address, new NodeBindAddress(new InetSocketAddress(1234), "override"));
     assertEquals("override", address.getPublicHostName());
-    assertEquals(1234, address.getPort());
     assertEquals(new InetSocketAddress(1234), address.getBindAddress());
 
     address = new NodeBindAddress(new InetSocketAddress("localhost", 1234), "override");
     assertEquals(address, new NodeBindAddress(new InetSocketAddress("localhost", 1234), "override"));
     assertEquals("override", address.getPublicHostName());
-    assertEquals(1234, address.getPort());
     assertEquals(new InetSocketAddress("localhost", 1234), address.getBindAddress());
 
   }

@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.internal.node;
 
 import java.net.InetAddress;
@@ -91,10 +92,6 @@ public class NodeBindAddress {
     } else if (!publicHostname.equals(other.publicHostname))
       return false;
     return true;
-  }
-
-  public int getPort() {
-    return address.getPort();
   }
 
   public InetSocketAddress getBindAddress() {

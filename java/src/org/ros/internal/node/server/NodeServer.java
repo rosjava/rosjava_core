@@ -44,7 +44,9 @@ public class NodeServer {
 
   public NodeServer(NodeBindAddress bindAddress) {
     this.bindAddress = bindAddress;
-    server = new WebServer(bindAddress.getPort(), bindAddress.getBindAddress().getAddress());
+    server =
+        new WebServer(bindAddress.getBindAddress().getPort(), bindAddress.getBindAddress()
+            .getAddress());
   }
 
   public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass, T instance)
