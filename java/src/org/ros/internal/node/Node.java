@@ -24,6 +24,7 @@ import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.NodeServer;
 import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceClient;
@@ -47,7 +48,7 @@ import java.util.concurrent.Executors;
 
 /**
  * Implementation of a ROS node. This implementation is responsible for the
- * managing the various node resources, including XMLRPC and TCPROS servers and
+ * managing the various node resources including XML-RPC, TCPROS servers, and
  * topic/service instances.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
@@ -99,9 +100,9 @@ public class Node {
   }
 
   /**
-   * Get or create a {@link Subscriber} instance. {@link Subscriber}s are cached
-   * and reused per topic for efficiency. If a new {@link Subscriber} is
-   * generated, it is registered with the {@link MasterServer}.
+   * Gets or creates a {@link Subscriber} instance. {@link Subscriber}s are
+   * cached and reused per topic. When a new {@link Subscriber} is generated, it
+   * is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
    * @param topicDefinition {@link TopicDefinition} that is subscribed to
@@ -137,6 +138,19 @@ public class Node {
     return subscriber;
   }
 
+  /**
+   * Gets or creates a {@link Publisher} instance. {@link Publisher}s are cached
+   * and reused per topic. When a new {@link Publisher} is generated, it is
+   * registered with the {@link MasterServer}.
+   * 
+   * @param <MessageType>
+   * @param topicDefinition {@link TopicDefinition} that is being published
+   * @param messageClass {@link Message} class for topic
+   * @return a {@link Subscriber} instance
+   * @throws RemoteException
+   * @throws URISyntaxException
+   * @throws IOException
+   */
   @SuppressWarnings("unchecked")
   public <MessageType extends Message> Publisher<MessageType> createPublisher(
       TopicDefinition topicDefinition, Class<MessageType> messageClass) throws IOException,
@@ -161,6 +175,20 @@ public class Node {
     return publisher;
   }
 
+  /**
+   * Gets or creates a {@link ServiceServer} instance. {@link ServiceServer}s
+   * are cached and reused per service. When a new {@link ServiceServer} is
+   * generated, it is registered with the {@link MasterServer}.
+   * 
+   * @param <RequestMessageType>
+   * @param serviceDefinition the {@link ServiceDefinition} that is being served
+   * @param requestMessageClass the {@link Message} class that is used for
+   *        requests
+   * @param responseBuilder the {@link ServiceResponseBuilder} that is used to
+   *        build responses
+   * @return a {@link ServiceServer} instance
+   * @throws Exception
+   */
   @SuppressWarnings("unchecked")
   public <RequestMessageType extends Message> ServiceServer<RequestMessageType> createServiceServer(
       ServiceDefinition serviceDefinition, Class<RequestMessageType> requestMessageClass,
@@ -187,6 +215,17 @@ public class Node {
     return serviceServer;
   }
 
+  /**
+   * Gets or creates a {@link ServiceClient} instance. {@link ServiceClient}s
+   * are cached and reused per service. When a new {@link ServiceClient} is
+   * created, it is connected to the {@link ServiceServer}.
+   * 
+   * @param <ResponseMessageType>
+   * @param serviceIdentifier the {@link ServiceIdentifier} of the server
+   * @param responseMessageClass the {@link Message} class that is used for
+   *        responses
+   * @return a {@link ServiceClient} instance
+   */
   @SuppressWarnings("unchecked")
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
@@ -210,39 +249,29 @@ public class Node {
     return serviceClient;
   }
 
-  /**
-   * Start the node.
-   * 
-   * @throws XmlRpcException
-   * @throws IOException
-   * @throws URISyntaxException
-   */
   void start() throws XmlRpcException, IOException, URISyntaxException {
     slaveServer.start();
   }
 
+  /**
+   * Stops the node.
+   */
   public void stop() {
     slaveServer.shutdown();
   }
 
-  /**
-   * @return the {@link TcpRosServer}
-   */
   @VisibleForTesting
   TcpRosServer getTcpRosServer() {
     return tcpRosServer;
   }
 
-  /**
-   * @return the {@link SlaveServer}
-   */
   @VisibleForTesting
   SlaveServer getSlaveServer() {
     return slaveServer;
   }
 
   /**
-   * @return {@link URI} of the Node server (XML-RPC).
+   * @return the {@link URI} of the {@link NodeServer}
    */
   public URI getUri() {
     return slaveServer.getUri();
