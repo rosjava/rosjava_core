@@ -12,6 +12,6 @@
 
   <node pkg="rosjava" type="PassthroughTestNode" name="rosjava_node" />
 
-  <test pkg="rosjava" type="test_string_passthrough.py" test-name="string_passthrough" />
+  <test pkg="rosjava" type="test_string_passthrough.py" test-name="string_passthrough" time-limit="90" />
 
 </launch>

@@ -90,6 +90,19 @@ class TestStringPassthrough(unittest.TestCase):
 
         self.assertEquals(self.nodes_set, self.test_nodes_cb, "passthrough did not pass along all message")
 
+        # Create a new Publisher here.  This will validate publisherUpdate()
+        pub = rospy.Publisher('string_in', String)
+        msg = 'test_publisherUpdate'
+        timeout_t = time.time() + 20.
+        print "waiting for 20 seconds for client to verify"
+        while not msg in self.nodes_set and \
+                not rospy.is_shutdown() and \
+                timeout_t > time.time():
+            pub.publish(data=msg)
+            time.sleep(0.2)
+
+        
+
 if __name__ == '__main__':
     import rostest
     rostest.run(PKG, NAME, TestStringPassthrough, sys.argv)
