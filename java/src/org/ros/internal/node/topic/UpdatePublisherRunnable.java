@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.topic;
 
+import org.ros.internal.node.server.SlaveIdentifier;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.RemoteException;
@@ -36,14 +38,18 @@ class UpdatePublisherRunnable<MessageType extends Message> implements Runnable {
 
   private final Subscriber<MessageType> subscriber;
   private final PublisherIdentifier publisherIdentifier;
+  private final SlaveIdentifier slaveIdentifier;
 
   /**
    * @param subscriber
+   * @param slaveIdentifier
+   *          Identifier of the subscriber's slave.
    * @param publisherIdentifier
    */
   public UpdatePublisherRunnable(Subscriber<MessageType> subscriber,
-      PublisherIdentifier publisherIdentifier) {
+      SlaveIdentifier slaveIdentifier, PublisherIdentifier publisherIdentifier) {
     this.subscriber = subscriber;
+    this.slaveIdentifier = slaveIdentifier;
     this.publisherIdentifier = publisherIdentifier;
   }
 
@@ -51,8 +57,7 @@ class UpdatePublisherRunnable<MessageType extends Message> implements Runnable {
   public void run() {
     SlaveClient slaveClient;
     try {
-      slaveClient = new SlaveClient(publisherIdentifier.getNodeName(),
-          publisherIdentifier.getSlaveUri());
+      slaveClient = new SlaveClient(slaveIdentifier.getName(), publisherIdentifier.getSlaveUri());
       Response<ProtocolDescription> response = slaveClient.requestTopic(
           this.subscriber.getTopicName(), ProtocolNames.SUPPORTED);
       // TODO(kwc): all of this logic really belongs in a protocol handler
@@ -67,6 +72,13 @@ class UpdatePublisherRunnable<MessageType extends Message> implements Runnable {
       log.error(e);
     } catch (RemoteException e) {
       // TODO(damonkohler): Retry logic is needed at the XML-RPC layer.
+      log.error(e);
+    } catch (RuntimeException e) {
+      // TODO(kwc):
+      // org.apache.xmlrpc.XmlRpcException/java.net.ConnectException's are
+      // leaking through as java.lang.reflect.UndeclaredThrowableExceptions.
+      // This is happening whenever the node attempts to connect to a stale
+      // publisher (i.e. a publisher that is no longer online).
       log.error(e);
     }
   }

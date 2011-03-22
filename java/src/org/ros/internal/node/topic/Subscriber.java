@@ -71,6 +71,7 @@ public class Subscriber<MessageType extends Message> extends Topic<MessageType> 
   private final ChannelFactory channelFactory;
   private final ChannelGroup channelGroup;
   private final Set<PublisherIdentifier> knownPublishers;
+  private final SlaveIdentifier slaveIdentifier;
 
   private final class MessageReadingThread extends Thread {
     @Override
@@ -127,14 +128,13 @@ public class Subscriber<MessageType extends Message> extends Topic<MessageType> 
     this.executor = executor;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new IncomingMessageQueue<MessageType>(messageClass);
-    header =
-        ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
-            .putAll(description.toHeader()).build();
+    this.slaveIdentifier = slaveIdentifier;
+    header = ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
+        .putAll(description.toHeader()).build();
     knownPublishers = Sets.newHashSet();
     channelGroup = new DefaultChannelGroup();
-    channelFactory =
-        new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool());
+    channelFactory = new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
+        Executors.newCachedThreadPool());
     thread = new MessageReadingThread();
     thread.start();
   }
@@ -166,8 +166,7 @@ public class Subscriber<MessageType extends Message> extends Topic<MessageType> 
   }
 
   public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
-      InetSocketAddress address) {  
-    
+      InetSocketAddress address) {
     // TODO(damonkohler): Release bootstrap resources on shutdown.
     ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
     TcpClientPipelineFactory factory = new TcpClientPipelineFactory() {
@@ -212,7 +211,8 @@ public class Subscriber<MessageType extends Message> extends Topic<MessageType> 
       }
     }
     for (final PublisherIdentifier publisher : newPublishers) {
-      executor.execute(new UpdatePublisherRunnable<MessageType>(this, publisher));
+      executor.execute(new UpdatePublisherRunnable<MessageType>(this, this.slaveIdentifier,
+          publisher));
     }
   }
 
