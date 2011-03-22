@@ -90,7 +90,7 @@ class TestHeaderPassthrough(unittest.TestCase):
         self.failIf(self.test_curr is None, "no data from test")
         self.assertEquals('/rosjava_node', self.test_curr.caller_id)
         self.assertEquals('/node0', self.test_curr.orig_caller_id)
-        t = self.test_curr.to_sec()
+        t = self.test_curr.header.stamp.to_sec()
         # be really generous here, just need to be in the ballpark.
         self.assert_(abs(time.time() - t) < 60.)
 
