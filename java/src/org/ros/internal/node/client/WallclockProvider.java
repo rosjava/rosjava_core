@@ -25,7 +25,7 @@ import org.ros.message.Time;
 public class WallclockProvider implements TimeProvider {
 
   @Override
-  public Time currentTime() {
+  public Time getCurrentTime() {
     return Time.fromMillis(System.currentTimeMillis());
   }
 

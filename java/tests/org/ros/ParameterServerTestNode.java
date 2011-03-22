@@ -46,7 +46,6 @@ public class ParameterServerTestNode implements NodeMain {
     try {
       // Node is only used to publish results.
       final Node node = new Node("test_node", nodeContext);
-      node.init();
 
       Publisher<org.ros.message.std_msgs.String> pub_string = node.createPublisher("string",
           org.ros.message.std_msgs.String.class);

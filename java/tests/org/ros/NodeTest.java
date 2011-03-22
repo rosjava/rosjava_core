@@ -68,7 +68,6 @@ public class NodeTest {
     NodeContext nodeContext = loader.createContext();
 
     Node node = new Node("test_addresses", nodeContext);
-    node.init();
     node.createPublisher("test_addresses_pub", Int64.class);
 
     URI uri = node.getUri();

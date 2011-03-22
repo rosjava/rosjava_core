@@ -33,7 +33,6 @@ public class PassthroughTestNode implements NodeMain {
   public void run(List<String> argv, NodeContext nodeContext) throws RosNameException,
       RosInitException {
     final Node node = new Node("test_node", nodeContext);
-    node.init();
 
     // The goal of the passthrough node is simply to retransmit the messages
     // sent to it. This allows us to external verify that the node is compatible

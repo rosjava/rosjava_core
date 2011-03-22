@@ -59,7 +59,7 @@ public class RosoutLogger implements Log {
   private void publishToRosout(Object message) {
     org.ros.message.rosgraph_msgs.Log m = new org.ros.message.rosgraph_msgs.Log();
     m.msg = message.toString();
-    m.header.stamp = timeProvider.currentTime();
+    m.header.stamp = timeProvider.getCurrentTime();
     m.topics = getTopics();
     rosoutPublisher.publish(m);
   }

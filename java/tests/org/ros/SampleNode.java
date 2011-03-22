@@ -30,7 +30,6 @@ public class SampleNode {
     
     RosLoader loader = new CommandLineLoader(argv);
     Node node = new Node("sample_rosjava_node", loader.createContext());
-    node.init();
 
     Publisher<PoseStamped> pub_pose = node.createPublisher("pose", PoseStamped.class);
 
@@ -54,7 +53,7 @@ public class SampleNode {
       PoseStamped pose = new PoseStamped();
       pose.header.frame_id = "/map";
       pose.header.seq = seq++;
-      pose.header.stamp = node.currentTime();
+      pose.header.stamp = node.getCurrentTime();
       pose.pose.position = origin;
       pose.pose.orientation = orientation;
       pub_pose.publish(pose);

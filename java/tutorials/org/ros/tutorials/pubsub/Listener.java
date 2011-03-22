@@ -38,8 +38,6 @@ public class Listener implements NodeMain {
     Node node = null;
     try {
       node = new Node("listener", context);
-      node.init();
-      
       final Log log = node.getLog();
       Subscriber<org.ros.message.std_msgs.String> subscriber =
           node.createSubscriber("chatter", new MessageListener<org.ros.message.std_msgs.String>() {

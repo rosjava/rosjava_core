@@ -32,7 +32,6 @@ public class SlaveApiTestNode implements NodeMain {
   public void run(List<String> argv, NodeContext nodeContext) throws RosNameException,
       RosInitException {
     final Node node = new Node("test_node", nodeContext);
-    node.init();
 
     // Basic chatter in/out test.
     Publisher<org.ros.message.std_msgs.String> pub_string =
