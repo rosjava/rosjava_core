@@ -19,7 +19,6 @@ package org.ros.internal.node.xmlrpc;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.response.Response;
@@ -158,11 +157,13 @@ public class SlaveImpl implements Slave {
     try {
       ArrayList<URI> publisherUris = new ArrayList<URI>(publishers.length);
       for (Object publisher : publishers) {
-        publisherUris.add(new URI(publisher.toString()));
+        URI uri = new URI(publisher.toString());
+        if (!uri.getScheme().equals("http") && !uri.getScheme().equals("https")) {
+          return Response.createError("unknown URI scheme sent in update", 0).toList();
+        }
+        publisherUris.add(uri);
       }
-      //TODO(kwc): remove when publisherUpdate is implemented
-      slave.publisherUpdate(callerId, topic, publisherUris);
-      return Response.createFailure("publisherUpdate implementation in progress", 0).toList();
+      return Response.createSuccess("publisher update received", 0).toList();
     } catch (URISyntaxException e) {
       return Response.createError("invalid URI sent in update", 0).toList();
     }
