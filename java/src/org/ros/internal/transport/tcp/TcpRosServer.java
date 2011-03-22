@@ -94,7 +94,7 @@ public class TcpRosServer {
   }
 
   /**
-   * @return the advertisable address of this {@link TcpRosServer}
+   * @return the advertise-able address of this {@link TcpRosServer}
    */
   public InetSocketAddress getAddress() {
     return advertiseAddress.toInetSocketAddress();
