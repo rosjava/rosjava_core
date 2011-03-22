@@ -15,36 +15,23 @@
  */
 package org.ros.namespace;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 
 import java.util.HashMap;
 
 /**
- * See the rules for names - http://www.ros.org/wiki/Names The resolver will do
- * ros name remappings for the user, if it has been initialized.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  */
 public class NameResolver {
 
-  private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(NameResolver.class);
-
-  private final HashMap<GraphName, GraphName> remappings;
   private final String namespace;
+  private HashMap<GraphName, GraphName> remappings;
 
-  /**
-   * @param remappings
-   * @throws RosNameException
-   * 
-   */
   public NameResolver(String namespace, HashMap<GraphName, GraphName> remappings)
       throws RosNameException {
     this.remappings = remappings;
@@ -57,7 +44,8 @@ public class NameResolver {
 
   /**
    * Resolve name relative to namespace. If namespace is not global, it will
-   * first be resolved to a global name.
+   * first be resolved to a global name. This method will not resolve private
+   * ~names.
    * 
    * This does all remappings of both the namespace and name.
    * 
@@ -69,55 +57,18 @@ public class NameResolver {
    */
   public String resolveName(String namespace, String name) throws RosNameException {
     GraphName ns = lookUpRemapping(new GraphName(namespace));
-    Preconditions.checkArgument(ns.isGlobal(), "namespace must be global: "+ns.toString());
+    Preconditions.checkArgument(ns.isGlobal(), "namespace must be global: " + ns.toString());
     GraphName n = lookUpRemapping(new GraphName(name));
     if (n.isGlobal()) {
       return n.toString();
     }
     if (n.isRelative()) {
-      return join(ns.getParent(), n);
+      return join(ns, n);
     } else if (n.isPrivate()) {
-      String s = n.toRelative();
-      // allow ~/foo
-      if (s.startsWith("/")) {
-        s = s.substring(1);
-      }
-      if (DEBUG) {
-        log.info("Join: " + namespace + " " + ns + ", " + s);
-      }
-      return join(ns, new GraphName(s));
+      throw new RosNameException("cannot resolve ~private names in arbitrary namespaces");
+    } else {
+      throw new RosNameException("Bad name: " + name);
     }
-    throw new RosNameException("Bad name: " + name);
-  }
-
-  /**
-   * Convenience function for looking up a remapping.
-   * 
-   * @param name
-   *          The name to lookup.
-   * @return The name if it is not remapped, otherwise the remapped name.
-   */
-  private GraphName lookUpRemapping(GraphName name) {
-    GraphName rmname = name;
-    if (remappings.containsKey(name)) {
-      rmname = remappings.get(name);
-    }
-    return rmname;
-  }
-
-  @VisibleForTesting
-  public HashMap<GraphName, GraphName> getRemappings() {
-    return remappings;
-  }
-
-  /**
-   * @param name
-   *          Name to resolve
-   * @return The name resolved relative to the default namespace.
-   * @throws RosNameException
-   */
-  public String resolveName(String name) throws RosNameException {
-    return resolveName(namespace, name);
   }
 
   /**
@@ -159,6 +110,35 @@ public class NameResolver {
     } else {
       return new GraphName(name1.toString() + "/" + name2.toString()).toString();
     }
+  }
+
+  /**
+   * Convenience function for looking up a remapping.
+   * 
+   * @param name
+   *          The name to lookup.
+   * @return The name if it is not remapped, otherwise the remapped name.
+   */
+  protected GraphName lookUpRemapping(GraphName name) {
+    GraphName rmname = name;
+    if (remappings.containsKey(name)) {
+      rmname = remappings.get(name);
+    }
+    return rmname;
+  }
+
+  public HashMap<GraphName, GraphName> getRemappings() {
+    return remappings;
+  }
+
+  /**
+   * @param name
+   *          Name to resolve
+   * @return The name resolved relative to the default namespace.
+   * @throws RosNameException
+   */
+  public String resolveName(String name) throws RosNameException {
+    return resolveName(getNamespace(), name);
   }
 
   /**

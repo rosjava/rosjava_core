@@ -18,6 +18,8 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.node.xmlrpc.Master;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exceptions.RosInitException;
@@ -37,6 +39,7 @@ import org.ros.message.Message;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
+import org.ros.namespace.NodeNameResolver;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -50,7 +53,7 @@ import java.net.URI;
 public class Node implements Namespace {
 
   private final NodeContext context;
-  private final NameResolver resolver;
+  private final NodeNameResolver resolver;
   private final GraphName nodeName;
   private final org.ros.internal.node.Node node;
   private final RosoutLogger log;
@@ -76,7 +79,7 @@ public class Node implements Namespace {
       baseName = name;
     }
     nodeName = new GraphName(NameResolver.join(parentResolver.getNamespace(), baseName));
-    resolver = parentResolver.createResolver(nodeName.toString());
+    resolver = NodeNameResolver.create(parentResolver, nodeName);
 
     // TODO (kwc): implement simulated time.
     timeProvider = new WallclockProvider();
@@ -187,7 +190,7 @@ public class Node implements Namespace {
 
   @Override
   public String resolveName(String name) throws RosNameException {
-    return resolver.resolveName(getName(), name);
+    return resolver.resolveName(name);
   }
 
   public void stop() {
@@ -195,14 +198,14 @@ public class Node implements Namespace {
   }
 
   /**
-   * @return {@link URI} of ROS Master that this node is attached to.
+   * @return {@link URI} of {@link Master} that this node is attached to.
    */
   public URI getMasterUri() {
     return context.getRosMasterUri();
   }
 
   @Override
-  public NameResolver getResolver() {
+  public NodeNameResolver getResolver() {
     return resolver;
   }
 

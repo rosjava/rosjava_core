@@ -50,21 +50,21 @@ public class Subscriber<MessageType extends Message> {
   }
 
   /**
-   * @return the name of the subscribed topic
+   * @return The name of the subscribed topic.
    */
   public String getTopicName() {
     return topicName;
   }
 
   /**
-   * @return the {@link Message} class literal for the subscribed topic
+   * @return the {@link Message} class literal for the subscribed topic.
    */
   public Class<MessageType> getTopicMessageClass() {
     return messageClass;
   }
 
   /**
-   * @return the {@link MessageListener} for this {@link Subscriber}
+   * @return The {@link MessageListener} for this {@link Subscriber}.
    */
   public MessageListener<MessageType> getMessageListener() {
     return messageListener;

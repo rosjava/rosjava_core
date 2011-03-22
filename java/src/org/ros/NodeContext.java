@@ -15,9 +15,9 @@
  */
 package org.ros;
 
-import java.net.URI;
-
 import org.ros.namespace.NameResolver;
+
+import java.net.URI;
 
 /**
  * Stores contextual information about a ROS node, including common ROS

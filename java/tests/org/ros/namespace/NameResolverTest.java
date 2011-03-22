@@ -15,37 +15,33 @@
  */
 package org.ros.namespace;
 
+import junit.framework.TestCase;
+import org.junit.Test;
+import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 
 import java.util.HashMap;
 
-import org.ros.exceptions.RosNameException;
-
-import junit.framework.TestCase;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 public class NameResolverTest extends TestCase {
 
-  private HashMap<GraphName, GraphName> emptyRemappings;
-
-  @Override
-  @Before
-  public void setUp() throws Exception {
-    emptyRemappings = new HashMap<GraphName, GraphName>();
+  public NameResolver createGlobalResolver() throws RosNameException {
+    return createGlobalResolver(new HashMap<GraphName, GraphName>());
   }
-
-  @Override
-  @After
-  public void tearDown() throws Exception {
+  
+  public NameResolver createGlobalResolver(HashMap<GraphName, GraphName> remappings) throws RosNameException {
+    return new NameResolver(Namespace.GLOBAL_NS, remappings);
   }
 
   @Test
-  public void testResolveName() throws RosNameException {
+  public void testResolveNameOneArg() throws RosNameException {
+
+  }
+
+  @Test
+  public void testResolveNameTwoArg() throws RosNameException {
     // these tests are based on test_roslib_names.py
-    NameResolver r = new NameResolver(Namespace.GLOBAL_NS, emptyRemappings);
+
+    NameResolver r = createGlobalResolver();
     try {
       r.resolveName("foo", "bar");
       fail("should have raised");
@@ -57,10 +53,8 @@ public class NameResolverTest extends TestCase {
       assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
       assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, Namespace.GLOBAL_NS));
       assertEquals(Namespace.GLOBAL_NS, r.resolveName("/anything/bar", Namespace.GLOBAL_NS));
-      
-      assertEquals(Namespace.GLOBAL_NS, r.resolveName("/node", ""));
-      System.out.println(r.resolveName("/ns1/node", ""));
-      assertEquals("/ns1", r.resolveName("/ns1/node", ""));
+
+      assertEquals("/ns1/node", r.resolveName("/ns1/node", ""));
       assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
 
       // relative namespaces get resolved to default namespace
@@ -69,49 +63,26 @@ public class NameResolverTest extends TestCase {
       assertEquals("/foo", r.resolveName("/", "/foo"));
       assertEquals("/foo", r.resolveName("/", "/foo/"));
 
-      assertEquals("/ns1/foo", r.resolveName("/ns1/ns2", "foo"));
-      assertEquals("/ns1/foo", r.resolveName("/ns1/ns2", "foo/"));
-      assertEquals("/ns1/foo", r.resolveName("/ns1/ns2/", "foo"));
+      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "foo"));
+      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "foo/"));
+      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2/", "foo"));
       assertEquals("/foo", r.resolveName("/ns1/ns2", "/foo/"));
 
-      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2/ns3", "foo"));
-      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2/ns3/", "foo"));
+      assertEquals("/ns1/ns2/ns3/foo", r.resolveName("/ns1/ns2/ns3", "foo"));
+      assertEquals("/ns1/ns2/ns3/foo", r.resolveName("/ns1/ns2/ns3/", "foo"));
       assertEquals("/foo", r.resolveName("/", "/foo/"));
 
-      assertEquals("/ns1/foo/bar", r.resolveName("/ns1/ns2", "foo/bar"));
-      assertEquals("/ns1/ns2/foo/bar", r.resolveName("/ns1/ns2/ns3", "foo/bar"));
-
-      assertEquals("/foo", r.resolveName("/", "~foo"));
-      assertEquals("/node/foo", r.resolveName("/node", "~foo"));
-      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "~foo"));
-      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "~foo/"));
-      assertEquals("/ns1/ns2/foo/bar", r.resolveName("/ns1/ns2", "~foo/bar"));
-
-      // https://code.ros.org/trac/ros/ticket/3044
-      assertEquals("/foo", r.resolveName("/", "~/foo"));
-      assertEquals("/node/foo", r.resolveName("/node", "~/foo"));
-      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "~/foo"));
-      assertEquals("/ns1/ns2/foo/bar", r.resolveName("/ns1/ns2", "~/foo/bar"));
+      assertEquals("/ns1/ns2/foo/bar", r.resolveName("/ns1/ns2", "foo/bar"));
+      assertEquals("/ns1/ns2/ns3/foo/bar", r.resolveName("/ns1/ns2/ns3", "foo/bar"));
     } catch (RosNameException e) {
       fail("should not be any invalid names in this test");
     }
-    /*
-     * //ns join tests # private and global names cannot be joined
-     * self.assertEquals('~name', ns_join('/foo', '~name'))
-     * self.assertEquals('/name', ns_join('/foo', '/name'))
-     * self.assertEquals('~name', ns_join('~', '~name'))
-     * self.assertEquals('/name', ns_join('/', '/name'))
-     * 
-     * # ns can be '~' or '/' self.assertEquals('~name', ns_join('~', 'name'))
-     * self.assertEquals('/name', ns_join('/', 'name'))
-     * 
-     * self.assertEquals('/ns/name', ns_join('/ns', 'name'))
-     * self.assertEquals('/ns/name', ns_join('/ns/', 'name'))
-     * self.assertEquals('/ns/ns2/name', ns_join('/ns', 'ns2/name'))
-     * self.assertEquals('/ns/ns2/name', ns_join('/ns/', 'ns2/name'))
-     * 
-     * # allow ns to be empty self.assertEquals('name', ns_join('', 'name'))
-     */
+
+    try {
+      assertEquals("/foo", r.resolveName("/", "~foo"));
+      fail("resolveName() with two args should never allow private names");
+    } catch (RosNameException e) {
+    }
   }
 
   /**
@@ -125,7 +96,7 @@ public class NameResolverTest extends TestCase {
     remappings.put(new GraphName("name"), new GraphName("/my/name"));
     remappings.put(new GraphName("foo"), new GraphName("/my/foo"));
 
-    NameResolver r = new NameResolver(Namespace.GLOBAL_NS, remappings);
+    NameResolver r = createGlobalResolver(remappings);
 
     String n = r.resolveName("name");
     System.out.print(n);

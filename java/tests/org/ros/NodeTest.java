@@ -16,14 +16,17 @@
 
 package org.ros;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.junit.Before;
 import org.junit.Test;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
@@ -33,6 +36,7 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.std_msgs.Int64;
+import org.ros.namespace.NameResolver;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -45,6 +49,57 @@ import java.util.Map;
  */
 public class NodeTest {
 
+  private MasterServer master;
+  private URI masterUri;
+  private NodeContext nodeContext;
+
+  @Before
+  public void setUp() throws XmlRpcException, IOException, RosInitException {
+    master = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+    master.start();
+    masterUri = master.getUri();
+    checkHostName(masterUri.getHost());
+
+
+    // Make sure that none of the publicly reported addresses are bind
+    // addresses.
+    Map<String, String> env = new HashMap<String, String>();
+    env.put("ROS_MASTER_URI", masterUri.toString());
+    CommandLineLoader loader = new CommandLineLoader(new String[] {}, env);
+    nodeContext = loader.createContext();
+  }
+
+  @Test
+  public void testResolveName() throws RosNameException, RosInitException {
+    nodeContext.setParentResolver(new NameResolver("/ns1", new HashMap<GraphName, GraphName>()));
+    Node node = new Node("test_resolver", nodeContext);
+    
+    assertEquals("/foo", node.resolveName("/foo"));
+    assertEquals("/ns1/foo", node.resolveName("foo"));
+    assertEquals("/ns1/test_resolver/foo", node.resolveName("~foo"));
+    
+    Publisher<Int64> pub = node.createPublisher("pub", Int64.class);
+    assertEquals("/ns1/pub", pub.getTopicName());
+    pub = node.createPublisher("/pub", Int64.class);
+    assertEquals("/pub", pub.getTopicName());
+    pub = node.createPublisher("~pub", Int64.class);
+    assertEquals("/ns1/test_resolver/pub", pub.getTopicName());
+    
+    MessageListener<Int64> callback = new MessageListener<Int64>() {
+      
+      @Override
+      public void onNewMessage(Int64 message) {
+      }
+    };;;
+    
+    Subscriber<Int64> sub = node.createSubscriber("sub", callback , Int64.class);
+    assertEquals("/ns1/sub", sub.getTopicName());
+    sub = node.createSubscriber("/sub", callback , Int64.class);
+    assertEquals("/sub", sub.getTopicName());
+    sub = node.createSubscriber("~sub", callback , Int64.class);
+    assertEquals("/ns1/test_resolver/sub", sub.getTopicName());
+  }
+
   void checkHostName(String hostName) {
     System.out.println(hostName);
     assertTrue(!hostName.equals("0.0.0.0"));
@@ -54,8 +109,8 @@ public class NodeTest {
   @Test
   public void testPublicAddresses() throws RosInitException, RosNameException, RemoteException,
       XmlRpcException, IOException {
-    MasterServer master =
-        new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+    MasterServer master = new MasterServer(BindAddress.createPublic(0),
+        AdvertiseAddress.createPublic());
     master.start();
     URI masterUri = master.getUri();
     checkHostName(masterUri.getHost());
@@ -77,8 +132,8 @@ public class NodeTest {
 
     // check the TCPROS server address via the XMLRPC api.
     SlaveClient slaveClient = new SlaveClient("test_addresses", uri);
-    Response<ProtocolDescription> response =
-        slaveClient.requestTopic("test_addresses_pub", Lists.newArrayList(ProtocolNames.TCPROS));
+    Response<ProtocolDescription> response = slaveClient.requestTopic("test_addresses_pub",
+        Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();
     InetSocketAddress tcpRosAddress = result.getAddress();
     checkHostName(tcpRosAddress.getHostName());

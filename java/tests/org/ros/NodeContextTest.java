@@ -15,17 +15,14 @@
  */
 package org.ros;
 
-import static org.junit.Assert.*;
-
-import org.ros.exceptions.RosNameException;
-
-import java.util.HashMap;
-
-import org.ros.internal.namespace.GraphName;
-
-import org.ros.namespace.NameResolver;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import org.ros.exceptions.RosNameException;
+import org.ros.internal.namespace.GraphName;
+import org.ros.namespace.NameResolver;
+
+import java.util.HashMap;
 
 public class NodeContextTest {
 

@@ -26,10 +26,10 @@ import org.ros.message.Message;
  *          messages of this type.
  */
 public class Publisher<MessageType extends Message> {
-  org.ros.internal.node.topic.Publisher<MessageType> publisher;
-  String topicName;
+  private final org.ros.internal.node.topic.Publisher<MessageType> publisher;
+  private final String topicName;
   // deal with type erasure for generics
-  Class<MessageType> messageClass;
+  private final Class<MessageType> messageClass;
 
   /**
    * Default package level constructor
@@ -46,14 +46,25 @@ public class Publisher<MessageType extends Message> {
 
   /**
    * @param m
-   *          The message to publish. This message will be available on the
-   *          topic that this Publisher has been associated with.
+   *          The {@link Message} to publish. This message will be available on
+   *          the topic that this {@link Publisher} has been associated with.
    */
   public void publish(MessageType m) {
     // publisher is shared across multiple publisher instances, so lock access.
     synchronized (this) {
       publisher.publish(m);
     }
+  }
+
+  public String getTopicName() {
+    return topicName;
+  }
+
+  /**
+   * @return The {@link Message} class literal for the published topic.
+   */
+  public Class<MessageType> getTopicMessageClass() {
+    return messageClass;
   }
 
 }

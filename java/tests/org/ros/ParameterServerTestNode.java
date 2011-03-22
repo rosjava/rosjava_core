@@ -16,20 +16,17 @@
 
 package org.ros;
 
-import java.util.List;
-import java.util.Map;
-
-import org.ros.message.test_ros.Composite;
-
-import org.ros.message.std_msgs.Float64;
-
-import org.ros.namespace.NameResolver;
-
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.node.RemoteException;
 import org.ros.message.std_msgs.Bool;
+import org.ros.message.std_msgs.Float64;
 import org.ros.message.std_msgs.Int64;
+import org.ros.message.test_ros.Composite;
+import org.ros.namespace.NameResolver;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * This node is used in rostest end-to-end integration tests with other client
@@ -47,6 +44,8 @@ public class ParameterServerTestNode implements NodeMain {
       // Node is only used to publish results.
       final Node node = new Node("test_node", nodeContext);
 
+      Publisher<org.ros.message.std_msgs.String> pub_tilde = node.createPublisher("tilde",
+          org.ros.message.std_msgs.String.class);
       Publisher<org.ros.message.std_msgs.String> pub_string = node.createPublisher("string",
           org.ros.message.std_msgs.String.class);
       Publisher<Int64> pub_int = node.createPublisher("int", org.ros.message.std_msgs.Int64.class);
@@ -58,7 +57,11 @@ public class ParameterServerTestNode implements NodeMain {
       
       ParameterClient param = node.createParameterClient();
 
-      String paramNamespace = (String) param.getParam("parameterNamespace");
+      org.ros.message.std_msgs.String tilde_m = new org.ros.message.std_msgs.String();
+      tilde_m.data = (String) param.getParam(node.resolveName("~tilde"));
+      
+      String paramNamespace = (String) param.getParam("parameter_namespace");
+      node.getLog().info("parameter_namespace: "+paramNamespace);
       NameResolver resolver = node.getResolver().createResolver(paramNamespace);
 
       org.ros.message.std_msgs.String string_m = new org.ros.message.std_msgs.String();
@@ -82,6 +85,7 @@ public class ParameterServerTestNode implements NodeMain {
       
       try {
         while (true) {
+          pub_tilde.publish(tilde_m);
           pub_string.publish(string_m);
           pub_int.publish(int_m);
           pub_bool.publish(bool_m);
