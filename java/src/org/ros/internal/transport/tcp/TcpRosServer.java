@@ -97,11 +97,14 @@ public class TcpRosServer {
    * @return the advertisable address of this {@link TcpRosServer}
    */
   public InetSocketAddress getAddress() {
-    try {
-      return advertiseAddress.toInetSocketAddress();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return advertiseAddress.toInetSocketAddress();
   }
-  
+
+  /**
+   * @return the {@link AdvertiseAddress} of this {@link TcpRosServer}
+   */
+  public AdvertiseAddress getAdvertiseAddress() {
+    return advertiseAddress;
+  }
+
 }

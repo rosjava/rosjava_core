@@ -57,14 +57,22 @@ public class AdvertiseAddress implements Address {
     this.portCallable = portCallable;
   }
 
-  public InetSocketAddress toInetSocketAddress() throws Exception {
+  public InetSocketAddress toInetSocketAddress() {
     Preconditions.checkNotNull(portCallable);
-    return InetSocketAddress.createUnresolved(host, portCallable.call());
+    try {
+      return InetSocketAddress.createUnresolved(host, portCallable.call());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  public URI toUri(String scheme) throws Exception {
+  public URI toUri(String scheme) {
     Preconditions.checkNotNull(portCallable);
-    return new URI(scheme, null, host, portCallable.call(), null, null, null);
+    try {
+      return new URI(scheme, null, host, portCallable.call(), null, null, null);
+    } catch (Exception e) {
+      throw new RuntimeException();
+    }
   }
 
   @Override

@@ -178,8 +178,7 @@ public class Node {
       } else {
         serviceServer =
             new ServiceServer<RequestMessageType>(serviceDefinition, requestMessageClass,
-                responseBuilder);
-        serviceServer.setAddress(tcpRosServer.getAddress());
+                responseBuilder, tcpRosServer.getAdvertiseAddress());
         createdNewService = true;
       }
     }

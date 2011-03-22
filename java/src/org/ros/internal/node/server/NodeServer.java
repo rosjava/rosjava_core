@@ -75,11 +75,7 @@ public class NodeServer {
   }
 
   public URI getUri() {
-    try {
-      return advertiseAddress.toUri("http");
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return advertiseAddress.toUri("http");
   }
 
 }
