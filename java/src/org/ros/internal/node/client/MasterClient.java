@@ -107,9 +107,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
       throws URISyntaxException, RemoteException {
-    return Response.fromListChecked(
-        node.registerSubscriber(slave.getName().toString(), subscriber.getTopicName(),
-            subscriber.getTopicMessageType(), slave.getUri().toString()),
+    return Response.fromListChecked(node.registerSubscriber(slave.getName().toString(), subscriber
+        .getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri().toString()),
         new UriListResultFactory());
   }
 
@@ -125,7 +124,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
       throws RemoteException {
     return Response.fromListChecked(node.unregisterSubscriber(slave.getName().toString(),
-        subscriber.getTopicName(), slave.getUri().toString()), new IntegerResultFactory());
+        subscriber.getTopicName().toString(), slave.getUri().toString()),
+        new IntegerResultFactory());
   }
 
   /**
@@ -142,8 +142,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   public Response<List<URI>> registerPublisher(PublisherIdentifier publisher)
       throws URISyntaxException, RemoteException {
     return Response.fromListChecked(node.registerPublisher(publisher.getNodeName().toString(),
-        publisher.getTopicName(), publisher.getTopicMessageType(), publisher.getSlaveUri()
-            .toString()), new UriListResultFactory());
+        publisher.getTopicName().toString(), publisher.getTopicMessageType(), publisher
+            .getSlaveUri().toString()), new UriListResultFactory());
   }
 
   /**
@@ -158,7 +158,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   public Response<Integer> unregisterPublisher(PublisherIdentifier publisher)
       throws RemoteException {
     return Response.fromListChecked(node.unregisterPublisher(publisher.getNodeName().toString(),
-        publisher.getTopicName(), publisher.getSlaveUri().toString()), new IntegerResultFactory());
+        publisher.getTopicName().toString(), publisher.getSlaveUri().toString()),
+        new IntegerResultFactory());
   }
 
   /**

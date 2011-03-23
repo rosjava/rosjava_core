@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 
 import org.junit.Test;
 import org.mockito.Matchers;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -56,7 +57,8 @@ public class MasterImplTest {
     MasterServer mockMaster = mock(MasterServer.class);
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
     TopicDefinition topicDefinition =
-        new TopicDefinition("/topic", MessageDefinition.createMessageDefinition("msg"));
+        new TopicDefinition(new GraphName("/topic"),
+            MessageDefinition.createMessageDefinition("msg"));
     SubscriberIdentifier subscriberDescription =
         new SubscriberIdentifier(slaveIdentifier, topicDefinition);
     when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
@@ -85,7 +87,8 @@ public class MasterImplTest {
     MasterServer mockMaster = mock(MasterServer.class);
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
     TopicDefinition topicDefinition =
-        new TopicDefinition("/topic", MessageDefinition.createMessageDefinition("msg"));
+        new TopicDefinition(new GraphName("/topic"),
+            MessageDefinition.createMessageDefinition("msg"));
     PublisherIdentifier publisherDescription =
         new PublisherIdentifier(slaveIdentifier, topicDefinition);
     when(mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any())).thenReturn(

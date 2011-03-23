@@ -113,9 +113,10 @@ public class Node implements Namespace {
       Class<MessageType> messageClass) throws RosInitException, RosNameException {
     try {
       String resolvedTopicName = resolveName(topicName);
-      Message m = messageClass.newInstance();
+      Message message = messageClass.newInstance();
       TopicDefinition topicDefinition =
-          new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(m));
+          new TopicDefinition(new GraphName(resolvedTopicName),
+              MessageDefinition.createFromMessage(message));
       org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
           node.createPublisher(topicDefinition, messageClass);
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
@@ -134,7 +135,8 @@ public class Node implements Namespace {
       String resolvedTopicName = resolveName(topicName);
       Message message = messageClass.newInstance();
       TopicDefinition topicDefinition =
-          new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(message));
+          new TopicDefinition(new GraphName(resolvedTopicName),
+              MessageDefinition.createFromMessage(message));
       org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
           node.createSubscriber(topicDefinition, messageClass);
       subscriber.addMessageListener(callback);

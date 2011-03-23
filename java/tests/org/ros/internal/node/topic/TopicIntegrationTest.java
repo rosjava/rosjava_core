@@ -52,7 +52,7 @@ public class TopicIntegrationTest {
   public void testOnePublisherToOneSubscriber() throws URISyntaxException, RemoteException,
       IOException, InterruptedException, XmlRpcException {
     TopicDefinition topicDefinition =
-        new TopicDefinition("/foo",
+        new TopicDefinition(new GraphName("/foo"),
             MessageDefinition.createFromMessage(new org.ros.message.std_msgs.String()));
 
     Node publisherNode =
@@ -60,8 +60,7 @@ public class TopicIntegrationTest {
     Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.createPublisher(topicDefinition, org.ros.message.std_msgs.String.class);
 
-    Node subscriberNode =
-        Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
+    Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         publisherNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class);
 

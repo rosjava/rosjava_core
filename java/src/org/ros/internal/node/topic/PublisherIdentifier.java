@@ -46,7 +46,7 @@ public class PublisherIdentifier {
     return slaveIdentifier.getUri();
   }
 
-  public String getTopicName() {
+  public GraphName getTopicName() {
     return topicDefinition.getName();
   }
   

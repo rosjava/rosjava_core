@@ -20,8 +20,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.transport.ConnectionHeaderFields;
-
 
 import java.util.List;
 import java.util.Map;
@@ -31,21 +31,21 @@ import java.util.Map;
  */
 public class TopicDefinition {
 
-  private final String name;
+  private final GraphName name;
   private final MessageDefinition messageDefinition;
 
   public static TopicDefinition createFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));
-    return new TopicDefinition(header.get(ConnectionHeaderFields.TOPIC),
+    return new TopicDefinition(new GraphName(header.get(ConnectionHeaderFields.TOPIC)),
         MessageDefinition.createFromHeader(header));
   }
 
-  public TopicDefinition(String name, MessageDefinition messageDefinition) {
+  public TopicDefinition(GraphName name, MessageDefinition messageDefinition) {
     this.name = name;
     this.messageDefinition = messageDefinition;
   }
 
-  public String getName() {
+  public GraphName getName() {
     return name;
   }
 
@@ -55,13 +55,13 @@ public class TopicDefinition {
 
   public Map<String, String> toHeader() {
     return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.TOPIC, name)
+        .put(ConnectionHeaderFields.TOPIC, name.toString())
         .putAll(messageDefinition.toHeader())
         .build();
   }
 
   public List<String> toList() {
-    return Lists.newArrayList(name, getMessageType());
+    return Lists.newArrayList(name.toString(), getMessageType());
   }
 
   @Override

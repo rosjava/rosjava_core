@@ -16,6 +16,7 @@
 
 package org.ros.internal.node.topic;
 
+import org.ros.internal.namespace.GraphName;
 import org.ros.message.Message;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class Topic<MessageType extends Message> {
     return description.toList();
   }
   
-  public String getTopicName() {
+  public GraphName getTopicName() {
     return description.getName();
   }
   

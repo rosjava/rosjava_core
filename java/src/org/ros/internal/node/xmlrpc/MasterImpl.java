@@ -75,7 +75,8 @@ public class MasterImpl implements Master {
       String callerApi) throws URISyntaxException {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
-        new TopicDefinition(topic, MessageDefinition.createMessageDefinition(topicType));
+        new TopicDefinition(new GraphName(topic),
+            MessageDefinition.createMessageDefinition(topicType));
     PublisherIdentifier description = new PublisherIdentifier(slaveIdentifier, topicDefinition);
     List<SubscriberIdentifier> subscribers = master.registerPublisher(callerId, description);
     List<String> urls = Lists.newArrayList();
@@ -102,7 +103,8 @@ public class MasterImpl implements Master {
       String callerApi) throws URISyntaxException {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
-        new TopicDefinition(topic, MessageDefinition.createMessageDefinition(topicType));
+        new TopicDefinition(new GraphName(topic),
+            MessageDefinition.createMessageDefinition(topicType));
     List<PublisherIdentifier> publishers =
         master.registerSubscriber(new SubscriberIdentifier(slaveIdentifier, topicDefinition));
     List<String> urls = Lists.newArrayList();

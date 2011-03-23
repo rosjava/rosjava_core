@@ -85,9 +85,9 @@ public class MasterServer extends NodeServer {
    *         publishing the specified topic.
    */
   public List<PublisherIdentifier> registerSubscriber(SubscriberIdentifier description) {
-    subscribers.put(description.getTopicName(), description);
+    subscribers.put(description.getTopicName().toString(), description);
     addSlave(description.getSlaveIdentifier());
-    return ImmutableList.copyOf(publishers.get(description.getTopicName()));
+    return ImmutableList.copyOf(publishers.get(description.getTopicName().toString()));
   }
 
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi) {
@@ -102,9 +102,9 @@ public class MasterServer extends NodeServer {
    */
   public List<SubscriberIdentifier> registerPublisher(String callerId,
       PublisherIdentifier description) {
-    publishers.put(description.getTopicName(), description);
+    publishers.put(description.getTopicName().toString(), description);
     addSlave(description.getSlaveIdentifier());
-    return ImmutableList.copyOf(subscribers.get(description.getTopicName()));
+    return ImmutableList.copyOf(subscribers.get(description.getTopicName().toString()));
   }
 
   public List<Object> unregisterPublisher(String callerId, String topic, String callerApi) {

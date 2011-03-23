@@ -18,6 +18,7 @@ package org.ros.internal.node.response;
 
 import com.google.common.collect.Lists;
 
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.topic.MessageDefinition;
 import org.ros.internal.node.topic.TopicDefinition;
 
@@ -28,7 +29,7 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TopicDefinitionListResultFactory implements ResultFactory<List<TopicDefinition>> {
-  
+
   @Override
   public List<TopicDefinition> create(Object value) {
     List<TopicDefinition> descriptions = Lists.newArrayList();
@@ -36,9 +37,10 @@ public class TopicDefinitionListResultFactory implements ResultFactory<List<Topi
     for (Object topic : topics) {
       String name = (String) ((Object[]) topic)[0];
       String type = (String) ((Object[]) topic)[1];
-      descriptions.add(new TopicDefinition(name, MessageDefinition.createMessageDefinition(type)));
+      descriptions.add(new TopicDefinition(new GraphName(name), MessageDefinition
+          .createMessageDefinition(type)));
     }
     return descriptions;
   }
-  
+
 }

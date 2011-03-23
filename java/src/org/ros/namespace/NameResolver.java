@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.namespace;
 
 import com.google.common.base.Preconditions;
@@ -23,7 +24,6 @@ import org.ros.internal.namespace.GraphName;
 import java.util.HashMap;
 
 /**
- * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  */
@@ -52,8 +52,7 @@ public class NameResolver {
    * @param namespace
    * @param name
    * @return the fully resolved name relative to the given namespace.
-   * @throws RosNameException
-   *           Will throw on a poorly formated name.
+   * @throws RosNameException Will throw on a poorly formated name.
    */
   public String resolveName(String namespace, String name) throws RosNameException {
     GraphName ns = lookUpRemapping(new GraphName(namespace));
@@ -74,15 +73,11 @@ public class NameResolver {
   /**
    * Join two names together.
    * 
-   * @param name1
-   *          ROS name to join to.
-   * @param name2
-   *          ROS name to join. Must be relative.
+   * @param name1 ROS name to join to.
+   * @param name2 ROS name to join. Must be relative.
    * @return A concatenation of the two names
-   * @throws RosNameException
-   *           If name1 or name2 is an illegal name
-   * @throws IllegalArgumentException
-   *           If name2 is not a relative name
+   * @throws RosNameException If name1 or name2 is an illegal name
+   * @throws IllegalArgumentException If name2 is not a relative name
    */
   public static String join(String name1, String name2) throws RosNameException {
     return join(new GraphName(name1), new GraphName(name2));
@@ -91,15 +86,11 @@ public class NameResolver {
   /**
    * Join two names together.
    * 
-   * @param name1
-   *          ROS name to join to.
-   * @param name2
-   *          ROS name to join. Must be relative.
+   * @param name1 ROS name to join to.
+   * @param name2 ROS name to join. Must be relative.
    * @return A concatenation of the two names.
-   * @throws RosNameException
-   *           If name1 or name2 is an illegal name
-   * @throws IllegalArgumentException
-   *           If name2 is not a relative name.
+   * @throws RosNameException If name1 or name2 is an illegal name
+   * @throws IllegalArgumentException If name2 is not a relative name.
    */
   public static String join(GraphName name1, GraphName name2) throws RosNameException {
     // TODO: review - another possible behavior is to just return name2
@@ -115,8 +106,7 @@ public class NameResolver {
   /**
    * Convenience function for looking up a remapping.
    * 
-   * @param name
-   *          The name to lookup.
+   * @param name The name to lookup.
    * @return The name if it is not remapped, otherwise the remapped name.
    */
   protected GraphName lookUpRemapping(GraphName name) {
@@ -132,8 +122,7 @@ public class NameResolver {
   }
 
   /**
-   * @param name
-   *          Name to resolve
+   * @param name Name to resolve
    * @return The name resolved relative to the default namespace.
    * @throws RosNameException
    */

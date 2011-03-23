@@ -58,7 +58,7 @@ public class SubscriberIdentifier {
     return slaveIdentifier.getUri();
   }
 
-  public String getTopicName() {
+  public GraphName getTopicName() {
     return topicDefinition.getName();
   }
 

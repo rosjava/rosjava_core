@@ -16,13 +16,12 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.node.server.SlaveIdentifier;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.Message;
@@ -42,8 +41,7 @@ class UpdatePublisherRunnable<MessageType extends Message> implements Runnable {
 
   /**
    * @param subscriber
-   * @param slaveIdentifier
-   *          Identifier of the subscriber's slave.
+   * @param slaveIdentifier Identifier of the subscriber's slave.
    * @param publisherIdentifier
    */
   public UpdatePublisherRunnable(Subscriber<MessageType> subscriber,
@@ -58,8 +56,9 @@ class UpdatePublisherRunnable<MessageType extends Message> implements Runnable {
     SlaveClient slaveClient;
     try {
       slaveClient = new SlaveClient(slaveIdentifier.getName(), publisherIdentifier.getSlaveUri());
-      Response<ProtocolDescription> response = slaveClient.requestTopic(
-          this.subscriber.getTopicName(), ProtocolNames.SUPPORTED);
+      Response<ProtocolDescription> response =
+          slaveClient.requestTopic(this.subscriber.getTopicName().toString(),
+              ProtocolNames.SUPPORTED);
       // TODO(kwc): all of this logic really belongs in a protocol handler
       // registry.
       ProtocolDescription selected = response.getResult();

@@ -117,7 +117,7 @@ public class Node {
   public <MessageType extends Message> Subscriber<MessageType> createSubscriber(
       TopicDefinition topicDefinition, Class<MessageType> messageClass) throws IOException,
       URISyntaxException, RemoteException {
-    String topicName = topicDefinition.getName();
+    String topicName = topicDefinition.getName().toString();
     Subscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
 
@@ -156,7 +156,7 @@ public class Node {
   public <MessageType extends Message> Publisher<MessageType> createPublisher(
       TopicDefinition topicDefinition, Class<MessageType> messageClass) throws IOException,
       URISyntaxException, RemoteException {
-    String topicName = topicDefinition.getName();
+    String topicName = topicDefinition.getName().toString();
     Publisher<MessageType> publisher;
     boolean createdNewPublisher = false;
 
