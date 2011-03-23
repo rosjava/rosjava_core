@@ -24,17 +24,33 @@ import java.util.HashMap;
 
 public class NameResolverTest extends TestCase {
 
-  public NameResolver createGlobalResolver() throws RosNameException {
+  public NameResolver createGlobalResolver() {
     return createGlobalResolver(new HashMap<GraphName, GraphName>());
   }
-  
-  public NameResolver createGlobalResolver(HashMap<GraphName, GraphName> remappings) throws RosNameException {
+
+  public NameResolver createGlobalResolver(HashMap<GraphName, GraphName> remappings) {
     return new NameResolver(Namespace.GLOBAL_NS, remappings);
   }
 
   @Test
-  public void testResolveNameOneArg() throws RosNameException {
+  public void testResolveNameOneArg() {
+    NameResolver r = createGlobalResolver();
 
+    assertEquals("/foo", r.resolveName("foo"));
+    assertEquals("/foo", r.resolveName("/foo"));
+    assertEquals("/foo/bar", r.resolveName("foo/bar"));
+
+    try {
+      assertEquals("/node/foo", r.resolveName("~foo"));
+      fail("should have thrown RosNameException");
+    } catch (RosNameException e) {
+
+    }
+    r = new NameResolver("/ns1", new HashMap<GraphName, GraphName>());
+
+    assertEquals("/ns1/foo", r.resolveName("foo"));
+    assertEquals("/foo", r.resolveName("/foo"));
+    assertEquals("/ns1/foo/bar", r.resolveName("foo/bar"));
   }
 
   @Test
@@ -85,6 +101,21 @@ public class NameResolverTest extends TestCase {
     }
   }
 
+  @Test
+  public void testJoin() {
+    assertEquals("/bar", NameResolver.join("/", "bar"));
+    assertEquals("bar", NameResolver.join("", "bar"));
+    assertEquals("foo/bar", NameResolver.join("foo", "bar"));
+    assertEquals("/foo/bar", NameResolver.join("/foo", "bar"));
+    assertEquals("/bar", NameResolver.join("/foo", "/bar"));
+
+    assertEquals("/bar", NameResolver.join(new GraphName("/"), new GraphName("bar")));
+    assertEquals("bar", NameResolver.join(new GraphName(""), new GraphName("bar")));
+    assertEquals("foo/bar", NameResolver.join(new GraphName("foo"), new GraphName("bar")));
+    assertEquals("/foo/bar", NameResolver.join(new GraphName("/foo"), new GraphName("bar")));
+    assertEquals("/bar", NameResolver.join(new GraphName("/foo"), new GraphName("/bar")));
+  }
+
   /**
    * Test resolveName with name remapping active.
    * 
@@ -99,13 +130,10 @@ public class NameResolverTest extends TestCase {
     NameResolver r = createGlobalResolver(remappings);
 
     String n = r.resolveName("name");
-    System.out.print(n);
     assertTrue(n.equals("/my/name"));
     assertTrue(r.resolveName("/name").equals("/name"));
     assertTrue(r.resolveName("foo").equals("/my/foo"));
     assertTrue(r.resolveName("/my/name").equals("/my/name"));
-
-    // TODO: not enough tests here.
   }
 
 }

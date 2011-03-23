@@ -87,16 +87,14 @@ public class NameResolver {
    * Join two names together.
    * 
    * @param name1 ROS name to join to.
-   * @param name2 ROS name to join. Must be relative.
+   * @param name2 ROS name to join. If name2 is global, this will return name2.
    * @return A concatenation of the two names.
    * @throws RosNameException If name1 or name2 is an illegal name
-   * @throws IllegalArgumentException If name2 is not a relative name.
    */
   public static String join(GraphName name1, GraphName name2) throws RosNameException {
-    // TODO: review - another possible behavior is to just return name2
-    Preconditions.checkArgument(name2.isRelative(),
-        "name2 cannot be joined as it is global or private");
-    if (name1.equals(Namespace.GLOBAL_NS)) {
+    if (name2.isGlobal() || name1.toString().equals("")) {
+      return name2.toString();
+    } else if (name1.equals(Namespace.GLOBAL_NS)) {
       return Namespace.GLOBAL_NS + name2.toString();
     } else {
       return new GraphName(name1.toString() + "/" + name2.toString()).toString();

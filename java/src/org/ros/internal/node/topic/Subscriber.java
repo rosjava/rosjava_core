@@ -140,16 +140,11 @@ public class Subscriber<MessageType extends Message> extends Topic<MessageType> 
   }
 
   public Collection<String> getSupportedProtocols() {
-    // TODO(kwc): the client is allowed to send parameter arguments with the
-    // supported protocols as well (e.g. to test for shared memory
-    // compatibility), so not sufficient to represent as a list of
-    // Strings.
     return ProtocolNames.SUPPORTED;
   }
 
   public void addMessageListener(MessageListener<MessageType> listener) {
     listeners.add(listener);
-    // TODO(kwc): send event to start registration with master.
   }
 
   public void removeMessageListener(MessageListener<MessageType> listener) {
