@@ -59,25 +59,38 @@ public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.Par
   }
 
   public Response<Object> getParam(String callerId, String parameterName) throws RemoteException {
-    return Response.fromListCheckedFailure(node.getParam(callerId, parameterName), new ObjectResultFactory());
+    return Response.fromListCheckedFailure(node.getParam(callerId, parameterName),
+        new ObjectResultFactory());
   }
 
   public Response<Boolean> hasParam(String callerId, String parameterName) throws RemoteException {
-    return Response.fromListChecked(node.hasParam(callerId, parameterName), new BooleanResultFactory());
+    return Response.fromListChecked(node.hasParam(callerId, parameterName),
+        new BooleanResultFactory());
   }
 
   public Response<Void> deleteParam(String callerId, String parameterName) throws RemoteException {
-    return Response.fromListChecked(node.deleteParam(callerId, parameterName), new VoidResultFactory());
-  }
-
-  public Response<Void> setParam(String callerId, String parameterName, String parameterValue)
-      throws RemoteException {
-    return Response.fromListChecked(node.setParam(callerId, parameterName, parameterValue),
+    return Response.fromListChecked(node.deleteParam(callerId, parameterName),
         new VoidResultFactory());
   }
 
+  public Response<Void> setParam(String callerId, String parameterName, Object parameterValue)
+      throws RemoteException {
+    // Convert Longs to ints due to Apache XMLRPC restriction. An alternative
+    // would be to change setParam to have type-specific overloads, though we
+    // would still have issues with arrays and maps.
+    if (parameterValue instanceof Long) {
+      return Response.fromListChecked(
+          node.setParam(callerId, parameterName, ((Long) parameterValue).intValue()),
+          new VoidResultFactory());
+    } else {
+      return Response.fromListChecked(node.setParam(callerId, parameterName, parameterValue),
+          new VoidResultFactory());
+    }
+  }
+
   public Response<String> searchParam(String callerId, String parameterName) throws RemoteException {
-    return Response.fromListCheckedFailure(node.searchParam(callerId, parameterName), new StringResultFactory());
+    return Response.fromListCheckedFailure(node.searchParam(callerId, parameterName),
+        new StringResultFactory());
   }
 
   public Response<Object> subscribeParam(SlaveIdentifier slave, String parameterName)

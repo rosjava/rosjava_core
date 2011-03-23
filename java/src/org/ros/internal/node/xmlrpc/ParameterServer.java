@@ -25,7 +25,7 @@ public interface ParameterServer extends Node {
 
   public List<Object> deleteParam(String callerId, String key);
 
-  public List<Object> setParam(String callerId, String key, String value);
+  public List<Object> setParam(String callerId, String key, Object value);
 
   public List<Object> getParam(String callerId, String key);
 

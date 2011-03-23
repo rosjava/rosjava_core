@@ -104,7 +104,7 @@ public class ParameterClient {
     parameterServer.deleteParam(this.callerId, resolvedName);
   }
 
-  public void setParam(String parameterName, String parameterValue) throws RemoteException,
+  public void setParam(String parameterName, Object parameterValue) throws RemoteException,
       RosNameException {
     String resolvedName = resolver.resolveName(parameterName);
     if (DEBUG) {
