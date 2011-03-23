@@ -68,9 +68,9 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<Void> registerService(SlaveIdentifier slave,
       ServiceServer<? extends Message> service) throws URISyntaxException, RemoteException {
-    return Response.fromListChecked(node.registerService(slave.getName().toString(),
-        service.getName(), service
-        .getUri().toString(), slave.getUri().toString()), new VoidResultFactory());
+    return Response.fromListChecked(node.registerService(slave.getName().toString(), service
+        .getName().toString(), service.getUri().toString(), slave.getUri().toString()),
+        new VoidResultFactory());
   }
 
   /**
@@ -86,10 +86,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<Integer> unregisterService(SlaveIdentifier slave,
       ServiceServer<? extends Message> service) throws URISyntaxException, RemoteException {
-    return Response.fromListChecked(
-node.unregisterService(slave.getName().toString(),
-        service.getName(), service.getUri().toString()),
-        new IntegerResultFactory());
+    return Response.fromListChecked(node.unregisterService(slave.getName().toString(), service
+        .getName().toString(), service.getUri().toString()), new IntegerResultFactory());
   }
 
   /**
@@ -127,8 +125,7 @@ node.unregisterService(slave.getName().toString(),
   public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
       throws RemoteException {
     return Response.fromListChecked(node.unregisterSubscriber(slave.getName().toString(),
-        subscriber.getTopicName(),
-        slave.getUri().toString()), new IntegerResultFactory());
+        subscriber.getTopicName(), slave.getUri().toString()), new IntegerResultFactory());
   }
 
   /**
@@ -144,11 +141,9 @@ node.unregisterService(slave.getName().toString(),
    */
   public Response<List<URI>> registerPublisher(PublisherIdentifier publisher)
       throws URISyntaxException, RemoteException {
-    return Response.fromListChecked(
-node.registerPublisher(publisher.getNodeName().toString(),
-        publisher.getTopicName(),
-            publisher.getTopicMessageType(), publisher.getSlaveUri().toString()),
-        new UriListResultFactory());
+    return Response.fromListChecked(node.registerPublisher(publisher.getNodeName().toString(),
+        publisher.getTopicName(), publisher.getTopicMessageType(), publisher.getSlaveUri()
+            .toString()), new UriListResultFactory());
   }
 
   /**

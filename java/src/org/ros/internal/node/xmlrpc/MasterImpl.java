@@ -18,6 +18,7 @@ package org.ros.internal.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -90,7 +91,8 @@ public class MasterImpl implements Master {
     // TODO(damonkohler): Pull out factory methods to avoid passing in the null
     // type and md5Checksum here.
     ServiceIdentifier description =
-        new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(serviceName, null, null));
+        new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(
+            new GraphName(serviceName), null, null));
     master.registerService(description);
     return Response.createSuccess("Success", 0).toList();
   }

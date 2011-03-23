@@ -18,8 +18,8 @@ package org.ros.internal.node.service;
 
 import com.google.common.collect.ImmutableMap;
 
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.transport.ConnectionHeaderFields;
-
 
 import java.net.URI;
 import java.util.Map;
@@ -39,11 +39,11 @@ public class ServiceIdentifier {
 
   public Map<String, String> toHeader() {
     return ImmutableMap.<String, String>builder()
-        .put(ConnectionHeaderFields.SERVICE, serviceDefinition.getName())
+        .put(ConnectionHeaderFields.SERVICE, serviceDefinition.getName().toString())
         .putAll(serviceDefinition.toHeader()).build();
   }
 
-  public String getName() {
+  public GraphName getName() {
     return serviceDefinition.getName();
   }
 

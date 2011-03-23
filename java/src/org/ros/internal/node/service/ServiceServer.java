@@ -27,6 +27,7 @@ import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.transport.ConnectionHeader;
@@ -78,7 +79,7 @@ public class ServiceServer<RequestMessageType extends Message> {
     this.advertiseAddress = advertiseAddress;
     header =
         ImmutableMap.<String, String>builder()
-            .put(ConnectionHeaderFields.SERVICE, definition.getName())
+            .put(ConnectionHeaderFields.SERVICE, definition.getName().toString())
             .putAll(definition.toHeader()).build();
   }
 
@@ -101,7 +102,7 @@ public class ServiceServer<RequestMessageType extends Message> {
     return advertiseAddress.toUri("rosrpc");
   }
 
-  public String getName() {
+  public GraphName getName() {
     return definition.getName();
   }
 

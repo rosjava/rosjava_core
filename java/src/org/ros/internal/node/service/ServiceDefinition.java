@@ -19,8 +19,8 @@ package org.ros.internal.node.service;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.transport.ConnectionHeaderFields;
-
 
 import java.util.Map;
 
@@ -29,30 +29,28 @@ import java.util.Map;
  */
 public class ServiceDefinition {
 
-  private final String name;
+  private final GraphName name;
   private final String type;
   private final String md5Checksum;
-  
-  public ServiceDefinition(String name, String type, String md5Checksum) {
+
+  public ServiceDefinition(GraphName name, String type, String md5Checksum) {
     this.name = name;
     this.type = type;
     this.md5Checksum = md5Checksum;
   }
-  
+
   public Map<String, String> toHeader() {
     Preconditions.checkNotNull(md5Checksum);
-    return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.TYPE, type)
-        .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum)
-        .build();
+    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.TYPE, type)
+        .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum).build();
   }
 
   public String getType() {
     return type;
   }
-  
-  public String getName() {
+
+  public GraphName getName() {
     return name;
   }
-  
+
 }

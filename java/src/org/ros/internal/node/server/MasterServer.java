@@ -60,7 +60,7 @@ public class MasterServer extends NodeServer {
   }
 
   public void registerService(ServiceIdentifier description) {
-    services.put(description.getName(), description);
+    services.put(description.getName().toString(), description);
   }
 
   public List<Object> unregisterService(String callerId, String service, String serviceApi) {

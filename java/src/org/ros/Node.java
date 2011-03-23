@@ -90,12 +90,12 @@ public class Node implements Namespace {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
         node =
-            org.ros.internal.node.Node.createPrivate(nodeName,
-            context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
+            org.ros.internal.node.Node.createPrivate(nodeName, context.getRosMasterUri(),
+                context.getXmlRpcPort(), context.getTcpRosPort());
       } else {
         node =
-            org.ros.internal.node.Node.createPublic(nodeName,
-            context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
+            org.ros.internal.node.Node.createPublic(nodeName, context.getRosMasterUri(),
+                context.getXmlRpcPort(), context.getTcpRosPort());
       }
     } catch (Exception e) {
       throw new RosInitException(e);
@@ -103,8 +103,8 @@ public class Node implements Namespace {
 
     // TODO(damonkohler): Move the creation and management of the RosoutLogger
     // into the internal.Node class.
-    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher = createPublisher("/rosout",
-        org.ros.message.rosgraph_msgs.Log.class);
+    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
+        createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
     log.setRosoutPublisher(rosoutPublisher);
   }
 
@@ -114,10 +114,10 @@ public class Node implements Namespace {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message m = messageClass.newInstance();
-      TopicDefinition topicDefinition = new TopicDefinition(resolvedTopicName,
-          MessageDefinition.createFromMessage(m));
-      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl = node.createPublisher(
-          topicDefinition, messageClass);
+      TopicDefinition topicDefinition =
+          new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(m));
+      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
+          node.createPublisher(topicDefinition, messageClass);
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (RosNameException e) {
       throw e;
@@ -131,21 +131,14 @@ public class Node implements Namespace {
       final MessageListener<MessageType> callback, Class<MessageType> messageClass)
       throws RosInitException, RosNameException {
     try {
-      Message m = messageClass.newInstance();
       String resolvedTopicName = resolveName(topicName);
-      TopicDefinition topicDefinition = new TopicDefinition(resolvedTopicName,
-          MessageDefinition.createFromMessage(m));
-      org.ros.internal.node.topic.Subscriber<MessageType> subscriberImpl = node.createSubscriber(
-          topicDefinition, messageClass);
-
-      // Add the callback to the impl.
-      subscriberImpl.addMessageListener(callback);
-      // Create the user-facing Subscriber handle. This is little more than a
-      // lightweight wrapper around the internal implementation so that we can
-      // track callback references.
-      Subscriber<MessageType> subscriber = new Subscriber<MessageType>(resolvedTopicName, callback,
-          messageClass, subscriberImpl);
-      return subscriber;
+      Message message = messageClass.newInstance();
+      TopicDefinition topicDefinition =
+          new TopicDefinition(resolvedTopicName, MessageDefinition.createFromMessage(message));
+      org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
+          node.createSubscriber(topicDefinition, messageClass);
+      subscriber.addMessageListener(callback);
+      return new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriber);
     } catch (RosNameException e) {
       throw e;
     } catch (Exception e) {

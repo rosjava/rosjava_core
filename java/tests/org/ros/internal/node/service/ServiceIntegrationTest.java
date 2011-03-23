@@ -51,7 +51,7 @@ public class ServiceIntegrationTest {
   @Test
   public void PesistentServiceConnectionTest() throws Exception {
     ServiceDefinition definition =
-        new ServiceDefinition("/add_two_ints", AddTwoInts.__s_getDataType(),
+        new ServiceDefinition(new GraphName("/add_two_ints"), AddTwoInts.__s_getDataType(),
             AddTwoInts.__s_getMD5Sum());
 
     Node serverNode = Node.createPrivate(new GraphName("/server"), masterServer.getUri(), 0, 0);

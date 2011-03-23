@@ -195,7 +195,7 @@ public class Node {
       ServiceDefinition serviceDefinition, Class<RequestMessageType> requestMessageClass,
       ServiceResponseBuilder<RequestMessageType> responseBuilder) throws Exception {
     ServiceServer<RequestMessageType> serviceServer;
-    String name = serviceDefinition.getName();
+    String name = serviceDefinition.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
@@ -231,7 +231,7 @@ public class Node {
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
     ServiceClient<ResponseMessageType> serviceClient;
-    String name = serviceIdentifier.getName();
+    String name = serviceIdentifier.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
