@@ -31,8 +31,13 @@ import org.ros.namespace.Namespace;
 public class GraphName {
   
   private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
-  
+  private static final String UNKNOWN_NAME = "/unknown";
+
   private final String name;
+  
+  public static GraphName createUnknown() {
+    return new GraphName(UNKNOWN_NAME);
+  }
 
   /**
    * @param name

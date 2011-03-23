@@ -23,6 +23,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.MessageListener;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.Node;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
@@ -53,7 +54,7 @@ public class ServiceIntegrationTest {
         new ServiceDefinition("/add_two_ints", AddTwoInts.__s_getDataType(),
             AddTwoInts.__s_getMD5Sum());
 
-    Node serverNode = Node.createPrivate("/server", masterServer.getUri(), 0, 0);
+    Node serverNode = Node.createPrivate(new GraphName("/server"), masterServer.getUri(), 0, 0);
     ServiceServer<AddTwoInts.Request> server =
         serverNode.createServiceServer(definition, AddTwoInts.Request.class,
             new ServiceResponseBuilder<AddTwoInts.Request>() {
@@ -65,7 +66,7 @@ public class ServiceIntegrationTest {
               }
             });
 
-    Node clientNode = Node.createPrivate("/client", masterServer.getUri(), 0, 0);
+    Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
     ServiceClient<AddTwoInts.Response> client =
         clientNode.createServiceClient(new ServiceIdentifier(server.getUri(), definition),
             AddTwoInts.Response.class);

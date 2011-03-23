@@ -16,20 +16,15 @@
 
 package org.ros.internal.node.client;
 
-import org.ros.internal.node.response.StringListResultFactory;
-
-import org.ros.internal.node.response.IntegerResultFactory;
-
-import org.ros.internal.node.server.SlaveIdentifier;
-
-import org.ros.internal.node.response.StringResultFactory;
-
-import org.ros.internal.node.response.VoidResultFactory;
-
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.BooleanResultFactory;
+import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.ObjectResultFactory;
 import org.ros.internal.node.response.Response;
+import org.ros.internal.node.response.StringListResultFactory;
+import org.ros.internal.node.response.StringResultFactory;
+import org.ros.internal.node.response.VoidResultFactory;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.xmlrpc.ParameterServer;
 
 import java.net.MalformedURLException;
@@ -96,14 +91,15 @@ public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.Par
   public Response<Object> subscribeParam(SlaveIdentifier slave, String parameterName)
       throws RemoteException {
     return Response.fromListChecked(
-        node.subscribeParam(slave.getName(), slave.getUri().toString(), parameterName),
+        node.subscribeParam(slave.getName().toString(), slave.getUri().toString(), parameterName),
         new ObjectResultFactory());
   }
 
   public Response<Integer> unsubscribeParam(SlaveIdentifier slave, String parameterName)
       throws RemoteException {
     return Response.fromListChecked(
-        node.unsubscribeParam(slave.getName(), slave.getUri().toString(), parameterName),
+node.unsubscribeParam(slave.getName().toString(), slave.getUri()
+            .toString(), parameterName),
         new IntegerResultFactory());
   }
 

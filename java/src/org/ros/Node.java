@@ -18,8 +18,6 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.node.xmlrpc.Master;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exceptions.RosInitException;
@@ -35,6 +33,7 @@ import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.MessageDefinition;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.Message;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
@@ -90,10 +89,12 @@ public class Node implements Namespace {
       if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
-        node = org.ros.internal.node.Node.createPrivate(nodeName.toString(),
+        node =
+            org.ros.internal.node.Node.createPrivate(nodeName,
             context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
       } else {
-        node = org.ros.internal.node.Node.createPublic(nodeName.toString(),
+        node =
+            org.ros.internal.node.Node.createPublic(nodeName,
             context.getRosMasterUri(), context.getXmlRpcPort(), context.getTcpRosPort());
       }
     } catch (Exception e) {

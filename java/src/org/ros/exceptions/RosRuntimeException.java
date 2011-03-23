@@ -16,30 +16,41 @@
 package org.ros.exceptions;
 
 /**
- * @author ethan.rublee@gmail.com (Ethan Rublee)
+ * @author "Ethan Rublee ethan.rublee@gmail.com"
+ *
  */
-public class RosNameException extends RosRuntimeException {
+public class RosRuntimeException extends RuntimeException {
 
   /**
    * @param exception
    */
-  public RosNameException(final Exception exception) {
+  public RosRuntimeException(final Exception exception) {
     super(exception);
   }
-
   /**
    * @param message
    * @param throwable
    */
-  public RosNameException(final String message, final Throwable throwable) {
-    super(message, throwable);
+  public RosRuntimeException(final String message, final Throwable throwable) {
+    super(message,throwable);
   }
-
   /**
    * @param message
    */
-  public RosNameException(final String message) {
+  public RosRuntimeException(final String message) {
     super(message);
   }
+  
+//  /**
+//   * @param object
+//   */
+//  public RosException(final Object object) {
+//    super(object.toString());
+//  }
+  
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
 
 }

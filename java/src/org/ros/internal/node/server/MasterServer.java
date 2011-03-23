@@ -68,7 +68,7 @@ public class MasterServer extends NodeServer {
   }
 
   private void addSlave(SlaveIdentifier description) {
-    String name = description.getName();
+    String name = description.getName().toString();
     Preconditions.checkState(slaves.get(name) == null || slaves.get(name).equals(description));
     slaves.put(name, description);
   }

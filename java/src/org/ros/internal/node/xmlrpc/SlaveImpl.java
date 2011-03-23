@@ -35,6 +35,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class SlaveImpl implements Slave {
 
   private static final boolean DEBUG = false;
@@ -46,54 +49,29 @@ public class SlaveImpl implements Slave {
     this.slave = slave;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Slave#getBusStats(java.lang.String)
-   */
   @Override
   public List<Object> getBusStats(String callerId) {
     return slave.getBusStats(callerId);
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Slave#getBusInfo(java.lang.String)
-   */
   @Override
   public List<Object> getBusInfo(String callerId) {
     List<Object> busInfo = slave.getBusInfo(callerId);
     return Response.createSuccess("bus info", busInfo).toList();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Slave#getMasterUri(java.lang.String)
-   */
   @Override
   public List<Object> getMasterUri(String callerId) {
     URI uri = slave.getMasterUri(callerId);
     return new Response<String>(StatusCode.SUCCESS, "", uri.toString()).toList();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Slave#shutdown(java.lang.String, java.lang.String)
-   */
   @Override
   public List<Object> shutdown(String callerId, String message) {
     slave.shutdown(callerId, message);
     return Response.createSuccess("Shutdown successful.", null).toList();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Slave#getPid(java.lang.String)
-   */
   @Override
   public List<Object> getPid(String callerId) {
     try {
@@ -104,11 +82,6 @@ public class SlaveImpl implements Slave {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Slave#getSubscriptions(java.lang.String)
-   */
   @Override
   public List<Object> getSubscriptions(String callerId) {
     List<Subscriber<?>> subscribers = slave.getSubscriptions();
@@ -119,11 +92,6 @@ public class SlaveImpl implements Slave {
     return Response.createSuccess("Success", subscriptions).toList();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Slave#getPublications(java.lang.String)
-   */
   @Override
   public List<Object> getPublications(String callerId) {
     List<Publisher<?>> publishers = slave.getPublications();
@@ -134,24 +102,12 @@ public class SlaveImpl implements Slave {
     return Response.createSuccess("Success", publications).toList();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Slave#paramUpdate(java.lang.String,
-   * java.lang.String, java.lang.String)
-   */
   @Override
   public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) {
     // TODO(kwc) implement parameter subscriptions (low priority)
     return Response.createError("paramUpdate is not supported", 0).toList();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Slave#publisherUpdate(java.lang.String,
-   * java.lang.String, java.lang.Object[])
-   */
   @Override
   public List<Object> publisherUpdate(String callerId, String topic, Object[] publishers) {
     try {
@@ -169,12 +125,6 @@ public class SlaveImpl implements Slave {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.node.xmlrpc.Slave#requestTopic(java.lang.String,
-   * java.lang.String, java.lang.Object[])
-   */
   @Override
   public List<Object> requestTopic(String callerId, String topic, Object[] protocols) {
     Set<String> requestedProtocols = Sets.newHashSet();

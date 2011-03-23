@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
@@ -55,12 +56,12 @@ public class MasterSlaveIntegrationTest {
     TopicManager topicManager = new TopicManager();
     ServiceManager serviceManager = new ServiceManager();
     slaveServer =
-        new SlaveServer("/foo", BindAddress.createPublic(0), AdvertiseAddress.createPublic(),
-            masterClient, topicManager, serviceManager, new TcpRosServer(
-                BindAddress.createPublic(0), AdvertiseAddress.createPublic(), topicManager,
-                serviceManager));
+        new SlaveServer(new GraphName("/foo"), BindAddress.createPublic(0),
+            AdvertiseAddress.createPublic(), masterClient, topicManager, serviceManager,
+            new TcpRosServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic(),
+                topicManager, serviceManager));
     slaveServer.start();
-    slaveClient = new SlaveClient("/bar", slaveServer.getUri());
+    slaveClient = new SlaveClient(new GraphName("/bar"), slaveServer.getUri());
   }
 
   @Test

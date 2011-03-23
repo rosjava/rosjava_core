@@ -18,6 +18,7 @@ package org.ros.internal.node.topic;
 
 import com.google.common.collect.ImmutableMap;
 
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
@@ -36,7 +37,7 @@ public class SubscriberIdentifier {
     // TODO(damonkohler): Update SlaveIdentifier to handle the case where the
     // URI is not set.
     SlaveIdentifier slaveIdentifier =
-        new SlaveIdentifier(header.get(ConnectionHeaderFields.CALLER_ID), null);
+        new SlaveIdentifier(new GraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
     return new SubscriberIdentifier(slaveIdentifier, TopicDefinition.createFromHeader(header));
   }
 
@@ -49,7 +50,7 @@ public class SubscriberIdentifier {
     return slaveIdentifier;
   }
 
-  public String getNodeName() {
+  public GraphName getNodeName() {
     return slaveIdentifier.getName();
   }
 
@@ -89,4 +90,5 @@ public class SubscriberIdentifier {
     } else if (!topicDefinition.equals(other.topicDefinition)) return false;
     return true;
   }
+  
 }

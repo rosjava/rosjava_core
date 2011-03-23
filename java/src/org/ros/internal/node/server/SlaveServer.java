@@ -16,7 +16,6 @@
 
 package org.ros.internal.node.server;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.apache.xmlrpc.XmlRpcException;
@@ -53,7 +52,7 @@ import java.util.List;
  */
 public class SlaveServer extends NodeServer {
 
-  private final String nodeName;
+  private final GraphName nodeName;
   private final MasterClient masterClient;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
@@ -69,14 +68,10 @@ public class SlaveServer extends NodeServer {
     return publishers;
   }
 
-  public SlaveServer(String nodeName, BindAddress xmlRpcServerAddress,
+  public SlaveServer(GraphName nodeName, BindAddress xmlRpcServerAddress,
       AdvertiseAddress advertiseAddress, MasterClient master, TopicManager topicManager,
       ServiceManager serviceManager, TcpRosServer tcpRosServer) {
     super(xmlRpcServerAddress, advertiseAddress);
-    // TODO(damonkohler): nodeName should be wrapped up in a class that
-    // guarantees these symantics.
-    Preconditions.checkNotNull(nodeName);
-    Preconditions.checkArgument(nodeName.startsWith("/"));
     this.nodeName = nodeName;
     this.masterClient = master;
     this.topicManager = topicManager;

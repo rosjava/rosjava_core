@@ -72,7 +72,7 @@ public class MasterImpl implements Master {
   @Override
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
       String callerApi) throws URISyntaxException {
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier(callerId, new URI(callerApi));
+    SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
         new TopicDefinition(topic, MessageDefinition.createMessageDefinition(topicType));
     PublisherIdentifier description = new PublisherIdentifier(slaveIdentifier, topicDefinition);
@@ -98,7 +98,7 @@ public class MasterImpl implements Master {
   @Override
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
       String callerApi) throws URISyntaxException {
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier(callerId, new URI(callerApi));
+    SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
         new TopicDefinition(topic, MessageDefinition.createMessageDefinition(topicType));
     List<PublisherIdentifier> publishers =

@@ -32,7 +32,6 @@ import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicDefinition;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -55,16 +54,16 @@ public class MasterImplTest {
   @Test
   public void testRegisterPublisher() throws URISyntaxException {
     MasterServer mockMaster = mock(MasterServer.class);
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/slave", new URI("http://api"));
-    TopicDefinition topicDefinition = new TopicDefinition("/topic",
-        MessageDefinition.createMessageDefinition("msg"));
-    SubscriberIdentifier subscriberDescription = new SubscriberIdentifier(slaveIdentifier,
-        topicDefinition);
+    SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
+    TopicDefinition topicDefinition =
+        new TopicDefinition("/topic", MessageDefinition.createMessageDefinition("msg"));
+    SubscriberIdentifier subscriberDescription =
+        new SubscriberIdentifier(slaveIdentifier, topicDefinition);
     when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
         .thenReturn(Lists.<SubscriberIdentifier>newArrayList(subscriberDescription));
     MasterImpl master = new MasterImpl(mockMaster);
-    List<Object> response = master
-        .registerPublisher("/slave", "/topic", "/topicType", "http://api");
+    List<Object> response =
+        master.registerPublisher("/slave", "/topic", "/topicType", "http://api");
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
     assertEquals(response.get(2),
         Lists.newArrayList(subscriberDescription.getSlaveUri().toString()));
@@ -84,16 +83,16 @@ public class MasterImplTest {
   @Test
   public void testRegisterSubscriber() throws URISyntaxException {
     MasterServer mockMaster = mock(MasterServer.class);
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier("/slave", new URI("http://api"));
-    TopicDefinition topicDefinition = new TopicDefinition("/topic",
-        MessageDefinition.createMessageDefinition("msg"));
-    PublisherIdentifier publisherDescription = new PublisherIdentifier(slaveIdentifier,
-        topicDefinition);
+    SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
+    TopicDefinition topicDefinition =
+        new TopicDefinition("/topic", MessageDefinition.createMessageDefinition("msg"));
+    PublisherIdentifier publisherDescription =
+        new PublisherIdentifier(slaveIdentifier, topicDefinition);
     when(mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any())).thenReturn(
         Lists.<PublisherIdentifier>newArrayList(publisherDescription));
     MasterImpl master = new MasterImpl(mockMaster);
-    List<Object> response = master.registerSubscriber("/slave", "/topic", "/topicType",
-        "http://api");
+    List<Object> response =
+        master.registerSubscriber("/slave", "/topic", "/topicType", "http://api");
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
     assertEquals(response.get(2), Lists.newArrayList(publisherDescription.getSlaveUri().toString()));
   }

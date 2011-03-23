@@ -36,6 +36,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 import org.ros.MessageListener;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
@@ -130,19 +131,17 @@ public class ServiceClient<ResponseMessageType extends Message> {
     }
   }
 
-  public static <S extends Message> ServiceClient<S> create(String nodeName,
+  public static <S extends Message> ServiceClient<S> create(GraphName nodeName,
       ServiceIdentifier serviceIdentifier, Class<S> incomingMessageClass) {
     return new ServiceClient<S>(nodeName, serviceIdentifier, incomingMessageClass);
   }
 
-  private ServiceClient(String nodeName, ServiceIdentifier serviceIdentifier,
+  private ServiceClient(GraphName nodeName, ServiceIdentifier serviceIdentifier,
       Class<ResponseMessageType> responseMessageClass) {
-    Preconditions.checkNotNull(nodeName);
-    Preconditions.checkArgument(nodeName.startsWith("/"));
     this.responseMessageClass = responseMessageClass;
     messageListeners = Lists.newLinkedList();
     header = ImmutableMap.<String, String>builder()
-        .put(ConnectionHeaderFields.CALLER_ID, nodeName)
+        .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
         // TODO(damonkohler): Support non-persistent connections.
         .put(ConnectionHeaderFields.PERSISTENT, "1")
         .putAll(serviceIdentifier.toHeader())

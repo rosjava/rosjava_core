@@ -23,6 +23,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.MessageListener;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.Node;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -54,11 +55,13 @@ public class TopicIntegrationTest {
         new TopicDefinition("/foo",
             MessageDefinition.createFromMessage(new org.ros.message.std_msgs.String()));
 
-    Node publisherNode = Node.createPrivate("/publisher", masterServer.getUri(), 0, 0);
+    Node publisherNode =
+        Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0, 0);
     Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.createPublisher(topicDefinition, org.ros.message.std_msgs.String.class);
 
-    Node subscriberNode = Node.createPrivate("/subscriber", masterServer.getUri(), 0, 0);
+    Node subscriberNode =
+        Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         publisherNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class);
 

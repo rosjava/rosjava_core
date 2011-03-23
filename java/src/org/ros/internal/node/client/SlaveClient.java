@@ -16,6 +16,7 @@
 
 package org.ros.internal.node.client;
 
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.ProtocolDescriptionResultFactory;
@@ -35,9 +36,9 @@ import java.util.List;
  */
 public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> {
 
-  private final String nodeName;
+  private final GraphName nodeName;
 
-  public SlaveClient(String nodeName, URI uri) throws MalformedURLException {
+  public SlaveClient(GraphName nodeName, URI uri) throws MalformedURLException {
     super(uri, org.ros.internal.node.xmlrpc.Slave.class);
     this.nodeName = nodeName;
   }
@@ -51,7 +52,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
   }
 
   public Response<URI> getMasterUri() throws RemoteException {
-    return Response.fromListChecked(node.getMasterUri(nodeName), new UriResultFactory());
+    return Response.fromListChecked(node.getMasterUri(nodeName.toString()), new UriResultFactory());
   }
 
   public List<Object> shutdown(String message) {
@@ -59,17 +60,17 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
   }
 
   public Response<Integer> getPid() throws RemoteException {
-    return Response.fromListChecked(node.getPid(nodeName), new IntegerResultFactory());
+    return Response.fromListChecked(node.getPid(nodeName.toString()), new IntegerResultFactory());
   }
 
   public Response<List<TopicDefinition>> getSubscriptions() throws RemoteException {
-    return Response.fromListChecked(node.getSubscriptions(nodeName),
+    return Response.fromListChecked(node.getSubscriptions(nodeName.toString()),
         new TopicDefinitionListResultFactory());
   }
 
   public Response<List<TopicDefinition>> getPublications() throws RemoteException {
-    return Response
-        .fromListChecked(node.getPublications(nodeName), new TopicDefinitionListResultFactory());
+    return Response.fromListChecked(node.getPublications(nodeName.toString()),
+        new TopicDefinitionListResultFactory());
   }
 
   public List<Object> paramUpdate(String parameterKey, String parameterValue) {
@@ -83,7 +84,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
   public Response<ProtocolDescription> requestTopic(String topic,
       Collection<String> requestedProtocols) throws RemoteException {
     return Response.fromListChecked(
-        node.requestTopic(nodeName, topic, new Object[][] {requestedProtocols.toArray()}),
+        node.requestTopic(nodeName.toString(), topic, new Object[][] {requestedProtocols.toArray()}),
         new ProtocolDescriptionResultFactory());
   }
 

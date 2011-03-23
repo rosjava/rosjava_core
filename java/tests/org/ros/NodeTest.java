@@ -86,11 +86,10 @@ public class NodeTest {
     assertEquals("/ns1/test_resolver/pub", pub.getTopicName());
     
     MessageListener<Int64> callback = new MessageListener<Int64>() {
-      
       @Override
       public void onNewMessage(Int64 message) {
       }
-    };;;
+    };
     
     Subscriber<Int64> sub = node.createSubscriber("sub", callback , Int64.class);
     assertEquals("/ns1/sub", sub.getTopicName());
@@ -109,8 +108,8 @@ public class NodeTest {
   @Test
   public void testPublicAddresses() throws RosInitException, RosNameException, RemoteException,
       XmlRpcException, IOException {
-    MasterServer master = new MasterServer(BindAddress.createPublic(0),
-        AdvertiseAddress.createPublic());
+    MasterServer master =
+        new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     master.start();
     URI masterUri = master.getUri();
     checkHostName(masterUri.getHost());
@@ -130,12 +129,13 @@ public class NodeTest {
     assertTrue(port > 0);
     checkHostName(uri.getHost());
 
-    // check the TCPROS server address via the XMLRPC api.
-    SlaveClient slaveClient = new SlaveClient("test_addresses", uri);
-    Response<ProtocolDescription> response = slaveClient.requestTopic("test_addresses_pub",
-        Lists.newArrayList(ProtocolNames.TCPROS));
+    // Check the TCPROS server address via the XML-RPC API.
+    SlaveClient slaveClient = new SlaveClient(new GraphName("test_addresses"), uri);
+    Response<ProtocolDescription> response =
+        slaveClient.requestTopic("test_addresses_pub", Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();
     InetSocketAddress tcpRosAddress = result.getAddress();
     checkHostName(tcpRosAddress.getHostName());
   }
+
 }

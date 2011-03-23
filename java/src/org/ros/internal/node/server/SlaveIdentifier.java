@@ -19,9 +19,12 @@ package org.ros.internal.node.server;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+import org.ros.exceptions.RosNameException;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
@@ -29,15 +32,15 @@ import java.util.Map;
  */
 public class SlaveIdentifier {
 
-  /** Value for name field if URI is known but slave name is not. */
-  private static final String UNKNOWN_NAME = "/unknown";
-
-  private final String name;
+  private final GraphName name;
   private final URI uri;
 
-  public SlaveIdentifier(String name, URI uri) {
-    Preconditions.checkNotNull(name);
-    Preconditions.checkArgument(name.startsWith("/"));
+  public static SlaveIdentifier createFromStrings(String nodeName, String uri)
+      throws RosNameException, URISyntaxException {
+    return new SlaveIdentifier(new GraphName(nodeName), new URI(uri));
+  }
+
+  public SlaveIdentifier(GraphName name, URI uri) {
     // TODO(damonkohler): URI is optional. There should be a factory method that
     // creates a SlaveIdentifier without a URI.
     this.name = name;
@@ -49,7 +52,7 @@ public class SlaveIdentifier {
    * @return a {@link SlaveIdentifier} with a {@link URI} but no name
    */
   public static SlaveIdentifier createAnonymous(URI uri) {
-    return new SlaveIdentifier(UNKNOWN_NAME, uri);
+    return new SlaveIdentifier(GraphName.createUnknown(), uri);
   }
 
   @Override
@@ -58,7 +61,7 @@ public class SlaveIdentifier {
     return "SlaveIdentifier<" + name + ", " + uri.toString() + ">";
   }
 
-  public String getName() {
+  public GraphName getName() {
     return name;
   }
 
@@ -67,8 +70,8 @@ public class SlaveIdentifier {
   }
 
   public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.CALLER_ID, name)
-        .build();
+    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.CALLER_ID,
+        name.toString()).build();
   }
 
   @Override

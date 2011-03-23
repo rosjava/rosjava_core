@@ -16,6 +16,7 @@
 
 package org.ros.internal.node.topic;
 
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.SlaveIdentifier;
 
 import java.net.URI;
@@ -37,7 +38,7 @@ public class PublisherIdentifier {
     return slaveIdentifier;
   }
 
-  public String getNodeName() {
+  public GraphName getNodeName() {
     return slaveIdentifier.getName();
   }
 

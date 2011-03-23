@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
@@ -39,7 +40,7 @@ public class NodeTest {
         new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
 
-    Node node = Node.createPublic("/node_name", masterServer.getUri(), 0, 0);
+    Node node = Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
     node.start();
 
     String hostName = InetAddress.getLocalHost().getCanonicalHostName();

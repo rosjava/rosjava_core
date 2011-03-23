@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
@@ -57,14 +58,14 @@ import java.util.concurrent.Executors;
 public class Node {
 
   private final Executor executor;
-  private final String nodeName;
+  private final GraphName nodeName;
   private final MasterClient masterClient;
   private final SlaveServer slaveServer;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
   private final TcpRosServer tcpRosServer;
 
-  public static Node createPublic(String nodeName, URI masterUri, int xmlRpcBindPort,
+  public static Node createPublic(GraphName nodeName, URI masterUri, int xmlRpcBindPort,
       int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
     Node node =
         new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
@@ -74,7 +75,7 @@ public class Node {
     return node;
   }
 
-  public static Node createPrivate(String nodeName, URI masterUri, int xmlRpcBindPort,
+  public static Node createPrivate(GraphName nodeName, URI masterUri, int xmlRpcBindPort,
       int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
     Node node =
         new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
@@ -84,7 +85,7 @@ public class Node {
     return node;
   }
 
-  Node(String nodeName, URI masterUri, BindAddress tcpRosBindAddress,
+  Node(GraphName nodeName, URI masterUri, BindAddress tcpRosBindAddress,
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
       AdvertiseAddress xmlRpcAdvertiseAddress) throws MalformedURLException {
     this.nodeName = nodeName;
