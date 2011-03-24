@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.namespace;
 
 import org.ros.MessageListener;
@@ -31,7 +32,7 @@ import org.ros.message.Message;
 /**
  * Interface for the ROS namespace specification.
  * 
- * http://www.ros.org/wiki/Names
+ * @see "http://www.ros.org/wiki/Names"
  */
 public interface Namespace {
 
@@ -53,7 +54,6 @@ public interface Namespace {
       Class<MessageType> clazz) throws RosInitException;
 
   /**
-   * 
    * @param <MessageType> The message type to create the Subscriber for.
    * @param topic_name The topic name to be subscribed to. This may be "bar"
    *        "/foo/bar" "~my" and will be auto resolved.
