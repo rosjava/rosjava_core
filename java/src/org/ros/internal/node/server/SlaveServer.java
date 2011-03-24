@@ -233,7 +233,7 @@ public class SlaveServer extends NodeServer {
    * @throws MalformedURLException
    * @throws URISyntaxException
    */
-  public SlaveIdentifier toSlaveIdentifier() throws URISyntaxException, MalformedURLException {
+  public SlaveIdentifier toSlaveIdentifier() {
     return new SlaveIdentifier(nodeName, getUri());
   }
 

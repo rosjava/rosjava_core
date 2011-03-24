@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
+import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.RosoutLogger;
 import org.ros.internal.node.client.TimeProvider;
 import org.ros.internal.node.client.WallclockProvider;
@@ -35,6 +36,7 @@ import org.ros.internal.node.topic.MessageDefinition;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.Message;
+import org.ros.message.Service;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
@@ -89,13 +91,11 @@ public class Node implements Namespace {
       if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
-        node =
-            org.ros.internal.node.Node.createPrivate(nodeName, context.getRosMasterUri(),
-                context.getXmlRpcPort(), context.getTcpRosPort());
+        node = org.ros.internal.node.Node.createPrivate(nodeName, context.getRosMasterUri(),
+            context.getXmlRpcPort(), context.getTcpRosPort());
       } else {
-        node =
-            org.ros.internal.node.Node.createPublic(nodeName, context.getRosMasterUri(),
-                context.getXmlRpcPort(), context.getTcpRosPort());
+        node = org.ros.internal.node.Node.createPublic(nodeName, context.getRosMasterUri(),
+            context.getXmlRpcPort(), context.getTcpRosPort());
       }
     } catch (Exception e) {
       throw new RosInitException(e);
@@ -103,8 +103,8 @@ public class Node implements Namespace {
 
     // TODO(damonkohler): Move the creation and management of the RosoutLogger
     // into the internal.Node class.
-    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
-        createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
+    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher = createPublisher("/rosout",
+        org.ros.message.rosgraph_msgs.Log.class);
     log.setRosoutPublisher(rosoutPublisher);
   }
 
@@ -114,11 +114,10 @@ public class Node implements Namespace {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message message = messageClass.newInstance();
-      TopicDefinition topicDefinition =
-          new TopicDefinition(new GraphName(resolvedTopicName),
-              MessageDefinition.createFromMessage(message));
-      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
-          node.createPublisher(topicDefinition, messageClass);
+      TopicDefinition topicDefinition = new TopicDefinition(new GraphName(resolvedTopicName),
+          MessageDefinition.createFromMessage(message));
+      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl = node.createPublisher(
+          topicDefinition, messageClass);
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (RosNameException e) {
       throw e;
@@ -134,11 +133,10 @@ public class Node implements Namespace {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message message = messageClass.newInstance();
-      TopicDefinition topicDefinition =
-          new TopicDefinition(new GraphName(resolvedTopicName),
-              MessageDefinition.createFromMessage(message));
-      org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
-          node.createSubscriber(topicDefinition, messageClass);
+      TopicDefinition topicDefinition = new TopicDefinition(new GraphName(resolvedTopicName),
+          MessageDefinition.createFromMessage(message));
+      org.ros.internal.node.topic.Subscriber<MessageType> subscriber = node.createSubscriber(
+          topicDefinition, messageClass);
       subscriber.addMessageListener(callback);
       return new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriber);
     } catch (RosNameException e) {
@@ -159,6 +157,27 @@ public class Node implements Namespace {
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
     return node.createServiceClient(serviceIdentifier, responseMessageClass);
+  }
+
+  /**
+   * Returns a {@link ServiceIdentifier} for communicating with the current
+   * provider of a {@link Service}. Return value is null if no provider can be
+   * determined.
+   * 
+   * @param serviceName
+   * @param serviceType
+   * @return {@link ServiceIdentifier} of current {@Service} provider
+   *         or null if none present.
+   */
+  public ServiceIdentifier lookupService(String serviceName, Service<?, ?> serviceType) {
+    // TODO(kwc) the need for the serviceType is an artifact of the
+    // ServiceIdentifier type. I would like to eliminate this need.
+    GraphName resolvedServiceName = new GraphName(resolveName(serviceName));
+    try {
+      return node.lookupService(resolvedServiceName, serviceType);
+    } catch (RemoteException e) {
+      return null;
+    }
   }
 
   /**

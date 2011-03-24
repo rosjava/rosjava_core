@@ -51,4 +51,9 @@ public class ServiceIdentifier {
     return uri;
   }
 
+  @Override
+  public String toString() {
+    return "ServiceIdentifier<" + uri.toString() + "," + serviceDefinition.toString() + ">";
+  }
+
 }

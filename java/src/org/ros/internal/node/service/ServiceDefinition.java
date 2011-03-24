@@ -53,4 +53,8 @@ public class ServiceDefinition {
     return name;
   }
 
+  @Override
+  public String toString() {
+    return "ServiceDefinition<" + name.toString() + "," + type + "," + md5Checksum + ">";
+  }
 }

@@ -19,11 +19,15 @@ package org.ros.internal.node;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.response.Response;
+import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.NodeServer;
 import org.ros.internal.node.server.ServiceManager;
@@ -39,6 +43,7 @@ import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
+import org.ros.message.Service;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -56,7 +61,7 @@ import java.util.concurrent.Executors;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Node {
-
+  private static final Log log = LogFactory.getLog(Node.class);
   private final Executor executor;
   private final GraphName nodeName;
   private final MasterClient masterClient;
@@ -67,20 +72,18 @@ public class Node {
 
   public static Node createPublic(GraphName nodeName, URI masterUri, int xmlRpcBindPort,
       int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
-    Node node =
-        new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
-            AdvertiseAddress.createPublic(), BindAddress.createPublic(xmlRpcBindPort),
-            AdvertiseAddress.createPublic());
+    Node node = new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
+        AdvertiseAddress.createPublic(), BindAddress.createPublic(xmlRpcBindPort),
+        AdvertiseAddress.createPublic());
     node.start();
     return node;
   }
 
   public static Node createPrivate(GraphName nodeName, URI masterUri, int xmlRpcBindPort,
       int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
-    Node node =
-        new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
-            AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
-            AdvertiseAddress.createPrivate());
+    Node node = new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
+        AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
+        AdvertiseAddress.createPrivate());
     node.start();
     return node;
   }
@@ -93,11 +96,10 @@ public class Node {
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    tcpRosServer =
-        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
-    slaveServer =
-        new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress, masterClient,
-            topicManager, serviceManager, tcpRosServer);
+    tcpRosServer = new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager,
+        serviceManager);
+    slaveServer = new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress,
+        masterClient, topicManager, serviceManager, tcpRosServer);
   }
 
   /**
@@ -126,9 +128,8 @@ public class Node {
         subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
         Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
-        subscriber =
-            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
-                executor);
+        subscriber = Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition,
+            messageClass, executor);
         createdNewSubscriber = true;
       }
     }
@@ -203,9 +204,8 @@ public class Node {
         serviceServer = (ServiceServer<RequestMessageType>) serviceManager.getServiceServer(name);
         Preconditions.checkState(serviceServer.checkMessageClass(requestMessageClass));
       } else {
-        serviceServer =
-            new ServiceServer<RequestMessageType>(serviceDefinition, requestMessageClass,
-                responseBuilder, tcpRosServer.getAdvertiseAddress());
+        serviceServer = new ServiceServer<RequestMessageType>(serviceDefinition,
+            requestMessageClass, responseBuilder, tcpRosServer.getAdvertiseAddress());
         createdNewService = true;
       }
     }
@@ -276,6 +276,26 @@ public class Node {
    */
   public URI getUri() {
     return slaveServer.getUri();
+  }
+
+  public ServiceIdentifier lookupService(GraphName serviceName, Service<?, ?> serviceType)
+      throws RemoteException {
+    Response<URI> response;
+    try {
+      response = masterClient
+          .lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
+      if (response.getStatusCode() == StatusCode.SUCCESS) {
+        ServiceDefinition serviceDefinition = new ServiceDefinition(serviceName,
+            serviceType.getDataType(), serviceType.getMD5Sum());
+        return new ServiceIdentifier(response.getResult(), serviceDefinition);
+      } else {
+        return null;
+      }
+    } catch (URISyntaxException e) {
+      // TODO(kwc) what should be the error policy here be?
+      log.error("master returned invalid URI for lookupService", e);
+      throw new RemoteException(StatusCode.FAILURE, "master returned invalid URI");
+    }
   }
 
 }

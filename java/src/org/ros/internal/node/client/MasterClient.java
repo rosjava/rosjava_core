@@ -184,7 +184,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @param slave the {@link SlaveIdentifier} of the caller
    * @return the {@link URI} of the {@link MasterServer}
    * @throws URISyntaxException
-   * @throws RemoteException
+   * @throws RemoteException If {@code StatusCode.FAILURE} or
+   *         {@code StatusCode.ERROR} is returned by {@link MasterServer}.
    */
   public Response<URI> getUri(SlaveIdentifier slave) throws URISyntaxException, RemoteException {
     return Response
@@ -199,12 +200,13 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @return a {@link Response} with the {@link URI} of the
    *         {@link ServiceServer} as a result
    * @throws URISyntaxException
-   * @throws RemoteException
+   * @throws RemoteException If {@code StatusCode.FAILURE} is returned by
+   *         {@link MasterServer}.
    */
   public Response<URI> lookupService(SlaveIdentifier slave, String serviceName)
       throws URISyntaxException, RemoteException {
-    return Response.fromListChecked(node.lookupService(slave.getName().toString(), serviceName),
-        new UriResultFactory());
+    return Response.fromListCheckedFailure(
+        node.lookupService(slave.getName().toString(), serviceName), new UriResultFactory());
   }
 
   public Response<List<TopicDefinition>> getPublishedTopics(SlaveIdentifier slave, String subgraph) {

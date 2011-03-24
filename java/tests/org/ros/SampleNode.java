@@ -21,16 +21,14 @@ import org.ros.message.geometry_msgs.Point;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.geometry_msgs.Quaternion;
 
-public class SampleNode {
+import java.util.List;
 
-  public static void main(String[] argv) throws RosInitException, RosNameException {
-    // Node node = new Node(argv, "sample_node"); this crashes when topic is
-    // subscribed to
-    // Node node = new Node(argv, "sample_rosjava_node");
-    
-    RosLoader loader = new CommandLineLoader(argv);
-    Node node = new Node("sample_rosjava_node", loader.createContext());
+public class SampleNode implements NodeMain {
 
+  @Override
+  public void run(List<String> argv, NodeContext nodeContext) throws RosNameException, RosInitException {
+    Node node = new Node("sample_rosjava_node", nodeContext);
+   
     Publisher<PoseStamped> pub_pose = node.createPublisher("pose", PoseStamped.class);
 
     PoseStamped p = new PoseStamped();
@@ -60,4 +58,5 @@ public class SampleNode {
     }
 
   }
+
 }
