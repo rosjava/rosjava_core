@@ -16,61 +16,42 @@
 
 package org.ros.internal.message;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Map;
 import java.util.StringTokenizer;
-
 
 /**
  * Generates a {@link Message} instance from a specification file at runtime.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RuntimeGeneratedMessageFactory {
+public class RuntimeGeneratedMessageFactory implements FieldType {
 
-  private final String messageDefinition;
+  private final ImmutableMap<String, Short> valueFieldTypes;
+  private final ImmutableMap<String, Object> constantFieldValues;
 
-  private class Field {
-    String name;
-    String type;
-
-    public Field(String name, String type) {
-      this.name = name;
-      this.type = type;
-    }
-  }
-  
-  private class ValueField<T> extends Field {
-    T value;
-    
-    public ValueField(String name, String type) {
-      super(name, type);
-    }
-  }
-  
-  private class ConstantField<T> extends Field {
-    final T value;
-    
-    public ConstantField(String name, String type, T value) {
-      super(name, type);
-      this.value = value;
-    }
-  }
-
-  private final Map<String, ValueField> valueFields;
-  private final Map<String, ConstantField> constantFields;
-
-  public RuntimeGeneratedMessageFactory(String messageDefinition) {
-    this.messageDefinition = messageDefinition;
-    valueFields = Maps.newHashMap();
-    constantFields = Maps.newHashMap();
-  }
-
-  private void parse() throws IOException {
+  public RuntimeGeneratedMessageFactory(String messageDefinition) throws IOException {
+    ImmutableMap<String, Short> fieldTypeNames = ImmutableMap.<String, Short>builder()
+        .put("bool", BOOL)
+        .put("int8", INT8)
+        .put("uint8", UINT8)
+        .put("int16", INT16)
+        .put("uint16", UINT16)
+        .put("int32", INT32)
+        .put("uint32", UINT32)
+        .put("int64", INT64)
+        .put("uint64", UINT64)
+        .put("float32", FLOAT32)
+        .put("float64", FLOAT64)
+        .put("string", STRING)
+        .put("time", TIME)
+        .put("duration", DURATION)
+        .build();
+    ImmutableMap.Builder<String, Short> valueFieldTypesBuilder = ImmutableMap.builder();
+    ImmutableMap.Builder<String, Object> constantFieldValuesBuilder = ImmutableMap.builder();
     BufferedReader reader = new BufferedReader(new StringReader(messageDefinition));
     String line = reader.readLine();
     while (line != null) {
@@ -85,15 +66,16 @@ public class RuntimeGeneratedMessageFactory {
         // This is a constant.
 
       } else {
-        // This is a field.
-
+        valueFieldTypesBuilder.put(name, fieldTypeNames.get(type));
       }
       line = reader.readLine();
     }
+    valueFieldTypes = valueFieldTypesBuilder.build();
+    constantFieldValues = constantFieldValuesBuilder.build();
   }
 
   public Message createMessage() {
-    return null;
+    return new Message(valueFieldTypes, constantFieldValues);
   }
 
 }
