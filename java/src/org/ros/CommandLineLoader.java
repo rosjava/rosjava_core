@@ -17,8 +17,6 @@
 package org.ros;
 
 import org.ros.exceptions.RosInitException;
-
-import org.ros.exceptions.RosNameException;
 import org.ros.internal.loader.CommandLine;
 import org.ros.internal.loader.EnvironmentVariables;
 import org.ros.internal.namespace.GraphName;
@@ -83,36 +81,31 @@ public class CommandLineLoader extends RosLoader {
    */
   @Override
   public NodeContext createContext() throws RosInitException {
-    try {
-      Map<String, String> specialRemappings = getSpecialRemappings(commandLineArgs);
-      String namespace = getNamespace(specialRemappings, environment);
-      HashMap<GraphName, GraphName> remappings = parseRemappings(commandLineArgs);
-      NameResolver resolver = new NameResolver(namespace, remappings);
+    Map<String, String> specialRemappings = getSpecialRemappings(commandLineArgs);
+    String namespace = getNamespace(specialRemappings, environment);
+    HashMap<GraphName, GraphName> remappings = parseRemappings(commandLineArgs);
+    NameResolver resolver = new NameResolver(namespace, remappings);
 
-      NodeContext context = new NodeContext();
-      context.setParentResolver(resolver);
-      context.setRosRoot(getRosRoot(specialRemappings, environment));
-      context.setRosPackagePath(getRosPackagePath(specialRemappings, environment));
-      context.setRosMasterUri(getRosMasterUri(specialRemappings, environment));
+    NodeContext context = new NodeContext();
+    context.setParentResolver(resolver);
+    context.setRosRoot(getRosRoot(specialRemappings, environment));
+    context.setRosPackagePath(getRosPackagePath(specialRemappings, environment));
+    context.setRosMasterUri(getRosMasterUri(specialRemappings, environment));
 
-      if (specialRemappings.containsKey(CommandLine.NODE_NAME)) {
-        context.setNodeNameOverride(specialRemappings.get(CommandLine.NODE_NAME));
-      }
-      String addressOverride = getAddressOverride(specialRemappings, environment);
-      if (addressOverride != null) {
-        context.setHostName(addressOverride);
-      } else {
-        try {
-          context.setHostName(InetAddress.getLocalHost().getCanonicalHostName());
-        } catch (UnknownHostException e) {
-          throw new RosInitException(e);
-        }
-      }
-
-      return context;
-    } catch (RosNameException e) {
-      throw new RosInitException(e);
+    if (specialRemappings.containsKey(CommandLine.NODE_NAME)) {
+      context.setNodeNameOverride(specialRemappings.get(CommandLine.NODE_NAME));
     }
+    String addressOverride = getAddressOverride(specialRemappings, environment);
+    if (addressOverride != null) {
+      context.setHostName(addressOverride);
+    } else {
+      try {
+        context.setHostName(InetAddress.getLocalHost().getCanonicalHostName());
+      } catch (UnknownHostException e) {
+        throw new RosInitException(e);
+      }
+    }
+    return context;
   }
 
   /**
@@ -161,17 +154,24 @@ public class CommandLineLoader extends RosLoader {
     return address;
   }
 
-  private String getNamespace(Map<String, String> specialRemappings, Map<String, String> env)
-      throws RosNameException {
-    // Precedence:
-    //
-    // 1) The __ns:= command line argument.
-    // 2) the ROS_NAMESPACE environment variable.
+  /**
+   * Precedence:
+   * 
+   * <ol>
+   * <li>The __ns:= command line argument.</li>
+   * <li>The ROS_NAMESPACE environment variable.</li>
+   * </ol>
+   * 
+   * @param specialRemappings
+   * @param env
+   * @return
+   */
+  private String getNamespace(Map<String, String> specialRemappings, Map<String, String> env) {
 
     String namespace = Namespace.GLOBAL_NS;
     if (specialRemappings.containsKey(CommandLine.ROS_NAMESPACE)) {
-      namespace = new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal()
-          .toString();
+      namespace =
+          new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal().toString();
     } else if (env.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
       namespace = new GraphName(env.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal().toString();
     }
@@ -222,8 +222,7 @@ public class CommandLineLoader extends RosLoader {
     }
   }
 
-  private HashMap<GraphName, GraphName> parseRemappings(String[] commandLineArgs)
-      throws RosNameException {
+  private HashMap<GraphName, GraphName> parseRemappings(String[] commandLineArgs) {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     for (String arg : commandLineArgs) {
       if (arg.contains(":=") && !arg.startsWith("__")) {

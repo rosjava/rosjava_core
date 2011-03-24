@@ -17,16 +17,11 @@
 package org.ros;
 
 import org.apache.commons.logging.Log;
-
 import org.apache.commons.logging.LogFactory;
-
-import org.ros.exceptions.RosNameException;
-
-import org.ros.namespace.NameResolver;
-
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
+import org.ros.namespace.NameResolver;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -64,7 +59,7 @@ public class ParameterClient {
     return new ParameterClient(callerId, parameterServer, resolver);
   }
 
-  public Object getParam(String parameterName) throws RemoteException, RosNameException {
+  public Object getParam(String parameterName) throws RemoteException {
     String resolvedName = resolver.resolveName(parameterName);
     if (DEBUG) {
       log.info("getParam(" + parameterName + " -> [resolved] " + resolvedName + ")");
@@ -77,8 +72,7 @@ public class ParameterClient {
     }
   }
 
-  public Object getParam(String parameterName, Object defaultValue) throws RemoteException,
-      RosNameException {
+  public Object getParam(String parameterName, Object defaultValue) throws RemoteException {
     String resolvedName = resolver.resolveName(parameterName);
     if (DEBUG) {
       log.info("getParamDefault(" + parameterName + " -> [resolved] " + resolvedName + ")");
@@ -91,12 +85,12 @@ public class ParameterClient {
     }
   }
 
-  public boolean hasParam(String parameterName) throws RemoteException, RosNameException {
+  public boolean hasParam(String parameterName) throws RemoteException {
     String resolvedName = resolver.resolveName(parameterName);
     return parameterServer.hasParam(this.callerId, resolvedName).getResult();
   }
 
-  public void deleteParam(String parameterName) throws RemoteException, RosNameException {
+  public void deleteParam(String parameterName) throws RemoteException {
     String resolvedName = resolver.resolveName(parameterName);
     if (DEBUG) {
       log.info("deleteParam(" + parameterName + " -> [resolved] " + resolvedName + ")");
@@ -104,8 +98,7 @@ public class ParameterClient {
     parameterServer.deleteParam(this.callerId, resolvedName);
   }
 
-  public void setParam(String parameterName, Object parameterValue) throws RemoteException,
-      RosNameException {
+  public void setParam(String parameterName, Object parameterValue) throws RemoteException {
     String resolvedName = resolver.resolveName(parameterName);
     if (DEBUG) {
       log.info("setParam(" + parameterName + " -> [resolved] " + resolvedName + ")");
@@ -113,7 +106,7 @@ public class ParameterClient {
     parameterServer.setParam(this.callerId, resolvedName, parameterValue);
   }
 
-  public String searchParam(String parameterName) throws RemoteException, RosNameException {
+  public String searchParam(String parameterName) throws RemoteException {
     String resolvedName = resolver.resolveName(parameterName);
     Response<String> response = parameterServer.searchParam(this.callerId, resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {

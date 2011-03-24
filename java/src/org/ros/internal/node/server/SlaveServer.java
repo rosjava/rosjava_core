@@ -19,7 +19,6 @@ package org.ros.internal.node.server;
 import com.google.common.collect.Lists;
 
 import org.apache.xmlrpc.XmlRpcException;
-import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -98,8 +97,7 @@ public class SlaveServer extends NodeServer {
     super.shutdown();
   }
 
-  public void addPublisher(Publisher<?> publisher) throws MalformedURLException,
-      URISyntaxException, RemoteException {
+  public void addPublisher(Publisher<?> publisher) throws URISyntaxException, RemoteException {
     topicManager.putPublisher(publisher.getTopicName().toString(), publisher);
     masterClient.registerPublisher(publisher.toPublisherIdentifier(toSlaveIdentifier()));
   }
@@ -207,12 +205,8 @@ public class SlaveServer extends NodeServer {
 
   public ProtocolDescription requestTopic(String topicName, Collection<String> protocols)
       throws ServerException {
-    try {
-      // Canonicalize topic name.
-      topicName = new GraphName(topicName).toGlobal();
-    } catch (RosNameException e) {
-      throw new ServerException("Invalid topic name.");
-    }
+    // Canonicalize topic name.
+    topicName = new GraphName(topicName).toGlobal();
     if (!topicManager.hasPublisher(topicName)) {
       throw new ServerException("No publishers for topic: " + topicName);
     }
@@ -230,8 +224,6 @@ public class SlaveServer extends NodeServer {
 
   /**
    * @return a {@link SlaveIdentifier} for this {@link SlaveServer}
-   * @throws MalformedURLException
-   * @throws URISyntaxException
    */
   public SlaveIdentifier toSlaveIdentifier() {
     return new SlaveIdentifier(nodeName, getUri());

@@ -32,8 +32,7 @@ public class NameResolver {
   private final String namespace;
   private HashMap<GraphName, GraphName> remappings;
 
-  public NameResolver(String namespace, HashMap<GraphName, GraphName> remappings)
-      throws RosNameException {
+  public NameResolver(String namespace, HashMap<GraphName, GraphName> remappings) {
     this.remappings = remappings;
     this.namespace = GraphName.canonicalizeName(namespace);
   }
@@ -52,9 +51,8 @@ public class NameResolver {
    * @param namespace
    * @param name
    * @return the fully resolved name relative to the given namespace.
-   * @throws RosNameException Will throw on a poorly formated name.
    */
-  public String resolveName(String namespace, String name) throws RosNameException {
+  public String resolveName(String namespace, String name) {
     GraphName ns = lookUpRemapping(new GraphName(namespace));
     Preconditions.checkArgument(ns.isGlobal(), "namespace must be global: " + ns.toString());
     GraphName n = lookUpRemapping(new GraphName(name));
@@ -76,10 +74,9 @@ public class NameResolver {
    * @param name1 ROS name to join to.
    * @param name2 ROS name to join. Must be relative.
    * @return A concatenation of the two names
-   * @throws RosNameException If name1 or name2 is an illegal name
    * @throws IllegalArgumentException If name2 is not a relative name
    */
-  public static String join(String name1, String name2) throws RosNameException {
+  public static String join(String name1, String name2) {
     return join(new GraphName(name1), new GraphName(name2));
   }
 
@@ -89,9 +86,8 @@ public class NameResolver {
    * @param name1 ROS name to join to.
    * @param name2 ROS name to join. If name2 is global, this will return name2.
    * @return A concatenation of the two names.
-   * @throws RosNameException If name1 or name2 is an illegal name
    */
-  public static String join(GraphName name1, GraphName name2) throws RosNameException {
+  public static String join(GraphName name1, GraphName name2) {
     if (name2.isGlobal() || name1.toString().equals("")) {
       return name2.toString();
     } else if (name1.equals(Namespace.GLOBAL_NS)) {
@@ -122,9 +118,8 @@ public class NameResolver {
   /**
    * @param name Name to resolve
    * @return The name resolved relative to the default namespace.
-   * @throws RosNameException
    */
-  public String resolveName(String name) throws RosNameException {
+  public String resolveName(String name) {
     return resolveName(getNamespace(), name);
   }
 
@@ -135,10 +130,9 @@ public class NameResolver {
    * 
    * @param name
    * @return {@link NameResolver} relative to the current namespace.
-   * @throws RosNameException
    */
   @SuppressWarnings("unchecked")
-  public NameResolver createResolver(String name) throws RosNameException {
+  public NameResolver createResolver(String name) {
     String resolverNamespace = resolveName(name);
     return new NameResolver(resolverNamespace, (HashMap<GraphName, GraphName>) remappings.clone());
   }

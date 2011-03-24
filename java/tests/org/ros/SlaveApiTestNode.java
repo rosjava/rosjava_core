@@ -13,10 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
 import org.ros.exceptions.RosInitException;
-import org.ros.exceptions.RosNameException;
 import org.ros.message.std_msgs.Int64;
 
 import java.util.List;
@@ -29,8 +29,7 @@ import java.util.List;
 public class SlaveApiTestNode implements NodeMain {
 
   @Override
-  public void run(List<String> argv, NodeContext nodeContext) throws RosNameException,
-      RosInitException {
+  public void run(List<String> argv, NodeContext nodeContext) throws RosInitException {
     final Node node = new Node("test_node", nodeContext);
 
     // Basic chatter in/out test.

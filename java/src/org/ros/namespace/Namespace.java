@@ -15,15 +15,12 @@
  */
 package org.ros.namespace;
 
-import org.ros.ParameterClient;
-
-import org.ros.exceptions.RosNameException;
-
 import org.ros.MessageListener;
-
+import org.ros.ParameterClient;
 import org.ros.Publisher;
 import org.ros.Subscriber;
 import org.ros.exceptions.RosInitException;
+import org.ros.exceptions.RosNameException;
 import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
@@ -51,10 +48,9 @@ public interface Namespace {
    * @return A handle to a publisher that may be used to publish messages of
    *         type MessageType
    * @throws RosInitException May throw if the system is not in a proper state.
-   * @throws RosNameException May throw if the name is invalid.
    */
   public <MessageType extends Message> Publisher<MessageType> createPublisher(String topic_name,
-      Class<MessageType> clazz) throws RosInitException, RosNameException;
+      Class<MessageType> clazz) throws RosInitException;
 
   /**
    * 
@@ -71,11 +67,9 @@ public interface Namespace {
    * @throws RosInitException The subscriber may fail if the Ros system has not
    *         been initialized or other wackyness. TODO specify exceptions that
    *         might be thrown here.
-   * @throws RosNameException May throw if the topic name is invalid.
    */
   public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topic_name,
-      MessageListener<MessageType> callback, Class<MessageType> clazz) throws RosInitException,
-      RosNameException;
+      MessageListener<MessageType> callback, Class<MessageType> clazz) throws RosInitException;
 
   /**
    * Create a {@link ParameterClient} to query and set parameters on the ROS

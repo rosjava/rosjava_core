@@ -16,6 +16,7 @@
 package org.ros.internal.namespace;
 
 import junit.framework.TestCase;
+
 import org.junit.Test;
 import org.ros.exceptions.RosNameException;
 
@@ -27,7 +28,7 @@ public class GraphNameTest extends TestCase {
   @Test
   public void testToString() {
     try {
-      String[] canonical = { "abc", "ab7", "/abc", "/abc/bar", "/", "~garage", "~foo/bar" };
+      String[] canonical = {"abc", "ab7", "/abc", "/abc/bar", "/", "~garage", "~foo/bar"};
       for (String c : canonical) {
         assertEquals(c, new GraphName(c).toString());
       }
@@ -39,28 +40,22 @@ public class GraphNameTest extends TestCase {
       assertEquals("foo/bar", new GraphName("foo/bar/").toString());
     } catch (IllegalArgumentException e) {
       fail("These names should be valid" + e.toString());
-    } catch (RosNameException e) {
-      fail("These names should be valid" + e.toString());
     }
   }
 
   @Test
   public void testValidNames() {
-
-    String[] valid = { "", "abc", "ab7", "ab7_kdfJKSDJFGkd", "/abc", "/", "~private",
-        "~private/something", "/global", "/global/", "/global/local" };
-    try {
-      for (String v : valid) {
-        new GraphName(v);
-      }
-    } catch (RosNameException e) {
-      fail("These names should be valid" + e.toString());
+    String[] valid =
+        {"", "abc", "ab7", "ab7_kdfJKSDJFGkd", "/abc", "/", "~private", "~private/something",
+            "/global", "/global/", "/global/local"};
+    for (String v : valid) {
+      new GraphName(v);
     }
   }
 
   @Test
   public void testInvalidNames() {
-    final String[] illegalChars = { "=", "-", "(", ")", "*", "%", "^" };
+    final String[] illegalChars = {"=", "-", "(", ")", "*", "%", "^"};
     for (String i : illegalChars) {
       try {
         new GraphName("good" + i);
@@ -68,7 +63,7 @@ public class GraphNameTest extends TestCase {
       } catch (RosNameException e) {
       }
     }
-    final String[] illegalNames = { "/~private", "5foo" };
+    final String[] illegalNames = {"/~private", "5foo"};
     for (String i : illegalNames) {
       try {
         new GraphName(i);
@@ -79,31 +74,31 @@ public class GraphNameTest extends TestCase {
   }
 
   @Test
-  public void testIsGlobal() throws RosNameException {
-    final String[] tests = { "/", "/global", "/global2" };
+  public void testIsGlobal() {
+    final String[] tests = {"/", "/global", "/global2"};
     for (String t : tests) {
       assertTrue(new GraphName(t).isGlobal());
     }
-    final String[] fails = { "", "not_global", "not/global" };
+    final String[] fails = {"", "not_global", "not/global"};
     for (String t : fails) {
       assertFalse(new GraphName(t).isGlobal());
     }
   }
 
   @Test
-  public void testIsPrivate() throws RosNameException {
-    String[] tests = { "~name", "~name/sub" };
+  public void testIsPrivate() {
+    String[] tests = {"~name", "~name/sub"};
     for (String t : tests) {
       assertTrue(new GraphName(t).isPrivate());
     }
-    String[] fails = { "", "not_private", "not/private", "/" };
+    String[] fails = {"", "not_private", "not/private", "/"};
     for (String f : fails) {
       assertFalse(new GraphName(f).isPrivate());
     }
   }
 
   @Test
-  public void testIsRelative() throws RosNameException {
+  public void testIsRelative() {
     GraphName n = new GraphName("name");
     assertTrue(n.isRelative());
     n = new GraphName("/name");
@@ -111,7 +106,7 @@ public class GraphNameTest extends TestCase {
   }
 
   @Test
-  public void testGetParent() throws RosNameException {
+  public void testGetParent() {
     GraphName global = new GraphName("/");
     GraphName empty = new GraphName("");
     // parent of empty is empty, just like dirname
@@ -129,30 +124,30 @@ public class GraphNameTest extends TestCase {
     assertEquals(new GraphName("wg"), new GraphName("wg/name").getParent());
     assertEquals(empty, new GraphName("wg/").getParent());
   }
-  
+
   @Test
-  public void testCanonicalizeName() throws RosNameException {
+  public void testCanonicalizeName() {
     assertEquals("", GraphName.canonicalizeName(""));
     assertEquals("/", GraphName.canonicalizeName("/"));
     assertEquals("/", GraphName.canonicalizeName("//"));
     assertEquals("/", GraphName.canonicalizeName("///"));
-    
+
     assertEquals("foo", GraphName.canonicalizeName("foo"));
     assertEquals("foo", GraphName.canonicalizeName("foo/"));
     assertEquals("foo", GraphName.canonicalizeName("foo//"));
-    
+
     assertEquals("/foo", GraphName.canonicalizeName("/foo"));
     assertEquals("/foo", GraphName.canonicalizeName("/foo/"));
     assertEquals("/foo", GraphName.canonicalizeName("/foo//"));
-    
+
     assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar"));
     assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar/"));
     assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar//"));
-    
+
     assertEquals("~foo", GraphName.canonicalizeName("~foo"));
     assertEquals("~foo", GraphName.canonicalizeName("~foo/"));
     assertEquals("~foo", GraphName.canonicalizeName("~foo//"));
-    assertEquals("~foo", GraphName.canonicalizeName("~/foo")); 
+    assertEquals("~foo", GraphName.canonicalizeName("~/foo"));
   }
 
 }

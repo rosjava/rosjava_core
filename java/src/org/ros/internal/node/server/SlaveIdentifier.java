@@ -19,7 +19,6 @@ package org.ros.internal.node.server;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
@@ -36,7 +35,7 @@ public class SlaveIdentifier {
   private final URI uri;
 
   public static SlaveIdentifier createFromStrings(String nodeName, String uri)
-      throws RosNameException, URISyntaxException {
+      throws URISyntaxException {
     return new SlaveIdentifier(new GraphName(nodeName), new URI(uri));
   }
 

@@ -17,7 +17,6 @@
 package org.ros;
 
 import org.ros.exceptions.RosInitException;
-import org.ros.exceptions.RosNameException;
 
 import java.util.List;
 
@@ -30,8 +29,7 @@ import java.util.List;
 public class PassthroughTestNode implements NodeMain {
 
   @Override
-  public void run(List<String> argv, NodeContext nodeContext) throws RosNameException,
-      RosInitException {
+  public void run(List<String> argv, NodeContext nodeContext) throws RosInitException {
     final Node node = new Node("test_node", nodeContext);
 
     // The goal of the passthrough node is simply to retransmit the messages

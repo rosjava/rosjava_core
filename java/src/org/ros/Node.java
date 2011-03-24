@@ -21,7 +21,6 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exceptions.RosInitException;
-import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.RosoutLogger;
@@ -64,10 +63,9 @@ public class Node implements Namespace {
    * @param name Node name. This identifies this node to the rest of the ROS
    *        graph.
    * @param context
-   * @throws RosNameException If node name is invalid.
    * @throws RosInitException
    */
-  public Node(String name, NodeContext context) throws RosNameException, RosInitException {
+  public Node(String name, NodeContext context) throws RosInitException {
     Preconditions.checkNotNull(context);
     Preconditions.checkNotNull(name);
     this.context = context;
@@ -110,7 +108,7 @@ public class Node implements Namespace {
 
   @Override
   public <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
-      Class<MessageType> messageClass) throws RosInitException, RosNameException {
+      Class<MessageType> messageClass) throws RosInitException {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message message = messageClass.newInstance();
@@ -119,8 +117,6 @@ public class Node implements Namespace {
       org.ros.internal.node.topic.Publisher<MessageType> publisherImpl = node.createPublisher(
           topicDefinition, messageClass);
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
-    } catch (RosNameException e) {
-      throw e;
     } catch (Exception e) {
       throw new RosInitException(e);
     }
@@ -129,7 +125,7 @@ public class Node implements Namespace {
   @Override
   public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topicName,
       final MessageListener<MessageType> callback, Class<MessageType> messageClass)
-      throws RosInitException, RosNameException {
+      throws RosInitException {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message message = messageClass.newInstance();
@@ -139,8 +135,6 @@ public class Node implements Namespace {
           topicDefinition, messageClass);
       subscriber.addMessageListener(callback);
       return new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriber);
-    } catch (RosNameException e) {
-      throw e;
     } catch (Exception e) {
       throw new RosInitException(e);
     }
@@ -204,7 +198,7 @@ public class Node implements Namespace {
   }
 
   @Override
-  public String resolveName(String name) throws RosNameException {
+  public String resolveName(String name) {
     return resolver.resolveName(name);
   }
 

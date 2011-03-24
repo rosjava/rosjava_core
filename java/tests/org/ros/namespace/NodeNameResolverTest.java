@@ -15,7 +15,6 @@
  */
 package org.ros.namespace;
 
-import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 
 import java.util.HashMap;
@@ -23,7 +22,7 @@ import java.util.HashMap;
 public class NodeNameResolverTest extends NameResolverTest {
 
   @Override
-  public void testResolveNameOneArg() throws RosNameException {
+  public void testResolveNameOneArg() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     GraphName nodeName = new GraphName("/node");
     NodeNameResolver r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL_NS, remappings),
@@ -59,13 +58,12 @@ public class NodeNameResolverTest extends NameResolverTest {
   }
 
   @Override
-  public NameResolver createGlobalResolver() throws RosNameException {
+  public NameResolver createGlobalResolver() {
     return createGlobalResolver(new HashMap<GraphName, GraphName>());
   }
 
   @Override
-  public NameResolver createGlobalResolver(HashMap<GraphName, GraphName> remappings)
-      throws RosNameException {
+  public NameResolver createGlobalResolver(HashMap<GraphName, GraphName> remappings) {
     GraphName nodeName = new GraphName("/node");
     NodeNameResolver r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL_NS, remappings),
         nodeName);

@@ -16,10 +16,10 @@
 package org.ros;
 
 import junit.framework.TestCase;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.ros.exceptions.RosInitException;
-import org.ros.exceptions.RosNameException;
 import org.ros.internal.loader.CommandLine;
 import org.ros.internal.loader.EnvironmentVariables;
 import org.ros.internal.namespace.GraphName;
@@ -52,20 +52,21 @@ public class CommandLineLoaderTest extends TestCase {
   }
 
   @Test
-  public void testCommandLineLoader() throws RosNameException, RosInitException {
+  public void testCommandLineLoader() {
     // Test with no args.
     CommandLineLoader loader = new CommandLineLoader(new String[] {});
     assertEquals(0, loader.getCleanCommandLineArgs().length);
 
     // Test with no remappings.
-    String[] args = new String[] { "one two --three" };
+    String[] args = new String[] {"one two --three"};
     loader = new CommandLineLoader(args);
     Assert.assertArrayEquals(args, loader.getCleanCommandLineArgs());
 
     // Test with actual remappings. All of these are equivalent.
-    String[] tests = { "--help one name:=/my/name -i foo:=/my/foo",
-        "name:=/my/name --help one -i foo:=/my/foo", "name:=/my/name --help foo:=/my/foo one -i", };
-    String[] expected = { "--help", "one", "-i" };
+    String[] tests =
+        {"--help one name:=/my/name -i foo:=/my/foo", "name:=/my/name --help one -i foo:=/my/foo",
+            "name:=/my/name --help foo:=/my/foo one -i",};
+    String[] expected = {"--help", "one", "-i"};
     for (String test : tests) {
       loader = new CommandLineLoader(test.split(" "));
       // Test command-line parsing
@@ -80,18 +81,17 @@ public class CommandLineLoaderTest extends TestCase {
    * tested separately.
    * 
    * @throws RosInitException
-   * @throws RosNameException
    * @throws URISyntaxException
    * @throws UnknownHostException
    */
   @Test
-  public void testCreateContextEnvironment() throws RosInitException, RosNameException,
-      URISyntaxException, UnknownHostException {
+  public void testCreateContextEnvironment() throws RosInitException, URISyntaxException,
+      UnknownHostException {
     // Construct artificial environment. Test failure without required settings.
     // Failure: ROS_ROOT not set.
     String tmpDir = System.getProperty("java.io.tmpdir");
     String rosPackagePath = tmpDir + File.pathSeparator + defaultRosRoot;
-    String[] rosPackagePathArray = new String[] { tmpDir, defaultRosRoot };
+    String[] rosPackagePathArray = new String[] {tmpDir, defaultRosRoot};
     Map<String, String> env = new HashMap<String, String>();
     CommandLineLoader loader = null;
     env = new HashMap<String, String>();
@@ -142,19 +142,18 @@ public class CommandLineLoaderTest extends TestCase {
   }
 
   @Test
-  public void testCreateContextCommandLine() throws RosInitException, URISyntaxException,
-      RosNameException {
+  public void testCreateContextCommandLine() throws RosInitException, URISyntaxException {
     Map<String, String> env = getDefaultEnv();
 
     // Test __name override
     NodeContext nodeContext = new CommandLineLoader(new String[] {}, env).createContext();
     assertEquals(null, nodeContext.getNodeNameOverride());
-    String[] args = { "__name:=newname" };
+    String[] args = {"__name:=newname"};
     nodeContext = new CommandLineLoader(args, env).createContext();
     assertEquals("newname", nodeContext.getNodeNameOverride());
 
     // Test ROS_MASTER_URI from command-line
-    args = new String[] { CommandLine.ROS_MASTER_URI + ":=http://override:22622" };
+    args = new String[] {CommandLine.ROS_MASTER_URI + ":=http://override:22622"};
     nodeContext = new CommandLineLoader(args, env).createContext();
     assertEquals(new URI("http://override:22622"), nodeContext.getRosMasterUri());
 
@@ -167,11 +166,11 @@ public class CommandLineLoaderTest extends TestCase {
     // Test ROS namespace resolution and canonicalization
     String canonical = new GraphName("/baz/bar").toString();
     env = getDefaultEnv();
-    args = new String[] { CommandLine.ROS_NAMESPACE + ":=baz/bar" };
+    args = new String[] {CommandLine.ROS_NAMESPACE + ":=baz/bar"};
     nodeContext = new CommandLineLoader(args, env).createContext();
     assertEquals(canonical, nodeContext.getParentResolver().getNamespace());
 
-    args = new String[] { CommandLine.ROS_NAMESPACE + ":=baz/bar/" };
+    args = new String[] {CommandLine.ROS_NAMESPACE + ":=baz/bar/"};
     nodeContext = new CommandLineLoader(args, env).createContext();
     assertEquals(canonical, nodeContext.getParentResolver().getNamespace());
 
@@ -182,15 +181,16 @@ public class CommandLineLoaderTest extends TestCase {
 
     // Verify address override.
     env = getDefaultEnv();
-    args = new String[] { CommandLine.ROS_IP + ":=192.168.0.2" };
+    args = new String[] {CommandLine.ROS_IP + ":=192.168.0.2"};
     nodeContext = new CommandLineLoader(args, env).createContext();
     assertEquals("192.168.0.2", nodeContext.getHostName());
 
     // Verify multiple options work together.
     env = getDefaultEnv();
-    args = new String[] { CommandLine.ROS_NAMESPACE + ":=baz/bar/", "ignore",
-        CommandLine.ROS_MASTER_URI + ":=http://override:22622", "--bad",
-        CommandLine.ROS_IP + ":=192.168.0.2" };
+    args =
+        new String[] {CommandLine.ROS_NAMESPACE + ":=baz/bar/", "ignore",
+            CommandLine.ROS_MASTER_URI + ":=http://override:22622", "--bad",
+            CommandLine.ROS_IP + ":=192.168.0.2"};
     nodeContext = new CommandLineLoader(args, env).createContext();
     assertEquals(new URI("http://override:22622"), nodeContext.getRosMasterUri());
     assertEquals("192.168.0.2", nodeContext.getHostName());
@@ -208,12 +208,10 @@ public class CommandLineLoaderTest extends TestCase {
    * Test the {@link NameResolver} created by createContext().
    * 
    * @throws RosInitException
-   * @throws RosNameException
    * @throws URISyntaxException
    */
   @Test
-  public void testCreateContextResolver() throws RosInitException, RosNameException,
-      URISyntaxException {
+  public void testCreateContextResolver() throws RosInitException, URISyntaxException {
     // Construct artificial environment. Set required environment variables.
     HashMap<String, String> env = getDefaultEnv();
 
@@ -224,15 +222,16 @@ public class CommandLineLoaderTest extends TestCase {
     nodeContext = loader.createContext();
 
     // Test with no remappings.
-    String[] commandLineArgs = new String[] { "foo", "--bar" };
+    String[] commandLineArgs = new String[] {"foo", "--bar"};
     loader = new CommandLineLoader(commandLineArgs, env);
     nodeContext = loader.createContext();
     NameResolver resolver = nodeContext.getParentResolver();
     assertTrue(resolver.getRemappings().isEmpty());
 
     // test with actual remappings. All of these tests are equivalent.
-    String[] tests = { "--help name:=/my/name -i foo:=/my/foo",
-        "name:=/my/name --help -i foo:=/my/foo", "name:=/my/name foo:=/my/foo --help -i", };
+    String[] tests =
+        {"--help name:=/my/name -i foo:=/my/foo", "name:=/my/name --help -i foo:=/my/foo",
+            "name:=/my/name foo:=/my/foo --help -i",};
     for (String test : tests) {
       commandLineArgs = test.split(" ");
       loader = new CommandLineLoader(commandLineArgs, env);

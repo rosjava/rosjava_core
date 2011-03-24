@@ -16,17 +16,14 @@
 
 package org.ros;
 
-import org.ros.message.test_ros.TestArrays;
-
 import org.apache.commons.logging.Log;
-
 import org.ros.exceptions.RosInitException;
-import org.ros.exceptions.RosNameException;
 import org.ros.internal.node.RemoteException;
 import org.ros.message.std_msgs.Bool;
 import org.ros.message.std_msgs.Float64;
 import org.ros.message.std_msgs.Int64;
 import org.ros.message.test_ros.Composite;
+import org.ros.message.test_ros.TestArrays;
 import org.ros.namespace.NameResolver;
 
 import java.util.List;
@@ -42,71 +39,70 @@ public class ParameterServerTestNode implements NodeMain {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void run(List<String> argv, NodeContext nodeContext) throws RosNameException,
-      RosInitException {
+  public void run(List<String> argv, NodeContext nodeContext) throws RosInitException {
     try {
       // Node is only used to publish results.
       final Node node = new Node("param_client", nodeContext);
 
-      Publisher<org.ros.message.std_msgs.String> pub_tilde = node.createPublisher("tilde",
-          org.ros.message.std_msgs.String.class);
-      Publisher<org.ros.message.std_msgs.String> pub_string = node.createPublisher("string",
-          org.ros.message.std_msgs.String.class);
+      Publisher<org.ros.message.std_msgs.String> pub_tilde =
+          node.createPublisher("tilde", org.ros.message.std_msgs.String.class);
+      Publisher<org.ros.message.std_msgs.String> pub_string =
+          node.createPublisher("string", org.ros.message.std_msgs.String.class);
       Publisher<Int64> pub_int = node.createPublisher("int", org.ros.message.std_msgs.Int64.class);
       Publisher<Bool> pub_bool = node.createPublisher("bool", org.ros.message.std_msgs.Bool.class);
-      Publisher<Float64> pub_float = node.createPublisher("float",
-          org.ros.message.std_msgs.Float64.class);
-      Publisher<Composite> pub_composite = node.createPublisher("composite",
-          org.ros.message.test_ros.Composite.class);
-      Publisher<TestArrays> pub_list = node.createPublisher("list",
-          org.ros.message.test_ros.TestArrays.class);
-      
+      Publisher<Float64> pub_float =
+          node.createPublisher("float", org.ros.message.std_msgs.Float64.class);
+      Publisher<Composite> pub_composite =
+          node.createPublisher("composite", org.ros.message.test_ros.Composite.class);
+      Publisher<TestArrays> pub_list =
+          node.createPublisher("list", org.ros.message.test_ros.TestArrays.class);
+
       ParameterClient param = node.createParameterClient();
 
       Log log = node.getLog();
-      
+
       org.ros.message.std_msgs.String tilde_m = new org.ros.message.std_msgs.String();
       tilde_m.data = (String) param.getParam(node.resolveName("~tilde"));
-      log.info("tilde: "+tilde_m.data);
-      
+      log.info("tilde: " + tilde_m.data);
+
       String paramNamespace = (String) param.getParam("parameter_namespace");
       String targetNamespace = (String) param.getParam("target_namespace");
-      log.info("parameter_namespace: "+paramNamespace);
-      log.info("target_namespace: "+targetNamespace);
+      log.info("parameter_namespace: " + paramNamespace);
+      log.info("target_namespace: " + targetNamespace);
       NameResolver resolver = node.getResolver().createResolver(paramNamespace);
       NameResolver setResolver = node.getResolver().createResolver(targetNamespace);
-      
+
       org.ros.message.std_msgs.String string_m = new org.ros.message.std_msgs.String();
       string_m.data = (String) param.getParam(resolver.resolveName("string"));
-      log.info("string: "+string_m.data);
+      log.info("string: " + string_m.data);
       Int64 int_m = new org.ros.message.std_msgs.Int64();
       int_m.data = (Integer) param.getParam(resolver.resolveName("int"));
-      log.info("int: "+int_m.data);
+      log.info("int: " + int_m.data);
       Bool bool_m = new org.ros.message.std_msgs.Bool();
       bool_m.data = (Boolean) param.getParam(resolver.resolveName("bool"));
-      log.info("bool: "+bool_m.data);
+      log.info("bool: " + bool_m.data);
       Float64 float_m = new org.ros.message.std_msgs.Float64();
       float_m.data = (Double) param.getParam(resolver.resolveName("float"));
-      log.info("float: "+float_m.data);
-      
+      log.info("float: " + float_m.data);
+
       Composite composite_m = new org.ros.message.test_ros.Composite();
       Map composite_map = (Map) param.getParam(resolver.resolveName("composite"));
-      composite_m.a.w = (Double) ((Map)composite_map.get("a")).get("w");
-      composite_m.a.x = (Double) ((Map)composite_map.get("a")).get("x");
-      composite_m.a.y = (Double) ((Map)composite_map.get("a")).get("y");
-      composite_m.a.z = (Double) ((Map)composite_map.get("a")).get("z");
-      composite_m.b.x = (Double) ((Map)composite_map.get("b")).get("x");
-      composite_m.b.y = (Double) ((Map)composite_map.get("b")).get("y");
-      composite_m.b.z = (Double) ((Map)composite_map.get("b")).get("z");
+      composite_m.a.w = (Double) ((Map) composite_map.get("a")).get("w");
+      composite_m.a.x = (Double) ((Map) composite_map.get("a")).get("x");
+      composite_m.a.y = (Double) ((Map) composite_map.get("a")).get("y");
+      composite_m.a.z = (Double) ((Map) composite_map.get("a")).get("z");
+      composite_m.b.x = (Double) ((Map) composite_map.get("b")).get("x");
+      composite_m.b.y = (Double) ((Map) composite_map.get("b")).get("y");
+      composite_m.b.z = (Double) ((Map) composite_map.get("b")).get("z");
 
       TestArrays list_m = new org.ros.message.test_ros.TestArrays();
       // only using the integer part for easier (non-float) comparison
       Object[] list = (Object[]) param.getParam(resolver.resolveName("list"));
       list_m.int32_array = new int[list.length];
-      for (int i=0; i<list.length; i++) { 
-         list_m.int32_array[i] = (Integer) list[i];
+      for (int i = 0; i < list.length; i++) {
+        list_m.int32_array[i] = (Integer) list[i];
       }
-      
+
       // Set parameters
       param.setParam(setResolver.resolveName("string"), string_m.data);
       param.setParam(setResolver.resolveName("int"), int_m.data);
@@ -114,7 +110,7 @@ public class ParameterServerTestNode implements NodeMain {
       param.setParam(setResolver.resolveName("bool"), bool_m.data);
       param.setParam(setResolver.resolveName("composite"), composite_map);
       param.setParam(setResolver.resolveName("list"), list);
-      
+
       try {
         while (true) {
           pub_tilde.publish(tilde_m);
@@ -132,5 +128,5 @@ public class ParameterServerTestNode implements NodeMain {
       e.printStackTrace();
     }
   }
-  
+
 }

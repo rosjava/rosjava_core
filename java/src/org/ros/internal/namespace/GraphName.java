@@ -29,28 +29,27 @@ import org.ros.namespace.Namespace;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
 public class GraphName {
-  
+
   private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
   private static final String UNKNOWN_NAME = "/unknown";
 
   private final String name;
-  
+
   public static GraphName createUnknown() {
     return new GraphName(UNKNOWN_NAME);
   }
 
   /**
    * @param name
-   * @throws RosNameException
    */
-  public GraphName(String name) throws RosNameException {
+  public GraphName(String name) {
     Preconditions.checkNotNull(name);
     validateName(name);
-    // intern all ROS names as there is not likely to be much variety.
+    // Intern all ROS names as there is not likely to be much variety.
     this.name = canonicalizeName(name).intern();
   }
 
-  public static boolean validateName(String name) throws RosNameException {
+  public static boolean validateName(String name) {
     // allow empty name
     if (name.length() > 0) {
       if (!name.matches(VALID_ROS_NAME_PATTERN)) {
@@ -65,10 +64,9 @@ public class GraphName {
    * trailing slashes. Canonical names can be global, private, or relative.
    * 
    * @param name
-   * @return
-   * @throws RosNameException
+   * @return the canonical name for this graph node
    */
-  public static String canonicalizeName(String name) throws RosNameException {
+  public static String canonicalizeName(String name) {
     validateName(name);
     // trim trailing slashes for canonical representation
     while (!name.equals(Namespace.GLOBAL_NS) && name.endsWith("/")) {
@@ -144,26 +142,21 @@ public class GraphName {
    *         return an empty name if there is no parent.
    */
   public GraphName getParent() {
-    try {
-      if (name.length() == 0) {
+    if (name.length() == 0) {
+      return new GraphName("");
+    }
+    if (name.equals(Namespace.GLOBAL_NS)) {
+      return new GraphName(Namespace.GLOBAL_NS);
+    }
+    int slashIdx = name.lastIndexOf('/');
+    if (slashIdx > 1) {
+      return new GraphName(name.substring(0, slashIdx));
+    } else {
+      if (isGlobal()) {
+        return new GraphName(Namespace.GLOBAL_NS);
+      } else {
         return new GraphName("");
       }
-      if (name.equals(Namespace.GLOBAL_NS)) {
-        return new GraphName(Namespace.GLOBAL_NS);
-      }
-      int slashIdx = name.lastIndexOf('/');
-      if (slashIdx > 1) {
-        return new GraphName(name.substring(0, slashIdx));
-      } else {
-        if (isGlobal()) {
-          return new GraphName(Namespace.GLOBAL_NS);
-        } else {
-          return new GraphName("");
-        }
-      }
-    } catch (RosNameException e) {
-      // This should be not occur as all substrings of names are valid names.
-      return null;
     }
   }
 

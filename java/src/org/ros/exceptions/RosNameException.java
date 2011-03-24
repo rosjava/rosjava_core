@@ -13,9 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.exceptions;
 
+import org.ros.internal.namespace.GraphName;
+
 /**
+ * Thrown in the case where a {@link GraphName} is invalid.
+ * 
+ * <p>
+ * This is a {@link RuntimeException} because in most cases it is the result of
+ * a programming error. In addition, it is not typically possible to recover
+ * from this error.
+ * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
 public class RosNameException extends RosRuntimeException {

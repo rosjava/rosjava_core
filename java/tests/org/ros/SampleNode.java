@@ -13,10 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
 import org.ros.exceptions.RosInitException;
-import org.ros.exceptions.RosNameException;
 import org.ros.message.geometry_msgs.Point;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.geometry_msgs.Quaternion;
@@ -26,7 +26,7 @@ import java.util.List;
 public class SampleNode implements NodeMain {
 
   @Override
-  public void run(List<String> argv, NodeContext nodeContext) throws RosNameException, RosInitException {
+  public void run(List<String> argv, NodeContext nodeContext) throws RosInitException {
     Node node = new Node("sample_rosjava_node", nodeContext);
    
     Publisher<PoseStamped> pub_pose = node.createPublisher("pose", PoseStamped.class);
@@ -56,7 +56,6 @@ public class SampleNode implements NodeMain {
       pose.pose.orientation = orientation;
       pub_pose.publish(pose);
     }
-
   }
 
 }

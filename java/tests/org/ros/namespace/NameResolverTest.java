@@ -16,6 +16,7 @@
 package org.ros.namespace;
 
 import junit.framework.TestCase;
+
 import org.junit.Test;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
@@ -44,8 +45,8 @@ public class NameResolverTest extends TestCase {
       assertEquals("/node/foo", r.resolveName("~foo"));
       fail("should have thrown RosNameException");
     } catch (RosNameException e) {
-
     }
+
     r = new NameResolver("/ns1", new HashMap<GraphName, GraphName>());
 
     assertEquals("/ns1/foo", r.resolveName("foo"));
@@ -54,7 +55,7 @@ public class NameResolverTest extends TestCase {
   }
 
   @Test
-  public void testResolveNameTwoArg() throws RosNameException {
+  public void testResolveNameTwoArg() {
     // these tests are based on test_roslib_names.py
 
     NameResolver r = createGlobalResolver();
@@ -62,37 +63,32 @@ public class NameResolverTest extends TestCase {
       r.resolveName("foo", "bar");
       fail("should have raised");
     } catch (IllegalArgumentException e) {
-    } catch (RosNameException e) {
-      fail("should have not raised");
     }
-    try {
-      assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
-      assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, Namespace.GLOBAL_NS));
-      assertEquals(Namespace.GLOBAL_NS, r.resolveName("/anything/bar", Namespace.GLOBAL_NS));
 
-      assertEquals("/ns1/node", r.resolveName("/ns1/node", ""));
-      assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
+    assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
+    assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, Namespace.GLOBAL_NS));
+    assertEquals(Namespace.GLOBAL_NS, r.resolveName("/anything/bar", Namespace.GLOBAL_NS));
 
-      // relative namespaces get resolved to default namespace
-      assertEquals("/foo", r.resolveName("/", "foo"));
-      assertEquals("/foo", r.resolveName("/", "foo/"));
-      assertEquals("/foo", r.resolveName("/", "/foo"));
-      assertEquals("/foo", r.resolveName("/", "/foo/"));
+    assertEquals("/ns1/node", r.resolveName("/ns1/node", ""));
+    assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
 
-      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "foo"));
-      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "foo/"));
-      assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2/", "foo"));
-      assertEquals("/foo", r.resolveName("/ns1/ns2", "/foo/"));
+    // relative namespaces get resolved to default namespace
+    assertEquals("/foo", r.resolveName("/", "foo"));
+    assertEquals("/foo", r.resolveName("/", "foo/"));
+    assertEquals("/foo", r.resolveName("/", "/foo"));
+    assertEquals("/foo", r.resolveName("/", "/foo/"));
 
-      assertEquals("/ns1/ns2/ns3/foo", r.resolveName("/ns1/ns2/ns3", "foo"));
-      assertEquals("/ns1/ns2/ns3/foo", r.resolveName("/ns1/ns2/ns3/", "foo"));
-      assertEquals("/foo", r.resolveName("/", "/foo/"));
+    assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "foo"));
+    assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "foo/"));
+    assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2/", "foo"));
+    assertEquals("/foo", r.resolveName("/ns1/ns2", "/foo/"));
 
-      assertEquals("/ns1/ns2/foo/bar", r.resolveName("/ns1/ns2", "foo/bar"));
-      assertEquals("/ns1/ns2/ns3/foo/bar", r.resolveName("/ns1/ns2/ns3", "foo/bar"));
-    } catch (RosNameException e) {
-      fail("should not be any invalid names in this test");
-    }
+    assertEquals("/ns1/ns2/ns3/foo", r.resolveName("/ns1/ns2/ns3", "foo"));
+    assertEquals("/ns1/ns2/ns3/foo", r.resolveName("/ns1/ns2/ns3/", "foo"));
+    assertEquals("/foo", r.resolveName("/", "/foo/"));
+
+    assertEquals("/ns1/ns2/foo/bar", r.resolveName("/ns1/ns2", "foo/bar"));
+    assertEquals("/ns1/ns2/ns3/foo/bar", r.resolveName("/ns1/ns2/ns3", "foo/bar"));
 
     try {
       assertEquals("/foo", r.resolveName("/", "~foo"));
@@ -118,11 +114,9 @@ public class NameResolverTest extends TestCase {
 
   /**
    * Test resolveName with name remapping active.
-   * 
-   * @throws RosNameException
    */
   @Test
-  public void testResolveNameRemapping() throws RosNameException {
+  public void testResolveNameRemapping() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     remappings.put(new GraphName("name"), new GraphName("/my/name"));
     remappings.put(new GraphName("foo"), new GraphName("/my/foo"));

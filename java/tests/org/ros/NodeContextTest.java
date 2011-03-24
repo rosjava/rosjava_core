@@ -13,12 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 
@@ -33,7 +33,7 @@ public class NodeContextTest {
   }
 
   @Test
-  public void testResolver() throws RosNameException {
+  public void testResolver() {
     NodeContext nodeContext = new NodeContext();
     assertEquals(null, nodeContext.getParentResolver());
 

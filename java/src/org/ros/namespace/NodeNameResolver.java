@@ -15,7 +15,6 @@
  */
 package org.ros.namespace;
 
-import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 
 import java.util.HashMap;
@@ -33,23 +32,19 @@ public class NodeNameResolver extends NameResolver {
 
   /**
    * @param remappings
-   * @throws RosNameException
-   * 
    */
   private NodeNameResolver(String defaultNamespace, String privateNamespace,
-      HashMap<GraphName, GraphName> remappings) throws RosNameException {
+      HashMap<GraphName, GraphName> remappings) {
     super(defaultNamespace, remappings);
     this.privateNamespace = privateNamespace;
   }
 
   /**
-   * @param name
-   *          Name to resolve
+   * @param name Name to resolve
    * @return The name resolved relative to the default namespace.
-   * @throws RosNameException
    */
   @Override
-  public String resolveName(String name) throws RosNameException {
+  public String resolveName(String name) {
     GraphName n = lookUpRemapping(new GraphName(name));
     if (n.isPrivate()) {
       String s = n.toRelative();
@@ -64,9 +59,9 @@ public class NodeNameResolver extends NameResolver {
 
   }
 
-  public static NodeNameResolver create(NameResolver defaultResolver, GraphName nodeName)
-      throws RosNameException {
+  public static NodeNameResolver create(NameResolver defaultResolver, GraphName nodeName) {
     return new NodeNameResolver(defaultResolver.getNamespace(), nodeName.toString(),
         defaultResolver.getRemappings());
   }
+
 }

@@ -25,7 +25,6 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.exceptions.RosInitException;
-import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -70,32 +69,32 @@ public class NodeTest {
   }
 
   @Test
-  public void testResolveName() throws RosNameException, RosInitException {
+  public void testResolveName() throws RosInitException {
     nodeContext.setParentResolver(new NameResolver("/ns1", new HashMap<GraphName, GraphName>()));
     Node node = new Node("test_resolver", nodeContext);
-    
+
     assertEquals("/foo", node.resolveName("/foo"));
     assertEquals("/ns1/foo", node.resolveName("foo"));
     assertEquals("/ns1/test_resolver/foo", node.resolveName("~foo"));
-    
+
     Publisher<Int64> pub = node.createPublisher("pub", Int64.class);
     assertEquals("/ns1/pub", pub.getTopicName());
     pub = node.createPublisher("/pub", Int64.class);
     assertEquals("/pub", pub.getTopicName());
     pub = node.createPublisher("~pub", Int64.class);
     assertEquals("/ns1/test_resolver/pub", pub.getTopicName());
-    
+
     MessageListener<Int64> callback = new MessageListener<Int64>() {
       @Override
       public void onNewMessage(Int64 message) {
       }
     };
-    
-    Subscriber<Int64> sub = node.createSubscriber("sub", callback , Int64.class);
+
+    Subscriber<Int64> sub = node.createSubscriber("sub", callback, Int64.class);
     assertEquals("/ns1/sub", sub.getTopicName());
-    sub = node.createSubscriber("/sub", callback , Int64.class);
+    sub = node.createSubscriber("/sub", callback, Int64.class);
     assertEquals("/sub", sub.getTopicName());
-    sub = node.createSubscriber("~sub", callback , Int64.class);
+    sub = node.createSubscriber("~sub", callback, Int64.class);
     assertEquals("/ns1/test_resolver/sub", sub.getTopicName());
   }
 
@@ -106,8 +105,8 @@ public class NodeTest {
   }
 
   @Test
-  public void testPublicAddresses() throws RosInitException, RosNameException, RemoteException,
-      XmlRpcException, IOException {
+  public void testPublicAddresses() throws RosInitException, RemoteException, XmlRpcException,
+      IOException {
     MasterServer master =
         new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     master.start();
