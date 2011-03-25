@@ -16,7 +16,6 @@
 
 package org.ros.internal.message;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import java.io.BufferedReader;
@@ -25,7 +24,6 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.StringTokenizer;
 
 /**
  * Generates a {@link MessageImpl} instance from a specification file at runtime.
@@ -83,12 +81,14 @@ public class MessageFactory<MessageType extends Message> implements FieldType {
     while (line != null) {
       line = line.trim();
       if (line.length() > 0 && !line.startsWith("#")) {
-        StringTokenizer tokenizer = new StringTokenizer(line);
-        Preconditions.checkState(tokenizer.countTokens() == 2);
-        String type = tokenizer.nextToken();
-        String name = tokenizer.nextToken();
+        String[] typeAndName = line.split("\\s+", 2);
+        String type = typeAndName[0];
+        String name = typeAndName[1];
         if (name.contains("=")) {
-          throw new UnsupportedOperationException();
+          String[] nameAndValue = name.split("=", 2);
+          name = nameAndValue[0];
+          String value = nameAndValue[1];
+          constantFieldValuesBuilder.put(name, parseConstant(value, FIELD_TYPE_NAMES.get(type)));
         } else {
           if (FIELD_TYPE_NAMES.containsKey(type)) {
             valueFieldTypesBuilder.put(name, FIELD_TYPE_NAMES.get(type));
@@ -103,6 +103,29 @@ public class MessageFactory<MessageType extends Message> implements FieldType {
     }
     valueFieldTypes = valueFieldTypesBuilder.build();
     constantFieldValues = constantFieldValuesBuilder.build();
+  }
+
+  private Object parseConstant(String value, short type) {
+    switch (type) {
+      case INT8:
+      case UINT8:
+      case INT16:
+      case UINT16:
+      case INT32:
+      case UINT32:
+        return Integer.parseInt(value);
+      case INT64:
+      case UINT64:
+        return Long.parseLong(value);
+      case FLOAT32:
+        return Float.parseFloat(value);
+      case FLOAT64:
+        return Double.parseDouble(value);
+      case STRING:
+        return value;
+      default:
+        throw new RuntimeException();
+    }
   }
 
   public MessageType createMessage() {

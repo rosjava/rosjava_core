@@ -88,4 +88,20 @@ public class MessageTest {
     barMessage.set("data", data);
     assertEquals(data, message.getMessage("bar", BarMessage.class).getInt("data"));
   }
+
+  @Test
+  public void testConstantInt8() throws IOException {
+    factory = new MessageFactory<FooMessage>("int8 data=42", FooMessage.class);
+    FooMessage message = factory.createMessage();
+    assertEquals(42, message.getInt("data"));
+  }
+
+  @Test
+  public void testConstantString() throws IOException {
+    factory =
+        new MessageFactory<FooMessage>("string data=Hello, ROS! # comment ", FooMessage.class);
+    FooMessage message = factory.createMessage();
+    assertEquals("Hello, ROS! # comment", message.getString("data"));
+  }
+
 }

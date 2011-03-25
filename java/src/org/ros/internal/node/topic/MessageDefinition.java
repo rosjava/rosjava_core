@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import org.ros.internal.transport.ConnectionHeaderFields;
-
 import org.ros.message.Message;
 
 import java.util.Map;
@@ -69,11 +68,6 @@ public class MessageDefinition {
     return "MessageDefinition<" + type + ", " + md5Checksum + ">";
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -83,11 +77,6 @@ public class MessageDefinition {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
@@ -102,4 +91,5 @@ public class MessageDefinition {
     } else if (!md5Checksum.equals(other.md5Checksum)) return false;
     return true;
   }
+
 }
