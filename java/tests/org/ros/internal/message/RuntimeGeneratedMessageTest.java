@@ -30,12 +30,42 @@ public class RuntimeGeneratedMessageTest {
   private RuntimeGeneratedMessageFactory factory;
 
   @Test
+  public void testCreateEmptyMessage() throws IOException {
+    factory = new RuntimeGeneratedMessageFactory("");
+    factory.createMessage();
+  }
+
+  @Test
+  public void testCreateEmptyMessageWithBlankLines() throws IOException {
+    factory = new RuntimeGeneratedMessageFactory("\n\n\n\n\n");
+    factory.createMessage();
+  }
+
+  @Test
   public void testString() throws IOException {
     factory = new RuntimeGeneratedMessageFactory("string data");
     String data = "Hello, ROS!";
     Message message = factory.createMessage();
     message.set("data", data);
     assertEquals(data, message.getString("data"));
+  }
+
+  @Test
+  public void testStringWithComments() throws IOException {
+    factory = new RuntimeGeneratedMessageFactory("# foo\nstring data\n    # string other data");
+    String data = "Hello, ROS!";
+    Message message = factory.createMessage();
+    message.set("data", data);
+    assertEquals(data, message.getString("data"));
+  }
+
+  @Test
+  public void testInt8() throws IOException {
+    factory = new RuntimeGeneratedMessageFactory("int8 data");
+    int data = 42;
+    Message message = factory.createMessage();
+    message.set("data", data);
+    assertEquals(data, message.getInt("data"));
   }
 
 }

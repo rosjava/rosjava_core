@@ -16,6 +16,7 @@
 
 package org.ros.internal.message;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import java.io.BufferedReader;
@@ -34,39 +35,28 @@ public class RuntimeGeneratedMessageFactory implements FieldType {
   private final ImmutableMap<String, Object> constantFieldValues;
 
   public RuntimeGeneratedMessageFactory(String messageDefinition) throws IOException {
-    ImmutableMap<String, Short> fieldTypeNames = ImmutableMap.<String, Short>builder()
-        .put("bool", BOOL)
-        .put("int8", INT8)
-        .put("uint8", UINT8)
-        .put("int16", INT16)
-        .put("uint16", UINT16)
-        .put("int32", INT32)
-        .put("uint32", UINT32)
-        .put("int64", INT64)
-        .put("uint64", UINT64)
-        .put("float32", FLOAT32)
-        .put("float64", FLOAT64)
-        .put("string", STRING)
-        .put("time", TIME)
-        .put("duration", DURATION)
-        .build();
+    ImmutableMap<String, Short> fieldTypeNames =
+        ImmutableMap.<String, Short>builder().put("bool", BOOL).put("int8", INT8)
+            .put("uint8", UINT8).put("int16", INT16).put("uint16", UINT16).put("int32", INT32)
+            .put("uint32", UINT32).put("int64", INT64).put("uint64", UINT64)
+            .put("float32", FLOAT32).put("float64", FLOAT64).put("string", STRING)
+            .put("time", TIME).put("duration", DURATION).build();
     ImmutableMap.Builder<String, Short> valueFieldTypesBuilder = ImmutableMap.builder();
     ImmutableMap.Builder<String, Object> constantFieldValuesBuilder = ImmutableMap.builder();
     BufferedReader reader = new BufferedReader(new StringReader(messageDefinition));
     String line = reader.readLine();
     while (line != null) {
       line = line.trim();
-      if (line.startsWith("#")) {
-        continue;
-      }
-      StringTokenizer tokenizer = new StringTokenizer(line);
-      String type = tokenizer.nextToken();
-      String name = tokenizer.nextToken();
-      if (name.contains("=")) {
-        // This is a constant.
-
-      } else {
-        valueFieldTypesBuilder.put(name, fieldTypeNames.get(type));
+      if (line.length() > 0 && !line.startsWith("#")) {
+        StringTokenizer tokenizer = new StringTokenizer(line);
+        Preconditions.checkState(tokenizer.countTokens() == 2);
+        String type = tokenizer.nextToken();
+        String name = tokenizer.nextToken();
+        if (name.contains("=")) {
+          throw new UnsupportedOperationException();
+        } else {
+          valueFieldTypesBuilder.put(name, fieldTypeNames.get(type));
+        }
       }
       line = reader.readLine();
     }
