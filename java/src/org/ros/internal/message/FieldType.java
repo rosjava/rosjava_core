@@ -20,7 +20,7 @@ package org.ros.internal.message;
  * @author damonkohler@google.com (Damon Kohler)
  */
 interface FieldType {
-  
+
   static final short BOOL = 0;
   static final short INT8 = 1;
   static final short UINT8 = 2;
@@ -35,5 +35,6 @@ interface FieldType {
   static final short STRING = 11;
   static final short TIME = 12;
   static final short DURATION = 13;
-  
+  static final short MESSAGE = 14;
+
 }

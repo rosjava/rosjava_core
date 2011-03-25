@@ -45,7 +45,7 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageQueueIntegrationTest {
+public class MessageImplQueueIntegrationTest {
 
   private OutgoingMessageQueue out;
 

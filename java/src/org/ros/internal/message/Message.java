@@ -16,175 +16,48 @@
 
 package org.ros.internal.message;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
 import org.ros.message.Duration;
 import org.ros.message.Time;
-
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Message implements FieldType {
+public interface Message {
 
-  private final ImmutableMap<String, Object> constantFieldValues;
-  private final ImmutableMap<String, Short> valueFieldTypes;
-  private final Map<String, Object> valueFieldValues;
+  Duration getDuration(String key);
 
-  public Message(ImmutableMap<String, Short> valueFieldTypes,
-      ImmutableMap<String, Object> constantFieldValues) {
-    this.constantFieldValues = constantFieldValues;
-    this.valueFieldTypes = valueFieldTypes;
-    valueFieldValues = Maps.newConcurrentMap();
-  }
+  Time getTime(String key);
 
-  public void set(String key, String value) {
-    if (valueFieldTypes.get(key) != STRING) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
+  boolean getBoolean(String key);
 
-  public void set(String key, int value) {
-    short type = valueFieldTypes.get(key);
-    if (type != INT8 && type != UINT8 && type != INT16 && type != UINT16 && type != INT32
-        && type != UINT32) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
+  double getDouble(String key);
 
-  public void set(String key, long value) {
-    short type = valueFieldTypes.get(key);
-    if (type != INT64 && type != UINT64) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
+  float getFloat(String key);
 
-  public void set(String key, float value) {
-    if (valueFieldTypes.get(key) != FLOAT32) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
+  long getLong(String key);
 
-  public void set(String key, double value) {
-    if (valueFieldTypes.get(key) != FLOAT64) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
+  int getInt(String key);
 
-  public void set(String key, boolean value) {
-    if (valueFieldTypes.get(key) != BOOL) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
+  String getString(String key);
 
-  public void set(String key, Time value) {
-    if (valueFieldTypes.get(key) != TIME) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
+  void set(String key, Duration value);
 
-  public void set(String key, Duration value) {
-    if (valueFieldTypes.get(key) != DURATION) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
+  void set(String key, Time value);
 
-  public String getString(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof String) {
-      return (String) constantFieldValues.get(key);
-    }
-    if (valueFieldValues.containsKey(key) && valueFieldTypes.get(key) == STRING) {
-      return (String) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
+  void set(String key, boolean value);
 
-  public int getInt(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Integer) {
-      return (Integer) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key)
-        && (type == INT8 || type == UINT8 || type == INT16 || type == UINT16 || type == INT32 || type == UINT32)) {
-      return (Integer) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
+  void set(String key, double value);
 
-  public long getLong(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Long) {
-      return (Long) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && (type == INT64 || type == UINT64)) {
-      return (Long) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
+  void set(String key, float value);
 
-  public float getFloat(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Float) {
-      return (Float) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && type == FLOAT32) {
-      return (Float) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
+  void set(String key, long value);
 
-  public double getDouble(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Double) {
-      return (Double) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && type == FLOAT64) {
-      return (Double) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
+  void set(String key, int value);
 
-  public boolean getBoolean(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Boolean) {
-      return (Boolean) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && type == BOOL) {
-      return (Boolean) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
+  void set(String key, String value);
 
-  public Time getTime(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Time) {
-      return (Time) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && type == TIME) {
-      return (Time) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
+  void set(String key, Message value);
 
-  public Duration getDuration(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Duration) {
-      return (Duration) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && type == DURATION) {
-      return (Duration) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
+  <MessageType extends Message> MessageType getMessage(String key, Class<MessageType> messageClass);
 
 }

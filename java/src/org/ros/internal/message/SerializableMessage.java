@@ -29,7 +29,7 @@ import java.nio.ByteOrder;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class SerializableMessage extends Message {
+public abstract class SerializableMessage extends MessageImpl {
 
   /**
    * @param valueFieldTypes
@@ -78,9 +78,9 @@ public abstract class SerializableMessage extends Message {
   }
 
   @Override
-  public Message clone() {
+  public MessageImpl clone() {
     try {
-      return (Message) super.clone();
+      return (MessageImpl) super.clone();
     } catch (CloneNotSupportedException e) {
       throw new RuntimeException("Clone of message not supported?!");
     }
