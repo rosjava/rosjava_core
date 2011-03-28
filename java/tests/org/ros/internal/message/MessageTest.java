@@ -40,9 +40,6 @@ public class MessageTest {
   private MessageLoader loader;
   private MessageFactory factory;
 
-  private void loadStdMsgs() {
-  }
-
   @Before
   public void setUp() {
     loader = new MessageLoader();
