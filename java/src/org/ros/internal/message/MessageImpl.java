@@ -16,215 +16,357 @@
 
 package org.ros.internal.message;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
+import java.math.BigInteger;
+import java.util.Collection;
 import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageImpl implements Message, FieldType {
+public class MessageImpl implements Message {
 
-  private final ImmutableMap<String, Object> constantFieldValues;
-  private final ImmutableMap<String, Short> valueFieldTypes;
-  private final Map<String, Object> valueFieldValues;
+  private Map<String, FieldType> constantFieldTypes;
+  private Map<String, Object> constantFieldValues;
+  private Map<String, FieldType> valueFieldTypes;
+  private Map<String, Object> valueFieldValues;
 
-  public MessageImpl(ImmutableMap<String, Short> valueFieldTypes,
-      ImmutableMap<String, Object> constantFieldValues) {
+  public MessageImpl(Map<String, FieldType> constantFieldTypes,
+      Map<String, Object> constantFieldValues, Map<String, FieldType> valueFieldTypes) {
+    this.constantFieldTypes = constantFieldTypes;
     this.constantFieldValues = constantFieldValues;
     this.valueFieldTypes = valueFieldTypes;
     valueFieldValues = Maps.newConcurrentMap();
   }
 
-  @Override
-  public void set(String key, String value) {
-    if (valueFieldTypes.get(key) != STRING) {
+  @SuppressWarnings("unchecked")
+  private <T> T getField(String key, FieldType type) {
+    if (constantFieldValues.containsKey(key) && constantFieldTypes.get(key) == type) {
+      return (T) constantFieldValues.get(key);
+    }
+    if (valueFieldValues.containsKey(key) && valueFieldTypes.get(key) == type) {
+      return (T) valueFieldValues.get(key);
+    }
+    throw new RuntimeException("Unknown field: " + type + " " + key);
+  }
+
+  private void setField(String key, FieldType type, Object value) {
+    if (valueFieldTypes.get(key) != type) {
       throw new RuntimeException();
     }
     valueFieldValues.put(key, value);
   }
 
   @Override
-  public void set(String key, int value) {
-    short type = valueFieldTypes.get(key);
-    if (type != INT8 && type != UINT8 && type != INT16 && type != UINT16 && type != INT32
-        && type != UINT32) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
+  public boolean getBool(String key) {
+    return getField(key, FieldType.BOOL);
   }
 
   @Override
-  public void set(String key, long value) {
-    short type = valueFieldTypes.get(key);
-    if (type != INT64 && type != UINT64) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
-
-  @Override
-  public void set(String key, float value) {
-    if (valueFieldTypes.get(key) != FLOAT32) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
-
-  @Override
-  public void set(String key, double value) {
-    if (valueFieldTypes.get(key) != FLOAT64) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
-
-  @Override
-  public void set(String key, boolean value) {
-    if (valueFieldTypes.get(key) != BOOL) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
-
-  @Override
-  public void set(String key, Time value) {
-    if (valueFieldTypes.get(key) != TIME) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
-
-  @Override
-  public void set(String key, Duration value) {
-    if (valueFieldTypes.get(key) != DURATION) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
-  }
-
-  @Override
-  public String getString(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof String) {
-      return (String) constantFieldValues.get(key);
-    }
-    if (valueFieldValues.containsKey(key) && valueFieldTypes.get(key) == STRING) {
-      return (String) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
-
-  @Override
-  public int getInt(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Integer) {
-      return (Integer) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key)
-        && (type == INT8 || type == UINT8 || type == INT16 || type == UINT16 || type == INT32 || type == UINT32)) {
-      return (Integer) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
-
-  @Override
-  public long getLong(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Long) {
-      return (Long) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && (type == INT64 || type == UINT64)) {
-      return (Long) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
-
-  @Override
-  public float getFloat(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Float) {
-      return (Float) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && type == FLOAT32) {
-      return (Float) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
-
-  @Override
-  public double getDouble(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Double) {
-      return (Double) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && type == FLOAT64) {
-      return (Double) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
-
-  @Override
-  public boolean getBoolean(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Boolean) {
-      return (Boolean) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && type == BOOL) {
-      return (Boolean) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
-  }
-
-  @Override
-  public Time getTime(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Time) {
-      return (Time) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && type == TIME) {
-      return (Time) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
+  public Collection<Boolean> getBoolArray(String key) {
+    return getField(key, FieldType.BOOL_ARRAY);
   }
 
   @Override
   public Duration getDuration(String key) {
-    if (constantFieldValues.containsKey(key) && constantFieldValues.get(key) instanceof Duration) {
-      return (Duration) constantFieldValues.get(key);
-    }
-    Short type = valueFieldTypes.get(key);
-    if (valueFieldValues.containsKey(key) && type == DURATION) {
-      return (Duration) valueFieldValues.get(key);
-    }
-    throw new RuntimeException();
+    return getField(key, FieldType.DURATION);
   }
 
   @Override
-  public void set(String key, Message value) {
-    if (valueFieldTypes.get(key) != MESSAGE) {
-      throw new RuntimeException();
-    }
-    valueFieldValues.put(key, value);
+  public Collection<Duration> getDurationArray(String key) {
+    return getField(key, FieldType.DURATION_ARRAY);
   }
 
-  @SuppressWarnings("unchecked")
+  @Override
+  public float getFloat32(String key) {
+    return getField(key, FieldType.FLOAT32);
+  }
+
+  @Override
+  public Collection<Float> getFloat32Array(String key) {
+    return getField(key, FieldType.FLOAT32_ARRAY);
+  }
+
+  @Override
+  public double getFloat64(String key) {
+    return getField(key, FieldType.FLOAT64);
+  }
+
+  @Override
+  public Collection<Double> getFloat64Array(String key) {
+    return getField(key, FieldType.FLOAT64_ARRAY);
+  }
+
+  @Override
+  public int getInt16(String key) {
+    return getField(key, FieldType.INT16);
+  }
+
+  @Override
+  public Collection<Integer> getInt16Array(String key) {
+    return getField(key, FieldType.INT16_ARRAY);
+  }
+
+  @Override
+  public int getInt32(String key) {
+    return getField(key, FieldType.INT32);
+  }
+
+  @Override
+  public Collection<Integer> getInt32Array(String key) {
+    return getField(key, FieldType.INT32_ARRAY);
+  }
+
+  @Override
+  public long getInt64(String key) {
+    return getField(key, FieldType.INT64);
+  }
+
+  @Override
+  public Collection<Long> getInt64Array(String key) {
+    return getField(key, FieldType.INT64_ARRAY);
+  }
+
+  @Override
+  public int getInt8(String key) {
+    return getField(key, FieldType.INT8);
+  }
+
+  @Override
+  public Collection<Integer> getInt8Array(String key) {
+    return getField(key, FieldType.INT8_ARRAY);
+  }
+
   @Override
   public <MessageType extends Message> MessageType getMessage(String key,
       Class<MessageType> messageClass) {
-    Object value = constantFieldValues.get(key);
-    if (constantFieldValues.containsKey(key) && messageClass.isInstance(value)) {
-      return (MessageType) value;
-    }
-    value = valueFieldValues.get(key);
-    if (valueFieldValues.containsKey(key) && valueFieldTypes.get(key) == MESSAGE
-        && messageClass.isInstance(value)) {
-      return (MessageType) value;
+    MessageType message = getField(key, FieldType.MESSAGE);
+    if (messageClass.isInstance(message)) {
+      return message;
     }
     throw new RuntimeException();
+  }
+
+  @Override
+  public <MessageType extends Message> Collection<MessageType> getMessageArray(String key,
+      Class<MessageType> messageClass) {
+    Collection<MessageType> message = getField(key, FieldType.MESSAGE_ARRAY);
+    // TODO(damonkohler): Check that all members are of the right type?
+    return message;
+  }
+
+  @Override
+  public String getString(String key) {
+    return getField(key, FieldType.STRING);
+  }
+
+  @Override
+  public Collection<String> getStringArray(String key) {
+    return getField(key, FieldType.STRING_ARRAY);
+  }
+
+  @Override
+  public Time getTime(String key) {
+    return getField(key, FieldType.TIME);
+  }
+
+  @Override
+  public Collection<Time> getTimeArray(String key) {
+    return getField(key, FieldType.TIME_ARRAY);
+  }
+
+  @Override
+  public int getUint16(String key) {
+    return getField(key, FieldType.UINT16);
+  }
+
+  @Override
+  public Collection<Integer> getUint16Array(String key) {
+    return getField(key, FieldType.UINT16_ARRAY);
+  }
+
+  @Override
+  public long getUint32(String key) {
+    return getField(key, FieldType.UINT32);
+  }
+
+  @Override
+  public Collection<Long> getUint32Array(String key) {
+    return getField(key, FieldType.UINT32_ARRAY);
+  }
+
+  @Override
+  public long getUint64(String key) {
+    return getField(key, FieldType.UINT64);
+  }
+
+  @Override
+  public Collection<Long> getUint64Array(String key) {
+    return getField(key, FieldType.UINT64_ARRAY);
+  }
+
+  @Override
+  public int getUint8(String key) {
+    return getField(key, FieldType.UINT8);
+  }
+
+  @Override
+  public Collection<Integer> getUint8Array(String key) {
+    return getField(key, FieldType.UINT8_ARRAY);
+  }
+
+  @Override
+  public void setBool(String key, boolean value) {
+    setField(key, FieldType.BOOL, value);
+  }
+
+  @Override
+  public void setBoolArray(String key, Collection<Boolean> value) {
+    setField(key, FieldType.BOOL_ARRAY, value);
+  }
+
+  @Override
+  public void setDuration(String key, Collection<Duration> value) {
+    setField(key, FieldType.DURATION_ARRAY, value);
+  }
+
+  @Override
+  public void setDuration(String key, Duration value) {
+    setField(key, FieldType.DURATION, value);
+  }
+
+  @Override
+  public void setFloat32(String key, float value) {
+    setField(key, FieldType.FLOAT32, value);
+  }
+
+  @Override
+  public void setFloat32Array(String key, Collection<Float> value) {
+    setField(key, FieldType.FLOAT32_ARRAY, value);
+  }
+
+  @Override
+  public void setFloat64(String key, double value) {
+    setField(key, FieldType.FLOAT64, value);
+  }
+
+  @Override
+  public void setFloat64Array(String key, Collection<Double> value) {
+    setField(key, FieldType.FLOAT64_ARRAY, value);
+  }
+
+  @Override
+  public void setInt16(String key, int value) {
+    setField(key, FieldType.INT16, value);
+  }
+
+  @Override
+  public void setInt16Array(String key, Collection<Integer> value) {
+    setField(key, FieldType.INT16_ARRAY, value);
+  }
+
+  @Override
+  public void setInt32(String key, int value) {
+    setField(key, FieldType.INT32, value);
+  }
+
+  @Override
+  public void setInt32Array(String key, Collection<Integer> value) {
+    setField(key, FieldType.INT32_ARRAY, value);
+  }
+
+  @Override
+  public void setInt64(String key, long value) {
+    setField(key, FieldType.INT64, value);
+  }
+
+  @Override
+  public void setInt64Array(String key, Collection<Long> value) {
+    setField(key, FieldType.INT64_ARRAY, value);
+  }
+
+  @Override
+  public void setInt8(String key, int value) {
+    setField(key, FieldType.INT8, value);
+  }
+
+  @Override
+  public void setInt8Array(String key, Collection<Integer> value) {
+    setField(key, FieldType.INT8_ARRAY, value);
+  }
+
+  @Override
+  public void setMessage(String key, Message value) {
+    setField(key, FieldType.MESSAGE, value);
+  }
+
+  @Override
+  public void setMessageArray(String key, Collection<Message> value) {
+    setField(key, FieldType.MESSAGE_ARRAY, value);
+  }
+
+  @Override
+  public void setString(String key, String value) {
+    setField(key, FieldType.STRING, value);
+  }
+
+  @Override
+  public void setStringArray(String key, Collection<String> value) {
+    setField(key, FieldType.STRING_ARRAY, value);
+  }
+
+  @Override
+  public void setTime(String key, Time value) {
+    setField(key, FieldType.TIME, value);
+  }
+
+  @Override
+  public void setTimeArray(String key, Collection<Time> value) {
+    setField(key, FieldType.TIME_ARRAY, value);
+  }
+
+  @Override
+  public void setUint16(String key, int value) {
+    setField(key, FieldType.UINT16, value);
+  }
+
+  @Override
+  public void setUint16Array(String key, Collection<Integer> value) {
+    setField(key, FieldType.UINT16_ARRAY, value);
+  }
+
+  @Override
+  public void setUint32(String key, long value) {
+    setField(key, FieldType.UINT32, value);
+  }
+
+  @Override
+  public void setUint32Array(String key, Collection<Long> value) {
+    setField(key, FieldType.UINT32_ARRAY, value);
+  }
+
+  @Override
+  public void setUint64(String key, BigInteger value) {
+    setField(key, FieldType.UINT64, value);
+  }
+
+  @Override
+  public void setUint64Array(String key, Collection<BigInteger> value) {
+    setField(key, FieldType.UINT64_ARRAY, value);
+  }
+
+  @Override
+  public void setUint8(String key, int value) {
+    setField(key, FieldType.UINT8, value);
+  }
+
+  @Override
+  public void setUint8Array(String key, Collection<Integer> value) {
+    setField(key, FieldType.UINT8_ARRAY, value);
   }
 
 }

@@ -44,6 +44,8 @@ public class MessageLoader {
 
   private static final Log log = LogFactory.getLog(MessageLoader.class);
 
+  private static final String STD_MSGS_HEADER_NAME = "std_msgs/Header";
+
   private final Collection<File> searchPaths;
   private final Map<String, String> messageDefinitions;
 
@@ -74,7 +76,11 @@ public class MessageLoader {
     String relativePath =
         absolutePath.substring(root.getAbsolutePath().length() - root.getName().length());
     String strippedExtension = relativePath.substring(0, relativePath.length() - 4);
-    return strippedExtension.replaceFirst("/msg/", "/");
+    String messageName = strippedExtension.replaceFirst("/msg/", "/");
+    if (messageName.equals(STD_MSGS_HEADER_NAME)) {
+      return "Header";
+    }
+    return messageName;
   }
 
   private void findMessages(File searchPath) {
@@ -88,21 +94,26 @@ public class MessageLoader {
         childPaths.addAll(listPathEntries(messagePath, filter));
       } else {
         try {
-          FileInputStream inputStream = new FileInputStream(messagePath);
-          FileChannel channel = inputStream.getChannel();
-          ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
-          channel.read(buffer);
-          buffer.rewind();
-          decoder.reset();
-          String definition = decoder.decode(buffer).toString().trim();
-          messageDefinitions.put(pathToMessageName(searchPath, messagePath), definition);
-          channel.close();
-          inputStream.close();
+          addMessageDefinitionFromPaths(searchPath, messagePath, decoder);
         } catch (IOException e) {
           log.error("Failed to read message: " + messagePath.getAbsolutePath(), e);
         }
       }
     }
+  }
+
+  private void addMessageDefinitionFromPaths(File searchPath, File messagePath,
+      CharsetDecoder decoder) throws IOException {
+    FileInputStream inputStream = new FileInputStream(messagePath);
+    FileChannel channel = inputStream.getChannel();
+    ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
+    channel.read(buffer);
+    buffer.rewind();
+    decoder.reset();
+    String definition = decoder.decode(buffer).toString().trim();
+    messageDefinitions.put(pathToMessageName(searchPath, messagePath), definition);
+    channel.close();
+    inputStream.close();
   }
 
   private Collection<File> listPathEntries(File searchPath, FindMessagesFilter filter) {
@@ -117,9 +128,18 @@ public class MessageLoader {
     return messageDefinitions.get(messageName);
   }
 
+  public boolean hasMessageDefinition(String messageName) {
+    return messageDefinitions.containsKey(messageName);
+  }
+
   @VisibleForTesting
   ImmutableMap<String, String> getMessageDefinitions() {
     return ImmutableMap.copyOf(messageDefinitions);
+  }
+
+  @VisibleForTesting
+  void addMessageDefinition(String messageName, String messageDefinition) {
+    messageDefinitions.put(messageName, messageDefinition);
   }
 
 }

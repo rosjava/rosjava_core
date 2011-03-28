@@ -19,22 +19,20 @@ package org.ros.internal.message;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-interface FieldType {
-
-  static final short BOOL = 0;
-  static final short INT8 = 1;
-  static final short UINT8 = 2;
-  static final short INT16 = 3;
-  static final short UINT16 = 4;
-  static final short INT32 = 5;
-  static final short UINT32 = 6;
-  static final short INT64 = 7;
-  static final short UINT64 = 8;
-  static final short FLOAT32 = 9;
-  static final short FLOAT64 = 10;
-  static final short STRING = 11;
-  static final short TIME = 12;
-  static final short DURATION = 13;
-  static final short MESSAGE = 14;
-
+enum FieldType {
+  BOOL, BOOL_ARRAY,
+  INT8, INT8_ARRAY,
+  UINT8, UINT8_ARRAY,
+  INT16, INT16_ARRAY,
+  UINT16, UINT16_ARRAY,
+  INT32, INT32_ARRAY,
+  UINT32, UINT32_ARRAY,
+  INT64, INT64_ARRAY,
+  UINT64, UINT64_ARRAY,
+  FLOAT32, FLOAT32_ARRAY,
+  FLOAT64, FLOAT64_ARRAY,
+  STRING, STRING_ARRAY,
+  TIME, TIME_ARRAY,
+  DURATION, DURATION_ARRAY,
+  MESSAGE, MESSAGE_ARRAY;
 }

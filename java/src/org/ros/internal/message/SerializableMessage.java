@@ -16,8 +16,6 @@
 
 package org.ros.internal.message;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.message.Duration;
@@ -25,6 +23,7 @@ import org.ros.message.Time;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -32,12 +31,13 @@ import java.nio.ByteOrder;
 public abstract class SerializableMessage extends MessageImpl {
 
   /**
-   * @param valueFieldTypes
+   * @param constantFieldTypes TODO
    * @param constantFieldValues
+   * @param valueFieldTypes
    */
-  public SerializableMessage(ImmutableMap<String, Short> valueFieldTypes,
-      ImmutableMap<String, Object> constantFieldValues) {
-    super(valueFieldTypes, constantFieldValues);
+  public SerializableMessage(Map<String, FieldType> constantFieldTypes,
+      Map<String, Object> constantFieldValues, Map<String, FieldType> valueFieldTypes) {
+    super(constantFieldTypes, constantFieldValues, valueFieldTypes);
   }
 
   private static final boolean DEBUG = false;
@@ -120,4 +120,5 @@ public abstract class SerializableMessage extends MessageImpl {
       bb.putInt(o.nsecs);
     }
   }
+
 }

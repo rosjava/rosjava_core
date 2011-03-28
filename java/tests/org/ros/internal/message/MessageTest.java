@@ -18,10 +18,10 @@ package org.ros.internal.message;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,89 +37,109 @@ public class MessageTest {
   private interface BarMessage extends Message {
   }
 
-  private MessageFactory<FooMessage> factory;
+  private MessageLoader loader;
+  private MessageFactory factory;
 
-  @Test
-  public void testCreateEmptyMessage() throws IOException {
-    factory = new MessageFactory<FooMessage>("", FooMessage.class);
-    factory.createMessage();
+  private void loadStdMsgs() {
+  }
+
+  @Before
+  public void setUp() {
+    loader = new MessageLoader();
+    URL resource = this.getClass().getResource("/data/std_msgs");
+    File searchPath = new File(resource.getPath());
+    loader.addSearchPath(searchPath);
+    loader.updateMessageDefinitions();
+    factory = new MessageFactory(loader);
   }
 
   @Test
-  public void testCreateEmptyMessageWithBlankLines() throws IOException {
-    factory = new MessageFactory<FooMessage>("\n\n\n\n\n", FooMessage.class);
-    factory.createMessage();
+  public void testCreateEmptyMessage() {
+    loader.addMessageDefinition("foo", "");
+    factory.createMessage("foo", FooMessage.class);
   }
 
   @Test
-  public void testString() throws IOException {
-    factory = new MessageFactory<FooMessage>("string data", FooMessage.class);
+  public void testCreateEmptyMessageWithBlankLines() {
+    loader.addMessageDefinition("foo", "\n\n\n\n\n");
+    factory.createMessage("foo", FooMessage.class);
+  }
+
+  @Test
+  public void testString() {
     String data = "Hello, ROS!";
-    FooMessage message = factory.createMessage();
-    message.set("data", data);
+    FooMessage message = factory.createMessage("std_msgs/String", FooMessage.class);
+    message.setString("data", data);
     assertEquals(data, message.getString("data"));
   }
 
   @Test
-  public void testStringWithComments() throws IOException {
-    factory =
-        new MessageFactory<FooMessage>("# foo\nstring data\n    # string other data",
-            FooMessage.class);
+  public void testStringWithComments() {
+    loader.addMessageDefinition("foo", "# foo\nstring data\n    # string other data");
     String data = "Hello, ROS!";
-    FooMessage message = factory.createMessage();
-    message.set("data", data);
+    FooMessage message = factory.createMessage("foo", FooMessage.class);
+    message.setString("data", data);
     assertEquals(data, message.getString("data"));
   }
 
   @Test
-  public void testInt8() throws IOException {
-    factory = new MessageFactory<FooMessage>("int8 data", FooMessage.class);
+  public void testInt8() {
     int data = 42;
-    FooMessage message = factory.createMessage();
-    message.set("data", data);
-    assertEquals(data, message.getInt("data"));
+    FooMessage message = factory.createMessage("std_msgs/Int8", FooMessage.class);
+    message.setInt8("data", data);
+    assertEquals(data, message.getInt8("data"));
   }
 
   @Test
-  public void testNestedMessage() throws IOException {
-    factory = new MessageFactory<FooMessage>("BarMessage bar", FooMessage.class);
-    MessageFactory<BarMessage> barFactory =
-        new MessageFactory<BarMessage>("int8 data", BarMessage.class);
-    FooMessage message = factory.createMessage();
-    BarMessage barMessage = barFactory.createMessage();
-    message.set("bar", barMessage);
+  public void testNestedMessage() {
+    loader.addMessageDefinition("foo", "bar data");
+    loader.addMessageDefinition("bar", "int8 data");
+    FooMessage fooMessage = factory.createMessage("foo", FooMessage.class);
+    BarMessage barMessage = factory.createMessage("bar", BarMessage.class);
+    fooMessage.setMessage("data", barMessage);
     int data = 42;
-    barMessage.set("data", data);
-    assertEquals(data, message.getMessage("bar", BarMessage.class).getInt("data"));
+    barMessage.setInt8("data", data);
+    assertEquals(data, fooMessage.getMessage("data", BarMessage.class).getInt8("data"));
   }
 
   @Test
-  public void testConstantInt8() throws IOException {
-    factory = new MessageFactory<FooMessage>("int8 data=42", FooMessage.class);
-    FooMessage message = factory.createMessage();
-    assertEquals(42, message.getInt("data"));
+  public void testConstantInt8() {
+    loader.addMessageDefinition("foo", "int8 data=42");
+    FooMessage message = factory.createMessage("foo", FooMessage.class);
+    assertEquals(42, message.getInt8("data"));
   }
 
   @Test
-  public void testConstantString() throws IOException {
-    factory =
-        new MessageFactory<FooMessage>("string data=Hello, ROS! # comment ", FooMessage.class);
-    FooMessage message = factory.createMessage();
+  public void testConstantString() {
+    loader.addMessageDefinition("foo", "string data=Hello, ROS! # comment ");
+    FooMessage message = factory.createMessage("foo", FooMessage.class);
     assertEquals("Hello, ROS! # comment", message.getString("data"));
   }
 
   @Test
-  public void testCreateAllStdMsgs() throws IOException {
+  public void testCreateAllStdMsgs() {
     URL resource = this.getClass().getResource("/data/std_msgs");
-    MessageLoader loader = new MessageLoader();
     File searchPath = new File(resource.getPath());
     loader.addSearchPath(searchPath);
     loader.updateMessageDefinitions();
     Map<String, String> definitions = loader.getMessageDefinitions();
     for (Entry<String, String> definition : definitions.entrySet()) {
-      factory = new MessageFactory<FooMessage>(definition.getValue(), FooMessage.class);
-      FooMessage message = factory.createMessage();
-      System.out.println(definition.getKey() + ": " + definition.getValue());
+      factory.createMessage(definition.getKey(), FooMessage.class);
+    }
+  }
+
+  @Test
+  public void testCreateAllTestRospyMsgs() {
+    URL resource = this.getClass().getResource("/data/test_rospy");
+    File searchPath = new File(resource.getPath());
+    loader.addSearchPath(searchPath);
+    resource = this.getClass().getResource("/data/test_ros");
+    searchPath = new File(resource.getPath());
+    loader.addSearchPath(searchPath);
+    loader.updateMessageDefinitions();
+    Map<String, String> definitions = loader.getMessageDefinitions();
+    for (Entry<String, String> definition : definitions.entrySet()) {
+      factory.createMessage(definition.getKey(), FooMessage.class);
     }
   }
 

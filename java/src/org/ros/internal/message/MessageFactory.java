@@ -16,7 +16,9 @@
 
 package org.ros.internal.message;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,38 +26,60 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collections;
+import java.util.Map;
 
 /**
- * Generates a {@link MessageImpl} instance from a specification file at runtime.
+ * Generates a {@link MessageImpl} instance from a specification file at
+ * runtime.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageFactory<MessageType extends Message> implements FieldType {
+public class MessageFactory {
 
-  private static final ImmutableMap<String, Short> FIELD_TYPE_NAMES;
+  private static final ImmutableMap<String, FieldType> FIELD_TYPE_NAMES;
 
   static {
-    FIELD_TYPE_NAMES = ImmutableMap.<String, Short>builder()
-        .put("bool", BOOL)
-        .put("int8", INT8)
-        .put("uint8", UINT8)
-        .put("int16", INT16)
-        .put("uint16", UINT16)
-        .put("int32", INT32)
-        .put("uint32", UINT32)
-        .put("int64", INT64)
-        .put("uint64", UINT64)
-        .put("float32", FLOAT32)
-        .put("float64", FLOAT64)
-        .put("string", STRING)
-        .put("time", TIME)
-        .put("duration", DURATION)
-        .build();
+    FIELD_TYPE_NAMES =
+        ImmutableMap.<String, FieldType>builder().put("bool", FieldType.BOOL)
+            .put("bool[]", FieldType.BOOL_ARRAY).put("byte", FieldType.INT8)
+            .put("byte[]", FieldType.INT8_ARRAY).put("int8", FieldType.INT8)
+            .put("int8[]", FieldType.INT8_ARRAY).put("char", FieldType.UINT8)
+            .put("char[]", FieldType.UINT8_ARRAY).put("uint8", FieldType.UINT8)
+            .put("uint8[]", FieldType.UINT8_ARRAY).put("int16", FieldType.INT16)
+            .put("int16[]", FieldType.INT16_ARRAY).put("uint16", FieldType.UINT16)
+            .put("uint16[]", FieldType.UINT16_ARRAY).put("int32", FieldType.INT32)
+            .put("int32[]", FieldType.INT32_ARRAY).put("uint32", FieldType.UINT32)
+            .put("uint32[]", FieldType.UINT32_ARRAY).put("int64", FieldType.INT64)
+            .put("int64[]", FieldType.INT64_ARRAY).put("uint64", FieldType.UINT64)
+            .put("uint64[]", FieldType.UINT64_ARRAY).put("float32", FieldType.FLOAT32)
+            .put("float32[]", FieldType.FLOAT32_ARRAY).put("float64", FieldType.FLOAT64)
+            .put("float64[]", FieldType.FLOAT64_ARRAY).put("string", FieldType.STRING)
+            .put("string[]", FieldType.STRING_ARRAY).put("time", FieldType.TIME)
+            .put("time[]", FieldType.TIME_ARRAY).put("duration", FieldType.DURATION)
+            .put("duration[]", FieldType.DURATION_ARRAY).build();
   }
 
-  private final Class<MessageType> messageClass;
-  private final ImmutableMap<String, Short> valueFieldTypes;
-  private final ImmutableMap<String, Object> constantFieldValues;
+  private static final class MessageContext<MessageType extends Message> {
+
+    final Class<MessageType> messageClass;
+    final Map<String, FieldType> valueFieldTypes;
+    final Map<String, FieldType> constantFieldTypes;
+    final Map<String, Object> constantFieldValues;
+
+    public MessageContext(Class<MessageType> messageClass,
+        Map<String, FieldType> constantFieldTypes, Map<String, Object> constantFieldValues,
+        Map<String, FieldType> valueFieldTypes) {
+      this.messageClass = messageClass;
+      this.constantFieldTypes = Collections.unmodifiableMap(constantFieldTypes);
+      this.constantFieldValues = Collections.unmodifiableMap(constantFieldValues);
+      this.valueFieldTypes = Collections.unmodifiableMap(valueFieldTypes);
+    }
+
+  }
+
+  private final Map<String, MessageContext<? extends Message>> messageContext;
+  private final MessageLoader messageLoader;
 
   private static final class MessageProxyFactory {
     @SuppressWarnings("unchecked")
@@ -71,11 +95,17 @@ public class MessageFactory<MessageType extends Message> implements FieldType {
     }
   }
 
-  public MessageFactory(String messageDefinition, Class<MessageType> messageClass)
-      throws IOException {
-    this.messageClass = messageClass;
-    ImmutableMap.Builder<String, Short> valueFieldTypesBuilder = ImmutableMap.builder();
-    ImmutableMap.Builder<String, Object> constantFieldValuesBuilder = ImmutableMap.builder();
+  public MessageFactory(MessageLoader loader) {
+    this.messageLoader = loader;
+    messageContext = Maps.newConcurrentMap();
+  }
+
+  private <MessageType extends Message> void addMessageContext(String messageName,
+      Class<MessageType> messageClass) throws IOException {
+    Map<String, FieldType> valueFieldTypes = Maps.newHashMap();
+    Map<String, FieldType> constantFieldTypes = Maps.newHashMap();
+    Map<String, Object> constantFieldValues = Maps.newHashMap();
+    String messageDefinition = getMessageDefinition(messageName);
     BufferedReader reader = new BufferedReader(new StringReader(messageDefinition));
     String line = reader.readLine();
     while (line != null) {
@@ -85,35 +115,79 @@ public class MessageFactory<MessageType extends Message> implements FieldType {
         String type = typeAndName[0];
         String name = typeAndName[1];
         if (name.contains("=")) {
-          String[] nameAndValue = name.split("=", 2);
-          name = nameAndValue[0];
-          String value = nameAndValue[1];
-          constantFieldValuesBuilder.put(name, parseConstant(value, FIELD_TYPE_NAMES.get(type)));
+          addConstantToContext(type, name, constantFieldTypes, constantFieldValues);
         } else {
-          if (FIELD_TYPE_NAMES.containsKey(type)) {
-            valueFieldTypesBuilder.put(name, FIELD_TYPE_NAMES.get(type));
+          if (type.equals("Header")) {
+            Preconditions.checkState(name.equals("header"));
+            valueFieldTypes.put(name, FieldType.MESSAGE);
+          } else if (type.endsWith("]")) {
+            addArrayFieldToContext(name, type, messageName, valueFieldTypes);
+          } else if (FIELD_TYPE_NAMES.containsKey(type)) {
+            valueFieldTypes.put(name, FIELD_TYPE_NAMES.get(type));
           } else {
-            // TODO(damonkohler): Maintain and check against a list of known
-            // message types.
-            valueFieldTypesBuilder.put(name, MESSAGE);
+            if (!type.contains("/")) {
+              type = messageName.substring(0, messageName.lastIndexOf('/') + 1) + type;
+            }
+            if (messageLoader.hasMessageDefinition(messageName)) {
+              valueFieldTypes.put(name, FieldType.MESSAGE);
+            } else {
+              throw new RuntimeException();
+            }
           }
         }
       }
       line = reader.readLine();
     }
-    valueFieldTypes = valueFieldTypesBuilder.build();
-    constantFieldValues = constantFieldValuesBuilder.build();
+    MessageContext<MessageType> contexts =
+        new MessageContext<MessageType>(messageClass, constantFieldTypes, constantFieldValues,
+            valueFieldTypes);
+    messageContext.put(messageName, contexts);
   }
 
-  private Object parseConstant(String value, short type) {
+  private void addArrayFieldToContext(String name, String type, String messageName,
+      Map<String, FieldType> valueFieldTypes) {
+    // TODO(damonkohler): Treat fixed sized arrays differently?
+    type = type.substring(0, type.lastIndexOf('['));
+    if (FIELD_TYPE_NAMES.containsKey(type + "[]")) {
+      valueFieldTypes.put(name, FIELD_TYPE_NAMES.get(type + "[]"));
+    } else {
+      if (!type.contains("/")) {
+        type = messageName.substring(0, messageName.lastIndexOf('/') + 1) + type;
+      }
+      if (messageLoader.hasMessageDefinition(messageName)) {
+        valueFieldTypes.put(name, FieldType.MESSAGE_ARRAY);
+      } else {
+        throw new RuntimeException();
+      }
+    }
+  }
+
+  private void addConstantToContext(String type, String name,
+      Map<String, FieldType> constantFieldTypes, Map<String, Object> constantFieldValues) {
+    String[] nameAndValue = name.split("=", 2);
+    name = nameAndValue[0];
+    String value = nameAndValue[1];
+    constantFieldTypes.put(name, FIELD_TYPE_NAMES.get(type));
+    constantFieldValues.put(name, parseConstant(value, FIELD_TYPE_NAMES.get(type)));
+  }
+
+  private String getMessageDefinition(String messageName) {
+    String messageDefinition = messageLoader.getMessageDefinition(messageName);
+    if (messageLoader.getMessageDefinition(messageName) == null) {
+      throw new RuntimeException("Unknown message type: " + messageName);
+    }
+    return messageDefinition;
+  }
+
+  private Object parseConstant(String value, FieldType type) {
     switch (type) {
       case INT8:
       case UINT8:
       case INT16:
       case UINT16:
       case INT32:
-      case UINT32:
         return Integer.parseInt(value);
+      case UINT32:
       case INT64:
       case UINT64:
         return Long.parseLong(value);
@@ -123,13 +197,29 @@ public class MessageFactory<MessageType extends Message> implements FieldType {
         return Double.parseDouble(value);
       case STRING:
         return value;
+      case BOOL:
+        return value.equals("1");
       default:
-        throw new RuntimeException();
+        throw new RuntimeException("Invalid field type for constant: " + type + " " + value);
     }
   }
 
-  public MessageType createMessage() {
-    return MessageProxyFactory.getProxy(messageClass, new MessageImpl(valueFieldTypes,
-        constantFieldValues));
+  @SuppressWarnings("unchecked")
+  public <MessageType extends Message> MessageType createMessage(String messageName,
+      Class<MessageType> messageClass) {
+    if (!messageContext.containsKey(messageName)) {
+      try {
+        addMessageContext(messageName, messageClass);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    MessageContext<MessageType> constants =
+        (MessageContext<MessageType>) messageContext.get(messageName);
+    Preconditions.checkNotNull(constants);
+    Preconditions.checkState(messageClass == constants.messageClass);
+    return MessageProxyFactory.getProxy(messageClass, new MessageImpl(constants.constantFieldTypes,
+        constants.constantFieldValues, constants.valueFieldTypes));
   }
+
 }
