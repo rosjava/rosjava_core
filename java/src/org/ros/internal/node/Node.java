@@ -61,7 +61,9 @@ import java.util.concurrent.Executors;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Node {
+
   private static final Log log = LogFactory.getLog(Node.class);
+
   private final Executor executor;
   private final GraphName nodeName;
   private final MasterClient masterClient;

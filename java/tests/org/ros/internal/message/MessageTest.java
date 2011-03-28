@@ -20,7 +20,11 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -102,6 +106,21 @@ public class MessageTest {
         new MessageFactory<FooMessage>("string data=Hello, ROS! # comment ", FooMessage.class);
     FooMessage message = factory.createMessage();
     assertEquals("Hello, ROS! # comment", message.getString("data"));
+  }
+
+  @Test
+  public void testCreateAllStdMsgs() throws IOException {
+    URL resource = this.getClass().getResource("/data/std_msgs");
+    MessageLoader loader = new MessageLoader();
+    File searchPath = new File(resource.getPath());
+    loader.addSearchPath(searchPath);
+    loader.updateMessageDefinitions();
+    Map<String, String> definitions = loader.getMessageDefinitions();
+    for (Entry<String, String> definition : definitions.entrySet()) {
+      factory = new MessageFactory<FooMessage>(definition.getValue(), FooMessage.class);
+      FooMessage message = factory.createMessage();
+      System.out.println(definition.getKey() + ": " + definition.getValue());
+    }
   }
 
 }
