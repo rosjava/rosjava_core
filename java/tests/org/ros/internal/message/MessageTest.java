@@ -18,11 +18,14 @@ package org.ros.internal.message;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.collect.Lists;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -111,6 +114,14 @@ public class MessageTest {
     loader.addMessageDefinition("foo", "string data=Hello, ROS! # comment ");
     FooMessage message = factory.createMessage("foo", FooMessage.class);
     assertEquals("Hello, ROS! # comment", message.getString("data"));
+  }
+
+  public void testInt8List() {
+    loader.addMessageDefinition("foo", "int8[] data");
+    FooMessage message = factory.createMessage("foo", FooMessage.class);
+    ArrayList<Integer> data = Lists.newArrayList(1, 2, 3);
+    message.setInt8List("data", data);
+    assertEquals(data, message.getInt8List("data"));
   }
 
   @Test
