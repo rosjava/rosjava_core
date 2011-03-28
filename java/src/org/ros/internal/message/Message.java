@@ -20,7 +20,7 @@ import org.ros.message.Duration;
 import org.ros.message.Time;
 
 import java.math.BigInteger;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -87,65 +87,65 @@ public interface Message {
 
   void setUint8(String key, int value);
 
-  void setStringArray(String key, Collection<String> value);
+  void setStringList(String key, List<String> value);
 
-  void setInt8Array(String key, Collection<Integer> value);
+  void setInt8List(String key, List<Integer> value);
 
-  void setUint8Array(String key, Collection<Integer> value);
+  void setUint8List(String key, List<Integer> value);
 
-  void setDuration(String key, Collection<Duration> value);
+  void setDuration(String key, List<Duration> value);
 
-  void setTimeArray(String key, Collection<Time> value);
+  void setTimeList(String key, List<Time> value);
 
-  void setBoolArray(String key, Collection<Boolean> value);
+  void setBoolList(String key, List<Boolean> value);
 
-  void setFloat64Array(String key, Collection<Double> value);
+  void setFloat64List(String key, List<Double> value);
 
-  void setFloat32Array(String key, Collection<Float> value);
+  void setFloat32List(String key, List<Float> value);
 
-  void setUint64Array(String key, Collection<BigInteger> value);
+  void setUint64List(String key, List<BigInteger> value);
 
-  void setInt64Array(String key, Collection<Long> value);
+  void setInt64List(String key, List<Long> value);
 
-  void setUint32Array(String key, Collection<Long> value);
+  void setUint32List(String key, List<Long> value);
 
-  void setInt32Array(String key, Collection<Integer> value);
+  void setInt32List(String key, List<Integer> value);
 
-  void setUint16Array(String key, Collection<Integer> value);
+  void setUint16List(String key, List<Integer> value);
 
-  void setInt16Array(String key, Collection<Integer> value);
+  void setInt16List(String key, List<Integer> value);
 
-  <MessageType extends Message> Collection<MessageType> getMessageArray(String key,
+  <MessageType extends Message> List<MessageType> getMessageList(String key,
       Class<MessageType> messageClass);
 
-  void setMessageArray(String key, Collection<Message> value);
+  void setMessageList(String key, List<Message> value);
 
-  Collection<Duration> getDurationArray(String key);
+  List<Duration> getDurationList(String key);
 
-  Collection<Time> getTimeArray(String key);
+  List<Time> getTimeList(String key);
 
-  Collection<Boolean> getBoolArray(String key);
+  List<Boolean> getBoolList(String key);
 
-  Collection<Double> getFloat64Array(String key);
+  List<Double> getFloat64List(String key);
 
-  Collection<Float> getFloat32Array(String key);
+  List<Float> getFloat32List(String key);
 
-  Collection<Long> getUint64Array(String key);
+  List<Long> getUint64List(String key);
 
-  Collection<Long> getInt64Array(String key);
+  List<Long> getInt64List(String key);
 
-  Collection<Long> getUint32Array(String key);
+  List<Long> getUint32List(String key);
 
-  Collection<Integer> getInt32Array(String key);
+  List<Integer> getInt32List(String key);
 
-  Collection<Integer> getUint16Array(String key);
+  List<Integer> getUint16List(String key);
 
-  Collection<Integer> getInt16Array(String key);
+  List<Integer> getInt16List(String key);
 
-  Collection<Integer> getUint8Array(String key);
+  List<Integer> getUint8List(String key);
 
-  Collection<Integer> getInt8Array(String key);
+  List<Integer> getInt8List(String key);
 
-  Collection<String> getStringArray(String key);
+  List<String> getStringList(String key);
 
 }

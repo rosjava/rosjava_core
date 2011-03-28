@@ -22,7 +22,7 @@ import org.ros.message.Duration;
 import org.ros.message.Time;
 
 import java.math.BigInteger;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,7 +67,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Boolean> getBoolArray(String key) {
+  public List<Boolean> getBoolList(String key) {
     return getField(key, FieldType.BOOL_ARRAY);
   }
 
@@ -77,7 +77,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Duration> getDurationArray(String key) {
+  public List<Duration> getDurationList(String key) {
     return getField(key, FieldType.DURATION_ARRAY);
   }
 
@@ -87,7 +87,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Float> getFloat32Array(String key) {
+  public List<Float> getFloat32List(String key) {
     return getField(key, FieldType.FLOAT32_ARRAY);
   }
 
@@ -97,7 +97,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Double> getFloat64Array(String key) {
+  public List<Double> getFloat64List(String key) {
     return getField(key, FieldType.FLOAT64_ARRAY);
   }
 
@@ -107,7 +107,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Integer> getInt16Array(String key) {
+  public List<Integer> getInt16List(String key) {
     return getField(key, FieldType.INT16_ARRAY);
   }
 
@@ -117,7 +117,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Integer> getInt32Array(String key) {
+  public List<Integer> getInt32List(String key) {
     return getField(key, FieldType.INT32_ARRAY);
   }
 
@@ -127,7 +127,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Long> getInt64Array(String key) {
+  public List<Long> getInt64List(String key) {
     return getField(key, FieldType.INT64_ARRAY);
   }
 
@@ -137,7 +137,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Integer> getInt8Array(String key) {
+  public List<Integer> getInt8List(String key) {
     return getField(key, FieldType.INT8_ARRAY);
   }
 
@@ -152,9 +152,9 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public <MessageType extends Message> Collection<MessageType> getMessageArray(String key,
+  public <MessageType extends Message> List<MessageType> getMessageList(String key,
       Class<MessageType> messageClass) {
-    Collection<MessageType> message = getField(key, FieldType.MESSAGE_ARRAY);
+    List<MessageType> message = getField(key, FieldType.MESSAGE_ARRAY);
     // TODO(damonkohler): Check that all members are of the right type?
     return message;
   }
@@ -165,7 +165,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<String> getStringArray(String key) {
+  public List<String> getStringList(String key) {
     return getField(key, FieldType.STRING_ARRAY);
   }
 
@@ -175,7 +175,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Time> getTimeArray(String key) {
+  public List<Time> getTimeList(String key) {
     return getField(key, FieldType.TIME_ARRAY);
   }
 
@@ -185,7 +185,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Integer> getUint16Array(String key) {
+  public List<Integer> getUint16List(String key) {
     return getField(key, FieldType.UINT16_ARRAY);
   }
 
@@ -195,7 +195,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Long> getUint32Array(String key) {
+  public List<Long> getUint32List(String key) {
     return getField(key, FieldType.UINT32_ARRAY);
   }
 
@@ -205,7 +205,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Long> getUint64Array(String key) {
+  public List<Long> getUint64List(String key) {
     return getField(key, FieldType.UINT64_ARRAY);
   }
 
@@ -215,7 +215,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public Collection<Integer> getUint8Array(String key) {
+  public List<Integer> getUint8List(String key) {
     return getField(key, FieldType.UINT8_ARRAY);
   }
 
@@ -225,12 +225,12 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setBoolArray(String key, Collection<Boolean> value) {
+  public void setBoolList(String key, List<Boolean> value) {
     setField(key, FieldType.BOOL_ARRAY, value);
   }
 
   @Override
-  public void setDuration(String key, Collection<Duration> value) {
+  public void setDuration(String key, List<Duration> value) {
     setField(key, FieldType.DURATION_ARRAY, value);
   }
 
@@ -245,7 +245,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setFloat32Array(String key, Collection<Float> value) {
+  public void setFloat32List(String key, List<Float> value) {
     setField(key, FieldType.FLOAT32_ARRAY, value);
   }
 
@@ -255,7 +255,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setFloat64Array(String key, Collection<Double> value) {
+  public void setFloat64List(String key, List<Double> value) {
     setField(key, FieldType.FLOAT64_ARRAY, value);
   }
 
@@ -265,7 +265,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setInt16Array(String key, Collection<Integer> value) {
+  public void setInt16List(String key, List<Integer> value) {
     setField(key, FieldType.INT16_ARRAY, value);
   }
 
@@ -275,7 +275,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setInt32Array(String key, Collection<Integer> value) {
+  public void setInt32List(String key, List<Integer> value) {
     setField(key, FieldType.INT32_ARRAY, value);
   }
 
@@ -285,7 +285,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setInt64Array(String key, Collection<Long> value) {
+  public void setInt64List(String key, List<Long> value) {
     setField(key, FieldType.INT64_ARRAY, value);
   }
 
@@ -295,7 +295,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setInt8Array(String key, Collection<Integer> value) {
+  public void setInt8List(String key, List<Integer> value) {
     setField(key, FieldType.INT8_ARRAY, value);
   }
 
@@ -305,7 +305,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setMessageArray(String key, Collection<Message> value) {
+  public void setMessageList(String key, List<Message> value) {
     setField(key, FieldType.MESSAGE_ARRAY, value);
   }
 
@@ -315,7 +315,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setStringArray(String key, Collection<String> value) {
+  public void setStringList(String key, List<String> value) {
     setField(key, FieldType.STRING_ARRAY, value);
   }
 
@@ -325,7 +325,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setTimeArray(String key, Collection<Time> value) {
+  public void setTimeList(String key, List<Time> value) {
     setField(key, FieldType.TIME_ARRAY, value);
   }
 
@@ -335,7 +335,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setUint16Array(String key, Collection<Integer> value) {
+  public void setUint16List(String key, List<Integer> value) {
     setField(key, FieldType.UINT16_ARRAY, value);
   }
 
@@ -345,7 +345,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setUint32Array(String key, Collection<Long> value) {
+  public void setUint32List(String key, List<Long> value) {
     setField(key, FieldType.UINT32_ARRAY, value);
   }
 
@@ -355,7 +355,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setUint64Array(String key, Collection<BigInteger> value) {
+  public void setUint64List(String key, List<BigInteger> value) {
     setField(key, FieldType.UINT64_ARRAY, value);
   }
 
@@ -365,7 +365,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setUint8Array(String key, Collection<Integer> value) {
+  public void setUint8List(String key, List<Integer> value) {
     setField(key, FieldType.UINT8_ARRAY, value);
   }
 
