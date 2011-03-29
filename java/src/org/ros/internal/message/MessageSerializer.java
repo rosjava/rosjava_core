@@ -66,6 +66,9 @@ public abstract class MessageSerializer {
     int length = getSerializedLength(message);
     ByteBuffer buffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
     for (Field field : message.getFields()) {
+      if (field.isConstant()) {
+        continue;
+      }
       String name = field.getName();
       if (field.getType() instanceof PrimitiveFieldType) {
         switch ((PrimitiveFieldType) field.getType()) {
