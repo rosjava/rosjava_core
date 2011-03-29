@@ -19,7 +19,7 @@ package org.ros.internal.message;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
-import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -35,15 +35,15 @@ public interface Message {
 
   double getFloat64(String key);
 
-  int getInt16(String key);
+  short getInt16(String key);
 
   int getInt32(String key);
 
   long getInt64(String key);
 
-  int getInt8(String key);
+  byte getInt8(String key);
 
-  <MessageType extends Message> MessageType getMessage(String key, Class<MessageType> messageClass);
+  <MessageType extends Message> MessageType getMessage(String key);
 
   String getString(String key);
 
@@ -55,7 +55,7 @@ public interface Message {
 
   long getUint64(String key);
 
-  int getUint8(String key);
+  short getUint8(String key);
 
   void setBool(String key, boolean value);
 
@@ -65,13 +65,13 @@ public interface Message {
 
   void setFloat64(String key, double value);
 
-  void setInt16(String key, int value);
+  void setInt16(String key, short value);
 
   void setInt32(String key, int value);
 
   void setInt64(String key, long value);
 
-  void setInt8(String key, int value);
+  void setInt8(String key, byte value);
 
   void setMessage(String key, Message value);
 
@@ -83,15 +83,15 @@ public interface Message {
 
   void setUint32(String key, long value);
 
-  void setUint64(String key, BigInteger value);
+  void setUint64(String key, long value);
 
-  void setUint8(String key, int value);
+  void setUint8(String key, short value);
 
   void setStringList(String key, List<String> value);
 
-  void setInt8List(String key, List<Integer> value);
+  void setInt8List(String key, List<Byte> value);
 
-  void setUint8List(String key, List<Integer> value);
+  void setUint8List(String key, List<Short> value);
 
   void setDuration(String key, List<Duration> value);
 
@@ -103,7 +103,7 @@ public interface Message {
 
   void setFloat32List(String key, List<Float> value);
 
-  void setUint64List(String key, List<BigInteger> value);
+  void setUint64List(String key, List<Long> value);
 
   void setInt64List(String key, List<Long> value);
 
@@ -113,7 +113,7 @@ public interface Message {
 
   void setUint16List(String key, List<Integer> value);
 
-  void setInt16List(String key, List<Integer> value);
+  void setInt16List(String key, List<Short> value);
 
   <MessageType extends Message> List<MessageType> getMessageList(String key,
       Class<MessageType> messageClass);
@@ -140,12 +140,14 @@ public interface Message {
 
   List<Integer> getUint16List(String key);
 
-  List<Integer> getInt16List(String key);
+  List<Short> getInt16List(String key);
 
-  List<Integer> getUint8List(String key);
+  List<Short> getUint8List(String key);
 
-  List<Integer> getInt8List(String key);
+  List<Byte> getInt8List(String key);
 
   List<String> getStringList(String key);
+
+  Collection<Field> getFields();
 
 }

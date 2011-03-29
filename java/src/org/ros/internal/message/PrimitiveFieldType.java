@@ -19,8 +19,28 @@ package org.ros.internal.message;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface FieldType {
+enum PrimitiveFieldType implements FieldType {
 
-  public String getName();
+  BOOL,
+  BYTE,
+  CHAR,
+  INT8,
+  UINT8,
+  INT16,
+  UINT16,
+  INT32,
+  UINT32,
+  INT64,
+  UINT64,
+  FLOAT32,
+  FLOAT64,
+  STRING,
+  TIME,
+  DURATION;
+
+  @Override
+  public String getName() {
+    return toString().toLowerCase();
+  }
 
 }

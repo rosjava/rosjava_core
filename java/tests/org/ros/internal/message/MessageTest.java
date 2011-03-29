@@ -84,7 +84,7 @@ public class MessageTest {
 
   @Test
   public void testInt8() {
-    int data = 42;
+    byte data = 42;
     FooMessage message = factory.createMessage("std_msgs/Int8", FooMessage.class);
     message.setInt8("data", data);
     assertEquals(data, message.getInt8("data"));
@@ -97,9 +97,9 @@ public class MessageTest {
     FooMessage fooMessage = factory.createMessage("foo", FooMessage.class);
     BarMessage barMessage = factory.createMessage("bar", BarMessage.class);
     fooMessage.setMessage("data", barMessage);
-    int data = 42;
+    byte data = 42;
     barMessage.setInt8("data", data);
-    assertEquals(data, fooMessage.getMessage("data", BarMessage.class).getInt8("data"));
+    assertEquals(data, fooMessage.getMessage("data").getInt8("data"));
   }
 
   @Test
@@ -119,7 +119,7 @@ public class MessageTest {
   public void testInt8List() {
     loader.addMessageDefinition("foo", "int8[] data");
     FooMessage message = factory.createMessage("foo", FooMessage.class);
-    ArrayList<Integer> data = Lists.newArrayList(1, 2, 3);
+    ArrayList<Byte> data = Lists.newArrayList((byte) 1, (byte) 2, (byte) 3);
     message.setInt8List("data", data);
     assertEquals(data, message.getInt8List("data"));
   }

@@ -21,7 +21,7 @@ import com.google.common.collect.Maps;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
-import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -30,343 +30,355 @@ import java.util.Map;
  */
 public class MessageImpl implements Message {
 
-  private Map<String, FieldType> constantFieldTypes;
-  private Map<String, Object> constantFieldValues;
-  private Map<String, FieldType> valueFieldTypes;
+  private MessageContext context;
   private Map<String, Object> valueFieldValues;
 
-  public MessageImpl(Map<String, FieldType> constantFieldTypes,
-      Map<String, Object> constantFieldValues, Map<String, FieldType> valueFieldTypes) {
-    this.constantFieldTypes = constantFieldTypes;
-    this.constantFieldValues = constantFieldValues;
-    this.valueFieldTypes = valueFieldTypes;
+  public MessageImpl(MessageContext context) {
+    this.context = context;
     valueFieldValues = Maps.newConcurrentMap();
   }
 
   @SuppressWarnings("unchecked")
-  private <T> T getField(String key, FieldType type) {
-    if (constantFieldValues.containsKey(key) && constantFieldTypes.get(key) == type) {
-      return (T) constantFieldValues.get(key);
+  private <T> T getField(String name, FieldType type) {
+    if (context.hasConstantField(name, type)) {
+      return (T) context.getConstant(name);
     }
-    if (valueFieldValues.containsKey(key) && valueFieldTypes.get(key) == type) {
-      return (T) valueFieldValues.get(key);
+    if (context.hasValueField(name, type)) {
+      return (T) valueFieldValues.get(name);
     }
-    throw new RuntimeException("Unknown field: " + type + " " + key);
+    throw new RuntimeException("Unknown field: " + type + " " + name);
   }
 
-  private void setField(String key, FieldType type, Object value) {
-    if (valueFieldTypes.get(key) != type) {
+  @SuppressWarnings("unchecked")
+  private <T> T getMessageValueField(String name) {
+    if (context.hasMessageValueField(name)) {
+      return (T) valueFieldValues.get(name);
+    }
+    throw new RuntimeException();
+  }
+
+  private void setValueField(String name, PrimitiveFieldType type, Object value) {
+    if (context.hasValueField(name, type)) {
+      valueFieldValues.put(name, value);
+    } else {
+      throw new RuntimeException("Unable to set value field: " + type + " " + name + " = " + value);
+    }
+  }
+
+  private void setMessageValueField(String name, Object value) {
+    if (context.hasMessageValueField(name)) {
+      valueFieldValues.put(name, value);
+    } else {
       throw new RuntimeException();
     }
-    valueFieldValues.put(key, value);
+  }
+
+  @Override
+  public Collection<Field> getFields() {
+    return context.getFields();
   }
 
   @Override
   public boolean getBool(String key) {
-    return getField(key, FieldType.BOOL);
+    return getField(key, PrimitiveFieldType.BOOL);
   }
 
   @Override
   public List<Boolean> getBoolList(String key) {
-    return getField(key, FieldType.BOOL_ARRAY);
+    return getField(key, PrimitiveFieldType.BOOL);
   }
 
   @Override
   public Duration getDuration(String key) {
-    return getField(key, FieldType.DURATION);
+    return getField(key, PrimitiveFieldType.DURATION);
   }
 
   @Override
   public List<Duration> getDurationList(String key) {
-    return getField(key, FieldType.DURATION_ARRAY);
+    return getField(key, PrimitiveFieldType.DURATION);
   }
 
   @Override
   public float getFloat32(String key) {
-    return getField(key, FieldType.FLOAT32);
+    return getField(key, PrimitiveFieldType.FLOAT32);
   }
 
   @Override
   public List<Float> getFloat32List(String key) {
-    return getField(key, FieldType.FLOAT32_ARRAY);
+    return getField(key, PrimitiveFieldType.FLOAT32);
   }
 
   @Override
   public double getFloat64(String key) {
-    return getField(key, FieldType.FLOAT64);
+    return getField(key, PrimitiveFieldType.FLOAT64);
   }
 
   @Override
   public List<Double> getFloat64List(String key) {
-    return getField(key, FieldType.FLOAT64_ARRAY);
+    return getField(key, PrimitiveFieldType.FLOAT64);
   }
 
   @Override
-  public int getInt16(String key) {
-    return getField(key, FieldType.INT16);
+  public short getInt16(String key) {
+    return getField(key, PrimitiveFieldType.INT16);
   }
 
   @Override
-  public List<Integer> getInt16List(String key) {
-    return getField(key, FieldType.INT16_ARRAY);
+  public List<Short> getInt16List(String key) {
+    return getField(key, PrimitiveFieldType.INT16);
   }
 
   @Override
   public int getInt32(String key) {
-    return getField(key, FieldType.INT32);
+    return getField(key, PrimitiveFieldType.INT32);
   }
 
   @Override
   public List<Integer> getInt32List(String key) {
-    return getField(key, FieldType.INT32_ARRAY);
+    return getField(key, PrimitiveFieldType.INT32);
   }
 
   @Override
   public long getInt64(String key) {
-    return getField(key, FieldType.INT64);
+    return getField(key, PrimitiveFieldType.INT64);
   }
 
   @Override
   public List<Long> getInt64List(String key) {
-    return getField(key, FieldType.INT64_ARRAY);
+    return getField(key, PrimitiveFieldType.INT64);
   }
 
   @Override
-  public int getInt8(String key) {
-    return getField(key, FieldType.INT8);
+  public byte getInt8(String key) {
+    return getField(key, PrimitiveFieldType.INT8);
   }
 
   @Override
-  public List<Integer> getInt8List(String key) {
-    return getField(key, FieldType.INT8_ARRAY);
+  public List<Byte> getInt8List(String key) {
+    return getField(key, PrimitiveFieldType.INT8);
   }
 
   @Override
-  public <MessageType extends Message> MessageType getMessage(String key,
-      Class<MessageType> messageClass) {
-    MessageType message = getField(key, FieldType.MESSAGE);
-    if (messageClass.isInstance(message)) {
-      return message;
-    }
-    throw new RuntimeException();
+  public <MessageType extends Message> MessageType getMessage(String key) {
+    return getMessageValueField(key);
   }
 
   @Override
   public <MessageType extends Message> List<MessageType> getMessageList(String key,
       Class<MessageType> messageClass) {
-    List<MessageType> message = getField(key, FieldType.MESSAGE_ARRAY);
+    List<MessageType> message = getMessageValueField(key);
     // TODO(damonkohler): Check that all members are of the right type?
     return message;
   }
 
   @Override
   public String getString(String key) {
-    return getField(key, FieldType.STRING);
+    return getField(key, PrimitiveFieldType.STRING);
   }
 
   @Override
   public List<String> getStringList(String key) {
-    return getField(key, FieldType.STRING_ARRAY);
+    return getField(key, PrimitiveFieldType.STRING);
   }
 
   @Override
   public Time getTime(String key) {
-    return getField(key, FieldType.TIME);
+    return getField(key, PrimitiveFieldType.TIME);
   }
 
   @Override
   public List<Time> getTimeList(String key) {
-    return getField(key, FieldType.TIME_ARRAY);
+    return getField(key, PrimitiveFieldType.TIME);
   }
 
   @Override
   public int getUint16(String key) {
-    return getField(key, FieldType.UINT16);
+    return getField(key, PrimitiveFieldType.UINT16);
   }
 
   @Override
   public List<Integer> getUint16List(String key) {
-    return getField(key, FieldType.UINT16_ARRAY);
+    return getField(key, PrimitiveFieldType.UINT16);
   }
 
   @Override
   public long getUint32(String key) {
-    return getField(key, FieldType.UINT32);
+    return getField(key, PrimitiveFieldType.UINT32);
   }
 
   @Override
   public List<Long> getUint32List(String key) {
-    return getField(key, FieldType.UINT32_ARRAY);
+    return getField(key, PrimitiveFieldType.UINT32);
   }
 
   @Override
   public long getUint64(String key) {
-    return getField(key, FieldType.UINT64);
+    return getField(key, PrimitiveFieldType.UINT64);
   }
 
   @Override
   public List<Long> getUint64List(String key) {
-    return getField(key, FieldType.UINT64_ARRAY);
+    return getField(key, PrimitiveFieldType.UINT64);
   }
 
   @Override
-  public int getUint8(String key) {
-    return getField(key, FieldType.UINT8);
+  public short getUint8(String key) {
+    return getField(key, PrimitiveFieldType.UINT8);
   }
 
   @Override
-  public List<Integer> getUint8List(String key) {
-    return getField(key, FieldType.UINT8_ARRAY);
+  public List<Short> getUint8List(String key) {
+    return getField(key, PrimitiveFieldType.UINT8);
   }
 
   @Override
   public void setBool(String key, boolean value) {
-    setField(key, FieldType.BOOL, value);
+    setValueField(key, PrimitiveFieldType.BOOL, value);
   }
 
   @Override
   public void setBoolList(String key, List<Boolean> value) {
-    setField(key, FieldType.BOOL_ARRAY, value);
+    setValueField(key, PrimitiveFieldType.BOOL, value);
   }
 
   @Override
   public void setDuration(String key, List<Duration> value) {
-    setField(key, FieldType.DURATION_ARRAY, value);
+    setValueField(key, PrimitiveFieldType.DURATION, value);
   }
 
   @Override
   public void setDuration(String key, Duration value) {
-    setField(key, FieldType.DURATION, value);
+    setValueField(key, PrimitiveFieldType.DURATION, value);
   }
 
   @Override
   public void setFloat32(String key, float value) {
-    setField(key, FieldType.FLOAT32, value);
+    setValueField(key, PrimitiveFieldType.FLOAT32, value);
   }
 
   @Override
   public void setFloat32List(String key, List<Float> value) {
-    setField(key, FieldType.FLOAT32_ARRAY, value);
+    setValueField(key, PrimitiveFieldType.FLOAT32, value);
   }
 
   @Override
   public void setFloat64(String key, double value) {
-    setField(key, FieldType.FLOAT64, value);
+    setValueField(key, PrimitiveFieldType.FLOAT64, value);
   }
 
   @Override
   public void setFloat64List(String key, List<Double> value) {
-    setField(key, FieldType.FLOAT64_ARRAY, value);
+    setValueField(key, PrimitiveFieldType.FLOAT64, value);
   }
 
   @Override
-  public void setInt16(String key, int value) {
-    setField(key, FieldType.INT16, value);
+  public void setInt16(String key, short value) {
+    setValueField(key, PrimitiveFieldType.INT16, value);
   }
 
   @Override
-  public void setInt16List(String key, List<Integer> value) {
-    setField(key, FieldType.INT16_ARRAY, value);
+  public void setInt16List(String key, List<Short> value) {
+    setValueField(key, PrimitiveFieldType.INT16, value);
   }
 
   @Override
   public void setInt32(String key, int value) {
-    setField(key, FieldType.INT32, value);
+    setValueField(key, PrimitiveFieldType.INT32, value);
   }
 
   @Override
   public void setInt32List(String key, List<Integer> value) {
-    setField(key, FieldType.INT32_ARRAY, value);
+    setValueField(key, PrimitiveFieldType.INT32, value);
   }
 
   @Override
   public void setInt64(String key, long value) {
-    setField(key, FieldType.INT64, value);
+    setValueField(key, PrimitiveFieldType.INT64, value);
   }
 
   @Override
   public void setInt64List(String key, List<Long> value) {
-    setField(key, FieldType.INT64_ARRAY, value);
+    setValueField(key, PrimitiveFieldType.INT64, value);
   }
 
   @Override
-  public void setInt8(String key, int value) {
-    setField(key, FieldType.INT8, value);
+  public void setInt8(String key, byte value) {
+    setValueField(key, PrimitiveFieldType.INT8, value);
   }
 
   @Override
-  public void setInt8List(String key, List<Integer> value) {
-    setField(key, FieldType.INT8_ARRAY, value);
+  public void setInt8List(String key, List<Byte> value) {
+    setValueField(key, PrimitiveFieldType.INT8, value);
   }
 
   @Override
   public void setMessage(String key, Message value) {
-    setField(key, FieldType.MESSAGE, value);
+    setMessageValueField(key, value);
   }
 
   @Override
   public void setMessageList(String key, List<Message> value) {
-    setField(key, FieldType.MESSAGE_ARRAY, value);
+    setMessageValueField(key, value);
   }
 
   @Override
   public void setString(String key, String value) {
-    setField(key, FieldType.STRING, value);
+    setValueField(key, PrimitiveFieldType.STRING, value);
   }
 
   @Override
   public void setStringList(String key, List<String> value) {
-    setField(key, FieldType.STRING_ARRAY, value);
+    setValueField(key, PrimitiveFieldType.STRING, value);
   }
 
   @Override
   public void setTime(String key, Time value) {
-    setField(key, FieldType.TIME, value);
+    setValueField(key, PrimitiveFieldType.TIME, value);
   }
 
   @Override
   public void setTimeList(String key, List<Time> value) {
-    setField(key, FieldType.TIME_ARRAY, value);
+    setValueField(key, PrimitiveFieldType.TIME, value);
   }
 
   @Override
   public void setUint16(String key, int value) {
-    setField(key, FieldType.UINT16, value);
+    setValueField(key, PrimitiveFieldType.UINT16, value);
   }
 
   @Override
   public void setUint16List(String key, List<Integer> value) {
-    setField(key, FieldType.UINT16_ARRAY, value);
+    setValueField(key, PrimitiveFieldType.UINT16, value);
   }
 
   @Override
   public void setUint32(String key, long value) {
-    setField(key, FieldType.UINT32, value);
+    setValueField(key, PrimitiveFieldType.UINT32, value);
   }
 
   @Override
   public void setUint32List(String key, List<Long> value) {
-    setField(key, FieldType.UINT32_ARRAY, value);
+    setValueField(key, PrimitiveFieldType.UINT32, value);
   }
 
   @Override
-  public void setUint64(String key, BigInteger value) {
-    setField(key, FieldType.UINT64, value);
+  public void setUint64(String key, long value) {
+    setValueField(key, PrimitiveFieldType.UINT64, value);
   }
 
   @Override
-  public void setUint64List(String key, List<BigInteger> value) {
-    setField(key, FieldType.UINT64_ARRAY, value);
+  public void setUint64List(String key, List<Long> value) {
+    setValueField(key, PrimitiveFieldType.UINT64, value);
   }
 
   @Override
-  public void setUint8(String key, int value) {
-    setField(key, FieldType.UINT8, value);
+  public void setUint8(String key, short value) {
+    setValueField(key, PrimitiveFieldType.UINT8, value);
   }
 
   @Override
-  public void setUint8List(String key, List<Integer> value) {
-    setField(key, FieldType.UINT8_ARRAY, value);
+  public void setUint8List(String key, List<Short> value) {
+    setValueField(key, PrimitiveFieldType.UINT8, value);
   }
 
 }

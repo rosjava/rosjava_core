@@ -17,7 +17,6 @@
 package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import java.io.BufferedReader;
@@ -26,7 +25,6 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -37,48 +35,7 @@ import java.util.Map;
  */
 public class MessageFactory {
 
-  private static final ImmutableMap<String, FieldType> FIELD_TYPE_NAMES;
-
-  static {
-    FIELD_TYPE_NAMES =
-        ImmutableMap.<String, FieldType>builder().put("bool", FieldType.BOOL)
-            .put("bool[]", FieldType.BOOL_ARRAY).put("byte", FieldType.INT8)
-            .put("byte[]", FieldType.INT8_ARRAY).put("int8", FieldType.INT8)
-            .put("int8[]", FieldType.INT8_ARRAY).put("char", FieldType.UINT8)
-            .put("char[]", FieldType.UINT8_ARRAY).put("uint8", FieldType.UINT8)
-            .put("uint8[]", FieldType.UINT8_ARRAY).put("int16", FieldType.INT16)
-            .put("int16[]", FieldType.INT16_ARRAY).put("uint16", FieldType.UINT16)
-            .put("uint16[]", FieldType.UINT16_ARRAY).put("int32", FieldType.INT32)
-            .put("int32[]", FieldType.INT32_ARRAY).put("uint32", FieldType.UINT32)
-            .put("uint32[]", FieldType.UINT32_ARRAY).put("int64", FieldType.INT64)
-            .put("int64[]", FieldType.INT64_ARRAY).put("uint64", FieldType.UINT64)
-            .put("uint64[]", FieldType.UINT64_ARRAY).put("float32", FieldType.FLOAT32)
-            .put("float32[]", FieldType.FLOAT32_ARRAY).put("float64", FieldType.FLOAT64)
-            .put("float64[]", FieldType.FLOAT64_ARRAY).put("string", FieldType.STRING)
-            .put("string[]", FieldType.STRING_ARRAY).put("time", FieldType.TIME)
-            .put("time[]", FieldType.TIME_ARRAY).put("duration", FieldType.DURATION)
-            .put("duration[]", FieldType.DURATION_ARRAY).build();
-  }
-
-  private static final class MessageContext<MessageType extends Message> {
-
-    final Class<MessageType> messageClass;
-    final Map<String, FieldType> valueFieldTypes;
-    final Map<String, FieldType> constantFieldTypes;
-    final Map<String, Object> constantFieldValues;
-
-    public MessageContext(Class<MessageType> messageClass,
-        Map<String, FieldType> constantFieldTypes, Map<String, Object> constantFieldValues,
-        Map<String, FieldType> valueFieldTypes) {
-      this.messageClass = messageClass;
-      this.constantFieldTypes = Collections.unmodifiableMap(constantFieldTypes);
-      this.constantFieldValues = Collections.unmodifiableMap(constantFieldValues);
-      this.valueFieldTypes = Collections.unmodifiableMap(valueFieldTypes);
-    }
-
-  }
-
-  private final Map<String, MessageContext<? extends Message>> messageContext;
+  private final Map<String, MessageContext> messageContexts;
   private final MessageLoader messageLoader;
 
   private static final class MessageProxyFactory {
@@ -97,78 +54,71 @@ public class MessageFactory {
 
   public MessageFactory(MessageLoader loader) {
     this.messageLoader = loader;
-    messageContext = Maps.newConcurrentMap();
+    messageContexts = Maps.newConcurrentMap();
   }
 
-  private <MessageType extends Message> void addMessageContext(String messageName,
-      Class<MessageType> messageClass) throws IOException {
-    Map<String, FieldType> valueFieldTypes = Maps.newHashMap();
-    Map<String, FieldType> constantFieldTypes = Maps.newHashMap();
-    Map<String, Object> constantFieldValues = Maps.newHashMap();
+  private void createFieldFromString(String field, MessageContext context) {
+    String[] typeAndName = field.split("\\s+", 2);
+    String type = typeAndName[0];
+    String name = typeAndName[1];
+    String value = null;
+    if (name.contains("=")) {
+      String[] nameAndValue = name.split("=", 2);
+      name = nameAndValue[0].trim();
+      value = nameAndValue[1].trim();
+    }
+    boolean array = false;
+    if (name.endsWith("]")) {
+      // TODO(damonkohler): Treat fixed sized arrays differently?
+      type = type.substring(0, type.lastIndexOf('['));
+      array = true;
+    }
+    FieldType fieldType = getFieldType(context.getName(), type);
+    if (value != null) {
+      Preconditions.checkState(fieldType instanceof PrimitiveFieldType);
+      Object parsedValue = parseConstantValueFromString(value, (PrimitiveFieldType) fieldType);
+      if (array) {
+        context.addConstantArrayField(name, fieldType, parsedValue);
+      } else {
+        context.addConstantField(name, fieldType, parsedValue);
+      }
+    } else if (array) {
+      context.addValueArrayField(name, fieldType);
+    } else {
+      context.addValueField(name, fieldType);
+    }
+    if (fieldType.getName().equals("Header")) {
+      Preconditions.checkState(name.equals("header"));
+    }
+    if (fieldType instanceof MessageFieldType) {
+      Preconditions.checkState(messageLoader.hasMessageDefinition(context.getName()));
+    }
+  }
+
+  private FieldType getFieldType(String messageName, String type) {
+    try {
+      return PrimitiveFieldType.valueOf(type.toUpperCase());
+    } catch (Exception e) {
+    }
+    if (!type.equals("Header") && !type.contains("/")) {
+      type = messageName.substring(0, messageName.lastIndexOf('/') + 1) + type;
+    }
+    return new MessageFieldType(type);
+  }
+
+  private void addMessageContext(String messageName) throws IOException {
+    MessageContext context = new MessageContext(messageName);
     String messageDefinition = getMessageDefinition(messageName);
     BufferedReader reader = new BufferedReader(new StringReader(messageDefinition));
     String line = reader.readLine();
     while (line != null) {
       line = line.trim();
       if (line.length() > 0 && !line.startsWith("#")) {
-        String[] typeAndName = line.split("\\s+", 2);
-        String type = typeAndName[0];
-        String name = typeAndName[1];
-        if (name.contains("=")) {
-          addConstantToContext(type, name, constantFieldTypes, constantFieldValues);
-        } else {
-          if (type.equals("Header")) {
-            Preconditions.checkState(name.equals("header"));
-            valueFieldTypes.put(name, FieldType.MESSAGE);
-          } else if (type.endsWith("]")) {
-            addArrayFieldToContext(name, type, messageName, valueFieldTypes);
-          } else if (FIELD_TYPE_NAMES.containsKey(type)) {
-            valueFieldTypes.put(name, FIELD_TYPE_NAMES.get(type));
-          } else {
-            if (!type.contains("/")) {
-              type = messageName.substring(0, messageName.lastIndexOf('/') + 1) + type;
-            }
-            if (messageLoader.hasMessageDefinition(messageName)) {
-              valueFieldTypes.put(name, FieldType.MESSAGE);
-            } else {
-              throw new RuntimeException();
-            }
-          }
-        }
+        createFieldFromString(line, context);
       }
       line = reader.readLine();
     }
-    MessageContext<MessageType> contexts =
-        new MessageContext<MessageType>(messageClass, constantFieldTypes, constantFieldValues,
-            valueFieldTypes);
-    messageContext.put(messageName, contexts);
-  }
-
-  private void addArrayFieldToContext(String name, String type, String messageName,
-      Map<String, FieldType> valueFieldTypes) {
-    // TODO(damonkohler): Treat fixed sized arrays differently?
-    type = type.substring(0, type.lastIndexOf('['));
-    if (FIELD_TYPE_NAMES.containsKey(type + "[]")) {
-      valueFieldTypes.put(name, FIELD_TYPE_NAMES.get(type + "[]"));
-    } else {
-      if (!type.contains("/")) {
-        type = messageName.substring(0, messageName.lastIndexOf('/') + 1) + type;
-      }
-      if (messageLoader.hasMessageDefinition(messageName)) {
-        valueFieldTypes.put(name, FieldType.MESSAGE_ARRAY);
-      } else {
-        throw new RuntimeException();
-      }
-    }
-  }
-
-  private void addConstantToContext(String type, String name,
-      Map<String, FieldType> constantFieldTypes, Map<String, Object> constantFieldValues) {
-    String[] nameAndValue = name.split("=", 2);
-    name = nameAndValue[0];
-    String value = nameAndValue[1];
-    constantFieldTypes.put(name, FIELD_TYPE_NAMES.get(type));
-    constantFieldValues.put(name, parseConstant(value, FIELD_TYPE_NAMES.get(type)));
+    messageContexts.put(messageName, context);
   }
 
   private String getMessageDefinition(String messageName) {
@@ -179,11 +129,13 @@ public class MessageFactory {
     return messageDefinition;
   }
 
-  private Object parseConstant(String value, FieldType type) {
+  private Object parseConstantValueFromString(String value, PrimitiveFieldType type) {
     switch (type) {
       case INT8:
+        return Byte.parseByte(value);
       case UINT8:
       case INT16:
+        return Short.parseShort(value);
       case UINT16:
       case INT32:
         return Integer.parseInt(value);
@@ -207,19 +159,16 @@ public class MessageFactory {
   @SuppressWarnings("unchecked")
   public <MessageType extends Message> MessageType createMessage(String messageName,
       Class<MessageType> messageClass) {
-    if (!messageContext.containsKey(messageName)) {
+    if (!messageContexts.containsKey(messageName)) {
       try {
-        addMessageContext(messageName, messageClass);
+        addMessageContext(messageName);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
     }
-    MessageContext<MessageType> constants =
-        (MessageContext<MessageType>) messageContext.get(messageName);
-    Preconditions.checkNotNull(constants);
-    Preconditions.checkState(messageClass == constants.messageClass);
-    return MessageProxyFactory.getProxy(messageClass, new MessageImpl(constants.constantFieldTypes,
-        constants.constantFieldValues, constants.valueFieldTypes));
+    MessageContext context = messageContexts.get(messageName);
+    Preconditions.checkNotNull(context);
+    return MessageProxyFactory.getProxy(messageClass, new MessageImpl(context));
   }
 
 }
