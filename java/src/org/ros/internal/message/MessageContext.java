@@ -19,7 +19,7 @@ package org.ros.internal.message;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -30,13 +30,13 @@ class MessageContext {
 
   private final String name;
   private final Map<String, Field> fields;
-  private final List<String> fieldNames;
+  private final List<Field> orderedFields;
   private final Map<String, Object> constantFieldValues;
 
   MessageContext(String name) {
     this.name = name;
     this.fields = Maps.newConcurrentMap();
-    this.fieldNames = Lists.newArrayList();
+    this.orderedFields = Lists.newArrayList();
     this.constantFieldValues = Maps.newConcurrentMap();
   }
   
@@ -45,25 +45,29 @@ class MessageContext {
   }
 
   void addConstantField(String name, FieldType type, Object value) {
-    fields.put(name, Field.createConstant(name, type));
-    fieldNames.add(name);
+    Field field = Field.createConstant(name, type);
+    fields.put(name, field);
+    orderedFields.add(field);
     constantFieldValues.put(name, value);
   }
 
   void addConstantArrayField(String name, FieldType type, Object value) {
-    fields.put(name, Field.createConstantArray(name, type));
-    fieldNames.add(name);
+    Field field = Field.createConstantArray(name, type);
+    fields.put(name, field);
+    orderedFields.add(field);
     constantFieldValues.put(name, value);
   }
 
   void addValueField(String name, FieldType type) {
-    fields.put(name, Field.createValue(name, type));
-    fieldNames.add(name);
+    Field field = Field.createValue(name, type);
+    fields.put(name, field);
+    orderedFields.add(field);
   }
 
   void addValueArrayField(String name, FieldType type) {
-    fields.put(name, Field.createValueArray(name, type));
-    fieldNames.add(name);
+    Field field = Field.createValueArray(name, type);
+    fields.put(name, field);
+    orderedFields.add(field);
   }
 
   boolean hasConstantField(String name, FieldType type) {
@@ -86,14 +90,10 @@ class MessageContext {
   }
 
   /**
-   * @return the {@link List} of field names in the order they were added
+   * @return the {@link List} of {@link Field}s in the order they were added
    */
-  List<String> getFieldNames() {
-    return fieldNames;
-  }
-
-  Collection<Field> getFields() {
-    return Lists.newArrayList(fields.values());
+  List<Field> getFields() {
+    return Collections.unmodifiableList(orderedFields);
   }
 
 }

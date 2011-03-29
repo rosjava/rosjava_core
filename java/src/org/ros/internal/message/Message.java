@@ -18,8 +18,8 @@ package org.ros.internal.message;
 
 import org.ros.message.Duration;
 import org.ros.message.Time;
+import org.ros.message.std_msgs.Char;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -27,127 +27,143 @@ import java.util.List;
  */
 public interface Message {
 
-  boolean getBool(String key);
+  boolean getBool(String name);
 
-  Duration getDuration(String key);
+  byte getByte(String name);
 
-  float getFloat32(String key);
+  char getChar(String name);
 
-  double getFloat64(String key);
+  Duration getDuration(String name);
 
-  short getInt16(String key);
+  float getFloat32(String name);
 
-  int getInt32(String key);
+  double getFloat64(String name);
 
-  long getInt64(String key);
+  short getInt16(String name);
 
-  byte getInt8(String key);
+  int getInt32(String name);
 
-  <MessageType extends Message> MessageType getMessage(String key);
+  long getInt64(String name);
 
-  String getString(String key);
+  byte getInt8(String name);
 
-  Time getTime(String key);
+  <MessageType extends Message> MessageType getMessage(String name);
 
-  int getUint16(String key);
+  String getString(String name);
 
-  long getUint32(String key);
+  Time getTime(String name);
 
-  long getUint64(String key);
+  int getUint16(String name);
 
-  short getUint8(String key);
+  long getUint32(String name);
 
-  void setBool(String key, boolean value);
+  long getUint64(String name);
 
-  void setDuration(String key, Duration value);
+  short getUint8(String name);
 
-  void setFloat32(String key, float value);
+  void setBool(String name, boolean value);
 
-  void setFloat64(String key, double value);
+  void setByte(String name, byte value);
 
-  void setInt16(String key, short value);
+  void setChar(String name, char value);
 
-  void setInt32(String key, int value);
+  void setDuration(String name, Duration value);
 
-  void setInt64(String key, long value);
+  void setFloat32(String name, float value);
 
-  void setInt8(String key, byte value);
+  void setFloat64(String name, double value);
 
-  void setMessage(String key, Message value);
+  void setInt16(String name, short value);
 
-  void setString(String key, String value);
+  void setInt32(String name, int value);
 
-  void setTime(String key, Time value);
+  void setInt64(String name, long value);
 
-  void setUint16(String key, int value);
+  void setInt8(String name, byte value);
 
-  void setUint32(String key, long value);
+  void setMessage(String name, Message value);
 
-  void setUint64(String key, long value);
+  void setString(String name, String value);
 
-  void setUint8(String key, short value);
+  void setTime(String name, Time value);
 
-  void setStringList(String key, List<String> value);
+  void setUint16(String name, int value);
 
-  void setInt8List(String key, List<Byte> value);
+  void setUint32(String name, long value);
 
-  void setUint8List(String key, List<Short> value);
+  void setUint64(String name, long value);
 
-  void setDuration(String key, List<Duration> value);
+  void setUint8(String name, short value);
 
-  void setTimeList(String key, List<Time> value);
+  void setStringList(String name, List<String> value);
 
-  void setBoolList(String key, List<Boolean> value);
+  void setInt8List(String name, List<Byte> value);
 
-  void setFloat64List(String key, List<Double> value);
+  void setUint8List(String name, List<Short> value);
 
-  void setFloat32List(String key, List<Float> value);
+  void setDuration(String name, List<Duration> value);
 
-  void setUint64List(String key, List<Long> value);
+  void setTimeList(String name, List<Time> value);
 
-  void setInt64List(String key, List<Long> value);
+  void setBoolList(String name, List<Boolean> value);
 
-  void setUint32List(String key, List<Long> value);
+  void setByteList(String name, List<Byte> value);
 
-  void setInt32List(String key, List<Integer> value);
+  void setCharList(String name, List<Char> value);
 
-  void setUint16List(String key, List<Integer> value);
+  void setFloat64List(String name, List<Double> value);
 
-  void setInt16List(String key, List<Short> value);
+  void setFloat32List(String name, List<Float> value);
 
-  <MessageType extends Message> List<MessageType> getMessageList(String key,
+  void setUint64List(String name, List<Long> value);
+
+  void setInt64List(String name, List<Long> value);
+
+  void setUint32List(String name, List<Long> value);
+
+  void setInt32List(String name, List<Integer> value);
+
+  void setUint16List(String name, List<Integer> value);
+
+  void setInt16List(String name, List<Short> value);
+
+  <MessageType extends Message> List<MessageType> getMessageList(String name,
       Class<MessageType> messageClass);
 
-  void setMessageList(String key, List<Message> value);
+  void setMessageList(String name, List<Message> value);
 
-  List<Duration> getDurationList(String key);
+  List<Duration> getDurationList(String name);
 
-  List<Time> getTimeList(String key);
+  List<Time> getTimeList(String name);
 
-  List<Boolean> getBoolList(String key);
+  List<Boolean> getBoolList(String name);
 
-  List<Double> getFloat64List(String key);
+  List<Byte> getByteList(String name);
 
-  List<Float> getFloat32List(String key);
+  List<Char> getCharList(String name);
 
-  List<Long> getUint64List(String key);
+  List<Double> getFloat64List(String name);
 
-  List<Long> getInt64List(String key);
+  List<Float> getFloat32List(String name);
 
-  List<Long> getUint32List(String key);
+  List<Long> getUint64List(String name);
 
-  List<Integer> getInt32List(String key);
+  List<Long> getInt64List(String name);
 
-  List<Integer> getUint16List(String key);
+  List<Long> getUint32List(String name);
 
-  List<Short> getInt16List(String key);
+  List<Integer> getInt32List(String name);
 
-  List<Short> getUint8List(String key);
+  List<Integer> getUint16List(String name);
 
-  List<Byte> getInt8List(String key);
+  List<Short> getInt16List(String name);
 
-  List<String> getStringList(String key);
+  List<Short> getUint8List(String name);
 
-  Collection<Field> getFields();
+  List<Byte> getInt8List(String name);
+
+  List<String> getStringList(String name);
+
+  List<Field> getFields();
 
 }
