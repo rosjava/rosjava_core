@@ -51,24 +51,26 @@ public class MessageTest {
     loader.addSearchPath(searchPath);
     loader.updateMessageDefinitions();
     factory = new MessageFactory(loader);
+    factory.setMessageClass("foo", FooMessage.class);
+    factory.setMessageClass("bar", BarMessage.class);
   }
 
   @Test
   public void testCreateEmptyMessage() {
     loader.addMessageDefinition("foo", "");
-    factory.createMessage("foo", FooMessage.class);
+    factory.createMessage("foo");
   }
 
   @Test
   public void testCreateEmptyMessageWithBlankLines() {
     loader.addMessageDefinition("foo", "\n\n\n\n\n");
-    factory.createMessage("foo", FooMessage.class);
+    factory.createMessage("foo");
   }
 
   @Test
   public void testString() {
     String data = "Hello, ROS!";
-    FooMessage message = factory.createMessage("std_msgs/String", FooMessage.class);
+    Message message = factory.createMessage("std_msgs/String");
     message.setString("data", data);
     assertEquals(data, message.getString("data"));
   }
@@ -77,7 +79,7 @@ public class MessageTest {
   public void testStringWithComments() {
     loader.addMessageDefinition("foo", "# foo\nstring data\n    # string other data");
     String data = "Hello, ROS!";
-    FooMessage message = factory.createMessage("foo", FooMessage.class);
+    FooMessage message = factory.createMessage("foo");
     message.setString("data", data);
     assertEquals(data, message.getString("data"));
   }
@@ -85,7 +87,7 @@ public class MessageTest {
   @Test
   public void testInt8() {
     byte data = 42;
-    FooMessage message = factory.createMessage("std_msgs/Int8", FooMessage.class);
+    Message message = factory.createMessage("std_msgs/Int8");
     message.setInt8("data", data);
     assertEquals(data, message.getInt8("data"));
   }
@@ -94,8 +96,8 @@ public class MessageTest {
   public void testNestedMessage() {
     loader.addMessageDefinition("foo", "bar data");
     loader.addMessageDefinition("bar", "int8 data");
-    FooMessage fooMessage = factory.createMessage("foo", FooMessage.class);
-    BarMessage barMessage = factory.createMessage("bar", BarMessage.class);
+    FooMessage fooMessage = factory.createMessage("foo");
+    BarMessage barMessage = factory.createMessage("bar");
     fooMessage.setMessage("data", barMessage);
     byte data = 42;
     barMessage.setInt8("data", data);
@@ -105,20 +107,20 @@ public class MessageTest {
   @Test
   public void testConstantInt8() {
     loader.addMessageDefinition("foo", "int8 data=42");
-    FooMessage message = factory.createMessage("foo", FooMessage.class);
+    FooMessage message = factory.createMessage("foo");
     assertEquals(42, message.getInt8("data"));
   }
 
   @Test
   public void testConstantString() {
     loader.addMessageDefinition("foo", "string data=Hello, ROS! # comment ");
-    FooMessage message = factory.createMessage("foo", FooMessage.class);
+    FooMessage message = factory.createMessage("foo");
     assertEquals("Hello, ROS! # comment", message.getString("data"));
   }
 
   public void testInt8List() {
     loader.addMessageDefinition("foo", "int8[] data");
-    FooMessage message = factory.createMessage("foo", FooMessage.class);
+    FooMessage message = factory.createMessage("foo");
     ArrayList<Byte> data = Lists.newArrayList((byte) 1, (byte) 2, (byte) 3);
     message.setInt8List("data", data);
     assertEquals(data, message.getInt8List("data"));
@@ -132,7 +134,7 @@ public class MessageTest {
     loader.updateMessageDefinitions();
     Map<String, String> definitions = loader.getMessageDefinitions();
     for (Entry<String, String> definition : definitions.entrySet()) {
-      factory.createMessage(definition.getKey(), FooMessage.class);
+      factory.createMessage(definition.getKey());
     }
   }
 
@@ -147,7 +149,7 @@ public class MessageTest {
     loader.updateMessageDefinitions();
     Map<String, String> definitions = loader.getMessageDefinitions();
     for (Entry<String, String> definition : definitions.entrySet()) {
-      factory.createMessage(definition.getKey(), FooMessage.class);
+      factory.createMessage(definition.getKey());
     }
   }
 

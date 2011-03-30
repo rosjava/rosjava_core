@@ -96,4 +96,36 @@ class MessageContext {
     return Collections.unmodifiableList(orderedFields);
   }
 
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((constantFieldValues == null) ? 0 : constantFieldValues.hashCode());
+    result = prime * result + ((fields == null) ? 0 : fields.hashCode());
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((orderedFields == null) ? 0 : orderedFields.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    MessageContext other = (MessageContext) obj;
+    if (constantFieldValues == null) {
+      if (other.constantFieldValues != null) return false;
+    } else if (!constantFieldValues.equals(other.constantFieldValues)) return false;
+    if (fields == null) {
+      if (other.fields != null) return false;
+    } else if (!fields.equals(other.fields)) return false;
+    if (name == null) {
+      if (other.name != null) return false;
+    } else if (!name.equals(other.name)) return false;
+    if (orderedFields == null) {
+      if (other.orderedFields != null) return false;
+    } else if (!orderedFields.equals(other.orderedFields)) return false;
+    return true;
+  }
+
 }

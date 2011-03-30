@@ -16,6 +16,8 @@
 
 package org.ros.internal.message;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.ros.message.Duration;
 import org.ros.message.Time;
 import org.ros.message.std_msgs.Char;
@@ -101,7 +103,7 @@ public interface Message {
 
   void setUint8List(String name, List<Short> value);
 
-  void setDuration(String name, List<Duration> value);
+  void setDurationList(String name, List<Duration> value);
 
   void setTimeList(String name, List<Time> value);
 
@@ -165,5 +167,8 @@ public interface Message {
   List<String> getStringList(String name);
 
   List<Field> getFields();
+
+  @VisibleForTesting
+  Object getInstance();
 
 }
