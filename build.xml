@@ -9,6 +9,10 @@
       <ant dir="java" target="msg_gen" />
   </target>
 
+  <target name="srv_gen">
+      <ant dir="java" target="srv_gen" />
+  </target>
+
   <target name="compile">
       <ant dir="java" target="compile" />
   </target>
