@@ -164,10 +164,8 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public <MessageType extends Message> List<MessageType> getMessageList(String name,
-      Class<MessageType> messageClass) {
+  public <MessageType extends Message> List<MessageType> getMessageList(String name) {
     List<MessageType> message = getMessageValueField(name);
-    // TODO(damonkohler): Check that all members are of the right type?
     return message;
   }
 

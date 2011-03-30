@@ -70,7 +70,7 @@ public class MessageFactory {
       value = nameAndValue[1].trim();
     }
     boolean array = false;
-    if (name.endsWith("]")) {
+    if (type.endsWith("]")) {
       // TODO(damonkohler): Treat fixed sized arrays differently?
       type = type.substring(0, type.lastIndexOf('['));
       array = true;

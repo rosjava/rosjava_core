@@ -18,6 +18,8 @@ package org.ros.internal.message;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.collect.Lists;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -68,6 +70,15 @@ public class MessageSerializationTest {
     fooMessage.setMessage("data", stringMessage);
     ByteBuffer buffer = MessageSerializer.serialize(fooMessage);
     assertEquals(fooMessage, MessageDeserializer.deserialize(factory, "foo", buffer));
+  }
+
+  @Test
+  public void testInt32Array() {
+    loader.addMessageDefinition("foo", "int32[] data");
+    Message message = factory.createMessage("foo");
+    message.setInt32List("data", Lists.newArrayList(1, 2, 3, 4, 5));
+    ByteBuffer buffer = MessageSerializer.serialize(message);
+    assertEquals(message, MessageDeserializer.deserialize(factory, "foo", buffer));
   }
 
 }

@@ -129,8 +129,7 @@ public interface Message {
 
   void setInt16List(String name, List<Short> value);
 
-  <MessageType extends Message> List<MessageType> getMessageList(String name,
-      Class<MessageType> messageClass);
+  <MessageType extends Message> List<MessageType> getMessageList(String name);
 
   void setMessageList(String name, List<Message> value);
 

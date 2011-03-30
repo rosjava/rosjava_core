@@ -24,11 +24,12 @@ import org.ros.message.Time;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class MessageSerializer {
+public class MessageSerializer {
 
   // TODO(damonkohler): Should this go into the FieldType? It's not a perfect
   // fit there either.
@@ -50,19 +51,113 @@ public abstract class MessageSerializer {
     // Utility class
   }
 
-  // TODO(damonkohler): Handle arrays.
   public static int getSerializedLength(Message message) {
     int size = 0;
     for (Field field : message.getFields()) {
       String fieldName = field.getName();
-      if (field.getType() instanceof MessageFieldType) {
-        size += getSerializedLength(message.getMessage(fieldName));
-      } else if (field.getType() == PrimitiveFieldType.STRING) {
-        // Add in an extra 4 bytes for the length of the string. Also, we only
-        // use ASCII strings, so we calculate 1 byte per character.
-        size += message.getString(fieldName).length() + 4;
+      if (field.isArray()) {
+        size += 4; // Reserve 4 bytes for the array length.
+        if (field.getType() instanceof MessageFieldType) {
+          List<Message> nestedMessages = message.getMessageList(fieldName);
+          for (Message nestedMessage : nestedMessages) {
+            size += getSerializedLength(nestedMessage);
+          }
+        } else {
+          switch ((PrimitiveFieldType) field.getType()) {
+            case BOOL:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.BOOL)
+                      * message.getBoolList(fieldName).size();
+              break;
+            case CHAR:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.CHAR)
+                      * message.getCharList(fieldName).size();
+              break;
+            case BYTE:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.BYTE)
+                      * message.getByteList(fieldName).size();
+              break;
+            case INT8:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.INT8)
+                      * message.getInt8List(fieldName).size();
+              break;
+            case UINT8:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.UINT8)
+                      * message.getUint8List(fieldName).size();
+              break;
+            case INT16:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.INT16)
+                      * message.getInt16List(fieldName).size();
+              break;
+            case UINT16:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.UINT16)
+                      * message.getUint16List(fieldName).size();
+              break;
+            case INT32:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.INT32)
+                      * message.getInt32List(fieldName).size();
+              break;
+            case UINT32:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.UINT32)
+                      * message.getUint32List(fieldName).size();
+              break;
+            case INT64:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.INT64)
+                      * message.getInt64List(fieldName).size();
+              break;
+            case UINT64:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.UINT64)
+                      * message.getUint64List(fieldName).size();
+              break;
+            case FLOAT32:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.FLOAT32)
+                      * message.getFloat32List(fieldName).size();
+              break;
+            case FLOAT64:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.FLOAT64)
+                      * message.getFloat64List(fieldName).size();
+              break;
+            case STRING:
+              for (String string : message.getStringList(fieldName)) {
+                size += string.length() + 4;
+              }
+              break;
+            case TIME:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.TIME)
+                      * message.getTimeList(fieldName).size();
+              break;
+            case DURATION:
+              size +=
+                  FIELD_TYPE_SIZES.get(PrimitiveFieldType.DURATION)
+                      * message.getDurationList(fieldName).size();
+              break;
+            default:
+              throw new RuntimeException();
+          }
+        }
       } else {
-        size += FIELD_TYPE_SIZES.get(field.getType());
+        if (field.getType() instanceof MessageFieldType) {
+          size += getSerializedLength(message.getMessage(fieldName));
+        } else if (field.getType() == PrimitiveFieldType.STRING) {
+          // Add in an extra 4 bytes for the length of the string. Also, we only
+          // use ASCII strings, so we calculate 1 byte per character.
+          size += message.getString(fieldName).length() + 4;
+        } else {
+          size += FIELD_TYPE_SIZES.get(field.getType());
+        }
       }
     }
     return size;
