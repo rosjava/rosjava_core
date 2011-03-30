@@ -14,5 +14,6 @@
   <depend package="roslang"/>
   <depend package="rostest"/>
   <depend package="test_ros"/>
+  <depend package="app_manager"/>
 </package>
 
