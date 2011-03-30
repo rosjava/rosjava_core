@@ -80,87 +80,87 @@ public class MessageImpl implements Message {
 
   @Override
   public boolean getBool(String name) {
-    return getField(name, PrimitiveFieldType.BOOL);
+    return this.<Boolean>getField(name, PrimitiveFieldType.BOOL);
   }
 
   @Override
   public List<Boolean> getBoolList(String name) {
-    return getField(name, PrimitiveFieldType.BOOL);
+    return this.<List<Boolean>>getField(name, PrimitiveFieldType.BOOL);
   }
 
   @Override
   public Duration getDuration(String name) {
-    return getField(name, PrimitiveFieldType.DURATION);
+    return this.<Duration>getField(name, PrimitiveFieldType.DURATION);
   }
 
   @Override
   public List<Duration> getDurationList(String name) {
-    return getField(name, PrimitiveFieldType.DURATION);
+    return this.<List<Duration>>getField(name, PrimitiveFieldType.DURATION);
   }
 
   @Override
   public float getFloat32(String name) {
-    return getField(name, PrimitiveFieldType.FLOAT32);
+    return this.<Float>getField(name, PrimitiveFieldType.FLOAT32);
   }
 
   @Override
   public List<Float> getFloat32List(String name) {
-    return getField(name, PrimitiveFieldType.FLOAT32);
+    return this.<List<Float>>getField(name, PrimitiveFieldType.FLOAT32);
   }
 
   @Override
   public double getFloat64(String name) {
-    return getField(name, PrimitiveFieldType.FLOAT64);
+    return this.<Double>getField(name, PrimitiveFieldType.FLOAT64);
   }
 
   @Override
   public List<Double> getFloat64List(String name) {
-    return getField(name, PrimitiveFieldType.FLOAT64);
+    return this.<List<Double>>getField(name, PrimitiveFieldType.FLOAT64);
   }
 
   @Override
   public short getInt16(String name) {
-    return getField(name, PrimitiveFieldType.INT16);
+    return this.<Short>getField(name, PrimitiveFieldType.INT16);
   }
 
   @Override
   public List<Short> getInt16List(String name) {
-    return getField(name, PrimitiveFieldType.INT16);
+    return this.<List<Short>>getField(name, PrimitiveFieldType.INT16);
   }
 
   @Override
   public int getInt32(String name) {
-    return getField(name, PrimitiveFieldType.INT32);
+    return this.<Integer>getField(name, PrimitiveFieldType.INT32);
   }
 
   @Override
   public List<Integer> getInt32List(String name) {
-    return getField(name, PrimitiveFieldType.INT32);
+    return this.<List<Integer>>getField(name, PrimitiveFieldType.INT32);
   }
 
   @Override
   public long getInt64(String name) {
-    return getField(name, PrimitiveFieldType.INT64);
+    return this.<Long>getField(name, PrimitiveFieldType.INT64);
   }
 
   @Override
   public List<Long> getInt64List(String name) {
-    return getField(name, PrimitiveFieldType.INT64);
+    return this.<List<Long>>getField(name, PrimitiveFieldType.INT64);
   }
 
   @Override
   public byte getInt8(String name) {
-    return getField(name, PrimitiveFieldType.INT8);
+    return this.<Byte>getField(name, PrimitiveFieldType.INT8);
   }
 
   @Override
   public List<Byte> getInt8List(String name) {
-    return getField(name, PrimitiveFieldType.INT8);
+    return this.<List<Byte>>getField(name, PrimitiveFieldType.INT8);
   }
 
   @Override
   public <MessageType extends Message> MessageType getMessage(String name) {
-    return getMessageValueField(name);
+    return this.<MessageType>getMessageValueField(name);
   }
 
   @Override
@@ -191,42 +191,42 @@ public class MessageImpl implements Message {
 
   @Override
   public int getUint16(String name) {
-    return getField(name, PrimitiveFieldType.UINT16);
+    return this.<Integer>getField(name, PrimitiveFieldType.UINT16);
   }
 
   @Override
   public List<Integer> getUint16List(String name) {
-    return getField(name, PrimitiveFieldType.UINT16);
+    return this.<List<Integer>>getField(name, PrimitiveFieldType.UINT16);
   }
 
   @Override
   public long getUint32(String name) {
-    return getField(name, PrimitiveFieldType.UINT32);
+    return this.<Long>getField(name, PrimitiveFieldType.UINT32);
   }
 
   @Override
   public List<Long> getUint32List(String name) {
-    return getField(name, PrimitiveFieldType.UINT32);
+    return this.<List<Long>>getField(name, PrimitiveFieldType.UINT32);
   }
 
   @Override
   public long getUint64(String name) {
-    return getField(name, PrimitiveFieldType.UINT64);
+    return this.<Long>getField(name, PrimitiveFieldType.UINT64);
   }
 
   @Override
   public List<Long> getUint64List(String name) {
-    return getField(name, PrimitiveFieldType.UINT64);
+    return this.<List<Long>>getField(name, PrimitiveFieldType.UINT64);
   }
 
   @Override
   public short getUint8(String name) {
-    return getField(name, PrimitiveFieldType.UINT8);
+    return this.<Short>getField(name, PrimitiveFieldType.UINT8);
   }
 
   @Override
   public List<Short> getUint8List(String name) {
-    return getField(name, PrimitiveFieldType.UINT8);
+    return this.<List<Short>>getField(name, PrimitiveFieldType.UINT8);
   }
 
   @Override
@@ -381,12 +381,12 @@ public class MessageImpl implements Message {
 
   @Override
   public byte getByte(String name) {
-    return getField(name, PrimitiveFieldType.BYTE);
+    return this.<Byte>getField(name, PrimitiveFieldType.BYTE);
   }
 
   @Override
   public char getChar(String name) {
-    return getField(name, PrimitiveFieldType.CHAR);
+    return this.<Character>getField(name, PrimitiveFieldType.CHAR);
   }
 
   @Override

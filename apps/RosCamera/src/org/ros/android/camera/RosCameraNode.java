@@ -15,20 +15,19 @@
  */
 package org.ros.android.camera;
 
-import org.ros.Context;
-
+import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.util.Log;
 import org.ros.Node;
 import org.ros.Publisher;
-import org.ros.Ros;
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
 import org.ros.message.Time;
-import org.ros.message.sensor.CameraInfo;
-import org.ros.message.sensor.Image;
+import org.ros.message.sensor_msgs.CameraInfo;
+import org.ros.message.sensor_msgs.Image;
+
 
 /**
  * A camera node that publishes images and camera_info

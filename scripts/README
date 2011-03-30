@@ -11,3 +11,5 @@ Example (output to java/msg_gen/java):
 
 Example (most of Diamondback):
 ./java_msgs.py rosgraph_msgs std_msgs joy geometry_msgs sensor_msgs nav_msgs visualization_msgs trajectory_msgs actionlib_msgs diagnostic_msgs stereo_msgs test_ros -o ../java/msg_gen/java
+
+./java_srvs.py std_srvs sensor_msgs nav_msgs tf test_ros diagnostic_msgs dynamic_reconfigure nodelet -o ../java/srv_gen/java

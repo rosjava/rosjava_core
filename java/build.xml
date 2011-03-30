@@ -10,6 +10,7 @@
     <property name="build-xmlrpc" location="${build}/xmlrpc"/>
     <property name="dist" location="dist"/>
     <property name="msg_gen" location="msg_gen/java"/>
+    <property name="srv_gen" location="srv_gen/java"/>
     
     <property name="jar.xmlrpc" location="${dist}/apache-xmlrpc-3.1.3rosjava.jar" />
     <property name="jar.rosjava" location="${dist}/rosjava.jar" />
@@ -37,6 +38,8 @@
     <target name="clean">
         <delete dir="${build}"/>
         <delete dir="${dist}"/>
+        <delete dir="${msg_gen}"/>
+        <delete dir="${srv_gen}"/>
     </target>
 
     <target name="msg_gen" depends="init">
@@ -53,10 +56,30 @@
           <arg value="nav_msgs" />
           <arg value="sensor_msgs" />
           <arg value="test_ros" />
+          <arg value="diagnostic_msgs" />
+          <arg value="app_manager" />
+          <arg value="dynamic_reconfigure" />
         </exec>
     </target>
 
-    <target name="compile" depends="init, msg_gen">
+    <target name="srv_gen" depends="init">
+        <echo message="building commonly used ROS services"/>        
+
+        <exec executable="../scripts/java_srvs.py">
+          <arg value="-o ${srv_gen}" />
+
+          <!-- list of packages to generate for -->
+          <arg value="std_srvs" />
+          <arg value="nav_msgs" />
+          <arg value="sensor_msgs" />
+          <arg value="test_ros" />
+          <arg value="diagnostic_msgs" />
+          <arg value="app_manager" />
+          <arg value="dynamic_reconfigure" />
+        </exec>
+    </target>
+
+    <target name="compile" depends="init, msg_gen, srv_gen">
         <echo message="${ant.project.name}: ${ant.file}"/>
         
         <copy todir="${build-xmlrpc}">
@@ -95,6 +118,7 @@
         <javac debug="true" debuglevel="${debuglevel}" destdir="${build-rosjava}" source="${source}" target="${target}">
             <src path="src"/>
             <src path="${msg_gen}"/>
+            <src path="${srv_gen}"/>
             <classpath refid="java.classpath"/>
             <classpath refid="rosjava.classpath"/>
         </javac>
