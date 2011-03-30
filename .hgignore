@@ -15,4 +15,4 @@ syntax: regexp
 build/.*
 android/(bin|gen)/.*
 apps/.*/(bin|gen)/.*
-java/(bin|build|dist|msg_gen)/.*
+java/(bin|build|dist|msg_gen|srv_gen)/.*

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="srv_gen/java"/>
 	<classpathentry kind="src" path="msg_gen/java"/>
 	<classpathentry kind="src" path="apache-xmlrpc-3.1.3-src/client/src/main/java"/>
 	<classpathentry kind="src" path="apache-xmlrpc-3.1.3-src/common/src/main/java"/>

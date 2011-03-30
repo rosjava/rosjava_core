@@ -633,9 +633,6 @@ def generate(package, output_dir=None):
     @return: output directory
     @rtype: str
     """
-    pkg_dir = roslib.packages.get_pkg_dir(package)
-    msg_dir = os.path.join(pkg_dir, roslib.packages.MSG_DIR)
-
     # org.ros. -> org/ros/
     package_prefix = os.sep.join(JAVA_PACKAGE.split('.'))
 

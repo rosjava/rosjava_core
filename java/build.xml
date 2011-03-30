@@ -53,6 +53,9 @@
           <arg value="nav_msgs" />
           <arg value="sensor_msgs" />
           <arg value="test_ros" />
+          <arg value="diagnostic_msgs" />
+          <arg value="app_manager" />
+          <arg value="dynamic_reconfigure" />
         </exec>
     </target>
 
