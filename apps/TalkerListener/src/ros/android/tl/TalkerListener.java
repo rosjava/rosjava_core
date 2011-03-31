@@ -1,16 +1,15 @@
-package ros.android.TalkerListener;
-
-import android.util.Log;
+package ros.android.tl;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.NodeContext;
 import ros.android.BarcodeLoader;
-
-import java.util.concurrent.LinkedBlockingDeque;
+import ros.android.utils.master.MasterChooser;
 
 public class TalkerListener extends Activity {
 
@@ -20,32 +19,44 @@ public class TalkerListener extends Activity {
   }
 
   Node node;
-//  
-//  @Override
-//  public Object onRetainNonConfigurationInstance() {
-//      final LoadedPhoto[] list = new LoadedPhoto[numberOfPhotos];
-//      keepPhotos(list);
-//      return list;
-//  }
+
+  //
+  // @Override
+  // public Object onRetainNonConfigurationInstance() {
+  // final LoadedPhoto[] list = new LoadedPhoto[numberOfPhotos];
+  // keepPhotos(list);
+  // return list;
+  // }
 
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
+  }
 
+  @Override
+  protected void onPause() {
+    super.onPause();
+    node.stop();
+    node = null;
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
     if (node == null) {
+      
       setText("loading");
-      Log.i("RosAndroid","loading.... should only happen once");
+      Log.i("RosAndroid", "loading.... should only happen once");
 
-      LinkedBlockingDeque<Integer> g = new LinkedBlockingDeque<Integer>();
-      g.add(1);
-
-      BarcodeLoader loader = new BarcodeLoader();
-      NodeContext context;
       try {
+
+        BarcodeLoader loader = new BarcodeLoader(this, 0);
+        loader.makeNotification(this);
+        NodeContext context;
         context = loader.createContext();
-        Node node = new Node("listener", context);
+        node = new Node("listener", context);
         // final Log log = node.getLog();
         node.createSubscriber("chatter", new MessageListener<org.ros.message.std_msgs.String>() {
           @Override
@@ -65,6 +76,13 @@ public class TalkerListener extends Activity {
       } catch (Exception e) {
         setText("failed to create node" + e.getMessage());
       }
+    }
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == 0) {
+      MasterChooser.uriFromResult(this, resultCode, data);
     }
   }
 }
