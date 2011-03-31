@@ -33,6 +33,15 @@ public class BarcodeLoader extends RosLoader {
   private String masterUri;
   private static final int ROS_MASTER_TICKER_CHOOSER = 1;
 
+  /**
+   * This will create notification that will allow easy switch of ros master uri
+   * from a 2d barcode scanning app.
+   * 
+   * You should call this from your main activity, if you wish to be able to
+   * update the cached uri.
+   * 
+   * @param activity
+   */
   public void makeNotification(Activity activity) {
     String ns = Context.NOTIFICATION_SERVICE;
     NotificationManager mNotificationManager = (NotificationManager) activity.getSystemService(ns);
@@ -50,6 +59,13 @@ public class BarcodeLoader extends RosLoader {
     mNotificationManager.notify(ROS_MASTER_TICKER_CHOOSER, notification);
   }
 
+  /**
+   * Tries to bring up the cached master uri, or else will launch a barcode
+   * scanning intent.
+   * 
+   * @param activity
+   * @param requestCode
+   */
   public BarcodeLoader(Activity activity, int requestCode) {
     masterUri = MasterChooser.getCachedURI(activity);
     if (masterUri == null) {
@@ -88,7 +104,7 @@ public class BarcodeLoader extends RosLoader {
   /**
    * @return The url of the local host. IPv4 only for now.
    */
-  public String getHostName() {
+  private String getHostName() {
     try {
       String address = null;
       for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
