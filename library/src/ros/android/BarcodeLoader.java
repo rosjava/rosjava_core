@@ -36,7 +36,7 @@ public class BarcodeLoader extends RosLoader {
   public void makeNotification(Activity activity) {
     String ns = Context.NOTIFICATION_SERVICE;
     NotificationManager mNotificationManager = (NotificationManager) activity.getSystemService(ns);
-    int icon = R.drawable.icon;
+    int icon = R.drawable.status;
     CharSequence ticker = "ROS Master Selector";
     long when = System.currentTimeMillis();
     Notification notification = new Notification(icon, ticker, when);

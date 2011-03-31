@@ -268,6 +268,8 @@ public class Node {
    */
   public void stop() {
     slaveServer.shutdown();
+    tcpRosServer.shutdown();
+    
   }
 
   @VisibleForTesting

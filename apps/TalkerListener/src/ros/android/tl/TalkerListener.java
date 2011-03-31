@@ -38,7 +38,9 @@ public class TalkerListener extends Activity {
   @Override
   protected void onPause() {
     super.onPause();
-    node.stop();
+    if (node != null) {
+      node.stop();
+    }
     node = null;
   }
 
@@ -46,7 +48,7 @@ public class TalkerListener extends Activity {
   protected void onResume() {
     super.onResume();
     if (node == null) {
-      
+
       setText("loading");
       Log.i("RosAndroid", "loading.... should only happen once");
 
