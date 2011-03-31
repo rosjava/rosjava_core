@@ -75,48 +75,7 @@ public class RosCamera extends Activity{
 
   }
 
-  public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-    if (requestCode == 0) {
-      if (resultCode == RESULT_OK) {
-        String contents = intent.getStringExtra("SCAN_RESULT");
-        // String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
-        masterURI = contents;
-        setupNode();
-        // Handle successful scan
-      } else if (resultCode == RESULT_CANCELED) {
-        Toast.makeText(getApplicationContext(), "No ROS Master URI found, Please try again.",
-            Toast.LENGTH_LONG).show();
-        setupNode();
-      }
-    }
-  }
 
-  private void launchUriSelector() {
-    // create a selector gui for picking the ros master url
-    final CharSequence[] uriItems = { "From Barcode", "http://localhost:11311",
-        "http://10.0.2.2:11311", };
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    builder.setTitle("Pick a ROS Master URI");
-    builder.setItems(uriItems, new DialogInterface.OnClickListener() {
-      public void onClick(DialogInterface dialog, int item) {
-        if (item == 0) {
-          Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-          intent.setPackage("com.google.zxing.client.android");
-          intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-          startActivityForResult(intent, 0);
-          Toast.makeText(getApplicationContext(), "Please Scan a QR Code with a ROS host URI.",
-              Toast.LENGTH_LONG).show();
-          masterURI = null;
-        } else {
-          masterURI = (String) uriItems[item];
-          setupNode();
-        }
-
-      }
-    });
-    AlertDialog alert = builder.create();
-    alert.show();
-  }
 
   @Override
   protected void onResume() {
