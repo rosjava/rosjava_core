@@ -144,7 +144,7 @@ public class BarcodeLoader extends RosLoader {
       if (address != null)
         return address;
     } catch (SocketException ex) {
-      // log.error(ex);
+      Log.i("RosAndroid", "SocketException: " + ex.getMessage());
     }
     throw new RuntimeException("Could not find a network address for the local host!");
   }
