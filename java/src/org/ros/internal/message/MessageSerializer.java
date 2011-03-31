@@ -46,63 +46,7 @@ public class MessageSerializer {
             size += getSerializedLength(nestedMessage);
           }
         } else {
-          switch ((PrimitiveFieldType) field.getType()) {
-            case BOOL:
-              size += PrimitiveFieldType.BOOL.getSize() * message.getBoolList(fieldName).size();
-              break;
-            case CHAR:
-              size += PrimitiveFieldType.CHAR.getSize() * message.getCharList(fieldName).size();
-              break;
-            case BYTE:
-              size += PrimitiveFieldType.BYTE.getSize() * message.getByteList(fieldName).size();
-              break;
-            case INT8:
-              size += PrimitiveFieldType.INT8.getSize() * message.getInt8List(fieldName).size();
-              break;
-            case UINT8:
-              size += PrimitiveFieldType.UINT8.getSize() * message.getUint8List(fieldName).size();
-              break;
-            case INT16:
-              size += PrimitiveFieldType.INT16.getSize() * message.getInt16List(fieldName).size();
-              break;
-            case UINT16:
-              size += PrimitiveFieldType.UINT16.getSize() * message.getUint16List(fieldName).size();
-              break;
-            case INT32:
-              size += PrimitiveFieldType.INT32.getSize() * message.getInt32List(fieldName).size();
-              break;
-            case UINT32:
-              size += PrimitiveFieldType.UINT32.getSize() * message.getUint32List(fieldName).size();
-              break;
-            case INT64:
-              size += PrimitiveFieldType.INT64.getSize() * message.getInt64List(fieldName).size();
-              break;
-            case UINT64:
-              size += PrimitiveFieldType.UINT64.getSize() * message.getUint64List(fieldName).size();
-              break;
-            case FLOAT32:
-              size +=
-                  PrimitiveFieldType.FLOAT32.getSize() * message.getFloat32List(fieldName).size();
-              break;
-            case FLOAT64:
-              size +=
-                  PrimitiveFieldType.FLOAT64.getSize() * message.getFloat64List(fieldName).size();
-              break;
-            case STRING:
-              for (String string : message.getStringList(fieldName)) {
-                size += string.length() + 4;
-              }
-              break;
-            case TIME:
-              size += PrimitiveFieldType.TIME.getSize() * message.getTimeList(fieldName).size();
-              break;
-            case DURATION:
-              size +=
-                  PrimitiveFieldType.DURATION.getSize() * message.getDurationList(fieldName).size();
-              break;
-            default:
-              throw new RuntimeException();
-          }
+          size += field.getSerializedSize();
         }
       } else {
         if (field.getType() instanceof MessageFieldType) {
@@ -112,7 +56,7 @@ public class MessageSerializer {
           // use ASCII strings, so we calculate 1 byte per character.
           size += message.getString(fieldName).length() + 4;
         } else {
-          size += ((PrimitiveFieldType) field.getType()).getSize();
+          size += ((PrimitiveFieldType) field.getType()).getSerializedSize();
         }
       }
     }

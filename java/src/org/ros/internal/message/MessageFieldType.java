@@ -27,6 +27,11 @@ class MessageFieldType implements FieldType {
     this.name = name;
   }
 
+  @Override
+  public int getSerializedSize() {
+    throw new UnsupportedOperationException();
+  }
+
   /**
    * @return the name
    */

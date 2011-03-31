@@ -23,97 +23,97 @@ enum PrimitiveFieldType implements FieldType {
 
   BOOL {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 1;
     }
   },
   BYTE {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 1;
     }
   },
   CHAR {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 1;
     }
   },
   INT8 {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 1;
     }
   },
   UINT8 {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 1;
     }
   },
   INT16 {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 2;
     }
   },
   UINT16 {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 2;
     }
   },
   INT32 {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 4;
     }
   },
   UINT32 {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 4;
     }
   },
   INT64 {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 8;
     }
   },
   UINT64 {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 8;
     }
   },
   FLOAT32 {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 4;
     }
   },
   FLOAT64 {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 8;
     }
   },
   STRING {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       throw new RuntimeException();
     }
   },
   TIME {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 8;
     }
   },
   DURATION {
     @Override
-    public int getSize() {
+    public int getSerializedSize() {
       return 8;
     }
   };
@@ -123,9 +123,7 @@ enum PrimitiveFieldType implements FieldType {
     return toString().toLowerCase();
   }
 
-  /**
-   * @return the serialized size of this {@link PrimitiveFieldType}
-   */
-  public abstract int getSize();
+  @Override
+  public abstract int getSerializedSize();
 
 }

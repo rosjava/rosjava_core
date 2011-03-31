@@ -18,6 +18,8 @@ package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
 
+import java.util.List;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -89,6 +91,20 @@ class Field<ValueType> {
    */
   public FieldType getType() {
     return type;
+  }
+
+  public int getSerializedSize() {
+    Preconditions.checkNotNull(value);
+    int length;
+    if (type instanceof MessageFieldType) {
+      throw new UnsupportedOperationException();
+    } else {
+      length = type.getSerializedSize();
+    }
+    if (isArray) {
+      return length * ((List<?>) value).size();
+    }
+    return length;
   }
 
   @Override
