@@ -90,6 +90,7 @@ public class TcpRosServer {
     future.awaitUninterruptibly();
     channelFactory.releaseExternalResources();
     bootstrap.releaseExternalResources();
+    channel.close();
     channel = null;
   }
 
