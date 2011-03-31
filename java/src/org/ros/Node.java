@@ -60,8 +60,8 @@ public class Node implements Namespace {
   private final TimeProvider timeProvider;
 
   /**
-   * @param name Node name. This identifies this node to the rest of the ROS
-   *        graph.
+   * @param name
+   *          Node name. This identifies this node to the rest of the ROS graph.
    * @param context
    * @throws RosInitException
    */
@@ -86,6 +86,9 @@ public class Node implements Namespace {
     log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
 
     try {
+      if (context.getHostName() == null) { 
+        throw new NullPointerException("context.getHostName() cannot be null");
+      }
       if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
@@ -93,7 +96,7 @@ public class Node implements Namespace {
             context.getXmlRpcPort(), context.getTcpRosPort());
       } else {
         node = org.ros.internal.node.Node.createPublic(nodeName, context.getRosMasterUri(),
-            context.getXmlRpcPort(), context.getTcpRosPort());
+            context.getHostName(), context.getXmlRpcPort(), context.getTcpRosPort());
       }
     } catch (Exception e) {
       throw new RosInitException(e);

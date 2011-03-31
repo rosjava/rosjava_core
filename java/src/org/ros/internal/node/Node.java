@@ -72,11 +72,12 @@ public class Node {
   private final ServiceManager serviceManager;
   private final TcpRosServer tcpRosServer;
 
-  public static Node createPublic(GraphName nodeName, URI masterUri, int xmlRpcBindPort,
-      int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
+  public static Node createPublic(GraphName nodeName, URI masterUri, String advertiseHostname,
+      int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
+      URISyntaxException {
     Node node = new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
-        AdvertiseAddress.createPublic(), BindAddress.createPublic(xmlRpcBindPort),
-        AdvertiseAddress.createPublic());
+        new AdvertiseAddress(advertiseHostname), BindAddress.createPublic(xmlRpcBindPort),
+        new AdvertiseAddress(advertiseHostname));
     node.start();
     return node;
   }
@@ -110,8 +111,10 @@ public class Node {
    * is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition {@link TopicDefinition} that is subscribed to
-   * @param messageClass {@link Message} class for topic
+   * @param topicDefinition
+   *          {@link TopicDefinition} that is subscribed to
+   * @param messageClass
+   *          {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -148,8 +151,10 @@ public class Node {
    * registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition {@link TopicDefinition} that is being published
-   * @param messageClass {@link Message} class for topic
+   * @param topicDefinition
+   *          {@link TopicDefinition} that is being published
+   * @param messageClass
+   *          {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -185,11 +190,12 @@ public class Node {
    * generated, it is registered with the {@link MasterServer}.
    * 
    * @param <RequestMessageType>
-   * @param serviceDefinition the {@link ServiceDefinition} that is being served
-   * @param requestMessageClass the {@link Message} class that is used for
-   *        requests
-   * @param responseBuilder the {@link ServiceResponseBuilder} that is used to
-   *        build responses
+   * @param serviceDefinition
+   *          the {@link ServiceDefinition} that is being served
+   * @param requestMessageClass
+   *          the {@link Message} class that is used for requests
+   * @param responseBuilder
+   *          the {@link ServiceResponseBuilder} that is used to build responses
    * @return a {@link ServiceServer} instance
    * @throws Exception
    */
@@ -224,9 +230,10 @@ public class Node {
    * created, it is connected to the {@link ServiceServer}.
    * 
    * @param <ResponseMessageType>
-   * @param serviceIdentifier the {@link ServiceIdentifier} of the server
-   * @param responseMessageClass the {@link Message} class that is used for
-   *        responses
+   * @param serviceIdentifier
+   *          the {@link ServiceIdentifier} of the server
+   * @param responseMessageClass
+   *          the {@link Message} class that is used for responses
    * @return a {@link ServiceClient} instance
    */
   @SuppressWarnings("unchecked")

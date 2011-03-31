@@ -40,10 +40,11 @@ public class NodeTest {
         new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
 
-    Node node = Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-    node.start();
 
     String hostName = InetAddress.getLocalHost().getCanonicalHostName();
+    
+    Node node = Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
+    node.start();
 
     InetSocketAddress tcpRosAddress = node.getTcpRosServer().getAddress();
     assertTrue(tcpRosAddress.getPort() > 0);
