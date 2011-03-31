@@ -1,0 +1,19 @@
+- svn:
+    local-name: ros
+    uri: https://code.ros.org/svn/ros/stacks/ros/trunk
+- svn:
+    local-name: ros_comm
+    uri: https://code.ros.org/svn/ros/stacks/ros_comm/trunk
+- hg:
+    local-name: rosjava
+    uri: https://rosjava.googlecode.com/hg
+    version: default
+- svn:
+    local-name: common_msgs
+    uri: https://code.ros.org/svn/ros-pkg/stacks/common_msgs/tags/common_msgs-1.4.0
+- svn:
+    local-name: joy
+    uri: https://code.ros.org/svn/ros-pkg/stacks/joystick_drivers/tags/joystick_drivers-1.4.0/joy
+- svn:
+    local-name: multimaster_experimental
+    uri: https://code.ros.org/svn/ros/stacks/multimaster_experimental/trunk

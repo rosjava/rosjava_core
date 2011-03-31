@@ -36,6 +36,7 @@ import java.util.Map;
 public class MessageFactory {
 
   private final Map<String, MessageContext> messageContexts;
+  private final Map<String, Class<? extends Message>> messageClasses;
   private final MessageLoader messageLoader;
 
   private static final class MessageProxyFactory {
@@ -55,6 +56,7 @@ public class MessageFactory {
   public MessageFactory(MessageLoader loader) {
     this.messageLoader = loader;
     messageContexts = Maps.newConcurrentMap();
+    messageClasses = Maps.newConcurrentMap();
   }
 
   private void createFieldFromString(String field, MessageContext context) {
@@ -68,7 +70,7 @@ public class MessageFactory {
       value = nameAndValue[1].trim();
     }
     boolean array = false;
-    if (name.endsWith("]")) {
+    if (type.endsWith("]")) {
       // TODO(damonkohler): Treat fixed sized arrays differently?
       type = type.substring(0, type.lastIndexOf('['));
       array = true;
@@ -156,9 +158,19 @@ public class MessageFactory {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public <MessageType extends Message> MessageType createMessage(String messageName,
+  public <MessageType extends Message> void setMessageClass(String messageName,
       Class<MessageType> messageClass) {
+    messageClasses.put(messageName, messageClass);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <MessageType extends Message> MessageType createMessage(String messageName) {
+    Class<MessageType> messageClass = (Class<MessageType>) messageClasses.get(messageName);
+    if (messageClass == null) {
+      // If we don't know a specific message class to use with the proxy, fall
+      // back to the generic Message interface.
+      messageClass = (Class<MessageType>) Message.class;
+    }
     if (!messageContexts.containsKey(messageName)) {
       try {
         addMessageContext(messageName);

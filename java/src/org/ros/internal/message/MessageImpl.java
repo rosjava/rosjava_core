@@ -164,10 +164,8 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public <MessageType extends Message> List<MessageType> getMessageList(String name,
-      Class<MessageType> messageClass) {
+  public <MessageType extends Message> List<MessageType> getMessageList(String name) {
     List<MessageType> message = getMessageValueField(name);
-    // TODO(damonkohler): Check that all members are of the right type?
     return message;
   }
 
@@ -242,7 +240,7 @@ public class MessageImpl implements Message {
   }
 
   @Override
-  public void setDuration(String name, List<Duration> value) {
+  public void setDurationList(String name, List<Duration> value) {
     setValueField(name, PrimitiveFieldType.DURATION, value);
   }
 
@@ -419,6 +417,37 @@ public class MessageImpl implements Message {
   @Override
   public List<Char> getCharList(String name) {
     return getField(name, PrimitiveFieldType.CHAR);
+  }
+
+  @Override
+  public Object getInstance() {
+    return this;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((context == null) ? 0 : context.hashCode());
+    result = prime * result + ((valueFieldValues == null) ? 0 : valueFieldValues.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (!(obj instanceof Message)) return false;
+    obj = ((Message) obj).getInstance();
+    if (getClass() != obj.getClass()) return false;
+    MessageImpl other = (MessageImpl) obj;
+    if (context == null) {
+      if (other.context != null) return false;
+    } else if (!context.equals(other.context)) return false;
+    if (valueFieldValues == null) {
+      if (other.valueFieldValues != null) return false;
+    } else if (!valueFieldValues.equals(other.valueFieldValues)) return false;
+    return true;
   }
 
 }

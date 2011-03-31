@@ -21,6 +21,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
+//FIXME LinkedBlockingDeque requires android > 8 (meaning 2.2 won't run :( )
 public class CircularBlockingQueue<T> extends LinkedBlockingDeque<T> {
   
   public CircularBlockingQueue(int capacity) {

@@ -120,8 +120,8 @@ public class SlaveServer extends NodeServer {
       URISyntaxException, RemoteException {
     topicManager.putSubscriber(subscriber.getTopicName().toString(), subscriber);
     Response<List<URI>> response = masterClient.registerSubscriber(toSlaveIdentifier(), subscriber);
-    List<PublisherIdentifier> publishers =
-        buildPublisherIdentifierList(response.getResult(), subscriber.getTopicDefinition());
+    List<PublisherIdentifier> publishers = buildPublisherIdentifierList(response.getResult(),
+        subscriber.getTopicDefinition());
     subscriber.updatePublishers(publishers);
     return publishers;
   }
@@ -161,24 +161,26 @@ public class SlaveServer extends NodeServer {
 
   /**
    * @param callerId
-   * @return PID of node process
-   * @throws UnsupportedOperationException If PID cannot be retrieved on this
-   *         platform.
+   * @return PID of node process, if available.
    */
   public Integer getPid(String callerId) {
     // kwc: java has no standard way of getting pid, apparently. This is the
     // recommended solution, but this needs to be tested on Android.
     // MF.getName() returns '1234@localhost'.
-    String mxName = ManagementFactory.getRuntimeMXBean().getName();
-    int idx = mxName.indexOf('@');
-    if (idx > 0) {
-      try {
-        return Integer.parseInt(mxName.substring(0, idx));
-      } catch (NumberFormatException e) {
-        // handled by exception below
+    try {
+      String mxName = ManagementFactory.getRuntimeMXBean().getName();
+      int idx = mxName.indexOf('@');
+      if (idx > 0) {
+        try {
+          return Integer.parseInt(mxName.substring(0, idx));
+        } catch (NumberFormatException e) {
+          // handled by exception below
+        }
       }
+    } catch (NoClassDefFoundError e) {
+      // Android does not support ManagementFactory
     }
-    throw new UnsupportedOperationException("cannot retrieve pid on this platform");
+    return 0; //unsupported on this platform
   }
 
   public List<Subscriber<?>> getSubscriptions() {
@@ -197,8 +199,8 @@ public class SlaveServer extends NodeServer {
     if (topicManager.hasSubscriber(topicName)) {
       Subscriber<? extends Message> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
-      List<PublisherIdentifier> pubIdentifiers =
-          buildPublisherIdentifierList(publisherUris, topicDefinition);
+      List<PublisherIdentifier> pubIdentifiers = buildPublisherIdentifierList(publisherUris,
+          topicDefinition);
       subscriber.updatePublishers(pubIdentifiers);
     }
   }

@@ -62,10 +62,12 @@ HEADER = '%sstd_msgs.Header'%JAVA_PACKAGE
 # name of Message base class
 MESSAGE_CLASS = 'org.ros.message.Message'
 
+# we special case uint8 to always be byte. The user must use conversion
+# utilities to convert from signed to unsigned representation.
 MSG_TYPE_TO_JAVA = {'bool': 'boolean',
-                    'char': 'char',
-                    'byte': 'short',
-                    'uint8': 'short', 'int8': 'byte', 
+                    'char': 'byte',
+                    'byte': 'byte',
+                    'uint8': 'byte', 'int8': 'byte', 
                     'uint16': 'int', 'int16': 'short', 
                     'uint32': 'long', 'int32': 'int',
                     'uint64': 'long', 'int64': 'long',
@@ -77,9 +79,9 @@ MSG_TYPE_TO_JAVA = {'bool': 'boolean',
 
 MSG_TYPE_TO_SERIALIZATION_CODE = {
     'bool': '%(buffer)s.put((byte)(%(name)s ? 1 : 0))',
-    'char': '%(buffer)s.put((byte)%(name)s)',
-    'byte': '%(buffer)s.put((byte)%(name)s)',
-    'uint8': '%(buffer)s.put((byte)%(name)s)',
+    'char': '%(buffer)s.put(%(name)s)',
+    'byte': '%(buffer)s.put(%(name)s)',
+    'uint8': '%(buffer)s.put(%(name)s)',
     'int8': '%(buffer)s.put(%(name)s)',
     'uint16': '%(buffer)s.putShort((short)%(name)s)',
     'int16': '%(buffer)s.putShort(%(name)s)',
@@ -95,9 +97,9 @@ MSG_TYPE_TO_SERIALIZATION_CODE = {
 
 MSG_TYPE_TO_DESERIALIZATION_CODE = {
     'bool': '%s.get() != 0 ? true : false',
-    'char': '(char)(%s.get() & 0xff)',
-    'byte': '(short)(%s.get() & 0xff)',
-    'uint8': '(short)(%s.get() & 0xff)',
+    'char': '%s.get()',
+    'byte': '%s.get()',
+    'uint8': '%s.get()',
     'int8': '%s.get()',
     'uint16': '(int)(%s.getShort() & 0xffff)',
     'int16': '%s.getShort()',

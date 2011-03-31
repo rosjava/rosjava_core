@@ -1,0 +1,10 @@
+This is a cononical ROS for android library, meant to provide a swiss army knife
+of functionality to any poor soul who wishes to create android apps that use ROS.
+
+To build the library with ant:
+./project_create.sh
+ant compile
+
+Not really useful standalone, see the apps directory.
+
+

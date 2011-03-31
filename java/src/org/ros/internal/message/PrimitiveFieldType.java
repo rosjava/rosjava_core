@@ -21,26 +21,111 @@ package org.ros.internal.message;
  */
 enum PrimitiveFieldType implements FieldType {
 
-  BOOL,
-  BYTE,
-  CHAR,
-  INT8,
-  UINT8,
-  INT16,
-  UINT16,
-  INT32,
-  UINT32,
-  INT64,
-  UINT64,
-  FLOAT32,
-  FLOAT64,
-  STRING,
-  TIME,
-  DURATION;
+  BOOL {
+    @Override
+    public int getSize() {
+      return 1;
+    }
+  },
+  BYTE {
+    @Override
+    public int getSize() {
+      return 1;
+    }
+  },
+  CHAR {
+    @Override
+    public int getSize() {
+      return 1;
+    }
+  },
+  INT8 {
+    @Override
+    public int getSize() {
+      return 1;
+    }
+  },
+  UINT8 {
+    @Override
+    public int getSize() {
+      return 1;
+    }
+  },
+  INT16 {
+    @Override
+    public int getSize() {
+      return 2;
+    }
+  },
+  UINT16 {
+    @Override
+    public int getSize() {
+      return 2;
+    }
+  },
+  INT32 {
+    @Override
+    public int getSize() {
+      return 4;
+    }
+  },
+  UINT32 {
+    @Override
+    public int getSize() {
+      return 4;
+    }
+  },
+  INT64 {
+    @Override
+    public int getSize() {
+      return 8;
+    }
+  },
+  UINT64 {
+    @Override
+    public int getSize() {
+      return 8;
+    }
+  },
+  FLOAT32 {
+    @Override
+    public int getSize() {
+      return 4;
+    }
+  },
+  FLOAT64 {
+    @Override
+    public int getSize() {
+      return 8;
+    }
+  },
+  STRING {
+    @Override
+    public int getSize() {
+      throw new RuntimeException();
+    }
+  },
+  TIME {
+    @Override
+    public int getSize() {
+      return 8;
+    }
+  },
+  DURATION {
+    @Override
+    public int getSize() {
+      return 8;
+    }
+  };
 
   @Override
   public String getName() {
     return toString().toLowerCase();
   }
+
+  /**
+   * @return the serialized size of this {@link PrimitiveFieldType}
+   */
+  public abstract int getSize();
 
 }
