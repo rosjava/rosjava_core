@@ -51,6 +51,16 @@ public class MasterChooser {
     return "";
 
   }
+  public static void launchUriIntent(final Activity ctx, final int requestCode)
+  {
+    Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+    intent.setPackage("com.google.zxing.client.android");
+    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+    ctx.startActivityForResult(intent, requestCode);
+
+    Toast.makeText(ctx, "Please Scan a QR Code with a ROS host URI.", Toast.LENGTH_LONG)
+        .show();
+  }
 
   /**
    * This will launch an activity to choose the uri
@@ -67,13 +77,7 @@ public class MasterChooser {
     builder.setItems(uriItems, new DialogInterface.OnClickListener() {
       public void onClick(DialogInterface dialog, int item) {
         if (item == 0) {
-          Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-          intent.setPackage("com.google.zxing.client.android");
-          intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-          ctx.startActivityForResult(intent, requestCode);
-
-          Toast.makeText(ctx, "Please Scan a QR Code with a ROS host URI.", Toast.LENGTH_LONG)
-              .show();
+          launchUriIntent(ctx,requestCode);
         }
 
       }
@@ -87,11 +91,12 @@ public class MasterChooser {
    * 
    * @param ctx
    *          The app context, the preference is local only to this app.
-   * @return a string version of the master URI.
+   * @return a string version of the master URI. null if not cached.
    */
   public static String getCachedURI(final Context ctx) {
     SharedPreferences prefs = ctx.getSharedPreferences(MASTER_URI_PREFS, 0);
-    return prefs.getString(MASTER_URI, "");
+    return prefs.getString(MASTER_URI, null);
+    
   }
 
   /**
