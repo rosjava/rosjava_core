@@ -16,6 +16,8 @@
 
 package org.ros.internal.transport.tcp;
 
+import org.jboss.netty.channel.ChannelFuture;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -41,7 +43,7 @@ import java.util.concurrent.Executors;
  */
 public class TcpRosServer {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(TcpRosServer.class);
 
   private final BindAddress bindAddress;
@@ -86,7 +88,10 @@ public class TcpRosServer {
     if (DEBUG) {
       log.info("Shutting down: " + getAddress());
     }
-    ChannelGroupFuture future = channelGroup.close();
+    ChannelGroupFuture groupFuture = channelGroup.close();
+    groupFuture.awaitUninterruptibly();
+    
+    ChannelFuture future = channel.close();
     future.awaitUninterruptibly();
     channelFactory.releaseExternalResources();
     bootstrap.releaseExternalResources();
