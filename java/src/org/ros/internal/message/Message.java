@@ -29,6 +29,8 @@ import java.util.List;
  */
 public interface Message {
 
+  String getName();
+
   boolean getBool(String name);
 
   byte getByte(String name);
@@ -165,7 +167,7 @@ public interface Message {
 
   List<String> getStringList(String name);
 
-  List<Field> getFields();
+  List<Field<?>> getFields();
 
   @VisibleForTesting
   Object getInstance();

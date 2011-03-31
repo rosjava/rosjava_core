@@ -36,6 +36,11 @@ class MessageFieldType implements FieldType {
   }
 
   @Override
+  public String toString() {
+    return "MessageField<" + name + ">";
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;

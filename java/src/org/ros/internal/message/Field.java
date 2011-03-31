@@ -16,37 +16,51 @@
 
 package org.ros.internal.message;
 
+import com.google.common.base.Preconditions;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class Field {
+class Field<ValueType> {
 
   private final String name;
   private final FieldType type;
   private final boolean isArray;
   private final boolean isConstant;
 
-  static Field createConstant(String name, FieldType type) {
-    return new Field(name, type, false, true);
+  private ValueType value;
+
+  static <T> Field<T> createConstant(String name, FieldType type, T value) {
+    return new Field<T>(name, type, value, false, true);
   }
 
-  static Field createConstantArray(String name, FieldType type) {
-    return new Field(name, type, true, true);
+  static <T> Field<T> createConstantArray(String name, FieldType type, T value) {
+    return new Field<T>(name, type, value, true, true);
   }
 
-  static Field createValue(String name, FieldType type) {
-    return new Field(name, type, false, false);
+  static <T> Field<T> createValue(String name, FieldType type) {
+    return new Field<T>(name, type, null, false, false);
   }
 
-  static Field createValueArray(String name, FieldType type) {
-    return new Field(name, type, true, false);
+  static <T> Field<T> createValueArray(String name, FieldType type) {
+    return new Field<T>(name, type, null, true, false);
   }
 
-  private Field(String name, FieldType type, boolean isArray, boolean isConstant) {
+  private Field(String name, FieldType type, ValueType value, boolean isArray, boolean isConstant) {
     this.name = name;
     this.type = type;
     this.isArray = isArray;
     this.isConstant = isConstant;
+    this.value = value;
+  }
+
+  public ValueType getValue() {
+    return value;
+  }
+
+  public void setValue(ValueType value) {
+    Preconditions.checkState(!isConstant);
+    this.value = value;
   }
 
   /**
@@ -78,6 +92,11 @@ class Field {
   }
 
   @Override
+  public String toString() {
+    return "Field<" + name + ", " + type + ">";
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -93,7 +112,7 @@ class Field {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    Field other = (Field) obj;
+    Field<?> other = (Field<?>) obj;
     if (isArray != other.isArray) return false;
     if (isConstant != other.isConstant) return false;
     if (name == null) {
