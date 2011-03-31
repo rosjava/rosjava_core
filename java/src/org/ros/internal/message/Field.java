@@ -27,7 +27,7 @@ class Field<ValueType> {
 
   private final String name;
   private final FieldType type;
-  private final boolean isArray;
+  private final boolean isList;
   private final boolean isConstant;
 
   private ValueType value;
@@ -48,10 +48,10 @@ class Field<ValueType> {
     return new Field<T>(name, type, null, true, false);
   }
 
-  private Field(String name, FieldType type, ValueType value, boolean isArray, boolean isConstant) {
+  private Field(String name, FieldType type, ValueType value, boolean isList, boolean isConstant) {
     this.name = name;
     this.type = type;
-    this.isArray = isArray;
+    this.isList = isList;
     this.isConstant = isConstant;
     this.value = value;
   }
@@ -68,8 +68,8 @@ class Field<ValueType> {
   /**
    * @return <code>true</code> if this {@link Field} represents an array
    */
-  public boolean isArray() {
-    return isArray;
+  public boolean isList() {
+    return isList;
   }
 
   /**
@@ -101,7 +101,7 @@ class Field<ValueType> {
     } else {
       length = type.getSerializedSize();
     }
-    if (isArray) {
+    if (isList) {
       return length * ((List<?>) value).size();
     }
     return length;
@@ -116,7 +116,7 @@ class Field<ValueType> {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + (isArray ? 1231 : 1237);
+    result = prime * result + (isList ? 1231 : 1237);
     result = prime * result + (isConstant ? 1231 : 1237);
     result = prime * result + ((name == null) ? 0 : name.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
@@ -129,7 +129,7 @@ class Field<ValueType> {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     Field<?> other = (Field<?>) obj;
-    if (isArray != other.isArray) return false;
+    if (isList != other.isList) return false;
     if (isConstant != other.isConstant) return false;
     if (name == null) {
       if (other.name != null) return false;

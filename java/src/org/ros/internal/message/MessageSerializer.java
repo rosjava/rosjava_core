@@ -38,7 +38,7 @@ public class MessageSerializer {
     int size = 0;
     for (Field field : message.getFields()) {
       String fieldName = field.getName();
-      if (field.isArray()) {
+      if (field.isList()) {
         size += 4; // Reserve 4 bytes for the array length.
         if (field.getType() instanceof MessageFieldType) {
           List<Message> nestedMessages = message.getMessageList(fieldName);
@@ -71,7 +71,7 @@ public class MessageSerializer {
       if (field.isConstant()) {
         continue;
       }
-      Preconditions.checkState(!field.isArray());
+      Preconditions.checkState(!field.isList());
       if (field.getType() instanceof PrimitiveFieldType) {
         writePrimitiveFieldTypeValue(message, buffer, field);
       } else {
