@@ -32,6 +32,9 @@ public class BarcodeLoader extends RosLoader {
 
   private String masterUri;
   private static final int ROS_MASTER_TICKER_CHOOSER = 1;
+  private static final CharSequence TICKER_TITLE = "ROS";
+  private static final CharSequence TICKER_CONTENT_TITLE = "Select a robot";
+  private static final CharSequence TICKER_CONTENT_TEXT = "Scan a barcode to talk to robot.";
 
   /**
    * This will create notification that will allow easy switch of ros master uri
@@ -46,13 +49,14 @@ public class BarcodeLoader extends RosLoader {
     String ns = Context.NOTIFICATION_SERVICE;
     NotificationManager mNotificationManager = (NotificationManager) activity.getSystemService(ns);
     int icon = R.drawable.status;
-    CharSequence ticker = "ROS Master Selector";
+    CharSequence ticker = TICKER_TITLE;
     long when = System.currentTimeMillis();
     Notification notification = new Notification(icon, ticker, when);
-
+    notification.flags |= Notification.FLAG_ONGOING_EVENT;
+    
     Context context = activity.getApplicationContext();
-    CharSequence contentTitle = "Chose A Master";
-    CharSequence contentText = "Scan a barcode to pair with a robot.";
+    CharSequence contentTitle = TICKER_CONTENT_TITLE;
+    CharSequence contentText = TICKER_CONTENT_TEXT;
     Intent notificationIntent = new Intent(activity, MasterChooserActivity.class);
     PendingIntent contentIntent = PendingIntent.getActivity(activity, 0, notificationIntent, 0);
     notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
