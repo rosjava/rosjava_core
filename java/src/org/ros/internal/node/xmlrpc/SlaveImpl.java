@@ -109,7 +109,7 @@ public class SlaveImpl implements Slave {
   }
 
   @Override
-  public List<Object> publisherUpdate(String callerId, String topic, Object[] publishers) {
+  public List<Object> publisherUpdate(String callerId, String topicName, Object[] publishers) {
     try {
       ArrayList<URI> publisherUris = new ArrayList<URI>(publishers.length);
       for (Object publisher : publishers) {
@@ -119,6 +119,7 @@ public class SlaveImpl implements Slave {
         }
         publisherUris.add(uri);
       }
+      slave.publisherUpdate(callerId, topicName, publisherUris);
       return Response.createSuccess("publisher update received", 0).toList();
     } catch (URISyntaxException e) {
       return Response.createError("invalid URI sent in update", 0).toList();
