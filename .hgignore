@@ -11,6 +11,7 @@ syntax: glob
 .classpath
 .cproject
 .settings
+library/libs/*.jar
 syntax: regexp
 build/.*
 android/(bin|gen)/.*
