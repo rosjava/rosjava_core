@@ -15,10 +15,8 @@
  */
 package org.ros.android.camera;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
+import org.ros.android.camera.R;
+import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
@@ -34,8 +32,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
-import org.ros.android.camera.R;
+import org.ros.exceptions.RosInitException;
+import ros.android.activity.RosActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,7 +43,7 @@ import java.util.List;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * 
  */
-public class RosCamera extends Activity{
+public class RosCamera extends RosActivity {
   private Preview mPreview;
 
   Camera mCamera;
@@ -54,9 +52,7 @@ public class RosCamera extends Activity{
   // The first rear facing camera
   int defaultCameraId;
 
-  RosCameraNode cameraNode;
-
-  String masterURI;
+  private RosCameraPub rosCameraPublisher;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -70,24 +66,24 @@ public class RosCamera extends Activity{
     // and set it as the content of our activity.
     mPreview = new Preview(this);
     setContentView(mPreview);
-    // host loop back 10.0.2.2
-    // device loop back 127.0.0.1
 
+    rosCameraPublisher = new RosCameraPub();
   }
-
-
 
   @Override
   protected void onResume() {
     super.onResume();
-
     // Open the default i.e. the first rear facing camera.
     mCamera = Camera.open();
     cameraCurrentlyLocked = defaultCameraId;
     mPreview.setCamera(mCamera);
 
-    if (masterURI == null) {
-      launchUriSelector();
+    try {
+      rosCameraPublisher.init(getNode());
+      mPreview.setCallback(rosCameraPublisher);
+    } catch (RosInitException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
 
   }
@@ -95,7 +91,7 @@ public class RosCamera extends Activity{
   @Override
   protected void onPause() {
     super.onPause();
-
+    rosCameraPublisher.stop();
     // Because the Camera object is a shared resource, it's very
     // important to release it when the activity is paused.
     if (mCamera != null) {
@@ -103,27 +99,8 @@ public class RosCamera extends Activity{
       mCamera.release();
       mCamera = null;
     }
-    // if (cameraNode != null) {
-    //
-    // cameraNode.shutdown();
-    // cameraNode = null;
-    // }
-  }
 
-  void setupNode() {
-    if (cameraNode != null) {
-      Toast.makeText(getApplicationContext(), "Node already exists.", Toast.LENGTH_LONG).show();
-    }
-    if (masterURI != null) {
-      Toast.makeText(getApplicationContext(), "Using ROS Master on : " + masterURI,
-          Toast.LENGTH_LONG).show();
-      cameraNode = new RosCameraNode(masterURI, "android_camera");
-    } else {
-      launchUriSelector();
-    }
   }
-
- 
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -145,7 +122,6 @@ public class RosCamera extends Activity{
     }
   }
 
-
 }
 
 // ----------------------------------------------------------------------
@@ -164,11 +140,11 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback, PreviewCallba
   Size mPreviewSize;
   List<Size> mSupportedPreviewSizes;
   Camera mCamera;
-  RosCamera rosCamera;
 
-  Preview(RosCamera context) {
+  Preview(Context context) {
     super(context);
 
+    this.callback = null;
     mSurfaceView = new SurfaceView(context);
     addView(mSurfaceView);
 
@@ -177,6 +153,11 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback, PreviewCallba
     mHolder = mSurfaceView.getHolder();
     mHolder.addCallback(this);
     mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+  }
+
+  public void setCallback(PreviewCallback callback) {
+
+    this.callback = callback;
   }
 
   public void setCamera(Camera camera) {
@@ -302,12 +283,15 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback, PreviewCallba
     Camera.Parameters parameters = mCamera.getParameters();
     parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
     requestLayout();
-
+    parameters.setPreviewFormat(ImageFormat.NV21);
     mCamera.setParameters(parameters);
     mCamera.startPreview();
     setupPreview();
   }
+
   private ArrayList<byte[]> previewBuffers;
+
+  private PreviewCallback callback;
 
   void setupPreview() {
 
@@ -315,19 +299,17 @@ class Preview extends ViewGroup implements SurfaceHolder.Callback, PreviewCallba
     Size sz = mCamera.getParameters().getPreviewSize();
     int format = mCamera.getParameters().getPreviewFormat();
     int bits_per_pixel = ImageFormat.getBitsPerPixel(format);
-    int bytes_per_pixel = bits_per_pixel / 8;
-
-    previewBuffers.add(new byte[bytes_per_pixel * sz.height * sz.width]);
-
+    previewBuffers.add(new byte[sz.height * sz.width * bits_per_pixel / 8]);
     for (byte[] x : previewBuffers) {
       mCamera.addCallbackBuffer(x);
     }
-    mCamera.setPreviewCallbackWithBuffer(this);
+    mCamera.setPreviewCallback(this);
   }
+
   @Override
   public void onPreviewFrame(byte[] data, Camera camera) {
-    if (rosCamera.cameraNode != null)
-      rosCamera.cameraNode.onPreviewFrame(data, camera);
+    if (callback != null)
+      callback.onPreviewFrame(data, camera);
     mCamera.addCallbackBuffer(data);
   }
 

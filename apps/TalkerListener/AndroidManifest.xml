@@ -14,7 +14,7 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name="ros.android.MasterChooserActivity"
+		<activity android:name="ros.android.activity.MasterChooserActivity"
 			android:label="@string/app_name">
 		</activity>
 	</application>
