@@ -16,8 +16,6 @@
 
 package org.ros.internal.message;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import org.ros.message.Duration;
 import org.ros.message.Time;
 import org.ros.message.std_msgs.Char;
@@ -28,6 +26,8 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface Message {
+
+  String getName();
 
   boolean getBool(String name);
 
@@ -165,9 +165,6 @@ public interface Message {
 
   List<String> getStringList(String name);
 
-  List<Field> getFields();
-
-  @VisibleForTesting
-  Object getInstance();
+  List<Field<?>> getFields();
 
 }

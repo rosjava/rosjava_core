@@ -46,7 +46,7 @@ public class MessageDeserializer {
         continue;
       }
       String name = field.getName();
-      if (field.isArray()) {
+      if (field.isList()) {
         if (field.getType() instanceof PrimitiveFieldType) {
           setPrimitiveFieldTypeList(buffer, message, field, name);
         } else {

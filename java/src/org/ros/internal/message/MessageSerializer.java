@@ -18,9 +18,6 @@ package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.message.Duration;
-import org.ros.message.Time;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.List;
@@ -38,7 +35,7 @@ public class MessageSerializer {
     int size = 0;
     for (Field field : message.getFields()) {
       String fieldName = field.getName();
-      if (field.isArray()) {
+      if (field.isList()) {
         size += 4; // Reserve 4 bytes for the array length.
         if (field.getType() instanceof MessageFieldType) {
           List<Message> nestedMessages = message.getMessageList(fieldName);
@@ -46,63 +43,7 @@ public class MessageSerializer {
             size += getSerializedLength(nestedMessage);
           }
         } else {
-          switch ((PrimitiveFieldType) field.getType()) {
-            case BOOL:
-              size += PrimitiveFieldType.BOOL.getSize() * message.getBoolList(fieldName).size();
-              break;
-            case CHAR:
-              size += PrimitiveFieldType.CHAR.getSize() * message.getCharList(fieldName).size();
-              break;
-            case BYTE:
-              size += PrimitiveFieldType.BYTE.getSize() * message.getByteList(fieldName).size();
-              break;
-            case INT8:
-              size += PrimitiveFieldType.INT8.getSize() * message.getInt8List(fieldName).size();
-              break;
-            case UINT8:
-              size += PrimitiveFieldType.UINT8.getSize() * message.getUint8List(fieldName).size();
-              break;
-            case INT16:
-              size += PrimitiveFieldType.INT16.getSize() * message.getInt16List(fieldName).size();
-              break;
-            case UINT16:
-              size += PrimitiveFieldType.UINT16.getSize() * message.getUint16List(fieldName).size();
-              break;
-            case INT32:
-              size += PrimitiveFieldType.INT32.getSize() * message.getInt32List(fieldName).size();
-              break;
-            case UINT32:
-              size += PrimitiveFieldType.UINT32.getSize() * message.getUint32List(fieldName).size();
-              break;
-            case INT64:
-              size += PrimitiveFieldType.INT64.getSize() * message.getInt64List(fieldName).size();
-              break;
-            case UINT64:
-              size += PrimitiveFieldType.UINT64.getSize() * message.getUint64List(fieldName).size();
-              break;
-            case FLOAT32:
-              size +=
-                  PrimitiveFieldType.FLOAT32.getSize() * message.getFloat32List(fieldName).size();
-              break;
-            case FLOAT64:
-              size +=
-                  PrimitiveFieldType.FLOAT64.getSize() * message.getFloat64List(fieldName).size();
-              break;
-            case STRING:
-              for (String string : message.getStringList(fieldName)) {
-                size += string.length() + 4;
-              }
-              break;
-            case TIME:
-              size += PrimitiveFieldType.TIME.getSize() * message.getTimeList(fieldName).size();
-              break;
-            case DURATION:
-              size +=
-                  PrimitiveFieldType.DURATION.getSize() * message.getDurationList(fieldName).size();
-              break;
-            default:
-              throw new RuntimeException();
-          }
+          size += field.getSerializedSize();
         }
       } else {
         if (field.getType() instanceof MessageFieldType) {
@@ -112,7 +53,7 @@ public class MessageSerializer {
           // use ASCII strings, so we calculate 1 byte per character.
           size += message.getString(fieldName).length() + 4;
         } else {
-          size += ((PrimitiveFieldType) field.getType()).getSize();
+          size += ((PrimitiveFieldType) field.getType()).getSerializedSize();
         }
       }
     }
@@ -127,7 +68,7 @@ public class MessageSerializer {
       if (field.isConstant()) {
         continue;
       }
-      Preconditions.checkState(!field.isArray());
+      Preconditions.checkState(!field.isList());
       if (field.getType() instanceof PrimitiveFieldType) {
         writePrimitiveFieldTypeValue(message, buffer, field);
       } else {
@@ -139,127 +80,7 @@ public class MessageSerializer {
   }
 
   private static void writePrimitiveFieldTypeValue(Message message, ByteBuffer buffer, Field field) {
-    String name = field.getName();
-    switch ((PrimitiveFieldType) field.getType()) {
-      case BOOL:
-        writeBool(message.getBool(name), buffer);
-        break;
-      case CHAR:
-        writeChar(message.getChar(name), buffer);
-        break;
-      case BYTE:
-        writeByte(message.getByte(name), buffer);
-        break;
-      case INT8:
-        writeInt8(message.getInt8(name), buffer);
-        break;
-      case UINT8:
-        writeUint8(message.getUint8(name), buffer);
-        break;
-      case INT16:
-        writeInt16(message.getInt16(name), buffer);
-        break;
-      case UINT16:
-        writeUint16(message.getUint16(name), buffer);
-        break;
-      case INT32:
-        writeInt32(message.getInt32(name), buffer);
-        break;
-      case UINT32:
-        writeUint32(message.getUint32(name), buffer);
-        break;
-      case INT64:
-        writeInt64(message.getInt64(name), buffer);
-        break;
-      case UINT64:
-        writeUint64(message.getUint64(name), buffer);
-        break;
-      case FLOAT32:
-        writeFloat32(message.getFloat32(name), buffer);
-        break;
-      case FLOAT64:
-        writeFloat64(message.getFloat64(name), buffer);
-        break;
-      case STRING:
-        writeString(message.getString(name), buffer);
-        break;
-      case TIME:
-        writeTime(message.getTime(name), buffer);
-        break;
-      case DURATION:
-        writeDuration(message.getDuration(name), buffer);
-        break;
-      default:
-        throw new RuntimeException();
-    }
-  }
-
-  private static void writeBool(boolean value, ByteBuffer buffer) {
-    buffer.put((byte) (value ? 1 : 0));
-  }
-
-  private static void writeChar(char value, ByteBuffer buffer) {
-    buffer.put((byte) value);
-  }
-
-  private static void writeByte(byte value, ByteBuffer buffer) {
-    buffer.put(value);
-  }
-
-  private static void writeUint8(short value, ByteBuffer buffer) {
-    buffer.put((byte) value);
-  }
-
-  private static void writeInt8(byte value, ByteBuffer buffer) {
-    buffer.put(value);
-  }
-
-  private static void writeUint16(int value, ByteBuffer buffer) {
-    buffer.putShort((short) value);
-  }
-
-  private static void writeInt16(short value, ByteBuffer buffer) {
-    buffer.putShort(value);
-  }
-
-  private static void writeUint32(long value, ByteBuffer buffer) {
-    buffer.putInt((int) value);
-  }
-
-  private static void writeInt32(int value, ByteBuffer buffer) {
-    buffer.putInt(value);
-  }
-
-  private static void writeUint64(long value, ByteBuffer buffer) {
-    buffer.putLong(value);
-  }
-
-  private static void writeInt64(long value, ByteBuffer buffer) {
-    buffer.putLong(value);
-  }
-
-  private static void writeFloat32(float value, ByteBuffer buffer) {
-    buffer.putFloat(value);
-  }
-
-  private static void writeFloat64(double value, ByteBuffer buffer) {
-    buffer.putDouble(value);
-  }
-
-  private static void writeString(String value, ByteBuffer buffer) {
-    byte[] bytes = value.getBytes();
-    buffer.putInt(bytes.length);
-    buffer.put(bytes);
-  }
-
-  private static void writeTime(Time value, ByteBuffer buffer) {
-    buffer.putInt(value.secs);
-    buffer.putInt(value.nsecs);
-  }
-
-  private static void writeDuration(Duration value, ByteBuffer buffer) {
-    buffer.putInt(value.secs);
-    buffer.putInt(value.nsecs);
+    field.getType().serialize(field.getValue(), buffer);
   }
 
 }

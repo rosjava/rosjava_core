@@ -16,6 +16,8 @@
 
 package org.ros.internal.message;
 
+import java.nio.ByteBuffer;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -27,12 +29,27 @@ class MessageFieldType implements FieldType {
     this.name = name;
   }
 
+  @Override
+  public int getSerializedSize() {
+    throw new UnsupportedOperationException();
+  }
+
   /**
    * @return the name
    */
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public <T> void serialize(T value, ByteBuffer buffer) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String toString() {
+    return "MessageField<" + name + ">";
   }
 
   @Override
