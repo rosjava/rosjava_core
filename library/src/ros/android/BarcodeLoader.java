@@ -16,6 +16,8 @@
 
 package ros.android;
 
+import android.widget.Toast;
+
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -85,10 +87,11 @@ public class BarcodeLoader extends RosLoader {
    * @param activity
    * @param requestCode
    */
-  public BarcodeLoader(Activity activity, int requestCode) {
+  public BarcodeLoader(Activity activity) {
     masterUri = MasterChooser.getCachedURI(activity);
     if (masterUri == null) {
-      MasterChooser.launchUriIntent(activity, requestCode);
+      //MasterChooser.launchUriIntent(activity);
+      Toast.makeText(activity, activity.getString(R.string.uri_not_set_toast), Toast.LENGTH_LONG).show();
     }
   }
 

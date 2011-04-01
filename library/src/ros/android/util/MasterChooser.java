@@ -16,6 +16,10 @@
 
 package ros.android.util;
 
+import ros.android.util.zxing.IntentResult;
+
+import ros.android.util.zxing.IntentIntegrator;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -34,39 +38,42 @@ public class MasterChooser {
   private static final String MASTER_URI = "MASTER_URI";
 
   /**
-   * @param ctx 
+   * @param ctx
    * @param requestCode
    * @param resultCode
+   * @param resultCode2
    * @param intent
-   * @return 
+   * @return
    */
-  public static String uriFromResult(final Activity ctx, final int resultCode, final Intent intent) {
-    if (resultCode == Activity.RESULT_OK) {
-      String contents = intent.getStringExtra("SCAN_RESULT");
-      // String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+  public static String uriFromResult(final Activity ctx, final int requestCode, int resultCode,
+      final Intent intent) {
+    IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+    if (scanResult != null) {
+      String contents = scanResult.getContents();
+      // String format = scanResult.getFormatName();
       String masterURI = contents;
       MasterChooser.cacheURI(ctx, masterURI);
-      return masterURI;
       // Handle successful scan
-    } else if (resultCode == Activity.RESULT_CANCELED) {
+      return masterURI;
+    } else {
       Toast.makeText(ctx, "No ROS Master URI found, Please try again.", Toast.LENGTH_LONG).show();
     }
     return "";
 
   }
-  public static void launchUriIntent(final Activity ctx, final int requestCode)
-  {
-    Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-    intent.setPackage("com.google.zxing.client.android");
-    intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-    ctx.startActivityForResult(intent, requestCode);
 
-    Toast.makeText(ctx, "Please Scan a QR Code with a ROS host URI.", Toast.LENGTH_LONG)
-        .show();
+  public static void launchUriIntent(final Activity ctx) {
+    // Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+    // intent.setPackage("com.google.zxing.client.android");
+    // intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+    // ctx.startActivityForResult(intent, requestCode);
+    IntentIntegrator.initiateScan(ctx);
+
+    Toast.makeText(ctx, "Please Scan a QR Code with a ROS host URI.", Toast.LENGTH_LONG).show();
   }
 
   /**
-   * This will launch an activity to choose the uri
+   * This will launch an activity to choose the uri.
    * 
    * @param ctx
    * @param requestCode
@@ -80,7 +87,7 @@ public class MasterChooser {
     builder.setItems(uriItems, new DialogInterface.OnClickListener() {
       public void onClick(DialogInterface dialog, int item) {
         if (item == 0) {
-          launchUriIntent(ctx,requestCode);
+          launchUriIntent(ctx);
         }
 
       }
@@ -99,7 +106,7 @@ public class MasterChooser {
   public static String getCachedURI(final Context ctx) {
     SharedPreferences prefs = ctx.getSharedPreferences(MASTER_URI_PREFS, 0);
     return prefs.getString(MASTER_URI, null);
-    
+
   }
 
   /**

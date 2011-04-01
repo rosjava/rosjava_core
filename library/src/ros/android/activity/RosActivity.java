@@ -26,8 +26,6 @@ import ros.android.BarcodeLoader;
 import ros.android.util.MasterChooser;
 
 public class RosActivity extends Activity {
-
-  private static final int BARCODE_SCAN_REQUEST_CODE = 215421;
   private Node node;
   private Exception errorException;
   private String errorMessage;
@@ -65,7 +63,7 @@ public class RosActivity extends Activity {
       try {
         // TODO(kwc) check error conditions incrementally so that better error
         // handling behavior can surface to developer.
-        BarcodeLoader loader = new BarcodeLoader(this, BARCODE_SCAN_REQUEST_CODE);
+        BarcodeLoader loader = new BarcodeLoader(this);
         loader.makeNotification(this);
         NodeContext context;
         context = loader.createContext();
@@ -99,8 +97,6 @@ public class RosActivity extends Activity {
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == BARCODE_SCAN_REQUEST_CODE) {
-      MasterChooser.uriFromResult(this, resultCode, data);
-    }
+      MasterChooser.uriFromResult(this, requestCode,resultCode,data);
   }
 }
