@@ -166,12 +166,10 @@ public interface Message {
 
   List<String> getStringList(String name);
 
-  List<Field<?>> getFields();
+  List<Field> getFields();
 
   int getSerializedSize();
 
   ByteBuffer serialize();
-
-  void deserialize();
 
 }

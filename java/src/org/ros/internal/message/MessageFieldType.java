@@ -72,4 +72,10 @@ class MessageFieldType implements FieldType {
     return true;
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public Message deserialize(ByteBuffer buffer) {
+    throw new UnsupportedOperationException();
+  }
+
 }

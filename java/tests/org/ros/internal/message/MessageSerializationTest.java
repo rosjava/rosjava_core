@@ -50,7 +50,7 @@ public class MessageSerializationTest {
     Message message = factory.createMessage("std_msgs/Int32");
     message.setInt32("data", 42);
     ByteBuffer buffer = message.serialize();
-    assertEquals(message, MessageDeserializer.deserialize(factory, "std_msgs/Int32", buffer));
+    assertEquals(message, factory.deserializeMessage("std_msgs/Int32", buffer));
   }
 
   @Test
@@ -58,7 +58,7 @@ public class MessageSerializationTest {
     Message message = factory.createMessage("std_msgs/String");
     message.setString("data", "Hello, ROS!");
     ByteBuffer buffer = message.serialize();
-    assertEquals(message, MessageDeserializer.deserialize(factory, "std_msgs/String", buffer));
+    assertEquals(message, factory.deserializeMessage("std_msgs/String", buffer));
   }
 
   @Test
@@ -69,7 +69,7 @@ public class MessageSerializationTest {
     stringMessage.setString("data", "Hello, ROS!");
     fooMessage.setMessage("data", stringMessage);
     ByteBuffer buffer = fooMessage.serialize();
-    assertEquals(fooMessage, MessageDeserializer.deserialize(factory, "foo", buffer));
+    assertEquals(fooMessage, factory.deserializeMessage("foo", buffer));
   }
 
   @Test
@@ -78,7 +78,7 @@ public class MessageSerializationTest {
     Message message = factory.createMessage("foo");
     message.setInt32List("data", Lists.newArrayList(1, 2, 3, 4, 5));
     ByteBuffer buffer = message.serialize();
-    assertEquals(message, MessageDeserializer.deserialize(factory, "foo", buffer));
+    assertEquals(message, factory.deserializeMessage("foo", buffer));
   }
 
 }

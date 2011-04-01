@@ -25,6 +25,8 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Map;
 
 /**
@@ -77,12 +79,12 @@ public class MessageFactory {
       Preconditions.checkState(fieldType instanceof PrimitiveFieldType);
       Object parsedValue = parseConstantValueFromString(value, (PrimitiveFieldType) fieldType);
       if (array) {
-        context.addConstantArrayField(name, fieldType, parsedValue);
+        throw new RuntimeException();
       } else {
         context.addConstantField(name, fieldType, parsedValue);
       }
     } else if (array) {
-      context.addValueArrayField(name, fieldType);
+      context.addValueListField(name, fieldType);
     } else {
       context.addValueField(name, fieldType);
     }
@@ -175,6 +177,23 @@ public class MessageFactory {
     }
     MessageContext context = createMessageContext(messageName);
     return MessageProxyFactory.getProxy(messageClass, new MessageImpl(context));
+  }
+
+  public <MessageType extends Message> MessageType deserializeMessage(String messageName,
+      ByteBuffer buffer) {
+    buffer.order(ByteOrder.LITTLE_ENDIAN);
+    MessageType message = createMessage(messageName);
+    for (Field field : message.getFields()) {
+      if (field.isConstant()) {
+        continue;
+      }
+      if (field.getType() instanceof MessageFieldType) {
+        message.setMessage(field.getName(), deserializeMessage(field.getType().getName(), buffer));
+      } else {
+        field.deserialize(buffer);
+      }
+    }
+    return message;
   }
 
 }

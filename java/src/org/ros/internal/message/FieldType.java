@@ -32,4 +32,6 @@ public interface FieldType {
 
   public <T> void serialize(T value, ByteBuffer buffer);
 
+  public <T> T deserialize(ByteBuffer buffer);
+
 }

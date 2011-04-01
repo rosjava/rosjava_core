@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class MessageImpl implements Message, GetInstance {
 
-  private MessageContext context;
+  private final MessageContext context;
 
   public MessageImpl(MessageContext context) {
     this.context = context;
@@ -57,7 +57,7 @@ public class MessageImpl implements Message, GetInstance {
   }
 
   @Override
-  public List<Field<?>> getFields() {
+  public List<Field> getFields() {
     return context.getFields();
   }
 
@@ -442,7 +442,7 @@ public class MessageImpl implements Message, GetInstance {
   @Override
   public int getSerializedSize() {
     int size = 0;
-    for (Field<?> field : getFields()) {
+    for (Field field : getFields()) {
       size += field.getSerializedSize();
     }
     return size;
@@ -452,7 +452,7 @@ public class MessageImpl implements Message, GetInstance {
   public ByteBuffer serialize() {
     int length = getSerializedSize();
     ByteBuffer buffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
-    for (Field<?> field : getFields()) {
+    for (Field field : getFields()) {
       if (field.isConstant()) {
         continue;
       }
@@ -460,11 +460,6 @@ public class MessageImpl implements Message, GetInstance {
     }
     buffer.flip();
     return buffer;
-  }
-
-  @Override
-  public void deserialize() {
-    throw new UnsupportedOperationException();
   }
 
 }

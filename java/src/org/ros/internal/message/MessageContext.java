@@ -29,8 +29,8 @@ import java.util.Map;
 class MessageContext {
 
   private final String name;
-  private final Map<String, Field<?>> fields;
-  private final List<Field<?>> orderedFields;
+  private final Map<String, Field> fields;
+  private final List<Field> orderedFields;
 
   MessageContext(String name) {
     this.name = name;
@@ -43,25 +43,25 @@ class MessageContext {
   }
 
   <T> void addConstantField(String name, FieldType type, T value) {
-    Field<T> field = Field.createConstant(name, type, value);
+    ScalarField<T> field = ScalarField.createConstant(name, type, value);
     fields.put(name, field);
     orderedFields.add(field);
   }
 
-  <T> void addConstantArrayField(String name, FieldType type, T value) {
-    Field<T> field = Field.createConstantArray(name, type, value);
+  <T> void addConstantListField(String name, FieldType type, List<T> value) {
+    ListField<T> field = ListField.createConstant(name, type, value);
     fields.put(name, field);
     orderedFields.add(field);
   }
 
   void addValueField(String name, FieldType type) {
-    Field<?> field = Field.createValue(name, type);
+    ScalarField<?> field = ScalarField.createValue(name, type);
     fields.put(name, field);
     orderedFields.add(field);
   }
 
-  void addValueArrayField(String name, FieldType type) {
-    Field<?> field = Field.createValueArray(name, type);
+  void addValueListField(String name, FieldType type) {
+    ListField<?> field = ListField.createValue(name, type);
     fields.put(name, field);
     orderedFields.add(field);
   }
@@ -73,14 +73,14 @@ class MessageContext {
   // This cast should always be checked by calling hasField() before
   // getField().
   @SuppressWarnings("unchecked")
-  <T> Field<T> getField(String name) {
-    return (Field<T>) fields.get(name);
+  <T> ScalarField<T> getField(String name) {
+    return (ScalarField<T>) fields.get(name);
   }
 
   /**
-   * @return the {@link List} of {@link Field}s in the order they were added
+   * @return the {@link List} of {@link ScalarField}s in the order they were added
    */
-  List<Field<?>> getFields() {
+  List<Field> getFields() {
     return Collections.unmodifiableList(orderedFields);
   }
 

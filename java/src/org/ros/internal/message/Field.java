@@ -16,68 +16,21 @@
 
 package org.ros.internal.message;
 
-import com.google.common.base.Preconditions;
-
 import java.nio.ByteBuffer;
-import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class Field<ValueType> {
+public abstract class Field {
 
-  private final String name;
-  private final FieldType type;
-  private final boolean isList;
-  private final boolean isConstant;
+  protected final String name;
+  protected final FieldType type;
+  protected final boolean isConstant;
 
-  private ValueType value;
-
-  static <T> Field<T> createConstant(String name, FieldType type, T value) {
-    return new Field<T>(name, type, value, false, true);
-  }
-
-  static <T> Field<T> createConstantArray(String name, FieldType type, T value) {
-    return new Field<T>(name, type, value, true, true);
-  }
-
-  static <T> Field<T> createValue(String name, FieldType type) {
-    return new Field<T>(name, type, null, false, false);
-  }
-
-  static <T> Field<T> createValueArray(String name, FieldType type) {
-    return new Field<T>(name, type, null, true, false);
-  }
-
-  private Field(String name, FieldType type, ValueType value, boolean isList, boolean isConstant) {
+  protected Field(String name, FieldType type, boolean isConstant) {
     this.name = name;
     this.type = type;
-    this.isList = isList;
     this.isConstant = isConstant;
-    this.value = value;
-  }
-
-  public ValueType getValue() {
-    return value;
-  }
-
-  public void setValue(ValueType value) {
-    Preconditions.checkState(!isConstant);
-    this.value = value;
-  }
-
-  /**
-   * @return <code>true</code> if this {@link Field} represents an array
-   */
-  public boolean isList() {
-    return isList;
-  }
-
-  /**
-   * @return <code>true</code> if this {@link Field} represents a constant
-   */
-  public boolean isConstant() {
-    return isConstant;
   }
 
   /**
@@ -90,88 +43,23 @@ class Field<ValueType> {
   /**
    * @return the type
    */
-  public FieldType getType() {
+  FieldType getType() {
     return type;
   }
 
-  public void serialize(ByteBuffer buffer) {
-    if (isList) {
-      List<?> values = (List<?>) value;
-      buffer.putInt(values.size());
-      for (Object v : values) {
-        type.serialize(v, buffer);
-      }
-    } else {
-      type.serialize(value, buffer);
-    }
+  /**
+   * @return <code>true</code> if this {@link ListField} represents a constant
+   */
+  boolean isConstant() {
+    return isConstant;
   }
 
-  @SuppressWarnings("unchecked")
-  public int getSerializedSize() {
-    Preconditions.checkNotNull(value);
-    if (isList) {
-      // Reserve 4 bytes for the length.
-      int size = 4;
-      if (type instanceof MessageFieldType) {
-        for (Message message : (List<Message>) value) {
-          size += message.getSerializedSize();
-        }
-      } else if (type == PrimitiveFieldType.STRING) {
-        for (String string : (List<String>) value) {
-          // We only support ASCII strings and reserve 4 bytes for the length.
-          size += string.length() + 4;
-        }
-      } else {
-        size += type.getSerializedSize() * ((List<?>) value).size();
-      }
-      return size;
-    } else {
-      if (type instanceof MessageFieldType) {
-        return ((Message) value).getSerializedSize();
-      } else if (type == PrimitiveFieldType.STRING) {
-        // We only support ASCII strings and reserve 4 bytes for the length.
-        return ((String) value).length() + 4;
-      } else {
-        return type.getSerializedSize();
-      }
-    }
-  }
+  abstract int getSerializedSize();
 
-  @Override
-  public String toString() {
-    return "Field<" + name + ", " + type + ">";
-  }
+  abstract void serialize(ByteBuffer buffer);
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (isConstant ? 1231 : 1237);
-    result = prime * result + (isList ? 1231 : 1237);
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
-    result = prime * result + ((value == null) ? 0 : value.hashCode());
-    return result;
-  }
+  abstract public void deserialize(ByteBuffer buffer);
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
-    Field<?> other = (Field<?>) obj;
-    if (isConstant != other.isConstant) return false;
-    if (isList != other.isList) return false;
-    if (name == null) {
-      if (other.name != null) return false;
-    } else if (!name.equals(other.name)) return false;
-    if (type == null) {
-      if (other.type != null) return false;
-    } else if (!type.equals(other.type)) return false;
-    if (value == null) {
-      if (other.value != null) return false;
-    } else if (!value.equals(other.value)) return false;
-    return true;
-  }
+  abstract void setValue(Object value);
 
 }
