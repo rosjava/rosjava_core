@@ -412,6 +412,28 @@ public class MessageImpl implements Message, GetInstance {
   }
 
   @Override
+  public int getSerializedSize() {
+    int size = 0;
+    for (Field field : getFields()) {
+      size += field.getSerializedSize();
+    }
+    return size;
+  }
+
+  @Override
+  public ByteBuffer serialize() {
+    int length = getSerializedSize();
+    ByteBuffer buffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+    for (Field field : getFields()) {
+      if (!field.isConstant()) {
+        field.serialize(buffer);
+      }
+    }
+    buffer.flip();
+    return buffer;
+  }
+
+  @Override
   public Object getInstance() {
     return this;
   }
@@ -437,29 +459,6 @@ public class MessageImpl implements Message, GetInstance {
       if (other.context != null) return false;
     } else if (!context.equals(other.context)) return false;
     return true;
-  }
-
-  @Override
-  public int getSerializedSize() {
-    int size = 0;
-    for (Field field : getFields()) {
-      size += field.getSerializedSize();
-    }
-    return size;
-  }
-
-  @Override
-  public ByteBuffer serialize() {
-    int length = getSerializedSize();
-    ByteBuffer buffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
-    for (Field field : getFields()) {
-      if (field.isConstant()) {
-        continue;
-      }
-      field.serialize(buffer);
-    }
-    buffer.flip();
-    return buffer;
   }
 
 }

@@ -24,9 +24,11 @@ import java.nio.ByteBuffer;
 class MessageFieldType implements FieldType {
 
   private final String name;
+  private final MessageFactory factory;
 
-  public MessageFieldType(String name) {
+  public MessageFieldType(String name, MessageFactory factory) {
     this.name = name;
+    this.factory = factory;
   }
 
   @Override
@@ -45,6 +47,12 @@ class MessageFieldType implements FieldType {
   @Override
   public <T> void serialize(T value, ByteBuffer buffer) {
     buffer.put(((Message) value).serialize());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public Message deserialize(ByteBuffer buffer) {
+    return factory.deserializeMessage(name, buffer);
   }
 
   @Override
@@ -70,12 +78,6 @@ class MessageFieldType implements FieldType {
       if (other.name != null) return false;
     } else if (!name.equals(other.name)) return false;
     return true;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public Message deserialize(ByteBuffer buffer) {
-    throw new UnsupportedOperationException();
   }
 
 }

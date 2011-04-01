@@ -73,6 +73,19 @@ public class MessageSerializationTest {
   }
 
   @Test
+  public void testNestedMessageArray() {
+    loader.addMessageDefinition("foo", "std_msgs/String[] data");
+    Message fooMessage = factory.createMessage("foo");
+    Message stringMessageA = factory.createMessage("std_msgs/String");
+    stringMessageA.setString("data", "Hello, ROS!");
+    Message stringMessageB = factory.createMessage("std_msgs/String");
+    stringMessageB.setString("data", "Goodbye, ROS!");
+    fooMessage.setMessageList("data", Lists.newArrayList(stringMessageA, stringMessageB));
+    ByteBuffer buffer = fooMessage.serialize();
+    assertEquals(fooMessage, factory.deserializeMessage("foo", buffer));
+  }
+
+  @Test
   public void testInt32Array() {
     loader.addMessageDefinition("foo", "int32[] data");
     Message message = factory.createMessage("foo");
