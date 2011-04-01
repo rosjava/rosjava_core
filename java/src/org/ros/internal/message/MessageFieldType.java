@@ -44,7 +44,7 @@ class MessageFieldType implements FieldType {
 
   @Override
   public <T> void serialize(T value, ByteBuffer buffer) {
-    throw new UnsupportedOperationException();
+    buffer.put(((Message) value).serialize());
   }
 
   @Override

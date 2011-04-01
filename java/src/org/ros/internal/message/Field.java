@@ -95,21 +95,46 @@ class Field<ValueType> {
   }
 
   public void serialize(ByteBuffer buffer) {
-    throw new UnsupportedOperationException();
+    if (isList) {
+      List<?> values = (List<?>) value;
+      buffer.putInt(values.size());
+      for (Object v : values) {
+        type.serialize(v, buffer);
+      }
+    } else {
+      type.serialize(value, buffer);
+    }
   }
 
+  @SuppressWarnings("unchecked")
   public int getSerializedSize() {
     Preconditions.checkNotNull(value);
-    int length;
-    if (type instanceof MessageFieldType) {
-      throw new UnsupportedOperationException();
-    } else {
-      length = type.getSerializedSize();
-    }
     if (isList) {
-      return length * ((List<?>) value).size();
+      // Reserve 4 bytes for the length.
+      int size = 4;
+      if (type instanceof MessageFieldType) {
+        for (Message message : (List<Message>) value) {
+          size += message.getSerializedSize();
+        }
+      } else if (type == PrimitiveFieldType.STRING) {
+        for (String string : (List<String>) value) {
+          // We only support ASCII strings and reserve 4 bytes for the length.
+          size += string.length() + 4;
+        }
+      } else {
+        size += type.getSerializedSize() * ((List<?>) value).size();
+      }
+      return size;
+    } else {
+      if (type instanceof MessageFieldType) {
+        return ((Message) value).getSerializedSize();
+      } else if (type == PrimitiveFieldType.STRING) {
+        // We only support ASCII strings and reserve 4 bytes for the length.
+        return ((String) value).length() + 4;
+      } else {
+        return type.getSerializedSize();
+      }
     }
-    return length;
   }
 
   @Override

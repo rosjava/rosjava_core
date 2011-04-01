@@ -168,7 +168,7 @@ public interface Message {
 
   List<Field<?>> getFields();
 
-  int getSerializedLength();
+  int getSerializedSize();
 
   ByteBuffer serialize();
 
