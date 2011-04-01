@@ -30,8 +30,7 @@ import java.nio.ByteOrder;
 import java.util.Map;
 
 /**
- * Generates a {@link MessageImpl} instance from a specification file at
- * runtime.
+ * Creates {@link MessageImpl} instances.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -70,7 +69,6 @@ public class MessageFactory {
     }
     boolean array = false;
     if (type.endsWith("]")) {
-      // TODO(damonkohler): Treat fixed sized arrays differently?
       type = type.substring(0, type.lastIndexOf('['));
       array = true;
     }
