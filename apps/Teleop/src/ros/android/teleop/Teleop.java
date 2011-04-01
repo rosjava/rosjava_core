@@ -16,6 +16,15 @@
 
 package ros.android.teleop;
 
+import android.view.MenuInflater;
+
+import android.view.Menu;
+import android.view.MenuItem;
+
+import android.view.WindowManager;
+
+import android.view.Window;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -39,22 +48,30 @@ public class Teleop extends RosActivity implements OnTouchListener {
   private Thread pubThread;
   private GravityTeleop sensor;
   private boolean deadman;
+  private Twist touchCartesianMessage;
   private Twist stopMessage;
+  private float motionY;
+  private float motionX;
+  private boolean gravityMode;
 
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    requestWindowFeature(Window.FEATURE_NO_TITLE);
+    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        WindowManager.LayoutParams.FLAG_FULLSCREEN);
     setContentView(R.layout.main);
-    
+
     View mainView = findViewById(R.id.image);
     mainView.setOnTouchListener(this);
-    
+
     imageSub = (SensorImageView) findViewById(R.id.image);
     imageSub.setOnTouchListener(this);
     sensor = new GravityTeleop();
     deadman = false;
     stopMessage = new Twist();
+    touchCartesianMessage = new Twist();
   }
 
   @Override
@@ -77,8 +94,8 @@ public class Teleop extends RosActivity implements OnTouchListener {
   protected void onResume() {
     // TODO(kwc): need to load app manager, make sure teleop control app is
     // running
-    
-    //TODO(kwc): needs a whole lot of tuning
+
+    // TODO(kwc): needs a whole lot of tuning
     super.onResume();
     try {
       sensor.start(this);
@@ -100,8 +117,12 @@ public class Teleop extends RosActivity implements OnTouchListener {
           try {
             while (true) {
               // 10Hz
-              message = sensor.getTwist();
-              
+              if (gravityMode) {
+                message = sensor.getTwist();
+              } else {
+                message = touchCartesianMessage;
+              }
+
               if (deadman && message != null) {
                 twistPub.publish(message);
                 Log.i("Teleop", "twist: " + message.angular.x + " " + message.angular.z);
@@ -123,10 +144,42 @@ public class Teleop extends RosActivity implements OnTouchListener {
   }
 
   @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.teleop_switch, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+    case R.id.gravity:
+      gravityMode = true;
+      break;
+    case R.id.touch:
+      gravityMode = false;
+      break;
+    }
+    // TODO Auto-generated method stub
+    return super.onOptionsItemSelected(item);
+  }
+
+  @Override
   public boolean onTouch(View arg0, MotionEvent motionEvent) {
     int action = motionEvent.getAction();
     if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
       deadman = true;
+      
+        motionX = (motionEvent.getX() - (arg0.getWidth() / 2)) / (arg0.getWidth());
+        motionY = (motionEvent.getY() - (arg0.getHeight() / 2)) / (arg0.getHeight());
+        
+        touchCartesianMessage.linear.x = -motionY;
+        touchCartesianMessage.linear.y = 0;
+        touchCartesianMessage.linear.z = 0;
+        touchCartesianMessage.angular.x = 0;
+        touchCartesianMessage.angular.y = 0;
+        touchCartesianMessage.angular.z = -2 * motionX;
+      
     } else {
       deadman = false;
     }
