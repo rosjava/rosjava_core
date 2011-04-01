@@ -25,11 +25,16 @@ import android.widget.Toast;
 
 public class MasterChooserActivity extends Activity {
 
+  private static final String MASTER_CHOOSER_SELECT = "MASTER_CHOOSER_SELECT";
+
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    MasterChooser.launchUriIntent(this, 0);
+    if(getIntent().getBooleanExtra(MASTER_CHOOSER_SELECT, false))
+      MasterChooser.launchUriIntent(this);
+    else
+      finish();
   }
 
   @Override
@@ -44,11 +49,9 @@ public class MasterChooserActivity extends Activity {
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == 0) {
-      MasterChooser.uriFromResult(this, resultCode, data);
-      Toast.makeText(this, "ROS Master updated to: " + MasterChooser.getCachedURI(this),
-          Toast.LENGTH_LONG).show();
-    }
+    MasterChooser.uriFromResult(this, requestCode, resultCode, data);
+    Toast.makeText(this, "ROS Master updated to: " + MasterChooser.getCachedURI(this),
+        Toast.LENGTH_LONG).show();
     finish();
   }
 }
