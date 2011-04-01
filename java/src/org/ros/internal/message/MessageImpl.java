@@ -16,10 +16,14 @@
 
 package org.ros.internal.message;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.message.Duration;
 import org.ros.message.Time;
 import org.ros.message.std_msgs.Char;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
 
 /**
@@ -435,6 +439,60 @@ public class MessageImpl implements Message, GetInstance {
       if (other.context != null) return false;
     } else if (!context.equals(other.context)) return false;
     return true;
+  }
+
+  @Override
+  public int getSerializedLength() {
+    int size = 0;
+    for (Field<?> field : getFields()) {
+      String fieldName = field.getName();
+      if (field.isList()) {
+        size += 4; // Reserve 4 bytes for the array length.
+        if (field.getType() instanceof MessageFieldType) {
+          List<Message> nestedMessages = getMessageList(fieldName);
+          for (Message nestedMessage : nestedMessages) {
+            size += nestedMessage.getSerializedLength();
+          }
+        } else {
+          size += field.getSerializedSize();
+        }
+      } else {
+        if (field.getType() instanceof MessageFieldType) {
+          size += getMessage(fieldName).getSerializedLength();
+        } else if (field.getType() == PrimitiveFieldType.STRING) {
+          // Add in an extra 4 bytes for the length of the string. Also, we only
+          // use ASCII strings, so we calculate 1 byte per character.
+          size += getString(fieldName).length() + 4;
+        } else {
+          size += ((PrimitiveFieldType) field.getType()).getSerializedSize();
+        }
+      }
+    }
+    return size;
+  }
+
+  @Override
+  public ByteBuffer serialize() {
+    int length = getSerializedLength();
+    ByteBuffer buffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
+    for (Field<?> field : getFields()) {
+      if (field.isConstant()) {
+        continue;
+      }
+      Preconditions.checkState(!field.isList());
+      if (field.getType() instanceof PrimitiveFieldType) {
+        field.getType().serialize(field.getValue(), buffer);
+      } else {
+        buffer.put(getMessage(field.getName()).serialize());
+      }
+    }
+    buffer.flip();
+    return buffer;
+  }
+
+  @Override
+  public void deserialize() {
+    throw new UnsupportedOperationException();
   }
 
 }

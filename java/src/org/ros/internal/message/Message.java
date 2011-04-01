@@ -20,6 +20,7 @@ import org.ros.message.Duration;
 import org.ros.message.Time;
 import org.ros.message.std_msgs.Char;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -166,5 +167,11 @@ public interface Message {
   List<String> getStringList(String name);
 
   List<Field<?>> getFields();
+
+  int getSerializedLength();
+
+  ByteBuffer serialize();
+
+  void deserialize();
 
 }
