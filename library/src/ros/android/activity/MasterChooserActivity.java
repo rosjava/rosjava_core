@@ -25,16 +25,16 @@ import android.widget.Toast;
 
 public class MasterChooserActivity extends Activity {
 
-  private static final String MASTER_CHOOSER_SELECT = "MASTER_CHOOSER_SELECT";
+  public static final String MASTER_CHOOSER_SELECT = "MASTER_CHOOSER_SELECT";
 
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    if(getIntent().getBooleanExtra(MASTER_CHOOSER_SELECT, false))
+   // if(getIntent().getBooleanExtra(MASTER_CHOOSER_SELECT, false))
       MasterChooser.launchUriIntent(this);
-    else
-      finish();
+    //else
+    //  finish();
   }
 
   @Override

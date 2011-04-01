@@ -75,7 +75,9 @@ public class BarcodeLoader extends RosLoader {
     CharSequence contentTitle = TICKER_CONTENT_TITLE;
     CharSequence contentText = TICKER_CONTENT_TEXT;
     Intent notificationIntent = new Intent(activity, MasterChooserActivity.class);
+    //notificationIntent.putExtra(MasterChooserActivity.MASTER_CHOOSER_SELECT, true);
     PendingIntent contentIntent = PendingIntent.getActivity(activity, 0, notificationIntent, 0);
+    
     notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
     mNotificationManager.notify(ROS_MASTER_TICKER_CHOOSER, notification);
   }
@@ -90,7 +92,7 @@ public class BarcodeLoader extends RosLoader {
   public BarcodeLoader(Activity activity) {
     masterUri = MasterChooser.getCachedURI(activity);
     if (masterUri == null) {
-      //MasterChooser.launchUriIntent(activity);
+      MasterChooser.launchUriIntent(activity);
       Toast.makeText(activity, activity.getString(R.string.uri_not_set_toast), Toast.LENGTH_LONG).show();
     }
   }
