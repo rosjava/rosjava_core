@@ -16,18 +16,13 @@
 
 package ros.android.ImageView;
 
-import ros.android.views.ImageSub;
-
-import org.ros.message.sensor_msgs.Image;
-
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
-import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.Publisher;
 import org.ros.exceptions.RosInitException;
 import ros.android.activity.RosActivity;
+import ros.android.views.ImageSub;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -56,7 +51,7 @@ public class ImageView extends RosActivity {
       Node node = getNode();
       
       ImageSub imageSub = (ImageSub) findViewById(R.id.image);
-      imageSub.init(node, "/camera/rgb/image_rgb");
+      imageSub.init(node, "/camera/rgb/image_color/compressed");
 
     } catch (RosInitException e) {
       Log.e("ImageView",e.getMessage());
