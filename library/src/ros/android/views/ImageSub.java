@@ -13,9 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.android.camera;
+package ros.android.views;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.util.Log;
 import android.widget.ImageView;
 import org.ros.MessageListener;
 import org.ros.Node;
@@ -28,11 +31,12 @@ import org.ros.message.sensor_msgs.Image;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * 
  */
-public class ImageSub extends ImageView implements MessageListener<Image> {
+public class ImageSub extends ImageView implements MessageListener<Image>, Runnable {
   private org.ros.Subscriber<Image> imageSub;
 
   public ImageSub(Context ctx) {
     super(ctx);
+    // bitmap = Bitmap.createBitmap(width, height, config)
   }
 
   public void init(Node node) throws RosInitException {
@@ -43,9 +47,39 @@ public class ImageSub extends ImageView implements MessageListener<Image> {
     imageSub.cancel();
   }
 
+  Bitmap bitmap;
+
   @Override
   public void onNewMessage(Image message) {
+    // FIXME support more encodings.
+    if (message.encoding != "rgb8") {
+      Log.e("RosAndroid", "Unsopported encoding : " + message.encoding);
+      return;
+    }
+    //if the bitmap is a different size or null allocate it.
+    if (bitmap == null || bitmap.getWidth() != message.width
+        || bitmap.getHeight() != message.height) {
+      bitmap = Bitmap.createBitmap((int) message.width, (int) message.height,
+          Bitmap.Config.ARGB_8888);
+    }
     
+    //copy the message data into the bitmap.
+    for (int x = 0; x < message.width; x++) {
+      for (int y = 0; y < message.height; y++) {
+        byte red = message.data[(int) (y * message.step + x)];
+        byte green = message.data[(int) (y * message.step + x + 1)];
+        byte blue = message.data[(int) (y * message.step + x + 2)];
+        bitmap.setPixel(x, y, Color.argb(1, red, green, blue));
+      }
+    }
+    post(this);
+
+  }
+
+  @Override
+  public void run() {
+    setImageBitmap(bitmap);
+
   }
 
 }
