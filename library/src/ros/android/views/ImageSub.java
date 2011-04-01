@@ -39,8 +39,8 @@ public class ImageSub extends ImageView implements MessageListener<Image>, Runna
     // bitmap = Bitmap.createBitmap(width, height, config)
   }
 
-  public void init(Node node) throws RosInitException {
-    imageSub = node.createSubscriber(node.resolveName("image"), this, Image.class);
+  public void init(Node node,String topic) throws RosInitException {
+    imageSub = node.createSubscriber(topic, this, Image.class);
   }
 
   public void stop() {
@@ -81,5 +81,7 @@ public class ImageSub extends ImageView implements MessageListener<Image>, Runna
     setImageBitmap(bitmap);
 
   }
+
+ 
 
 }
