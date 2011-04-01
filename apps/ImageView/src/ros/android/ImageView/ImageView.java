@@ -19,19 +19,14 @@ package ros.android.ImageView;
 import android.os.Bundle;
 import android.util.Log;
 import org.ros.Node;
-import org.ros.Publisher;
 import org.ros.exceptions.RosInitException;
 import ros.android.activity.RosActivity;
-import ros.android.views.ImageSub;
+import ros.android.views.SensorImageView;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
 public class ImageView extends RosActivity {
-
-  private Publisher<org.ros.message.std_msgs.String> pub;
-  private Thread pubThread;
-
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -49,15 +44,15 @@ public class ImageView extends RosActivity {
     super.onResume();
     try {
       Node node = getNode();
-      
-      ImageSub imageSub = (ImageSub) findViewById(R.id.image);
+
+      SensorImageView imageSub = (SensorImageView) findViewById(R.id.image);
+      // subscribe to the compressed version of image_color
       imageSub.init(node, "/camera/rgb/image_color/compressed");
 
     } catch (RosInitException e) {
-      Log.e("ImageView",e.getMessage());
+      Log.e("ImageView", e.getMessage());
     }
 
   }
-
 
 }
