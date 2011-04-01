@@ -28,7 +28,6 @@ import org.ros.exceptions.RosInitException;
 import org.ros.message.Time;
 import org.ros.message.geometry_msgs.Twist;
 import org.ros.message.geometry_msgs.Vector3Stamped;
-import org.ros.message.joy.Joy;
 import ros.android.activity.RosActivity;
 
 /**
@@ -44,12 +43,10 @@ public class GravityTeleop implements SensorEventListener {
   private Sensor gravity;
   private Vector3Stamped vector;
   private int rotation;
-  private Joy joy;
   private Twist twist;
 
   public GravityTeleop() {
     vector = null;
-    joy = new Joy();
     twist = new Twist();
   }
 
@@ -117,20 +114,12 @@ public class GravityTeleop implements SensorEventListener {
   }
 
   /**
-   * @return Current teleop sensor state as a {@link Vector3Stamped}
+   * @return Current teleop sensor state as a {@link Vector3Stamped}. Vector is
+   *         normalized to -1.0..1.0 values for x, y, and z, where 1.0
+   *         represents 9.8 m/s2.
    */
   public Vector3Stamped getGravityVector() {
     return vector;
-  }
-
-  /**
-   * @return Current teleop sensor state as a {@link Joy}. This reuses the
-   *         same {@link Joy} instance.
-   */
-  public Joy getJoy() {
-    joy.axes = new float[] { (float) vector.vector.x, (float) vector.vector.y };
-    joy.buttons = new int[] {};
-    return joy;
   }
 
   /**
@@ -138,14 +127,20 @@ public class GravityTeleop implements SensorEventListener {
    *         same {@link Twist} instance.
    */
   public Twist getTwist() {
-    twist.linear.x = 0;
-    twist.linear.y = 0;
-    twist.linear.z = 0;
+    if (vector == null) {
+      return null;
+    } else {
+      // cache for thread safety
+      Vector3Stamped v = vector;
+      twist.linear.x = -v.vector.y;
+      twist.linear.y = 0;
+      twist.linear.z = 0;
 
-    twist.angular.x = 0;
-    twist.angular.y = 0;
-    twist.angular.z = 0;
-    return twist;
+      twist.angular.x = 0;
+      twist.angular.y = 0;
+      twist.angular.z = 2 * v.vector.x;
+      return twist;
+    }
   }
 
 }
