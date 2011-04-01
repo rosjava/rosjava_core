@@ -35,27 +35,24 @@ import java.util.Map;
  */
 public class MessageFactory {
 
-  private final Map<String, MessageContext> messageContexts;
   private final Map<String, Class<? extends Message>> messageClasses;
   private final MessageLoader messageLoader;
 
   private static final class MessageProxyFactory {
     @SuppressWarnings("unchecked")
-    public static <T extends Message> T getProxy(Class<T> interfaceClass,
-        final Message implementation) {
-      return (T) Proxy.newProxyInstance(implementation.getClass().getClassLoader(),
-          new Class[] {interfaceClass}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-              return method.invoke(implementation, args);
-            }
-          });
+    public static <T> T getProxy(Class<T> interfaceClass, final Message implementation) {
+      return (T) Proxy.newProxyInstance(implementation.getClass().getClassLoader(), new Class[] {
+          interfaceClass, GetInstance.class}, new InvocationHandler() {
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+          return method.invoke(implementation, args);
+        }
+      });
     }
   }
 
   public MessageFactory(MessageLoader loader) {
     this.messageLoader = loader;
-    messageContexts = Maps.newConcurrentMap();
     messageClasses = Maps.newConcurrentMap();
   }
 
@@ -108,19 +105,24 @@ public class MessageFactory {
     return new MessageFieldType(type);
   }
 
-  private void addMessageContext(String messageName) throws IOException {
+  private MessageContext createMessageContext(String messageName) {
     MessageContext context = new MessageContext(messageName);
     String messageDefinition = getMessageDefinition(messageName);
     BufferedReader reader = new BufferedReader(new StringReader(messageDefinition));
-    String line = reader.readLine();
-    while (line != null) {
-      line = line.trim();
-      if (line.length() > 0 && !line.startsWith("#")) {
-        createFieldFromString(line, context);
-      }
+    String line;
+    try {
       line = reader.readLine();
+      while (line != null) {
+        line = line.trim();
+        if (line.length() > 0 && !line.startsWith("#")) {
+          createFieldFromString(line, context);
+        }
+        line = reader.readLine();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
-    messageContexts.put(messageName, context);
+    return context;
   }
 
   private String getMessageDefinition(String messageName) {
@@ -171,15 +173,7 @@ public class MessageFactory {
       // back to the generic Message interface.
       messageClass = (Class<MessageType>) Message.class;
     }
-    if (!messageContexts.containsKey(messageName)) {
-      try {
-        addMessageContext(messageName);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-    MessageContext context = messageContexts.get(messageName);
-    Preconditions.checkNotNull(context);
+    MessageContext context = createMessageContext(messageName);
     return MessageProxyFactory.getProxy(messageClass, new MessageImpl(context));
   }
 

@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageImpl implements Message {
+public class MessageImpl implements Message, GetInstance {
 
   private MessageContext context;
 
@@ -427,7 +427,8 @@ public class MessageImpl implements Message {
     if (this == obj) return true;
     if (obj == null) return false;
     if (!(obj instanceof Message)) return false;
-    obj = ((Message) obj).getInstance();
+    if (!(obj instanceof GetInstance)) return false;
+    obj = ((GetInstance) obj).getInstance();
     if (getClass() != obj.getClass()) return false;
     MessageImpl other = (MessageImpl) obj;
     if (context == null) {

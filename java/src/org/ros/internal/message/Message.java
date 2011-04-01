@@ -16,8 +16,6 @@
 
 package org.ros.internal.message;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import org.ros.message.Duration;
 import org.ros.message.Time;
 import org.ros.message.std_msgs.Char;
@@ -168,8 +166,5 @@ public interface Message {
   List<String> getStringList(String name);
 
   List<Field<?>> getFields();
-
-  @VisibleForTesting
-  Object getInstance();
 
 }

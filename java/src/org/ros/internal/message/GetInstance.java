@@ -16,20 +16,11 @@
 
 package org.ros.internal.message;
 
-import java.nio.ByteBuffer;
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface FieldType {
+interface GetInstance {
 
-  public String getName();
-
-  /**
-   * @return the serialized size of this {@link FieldType} in bytes
-   */
-  public int getSerializedSize();
-
-  public <T> void serialize(T value, ByteBuffer buffer);
+  public Object getInstance();
 
 }

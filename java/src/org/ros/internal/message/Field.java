@@ -18,6 +18,7 @@ package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -93,6 +94,10 @@ class Field<ValueType> {
     return type;
   }
 
+  public void serialize(ByteBuffer buffer) {
+    throw new UnsupportedOperationException();
+  }
+
   public int getSerializedSize() {
     Preconditions.checkNotNull(value);
     int length;
@@ -116,10 +121,11 @@ class Field<ValueType> {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + (isList ? 1231 : 1237);
     result = prime * result + (isConstant ? 1231 : 1237);
+    result = prime * result + (isList ? 1231 : 1237);
     result = prime * result + ((name == null) ? 0 : name.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
+    result = prime * result + ((value == null) ? 0 : value.hashCode());
     return result;
   }
 
@@ -129,12 +135,17 @@ class Field<ValueType> {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     Field<?> other = (Field<?>) obj;
-    if (isList != other.isList) return false;
     if (isConstant != other.isConstant) return false;
+    if (isList != other.isList) return false;
     if (name == null) {
       if (other.name != null) return false;
     } else if (!name.equals(other.name)) return false;
-    if (type != other.type) return false;
+    if (type == null) {
+      if (other.type != null) return false;
+    } else if (!type.equals(other.type)) return false;
+    if (value == null) {
+      if (other.value != null) return false;
+    } else if (!value.equals(other.value)) return false;
     return true;
   }
 
