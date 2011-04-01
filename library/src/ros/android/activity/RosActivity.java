@@ -17,18 +17,24 @@
 package ros.android.activity;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 import org.ros.Node;
 import org.ros.NodeContext;
 import org.ros.exceptions.RosInitException;
-import ros.android.BarcodeLoader;
 import ros.android.util.MasterChooser;
 
 public class RosActivity extends Activity {
+  private MasterChooser master_chooser_;
   private Node node;
   private Exception errorException;
   private String errorMessage;
+
+  public RosActivity() {
+    master_chooser_ = new MasterChooser( this );
+  }
 
   public Exception getErrorException() {
     return errorException;
@@ -46,6 +52,14 @@ public class RosActivity extends Activity {
     this.errorMessage = errorMessage;
   }
 
+  /** Re-launch the MasterChooserActivity to choose a new ROS master.
+   * The results are handled in onActivityResult() and onResume()
+   * since launching a new activity necessarily pauses this current
+   * one. */
+  public void chooseNewMaster() {
+    master_chooser_.launchChooserActivity();
+  }
+
   @Override
   protected void onPause() {
     super.onPause();
@@ -56,23 +70,46 @@ public class RosActivity extends Activity {
   }
 
   @Override
+  protected void onActivityResult( int requestCode, int resultCode, Intent result_intent ) {
+    if( master_chooser_.handleActivityResult( requestCode, resultCode, result_intent ) &&
+        !master_chooser_.haveMaster() )
+    {
+      Toast.makeText( this, "Cannot run without a ROS master.", Toast.LENGTH_LONG ).show();
+      finish();
+    }
+  }
+
+  @Override
   protected void onResume() {
     super.onResume();
-    if (node == null) {
-      Log.i("RosAndroid", "loading.... should only happen once");
-      try {
-        // TODO(kwc) check error conditions incrementally so that better error
-        // handling behavior can surface to developer.
-        BarcodeLoader loader = new BarcodeLoader(this);
-        loader.makeNotification(this);
-        NodeContext context;
-        context = loader.createContext();
-        node = new Node("listener", context);
-        // final Log log = node.getLog();
-      } catch (Exception e) {
-        node = null;
-        setErrorMessage("failed to create node" + e.getMessage());
-        setErrorException(e);
+    if( node == null ) {
+      if( master_chooser_.haveMaster() )
+      {
+        try
+        {
+          node = new Node( "listener", master_chooser_.createContext() );
+        }
+        catch( ActivityNotFoundException e )
+        {
+          Log.e( "RosAndroid", "MasterChooserActivity not found." );
+          Toast.makeText( this, "MasterChooserActivity missing, should be compiled in.", Toast.LENGTH_LONG ).show();
+          finish();
+        }
+        catch (Exception e)
+        {
+          Log.e( "RosAndroid", "Exception while creating node: " + e.getMessage() );
+          node = null;
+          setErrorMessage("failed to create node" + e.getMessage());
+          setErrorException(e);
+        }
+      }
+      else // we don't have a master yet.
+      {
+        master_chooser_.launchChooserActivity();
+        // Launching the master chooser activity causes this activity
+        // to pause.  this.onActivityResult() is called with the
+        // result before onResume() is called again, so
+        // master_chooser_.haveMaster() should be true.
       }
     }
   }
@@ -95,8 +132,4 @@ public class RosActivity extends Activity {
     return node;
   }
 
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-      MasterChooser.uriFromResult(this, requestCode,resultCode,data);
-  }
 }

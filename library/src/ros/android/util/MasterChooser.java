@@ -16,111 +16,134 @@
 
 package ros.android.util;
 
-import ros.android.util.zxing.IntentResult;
-
-import ros.android.util.zxing.IntentIntegrator;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.DialogInterface;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.util.Log;
 import android.widget.Toast;
 
-/**
- * @author ethan.rublee@gmail.com (Ethan Rublee)
+import org.ros.NodeContext;
+import org.ros.RosLoader;
+import org.ros.exceptions.RosInitException;
+import org.ros.internal.namespace.GraphName;
+import org.ros.namespace.NameResolver;
+import org.ros.namespace.Namespace;
+
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Enumeration;
+import java.util.HashMap;
+
+import ros.android.activity.MasterChooserActivity;
+
+/** Helper class for launching the MasterChooserActivity for choosing a ROS master.
+ * Keep this object around for the lifetime of an Activity.
  */
-public class MasterChooser {
+public class MasterChooser extends RosLoader {
+
+  private Activity calling_activity_;
+  private String master_uri_;
+
+  /** REQUEST_CODE number must be unique among activity requests which
+   * might be seen by handleActivityResult(). */
+  private static final int REQUEST_CODE = 8748792;
 
   private static final String MASTER_URI_PREFS = "MASTER_URI_PREFS";
   private static final String MASTER_URI = "MASTER_URI";
 
-  /**
-   * @param ctx
-   * @param requestCode
-   * @param resultCode
-   * @param resultCode2
-   * @param intent
-   * @return
-   */
-  public static String uriFromResult(final Activity ctx, final int requestCode, int resultCode,
-      final Intent intent) {
-    IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-    if (scanResult != null) {
-      String contents = scanResult.getContents();
-      // String format = scanResult.getFormatName();
-      String masterURI = contents;
-      MasterChooser.cacheURI(ctx, masterURI);
-      // Handle successful scan
-      return masterURI;
-    } else {
-      Toast.makeText(ctx, "No ROS Master URI found, Please try again.", Toast.LENGTH_LONG).show();
+  public MasterChooser( Activity calling_activity ) {
+    calling_activity_ = calling_activity;
+    master_uri_ = null;
+  }
+
+  public boolean haveMaster() {
+    return( master_uri_ != null && master_uri_.length() != 0 );
+  }
+
+  /** Call this from your activity's onActivityResult() to record the
+   * master URI.
+   * @returns true if the activity result came from the activity
+   *          started by this class, false otherwise. */
+  public boolean handleActivityResult( int requestCode, int resultCode, Intent result_intent ) {
+    if( requestCode != REQUEST_CODE )
+      return false;
+
+    if( resultCode == Activity.RESULT_OK )
+    {
+      master_uri_ = result_intent.getStringExtra( MasterChooserActivity.MASTER_URI_EXTRA );
     }
-    return "";
-
+    return true;
   }
 
-  public static void launchUriIntent(final Activity ctx) {
-    // Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-    // intent.setPackage("com.google.zxing.client.android");
-    // intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-    // ctx.startActivityForResult(intent, requestCode);
-    IntentIntegrator.initiateScan(ctx);
+  public void launchChooserActivity() throws ActivityNotFoundException {
+    Log.i( "RosAndroid", "starting master chooser activity" );
+    Intent chooser_intent = new Intent( calling_activity_, MasterChooserActivity.class );
+    calling_activity_.startActivityForResult( chooser_intent, REQUEST_CODE );
+  }
 
-    Toast.makeText(ctx, "Please Scan a QR Code with a ROS host URI.", Toast.LENGTH_LONG).show();
+  @Override
+  public NodeContext createContext() throws RosInitException {
+    if( master_uri_ == null) {
+      throw new RosInitException("ROS Master URI is not set");
+    }
+    String namespace = Namespace.GLOBAL_NS;
+    HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
+    NameResolver resolver = new NameResolver(namespace, remappings);
+
+    NodeContext context = new NodeContext();
+    context.setParentResolver(resolver);
+    context.setRosRoot("fixme");
+    context.setRosPackagePath(null);
+    try {
+      context.setRosMasterUri( new URI( master_uri_ ));
+    } catch( URISyntaxException ex ) {
+      throw new RosInitException( "ROS Master URI (" + master_uri_ + ") is invalid: " + ex.getMessage() );
+    }
+
+    String hostName = getHostName();
+    if (hostName != null) {
+      context.setHostName(hostName);
+    } else {
+      throw new RosInitException( "Could not get a hostname for this device.");
+    }
+    return context;
   }
 
   /**
-   * This will launch an activity to choose the uri.
-   * 
-   * @param ctx
-   * @param requestCode
+   * @return The url of the local host. IPv4 only for now.
    */
-  public static void launchUriSelector(final Activity ctx, final int requestCode) {
-    // create a selector gui for picking the ros master url
-    final CharSequence[] uriItems = { "From Barcode", "http://localhost:11311",
-        "http://10.0.2.2:11311", };
-    AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-    builder.setTitle("Pick a ROS Master URI");
-    builder.setItems(uriItems, new DialogInterface.OnClickListener() {
-      public void onClick(DialogInterface dialog, int item) {
-        if (item == 0) {
-          launchUriIntent(ctx);
+  private String getHostName() {
+    try {
+      String address = null;
+      for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
+          .hasMoreElements();) {
+        NetworkInterface intf = en.nextElement();
+        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
+            .hasMoreElements();) {
+          InetAddress inetAddress = enumIpAddr.nextElement();
+          Log.i("RosAndroid", "Address: " + inetAddress.getHostAddress().toString());
+          // IPv4 only for now
+          if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
+            if (address == null)
+              address = inetAddress.getHostAddress().toString();
+
+          }
         }
-
       }
-    });
-    AlertDialog alert = builder.create();
-    alert.show();
-  }
-
-  /**
-   * Return the master URI from the shared preferences of the app.
-   * 
-   * @param ctx
-   *          The app context, the preference is local only to this app.
-   * @return a string version of the master URI. null if not cached.
-   */
-  public static String getCachedURI(final Context ctx) {
-    SharedPreferences prefs = ctx.getSharedPreferences(MASTER_URI_PREFS, 0);
-    return prefs.getString(MASTER_URI, null);
-
-  }
-
-  /**
-   * Add a master uri to the shared preferences. Retrieve with getCachedURI.
-   * 
-   * @param ctx
-   *          The app context,the preference is local only to this app.
-   * @param uri
-   *          The ROS_MASTER uri
-   */
-  public static void cacheURI(final Context ctx, final String uri) {
-    SharedPreferences prefs = ctx.getSharedPreferences(MASTER_URI_PREFS, 0);
-    Editor editor = prefs.edit();
-    editor.putString(MASTER_URI, uri);
-    editor.commit();
+      if (address != null)
+        return address;
+    } catch (SocketException ex) {
+      Log.i("RosAndroid", "SocketException: " + ex.getMessage());
+    }
+    return null;
   }
 }

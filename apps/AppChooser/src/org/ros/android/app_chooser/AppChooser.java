@@ -47,7 +47,7 @@ public class AppChooser extends RosActivity
   }
 
   public void chooseNewMasterClicked( View view ) {
-    setStatus("new master not supported yet");
+    chooseNewMaster();
   }
 
   public ArrayList<App> getAppList() {
