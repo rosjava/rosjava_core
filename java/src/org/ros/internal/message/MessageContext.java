@@ -31,66 +31,51 @@ class MessageContext {
   private final String name;
   private final Map<String, Field> fields;
   private final List<Field> orderedFields;
-  private final Map<String, Object> constantFieldValues;
 
   MessageContext(String name) {
     this.name = name;
     this.fields = Maps.newConcurrentMap();
     this.orderedFields = Lists.newArrayList();
-    this.constantFieldValues = Maps.newConcurrentMap();
   }
-  
+
   String getName() {
     return name;
   }
 
-  void addConstantField(String name, FieldType type, Object value) {
-    Field field = Field.createConstant(name, type);
+  <T> void addConstantField(String name, FieldType type, T value) {
+    ScalarField<T> field = ScalarField.createConstant(name, type, value);
     fields.put(name, field);
     orderedFields.add(field);
-    constantFieldValues.put(name, value);
   }
 
-  void addConstantArrayField(String name, FieldType type, Object value) {
-    Field field = Field.createConstantArray(name, type);
+  <T> void addConstantListField(String name, FieldType type, List<T> value) {
+    ListField<T> field = ListField.createConstant(name, type, value);
     fields.put(name, field);
     orderedFields.add(field);
-    constantFieldValues.put(name, value);
   }
 
   void addValueField(String name, FieldType type) {
-    Field field = Field.createValue(name, type);
+    ScalarField<?> field = ScalarField.createValue(name, type);
     fields.put(name, field);
     orderedFields.add(field);
   }
 
-  void addValueArrayField(String name, FieldType type) {
-    Field field = Field.createValueArray(name, type);
+  void addValueListField(String name, FieldType type) {
+    ListField<?> field = ListField.createValue(name, type);
     fields.put(name, field);
     orderedFields.add(field);
   }
 
-  boolean hasConstantField(String name, FieldType type) {
-    return fields.containsKey(name) && fields.get(name).getType() == type
-        && fields.get(name).isConstant();
+  boolean hasField(String name, FieldType type) {
+    return fields.containsKey(name) && fields.get(name).getType().equals(type);
   }
 
-  Object getConstant(String name) {
-    return constantFieldValues.get(name);
-  }
-
-  boolean hasValueField(String name, FieldType type) {
-    return fields.containsKey(name) && fields.get(name).getType() == type
-        && !fields.get(name).isConstant();
-  }
-
-  boolean hasMessageValueField(String name) {
-    return fields.containsKey(name) && fields.get(name).getType() instanceof MessageFieldType
-        && !fields.get(name).isConstant();
+  Field getField(String name) {
+    return fields.get(name);
   }
 
   /**
-   * @return the {@link List} of {@link Field}s in the order they were added
+   * @return the {@link List} of {@link ScalarField}s in the order they were added
    */
   List<Field> getFields() {
     return Collections.unmodifiableList(orderedFields);
@@ -100,7 +85,6 @@ class MessageContext {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((constantFieldValues == null) ? 0 : constantFieldValues.hashCode());
     result = prime * result + ((fields == null) ? 0 : fields.hashCode());
     result = prime * result + ((name == null) ? 0 : name.hashCode());
     result = prime * result + ((orderedFields == null) ? 0 : orderedFields.hashCode());
@@ -113,9 +97,6 @@ class MessageContext {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     MessageContext other = (MessageContext) obj;
-    if (constantFieldValues == null) {
-      if (other.constantFieldValues != null) return false;
-    } else if (!constantFieldValues.equals(other.constantFieldValues)) return false;
     if (fields == null) {
       if (other.fields != null) return false;
     } else if (!fields.equals(other.fields)) return false;

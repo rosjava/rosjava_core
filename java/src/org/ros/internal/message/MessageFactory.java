@@ -25,37 +25,35 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Map;
 
 /**
- * Generates a {@link MessageImpl} instance from a specification file at
- * runtime.
+ * Creates {@link MessageImpl} instances.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MessageFactory {
 
-  private final Map<String, MessageContext> messageContexts;
   private final Map<String, Class<? extends Message>> messageClasses;
   private final MessageLoader messageLoader;
 
   private static final class MessageProxyFactory {
     @SuppressWarnings("unchecked")
-    public static <T extends Message> T getProxy(Class<T> interfaceClass,
-        final Message implementation) {
-      return (T) Proxy.newProxyInstance(implementation.getClass().getClassLoader(),
-          new Class[] {interfaceClass}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-              return method.invoke(implementation, args);
-            }
-          });
+    public static <T> T getProxy(Class<T> interfaceClass, final Message implementation) {
+      return (T) Proxy.newProxyInstance(implementation.getClass().getClassLoader(), new Class[] {
+          interfaceClass, GetInstance.class}, new InvocationHandler() {
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+          return method.invoke(implementation, args);
+        }
+      });
     }
   }
 
   public MessageFactory(MessageLoader loader) {
     this.messageLoader = loader;
-    messageContexts = Maps.newConcurrentMap();
     messageClasses = Maps.newConcurrentMap();
   }
 
@@ -71,7 +69,6 @@ public class MessageFactory {
     }
     boolean array = false;
     if (type.endsWith("]")) {
-      // TODO(damonkohler): Treat fixed sized arrays differently?
       type = type.substring(0, type.lastIndexOf('['));
       array = true;
     }
@@ -80,12 +77,12 @@ public class MessageFactory {
       Preconditions.checkState(fieldType instanceof PrimitiveFieldType);
       Object parsedValue = parseConstantValueFromString(value, (PrimitiveFieldType) fieldType);
       if (array) {
-        context.addConstantArrayField(name, fieldType, parsedValue);
+        throw new RuntimeException();
       } else {
         context.addConstantField(name, fieldType, parsedValue);
       }
     } else if (array) {
-      context.addValueArrayField(name, fieldType);
+      context.addValueListField(name, fieldType);
     } else {
       context.addValueField(name, fieldType);
     }
@@ -105,22 +102,27 @@ public class MessageFactory {
     if (!type.equals("Header") && !type.contains("/")) {
       type = messageName.substring(0, messageName.lastIndexOf('/') + 1) + type;
     }
-    return new MessageFieldType(type);
+    return new MessageFieldType(type, this);
   }
 
-  private void addMessageContext(String messageName) throws IOException {
+  private MessageContext createMessageContext(String messageName) {
     MessageContext context = new MessageContext(messageName);
     String messageDefinition = getMessageDefinition(messageName);
     BufferedReader reader = new BufferedReader(new StringReader(messageDefinition));
-    String line = reader.readLine();
-    while (line != null) {
-      line = line.trim();
-      if (line.length() > 0 && !line.startsWith("#")) {
-        createFieldFromString(line, context);
-      }
+    String line;
+    try {
       line = reader.readLine();
+      while (line != null) {
+        line = line.trim();
+        if (line.length() > 0 && !line.startsWith("#")) {
+          createFieldFromString(line, context);
+        }
+        line = reader.readLine();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
-    messageContexts.put(messageName, context);
+    return context;
   }
 
   private String getMessageDefinition(String messageName) {
@@ -171,16 +173,20 @@ public class MessageFactory {
       // back to the generic Message interface.
       messageClass = (Class<MessageType>) Message.class;
     }
-    if (!messageContexts.containsKey(messageName)) {
-      try {
-        addMessageContext(messageName);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+    MessageContext context = createMessageContext(messageName);
+    return MessageProxyFactory.getProxy(messageClass, new MessageImpl(context));
+  }
+
+  public <MessageType extends Message> MessageType deserializeMessage(String messageName,
+      ByteBuffer buffer) {
+    buffer.order(ByteOrder.LITTLE_ENDIAN);
+    MessageType message = createMessage(messageName);
+    for (Field field : message.getFields()) {
+      if (!field.isConstant()) {
+        field.deserialize(buffer);
       }
     }
-    MessageContext context = messageContexts.get(messageName);
-    Preconditions.checkNotNull(context);
-    return MessageProxyFactory.getProxy(messageClass, new MessageImpl(context));
+    return message;
   }
 
 }

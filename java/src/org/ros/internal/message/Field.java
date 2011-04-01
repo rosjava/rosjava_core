@@ -16,51 +16,21 @@
 
 package org.ros.internal.message;
 
+import java.nio.ByteBuffer;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class Field {
+public abstract class Field {
 
-  private final String name;
-  private final FieldType type;
-  private final boolean isArray;
-  private final boolean isConstant;
+  protected final String name;
+  protected final FieldType type;
+  protected final boolean isConstant;
 
-  static Field createConstant(String name, FieldType type) {
-    return new Field(name, type, false, true);
-  }
-
-  static Field createConstantArray(String name, FieldType type) {
-    return new Field(name, type, true, true);
-  }
-
-  static Field createValue(String name, FieldType type) {
-    return new Field(name, type, false, false);
-  }
-
-  static Field createValueArray(String name, FieldType type) {
-    return new Field(name, type, true, false);
-  }
-
-  private Field(String name, FieldType type, boolean isArray, boolean isConstant) {
+  protected Field(String name, FieldType type, boolean isConstant) {
     this.name = name;
     this.type = type;
-    this.isArray = isArray;
     this.isConstant = isConstant;
-  }
-
-  /**
-   * @return <code>true</code> if this {@link Field} represents an array
-   */
-  public boolean isArray() {
-    return isArray;
-  }
-
-  /**
-   * @return <code>true</code> if this {@link Field} represents a constant
-   */
-  public boolean isConstant() {
-    return isConstant;
   }
 
   /**
@@ -73,34 +43,25 @@ class Field {
   /**
    * @return the type
    */
-  public FieldType getType() {
+  FieldType getType() {
     return type;
   }
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + (isArray ? 1231 : 1237);
-    result = prime * result + (isConstant ? 1231 : 1237);
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
-    return result;
+  /**
+   * @return <code>true</code> if this {@link ListField} represents a constant
+   */
+  boolean isConstant() {
+    return isConstant;
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
-    Field other = (Field) obj;
-    if (isArray != other.isArray) return false;
-    if (isConstant != other.isConstant) return false;
-    if (name == null) {
-      if (other.name != null) return false;
-    } else if (!name.equals(other.name)) return false;
-    if (type != other.type) return false;
-    return true;
-  }
+  abstract int getSerializedSize();
+
+  abstract void serialize(ByteBuffer buffer);
+
+  abstract void deserialize(ByteBuffer buffer);
+
+  abstract <T> T getValue();
+
+  abstract void setValue(Object value);
 
 }
