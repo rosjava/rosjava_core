@@ -89,6 +89,12 @@ public class Time implements Comparable<Time> {
     return new Time(secs, nsecs);
   }
 
+  public static Time fromNano(long timeInNs) {
+    int secs = (int) Math.floor(timeInNs / 1000000000);
+    int nsecs = (int) (timeInNs - secs * 1000000000);
+    return new Time(secs, nsecs);
+  }
+  
   @Override
   public String toString() {
     return secs + ":" + nsecs;
@@ -113,6 +119,7 @@ public class Time implements Comparable<Time> {
     }
   }
 
+  @Override
   public Time clone() {
     try {
       return (Time) super.clone();
