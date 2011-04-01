@@ -41,6 +41,8 @@ class ScalarField<ValueType> extends Field {
     this.value = value;
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
   public ValueType getValue() {
     return value;
   }

@@ -58,7 +58,9 @@ public abstract class Field {
 
   abstract void serialize(ByteBuffer buffer);
 
-  abstract public void deserialize(ByteBuffer buffer);
+  abstract void deserialize(ByteBuffer buffer);
+
+  abstract <T> T getValue();
 
   abstract void setValue(Object value);
 

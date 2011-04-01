@@ -70,11 +70,8 @@ class MessageContext {
     return fields.containsKey(name) && fields.get(name).getType().equals(type);
   }
 
-  // This cast should always be checked by calling hasField() before
-  // getField().
-  @SuppressWarnings("unchecked")
-  <T> ScalarField<T> getField(String name) {
-    return (ScalarField<T>) fields.get(name);
+  Field getField(String name) {
+    return fields.get(name);
   }
 
   /**

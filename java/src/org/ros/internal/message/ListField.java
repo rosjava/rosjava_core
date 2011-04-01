@@ -43,6 +43,8 @@ public class ListField<ValueType> extends Field {
     this.value = value;
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
   public List<ValueType> getValue() {
     return value;
   }
