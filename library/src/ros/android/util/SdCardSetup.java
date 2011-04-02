@@ -36,7 +36,7 @@ public class SdCardSetup {
    * 
    * @return true if the external storage is mounted and writable.
    */
-  private static boolean checkExternalStorage() {
+  public static boolean isReady() {
     boolean externalStorageAvailable = false;
     boolean externalStorageWriteable = false;
     String state = Environment.getExternalStorageState();
@@ -65,28 +65,25 @@ public class SdCardSetup {
    */
   public static void promptUserForMount(Context ctx) {
     AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-    builder.setTitle("Please mount your sdcard.");
+    builder.setTitle("Please mount your (writable) sdcard.");
     builder.setCancelable(true);
     builder.setOnCancelListener(new OnCancelListener() {
-
-      @Override
-      public void onCancel(DialogInterface dialog) {
-        dialog.dismiss();
-      }
-    });
+        @Override
+        public void onCancel(DialogInterface dialog) {
+          dialog.dismiss();
+        }
+      });
     builder.create().show();
   }
 
   /**
    * Helper function for geting the ros directory. This will create it if it
-   * doesn't exist.
+   * doesn't exist.  This will fail if isReady() returns false.
    * 
    * @return A file that will likely be /sdcard/ros
    * @throws RosException
    */
-  public static File getRosDir() throws RosException {
-    if (!checkExternalStorage())
-      throw new RosException("Couldn't access the external storage device!");
+  public static File getRosDir() {
     File sdcard = Environment.getExternalStorageDirectory();
     File ros_dir = new File(sdcard, "ros");
     if (!ros_dir.exists())
