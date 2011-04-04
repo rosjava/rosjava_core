@@ -71,18 +71,28 @@ public class RosActivity extends Activity {
 
   @Override
   protected void onActivityResult( int requestCode, int resultCode, Intent result_intent ) {
-    if( master_chooser_.handleActivityResult( requestCode, resultCode, result_intent ) &&
-        !master_chooser_.haveMaster() )
+    if( master_chooser_.handleActivityResult( requestCode, resultCode, result_intent ))
     {
-      Toast.makeText( this, "Cannot run without a ROS master.", Toast.LENGTH_LONG ).show();
-      finish();
+      // Save before checking validity in case someone wants to force
+      // the next app to use the chooser.
+      master_chooser_.saveCurrentMaster();
+      if( !master_chooser_.haveMaster() )
+      {
+        Toast.makeText( this, "Cannot run without a ROS master.", Toast.LENGTH_LONG ).show();
+        finish();
+      }
     }
   }
 
+  /** Read the current ROS master URI from external storage and set up
+   * the ROS node from the resulting node context.  If the current
+   * master is not set or is invalid, launch the MasterChooserActivity
+   * to choose one or scan a new one. */
   @Override
   protected void onResume() {
     super.onResume();
     if( node == null ) {
+      master_chooser_.loadCurrentMaster();
       if( master_chooser_.haveMaster() )
       {
         try
