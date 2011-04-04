@@ -16,24 +16,24 @@
 
 package org.ros.internal.message;
 
-import java.nio.ByteBuffer;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface FieldType {
+class MessageProxyFactory {
 
-  public String getName();
-
-  public <T> T parseFromString(String value);
-
-  /**
-   * @return the serialized size of this {@link FieldType} in bytes
-   */
-  public int getSerializedSize();
-
-  public <T> void serialize(T value, ByteBuffer buffer);
-
-  public <T> T deserialize(ByteBuffer buffer);
+  @SuppressWarnings("unchecked")
+  public static <T> T createMessageProxy(Class<T> interfaceClass, final Message implementation) {
+    return (T) Proxy.newProxyInstance(implementation.getClass().getClassLoader(), new Class[] {
+        interfaceClass, GetInstance.class}, new InvocationHandler() {
+      @Override
+      public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        return method.invoke(implementation, args);
+      }
+    });
+  }
 
 }

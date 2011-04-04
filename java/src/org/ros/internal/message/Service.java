@@ -16,24 +16,25 @@
 
 package org.ros.internal.message;
 
-import java.nio.ByteBuffer;
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface FieldType {
+public class Service {
 
-  public String getName();
+  private final Message request;
+  private final Message response;
 
-  public <T> T parseFromString(String value);
+  public Service(Message request, Message response) {
+    this.request = request;
+    this.response = response;
+  }
 
-  /**
-   * @return the serialized size of this {@link FieldType} in bytes
-   */
-  public int getSerializedSize();
+  public Message getRequest() {
+    return request;
+  }
 
-  public <T> void serialize(T value, ByteBuffer buffer);
-
-  public <T> T deserialize(ByteBuffer buffer);
+  public Message getResponse() {
+    return response;
+  }
 
 }

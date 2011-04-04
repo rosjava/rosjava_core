@@ -17,17 +17,12 @@
 package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Map;
 
 /**
  * Creates {@link MessageImpl} instances.
@@ -36,25 +31,12 @@ import java.util.Map;
  */
 public class MessageFactory {
 
-  private final Map<String, Class<? extends Message>> messageClasses;
   private final MessageLoader messageLoader;
+  private final MessageClassRegistry messageClassRegistry;
 
-  private static final class MessageProxyFactory {
-    @SuppressWarnings("unchecked")
-    public static <T> T getProxy(Class<T> interfaceClass, final Message implementation) {
-      return (T) Proxy.newProxyInstance(implementation.getClass().getClassLoader(), new Class[] {
-          interfaceClass, GetInstance.class}, new InvocationHandler() {
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-          return method.invoke(implementation, args);
-        }
-      });
-    }
-  }
-
-  public MessageFactory(MessageLoader loader) {
+  public MessageFactory(MessageLoader loader, MessageClassRegistry messageClassRegistry) {
     this.messageLoader = loader;
-    messageClasses = Maps.newConcurrentMap();
+    this.messageClassRegistry = messageClassRegistry;
   }
 
   private void createFieldFromString(String field, MessageContext context) {
@@ -74,12 +56,11 @@ public class MessageFactory {
     }
     FieldType fieldType = getFieldType(context.getName(), type);
     if (value != null) {
-      Preconditions.checkState(fieldType instanceof PrimitiveFieldType);
-      Object parsedValue = parseConstantValueFromString(value, (PrimitiveFieldType) fieldType);
       if (array) {
         throw new RuntimeException();
       } else {
-        context.addConstantField(name, fieldType, parsedValue);
+        Preconditions.checkState(fieldType instanceof PrimitiveFieldType);
+        context.addConstantField(name, fieldType, fieldType.parseFromString(value));
       }
     } else if (array) {
       context.addValueListField(name, fieldType);
@@ -133,48 +114,10 @@ public class MessageFactory {
     return messageDefinition;
   }
 
-  private Object parseConstantValueFromString(String value, PrimitiveFieldType type) {
-    switch (type) {
-      case INT8:
-        return Byte.parseByte(value);
-      case UINT8:
-      case INT16:
-        return Short.parseShort(value);
-      case UINT16:
-      case INT32:
-        return Integer.parseInt(value);
-      case UINT32:
-      case INT64:
-      case UINT64:
-        return Long.parseLong(value);
-      case FLOAT32:
-        return Float.parseFloat(value);
-      case FLOAT64:
-        return Double.parseDouble(value);
-      case STRING:
-        return value;
-      case BOOL:
-        return value.equals("1");
-      default:
-        throw new RuntimeException("Invalid field type for constant: " + type + " " + value);
-    }
-  }
-
-  public <MessageType extends Message> void setMessageClass(String messageName,
-      Class<MessageType> messageClass) {
-    messageClasses.put(messageName, messageClass);
-  }
-
-  @SuppressWarnings("unchecked")
   public <MessageType extends Message> MessageType createMessage(String messageName) {
-    Class<MessageType> messageClass = (Class<MessageType>) messageClasses.get(messageName);
-    if (messageClass == null) {
-      // If we don't know a specific message class to use with the proxy, fall
-      // back to the generic Message interface.
-      messageClass = (Class<MessageType>) Message.class;
-    }
+    Class<MessageType> messageClass = messageClassRegistry.get(messageName);
     MessageContext context = createMessageContext(messageName);
-    return MessageProxyFactory.getProxy(messageClass, new MessageImpl(context));
+    return MessageProxyFactory.createMessageProxy(messageClass, new MessageImpl(context));
   }
 
   public <MessageType extends Message> MessageType deserializeMessage(String messageName,

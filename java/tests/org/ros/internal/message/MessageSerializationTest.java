@@ -42,7 +42,8 @@ public class MessageSerializationTest {
     File searchPath = new File(resource.getPath());
     loader.addSearchPath(searchPath);
     loader.updateMessageDefinitions();
-    factory = new MessageFactory(loader);
+    MessageClassRegistry registry = new MessageClassRegistry();
+    factory = new MessageFactory(loader, registry);
   }
 
   @Test

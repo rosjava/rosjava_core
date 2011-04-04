@@ -55,6 +55,12 @@ class MessageFieldType implements FieldType {
     return factory.deserializeMessage(name, buffer);
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public Void parseFromString(String value) {
+    throw new UnsupportedOperationException();
+  }
+
   @Override
   public String toString() {
     return "MessageField<" + name + ">";
