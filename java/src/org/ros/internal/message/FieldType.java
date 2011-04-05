@@ -25,6 +25,8 @@ public interface FieldType {
 
   public String getName();
 
+  public <T> T parseFromString(String value);
+
   /**
    * @return the serialized size of this {@link FieldType} in bytes
    */

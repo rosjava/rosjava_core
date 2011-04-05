@@ -16,18 +16,8 @@
 
 package org.ros.internal.message;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Map;
 
 /**
  * Creates {@link MessageImpl} instances.
@@ -36,151 +26,36 @@ import java.util.Map;
  */
 public class MessageFactory {
 
-  private final Map<String, Class<? extends Message>> messageClasses;
-  private final MessageLoader messageLoader;
+  private final MessageDefinitionProvider messageDefinitionProvider;
+  private final MessageClassRegistry messageClassRegistry;
+  private final MessageContextFactory messageContextFactory;
 
-  private static final class MessageProxyFactory {
-    @SuppressWarnings("unchecked")
-    public static <T> T getProxy(Class<T> interfaceClass, final Message implementation) {
-      return (T) Proxy.newProxyInstance(implementation.getClass().getClassLoader(), new Class[] {
-          interfaceClass, GetInstance.class}, new InvocationHandler() {
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-          return method.invoke(implementation, args);
-        }
-      });
-    }
+  public MessageFactory(MessageDefinitionProvider messageDefinitionProvider,
+      MessageClassRegistry messageClassRegistry) {
+    this.messageDefinitionProvider = messageDefinitionProvider;
+    this.messageClassRegistry = messageClassRegistry;
+    messageContextFactory = new MessageContextFactory(this);
   }
 
-  public MessageFactory(MessageLoader loader) {
-    this.messageLoader = loader;
-    messageClasses = Maps.newConcurrentMap();
+  <MessageType> MessageType createMessage(String messageName,
+      String messageDefinition, Class<MessageType> messageClass) {
+    MessageContext context = messageContextFactory.create(messageName, messageDefinition);
+    return ProxyFactory.createProxy(messageClass, new MessageImpl(context));
   }
 
-  private void createFieldFromString(String field, MessageContext context) {
-    String[] typeAndName = field.split("\\s+", 2);
-    String type = typeAndName[0];
-    String name = typeAndName[1];
-    String value = null;
-    if (name.contains("=")) {
-      String[] nameAndValue = name.split("=", 2);
-      name = nameAndValue[0].trim();
-      value = nameAndValue[1].trim();
-    }
-    boolean array = false;
-    if (type.endsWith("]")) {
-      type = type.substring(0, type.lastIndexOf('['));
-      array = true;
-    }
-    FieldType fieldType = getFieldType(context.getName(), type);
-    if (value != null) {
-      Preconditions.checkState(fieldType instanceof PrimitiveFieldType);
-      Object parsedValue = parseConstantValueFromString(value, (PrimitiveFieldType) fieldType);
-      if (array) {
-        throw new RuntimeException();
-      } else {
-        context.addConstantField(name, fieldType, parsedValue);
-      }
-    } else if (array) {
-      context.addValueListField(name, fieldType);
-    } else {
-      context.addValueField(name, fieldType);
-    }
-    if (fieldType.getName().equals("Header")) {
-      Preconditions.checkState(name.equals("header"));
-    }
-    if (fieldType instanceof MessageFieldType) {
-      Preconditions.checkState(messageLoader.hasMessageDefinition(context.getName()));
-    }
-  }
-
-  private FieldType getFieldType(String messageName, String type) {
-    try {
-      return PrimitiveFieldType.valueOf(type.toUpperCase());
-    } catch (Exception e) {
-    }
-    if (!type.equals("Header") && !type.contains("/")) {
-      type = messageName.substring(0, messageName.lastIndexOf('/') + 1) + type;
-    }
-    return new MessageFieldType(type, this);
-  }
-
-  private MessageContext createMessageContext(String messageName) {
-    MessageContext context = new MessageContext(messageName);
-    String messageDefinition = getMessageDefinition(messageName);
-    BufferedReader reader = new BufferedReader(new StringReader(messageDefinition));
-    String line;
-    try {
-      line = reader.readLine();
-      while (line != null) {
-        line = line.trim();
-        if (line.length() > 0 && !line.startsWith("#")) {
-          createFieldFromString(line, context);
-        }
-        line = reader.readLine();
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    return context;
-  }
-
-  private String getMessageDefinition(String messageName) {
-    String messageDefinition = messageLoader.getMessageDefinition(messageName);
-    if (messageLoader.getMessageDefinition(messageName) == null) {
-      throw new RuntimeException("Unknown message type: " + messageName);
-    }
-    return messageDefinition;
-  }
-
-  private Object parseConstantValueFromString(String value, PrimitiveFieldType type) {
-    switch (type) {
-      case INT8:
-        return Byte.parseByte(value);
-      case UINT8:
-      case INT16:
-        return Short.parseShort(value);
-      case UINT16:
-      case INT32:
-        return Integer.parseInt(value);
-      case UINT32:
-      case INT64:
-      case UINT64:
-        return Long.parseLong(value);
-      case FLOAT32:
-        return Float.parseFloat(value);
-      case FLOAT64:
-        return Double.parseDouble(value);
-      case STRING:
-        return value;
-      case BOOL:
-        return value.equals("1");
-      default:
-        throw new RuntimeException("Invalid field type for constant: " + type + " " + value);
-    }
-  }
-
-  public <MessageType extends Message> void setMessageClass(String messageName,
-      Class<MessageType> messageClass) {
-    messageClasses.put(messageName, messageClass);
-  }
-
-  @SuppressWarnings("unchecked")
   public <MessageType extends Message> MessageType createMessage(String messageName) {
-    Class<MessageType> messageClass = (Class<MessageType>) messageClasses.get(messageName);
-    if (messageClass == null) {
-      // If we don't know a specific message class to use with the proxy, fall
-      // back to the generic Message interface.
-      messageClass = (Class<MessageType>) Message.class;
-    }
-    MessageContext context = createMessageContext(messageName);
-    return MessageProxyFactory.getProxy(messageClass, new MessageImpl(context));
+    MessageContext context =
+        messageContextFactory.create(messageName, messageDefinitionProvider.get(messageName));
+    return ProxyFactory.createProxy(
+        messageClassRegistry.<MessageType>get(messageName), new MessageImpl(context));
   }
 
   public <MessageType extends Message> MessageType deserializeMessage(String messageName,
       ByteBuffer buffer) {
     buffer.order(ByteOrder.LITTLE_ENDIAN);
-    MessageType message = createMessage(messageName);
+    MessageType message =
+        createMessage(messageName, messageDefinitionProvider.get(messageName),
+            messageClassRegistry.<MessageType>get(messageName));
     for (Field field : message.getFields()) {
       if (!field.isConstant()) {
         field.deserialize(buffer);

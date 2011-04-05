@@ -16,27 +16,13 @@
 
 package org.ros.internal.message;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
-import java.io.File;
-import java.net.URL;
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageLoaderTest {
+public interface MessageDefinitionProvider {
 
-  @Test
-  public void testStdMessages() {
-    URL resource = this.getClass().getResource("/data/std_msgs");
-    MessageLoader loader = new MessageLoader();
-    File searchPath = new File(resource.getPath());
-    loader.addSearchPath(searchPath);
-    loader.updateMessageDefinitions();
-    assertEquals("string data", loader.get("std_msgs/String"));
-    assertEquals("int8 data", loader.get("std_msgs/Int8"));
-  }
+  String get(String messageName);
+
+  boolean has(String messageName);
 
 }

@@ -17,6 +17,7 @@
 package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 
 import org.ros.message.Duration;
 import org.ros.message.Time;
@@ -47,6 +48,12 @@ enum PrimitiveFieldType implements FieldType {
     public Boolean deserialize(ByteBuffer buffer) {
       return buffer.get() == 1;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Boolean parseFromString(String value) {
+      return value.equals("1");
+    }
   },
   BYTE {
     @Override
@@ -64,6 +71,12 @@ enum PrimitiveFieldType implements FieldType {
     @Override
     public Byte deserialize(ByteBuffer buffer) {
       return (byte) (buffer.get() & 0xff);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Byte parseFromString(String value) {
+      return Byte.parseByte(value);
     }
   },
   CHAR {
@@ -83,6 +96,13 @@ enum PrimitiveFieldType implements FieldType {
     public Character deserialize(ByteBuffer buffer) {
       return Character.valueOf((char) (buffer.get() & 0xff));
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Character parseFromString(String value) {
+      Preconditions.checkArgument(value.length() == 1);
+      return Character.valueOf(value.charAt(0));
+    }
   },
   INT8 {
     @Override
@@ -100,6 +120,12 @@ enum PrimitiveFieldType implements FieldType {
     @Override
     public Byte deserialize(ByteBuffer buffer) {
       return buffer.get();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Byte parseFromString(String value) {
+      return Byte.parseByte(value);
     }
   },
   UINT8 {
@@ -119,6 +145,12 @@ enum PrimitiveFieldType implements FieldType {
     public Short deserialize(ByteBuffer buffer) {
       return (short) (buffer.get() & 0xff);
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Short parseFromString(String value) {
+      return Short.parseShort(value);
+    }
   },
   INT16 {
     @Override
@@ -136,6 +168,12 @@ enum PrimitiveFieldType implements FieldType {
     @Override
     public Short deserialize(ByteBuffer buffer) {
       return buffer.getShort();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Short parseFromString(String value) {
+      return Short.parseShort(value);
     }
   },
   UINT16 {
@@ -155,6 +193,12 @@ enum PrimitiveFieldType implements FieldType {
     public Integer deserialize(ByteBuffer buffer) {
       return buffer.getShort() & 0xffff;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Integer parseFromString(String value) {
+      return Integer.parseInt(value);
+    }
   },
   INT32 {
     @Override
@@ -172,6 +216,12 @@ enum PrimitiveFieldType implements FieldType {
     @Override
     public Integer deserialize(ByteBuffer buffer) {
       return buffer.getInt();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Integer parseFromString(String value) {
+      return Integer.parseInt(value);
     }
   },
   UINT32 {
@@ -191,6 +241,12 @@ enum PrimitiveFieldType implements FieldType {
     public Integer deserialize(ByteBuffer buffer) {
       return buffer.getInt() & 0xffffffff;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Long parseFromString(String value) {
+      return Long.parseLong(value);
+    }
   },
   INT64 {
     @Override
@@ -208,6 +264,12 @@ enum PrimitiveFieldType implements FieldType {
     @Override
     public Long deserialize(ByteBuffer buffer) {
       return buffer.getLong();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Long parseFromString(String value) {
+      return Long.parseLong(value);
     }
   },
   UINT64 {
@@ -227,6 +289,12 @@ enum PrimitiveFieldType implements FieldType {
     public Long deserialize(ByteBuffer buffer) {
       return buffer.getLong();
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Long parseFromString(String value) {
+      return Long.parseLong(value);
+    }
   },
   FLOAT32 {
     @Override
@@ -245,6 +313,12 @@ enum PrimitiveFieldType implements FieldType {
     public Float deserialize(ByteBuffer buffer) {
       return buffer.getFloat();
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Float parseFromString(String value) {
+      return Float.parseFloat(value);
+    }
   },
   FLOAT64 {
     @Override
@@ -262,6 +336,12 @@ enum PrimitiveFieldType implements FieldType {
     @Override
     public Double deserialize(ByteBuffer buffer) {
       return buffer.getDouble();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Double parseFromString(String value) {
+      return Double.parseDouble(value);
     }
   },
   STRING {
@@ -287,6 +367,12 @@ enum PrimitiveFieldType implements FieldType {
       buffer.position(buffer.position() + length);
       return Charset.forName("US-ASCII").decode(stringBuffer).toString();
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public String parseFromString(String value) {
+      return value;
+    }
   },
   TIME {
     @Override
@@ -305,6 +391,12 @@ enum PrimitiveFieldType implements FieldType {
     @Override
     public Time deserialize(ByteBuffer buffer) {
       return new Time(buffer.getInt(), buffer.getInt());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Void parseFromString(String value) {
+      throw new UnsupportedOperationException();
     }
   },
   DURATION {
@@ -325,7 +417,27 @@ enum PrimitiveFieldType implements FieldType {
     public Duration deserialize(ByteBuffer buffer) {
       return new Duration(buffer.getInt(), buffer.getInt());
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Void parseFromString(String value) {
+      throw new UnsupportedOperationException();
+    }
   };
+
+  private static final ImmutableSet<String> TYPE_NAMES;
+
+  static {
+    ImmutableSet.Builder<String> builder = ImmutableSet.<String>builder();
+    for (PrimitiveFieldType type : values()) {
+      builder.add(type.getName());
+    }
+    TYPE_NAMES = builder.build();
+  }
+
+  public static boolean existsFor(String name) {
+    return TYPE_NAMES.contains(name);
+  }
 
   @Override
   public String getName() {

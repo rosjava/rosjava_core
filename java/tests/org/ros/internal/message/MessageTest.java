@@ -41,6 +41,7 @@ public class MessageTest {
   }
 
   private MessageLoader loader;
+  private MessageClassRegistry registry;
   private MessageFactory factory;
 
   @Before
@@ -50,9 +51,10 @@ public class MessageTest {
     File searchPath = new File(resource.getPath());
     loader.addSearchPath(searchPath);
     loader.updateMessageDefinitions();
-    factory = new MessageFactory(loader);
-    factory.setMessageClass("foo", FooMessage.class);
-    factory.setMessageClass("bar", BarMessage.class);
+    registry = new MessageClassRegistry();
+    registry.put("foo", FooMessage.class);
+    registry.put("bar", BarMessage.class);
+    factory = new MessageFactory(loader, registry);
   }
 
   @Test

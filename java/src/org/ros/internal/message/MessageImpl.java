@@ -35,10 +35,9 @@ public class MessageImpl implements Message, GetInstance {
     this.context = context;
   }
 
-  @SuppressWarnings("unchecked")
   private <T> T getFieldValue(String name, FieldType type) {
     if (context.hasField(name, type)) {
-      return (T) context.getField(name).getValue();
+      return context.getField(name).<T>getValue();
     }
     throw new RuntimeException("Unknown field: " + type + " " + name);
   }
@@ -141,20 +140,18 @@ public class MessageImpl implements Message, GetInstance {
     return this.<List<Byte>>getFieldValue(name, PrimitiveFieldType.INT8);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <MessageType extends Message> MessageType getMessage(String name) {
     if (context.getField(name).getType() instanceof MessageFieldType) {
-      return (MessageType) context.getField(name).getValue();
+      return context.getField(name).<MessageType>getValue();
     }
     throw new RuntimeException();
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <MessageType extends Message> List<MessageType> getMessageList(String name) {
     if (context.getField(name).getType() instanceof MessageFieldType) {
-      return (List<MessageType>) context.getField(name).getValue();
+      return context.getField(name).<List<MessageType>>getValue();
     }
     throw new RuntimeException();
   }

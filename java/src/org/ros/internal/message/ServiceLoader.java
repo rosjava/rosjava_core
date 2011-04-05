@@ -40,83 +40,77 @@ import java.util.Queue;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageLoader implements MessageDefinitionProvider {
+public class ServiceLoader {
 
-  private static final Log log = LogFactory.getLog(MessageLoader.class);
-
-  private static final String STD_MSGS_HEADER_NAME = "std_msgs/Header";
+  private static final Log log = LogFactory.getLog(ServiceLoader.class);
 
   private final Collection<File> searchPaths;
-  private final Map<String, String> messageDefinitions;
+  private final Map<String, String> serviceDefinitions;
 
-  public MessageLoader() {
+  public ServiceLoader() {
     searchPaths = Sets.newHashSet();
-    messageDefinitions = Maps.newConcurrentMap();
+    serviceDefinitions = Maps.newConcurrentMap();
   }
 
   public void addSearchPath(File path) {
     searchPaths.add(path);
   }
 
-  public void updateMessageDefinitions() {
+  public void updateServiceDefinitions() {
     for (File searchPath : searchPaths) {
       findMessages(searchPath);
     }
   }
 
-  private final class FindMessagesFilter implements FileFilter {
+  private final class FindServicesFilter implements FileFilter {
     @Override
     public boolean accept(File pathname) {
-      return pathname.isDirectory() || pathname.getName().endsWith(".msg");
+      return pathname.isDirectory() || pathname.getName().endsWith(".srv");
     }
   }
 
-  private String pathToMessageName(File root, File message) {
+  private String pathToServiceName(File root, File message) {
     String absolutePath = message.getAbsolutePath();
     String relativePath =
         absolutePath.substring(root.getAbsolutePath().length() - root.getName().length());
     String strippedExtension = relativePath.substring(0, relativePath.length() - 4);
-    String messageName = strippedExtension.replaceFirst("/msg/", "/");
-    if (messageName.equals(STD_MSGS_HEADER_NAME)) {
-      return "Header";
-    }
-    return messageName;
+    return strippedExtension.replaceFirst("/srv/", "/");
   }
 
   private void findMessages(File searchPath) {
     CharsetDecoder decoder = Charset.forName("US-ASCII").newDecoder();
-    FindMessagesFilter filter = new FindMessagesFilter();
+    FindServicesFilter filter = new FindServicesFilter();
     Queue<File> childPaths = Lists.newLinkedList();
     childPaths.addAll(listPathEntries(searchPath, filter));
     while (!childPaths.isEmpty()) {
-      File messagePath = childPaths.poll();
-      if (messagePath.isDirectory()) {
-        childPaths.addAll(listPathEntries(messagePath, filter));
+      File servicePath = childPaths.poll();
+      if (servicePath.isDirectory()) {
+        childPaths.addAll(listPathEntries(servicePath, filter));
       } else {
         try {
-          addMessageDefinitionFromPaths(searchPath, messagePath, decoder);
+          addServiceDefinitionFromPaths(searchPath, servicePath, decoder);
         } catch (IOException e) {
-          log.error("Failed to read message: " + messagePath.getAbsolutePath(), e);
+          log.error("Failed to read service: " + servicePath.getAbsolutePath(), e);
         }
       }
     }
   }
 
-  private void addMessageDefinitionFromPaths(File searchPath, File messagePath,
+  private void addServiceDefinitionFromPaths(File searchPath, File servicePath,
       CharsetDecoder decoder) throws IOException {
-    FileInputStream inputStream = new FileInputStream(messagePath);
+    FileInputStream inputStream = new FileInputStream(servicePath);
     FileChannel channel = inputStream.getChannel();
     ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
     channel.read(buffer);
     buffer.rewind();
     decoder.reset();
     String definition = decoder.decode(buffer).toString().trim();
-    messageDefinitions.put(pathToMessageName(searchPath, messagePath), definition);
+    serviceDefinitions.put(pathToServiceName(searchPath, servicePath), definition);
     channel.close();
     inputStream.close();
   }
 
-  private Collection<File> listPathEntries(File searchPath, FindMessagesFilter filter) {
+  private Collection<File> listPathEntries(File searchPath, FindServicesFilter filter) {
     File[] entries = searchPath.listFiles(filter);
     if (entries == null) {
       return Lists.newArrayList();
@@ -124,24 +118,22 @@ public class MessageLoader implements MessageDefinitionProvider {
     return Lists.newArrayList(entries);
   }
 
-  @Override
-  public String get(String messageName) {
-    return messageDefinitions.get(messageName);
+  public String getServiceDefinition(String serviceName) {
+    return serviceDefinitions.get(serviceName);
   }
 
-  @Override
-  public boolean has(String messageName) {
-    return messageDefinitions.containsKey(messageName);
-  }
-
-  @VisibleForTesting
-  ImmutableMap<String, String> getMessageDefinitions() {
-    return ImmutableMap.copyOf(messageDefinitions);
+  public boolean hasServiceDefinition(String serviceName) {
+    return serviceDefinitions.containsKey(serviceName);
   }
 
   @VisibleForTesting
-  void addMessageDefinition(String messageName, String messageDefinition) {
-    messageDefinitions.put(messageName, messageDefinition);
+  ImmutableMap<String, String> getServiceDefinitions() {
+    return ImmutableMap.copyOf(serviceDefinitions);
+  }
+
+  @VisibleForTesting
+  void addServiceDefinition(String serviceName, String serviceDefinition) {
+    serviceDefinitions.put(serviceName, serviceDefinition);
   }
 
 }
