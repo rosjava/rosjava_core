@@ -40,7 +40,7 @@ import java.util.Queue;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageLoader {
+public class MessageLoader implements MessageDefinitionProvider {
 
   private static final Log log = LogFactory.getLog(MessageLoader.class);
 
@@ -124,11 +124,13 @@ public class MessageLoader {
     return Lists.newArrayList(entries);
   }
 
-  public String getMessageDefinition(String messageName) {
+  @Override
+  public String get(String messageName) {
     return messageDefinitions.get(messageName);
   }
 
-  public boolean hasMessageDefinition(String messageName) {
+  @Override
+  public boolean has(String messageName) {
     return messageDefinitions.containsKey(messageName);
   }
 

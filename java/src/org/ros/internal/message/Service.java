@@ -21,20 +21,28 @@ package org.ros.internal.message;
  */
 public class Service {
 
-  private final Message request;
-  private final Message response;
+  public interface Request extends Message {
+  }
 
-  public Service(Message request, Message response) {
+  public interface Response extends Message {
+  }
+
+  private final Request request;
+  private final Response response;
+
+  public Service(Request request, Response response) {
     this.request = request;
     this.response = response;
   }
 
-  public Message getRequest() {
-    return request;
+  @SuppressWarnings("unchecked")
+  public <MessageType extends Request> MessageType getRequest() {
+    return (MessageType) request;
   }
 
-  public Message getResponse() {
-    return response;
+  @SuppressWarnings("unchecked")
+  public <MessageType extends Response> MessageType getResponse() {
+    return (MessageType) response;
   }
 
 }

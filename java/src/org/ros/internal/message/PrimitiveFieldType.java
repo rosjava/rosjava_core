@@ -17,6 +17,7 @@
 package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 
 import org.ros.message.Duration;
 import org.ros.message.Time;
@@ -423,6 +424,20 @@ enum PrimitiveFieldType implements FieldType {
       throw new UnsupportedOperationException();
     }
   };
+
+  private static final ImmutableSet<String> TYPE_NAMES;
+
+  static {
+    ImmutableSet.Builder<String> builder = ImmutableSet.<String>builder();
+    for (PrimitiveFieldType type : values()) {
+      builder.add(type.getName());
+    }
+    TYPE_NAMES = builder.build();
+  }
+
+  public static boolean existsFor(String name) {
+    return TYPE_NAMES.contains(name);
+  }
 
   @Override
   public String getName() {

@@ -64,18 +64,17 @@ public class ListField<ValueType> extends Field {
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void deserialize(ByteBuffer buffer) {
     int size = buffer.getInt();
     value = Lists.newArrayList();
     for (int i = 0; i < size; i++) {
-      value.add((ValueType) type.deserialize(buffer));
+      value.add(type.<ValueType>deserialize(buffer));
     }
   }
 
-  @Override
   @SuppressWarnings("unchecked")
+  @Override
   public int getSerializedSize() {
     Preconditions.checkNotNull(value);
     // Reserve 4 bytes for the length.

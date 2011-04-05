@@ -23,17 +23,18 @@ import java.lang.reflect.Proxy;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class MessageProxyFactory {
+class ProxyFactory {
 
   @SuppressWarnings("unchecked")
-  public static <T> T createMessageProxy(Class<T> interfaceClass, final Message implementation) {
-    return (T) Proxy.newProxyInstance(implementation.getClass().getClassLoader(), new Class[] {
-        interfaceClass, GetInstance.class}, new InvocationHandler() {
-      @Override
-      public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        return method.invoke(implementation, args);
-      }
-    });
+  public static <InterfaceType, ImplementationType> InterfaceType createProxy(
+      Class<InterfaceType> interfaceClass, final ImplementationType implementation) {
+    return (InterfaceType) Proxy.newProxyInstance(implementation.getClass().getClassLoader(),
+        new Class[] {interfaceClass, GetInstance.class}, new InvocationHandler() {
+          @Override
+          public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            return method.invoke(implementation, args);
+          }
+        });
   }
 
 }

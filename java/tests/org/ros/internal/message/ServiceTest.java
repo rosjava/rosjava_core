@@ -16,8 +16,7 @@
 
 package org.ros.internal.message;
 
-import static org.junit.Assert.assertEquals;
-
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -26,17 +25,29 @@ import java.net.URL;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageLoaderTest {
+public class ServiceTest {
+
+  private MessageLoader messageLoader;
+  private MessageClassRegistry messageClassRegistry;
+  private MessageFactory messageFactory;
+
+  @Before
+  public void setUp() {
+    messageLoader = new MessageLoader();
+    URL resource = this.getClass().getResource("/data/std_msgs");
+    File searchPath = new File(resource.getPath());
+    messageLoader.addSearchPath(searchPath);
+    messageLoader.updateMessageDefinitions();
+    messageClassRegistry = new MessageClassRegistry();
+    messageFactory = new MessageFactory(messageLoader, messageClassRegistry);
+  }
 
   @Test
-  public void testStdMessages() {
-    URL resource = this.getClass().getResource("/data/std_msgs");
-    MessageLoader loader = new MessageLoader();
-    File searchPath = new File(resource.getPath());
-    loader.addSearchPath(searchPath);
-    loader.updateMessageDefinitions();
-    assertEquals("string data", loader.get("std_msgs/String"));
-    assertEquals("int8 data", loader.get("std_msgs/Int8"));
+  public void testCreateEchoService() {
+    ServiceLoader loader = new ServiceLoader();
+    loader.addServiceDefinition("Echo", "std_msgs/String data\n---\nstd_msgs/String data");
+    ServiceFactory factory = new ServiceFactory(loader, messageFactory);
+    Service echoService = factory.<Service.Request, Service.Response>createService("Echo");
   }
 
 }
