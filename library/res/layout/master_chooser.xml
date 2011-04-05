@@ -9,7 +9,8 @@
       android:layout_width="fill_parent" 
       android:layout_height="fill_parent"
       android:padding="10dp"
-      android:dividerHeight="10dp"
+      android:dividerHeight="5dp"
+      android:divider="#000000"
       android:layout_weight="1"
   />
 <Button

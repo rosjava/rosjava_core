@@ -34,6 +34,7 @@ import android.widget.TextView;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.LayoutInflater;
 import java.util.List;
 
 public class MasterAdapter extends BaseAdapter {
@@ -63,14 +64,16 @@ public class MasterAdapter extends BaseAdapter {
 
   // create a new View for each item referenced by the Adapter
   public View getView(int position, View convertView, ViewGroup parent) {
-    TextView new_view;
+    View new_view;
     if (convertView == null) {  // if it's not recycled, initialize some attributes
-      new_view = new TextView( context_ );
+      LayoutInflater inflater =
+        (LayoutInflater) context_.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+      new_view = inflater.inflate( R.layout.master_item, null );
     } else {
-      new_view = (TextView) convertView;
+      new_view = (View) convertView;
     }
-
-    new_view.setText( master_uris_.get( position ));
+    TextView uri_view = (TextView) new_view.findViewById( R.id.uri );
+    uri_view.setText( master_uris_.get( position ));
 
     return new_view;
   }
