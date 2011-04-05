@@ -27,50 +27,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ros.android.activity;
+package ros.android.util;
 
-import android.widget.BaseAdapter;
-import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Date;
 
-public class MasterAdapter extends BaseAdapter {
-  private Context context_;
-  private List<String> master_uris_;
-  private String my_hostname_;
-  private List<MasterItem> master_items_;
-
-  public MasterAdapter(Context c, List<String> master_uris, String my_hostname ) {
-    context_ = c;
-    master_uris_ = master_uris;
-    my_hostname_ = my_hostname;
-    master_items_ = new ArrayList<MasterItem>();
-    for( int i = 0; i < master_uris_.size(); i++ )
-    {
-      master_items_.add( new MasterItem( master_uris_.get( i ), my_hostname_ ));
-    }
-  }
-
-  public int getCount() {
-    if( master_uris_ == null )
-    {
-      return 0;
-    }
-    return master_uris_.size();
-  }
-
-  public Object getItem(int position) {
-    return null;
-  }
-
-  public long getItemId(int position) {
-    return 0;
-  }
-
-  // create a new View for each item referenced by the Adapter
-  public View getView(int position, View convertView, ViewGroup parent) {
-    return master_items_.get( position ).getView( context_, convertView, parent );
-  }
+public class RobotDescription {
+  public String master_uri_;
+  public String robot_name_;
+  public String robot_type_;
+  public String connection_status_;
+  public Date time_last_seen_;
 }

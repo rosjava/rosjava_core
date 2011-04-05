@@ -37,11 +37,14 @@ import java.util.Arrays;
 import ros.android.util.zxing.IntentResult;
 import ros.android.util.zxing.IntentIntegrator;
 import ros.android.util.SdCardSetup;
+import ros.android.util.Net;
 
 public class MasterChooserActivity extends Activity {
 
   public static final String MASTER_URI_EXTRA = "org.ros.android.MasterURI";
 
+  // TODO: This should eventually be a list of RobotDescriptions to
+  // persist robot name and type data.
   private List<String> master_uris_;
 
   public MasterChooserActivity() {
@@ -133,14 +136,16 @@ public class MasterChooserActivity extends Activity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
-    readMasterList();
-
     setTitle( "Choose a ROS Master" );
     setContentView(R.layout.master_chooser);
-    ListView listview = (ListView) findViewById(R.id.master_list);
+  }
 
-    listview.setAdapter( new MasterAdapter( this, master_uris_ ));
+  @Override
+  protected void onResume() {
+    super.onResume();
+    readMasterList();
+    ListView listview = (ListView) findViewById(R.id.master_list);
+    listview.setAdapter( new MasterAdapter( this, master_uris_, Net.getNonLoopbackHostName() ));
 
     listview.setOnItemClickListener(new OnItemClickListener() {
         public void onItemClick(AdapterView<?> parent, View v, int position, long id) {

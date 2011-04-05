@@ -27,50 +27,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ros.android.activity;
+package ros.android.util;
 
-import android.widget.BaseAdapter;
-import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
-import java.util.List;
-import java.util.ArrayList;
+import android.util.Log;
 
-public class MasterAdapter extends BaseAdapter {
-  private Context context_;
-  private List<String> master_uris_;
-  private String my_hostname_;
-  private List<MasterItem> master_items_;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
-  public MasterAdapter(Context c, List<String> master_uris, String my_hostname ) {
-    context_ = c;
-    master_uris_ = master_uris;
-    my_hostname_ = my_hostname;
-    master_items_ = new ArrayList<MasterItem>();
-    for( int i = 0; i < master_uris_.size(); i++ )
-    {
-      master_items_.add( new MasterItem( master_uris_.get( i ), my_hostname_ ));
+/** Network utility functions. */
+public class Net {
+  /**
+   * @return The first valid non-loopback, IPv4 host name (address in text form like "10.0.129.222" found for this device.
+   */
+  static public String getNonLoopbackHostName() {
+    try {
+      String address = null;
+      for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
+          .hasMoreElements();) {
+        NetworkInterface intf = en.nextElement();
+        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
+            .hasMoreElements();) {
+          InetAddress inetAddress = enumIpAddr.nextElement();
+          Log.i("RosAndroid", "Address: " + inetAddress.getHostAddress().toString());
+          // IPv4 only for now
+          if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
+            if (address == null)
+              address = inetAddress.getHostAddress().toString();
+          }
+        }
+      }
+      if (address != null)
+        return address;
+    } catch (SocketException ex) {
+      Log.i("RosAndroid", "SocketException: " + ex.getMessage());
     }
-  }
-
-  public int getCount() {
-    if( master_uris_ == null )
-    {
-      return 0;
-    }
-    return master_uris_.size();
-  }
-
-  public Object getItem(int position) {
     return null;
-  }
-
-  public long getItemId(int position) {
-    return 0;
-  }
-
-  // create a new View for each item referenced by the Adapter
-  public View getView(int position, View convertView, ViewGroup parent) {
-    return master_items_.get( position ).getView( context_, convertView, parent );
   }
 }

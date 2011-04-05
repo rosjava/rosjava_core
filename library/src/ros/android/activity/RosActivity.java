@@ -99,12 +99,6 @@ public class RosActivity extends Activity {
         {
           node = new Node( "listener", master_chooser_.createContext() );
         }
-        catch( ActivityNotFoundException e )
-        {
-          Log.e( "RosAndroid", "MasterChooserActivity not found." );
-          Toast.makeText( this, "MasterChooserActivity missing, should be compiled in.", Toast.LENGTH_LONG ).show();
-          finish();
-        }
         catch (Exception e)
         {
           Log.e( "RosAndroid", "Exception while creating node: " + e.getMessage() );

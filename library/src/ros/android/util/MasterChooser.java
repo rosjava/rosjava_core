@@ -39,12 +39,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.BufferedReader;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Enumeration;
 import java.util.HashMap;
 
 import ros.android.activity.MasterChooserActivity;
@@ -201,7 +197,11 @@ public class MasterChooser extends RosLoader {
    * for the device we are running on. */
   @Override
   public NodeContext createContext() throws RosInitException {
-    if( master_uri_ == null) {
+    return createContext( master_uri_, Net.getNonLoopbackHostName() );
+  }
+
+  static public NodeContext createContext( String master_uri, String my_host_name ) throws RosInitException {
+    if( master_uri == null) {
       throw new RosInitException("ROS Master URI is not set");
     }
     String namespace = Namespace.GLOBAL_NS;
@@ -213,46 +213,16 @@ public class MasterChooser extends RosLoader {
     context.setRosRoot("fixme");
     context.setRosPackagePath(null);
     try {
-      context.setRosMasterUri( new URI( master_uri_ ));
+      context.setRosMasterUri( new URI( master_uri ));
     } catch( URISyntaxException ex ) {
-      throw new RosInitException( "ROS Master URI (" + master_uri_ + ") is invalid: " + ex.getMessage() );
+      throw new RosInitException( "ROS Master URI (" + master_uri + ") is invalid: " + ex.getMessage() );
     }
 
-    String hostName = getHostName();
-    if (hostName != null) {
-      context.setHostName(hostName);
+    if (my_host_name != null) {
+      context.setHostName( my_host_name );
     } else {
-      throw new RosInitException( "Could not get a hostname for this device.");
+      throw new RosInitException( "Could not get a hostname for this device." );
     }
     return context;
-  }
-
-  /**
-   * @return The url of the local host. IPv4 only for now.
-   */
-  private String getHostName() {
-    try {
-      String address = null;
-      for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
-          .hasMoreElements();) {
-        NetworkInterface intf = en.nextElement();
-        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
-            .hasMoreElements();) {
-          InetAddress inetAddress = enumIpAddr.nextElement();
-          Log.i("RosAndroid", "Address: " + inetAddress.getHostAddress().toString());
-          // IPv4 only for now
-          if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
-            if (address == null)
-              address = inetAddress.getHostAddress().toString();
-
-          }
-        }
-      }
-      if (address != null)
-        return address;
-    } catch (SocketException ex) {
-      Log.i("RosAndroid", "SocketException: " + ex.getMessage());
-    }
-    return null;
   }
 }
