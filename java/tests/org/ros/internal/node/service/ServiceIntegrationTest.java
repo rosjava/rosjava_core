@@ -71,6 +71,10 @@ public class ServiceIntegrationTest {
         clientNode.createServiceClient(new ServiceIdentifier(server.getUri(), definition),
             AddTwoInts.Response.class);
 
+    // TODO(damonkohler): This is a hack that we should remove once it's
+    // possible to block on a connection being established.
+    Thread.sleep(100);
+
     AddTwoInts.Request request = new AddTwoInts.Request();
     request.a = 2;
     request.b = 2;
@@ -82,6 +86,6 @@ public class ServiceIntegrationTest {
         latch.countDown();
       }
     });
-    assertTrue(latch.await(1000, TimeUnit.SECONDS));
+    assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 }

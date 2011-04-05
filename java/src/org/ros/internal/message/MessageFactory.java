@@ -16,6 +16,7 @@
 
 package org.ros.internal.message;
 
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -27,35 +28,37 @@ import java.nio.ByteOrder;
 public class MessageFactory {
 
   private final MessageDefinitionProvider messageDefinitionProvider;
-  private final MessageClassRegistry messageClassRegistry;
+  private final DefaultedClassMap<Message> messageClasses;
   private final MessageContextFactory messageContextFactory;
 
   public MessageFactory(MessageDefinitionProvider messageDefinitionProvider,
-      MessageClassRegistry messageClassRegistry) {
+      DefaultedClassMap<Message> messageClasses) {
     this.messageDefinitionProvider = messageDefinitionProvider;
-    this.messageClassRegistry = messageClassRegistry;
+    this.messageClasses = messageClasses;
     messageContextFactory = new MessageContextFactory(this);
   }
 
-  <MessageType> MessageType createMessage(String messageName,
-      String messageDefinition, Class<MessageType> messageClass) {
+  <MessageType> MessageType createMessage(String messageName, String messageDefinition,
+      Class<MessageType> messageClass) {
     MessageContext context = messageContextFactory.create(messageName, messageDefinition);
     return ProxyFactory.createProxy(messageClass, new MessageImpl(context));
   }
 
+  @SuppressWarnings("unchecked")
   public <MessageType extends Message> MessageType createMessage(String messageName) {
     MessageContext context =
         messageContextFactory.create(messageName, messageDefinitionProvider.get(messageName));
-    return ProxyFactory.createProxy(
-        messageClassRegistry.<MessageType>get(messageName), new MessageImpl(context));
+    return ProxyFactory.createProxy((Class<MessageType>) messageClasses.get(messageName),
+        new MessageImpl(context));
   }
 
+  @SuppressWarnings("unchecked")
   public <MessageType extends Message> MessageType deserializeMessage(String messageName,
       ByteBuffer buffer) {
     buffer.order(ByteOrder.LITTLE_ENDIAN);
     MessageType message =
-        createMessage(messageName, messageDefinitionProvider.get(messageName),
-            messageClassRegistry.<MessageType>get(messageName));
+        (MessageType) createMessage(messageName, messageDefinitionProvider.get(messageName),
+            messageClasses.get(messageName));
     for (Field field : message.getFields()) {
       if (!field.isConstant()) {
         field.deserialize(buffer);

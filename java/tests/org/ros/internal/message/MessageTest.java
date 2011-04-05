@@ -41,7 +41,7 @@ public class MessageTest {
   }
 
   private MessageLoader loader;
-  private MessageClassRegistry registry;
+  private DefaultedClassMap<Message> classes;
   private MessageFactory factory;
 
   @Before
@@ -51,10 +51,10 @@ public class MessageTest {
     File searchPath = new File(resource.getPath());
     loader.addSearchPath(searchPath);
     loader.updateMessageDefinitions();
-    registry = new MessageClassRegistry();
-    registry.put("foo", FooMessage.class);
-    registry.put("bar", BarMessage.class);
-    factory = new MessageFactory(loader, registry);
+    classes = DefaultedClassMap.create(Message.class);
+    classes.put("foo", FooMessage.class);
+    classes.put("bar", BarMessage.class);
+    factory = new MessageFactory(loader, classes);
   }
 
   @Test

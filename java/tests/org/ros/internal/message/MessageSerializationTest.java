@@ -33,7 +33,7 @@ import java.nio.ByteBuffer;
 public class MessageSerializationTest {
 
   private MessageLoader loader;
-  private MessageClassRegistry registry;
+  private DefaultedClassMap<Message> classes;
   private MessageFactory factory;
 
   @Before
@@ -43,8 +43,8 @@ public class MessageSerializationTest {
     File searchPath = new File(resource.getPath());
     loader.addSearchPath(searchPath);
     loader.updateMessageDefinitions();
-    registry = new MessageClassRegistry();
-    factory = new MessageFactory(loader, registry);
+    classes = DefaultedClassMap.create(Message.class);
+    factory = new MessageFactory(loader, classes);
   }
 
   @Test

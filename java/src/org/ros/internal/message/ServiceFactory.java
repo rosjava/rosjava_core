@@ -31,34 +31,31 @@ public class ServiceFactory {
 
   private final ServiceLoader serviceLoader;
   private final MessageFactory messageFactory;
-  private final MessageClassRegistry requestMessageClassRegistry;
-  private final MessageClassRegistry responseMessageClassRegistry;
+  private final DefaultedClassMap<Service.Request> requestMessageClassRegistry;
+  private final DefaultedClassMap<Service.Response> responseMessageClassRegistry;
   private final Map<String, String> requestDefinitions;
   private final Map<String, String> responseDefinitions;
 
   public ServiceFactory(ServiceLoader serviceLoader, MessageFactory messageFactory) {
     this.serviceLoader = serviceLoader;
     this.messageFactory = messageFactory;
-    requestMessageClassRegistry = new MessageClassRegistry();
-    responseMessageClassRegistry = new MessageClassRegistry();
+    requestMessageClassRegistry = new DefaultedClassMap<Service.Request>(Service.Request.class);
+    responseMessageClassRegistry = new DefaultedClassMap<Service.Response>(Service.Response.class);
     requestDefinitions = Maps.newConcurrentMap();
     responseDefinitions = Maps.newConcurrentMap();
   }
 
-  public <RequestType extends Service.Request, ResponseType extends Service.Response> Service createService(
-      String serviceName) {
+  public Service createService(String serviceName) {
     if (!requestDefinitions.containsKey(serviceName)) {
       Preconditions.checkState(!responseDefinitions.containsKey(serviceName));
       addServiceDefinition(serviceName);
     }
-    RequestType request =
-        messageFactory.<RequestType>createMessage(serviceName,
-            requestDefinitions.get(serviceName),
-            requestMessageClassRegistry.<RequestType>get(serviceName));
-    ResponseType response =
-        messageFactory.<ResponseType>createMessage(serviceName,
-            responseDefinitions.get(serviceName),
-            responseMessageClassRegistry.<ResponseType>get(serviceName));
+    Service.Request request =
+        messageFactory.createMessage(serviceName, requestDefinitions.get(serviceName),
+            requestMessageClassRegistry.get(serviceName));
+    Service.Response response =
+        messageFactory.createMessage(serviceName, responseDefinitions.get(serviceName),
+            responseMessageClassRegistry.get(serviceName));
     return new Service(request, response);
   }
 

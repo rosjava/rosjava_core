@@ -28,7 +28,7 @@ import java.net.URL;
 public class ServiceTest {
 
   private MessageLoader messageLoader;
-  private MessageClassRegistry messageClassRegistry;
+  private DefaultedClassMap<Message> messageClassRegistry;
   private MessageFactory messageFactory;
 
   @Before
@@ -38,16 +38,20 @@ public class ServiceTest {
     File searchPath = new File(resource.getPath());
     messageLoader.addSearchPath(searchPath);
     messageLoader.updateMessageDefinitions();
-    messageClassRegistry = new MessageClassRegistry();
+    messageClassRegistry = DefaultedClassMap.create(Message.class);
     messageFactory = new MessageFactory(messageLoader, messageClassRegistry);
   }
 
   @Test
   public void testCreateEchoService() {
     ServiceLoader loader = new ServiceLoader();
-    loader.addServiceDefinition("Echo", "std_msgs/String data\n---\nstd_msgs/String data");
+    loader.addServiceDefinition("Echo", "string data\n---\nstring data");
     ServiceFactory factory = new ServiceFactory(loader, messageFactory);
-    Service echoService = factory.<Service.Request, Service.Response>createService("Echo");
+    Service echoService = factory.createService("Echo");
+    Message request = echoService.getRequest();
+    Message response = echoService.getResponse();
+    request.setString("data", "Hello, ROS!");
+    response.setString("data", "Hello, ROS!");
   }
 
 }
