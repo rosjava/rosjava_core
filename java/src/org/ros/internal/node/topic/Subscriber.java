@@ -58,7 +58,7 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Subscriber<MessageType extends Message> extends Topic<MessageType> {
+public class Subscriber<MessageType extends Message> extends Topic {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Subscriber.class);

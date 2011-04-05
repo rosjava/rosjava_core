@@ -19,14 +19,13 @@ package org.ros.internal.node.topic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import org.jboss.netty.channel.Channel;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.Channel;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.ConnectionHeader;
+import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.message.Message;
 
@@ -38,7 +37,7 @@ import java.util.Map;
  *
  * @param <MessageType>
  */
-public class Publisher<MessageType extends Message> extends Topic<MessageType> {
+public class Publisher<MessageType extends Message> extends Topic {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);

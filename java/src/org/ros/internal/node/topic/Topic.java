@@ -25,12 +25,12 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Topic<MessageType extends Message> {
+public class Topic {
 
   private final TopicDefinition description;
-  private final Class<MessageType> messageClass;
+  private final Class<?> messageClass;
 
-  public Topic(TopicDefinition description, Class<MessageType> messageClass) {
+  public Topic(TopicDefinition description, Class<?> messageClass) {
     this.description = description;
     this.messageClass = messageClass;
   }
@@ -60,7 +60,7 @@ public class Topic<MessageType extends Message> {
    * @return <code>true</code> if this {@link Subscriber} instance accepts the
    *         supplied {@link Message} class
    */
-  public boolean checkMessageClass(Class<? extends Message> messageClass) {
+  public boolean checkMessageClass(Class<?> messageClass) {
     return this.messageClass == messageClass;
   }
 
