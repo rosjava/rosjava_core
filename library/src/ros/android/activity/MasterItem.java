@@ -60,6 +60,10 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
     checker_.beginChecking( master_uri );
   }
 
+  public boolean isOk() {
+    return connection_status_ == "ok";
+  }
+
   public void receive( RobotDescription robot_description ) {
     desc_ = robot_description;
     connection_status_ = "ok";

@@ -17,14 +17,18 @@
 package ros.android.activity;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 import android.widget.ListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
 
 import java.io.File;
 import java.io.FileReader;
@@ -41,11 +45,13 @@ import ros.android.util.Net;
 
 public class MasterChooserActivity extends Activity {
 
+  private static final int ADD_URI_DIALOG_ID = 0;
+
   public static final String MASTER_URI_EXTRA = "org.ros.android.MasterURI";
 
   // TODO: This should eventually be a list of RobotDescriptions to
   // persist robot name and type data.
-  private List<String> master_uris_;
+  private List<String> master_uris_; // don't modify this without immediately calling updateListView().
 
   public MasterChooserActivity() {
     master_uris_ = new ArrayList<String>();
@@ -137,13 +143,17 @@ public class MasterChooserActivity extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setTitle( "Choose a ROS Master" );
-    setContentView(R.layout.master_chooser);
   }
 
   @Override
   protected void onResume() {
     super.onResume();
     readMasterList();
+    updateListView();
+  }
+
+  private void updateListView() {
+    setContentView(R.layout.master_chooser);
     ListView listview = (ListView) findViewById(R.id.master_list);
     listview.setAdapter( new MasterAdapter( this, master_uris_, Net.getNonLoopbackHostName() ));
 
@@ -165,8 +175,7 @@ public class MasterChooserActivity extends Activity {
   public void onActivityResult(int requestCode, int resultCode, Intent intent) {
     IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
     if (scanResult != null) {
-      master_uris_.add( scanResult.getContents() );
-      writeNewMaster( scanResult.getContents() );
+      addMaster( scanResult.getContents() );
     }
     else
     {
@@ -174,7 +183,56 @@ public class MasterChooserActivity extends Activity {
     }
   }
 
-  public void scanNewRobotClicked( View view ) {
+  private void addMaster( String new_master_uri ) {
+    master_uris_.add( new_master_uri );
+    writeNewMaster( new_master_uri );
+    updateListView();
+  }
+
+  @Override
+  protected Dialog onCreateDialog( int id ) {
+    Dialog dialog;
+    switch( id )
+    {
+    case ADD_URI_DIALOG_ID:
+      dialog = new Dialog( this );
+      dialog.setContentView( R.layout.add_uri_dialog );
+      dialog.setTitle( "Add a robot" );
+      EditText uri_field = (EditText) dialog.findViewById( R.id.uri_editor );
+      uri_field.setOnKeyListener( new URIFieldKeyListener() );
+      Button scan_button = (Button) dialog.findViewById( R.id.scan_robot_button );
+      scan_button.setOnClickListener( new View.OnClickListener() {
+          public void onClick( View v ) {
+            scanRobotClicked( v );
+          }
+        });
+      break;
+    default:
+      dialog = null;
+    }
+    return dialog;
+  }
+
+  public void addRobotClicked( View view ) {
+    showDialog( ADD_URI_DIALOG_ID );
+  }
+
+  public void scanRobotClicked( View view ) {
+    dismissDialog( ADD_URI_DIALOG_ID );
     IntentIntegrator.initiateScan( this );
+  }
+
+  public class URIFieldKeyListener implements View.OnKeyListener {
+    public boolean onKey( View view, int key_code, KeyEvent event ) {
+      if( event.getAction() == KeyEvent.ACTION_DOWN &&
+          key_code == KeyEvent.KEYCODE_ENTER )
+      {
+        EditText uri_field = (EditText) view;
+        addMaster( uri_field.getText().toString() );
+        dismissDialog( ADD_URI_DIALOG_ID );
+        return true;
+      }
+      return false;
+    }
   }
 }

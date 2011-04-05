@@ -25,7 +25,6 @@ public class AppChooser extends RosActivity
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.main);
   }
 
   @Override
@@ -35,6 +34,7 @@ public class AppChooser extends RosActivity
   }
 
   private void updateList() {
+    setContentView(R.layout.main);
     ArrayList<App> apps = getAppList();
     GridView gridview = (GridView) findViewById(R.id.gridview);
     gridview.setAdapter(new AppAdapter(this, apps));
@@ -69,6 +69,9 @@ public class AppChooser extends RosActivity
 
   private void setStatus( String status_message ) {
     TextView status_view = (TextView) findViewById(R.id.status_view);
-    status_view.setText( status_message );
+    if( status_view != null )
+    {
+      status_view.setText( status_message );
+    }
   }
 }

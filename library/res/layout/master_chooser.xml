@@ -16,8 +16,7 @@
 <Button
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
-    android:text="scan a new robot"
-    android:onClick="scanNewRobotClicked"
+    android:text="Add a robot"
+    android:onClick="addRobotClicked"
     />
 </LinearLayout>
-

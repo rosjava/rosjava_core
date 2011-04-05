@@ -61,6 +61,14 @@ public class MasterAdapter extends BaseAdapter {
     return master_uris_.size();
   }
 
+  public boolean areAllItemsEnabled() {
+    return false;
+  }
+
+  public boolean isEnabled( int position ) {
+    return master_items_.get( position ).isOk();
+  }
+
   public Object getItem(int position) {
     return null;
   }

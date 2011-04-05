@@ -15,13 +15,13 @@
                 >
     <TextView android:layout_width="fill_parent"
               android:layout_height="wrap_content"
-              android:id="@+id/uri"/>
-    <TextView android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
               android:textColor="#ffffcc"
               android:textSize="20sp"
               android:id="@+id/name"
               android:text="Robot Name"/>
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:id="@+id/uri"/>
     <TextView android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:textColor="#808080"
