@@ -34,6 +34,7 @@ import java.lang.Runnable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -112,6 +113,23 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
 
     tv = (TextView) view_.findViewById( R.id.status );
     tv.setText( connection_status_ );
+
+    ImageView iv = (ImageView) view_.findViewById( R.id.robot_icon );
+    if( desc_.robot_type_ == null )
+    {
+      iv.setImageResource( R.drawable.question_mark );
+    }
+    else if( desc_.robot_type_.equals( "pr2" ))
+    {
+      iv.setImageResource( R.drawable.pr2 );
+    }
+    else if( desc_.robot_type_.equals( "turtlebot" ))
+    {
+      iv.setImageResource( R.drawable.turtlebot );
+    }
+    else
+    {
+      iv.setImageResource( R.drawable.question_mark );
+    }
   }
 }
-
