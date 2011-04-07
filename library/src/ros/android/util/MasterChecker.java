@@ -29,16 +29,11 @@
 
 package ros.android.util;
 
+import android.util.Log;
 import org.ros.Node;
-import org.ros.NodeContext;
 import org.ros.ParameterClient;
-import org.ros.exceptions.RosInitException;
 
 import java.util.Date;
-import java.lang.Thread;
-import java.lang.InterruptedException;
-
-import android.util.Log;
 
 /** Threaded ROS-master checker.  Runs a thread which checks for a
  * valid ROS master and sends back a RobotDescription (with robot name
@@ -105,12 +100,14 @@ public class MasterChecker {
 
       setDaemon( true ); // don't require callers to explicitly kill all the old checker threads.
       setUncaughtExceptionHandler( new Thread.UncaughtExceptionHandler() {
+          @Override
           public void uncaughtException( Thread thread, Throwable ex ) {
-            failure_callback_.handleFailure( "exception" );
+            failure_callback_.handleFailure( "exception: " +ex.getMessage());
           }
         } );
     }
 
+    @Override
     public void run() {
       try
       {

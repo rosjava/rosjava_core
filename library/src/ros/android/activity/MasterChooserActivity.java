@@ -23,25 +23,23 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
-import android.widget.ListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
+import ros.android.util.Net;
+import ros.android.util.SdCardSetup;
+import ros.android.util.zxing.IntentIntegrator;
+import ros.android.util.zxing.IntentResult;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.BufferedReader;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import ros.android.util.zxing.IntentResult;
-import ros.android.util.zxing.IntentIntegrator;
-import ros.android.util.SdCardSetup;
-import ros.android.util.Net;
+import java.util.List;
 
 public class MasterChooserActivity extends Activity {
 
@@ -158,6 +156,7 @@ public class MasterChooserActivity extends Activity {
     listview.setAdapter( new MasterAdapter( this, master_uris_, Net.getNonLoopbackHostName() ));
 
     listview.setOnItemClickListener(new OnItemClickListener() {
+        @Override
         public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
           choose( position );
         }
@@ -202,6 +201,7 @@ public class MasterChooserActivity extends Activity {
       uri_field.setOnKeyListener( new URIFieldKeyListener() );
       Button scan_button = (Button) dialog.findViewById( R.id.scan_robot_button );
       scan_button.setOnClickListener( new View.OnClickListener() {
+          @Override
           public void onClick( View v ) {
             scanRobotClicked( v );
           }
@@ -223,6 +223,7 @@ public class MasterChooserActivity extends Activity {
   }
 
   public class URIFieldKeyListener implements View.OnKeyListener {
+    @Override
     public boolean onKey( View view, int key_code, KeyEvent event ) {
       if( event.getAction() == KeyEvent.ACTION_DOWN &&
           key_code == KeyEvent.KEYCODE_ENTER )

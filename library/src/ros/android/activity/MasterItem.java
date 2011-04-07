@@ -29,15 +29,11 @@
 
 package ros.android.activity;
 
-import java.lang.Runnable;
-
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
 import android.content.Context;
 import android.view.LayoutInflater;
-
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import ros.android.util.MasterChecker;
 import ros.android.util.RobotDescription;
 
@@ -64,12 +60,14 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
     return connection_status_ == "ok";
   }
 
+  @Override
   public void receive( RobotDescription robot_description ) {
     desc_ = robot_description;
     connection_status_ = "ok";
     safePopulateView();
   }
 
+  @Override
   public void handleFailure( String reason ) {
     connection_status_ = reason;
     desc_.robot_name_ = "";
@@ -95,6 +93,7 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
     if( view_ != null )
     {
       view_.post( new Runnable() {
+          @Override
           public void run() {
             populateView();
           }
