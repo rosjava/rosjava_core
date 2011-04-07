@@ -56,7 +56,7 @@ public class RosActivity extends Activity {
   }
 
   public RobotDescription getCurrentRobot() {
-    return master_chooser_.getCurrentRobot();
+    return masterChooser.getCurrentRobot();
   }
 
   /**
@@ -121,7 +121,7 @@ public class RosActivity extends Activity {
         // Launching the master chooser activity causes this activity
         // to pause.  this.onActivityResult() is called with the
         // result before onResume() is called again, so
-        // master_chooser_.haveRobot() should be true.
+        // masterChooser.haveRobot() should be true.
       }
     }
   }

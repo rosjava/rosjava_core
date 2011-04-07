@@ -35,6 +35,8 @@ import org.ros.internal.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
 
+import org.yaml.snakeyaml.Yaml;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -42,6 +44,8 @@ import java.io.BufferedReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+
+import ros.android.activity.MasterChooserActivity;
 
 /**
  * Helper class for launching the MasterChooserActivity for choosing a ROS
@@ -97,7 +101,7 @@ public class MasterChooser extends RosLoader {
     }
   }
 
-  /** Write the current value of private current_robot_ variable to a
+  /** Write the current value of private currentRobot variable to a
    * common file on the sdcard, so it can be shared between ROS
    * apps. */
   public void saveCurrentRobot() {
@@ -131,7 +135,7 @@ public class MasterChooser extends RosLoader {
   /** Read the current robot description from a file shared by ROS applications,
    * so we don't have to re-choose the robot for each new app launch.
    * If the file does not exist or has invalid data, haveMaster() will
-   * return false after this.  On success, private current_robot_
+   * return false after this.  On success, private currentRobot
    * variable is set.  On failure, nothing is changed. */
   public void loadCurrentRobot() {
     try
@@ -147,7 +151,7 @@ public class MasterChooser extends RosLoader {
       try
       {
         Yaml yaml = new Yaml();
-        current_robot_ = (RobotDescription) yaml.load( reader );
+        currentRobot = (RobotDescription) yaml.load( reader );
       }
       finally
       {
@@ -184,7 +188,7 @@ public class MasterChooser extends RosLoader {
 
     if( resultCode == Activity.RESULT_OK )
     {
-      current_robot_ = (RobotDescription) result_intent.getSerializableExtra( MasterChooserActivity.ROBOT_DESCRIPTION_EXTRA );
+      currentRobot = (RobotDescription) result_intent.getSerializableExtra( MasterChooserActivity.ROBOT_DESCRIPTION_EXTRA );
     }
     return true;
   }
