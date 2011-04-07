@@ -34,6 +34,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -55,15 +56,19 @@ public class AppLauncher {
       return;
     }
 
+    Log.i( "RosAndroid", "launching robot app " + app.name + ".  Found " + app.client_apps.size() + " client apps." );
+
     // Loop over all possible client apps to find the android ones.
     for( int i = 0; i < app.client_apps.size(); i++ )
     {
       ClientApp client_app = app.client_apps.get( i );
-      if( client_app.client_type == CLIENT_TYPE )
+      if( client_app.client_type != null && client_app.client_type.equals( CLIENT_TYPE ))
       {
         android_apps.add( new ClientAppData( client_app ));
       }
     }
+
+    Log.i( "RosAndroid", "launching robot app " + app.name + ".  Found " + android_apps.size() + " android apps." );
 
     // TODO: filter out android apps which are not appropriate for
     // this device by looking at specific entries in the manager_data_
@@ -77,13 +82,19 @@ public class AppLauncher {
       Intent intent = app_data.createIntent();
       try
       {
+        Log.i( "RosAndroid",
+               "trying to startActivity( action: " + intent.getAction() + " )" );
         parent_activity.startActivity( intent );
         return;
       }
       catch (ActivityNotFoundException e)
       {
+        Log.i( "RosAndroid",
+               "activity not found for action: " + intent.getAction() );
       }
     }
+
+    Log.i( "RosAndroid", "showing not-installed dialog." );
 
     // TODO:
     // Loop over all android apps, trying to install one. (??)

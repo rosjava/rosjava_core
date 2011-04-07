@@ -53,9 +53,9 @@ public class ClientAppData {
     Intent intent = new Intent();
 
     // Set up standard intent fields.
-    intent.setAction( manager_data_.get( "intent_action" ));
-    intent.addCategory( manager_data_.get( "intent_category" ));
-    intent.setType( manager_data_.get( "intent_type" ));
+    intent.setAction( manager_data_.get( "intent-action" ));
+    intent.addCategory( manager_data_.get( "intent-category" ));
+    intent.setType( manager_data_.get( "intent-type" ));
     // Can we handle classname and package name?
 
     // Copy all app data to "extra" data in the intent.

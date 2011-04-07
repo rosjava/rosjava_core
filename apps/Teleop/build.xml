@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="AppChooser" default="help" basedir=".">
+<project name="Teleop" default="help">
 
 <!-- The local.properties file is created and updated by the 'android'
      tool.
@@ -47,7 +47,6 @@
         </fileset>
       </copy>
     </target>
-
 <!--
     <target name="-pre-build">
     </target>

@@ -31,6 +31,7 @@ package org.ros.android.app_chooser;
 
 import android.os.Bundle;
 import android.content.Intent;
+import android.view.View;
 import android.widget.TextView;
 
 import ros.android.activity.RosActivity;
@@ -50,5 +51,15 @@ public class StubAppActivity extends RosActivity
     TextView tv;
     tv = (TextView) findViewById( R.id.name );
     tv.setText( starting_intent.getStringExtra( AppLauncher.PACKAGE + ".robot_app_name" ));
+  }
+
+  public void onStartClicked( View view ) {
+    // TODO: start the ROS application
+  }
+
+  public void onStopClicked( View view ) {
+    // TODO: stop the ROS application
+
+    finish(); // End this stub app activity
   }
 }
