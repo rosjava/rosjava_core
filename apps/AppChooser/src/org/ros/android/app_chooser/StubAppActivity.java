@@ -34,32 +34,90 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.TextView;
 
-import ros.android.activity.RosActivity;
+import org.ros.app_manager.AppManager;
+import org.ros.app_manager.AppNotInstalledException;
+import org.ros.app_manager.AppManagerNotAvailableException;
+import org.ros.exceptions.RosInitException;
 
-public class StubAppActivity extends RosActivity
+import ros.android.activity.RosAppActivity;
+
+public class StubAppActivity extends RosAppActivity
 {
+  private String robotAppName;
+  private String robotAppDisplayName;
+  private TextView statusView;
+
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    robotAppName = getIntent().getStringExtra( AppLauncher.PACKAGE + ".robot_app_name" );
+    robotAppDisplayName = getIntent().getStringExtra( AppLauncher.PACKAGE + ".robot_app_display_name" );
+    
+    setTitle( robotAppDisplayName );
+
     setContentView(R.layout.stub_app);
 
-    Intent starting_intent = getIntent();
+    TextView tv = (TextView) findViewById( R.id.name );
+    tv.setText( robotAppName );
 
-    setTitle( starting_intent.getStringExtra( AppLauncher.PACKAGE + ".robot_app_display_name" ));
-
-    TextView tv;
-    tv = (TextView) findViewById( R.id.name );
-    tv.setText( starting_intent.getStringExtra( AppLauncher.PACKAGE + ".robot_app_name" ));
+    statusView = (TextView) findViewById( R.id.status_view );
   }
 
   public void onStartClicked( View view ) {
-    // TODO: start the ROS application
+    setStatus( "Starting..." );
+    Thread starterThread = new Thread() {
+        public void run() {
+          try {
+            ensureAppRunning( robotAppName );
+            safeSetStatus( "Running" );
+          } catch( AppNotInstalledException ex ) {
+            safeSetStatus( "App not installed on robot: " + ex.getMessage() );
+          } catch( AppManagerNotAvailableException ex ) {
+            safeSetStatus( "App Manager not available: " + ex.getMessage() );
+          } catch( RosInitException ex ) {
+            safeSetStatus( "Ros init exception: " + ex.getMessage() );
+          }
+        }
+      };
+    starterThread.start();
   }
 
   public void onStopClicked( View view ) {
-    // TODO: stop the ROS application
+    setStatus( "Stopping..." );
+    Thread stopperThread = new Thread() {
+        public void run() {
+          try {
+            AppManager appMan = createAppManager();
+            appMan.stopApp( robotAppName );
+            safeSetStatus( "Stopped." );
+          } catch( AppManagerNotAvailableException ex ) {
+            safeSetStatus( "App Manager not available: " + ex.getMessage() );
+          } catch( RosInitException ex ) {
+            safeSetStatus( "Ros init exception: " + ex.getMessage() );
+          }
+        }
+      };
+    stopperThread.start();
+  }
 
-    finish(); // End this stub app activity
+  public void onExitClicked( View view ) {
+    finish();
+  }
+
+  /**
+   * Set the status text.  Safe to call from any thread.
+   */
+  private void safeSetStatus( final String status ) {
+    statusView.post( new Runnable() {
+        public void run() {
+          setStatus( status );
+        }
+      });
+  }
+
+  private void setStatus( String status ) {
+    statusView.setText( status );
   }
 }

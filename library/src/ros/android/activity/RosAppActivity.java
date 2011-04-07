@@ -52,7 +52,7 @@ public class RosAppActivity extends RosActivity {
 
   }
 
-  private AppManager createAppManager() throws RosInitException {
+  protected AppManager createAppManager() throws RosInitException {
     String robotName = "turtlebot";
     return new AppManager(getNode(), robotName);
   }
