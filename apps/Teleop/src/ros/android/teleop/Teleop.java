@@ -16,33 +16,31 @@
 
 package ros.android.teleop;
 
-import android.view.MenuInflater;
-
-import android.view.Menu;
-import android.view.MenuItem;
-
-import android.view.WindowManager;
-
-import android.view.Window;
-
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.Window;
+import android.view.WindowManager;
 import org.ros.Node;
 import org.ros.Publisher;
+import org.ros.app_manager.AppManagerNotAvailableException;
+import org.ros.app_manager.AppNotInstalledException;
 import org.ros.exceptions.RosInitException;
 import org.ros.message.geometry_msgs.Twist;
 import org.ros.namespace.NameResolver;
-import ros.android.activity.RosActivity;
+import ros.android.activity.RosAppActivity;
 import ros.android.sensor.GravityTeleop;
 import ros.android.views.SensorImageView;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class Teleop extends RosActivity implements OnTouchListener {
+public class Teleop extends RosAppActivity implements OnTouchListener {
   private Publisher<Twist> twistPub;
   private SensorImageView imageSub;
   private Thread pubThread;
@@ -92,18 +90,18 @@ public class Teleop extends RosActivity implements OnTouchListener {
 
   @Override
   protected void onResume() {
-    // TODO(kwc): need to load app manager, make sure teleop control app is
-    // running
-
     // TODO(kwc): needs a whole lot of tuning
     super.onResume();
+    
     try {
+      ensureAppRunning("turtlebot_teleop/android_teleop");      
+
       sensor.start(this);
 
       Node node = getNode();
 
       imageSub = (SensorImageView) findViewById(R.id.image);
-      imageSub.init(node, "/camera/rgb/image_color/compressed");
+      imageSub.init(node, "/turtlebot/application/camera/rgb/image_color/compressed");
       imageSub.setSelected(true);
 
       NameResolver resolver = node.getResolver().createResolver("turtlebot_node");
@@ -138,6 +136,14 @@ public class Teleop extends RosActivity implements OnTouchListener {
       });
       pubThread.start();
     } catch (RosInitException e) {
+      Log.e("Teleop", e.getMessage());
+    } catch (AppManagerNotAvailableException e) {
+      //TODO(kwc) need standard way of display app launch failure to user
+      
+      Log.e("Teleop", e.getMessage());
+    } catch (AppNotInstalledException e) {
+      //TODO(kwc) display message to user that app cannot be run on this robot
+      
       Log.e("Teleop", e.getMessage());
     }
 
