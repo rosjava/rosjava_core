@@ -39,6 +39,14 @@
 
 <!-- extension targets. Uncomment the ones where you want to do custom work
      in between standard targets -->
+    <target name="-pre-build">
+      <copy todir="${basedir}/libs" overwrite="true">
+        <fileset dir="${basedir}/../../java/dist">
+          <exclude name="apache-xmlrpc*.jar"/>
+          <filename name="*.jar"/>
+        </fileset>
+      </copy>
+    </target>
 <!--
     <target name="-pre-build">
     </target>

@@ -37,7 +37,6 @@ public class TalkerListener extends RosActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.main);
   }
 
   @Override
@@ -52,6 +51,7 @@ public class TalkerListener extends RosActivity {
   @Override
   protected void onResume() {
     super.onResume();
+    setContentView(R.layout.main);
     try {
       Node node = getNode();
       setText("loading");
