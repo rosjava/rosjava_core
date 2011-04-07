@@ -27,62 +27,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ros.android.activity;
+package org.ros.android.app_chooser;
 
-import android.widget.BaseAdapter;
-import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
+import android.content.Intent;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 
-import ros.android.util.RobotDescription;
+import org.ros.message.app_manager.ClientApp;
+import org.ros.message.app_manager.KeyValue;
 
-public class MasterAdapter extends BaseAdapter {
-  private Context context_;
-  private String my_hostname_;
-  private List<MasterItem> master_items_;
+/** Convenience class which populates HashMaps with manager_data and
+ * app_data from the corresponding KeyValue arrays in the ClientApp
+ * message. */
+public class ClientAppData {
+  public HashMap<String,String> manager_data_;
+  public List<KeyValue> app_data_;
 
-  public MasterAdapter(MasterChooserActivity mca, List<RobotDescription> robots, String my_hostname ) {
-    context_ = mca;
-    my_hostname_ = my_hostname;
-    master_items_ = new ArrayList<MasterItem>();
-    if( robots != null )
+  public ClientAppData( ClientApp client_app_msg ) {
+    manager_data_ = keyValueListToMap( client_app_msg.manager_data );
+    app_data_ = client_app_msg.app_data;
+  }
+
+  public Intent createIntent() {
+    Intent intent = new Intent();
+
+    // Set up standard intent fields.
+    intent.setAction( manager_data_.get( "intent_action" ));
+    intent.addCategory( manager_data_.get( "intent_category" ));
+    intent.setType( manager_data_.get( "intent_type" ));
+    // Can we handle classname and package name?
+
+    // Copy all app data to "extra" data in the intent.
+    for( int i = 0; i < app_data_.size(); i++ )
     {
-      for( int i = 0; i < robots.size(); i++ )
-      {
-        master_items_.add( new MasterItem( robots.get( i ), my_hostname_, mca ));
-      }
+      KeyValue kv = app_data_.get( i );
+      intent.putExtra( kv.key, kv.value );
     }
+
+    return intent;
   }
 
-  public int getCount() {
-    if( master_items_ == null )
+  private HashMap<String,String> keyValueListToMap( List<KeyValue> kvl ) {
+    HashMap<String,String> map = new HashMap<String,String>();
+    for( int i = 0; i < kvl.size(); i++ )
     {
-      return 0;
+      KeyValue kv = kvl.get( i );
+      map.put( kv.key, kv.value );
     }
-    return master_items_.size();
-  }
-
-  public boolean areAllItemsEnabled() {
-    return false;
-  }
-
-  public boolean isEnabled( int position ) {
-    return master_items_.get( position ).isOk();
-  }
-
-  public Object getItem(int position) {
-    return null;
-  }
-
-  public long getItemId(int position) {
-    return 0;
-  }
-
-  // create a new View for each item referenced by the Adapter
-  public View getView(int position, View convertView, ViewGroup parent) {
-    return master_items_.get( position ).getView( context_, convertView, parent );
+    return map;
   }
 }

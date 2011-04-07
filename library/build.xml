@@ -49,12 +49,12 @@
      in between standard targets -->
 
     <target name="-pre-build">
-      <copy todir="${basedir}/libs">
+      <copy todir="${basedir}/libs" overwrite="true">
         <fileset dir="${basedir}/../java/dist">
           <filename name="*.jar"/>
         </fileset>
       </copy>
-      <copy todir="${basedir}/libs">
+      <copy todir="${basedir}/libs" overwrite="true">
         <fileset dir="${basedir}/../java/lib">
           <exclude name="junit*.jar"/>
           <exclude name="mockito*.jar"/>

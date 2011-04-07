@@ -50,15 +50,14 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
   private View view_;
   private RobotDescription desc_;
   private String connection_status_;
+  private MasterChooserActivity parent_mca_;
 
-  public MasterItem( String master_uri, String my_hostname ) {
-    desc_ = new RobotDescription();
-    desc_.master_uri_ = master_uri;
-    desc_.robot_name_ = "...";
-    desc_.robot_type_ = "...";
+  public MasterItem( RobotDescription desc, String my_hostname, MasterChooserActivity parent_mca ) {
+    parent_mca_ = parent_mca;
+    desc_ = desc;
     connection_status_ = "...";
     checker_ = new MasterChecker( my_hostname, this, this );
-    checker_.beginChecking( master_uri );
+    checker_.beginChecking( desc_.master_uri_ );
   }
 
   public boolean isOk() {
@@ -66,15 +65,13 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
   }
 
   public void receive( RobotDescription robot_description ) {
-    desc_ = robot_description;
+    desc_.copyFrom( robot_description );
     connection_status_ = "ok";
     safePopulateView();
   }
 
   public void handleFailure( String reason ) {
     connection_status_ = reason;
-    desc_.robot_name_ = "";
-    desc_.robot_type_ = "";
     safePopulateView();
   }
 
@@ -95,9 +92,12 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
   private void safePopulateView() {
     if( view_ != null )
     {
+      final MasterChooserActivity mca = parent_mca_;
+
       view_.post( new Runnable() {
           public void run() {
             populateView();
+            mca.writeRobotList();
           }
         });
     }

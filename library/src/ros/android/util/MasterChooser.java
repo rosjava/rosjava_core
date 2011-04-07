@@ -45,13 +45,15 @@ import java.util.HashMap;
 
 import ros.android.activity.MasterChooserActivity;
 
+import org.yaml.snakeyaml.Yaml;
+
 /** Helper class for launching the MasterChooserActivity for choosing a ROS master.
  * Keep this object around for the lifetime of an Activity.
  */
 public class MasterChooser extends RosLoader {
 
   private Activity calling_activity_;
-  private String master_uri_;
+  private RobotDescription current_robot_;
 
   /** REQUEST_CODE number must be unique among activity requests which
    * might be seen by handleActivityResult(). */
@@ -61,17 +63,21 @@ public class MasterChooser extends RosLoader {
   private static final String MASTER_URI = "MASTER_URI";
 
   /** Constructor.  Does not read current master from disk, that must
-   * be done by calling loadCurrentMaster(). */
+   * be done by calling loadCurrentRobot(). */
   public MasterChooser( Activity calling_activity ) {
     calling_activity_ = calling_activity;
-    master_uri_ = null;
+    current_robot_ = null;
   }
 
-  /** Returns a File for the current-master file if the sdcard is
+  public RobotDescription getCurrentRobot() {
+    return current_robot_;
+  }
+
+  /** Returns a File for the current-robot file if the sdcard is
    * ready and there's no error, null otherwise.  The actual file on
    * "disk" does not have to exist for this to work and return a File
    * object. */
-  private File getCurrentMasterFile() {
+  private File getCurrentRobotFile() {
     if( !SdCardSetup.isReady() )
     {
       return null;
@@ -81,69 +87,67 @@ public class MasterChooser extends RosLoader {
       try
       {
         File ros_dir = SdCardSetup.getRosDir();
-        return new File( ros_dir, "current_master_uri" );
+        return new File( ros_dir, "current_robot.yaml" );
       }
       catch( Exception ex )
       {
-        Log.e( "RosAndroid", "exception in getCurrentMasterFile: " + ex.getMessage() );
+        Log.e( "RosAndroid", "exception in getCurrentRobotFile: " + ex.getMessage() );
         return null;
       }
     }
   }
 
-  /** Write the current value of private master_uri_ variable to a
+  /** Write the current value of private current_robot_ variable to a
    * common file on the sdcard, so it can be shared between ROS
    * apps. */
-  public void saveCurrentMaster() {
-    File current_master_file = getCurrentMasterFile();
-    if( current_master_file == null )
+  public void saveCurrentRobot() {
+    File current_robot_file = getCurrentRobotFile();
+    if( current_robot_file == null )
     {
-      Log.e( "RosAndroid", "writeNewMaster(): could not get current-master File object." );
+      Log.e( "RosAndroid", "writeNewMaster(): could not get current-robot File object." );
       return;
     }
 
     try
     {
-      if( ! current_master_file.exists() )
+      if( ! current_robot_file.exists() )
       {
-        Log.i( "RosAndroid", "current-master file does not exist, creating." );
-        current_master_file.createNewFile();
+        Log.i( "RosAndroid", "current-robot file does not exist, creating." );
+        current_robot_file.createNewFile();
       }
 
-      FileWriter writer = new FileWriter( current_master_file, false ); // overwrite the file contents.
-      writer.write( master_uri_ + "\n" );
+      FileWriter writer = new FileWriter( current_robot_file, false ); // overwrite the file contents.
+      Yaml yaml = new Yaml();
+      yaml.dump( current_robot_, writer );
       writer.close();
-      Log.i( "RosAndroid", "Wrote '" + master_uri_ + "' to current-master file." );
+      Log.i( "RosAndroid", "Wrote '" + current_robot_.master_uri_ + "' etc to current-robot file." );
     }
     catch( Exception ex )
     {
-      Log.e( "RosAndroid", "exception writing new master to sdcard: " + ex.getMessage() );
+      Log.e( "RosAndroid", "exception writing current robot to sdcard: " + ex.getMessage() );
     }
   }
 
-  /** Read the current master from a file shared by ROS applications,
-   * so we don't have to re-choose the master for each new app launch.
+  /** Read the current robot description from a file shared by ROS applications,
+   * so we don't have to re-choose the robot for each new app launch.
    * If the file does not exist or has invalid data, haveMaster() will
-   * return false after this.  On success, private current_master_
+   * return false after this.  On success, private current_robot_
    * variable is set.  On failure, nothing is changed. */
-  public void loadCurrentMaster() {
+  public void loadCurrentRobot() {
     try
     {
-      File current_master_file = getCurrentMasterFile();
-      if( current_master_file == null )
+      File current_robot_file = getCurrentRobotFile();
+      if( current_robot_file == null )
       {
-        Log.e( "RosAndroid", "loadCurrentMaster(): can't get the current-master file." );
+        Log.e( "RosAndroid", "loadCurrentRobot(): can't get the current-robot file." );
         return;
       }
 
-      BufferedReader reader = new BufferedReader( new FileReader( current_master_file ));
+      BufferedReader reader = new BufferedReader( new FileReader( current_robot_file ));
       try
       {
-        String line = reader.readLine();
-        if( line != null && line != "" )
-        {
-          master_uri_ = line;
-        }
+        Yaml yaml = new Yaml();
+        current_robot_ = (RobotDescription) yaml.load( reader );
       }
       finally
       {
@@ -152,14 +156,18 @@ public class MasterChooser extends RosLoader {
     }
     catch( Exception ex )
     {
-      Log.e( "RosAndroid", "exception reading current-master file: " + ex.getMessage() );
+      Log.e( "RosAndroid", "exception reading current-robot file: " + ex.getMessage() );
     }
   }
 
-  /** Returns true if current master URI is set in memory, false
-   * otherwise.  Does not read anything from disk. */
-  public boolean haveMaster() {
-    return( master_uri_ != null && master_uri_.length() != 0 );
+  /** Returns true if current master URI and robot name are set in
+   * memory, false otherwise.  Does not read anything from disk. */
+  public boolean haveRobot() {
+    return( current_robot_ != null &&
+            current_robot_.master_uri_ != null &&
+            current_robot_.master_uri_.length() != 0 &&
+            current_robot_.robot_name_ != null &&
+            current_robot_.robot_name_.length() != 0 );
   }
 
   /** Call this from your activity's onActivityResult() to record the
@@ -176,7 +184,7 @@ public class MasterChooser extends RosLoader {
 
     if( resultCode == Activity.RESULT_OK )
     {
-      master_uri_ = result_intent.getStringExtra( MasterChooserActivity.MASTER_URI_EXTRA );
+      current_robot_ = (RobotDescription) result_intent.getSerializableExtra( MasterChooserActivity.ROBOT_DESCRIPTION_EXTRA );
     }
     return true;
   }
@@ -197,7 +205,7 @@ public class MasterChooser extends RosLoader {
    * for the device we are running on. */
   @Override
   public NodeContext createContext() throws RosInitException {
-    return createContext( master_uri_, Net.getNonLoopbackHostName() );
+    return createContext( current_robot_.master_uri_, Net.getNonLoopbackHostName() );
   }
 
   static public NodeContext createContext( String master_uri, String my_host_name ) throws RosInitException {

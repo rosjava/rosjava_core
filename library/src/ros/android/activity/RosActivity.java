@@ -21,10 +21,13 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
+
 import org.ros.Node;
 import org.ros.NodeContext;
 import org.ros.exceptions.RosInitException;
+
 import ros.android.util.MasterChooser;
+import ros.android.util.RobotDescription;
 
 public class RosActivity extends Activity {
   private MasterChooser master_chooser_;
@@ -52,6 +55,10 @@ public class RosActivity extends Activity {
     this.errorMessage = errorMessage;
   }
 
+  public RobotDescription getCurrentRobot() {
+    return master_chooser_.getCurrentRobot();
+  }
+
   /** Re-launch the MasterChooserActivity to choose a new ROS master.
    * The results are handled in onActivityResult() and onResume()
    * since launching a new activity necessarily pauses this current
@@ -75,8 +82,8 @@ public class RosActivity extends Activity {
     {
       // Save before checking validity in case someone wants to force
       // the next app to use the chooser.
-      master_chooser_.saveCurrentMaster();
-      if( !master_chooser_.haveMaster() )
+      master_chooser_.saveCurrentRobot();
+      if( !master_chooser_.haveRobot() )
       {
         Toast.makeText( this, "Cannot run without a ROS master.", Toast.LENGTH_LONG ).show();
         finish();
@@ -92,8 +99,8 @@ public class RosActivity extends Activity {
   protected void onResume() {
     super.onResume();
     if( node == null ) {
-      master_chooser_.loadCurrentMaster();
-      if( master_chooser_.haveMaster() )
+      master_chooser_.loadCurrentRobot();
+      if( master_chooser_.haveRobot() )
       {
         try
         {
@@ -113,7 +120,7 @@ public class RosActivity extends Activity {
         // Launching the master chooser activity causes this activity
         // to pause.  this.onActivityResult() is called with the
         // result before onResume() is called again, so
-        // master_chooser_.haveMaster() should be true.
+        // master_chooser_.haveRobot() should be true.
       }
     }
   }

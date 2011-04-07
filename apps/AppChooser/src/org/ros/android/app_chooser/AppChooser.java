@@ -1,6 +1,7 @@
 package org.ros.android.app_chooser;
 
 import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,12 +11,15 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 import android.view.View;
+
 import org.ros.message.app_manager.App;
 import org.ros.Node;
-import ros.android.activity.RosActivity;
 import org.ros.app_manager.AppManager;
 import org.ros.app_manager.AppManagerNotAvailableException;
 import org.ros.exceptions.RosInitException;
+
+import ros.android.activity.RosActivity;
+import ros.android.util.RobotDescription;
 
 /** Show a grid of applications that a given robot is capable of, and
  * launch whichever is chosen. */
@@ -35,13 +39,13 @@ public class AppChooser extends RosActivity
 
   private void updateList() {
     setContentView(R.layout.main);
-    ArrayList<App> apps = getAppList();
+    final ArrayList<App> apps = getAppList();
     GridView gridview = (GridView) findViewById(R.id.gridview);
     gridview.setAdapter(new AppAdapter(this, apps));
 
     gridview.setOnItemClickListener(new OnItemClickListener() {
         public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-          Toast.makeText(AppChooser.this, "app #" + position, Toast.LENGTH_SHORT).show();
+          AppLauncher.launch( AppChooser.this, apps.get( position ));
         }
       });
   }
@@ -52,7 +56,8 @@ public class AppChooser extends RosActivity
 
   public ArrayList<App> getAppList() {
     try {
-      AppManager app_man = new AppManager( getNode(), "robot1" );
+      RobotDescription robot = getCurrentRobot();
+      AppManager app_man = new AppManager( getNode(), robot.robot_name_ );
       return app_man.getAvailableApps();
     }
     catch( AppManagerNotAvailableException ex )

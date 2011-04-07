@@ -27,62 +27,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package ros.android.activity;
+package org.ros.android.app_chooser;
 
-import android.widget.BaseAdapter;
-import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
+import android.os.Bundle;
+import android.content.Intent;
+import android.widget.TextView;
 
-import java.util.List;
-import java.util.ArrayList;
+import ros.android.activity.RosActivity;
 
-import ros.android.util.RobotDescription;
+public class StubAppActivity extends RosActivity
+{
+  /** Called when the activity is first created. */
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.stub_app);
 
-public class MasterAdapter extends BaseAdapter {
-  private Context context_;
-  private String my_hostname_;
-  private List<MasterItem> master_items_;
+    Intent starting_intent = getIntent();
 
-  public MasterAdapter(MasterChooserActivity mca, List<RobotDescription> robots, String my_hostname ) {
-    context_ = mca;
-    my_hostname_ = my_hostname;
-    master_items_ = new ArrayList<MasterItem>();
-    if( robots != null )
-    {
-      for( int i = 0; i < robots.size(); i++ )
-      {
-        master_items_.add( new MasterItem( robots.get( i ), my_hostname_, mca ));
-      }
-    }
-  }
+    setTitle( starting_intent.getStringExtra( AppLauncher.PACKAGE + ".robot_app_display_name" ));
 
-  public int getCount() {
-    if( master_items_ == null )
-    {
-      return 0;
-    }
-    return master_items_.size();
-  }
-
-  public boolean areAllItemsEnabled() {
-    return false;
-  }
-
-  public boolean isEnabled( int position ) {
-    return master_items_.get( position ).isOk();
-  }
-
-  public Object getItem(int position) {
-    return null;
-  }
-
-  public long getItemId(int position) {
-    return 0;
-  }
-
-  // create a new View for each item referenced by the Adapter
-  public View getView(int position, View convertView, ViewGroup parent) {
-    return master_items_.get( position ).getView( context_, convertView, parent );
+    TextView tv;
+    tv = (TextView) findViewById( R.id.name );
+    tv.setText( starting_intent.getStringExtra( AppLauncher.PACKAGE + ".robot_app_name" ));
   }
 }

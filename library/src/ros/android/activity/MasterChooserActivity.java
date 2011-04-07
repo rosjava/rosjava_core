@@ -42,22 +42,25 @@ import ros.android.util.zxing.IntentResult;
 import ros.android.util.zxing.IntentIntegrator;
 import ros.android.util.SdCardSetup;
 import ros.android.util.Net;
+import ros.android.util.RobotDescription;
+
+import org.yaml.snakeyaml.Yaml;
 
 public class MasterChooserActivity extends Activity {
 
   private static final int ADD_URI_DIALOG_ID = 0;
 
-  public static final String MASTER_URI_EXTRA = "org.ros.android.MasterURI";
+  public static final String ROBOT_DESCRIPTION_EXTRA = "org.ros.android.RobotDescription";
 
   // TODO: This should eventually be a list of RobotDescriptions to
   // persist robot name and type data.
-  private List<String> master_uris_; // don't modify this without immediately calling updateListView().
+  private List<RobotDescription> robots_; // don't modify this without immediately calling updateListView().
 
   public MasterChooserActivity() {
-    master_uris_ = new ArrayList<String>();
+    robots_ = new ArrayList<RobotDescription>();
   }
 
-  private File getMasterFile() {
+  private File getRobotListFile() {
     if( !SdCardSetup.isReady() )
     {
       SdCardSetup.promptUserForMount( this );
@@ -68,63 +71,62 @@ public class MasterChooserActivity extends Activity {
       try
       {
         File ros_dir = SdCardSetup.getRosDir();
-        File master_list_file = new File( ros_dir, "master_uris" );
-        if( ! master_list_file.exists() )
+        File robot_list_file = new File( ros_dir, "robots.yaml" );
+        if( ! robot_list_file.exists() )
         {
-          Log.i( "RosAndroid", "masters file does not exist, creating." );
-          master_list_file.createNewFile();
+          Log.i( "RosAndroid", "robots.yaml file does not exist, creating." );
+          robot_list_file.createNewFile();
         }
-        return master_list_file;
+        return robot_list_file;
       }
       catch( Exception ex )
       {
-        Log.e( "RosAndroid", "exception in getMasterFile: " + ex.getMessage() );
+        Log.e( "RosAndroid", "exception in getRobotListFile: " + ex.getMessage() );
         return null;
       }
     }
   }
 
-  private void writeNewMaster( String new_master_uri ) {
-    File master_list_file = getMasterFile();
-    if( master_list_file == null )
+  public void writeRobotList() {
+    File robot_list_file = getRobotListFile();
+    if( robot_list_file == null )
     {
-      Log.e( "RosAndroid", "writeNewMaster(): no masters file." );
+      Log.e( "RosAndroid", "writeNewRobot(): no robots file." );
       return;
     }
 
     try
     {
-      FileWriter writer = new FileWriter( master_list_file, true ); // append to the file
-      writer.write( new_master_uri + "\n" );
+      FileWriter writer = new FileWriter( robot_list_file );
+      Yaml yaml = new Yaml();
+      yaml.dump( robots_, writer );
       writer.close();
-      Log.i( "RosAndroid", "Appended '" + new_master_uri + "' to masters file." );
+      Log.i( "RosAndroid", "Wrote robots.yaml file." );
     }
     catch( Exception ex )
     {
-      Log.e( "RosAndroid", "exception writing new master to sdcard: " + ex.getMessage() );
+      Log.e( "RosAndroid", "exception writing robots.yaml to sdcard: " + ex.getMessage() );
     }
   }
 
-  private void readMasterList() {
+  private void readRobotList() {
     try
     {
-      File master_list_file = getMasterFile();
-      if( master_list_file == null )
+      File robot_list_file = getRobotListFile();
+      if( robot_list_file == null )
       {
-        Log.e( "RosAndroid", "readMasterList(): no masters file." );
+        Log.e( "RosAndroid", "readRobotList(): no robots.yaml file." );
         return;
       }
 
-      BufferedReader reader = new BufferedReader( new FileReader( master_list_file ));
+      BufferedReader reader = new BufferedReader( new FileReader( robot_list_file ));
       try
       {
-        master_uris_.clear();
-        for( String line = reader.readLine(); line != null; line = reader.readLine() )
+        Yaml yaml = new Yaml();
+        robots_ = (List<RobotDescription>) yaml.load( reader );
+        if( robots_ == null )
         {
-          if( line != "" )
-          {
-            master_uris_.add( line );
-          }
+          robots_ = new ArrayList<RobotDescription>();
         }
       }
       finally
@@ -148,14 +150,14 @@ public class MasterChooserActivity extends Activity {
   @Override
   protected void onResume() {
     super.onResume();
-    readMasterList();
+    readRobotList();
     updateListView();
   }
 
   private void updateListView() {
     setContentView(R.layout.master_chooser);
     ListView listview = (ListView) findViewById(R.id.master_list);
-    listview.setAdapter( new MasterAdapter( this, master_uris_, Net.getNonLoopbackHostName() ));
+    listview.setAdapter( new MasterAdapter( this, robots_, Net.getNonLoopbackHostName() ));
 
     listview.setOnItemClickListener(new OnItemClickListener() {
         public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
@@ -166,7 +168,7 @@ public class MasterChooserActivity extends Activity {
 
   private void choose( int position ) {
     Intent result_intent = new Intent();
-    result_intent.putExtra( MASTER_URI_EXTRA, master_uris_.get( position ));
+    result_intent.putExtra( ROBOT_DESCRIPTION_EXTRA, robots_.get( position ));
     setResult( RESULT_OK, result_intent );
     finish();
   }
@@ -183,9 +185,20 @@ public class MasterChooserActivity extends Activity {
     }
   }
 
-  private void addMaster( String new_master_uri ) {
-    master_uris_.add( new_master_uri );
-    writeNewMaster( new_master_uri );
+  private void addMaster( String master_uri ) {
+    RobotDescription new_robot = new RobotDescription();
+    new_robot.master_uri_ = master_uri;
+    robots_.add( new_robot );
+    onRobotsChanged();
+  }
+
+  private void addRobot( RobotDescription new_robot ) {
+    robots_.add( new_robot );
+    onRobotsChanged();
+  }
+
+  private void onRobotsChanged() {
+    writeRobotList();
     updateListView();
   }
 

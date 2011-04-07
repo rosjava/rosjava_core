@@ -35,6 +35,7 @@ import org.ros.ParameterClient;
 import org.ros.exceptions.RosInitException;
 
 import java.util.Date;
+import java.util.Random;
 import java.lang.Thread;
 import java.lang.InterruptedException;
 
@@ -114,7 +115,8 @@ public class MasterChecker {
     public void run() {
       try
       {
-        Node node = new Node( "listener", MasterChooser.createContext( robot_description_.master_uri_, my_host_name_ ));
+        Node node = new Node( "master_checker_" + new Random().nextInt(),
+                              MasterChooser.createContext( robot_description_.master_uri_, my_host_name_ ));
         ParameterClient param_client = node.createParameterClient();
         robot_description_.robot_name_ = (String) param_client.getParam( "robot/name" );
         robot_description_.robot_type_ = (String) param_client.getParam( "robot/type" );

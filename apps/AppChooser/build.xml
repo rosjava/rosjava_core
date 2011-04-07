@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="AppChooser" default="help">
+<project name="AppChooser" default="help" basedir=".">
 
 <!-- The local.properties file is created and updated by the 'android'
      tool.
@@ -39,6 +39,24 @@
 
 <!-- extension targets. Uncomment the ones where you want to do custom work
      in between standard targets -->
+    <target name="-pre-build">
+      <copy todir="${basedir}/libs" overwrite="true">
+        <fileset dir="${basedir}/../../java/dist">
+          <exclude name="apache-xmlrpc*.jar"/>
+          <filename name="*.jar"/>
+        </fileset>
+      </copy>
+     <!--
+      <copy todir="${basedir}/libs" overwrite="true">
+        <fileset dir="${basedir}/../../java/lib">
+          <exclude name="junit*.jar"/>
+          <exclude name="mockito*.jar"/>
+          <filename name="*.jar"/>
+        </fileset>
+      </copy>
+     -->
+    </target>
+
 <!--
     <target name="-pre-build">
     </target>
