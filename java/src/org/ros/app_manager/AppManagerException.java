@@ -34,6 +34,14 @@ package org.ros.app_manager;
 
 public class AppManagerException extends Exception {
 
+  public AppManagerException(String string) {
+    super(string);
+  }
+
+  public AppManagerException() {
+    super();
+  }
+
   private static final long serialVersionUID = 1L;
 
 }

@@ -30,18 +30,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.ros.app_manager;
 
-public class AppManagerNotAvailableException extends AppManagerException {
+public class AppNotInstalledException extends AppManagerException {
 
-  public AppManagerNotAvailableException(String string) {
+  public AppNotInstalledException(String string) {
     super(string);
   }
 
-  public AppManagerNotAvailableException() {
-    super();
-  }
-  
   private static final long serialVersionUID = 1L;
 
 }
