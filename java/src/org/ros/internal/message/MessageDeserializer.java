@@ -32,7 +32,7 @@ public class MessageDeserializer implements org.ros.MessageDeserializer<Message>
 
   @Override
   public <MessageType extends Message> MessageType deserialize(String messageName, ByteBuffer buffer) {
-    return factory.deserializeMessage(messageName, buffer);
+    return factory.<MessageType>deserializeMessage(messageName, buffer);
   }
 
 }

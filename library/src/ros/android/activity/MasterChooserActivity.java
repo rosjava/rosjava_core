@@ -160,6 +160,7 @@ public class MasterChooserActivity extends Activity {
     listview.setAdapter( new MasterAdapter( this, robots_, Net.getNonLoopbackHostName() ));
 
     listview.setOnItemClickListener(new OnItemClickListener() {
+        @Override
         public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
           choose( position );
         }
@@ -215,6 +216,7 @@ public class MasterChooserActivity extends Activity {
       uri_field.setOnKeyListener( new URIFieldKeyListener() );
       Button scan_button = (Button) dialog.findViewById( R.id.scan_robot_button );
       scan_button.setOnClickListener( new View.OnClickListener() {
+          @Override
           public void onClick( View v ) {
             scanRobotClicked( v );
           }
@@ -236,6 +238,7 @@ public class MasterChooserActivity extends Activity {
   }
 
   public class URIFieldKeyListener implements View.OnKeyListener {
+    @Override
     public boolean onKey( View view, int key_code, KeyEvent event ) {
       if( event.getAction() == KeyEvent.ACTION_DOWN &&
           key_code == KeyEvent.KEYCODE_ENTER )

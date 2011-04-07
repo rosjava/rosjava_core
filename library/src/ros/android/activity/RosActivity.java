@@ -30,13 +30,13 @@ import ros.android.util.MasterChooser;
 import ros.android.util.RobotDescription;
 
 public class RosActivity extends Activity {
-  private MasterChooser master_chooser_;
+  private MasterChooser masterChooser;
   private Node node;
   private Exception errorException;
   private String errorMessage;
 
   public RosActivity() {
-    master_chooser_ = new MasterChooser( this );
+    masterChooser = new MasterChooser( this );
   }
 
   public Exception getErrorException() {
@@ -59,12 +59,13 @@ public class RosActivity extends Activity {
     return master_chooser_.getCurrentRobot();
   }
 
-  /** Re-launch the MasterChooserActivity to choose a new ROS master.
+  /**
+   * Re-launch the MasterChooserActivity to choose a new ROS master.
    * The results are handled in onActivityResult() and onResume()
    * since launching a new activity necessarily pauses this current
    * one. */
   public void chooseNewMaster() {
-    master_chooser_.launchChooserActivity();
+    masterChooser.launchChooserActivity();
   }
 
   @Override
@@ -78,12 +79,12 @@ public class RosActivity extends Activity {
 
   @Override
   protected void onActivityResult( int requestCode, int resultCode, Intent result_intent ) {
-    if( master_chooser_.handleActivityResult( requestCode, resultCode, result_intent ))
+    if( masterChooser.handleActivityResult( requestCode, resultCode, result_intent ))
     {
       // Save before checking validity in case someone wants to force
       // the next app to use the chooser.
-      master_chooser_.saveCurrentRobot();
-      if( !master_chooser_.haveRobot() )
+      masterChooser.saveCurrentRobot();
+      if( !masterChooser.haveRobot() )
       {
         Toast.makeText( this, "Cannot run without a ROS master.", Toast.LENGTH_LONG ).show();
         finish();
@@ -99,12 +100,12 @@ public class RosActivity extends Activity {
   protected void onResume() {
     super.onResume();
     if( node == null ) {
-      master_chooser_.loadCurrentRobot();
-      if( master_chooser_.haveRobot() )
+      masterChooser.loadCurrentRobot();
+      if( masterChooser.haveRobot() )
       {
         try
         {
-          node = new Node( "listener", master_chooser_.createContext() );
+          node = new Node( "listener", masterChooser.createContext() );
         }
         catch (Exception e)
         {
@@ -116,7 +117,7 @@ public class RosActivity extends Activity {
       }
       else // we don't have a master yet.
       {
-        master_chooser_.launchChooserActivity();
+        masterChooser.launchChooserActivity();
         // Launching the master chooser activity causes this activity
         // to pause.  this.onActivityResult() is called with the
         // result before onResume() is called again, so

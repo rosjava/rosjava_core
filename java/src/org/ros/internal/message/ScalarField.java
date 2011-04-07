@@ -62,7 +62,7 @@ class ScalarField<ValueType> extends Field {
   @SuppressWarnings("unchecked")
   @Override
   public void deserialize(ByteBuffer buffer) {
-    value = type.deserialize(buffer);
+    value = type.<ValueType>deserialize(buffer);
   }
 
   @Override

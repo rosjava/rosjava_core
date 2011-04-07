@@ -43,34 +43,34 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
-import ros.android.activity.MasterChooserActivity;
-
-import org.yaml.snakeyaml.Yaml;
-
-/** Helper class for launching the MasterChooserActivity for choosing a ROS master.
- * Keep this object around for the lifetime of an Activity.
+/**
+ * Helper class for launching the MasterChooserActivity for choosing a ROS
+ * master. Keep this object around for the lifetime of an Activity.
  */
 public class MasterChooser extends RosLoader {
 
-  private Activity calling_activity_;
-  private RobotDescription current_robot_;
+  private Activity callingActivity;
+  private RobotDescription currentRobot;
 
-  /** REQUEST_CODE number must be unique among activity requests which
-   * might be seen by handleActivityResult(). */
+  /**
+   * REQUEST_CODE number must be unique among activity requests which might be
+   * seen by handleActivityResult().
+   */
   private static final int REQUEST_CODE = 8748792;
 
   private static final String MASTER_URI_PREFS = "MASTER_URI_PREFS";
   private static final String MASTER_URI = "MASTER_URI";
 
-  /** Constructor.  Does not read current master from disk, that must
+  /**
+   * Constructor.  Does not read current master from disk, that must
    * be done by calling loadCurrentRobot(). */
   public MasterChooser( Activity calling_activity ) {
-    calling_activity_ = calling_activity;
-    current_robot_ = null;
+    callingActivity = calling_activity;
+    currentRobot = null;
   }
 
   public RobotDescription getCurrentRobot() {
-    return current_robot_;
+    return currentRobot;
   }
 
   /** Returns a File for the current-robot file if the sdcard is
@@ -104,7 +104,7 @@ public class MasterChooser extends RosLoader {
     File current_robot_file = getCurrentRobotFile();
     if( current_robot_file == null )
     {
-      Log.e( "RosAndroid", "writeNewMaster(): could not get current-robot File object." );
+      Log.e( "RosAndroid", "saveCurrentRobot(): could not get current-robot File object." );
       return;
     }
 
@@ -118,9 +118,9 @@ public class MasterChooser extends RosLoader {
 
       FileWriter writer = new FileWriter( current_robot_file, false ); // overwrite the file contents.
       Yaml yaml = new Yaml();
-      yaml.dump( current_robot_, writer );
+      yaml.dump( currentRobot, writer );
       writer.close();
-      Log.i( "RosAndroid", "Wrote '" + current_robot_.master_uri_ + "' etc to current-robot file." );
+      Log.i( "RosAndroid", "Wrote '" + currentRobot.master_uri_ + "' etc to current-robot file." );
     }
     catch( Exception ex )
     {
@@ -163,11 +163,11 @@ public class MasterChooser extends RosLoader {
   /** Returns true if current master URI and robot name are set in
    * memory, false otherwise.  Does not read anything from disk. */
   public boolean haveRobot() {
-    return( current_robot_ != null &&
-            current_robot_.master_uri_ != null &&
-            current_robot_.master_uri_.length() != 0 &&
-            current_robot_.robot_name_ != null &&
-            current_robot_.robot_name_.length() != 0 );
+    return( currentRobot != null &&
+            currentRobot.master_uri_ != null &&
+            currentRobot.master_uri_.length() != 0 &&
+            currentRobot.robot_name_ != null &&
+            currentRobot.robot_name_.length() != 0 );
   }
 
   /** Call this from your activity's onActivityResult() to record the
@@ -189,27 +189,31 @@ public class MasterChooser extends RosLoader {
     return true;
   }
 
-  /** Launch the MasterChooserActivity to choose or scan a new master.
-   * Because this launches an activity, the caller's onPause(),
-   * onActivityResult() and onResume() functions will be called before
-   * anything else happens there. */
+  /**
+   * Launch the {@link MasterChooserActivity} to choose or scan a new master.
+   * Because this launches an activity, the caller's {@code onPause()},
+   * {@code onActivityResult()} and {@code onResume()} functions will be called
+   * before anything else happens there.
+   */
   public void launchChooserActivity() throws ActivityNotFoundException {
-    Log.i( "RosAndroid", "starting master chooser activity" );
-    Intent chooser_intent = new Intent( calling_activity_, MasterChooserActivity.class );
-    calling_activity_.startActivityForResult( chooser_intent, REQUEST_CODE );
+    Log.i("RosAndroid", "starting master chooser activity");
+    Intent chooserIntent = new Intent(callingActivity, MasterChooserActivity.class);
+    callingActivity.startActivityForResult(chooserIntent, REQUEST_CODE);
   }
 
-  /** Create and return a new ROS NodeContext object based on the
-   * current value of the internal master_uri_ variable.  Throws an
-   * exception if that value is invalid or if we can't get a hostname
-   * for the device we are running on. */
+  /**
+   * Create and return a new ROS NodeContext object based on the current value
+   * of the internal master_uri_ variable. Throws an exception if that value is
+   * invalid or if we can't get a hostname for the device we are running on.
+   */
   @Override
   public NodeContext createContext() throws RosInitException {
-    return createContext( current_robot_.master_uri_, Net.getNonLoopbackHostName() );
+    return createContext( currentRobot.master_uri_, Net.getNonLoopbackHostName() );
   }
 
-  static public NodeContext createContext( String master_uri, String my_host_name ) throws RosInitException {
-    if( master_uri == null) {
+  static public NodeContext createContext(String masterUri, String myHostName)
+      throws RosInitException {
+    if (masterUri == null) {
       throw new RosInitException("ROS Master URI is not set");
     }
     String namespace = Namespace.GLOBAL_NS;
@@ -221,13 +225,14 @@ public class MasterChooser extends RosLoader {
     context.setRosRoot("fixme");
     context.setRosPackagePath(null);
     try {
-      context.setRosMasterUri( new URI( master_uri ));
+      context.setRosMasterUri(new URI(masterUri));
     } catch( URISyntaxException ex ) {
-      throw new RosInitException( "ROS Master URI (" + master_uri + ") is invalid: " + ex.getMessage() );
+      throw new RosInitException("ROS Master URI (" + masterUri + ") is invalid: "
+          + ex.getMessage());
     }
 
-    if (my_host_name != null) {
-      context.setHostName( my_host_name );
+    if (myHostName != null) {
+      context.setHostName(myHostName);
     } else {
       throw new RosInitException( "Could not get a hostname for this device." );
     }

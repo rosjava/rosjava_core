@@ -38,43 +38,47 @@ import org.ros.message.app_manager.App;
 import java.util.ArrayList;
 
 public class AppAdapter extends BaseAdapter {
-  private Context context_;
-  private ArrayList<App> apps_;
+  private Context context;
+  private ArrayList<App> apps;
 
   public AppAdapter(Context c, ArrayList<App> apps) {
-    context_ = c;
-    apps_ = apps;
+    context = c;
+    this.apps = apps;
   }
 
+  @Override
   public int getCount() {
-    if( apps_ == null )
-    {
+    if (apps == null) {
       return 0;
     }
-    return apps_.size();
+    return apps.size();
   }
 
+  @Override
   public Object getItem(int position) {
     return null;
   }
 
+  @Override
   public long getItemId(int position) {
     return 0;
   }
 
-  // create a new View for each item referenced by the Adapter
+  /**
+   * Create a new View for each item referenced by the Adapter.
+   */
+  @Override
   public View getView(int position, View convertView, ViewGroup parent) {
-    TextView new_view;
-    if (convertView == null) {  // if it's not recycled, initialize some attributes
-      new_view = new TextView( context_ );
+    TextView newView;
+    // If it's not recycled, initialize some attributes.
+    if (convertView == null) {
+      newView = new TextView(context);
     } else {
-      new_view = (TextView) convertView;
+      newView = (TextView) convertView;
     }
 
-    App app = apps_.get( position );
-
-    new_view.setText( app.display_name );
-
-    return new_view;
+    App app = apps.get(position);
+    newView.setText(app.display_name);
+    return newView;
   }
 }

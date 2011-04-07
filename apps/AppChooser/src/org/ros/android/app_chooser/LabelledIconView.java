@@ -29,11 +29,10 @@
 
 package org.ros.android.app_chooser;
 
-import android.graphics.drawable.Drawable;
-import android.widget.TextView;
 import android.content.Context;
-import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
+import android.widget.TextView;
 
 public class LabelledIconView extends TextView {
   public LabelledIconView( Context context ) {

@@ -64,12 +64,14 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
     return connection_status_ == "ok";
   }
 
+  @Override
   public void receive( RobotDescription robot_description ) {
     desc_.copyFrom( robot_description );
     connection_status_ = "ok";
     safePopulateView();
   }
 
+  @Override
   public void handleFailure( String reason ) {
     connection_status_ = reason;
     safePopulateView();
@@ -95,6 +97,7 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
       final MasterChooserActivity mca = parent_mca_;
 
       view_.post( new Runnable() {
+          @Override
           public void run() {
             populateView();
             mca.writeRobotList();

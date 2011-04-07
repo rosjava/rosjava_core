@@ -57,6 +57,7 @@ public class MasterAdapter extends BaseAdapter {
     }
   }
 
+  @Override
   public int getCount() {
     if( master_items_ == null )
     {
@@ -65,23 +66,28 @@ public class MasterAdapter extends BaseAdapter {
     return master_items_.size();
   }
 
+  @Override
   public boolean areAllItemsEnabled() {
     return false;
   }
 
+  @Override
   public boolean isEnabled( int position ) {
     return master_items_.get( position ).isOk();
   }
 
+  @Override
   public Object getItem(int position) {
     return null;
   }
 
+  @Override
   public long getItemId(int position) {
     return 0;
   }
 
   // create a new View for each item referenced by the Adapter
+  @Override
   public View getView(int position, View convertView, ViewGroup parent) {
     return master_items_.get( position ).getView( context_, convertView, parent );
   }
