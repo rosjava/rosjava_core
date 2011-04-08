@@ -67,6 +67,16 @@ public class StubAppActivity extends RosAppActivity
 
   public void onStartClicked( View view ) {
     setStatus( "Starting..." );
+    // ensureAppRunning( robotAppName, new AppStartCallback() {
+    //     public void startResult( boolean success, int errorCode, String message ) {
+    //       if( !success ) {
+    //         safeSetStatus( "failure!" /*...*/);
+    //       } else {
+    //         safeSetStatus( "running" );
+    //       }
+    //     }
+    //   });
+
     Thread starterThread = new Thread() {
         public void run() {
           try {
