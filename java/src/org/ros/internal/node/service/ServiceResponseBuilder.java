@@ -16,13 +16,31 @@
 
 package org.ros.internal.node.service;
 
-import org.ros.message.Message;
+import org.ros.MessageDeserializer;
+import org.ros.MessageSerializer;
+
+import java.nio.ByteBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ServiceResponseBuilder<RequestMessageType extends Message> {
+public abstract class ServiceResponseBuilder<RequestType, ResponseType> {
 
-  public Message build(RequestMessageType requestMessage);
+  private final MessageSerializer<ResponseType> serializer;
+  private final MessageDeserializer<RequestType> deserializer;
+
+  ServiceResponseBuilder(MessageSerializer<ResponseType> serializer,
+      MessageDeserializer<RequestType> deserializer) {
+    this.serializer = serializer;
+    this.deserializer = deserializer;
+  }
+
+  ByteBuffer handleRequest(ByteBuffer buffer) {
+    RequestType request = deserializer.deserialize(buffer);
+    ResponseType response = build(request);
+    return serializer.serialize(response);
+  }
+
+  abstract ResponseType build(RequestType requestMessage);
 
 }

@@ -65,7 +65,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
     if (incomingHeader.containsKey(ConnectionHeaderFields.SERVICE)) {
       String serviceName = incomingHeader.get(ConnectionHeaderFields.SERVICE);
       Preconditions.checkState(serviceManager.hasServiceServer(serviceName));
-      ServiceServer<?> serviceServer = serviceManager.getServiceServer(serviceName);
+      ServiceServer serviceServer = serviceManager.getServiceServer(serviceName);
 
       ChannelBuffer outgoingBuffer = serviceServer.finishHandshake(incomingHeader);
       if (outgoingBuffer == null) {

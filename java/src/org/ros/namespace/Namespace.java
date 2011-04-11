@@ -100,22 +100,10 @@ public interface Namespace {
    */
   public NameResolver getResolver();
 
-  /**
-   * @param serviceDefinition
-   * @param requestMessageClass
-   * @param responseBuilder
-   * @return
-   * @throws Exception
-   */
-  public <RequestMessageType extends Message> ServiceServer<RequestMessageType> createServiceServer(
-      ServiceDefinition serviceDefinition, Class<RequestMessageType> requestMessageClass,
-      ServiceResponseBuilder<RequestMessageType> responseBuilder) throws Exception;
+  public <RequestType, ResponseType> ServiceServer createServiceServer(
+      ServiceDefinition serviceDefinition,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception;
 
-  /**
-   * @param serviceIdentifier
-   * @param responseMessageClass
-   * @return
-   */
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass);
 

@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.internal.node.service;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -44,4 +45,5 @@ public final class ServiceResponseEncoder extends OneToOneEncoder {
       return msg;
     }
   }
+
 }

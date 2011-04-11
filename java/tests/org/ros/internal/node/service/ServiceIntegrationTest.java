@@ -28,8 +28,8 @@ import org.ros.internal.node.Node;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.message.Message;
 import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageSerializer;
 import org.ros.message.srv.AddTwoInts;
 
 import java.io.IOException;
@@ -56,11 +56,13 @@ public class ServiceIntegrationTest {
             AddTwoInts.__s_getMD5Sum());
 
     Node serverNode = Node.createPrivate(new GraphName("/server"), masterServer.getUri(), 0, 0);
-    ServiceServer<AddTwoInts.Request> server =
-        serverNode.createServiceServer(definition, AddTwoInts.Request.class,
-            new ServiceResponseBuilder<AddTwoInts.Request>() {
+    ServiceServer server =
+        serverNode.createServiceServer(definition,
+            new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>(
+                new MessageSerializer<AddTwoInts.Response>(),
+                new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class)) {
               @Override
-              public Message build(AddTwoInts.Request request) {
+              public AddTwoInts.Response build(AddTwoInts.Request request) {
                 AddTwoInts.Response response = new AddTwoInts.Response();
                 response.sum = request.a + request.b;
                 return response;

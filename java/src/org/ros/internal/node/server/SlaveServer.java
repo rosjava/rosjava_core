@@ -37,7 +37,6 @@ import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
-import org.ros.message.Message;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -133,7 +132,7 @@ public class SlaveServer extends NodeServer {
    * @throws MalformedURLException
    * @throws RemoteException
    */
-  public void addService(ServiceServer<? extends Message> server) throws URISyntaxException,
+  public void addService(ServiceServer server) throws URISyntaxException,
       MalformedURLException, RemoteException {
     serviceManager.putServiceServer(server.getName().toString(), server);
     masterClient.registerService(toSlaveIdentifier(), server);

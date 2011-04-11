@@ -17,7 +17,6 @@
 package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -190,31 +189,27 @@ public class Node {
    * are cached and reused per service. When a new {@link ServiceServer} is
    * generated, it is registered with the {@link MasterServer}.
    * 
-   * @param <RequestMessageType>
    * @param serviceDefinition the {@link ServiceDefinition} that is being served
-   * @param requestMessageClass the {@link Message} class that is used for
-   *        requests
    * @param responseBuilder the {@link ServiceResponseBuilder} that is used to
    *        build responses
    * @return a {@link ServiceServer} instance
    * @throws Exception
    */
   @SuppressWarnings("unchecked")
-  public <RequestMessageType extends Message> ServiceServer<RequestMessageType> createServiceServer(
-      ServiceDefinition serviceDefinition, Class<RequestMessageType> requestMessageClass,
-      ServiceResponseBuilder<RequestMessageType> responseBuilder) throws Exception {
-    ServiceServer<RequestMessageType> serviceServer;
+  public <RequestType, ResponseType> ServiceServer createServiceServer(
+      ServiceDefinition serviceDefinition,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
+    ServiceServer serviceServer;
     String name = serviceDefinition.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasServiceServer(name)) {
-        serviceServer = (ServiceServer<RequestMessageType>) serviceManager.getServiceServer(name);
-        Preconditions.checkState(serviceServer.checkMessageClass(requestMessageClass));
+        serviceServer = serviceManager.getServiceServer(name);
       } else {
         serviceServer =
-            new ServiceServer<RequestMessageType>(serviceDefinition, requestMessageClass,
-                responseBuilder, tcpRosServer.getAdvertiseAddress());
+            new ServiceServer(serviceDefinition, responseBuilder,
+                tcpRosServer.getAdvertiseAddress());
         createdNewService = true;
       }
     }

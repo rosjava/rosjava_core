@@ -22,65 +22,39 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelHandler;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
-import org.ros.message.Message;
 
 import java.net.URI;
-import java.nio.ByteOrder;
 import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceServer<RequestMessageType extends Message> {
+public class ServiceServer {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final AdvertiseAddress advertiseAddress;
-  private final Class<RequestMessageType> requestMessageClass;
-  private final ServiceResponseBuilder<RequestMessageType> responseBuilder;
+  private final ServiceResponseBuilder<?, ?> responseBuilder;
   private final ServiceDefinition definition;
   private final Map<String, String> header;
 
-  public final class RequestHandler extends SimpleChannelHandler {
-    @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-      RequestMessageType request = requestMessageClass.newInstance();
-      ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
-      request.deserialize(buffer.toByteBuffer());
-      Message responseMessage = responseBuilder.build(request);
-      // TODO(damonkohler): Support sequence number.
-      ChannelBuffer responseBuffer =
-          ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, responseMessage.serialize(0));
-      ServiceServerResponse response = new ServiceServerResponse();
-      // TODO(damonkohler): Support changing error code.
-      response.setErrorCode(1);
-      response.setMessageLength(responseBuffer.readableBytes());
-      response.setMessage(responseBuffer);
-      ctx.getChannel().write(response);
-    }
-  }
-
-  public ServiceServer(ServiceDefinition definition, Class<RequestMessageType> requestMessageClass,
-      ServiceResponseBuilder<RequestMessageType> responseBuilder, AdvertiseAddress advertiseAddress) {
-    this.requestMessageClass = requestMessageClass;
-    this.responseBuilder = responseBuilder;
+  public ServiceServer(ServiceDefinition definition, ServiceResponseBuilder<?, ?> responseBuilder,
+      AdvertiseAddress advertiseAddress) {
     this.definition = definition;
+    this.responseBuilder = responseBuilder;
     this.advertiseAddress = advertiseAddress;
     header =
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.SERVICE, definition.getName().toString())
-            .putAll(definition.toHeader()).build();
+            .putAll(definition.toHeader())
+            .build();
   }
 
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
@@ -107,11 +81,7 @@ public class ServiceServer<RequestMessageType extends Message> {
   }
 
   public ChannelHandler createRequestHandler() {
-    return new RequestHandler();
+    return new ServiceRequestHandler(responseBuilder);
   }
 
-  public boolean checkMessageClass(Class<RequestMessageType> expectedRequestMessageClass) {
-    return expectedRequestMessageClass == requestMessageClass;
-  }
-  
 }

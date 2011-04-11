@@ -151,10 +151,10 @@ public class Node implements Namespace {
   }
 
   @Override
-  public <RequestMessageType extends Message> ServiceServer<RequestMessageType> createServiceServer(
-      ServiceDefinition serviceDefinition, Class<RequestMessageType> requestMessageClass,
-      ServiceResponseBuilder<RequestMessageType> responseBuilder) throws Exception {
-    return node.createServiceServer(serviceDefinition, requestMessageClass, responseBuilder);
+  public <RequestType, ResponseType> ServiceServer createServiceServer(
+      ServiceDefinition serviceDefinition,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
+    return node.createServiceServer(serviceDefinition, responseBuilder);
   }
 
   @Override

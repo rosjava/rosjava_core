@@ -31,7 +31,6 @@ import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.topic.TopicDefinition;
-import org.ros.message.Message;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -66,8 +65,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @throws URISyntaxException
    * @throws RemoteException
    */
-  public Response<Void> registerService(SlaveIdentifier slave,
-      ServiceServer<? extends Message> service) throws URISyntaxException, RemoteException {
+  public Response<Void> registerService(SlaveIdentifier slave, ServiceServer service)
+      throws URISyntaxException, RemoteException {
     return Response.fromListChecked(node.registerService(slave.getName().toString(), service
         .getName().toString(), service.getUri().toString(), slave.getUri().toString()),
         new VoidResultFactory());
@@ -84,8 +83,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @throws URISyntaxException
    * @throws RemoteException
    */
-  public Response<Integer> unregisterService(SlaveIdentifier slave,
-      ServiceServer<? extends Message> service) throws URISyntaxException, RemoteException {
+  public Response<Integer> unregisterService(SlaveIdentifier slave, ServiceServer service)
+      throws URISyntaxException, RemoteException {
     return Response.fromListChecked(node.unregisterService(slave.getName().toString(), service
         .getName().toString(), service.getUri().toString()), new IntegerResultFactory());
   }
