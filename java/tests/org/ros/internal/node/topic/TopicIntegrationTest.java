@@ -29,6 +29,7 @@ import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.message.MessageSerializer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -58,7 +59,8 @@ public class TopicIntegrationTest {
     Node publisherNode =
         Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0, 0);
     Publisher<org.ros.message.std_msgs.String> publisher =
-        publisherNode.createPublisher(topicDefinition, org.ros.message.std_msgs.String.class);
+        publisherNode.createPublisher(topicDefinition, org.ros.message.std_msgs.String.class,
+            new MessageSerializer<org.ros.message.std_msgs.String>());
 
     Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
     Subscriber<org.ros.message.std_msgs.String> subscriber =

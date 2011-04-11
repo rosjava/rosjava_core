@@ -14,26 +14,22 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.message;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageDeserializer implements org.ros.MessageDeserializer<Message> {
-
-  private final MessageFactory factory;
-  private final String messageName;
-
-  public MessageDeserializer(String messageName, MessageFactory factory) {
-    this.messageName = messageName;
-    this.factory = factory;
-  }
+public class MessageSerializer<MessageType extends Message>
+    implements org.ros.MessageSerializer<MessageType> {
 
   @Override
-  public <MessageType extends Message> MessageType deserialize(ByteBuffer buffer) {
-    return factory.<MessageType>deserializeMessage(messageName, buffer);
+  public ByteBuffer serialize(MessageType message) {
+    ByteBuffer buffer = ByteBuffer.wrap(message.serialize(0));
+    buffer.order(ByteOrder.LITTLE_ENDIAN);
+    return buffer;
   }
 
 }

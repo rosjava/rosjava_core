@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
+import org.ros.MessageSerializer;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
@@ -75,18 +76,20 @@ public class Node {
   public static Node createPublic(GraphName nodeName, URI masterUri, String advertiseHostname,
       int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
       URISyntaxException {
-    Node node = new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
-        new AdvertiseAddress(advertiseHostname), BindAddress.createPublic(xmlRpcBindPort),
-        new AdvertiseAddress(advertiseHostname));
+    Node node =
+        new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
+            new AdvertiseAddress(advertiseHostname), BindAddress.createPublic(xmlRpcBindPort),
+            new AdvertiseAddress(advertiseHostname));
     node.start();
     return node;
   }
 
   public static Node createPrivate(GraphName nodeName, URI masterUri, int xmlRpcBindPort,
       int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
-    Node node = new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
-        AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
-        AdvertiseAddress.createPrivate());
+    Node node =
+        new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
+            AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
+            AdvertiseAddress.createPrivate());
     node.start();
     return node;
   }
@@ -99,10 +102,11 @@ public class Node {
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    tcpRosServer = new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager,
-        serviceManager);
-    slaveServer = new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress,
-        masterClient, topicManager, serviceManager, tcpRosServer);
+    tcpRosServer =
+        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
+    slaveServer =
+        new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress, masterClient,
+            topicManager, serviceManager, tcpRosServer);
   }
 
   /**
@@ -111,10 +115,8 @@ public class Node {
    * is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition
-   *          {@link TopicDefinition} that is subscribed to
-   * @param messageClass
-   *          {@link Message} class for topic
+   * @param topicDefinition {@link TopicDefinition} that is subscribed to
+   * @param messageClass {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -133,8 +135,9 @@ public class Node {
         subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
         Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
-        subscriber = Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition,
-            messageClass, executor);
+        subscriber =
+            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
+                executor);
         createdNewSubscriber = true;
       }
     }
@@ -151,10 +154,8 @@ public class Node {
    * registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition
-   *          {@link TopicDefinition} that is being published
-   * @param messageClass
-   *          {@link Message} class for topic
+   * @param topicDefinition {@link TopicDefinition} that is being published
+   * @param messageClass {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -162,8 +163,9 @@ public class Node {
    */
   @SuppressWarnings("unchecked")
   public <MessageType extends Message> Publisher<MessageType> createPublisher(
-      TopicDefinition topicDefinition, Class<MessageType> messageClass) throws IOException,
-      URISyntaxException, RemoteException {
+      TopicDefinition topicDefinition, Class<MessageType> messageClass,
+      MessageSerializer<MessageType> serializer) throws IOException, URISyntaxException,
+      RemoteException {
     String topicName = topicDefinition.getName().toString();
     Publisher<MessageType> publisher;
     boolean createdNewPublisher = false;
@@ -173,7 +175,7 @@ public class Node {
         publisher = (Publisher<MessageType>) topicManager.getPublisher(topicName);
         Preconditions.checkState(publisher.checkMessageClass(messageClass));
       } else {
-        publisher = new Publisher<MessageType>(topicDefinition, messageClass);
+        publisher = new Publisher<MessageType>(topicDefinition, messageClass, serializer);
         createdNewPublisher = true;
       }
     }
@@ -190,12 +192,11 @@ public class Node {
    * generated, it is registered with the {@link MasterServer}.
    * 
    * @param <RequestMessageType>
-   * @param serviceDefinition
-   *          the {@link ServiceDefinition} that is being served
-   * @param requestMessageClass
-   *          the {@link Message} class that is used for requests
-   * @param responseBuilder
-   *          the {@link ServiceResponseBuilder} that is used to build responses
+   * @param serviceDefinition the {@link ServiceDefinition} that is being served
+   * @param requestMessageClass the {@link Message} class that is used for
+   *        requests
+   * @param responseBuilder the {@link ServiceResponseBuilder} that is used to
+   *        build responses
    * @return a {@link ServiceServer} instance
    * @throws Exception
    */
@@ -212,8 +213,9 @@ public class Node {
         serviceServer = (ServiceServer<RequestMessageType>) serviceManager.getServiceServer(name);
         Preconditions.checkState(serviceServer.checkMessageClass(requestMessageClass));
       } else {
-        serviceServer = new ServiceServer<RequestMessageType>(serviceDefinition,
-            requestMessageClass, responseBuilder, tcpRosServer.getAdvertiseAddress());
+        serviceServer =
+            new ServiceServer<RequestMessageType>(serviceDefinition, requestMessageClass,
+                responseBuilder, tcpRosServer.getAdvertiseAddress());
         createdNewService = true;
       }
     }
@@ -230,10 +232,9 @@ public class Node {
    * created, it is connected to the {@link ServiceServer}.
    * 
    * @param <ResponseMessageType>
-   * @param serviceIdentifier
-   *          the {@link ServiceIdentifier} of the server
-   * @param responseMessageClass
-   *          the {@link Message} class that is used for responses
+   * @param serviceIdentifier the {@link ServiceIdentifier} of the server
+   * @param responseMessageClass the {@link Message} class that is used for
+   *        responses
    * @return a {@link ServiceClient} instance
    */
   @SuppressWarnings("unchecked")
@@ -292,11 +293,11 @@ public class Node {
       throws RemoteException {
     Response<URI> response;
     try {
-      response = masterClient
-          .lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
+      response =
+          masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
       if (response.getStatusCode() == StatusCode.SUCCESS) {
-        ServiceDefinition serviceDefinition = new ServiceDefinition(serviceName,
-            serviceType.getDataType(), serviceType.getMD5Sum());
+        ServiceDefinition serviceDefinition =
+            new ServiceDefinition(serviceName, serviceType.getDataType(), serviceType.getMD5Sum());
         return new ServiceIdentifier(response.getResult(), serviceDefinition);
       } else {
         return null;

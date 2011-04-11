@@ -35,6 +35,7 @@ import org.ros.internal.node.topic.MessageDefinition;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.Message;
+import org.ros.message.MessageSerializer;
 import org.ros.message.Service;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
@@ -60,8 +61,8 @@ public class Node implements Namespace {
   private final TimeProvider timeProvider;
 
   /**
-   * @param name
-   *          Node name. This identifies this node to the rest of the ROS graph.
+   * @param name Node name. This identifies this node to the rest of the ROS
+   *        graph.
    * @param context
    * @throws RosInitException
    */
@@ -86,17 +87,19 @@ public class Node implements Namespace {
     log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
 
     try {
-      if (context.getHostName() == null) { 
+      if (context.getHostName() == null) {
         throw new NullPointerException("context.getHostName() cannot be null");
       }
       if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
-        node = org.ros.internal.node.Node.createPrivate(nodeName, context.getRosMasterUri(),
-            context.getXmlRpcPort(), context.getTcpRosPort());
+        node =
+            org.ros.internal.node.Node.createPrivate(nodeName, context.getRosMasterUri(),
+                context.getXmlRpcPort(), context.getTcpRosPort());
       } else {
-        node = org.ros.internal.node.Node.createPublic(nodeName, context.getRosMasterUri(),
-            context.getHostName(), context.getXmlRpcPort(), context.getTcpRosPort());
+        node =
+            org.ros.internal.node.Node.createPublic(nodeName, context.getRosMasterUri(),
+                context.getHostName(), context.getXmlRpcPort(), context.getTcpRosPort());
       }
     } catch (Exception e) {
       throw new RosInitException(e);
@@ -104,8 +107,8 @@ public class Node implements Namespace {
 
     // TODO(damonkohler): Move the creation and management of the RosoutLogger
     // into the internal.Node class.
-    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher = createPublisher("/rosout",
-        org.ros.message.rosgraph_msgs.Log.class);
+    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
+        createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
     log.setRosoutPublisher(rosoutPublisher);
   }
 
@@ -115,10 +118,11 @@ public class Node implements Namespace {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message message = messageClass.newInstance();
-      TopicDefinition topicDefinition = new TopicDefinition(new GraphName(resolvedTopicName),
-          MessageDefinition.createFromMessage(message));
-      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl = node.createPublisher(
-          topicDefinition, messageClass);
+      TopicDefinition topicDefinition =
+          new TopicDefinition(new GraphName(resolvedTopicName),
+              MessageDefinition.createFromMessage(message));
+      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
+          node.createPublisher(topicDefinition, messageClass, new MessageSerializer<MessageType>());
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (Exception e) {
       throw new RosInitException(e);
@@ -132,10 +136,11 @@ public class Node implements Namespace {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message message = messageClass.newInstance();
-      TopicDefinition topicDefinition = new TopicDefinition(new GraphName(resolvedTopicName),
-          MessageDefinition.createFromMessage(message));
-      org.ros.internal.node.topic.Subscriber<MessageType> subscriber = node.createSubscriber(
-          topicDefinition, messageClass);
+      TopicDefinition topicDefinition =
+          new TopicDefinition(new GraphName(resolvedTopicName),
+              MessageDefinition.createFromMessage(message));
+      org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
+          node.createSubscriber(topicDefinition, messageClass);
       subscriber.addMessageListener(callback);
       return new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriber);
     } catch (Exception e) {

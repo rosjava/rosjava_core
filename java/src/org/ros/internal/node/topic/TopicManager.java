@@ -32,7 +32,7 @@ import java.util.Map;
 public class TopicManager {
 
   private final Map<String, Subscriber<? extends Message>> subscribers;
-  private final Map<String, Publisher<? extends Message>> publishers;
+  private final Map<String, Publisher<?>> publishers;
 
   public TopicManager() {
     publishers = Maps.newConcurrentMap();
@@ -47,7 +47,7 @@ public class TopicManager {
     return publishers.containsKey(topicName);
   }
 
-  public Publisher<? extends Message> getPublisher(String topicName) {
+  public Publisher<?> getPublisher(String topicName) {
     return publishers.get(topicName);
   }
 
@@ -55,7 +55,7 @@ public class TopicManager {
     return subscribers.get(topicName);
   }
 
-  public void putPublisher(String topicName, Publisher<? extends Message> publisher) {
+  public void putPublisher(String topicName, Publisher<?> publisher) {
     publishers.put(topicName, publisher);
   }
 
@@ -67,7 +67,7 @@ public class TopicManager {
     return ImmutableList.copyOf(subscribers.values());
   }
 
-  public List<Publisher<? extends Message>> getPublishers() {
+  public List<Publisher<?>> getPublishers() {
     return ImmutableList.copyOf(publishers.values());
   }
 

@@ -37,6 +37,8 @@ import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
+import org.ros.message.Message;
+import org.ros.message.MessageSerializer;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
@@ -47,7 +49,7 @@ import java.util.concurrent.Executors;
  */
 public class MessageImplQueueIntegrationTest {
 
-  private OutgoingMessageQueue out;
+  private OutgoingMessageQueue<Message> out;
 
   private class ServerHandler extends SimpleChannelHandler {
     @Override
@@ -59,7 +61,7 @@ public class MessageImplQueueIntegrationTest {
 
   @Before
   public void setup() {
-    out = new OutgoingMessageQueue();
+    out = new OutgoingMessageQueue<Message>(new MessageSerializer<Message>());
     out.start();
   }
 
@@ -91,7 +93,8 @@ public class MessageImplQueueIntegrationTest {
     // TODO(damonkohler): Test connecting multiple incoming queues to single
     // outgoing queue and visa versa.
     final IncomingMessageQueue<org.ros.message.std_msgs.String> in =
-        new IncomingMessageQueue<org.ros.message.std_msgs.String>(org.ros.message.std_msgs.String.class);
+        new IncomingMessageQueue<org.ros.message.std_msgs.String>(
+            org.ros.message.std_msgs.String.class);
 
     ChannelFactory clientChannelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),

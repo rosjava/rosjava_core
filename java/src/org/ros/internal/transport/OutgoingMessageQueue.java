@@ -22,31 +22,28 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.ros.message.Message;
-
-import java.nio.ByteOrder;
+import org.ros.MessageSerializer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class OutgoingMessageQueue {
+public class OutgoingMessageQueue<MessageType> {
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
   private final ChannelGroup channelGroup;
-  private final CircularBlockingQueue<Message> messages;
+  private final CircularBlockingQueue<MessageType> messages;
   private final MessageSendingThread thread;
+  private final MessageSerializer<MessageType> serializer;
 
   private final class MessageSendingThread extends Thread {
     @Override
     public void run() {
       try {
         while (!Thread.currentThread().isInterrupted()) {
-          // TODO(damonkohler): Set sequence number appropriately.
-          byte[] serializedMessage = messages.take().serialize(0);
-          ChannelBuffer message =
-              ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, serializedMessage);
-          channelGroup.write(message);
+          ChannelBuffer buffer =
+              ChannelBuffers.wrappedBuffer(serializer.serialize(messages.take()));
+          channelGroup.write(buffer);
         }
       } catch (InterruptedException e) {
         // Cancelable
@@ -59,13 +56,14 @@ public class OutgoingMessageQueue {
     }
   }
 
-  public OutgoingMessageQueue() {
+  public OutgoingMessageQueue(MessageSerializer<MessageType> serializer) {
+    this.serializer = serializer;
     channelGroup = new DefaultChannelGroup();
-    messages = new CircularBlockingQueue<Message>(MESSAGE_BUFFER_CAPACITY);
+    messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
     thread = new MessageSendingThread();
   }
 
-  public void put(Message message) {
+  public void put(MessageType message) {
     messages.put(message);
   }
 

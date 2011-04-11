@@ -35,7 +35,6 @@ import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
-import org.ros.message.Message;
 
 import java.util.Map;
 
@@ -82,7 +81,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
     } else {
       String topicName = incomingHeader.get(ConnectionHeaderFields.TOPIC);
       Preconditions.checkState(topicManager.hasPublisher(topicName));
-      Publisher<? extends Message> publisher = topicManager.getPublisher(topicName);
+      Publisher<?> publisher = topicManager.getPublisher(topicName);
       ChannelBuffer outgoingBuffer = publisher.finishHandshake(incomingHeader);
       Channel channel = ctx.getChannel();
       ChannelFuture future = channel.write(outgoingBuffer).await();
