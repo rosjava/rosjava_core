@@ -16,6 +16,11 @@
 
 package ros.android.teleop;
 
+import android.widget.Toast;
+
+import org.ros.MessageListener;
+import org.ros.message.app_manager.AppStatus;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -32,7 +37,7 @@ import org.ros.app_manager.AppManagerNotAvailableException;
 import org.ros.app_manager.AppNotInstalledException;
 import org.ros.exceptions.RosInitException;
 import org.ros.message.geometry_msgs.Twist;
-import org.ros.namespace.NameResolver;
+import org.ros.namespace.Namespace;
 import ros.android.activity.RosAppActivity;
 import ros.android.sensor.GravityTeleop;
 import ros.android.views.SensorImageView;
@@ -88,24 +93,41 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
     }
   }
 
+  protected void initializeToastStatus() throws RosInitException { 
+    Namespace appNamespace = getAppNamespace();
+    appNamespace.createSubscriber("app_status", new MessageListener<AppStatus>() {
+      @Override
+      public void onNewMessage(final AppStatus message) {
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            Toast.makeText(Teleop.this, message.status, Toast.LENGTH_LONG).show();
+          }
+        });
+
+      }
+    }, AppStatus.class);
+  }
+  
   @Override
   protected void onResume() {
     // TODO(kwc): needs a whole lot of tuning
     super.onResume();
-    
-    try {
-      ensureAppRunning("turtlebot_teleop/android_teleop");      
 
+    try {
+      ensureAppRunning("turtlebot_teleop/android_teleop");
+      initializeToastStatus();
+      
       sensor.start(this);
 
       Node node = getNode();
-
+      Namespace appNamespace = getAppNamespace();
       imageSub = (SensorImageView) findViewById(R.id.image);
-      imageSub.init(node, "/turtlebot/application/camera/rgb/image_color/compressed");
+      imageSub.init(node, appNamespace.resolveName("camera/rgb/image_color/compressed"));
       imageSub.setSelected(true);
 
-      NameResolver resolver = node.getResolver().createResolver("turtlebot_node");
-      twistPub = node.createPublisher(resolver.resolveName("cmd_vel"), Twist.class);
+      // TODO(kwc): I don't like cmd_vel being in the turtlebot_node namespace
+      twistPub = appNamespace.createPublisher("turtlebot_node/cmd_vel", Twist.class);
 
       pubThread = new Thread(new Runnable() {
 
@@ -138,13 +160,13 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
     } catch (RosInitException e) {
       Log.e("Teleop", e.getMessage());
     } catch (AppManagerNotAvailableException e) {
-      //TODO(kwc) need standard way of display app launch failure to user
-      
+      // TODO(kwc) need permanent way of display app launch failure to user
       Log.e("Teleop", e.getMessage());
+      Toast.makeText(Teleop.this, e.getMessage(), Toast.LENGTH_LONG).show();
     } catch (AppNotInstalledException e) {
-      //TODO(kwc) display message to user that app cannot be run on this robot
-      
+      // TODO(kwc) display message to user that app cannot be run on this robot
       Log.e("Teleop", e.getMessage());
+      Toast.makeText(Teleop.this, e.getMessage(), Toast.LENGTH_LONG).show();
     }
 
   }
@@ -175,17 +197,17 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
     int action = motionEvent.getAction();
     if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
       deadman = true;
-      
-        motionX = (motionEvent.getX() - (arg0.getWidth() / 2)) / (arg0.getWidth());
-        motionY = (motionEvent.getY() - (arg0.getHeight() / 2)) / (arg0.getHeight());
-        
-        touchCartesianMessage.linear.x = -motionY;
-        touchCartesianMessage.linear.y = 0;
-        touchCartesianMessage.linear.z = 0;
-        touchCartesianMessage.angular.x = 0;
-        touchCartesianMessage.angular.y = 0;
-        touchCartesianMessage.angular.z = -2 * motionX;
-      
+
+      motionX = (motionEvent.getX() - (arg0.getWidth() / 2)) / (arg0.getWidth());
+      motionY = (motionEvent.getY() - (arg0.getHeight() / 2)) / (arg0.getHeight());
+
+      touchCartesianMessage.linear.x = -motionY;
+      touchCartesianMessage.linear.y = 0;
+      touchCartesianMessage.linear.z = 0;
+      touchCartesianMessage.angular.x = 0;
+      touchCartesianMessage.angular.y = 0;
+      touchCartesianMessage.angular.z = -2 * motionX;
+
     } else {
       deadman = false;
     }
