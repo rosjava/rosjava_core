@@ -197,7 +197,7 @@ public class SlaveServer extends NodeServer {
 
   public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
     if (topicManager.hasSubscriber(topicName)) {
-      Subscriber<? extends Message> subscriber = topicManager.getSubscriber(topicName);
+      Subscriber<?> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
       List<PublisherIdentifier> pubIdentifiers = buildPublisherIdentifierList(publisherUris,
           topicDefinition);

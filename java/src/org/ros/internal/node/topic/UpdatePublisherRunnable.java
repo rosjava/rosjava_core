@@ -24,14 +24,13 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
-import org.ros.message.Message;
 
 import java.net.MalformedURLException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class UpdatePublisherRunnable<MessageType extends Message> implements Runnable {
+class UpdatePublisherRunnable<MessageType> implements Runnable {
 
   private static final Log log = LogFactory.getLog(UpdatePublisherRunnable.class);
 

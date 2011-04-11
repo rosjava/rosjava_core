@@ -29,6 +29,7 @@ import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 
 import java.io.IOException;
@@ -64,7 +65,9 @@ public class TopicIntegrationTest {
 
     Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
-        publisherNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class);
+        publisherNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
 
     final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
     helloMessage.data = "Hello, ROS!";

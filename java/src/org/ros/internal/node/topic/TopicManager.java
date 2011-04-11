@@ -19,8 +19,6 @@ package org.ros.internal.node.topic;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-import org.ros.message.Message;
-
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +29,7 @@ import java.util.Map;
  */
 public class TopicManager {
 
-  private final Map<String, Subscriber<? extends Message>> subscribers;
+  private final Map<String, Subscriber<?>> subscribers;
   private final Map<String, Publisher<?>> publishers;
 
   public TopicManager() {
@@ -51,7 +49,7 @@ public class TopicManager {
     return publishers.get(topicName);
   }
 
-  public Subscriber<? extends Message> getSubscriber(String topicName) {
+  public Subscriber<?> getSubscriber(String topicName) {
     return subscribers.get(topicName);
   }
 
@@ -63,7 +61,7 @@ public class TopicManager {
     subscribers.put(topicName, subscriber);
   }
 
-  public List<Subscriber<? extends Message>> getSubscribers() {
+  public List<Subscriber<?>> getSubscribers() {
     return ImmutableList.copyOf(subscribers.values());
   }
 

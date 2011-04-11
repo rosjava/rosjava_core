@@ -35,6 +35,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
+import org.ros.MessageDeserializer;
 import org.ros.MessageListener;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
@@ -42,7 +43,6 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
-import org.ros.message.Message;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
@@ -58,7 +58,7 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Subscriber<MessageType extends Message> extends Topic {
+public class Subscriber<MessageType> extends Topic {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Subscriber.class);
@@ -117,24 +117,28 @@ public class Subscriber<MessageType extends Message> extends Topic {
     }
   }
 
-  public static <S extends Message> Subscriber<S> create(SlaveIdentifier slaveIdentifier,
-      TopicDefinition description, Class<S> messageClass, Executor executor) {
-    return new Subscriber<S>(slaveIdentifier, description, messageClass, executor);
+  public static <S> Subscriber<S> create(SlaveIdentifier slaveIdentifier,
+      TopicDefinition description, Class<S> messageClass, Executor executor,
+      MessageDeserializer<S> deserializer) {
+    return new Subscriber<S>(slaveIdentifier, description, messageClass, executor, deserializer);
   }
 
   private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition description,
-      Class<MessageType> messageClass, Executor executor) {
+      Class<MessageType> messageClass, Executor executor,
+      MessageDeserializer<MessageType> deserializer) {
     super(description, messageClass);
     this.executor = executor;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
-    this.in = new IncomingMessageQueue<MessageType>(messageClass);
+    this.in = new IncomingMessageQueue<MessageType>(deserializer);
     this.slaveIdentifier = slaveIdentifier;
-    header = ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
-        .putAll(description.toHeader()).build();
+    header =
+        ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
+            .putAll(description.toHeader()).build();
     knownPublishers = Sets.newHashSet();
     channelGroup = new DefaultChannelGroup();
-    channelFactory = new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
-        Executors.newCachedThreadPool());
+    channelFactory =
+        new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
+            Executors.newCachedThreadPool());
     thread = new MessageReadingThread();
     thread.start();
   }

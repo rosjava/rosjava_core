@@ -35,6 +35,7 @@ import org.ros.internal.node.topic.MessageDefinition;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.Message;
+import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.message.Service;
 import org.ros.message.Time;
@@ -140,7 +141,8 @@ public class Node implements Namespace {
           new TopicDefinition(new GraphName(resolvedTopicName),
               MessageDefinition.createFromMessage(message));
       org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
-          node.createSubscriber(topicDefinition, messageClass);
+          node.createSubscriber(topicDefinition, messageClass,
+              new MessageDeserializer<MessageType>(messageClass));
       subscriber.addMessageListener(callback);
       return new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriber);
     } catch (Exception e) {

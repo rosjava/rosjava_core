@@ -38,6 +38,7 @@ import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 import org.ros.message.Message;
+import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 
 import java.net.InetSocketAddress;
@@ -94,7 +95,8 @@ public class MessageImplQueueIntegrationTest {
     // outgoing queue and visa versa.
     final IncomingMessageQueue<org.ros.message.std_msgs.String> in =
         new IncomingMessageQueue<org.ros.message.std_msgs.String>(
-            org.ros.message.std_msgs.String.class);
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
 
     ChannelFactory clientChannelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),

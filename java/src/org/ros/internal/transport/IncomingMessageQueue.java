@@ -21,30 +21,28 @@ import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
-import org.ros.message.Message;
+import org.ros.MessageDeserializer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class IncomingMessageQueue<MessageType extends Message> {
+public class IncomingMessageQueue<MessageType> {
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
-  private final Class<MessageType> messageClass;
   private final CircularBlockingQueue<MessageType> messages;
+  private final MessageDeserializer<MessageType> deserializer;
 
   private final class MessageHandler extends SimpleChannelHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
       ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
-      MessageType message = messageClass.newInstance();      
-      message.deserialize(buffer.toByteBuffer());
-      messages.put(message);
+      messages.put(deserializer.deserialize(buffer.toByteBuffer()));
     }
   }
 
-  public IncomingMessageQueue(Class<MessageType> messageClass) {
-    this.messageClass = messageClass;
+  public IncomingMessageQueue(MessageDeserializer<MessageType> deserializer) {
+    this.deserializer = deserializer;
     messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
   }
 

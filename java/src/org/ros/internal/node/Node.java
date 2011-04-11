@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
+import org.ros.MessageDeserializer;
 import org.ros.MessageSerializer;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -123,9 +124,9 @@ public class Node {
    * @throws IOException
    */
   @SuppressWarnings("unchecked")
-  public <MessageType extends Message> Subscriber<MessageType> createSubscriber(
-      TopicDefinition topicDefinition, Class<MessageType> messageClass) throws IOException,
-      URISyntaxException, RemoteException {
+  public <MessageType> Subscriber<MessageType> createSubscriber(TopicDefinition topicDefinition,
+      Class<MessageType> messageClass, MessageDeserializer<MessageType> deserializer)
+      throws IOException, URISyntaxException, RemoteException {
     String topicName = topicDefinition.getName().toString();
     Subscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
@@ -137,7 +138,7 @@ public class Node {
       } else {
         subscriber =
             Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
-                executor);
+                executor, deserializer);
         createdNewSubscriber = true;
       }
     }
