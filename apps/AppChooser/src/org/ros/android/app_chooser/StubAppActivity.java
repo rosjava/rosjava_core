@@ -56,12 +56,7 @@ public class StubAppActivity extends RosAppActivity
     robotAppDisplayName = getIntent().getStringExtra( AppLauncher.PACKAGE + ".robot_app_display_name" );
     
     setTitle( robotAppDisplayName );
-
     setContentView(R.layout.stub_app);
-
-    TextView tv = (TextView) findViewById( R.id.name );
-    tv.setText( robotAppName );
-
     statusView = (TextView) findViewById( R.id.status_view );
   }
 
