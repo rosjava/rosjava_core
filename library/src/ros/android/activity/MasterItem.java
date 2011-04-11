@@ -84,7 +84,7 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
     // up sometimes, so I'm always making new ones.
     view_ = inflater.inflate( R.layout.master_item, null );
     populateView();
-    return new_view;
+    return view_;
   }
 
   private void safePopulateView() {
