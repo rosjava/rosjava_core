@@ -24,7 +24,7 @@ import static org.mockito.Mockito.mock;
 import org.junit.Test;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
-import org.ros.internal.node.server.ServiceManager;
+import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 
 import java.net.InetAddress;

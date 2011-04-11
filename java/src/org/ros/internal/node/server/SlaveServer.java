@@ -25,6 +25,7 @@ import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
+import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.node.topic.PublisherIdentifier;

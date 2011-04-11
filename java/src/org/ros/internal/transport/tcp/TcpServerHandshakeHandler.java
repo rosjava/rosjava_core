@@ -28,7 +28,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
-import org.ros.internal.node.server.ServiceManager;
+import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceResponseEncoder;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.Publisher;

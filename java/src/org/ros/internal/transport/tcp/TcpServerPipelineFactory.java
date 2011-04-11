@@ -23,7 +23,7 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
-import org.ros.internal.node.server.ServiceManager;
+import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.ConnectionTrackingHandler;
 

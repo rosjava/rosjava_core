@@ -29,8 +29,8 @@ import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.server.ServiceManager;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.tcp.TcpRosServer;
 

@@ -14,12 +14,10 @@
  * the License.
  */
 
-package org.ros.internal.node.server;
+package org.ros.internal.node.service;
 
 import com.google.common.collect.Maps;
 
-import org.ros.internal.node.service.ServiceClient;
-import org.ros.internal.node.service.ServiceServer;
 import org.ros.message.Message;
 
 import java.util.Map;
