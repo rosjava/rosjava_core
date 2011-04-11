@@ -24,6 +24,8 @@ package org.ros.internal.node;
  */
 public class InvalidResponseException extends RuntimeException {
 
+  private static final long serialVersionUID = 1L;
+
   public InvalidResponseException(String message) {
     super(message);
   }

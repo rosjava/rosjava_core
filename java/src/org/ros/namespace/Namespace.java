@@ -16,6 +16,8 @@
 
 package org.ros.namespace;
 
+import java.net.URI;
+
 import org.ros.MessageListener;
 import org.ros.ParameterClient;
 import org.ros.Publisher;
@@ -43,24 +45,24 @@ public interface Namespace {
 
   /**
    * @param <MessageType> The message type to create the publisher for
-   * @param topic_name the topic name, will be pushed down under this namespace
-   *        unless '/' is prepended
-   * @param clazz the Class object used to deal with type eraser
+   * @param topicName The topic name, will be pushed down under this namespace
+   *        unless '/' is prepended.
+   * @param messageClass The Class object of the topic message type.
    * @return A handle to a publisher that may be used to publish messages of
    *         type MessageType
    * @throws RosInitException May throw if the system is not in a proper state.
    */
-  public <MessageType extends Message> Publisher<MessageType> createPublisher(String topic_name,
-      Class<MessageType> clazz) throws RosInitException;
+  public <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
+      Class<MessageType> messageClass) throws RosInitException;
 
   /**
    * @param <MessageType> The message type to create the Subscriber for.
-   * @param topic_name The topic name to be subscribed to. This may be "bar"
+   * @param topicName The topic name to be subscribed to. This may be "bar"
    *        "/foo/bar" "~my" and will be auto resolved.
-   * @param callback The callback to be registered to this subscription. This
+   * @param messageCallback The callback to be registered to this subscription. This
    *        will be called asynchronously any time that a message is published
    *        on the topic.
-   * @param clazz The class of the message type that is being published on the
+   * @param messageClass The class of the message type that is being published on the
    *        topic.
    * @return A handle to a Subscriber that may be used to subscribe messages of
    *         type MessageType.
@@ -68,8 +70,8 @@ public interface Namespace {
    *         been initialized or other wackyness. TODO specify exceptions that
    *         might be thrown here.
    */
-  public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topic_name,
-      MessageListener<MessageType> callback, Class<MessageType> clazz) throws RosInitException;
+  public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topicName,
+      MessageListener<MessageType> messageCallback, Class<MessageType> messageClass) throws RosInitException;
 
   /**
    * Create a {@link ParameterClient} to query and set parameters on the ROS
@@ -93,7 +95,7 @@ public interface Namespace {
    * @return Fully resolved ros namespace name.
    * @throws RosNameException
    */
-  public String resolveName(String name) throws RosNameException;
+  public String resolveName(String name);
 
   /**
    * @return {@link NameResolver} for this namespace.
@@ -106,5 +108,10 @@ public interface Namespace {
 
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass);
+
+  /**
+   * @return URI of ROS Master that manages this namespace.
+   */
+  public URI getMasterUri();
 
 }

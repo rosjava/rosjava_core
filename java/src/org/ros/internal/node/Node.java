@@ -195,7 +195,6 @@ public class Node {
    * @return a {@link ServiceServer} instance
    * @throws Exception
    */
-  @SuppressWarnings("unchecked")
   public <RequestType, ResponseType> ServiceServer createServiceServer(
       ServiceDefinition serviceDefinition,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {

@@ -16,6 +16,8 @@
 
 package org.ros;
 
+import org.ros.namespace.Namespace;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.RemoteException;
@@ -46,10 +48,11 @@ public class ParameterClient {
     this.resolver = resolver;
   }
 
-  public static ParameterClient createFromNode(Node node) throws MalformedURLException {
+  public static ParameterClient createFromNamespace(Namespace namespace)
+      throws MalformedURLException {
     org.ros.internal.node.client.ParameterClient parameterServer = new org.ros.internal.node.client.ParameterClient(
-        node.getMasterUri());
-    return new ParameterClient(node.getName(), parameterServer, node.getResolver());
+        namespace.getMasterUri());
+    return new ParameterClient(namespace.getName(), parameterServer, namespace.getResolver());
   }
 
   public static ParameterClient createStandalone(String callerId, URI masterUri,

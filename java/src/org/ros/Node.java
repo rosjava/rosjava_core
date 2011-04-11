@@ -220,6 +220,7 @@ public class Node implements Namespace {
   /**
    * @return {@link URI} of {@link Master} that this node is attached to.
    */
+  @Override
   public URI getMasterUri() {
     return context.getRosMasterUri();
   }
@@ -232,7 +233,7 @@ public class Node implements Namespace {
   @Override
   public ParameterClient createParameterClient() {
     try {
-      return ParameterClient.createFromNode(this);
+      return ParameterClient.createFromNamespace(this);
     } catch (MalformedURLException e) {
       // Convert to unchecked exception as this really shouldn't happen as URL
       // is already validated.
@@ -245,6 +246,10 @@ public class Node implements Namespace {
    */
   public URI getUri() {
     return node.getUri();
+  }
+
+  public NodeNamespace createNamespace(String namespace) {
+    return new NodeNamespace(this, namespace);
   }
 
 }

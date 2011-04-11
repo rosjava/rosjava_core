@@ -57,4 +57,9 @@ public class ServiceDefinition {
   public String toString() {
     return "ServiceDefinition<" + name.toString() + "," + type + "," + md5Checksum + ">";
   }
+
+  public String getMd5Checksum() {
+    return md5Checksum;
+  }
+
 }

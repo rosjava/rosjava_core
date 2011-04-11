@@ -22,7 +22,8 @@ import org.ros.internal.node.response.StatusCode;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class RemoteException extends Exception {
-  
+
+  private static final long serialVersionUID = 1L;
   private final StatusCode statusCode;
 
   public RemoteException(StatusCode statusCode, String message) {

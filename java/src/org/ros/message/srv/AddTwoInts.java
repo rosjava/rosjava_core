@@ -13,13 +13,17 @@ public class AddTwoInts extends Service<AddTwoInts.Request, AddTwoInts.Response>
   public static java.lang.String __s_getDataType() { return "beginner_tutorials/AddTwoInts"; }
   public static java.lang.String __s_getMD5Sum() { return "6a2e34150c00229791cc89ff309fff21"; }
 
+  @Override
   public java.lang.String getDataType() { return AddTwoInts.__s_getDataType(); }
+  @Override
   public java.lang.String getMD5Sum() { return AddTwoInts.__s_getMD5Sum(); }
 
+  @Override
   public AddTwoInts.Request createRequest() {
     return new AddTwoInts.Request();
   }
 
+  @Override
   public AddTwoInts.Response createResponse() {
     return new AddTwoInts.Response();
   }
@@ -33,27 +37,34 @@ static public class Request extends Message {
   }
 
   public static java.lang.String __s_getDataType() { return "beginner_tutorials/AddTwoIntsRequest"; }
+  @Override
   public java.lang.String getDataType() { return __s_getDataType(); }
   public static java.lang.String __s_getMD5Sum() { return "36d09b846be0b371c5f190354dd3153e"; }
+  @Override
   public java.lang.String getMD5Sum() { return __s_getMD5Sum(); }
   public static java.lang.String __s_getServerMD5Sum() { return "6a2e34150c00229791cc89ff309fff21"; }
+  @Override
   public java.lang.String getServerMD5Sum() { return __s_getServerMD5Sum(); }
   public static java.lang.String __s_getMessageDefinition() { return "int64 a\n" +
 "int64 b\n" +
 "\n" +
 ""; }
+  @Override
   public java.lang.String getMessageDefinition() { return __s_getMessageDefinition(); }
 
+  @Override
   public Request clone() {
     Request c = new Request();
     c.deserialize(serialize(0));
     return c;
   }
 
+  @Override
   public void setTo(Message m) {
     deserialize(m.serialize(0));
   }
 
+  @Override
   public int serializationLength() {
     int __l = 0;
     __l += 8; // a
@@ -61,11 +72,13 @@ static public class Request extends Message {
     return __l;
   }
 
+  @Override
   public void serialize(ByteBuffer bb, int seq) {
     bb.putLong(a);
     bb.putLong(b);
   }
 
+  @Override
   public void deserialize(ByteBuffer bb) {
     a = bb.getLong();
     b = bb.getLong();
@@ -101,37 +114,46 @@ static public class Response extends Message {
   }
 
   public static java.lang.String __s_getDataType() { return "beginner_tutorials/AddTwoIntsResponse"; }
+  @Override
   public java.lang.String getDataType() { return __s_getDataType(); }
   public static java.lang.String __s_getMD5Sum() { return "b88405221c77b1878a3cbbfff53428d7"; }
+  @Override
   public java.lang.String getMD5Sum() { return __s_getMD5Sum(); }
   public static java.lang.String __s_getServerMD5Sum() { return "6a2e34150c00229791cc89ff309fff21"; }
+  @Override
   public java.lang.String getServerMD5Sum() { return __s_getServerMD5Sum(); }
   public static java.lang.String __s_getMessageDefinition() { return "int64 sum\n" +
 "\n" +
 "\n" +
 ""; }
+  @Override
   public java.lang.String getMessageDefinition() { return __s_getMessageDefinition(); }
 
+  @Override
   public Response clone() {
     Response c = new Response();
     c.deserialize(serialize(0));
     return c;
   }
 
+  @Override
   public void setTo(Message m) {
     deserialize(m.serialize(0));
   }
 
+  @Override
   public int serializationLength() {
     int __l = 0;
     __l += 8; // sum
     return __l;
   }
 
+  @Override
   public void serialize(ByteBuffer bb, int seq) {
     bb.putLong(sum);
   }
 
+  @Override
   public void deserialize(ByteBuffer bb) {
     sum = bb.getLong();
   }

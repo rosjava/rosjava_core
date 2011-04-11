@@ -30,6 +30,8 @@ import org.ros.internal.namespace.GraphName;
  */
 public class RosNameException extends RosRuntimeException {
 
+  private static final long serialVersionUID = 1L;
+
   /**
    * @param exception
    */

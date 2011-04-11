@@ -56,4 +56,8 @@ public class ServiceIdentifier {
     return "ServiceIdentifier<" + uri.toString() + "," + serviceDefinition.toString() + ">";
   }
 
+  public ServiceDefinition getServiceDefinition() {
+    return serviceDefinition;
+  }
+
 }
