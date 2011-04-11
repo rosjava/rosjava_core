@@ -78,15 +78,11 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
   }
 
   public View getView( Context context, View convert_view, ViewGroup parent ) {
-    View new_view;
-    if (convert_view == null) {  // if it's not recycled, initialize some attributes
-      LayoutInflater inflater =
-        (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-      new_view = inflater.inflate( R.layout.master_item, null );
-    } else {
-      new_view = convert_view;
-    }
-    view_ = new_view;
+    LayoutInflater inflater =
+      (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+    // Using convert_view here seems to cause the wrong view to show
+    // up sometimes, so I'm always making new ones.
+    view_ = inflater.inflate( R.layout.master_item, null );
     populateView();
     return new_view;
   }
