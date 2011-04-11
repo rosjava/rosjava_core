@@ -77,10 +77,10 @@ public class MasterChecker {
   public void beginChecking( String master_uri ) {
     stopChecking();
     thread_ = new CheckerThread( my_host_name_, found_master_callback_, failure_callback_ );
-    thread_.robot_description_.master_uri_ = master_uri;
-    thread_.robot_description_.robot_name_ = null;
-    thread_.robot_description_.robot_type_ = null;
-    thread_.robot_description_.time_last_seen_ = null;
+    thread_.robot_description_.masterUri = master_uri;
+    thread_.robot_description_.robotName = null;
+    thread_.robot_description_.robotType = null;
+    thread_.robot_description_.timeLastSeen = null;
     thread_.start();
   }
 
@@ -118,17 +118,17 @@ public class MasterChecker {
       try
       {
         Node node = new Node( "master_checker_" + new Random().nextInt(),
-                              MasterChooser.createContext( robot_description_.master_uri_, my_host_name_ ));
+                              MasterChooser.createContext( robot_description_.masterUri, my_host_name_ ));
         ParameterClient param_client = node.createParameterClient();
-        robot_description_.robot_name_ = (String) param_client.getParam( "robot/name" );
-        robot_description_.robot_type_ = (String) param_client.getParam( "robot/type" );
-        robot_description_.time_last_seen_ = new Date(); // current time.
+        robot_description_.robotName = (String) param_client.getParam( "robot/name" );
+        robot_description_.robotType = (String) param_client.getParam( "robot/type" );
+        robot_description_.timeLastSeen = new Date(); // current time.
         found_master_callback_.receive( robot_description_ );
       }
       catch( Exception ex )
       {
         Log.e( "RosAndroid",
-               "Exception while creating node in MasterChecker for master URI " + robot_description_.master_uri_ +
+               "Exception while creating node in MasterChecker for master URI " + robot_description_.masterUri +
                " with my_host_name = " + my_host_name_ );
         failure_callback_.handleFailure( "exception" );
       }

@@ -57,7 +57,7 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
     desc_ = desc;
     connection_status_ = "...";
     checker_ = new MasterChecker( my_hostname, this, this );
-    checker_.beginChecking( desc_.master_uri_ );
+    checker_.beginChecking( desc_.masterUri );
   }
 
   public boolean isOk() {
@@ -105,24 +105,24 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
   private void populateView() {
     TextView tv;
     tv = (TextView) view_.findViewById( R.id.uri );
-    tv.setText( desc_.master_uri_ );
+    tv.setText( desc_.masterUri );
 
     tv = (TextView) view_.findViewById( R.id.name );
-    tv.setText( desc_.robot_name_ );
+    tv.setText( desc_.robotName );
 
     tv = (TextView) view_.findViewById( R.id.status );
     tv.setText( connection_status_ );
 
     ImageView iv = (ImageView) view_.findViewById( R.id.robot_icon );
-    if( desc_.robot_type_ == null )
+    if( desc_.robotType == null )
     {
       iv.setImageResource( R.drawable.question_mark );
     }
-    else if( desc_.robot_type_.equals( "pr2" ))
+    else if( desc_.robotType.equals( "pr2" ))
     {
       iv.setImageResource( R.drawable.pr2 );
     }
-    else if( desc_.robot_type_.equals( "turtlebot" ))
+    else if( desc_.robotType.equals( "turtlebot" ))
     {
       iv.setImageResource( R.drawable.turtlebot );
     }

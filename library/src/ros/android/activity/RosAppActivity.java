@@ -33,11 +33,21 @@
 
 package ros.android.activity;
 
+import android.widget.Toast;
+
+import org.ros.message.app_manager.AppStatus;
+
+import org.ros.MessageListener;
+
+import org.ros.Node;
 import org.ros.app_manager.AppManager;
 import org.ros.app_manager.AppManagerNotAvailableException;
 import org.ros.app_manager.AppNotInstalledException;
 import org.ros.exceptions.RosInitException;
 import org.ros.message.app_manager.App;
+import org.ros.namespace.NameResolver;
+import org.ros.namespace.Namespace;
+import ros.android.util.RobotDescription;
 
 import java.util.ArrayList;
 
@@ -53,21 +63,38 @@ public class RosAppActivity extends RosActivity {
   }
 
   protected AppManager createAppManager() throws RosInitException {
-    String robotName = "turtlebot";
-    return new AppManager(getNode(), robotName);
+    RobotDescription robotDescription = getCurrentRobot();
+    if (robotDescription == null) {
+      throw new RosInitException("no robot available");
+    } else {
+      return new AppManager(getNode(), robotDescription.robotName);
+    }
+  }
+
+  protected Namespace getAppNamespace() throws RosInitException {
+    RobotDescription robotDescription = getCurrentRobot();
+    if (robotDescription == null) {
+      throw new RosInitException("no robot available");
+    }
+    Node node = getNode();
+    if (node == null) {
+      throw new RosInitException("node not available");
+    }
+    return node.createNamespace(NameResolver.join(robotDescription.robotName, "application"));
   }
 
   /**
    * Start ROS app if it is not already running.
+   * 
    * @param appName
    * @throws RosInitException
    * @throws AppManagerNotAvailableException
    * @throws AppNotInstalledException
    */
-  public void ensureAppRunning(String appName) throws RosInitException, AppManagerNotAvailableException,
-      AppNotInstalledException {
+  public void ensureAppRunning(String appName) throws RosInitException,
+      AppManagerNotAvailableException, AppNotInstalledException {
     // TODO(kwc) create an explicit start app routine instead
-    
+
     AppManager appManager = createAppManager();
     ArrayList<App> availableApps = appManager.getAvailableApps();
     boolean installed = false;
@@ -86,6 +113,11 @@ public class RosAppActivity extends RosActivity {
       }
     }
     appManager.startApp(appName);
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
   }
 
 }

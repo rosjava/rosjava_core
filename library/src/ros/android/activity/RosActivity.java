@@ -17,15 +17,11 @@
 package ros.android.activity;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
-
 import org.ros.Node;
-import org.ros.NodeContext;
 import org.ros.exceptions.RosInitException;
-
 import ros.android.util.MasterChooser;
 import ros.android.util.RobotDescription;
 
@@ -36,7 +32,7 @@ public class RosActivity extends Activity {
   private String errorMessage;
 
   public RosActivity() {
-    masterChooser = new MasterChooser( this );
+    masterChooser = new MasterChooser(this);
   }
 
   public Exception getErrorException() {
@@ -60,10 +56,10 @@ public class RosActivity extends Activity {
   }
 
   /**
-   * Re-launch the MasterChooserActivity to choose a new ROS master.
-   * The results are handled in onActivityResult() and onResume()
-   * since launching a new activity necessarily pauses this current
-   * one. */
+   * Re-launch the MasterChooserActivity to choose a new ROS master. The results
+   * are handled in onActivityResult() and onResume() since launching a new
+   * activity necessarily pauses this current one.
+   */
   public void chooseNewMaster() {
     masterChooser.launchChooserActivity();
   }
@@ -78,50 +74,45 @@ public class RosActivity extends Activity {
   }
 
   @Override
-  protected void onActivityResult( int requestCode, int resultCode, Intent result_intent ) {
-    if( masterChooser.handleActivityResult( requestCode, resultCode, result_intent ))
-    {
+  protected void onActivityResult(int requestCode, int resultCode, Intent result_intent) {
+    if (masterChooser.handleActivityResult(requestCode, resultCode, result_intent)) {
       // Save before checking validity in case someone wants to force
       // the next app to use the chooser.
       masterChooser.saveCurrentRobot();
-      if( !masterChooser.haveRobot() )
-      {
-        Toast.makeText( this, "Cannot run without a ROS master.", Toast.LENGTH_LONG ).show();
+      if (!masterChooser.hasRobot()) {
+        Toast.makeText(this, "Cannot run without a ROS master.", Toast.LENGTH_LONG).show();
         finish();
       }
     }
   }
 
-  /** Read the current ROS master URI from external storage and set up
-   * the ROS node from the resulting node context.  If the current
-   * master is not set or is invalid, launch the MasterChooserActivity
-   * to choose one or scan a new one. */
+  /**
+   * Read the current ROS master URI from external storage and set up the ROS
+   * node from the resulting node context. If the current master is not set or
+   * is invalid, launch the MasterChooserActivity to choose one or scan a new
+   * one.
+   */
   @Override
   protected void onResume() {
     super.onResume();
-    if( node == null ) {
+    if (node == null) {
       masterChooser.loadCurrentRobot();
-      if( masterChooser.haveRobot() )
-      {
-        try
-        {
-          node = new Node( "listener", masterChooser.createContext() );
-        }
-        catch (Exception e)
-        {
-          Log.e( "RosAndroid", "Exception while creating node: " + e.getMessage() );
+      if (masterChooser.hasRobot()) {
+        try {
+          node = new Node("listener", masterChooser.createContext());
+        } catch (Exception e) {
+          Log.e("RosAndroid", "Exception while creating node: " + e.getMessage());
           node = null;
           setErrorMessage("failed to create node" + e.getMessage());
           setErrorException(e);
         }
-      }
-      else // we don't have a master yet.
+      } else // we don't have a master yet.
       {
         masterChooser.launchChooserActivity();
         // Launching the master chooser activity causes this activity
-        // to pause.  this.onActivityResult() is called with the
+        // to pause. this.onActivityResult() is called with the
         // result before onResume() is called again, so
-        // masterChooser.haveRobot() should be true.
+        // masterChooser.hasRobot() should be true.
       }
     }
   }

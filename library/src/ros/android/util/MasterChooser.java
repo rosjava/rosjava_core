@@ -124,7 +124,7 @@ public class MasterChooser extends RosLoader {
       Yaml yaml = new Yaml();
       yaml.dump( currentRobot, writer );
       writer.close();
-      Log.i( "RosAndroid", "Wrote '" + currentRobot.master_uri_ + "' etc to current-robot file." );
+      Log.i( "RosAndroid", "Wrote '" + currentRobot.masterUri + "' etc to current-robot file." );
     }
     catch( Exception ex )
     {
@@ -166,12 +166,12 @@ public class MasterChooser extends RosLoader {
 
   /** Returns true if current master URI and robot name are set in
    * memory, false otherwise.  Does not read anything from disk. */
-  public boolean haveRobot() {
+  public boolean hasRobot() {
     return( currentRobot != null &&
-            currentRobot.master_uri_ != null &&
-            currentRobot.master_uri_.length() != 0 &&
-            currentRobot.robot_name_ != null &&
-            currentRobot.robot_name_.length() != 0 );
+            currentRobot.masterUri != null &&
+            currentRobot.masterUri.length() != 0 &&
+            currentRobot.robotName != null &&
+            currentRobot.robotName.length() != 0 );
   }
 
   /** Call this from your activity's onActivityResult() to record the
@@ -212,7 +212,7 @@ public class MasterChooser extends RosLoader {
    */
   @Override
   public NodeContext createContext() throws RosInitException {
-    return createContext( currentRobot.master_uri_, Net.getNonLoopbackHostName() );
+    return createContext( currentRobot.masterUri, Net.getNonLoopbackHostName() );
   }
 
   static public NodeContext createContext(String masterUri, String myHostName)

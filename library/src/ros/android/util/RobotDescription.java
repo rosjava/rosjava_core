@@ -32,17 +32,20 @@ package ros.android.util;
 import java.util.Date;
 
 public class RobotDescription implements java.io.Serializable {
-  public String master_uri_;
-  public String robot_name_;
-  public String robot_type_;
-  public String connection_status_;
-  public Date time_last_seen_;
+  private static final long serialVersionUID = 1L;
+  public String masterUri;
+  public String robotName;
+  public String robotType;
+  public String connectionStatus;
+  public Date timeLastSeen;
 
-  public void copyFrom( RobotDescription other ) {
-    master_uri_ = other.master_uri_;
-    robot_name_ = other.robot_name_;
-    robot_type_ = other.robot_type_;
-    connection_status_ = other.connection_status_;
-    time_last_seen_ = other.time_last_seen_;
+  // TODO(kwc): add in canonicalization of robotName
+
+  public void copyFrom(RobotDescription other) {
+    masterUri = other.masterUri;
+    robotName = other.robotName;
+    robotType = other.robotType;
+    connectionStatus = other.connectionStatus;
+    timeLastSeen = other.timeLastSeen;
   }
 }

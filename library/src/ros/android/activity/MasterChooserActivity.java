@@ -188,7 +188,7 @@ public class MasterChooserActivity extends Activity {
 
   private void addMaster( String master_uri ) {
     RobotDescription new_robot = new RobotDescription();
-    new_robot.master_uri_ = master_uri;
+    new_robot.masterUri = master_uri;
     robots_.add( new_robot );
     onRobotsChanged();
   }
