@@ -29,26 +29,20 @@
 
 package org.ros.android.app_chooser;
 
-import java.util.ArrayList;
-
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-import android.widget.GridView;
-import android.widget.TextView;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Toast;
-import android.view.View;
-
-import org.ros.message.app_manager.App;
-import org.ros.Node;
+import android.widget.GridView;
+import android.widget.TextView;
 import org.ros.app_manager.AppManager;
 import org.ros.app_manager.AppManagerNotAvailableException;
 import org.ros.exceptions.RosInitException;
-
+import org.ros.message.app_manager.App;
 import ros.android.activity.RosActivity;
 import ros.android.util.RobotDescription;
+
+import java.util.ArrayList;
 
 /** Show a grid of applications that a given robot is capable of, and
  * launch whichever is chosen. */
@@ -87,7 +81,7 @@ public class AppChooser extends RosActivity
   public ArrayList<App> getAppList() {
     try {
       RobotDescription robot = getCurrentRobot();
-      AppManager app_man = new AppManager( getNode(), robot.robot_name_ );
+      AppManager app_man = new AppManager( getNode(), robot.robotName );
       return app_man.getAvailableApps();
     }
     catch( AppManagerNotAvailableException ex )
