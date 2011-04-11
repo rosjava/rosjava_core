@@ -35,6 +35,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
+import org.ros.MessageDeserializer;
 import org.ros.MessageListener;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.transport.ConnectionHeader;
@@ -44,6 +45,7 @@ import org.ros.message.Message;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Map;
 import java.util.Queue;
@@ -52,13 +54,13 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceClient<ResponseMessageType extends Message> {
+public class ServiceClient<ResponseMessageType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
 
+  private final MessageDeserializer<ResponseMessageType> deserializer;
   private final Queue<MessageListener<ResponseMessageType>> messageListeners;
-  private final Class<ResponseMessageType> responseMessageClass;
   private final Map<String, String> header;
   private final ChannelFactory channelFactory;
   private final ClientBootstrap bootstrap;
@@ -125,27 +127,26 @@ public class ServiceClient<ResponseMessageType extends Message> {
       MessageListener<ResponseMessageType> listener = messageListeners.poll();
       Preconditions.checkNotNull(listener);
       ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
-      ResponseMessageType message = responseMessageClass.newInstance();
-      message.deserialize(response.getMessage().toByteBuffer());
-      listener.onNewMessage(message);
+      ByteBuffer buffer = response.getMessage().toByteBuffer();
+      listener.onNewMessage(deserializer.deserialize(buffer));
     }
   }
 
-  public static <S extends Message> ServiceClient<S> create(GraphName nodeName,
-      ServiceIdentifier serviceIdentifier, Class<S> incomingMessageClass) {
-    return new ServiceClient<S>(nodeName, serviceIdentifier, incomingMessageClass);
+  public static <T> ServiceClient<T> create(GraphName nodeName,
+      ServiceIdentifier serviceIdentifier, MessageDeserializer<T> deserializer) {
+    return new ServiceClient<T>(nodeName, serviceIdentifier, deserializer);
   }
 
   private ServiceClient(GraphName nodeName, ServiceIdentifier serviceIdentifier,
-      Class<ResponseMessageType> responseMessageClass) {
-    this.responseMessageClass = responseMessageClass;
+      MessageDeserializer<ResponseMessageType> deserializer) {
+    this.deserializer = deserializer;
     messageListeners = Lists.newLinkedList();
-    header = ImmutableMap.<String, String>builder()
-        .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
-        // TODO(damonkohler): Support non-persistent connections.
-        .put(ConnectionHeaderFields.PERSISTENT, "1")
-        .putAll(serviceIdentifier.toHeader())
-        .build();
+    header =
+        ImmutableMap.<String, String>builder()
+            .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
+            // TODO(damonkohler): Support non-persistent connections.
+            .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceIdentifier.toHeader())
+            .build();
     channelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
@@ -208,8 +209,4 @@ public class ServiceClient<ResponseMessageType extends Message> {
     channel.write(buffer);
   }
 
-  public boolean checkMessageClass(Class<ResponseMessageType> expectedResponseMessageClass) {
-    return expectedResponseMessageClass == responseMessageClass;
-  }
-  
 }

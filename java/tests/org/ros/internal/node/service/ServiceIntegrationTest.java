@@ -29,6 +29,7 @@ import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.message.Message;
+import org.ros.message.MessageDeserializer;
 import org.ros.message.srv.AddTwoInts;
 
 import java.io.IOException;
@@ -69,7 +70,7 @@ public class ServiceIntegrationTest {
     Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
     ServiceClient<AddTwoInts.Response> client =
         clientNode.createServiceClient(new ServiceIdentifier(server.getUri(), definition),
-            AddTwoInts.Response.class);
+            new MessageDeserializer<AddTwoInts.Response>(AddTwoInts.Response.class));
 
     // TODO(damonkohler): This is a hack that we should remove once it's
     // possible to block on a connection being established.

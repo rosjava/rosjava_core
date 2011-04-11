@@ -232,13 +232,11 @@ public class Node {
    * 
    * @param <ResponseMessageType>
    * @param serviceIdentifier the {@link ServiceIdentifier} of the server
-   * @param responseMessageClass the {@link Message} class that is used for
-   *        responses
    * @return a {@link ServiceClient} instance
    */
   @SuppressWarnings("unchecked")
-  public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
-      ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
+  public <ResponseMessageType> ServiceClient<ResponseMessageType> createServiceClient(
+      ServiceIdentifier serviceIdentifier, MessageDeserializer<ResponseMessageType> deserializer) {
     ServiceClient<ResponseMessageType> serviceClient;
     String name = serviceIdentifier.getName().toString();
     boolean createdNewService = false;
@@ -246,9 +244,8 @@ public class Node {
     synchronized (serviceManager) {
       if (serviceManager.hasServiceClient(name)) {
         serviceClient = (ServiceClient<ResponseMessageType>) serviceManager.getServiceClient(name);
-        Preconditions.checkState(serviceClient.checkMessageClass(responseMessageClass));
       } else {
-        serviceClient = ServiceClient.create(nodeName, serviceIdentifier, responseMessageClass);
+        serviceClient = ServiceClient.create(nodeName, serviceIdentifier, deserializer);
         createdNewService = true;
       }
     }

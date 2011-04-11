@@ -160,7 +160,8 @@ public class Node implements Namespace {
   @Override
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
-    return node.createServiceClient(serviceIdentifier, responseMessageClass);
+    return node.createServiceClient(serviceIdentifier,
+        new MessageDeserializer<ResponseMessageType>(responseMessageClass));
   }
 
   /**
