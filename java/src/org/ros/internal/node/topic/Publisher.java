@@ -45,9 +45,8 @@ public class Publisher<MessageType> extends Topic {
   private final List<SubscriberIdentifier> subscribers;
   private final OutgoingMessageQueue<MessageType> out;
 
-  public Publisher(TopicDefinition description, Class<MessageType> messageClass,
-      MessageSerializer<MessageType> serializer) {
-    super(description, messageClass);
+  public Publisher(TopicDefinition description, MessageSerializer<MessageType> serializer) {
+    super(description);
     subscribers = Lists.newArrayList();
     out = new OutgoingMessageQueue<MessageType>(serializer);
     out.start();

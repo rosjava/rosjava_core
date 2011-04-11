@@ -17,7 +17,6 @@
 package org.ros.internal.node.topic;
 
 import org.ros.internal.namespace.GraphName;
-import org.ros.message.Message;
 
 import java.util.List;
 import java.util.Map;
@@ -28,11 +27,9 @@ import java.util.Map;
 public class Topic {
 
   private final TopicDefinition description;
-  private final Class<?> messageClass;
 
-  public Topic(TopicDefinition description, Class<?> messageClass) {
+  public Topic(TopicDefinition description) {
     this.description = description;
-    this.messageClass = messageClass;
   }
   
   public TopicDefinition getTopicDefinition() {
@@ -53,15 +50,6 @@ public class Topic {
   
   public Map<String, String> getTopicDefinitionHeader() {
     return description.toHeader();
-  }
-  
-  /**
-   * @param messageClass
-   * @return <code>true</code> if this {@link Subscriber} instance accepts the
-   *         supplied {@link Message} class
-   */
-  public boolean checkMessageClass(Class<?> messageClass) {
-    return this.messageClass == messageClass;
   }
 
 }

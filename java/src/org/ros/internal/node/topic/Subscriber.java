@@ -120,13 +120,12 @@ public class Subscriber<MessageType> extends Topic {
   public static <S> Subscriber<S> create(SlaveIdentifier slaveIdentifier,
       TopicDefinition description, Class<S> messageClass, Executor executor,
       MessageDeserializer<S> deserializer) {
-    return new Subscriber<S>(slaveIdentifier, description, messageClass, executor, deserializer);
+    return new Subscriber<S>(slaveIdentifier, description, deserializer, executor);
   }
 
   private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition description,
-      Class<MessageType> messageClass, Executor executor,
-      MessageDeserializer<MessageType> deserializer) {
-    super(description, messageClass);
+      MessageDeserializer<MessageType> deserializer, Executor executor) {
+    super(description);
     this.executor = executor;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new IncomingMessageQueue<MessageType>(deserializer);

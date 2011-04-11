@@ -134,7 +134,6 @@ public class Node {
     synchronized (topicManager) {
       if (topicManager.hasSubscriber(topicName)) {
         subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
-        Preconditions.checkState(subscriber.checkMessageClass(messageClass));
       } else {
         subscriber =
             Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
@@ -174,9 +173,8 @@ public class Node {
     synchronized (topicManager) {
       if (topicManager.hasPublisher(topicName)) {
         publisher = (Publisher<MessageType>) topicManager.getPublisher(topicName);
-        Preconditions.checkState(publisher.checkMessageClass(messageClass));
       } else {
-        publisher = new Publisher<MessageType>(topicDefinition, messageClass, serializer);
+        publisher = new Publisher<MessageType>(topicDefinition, serializer);
         createdNewPublisher = true;
       }
     }
