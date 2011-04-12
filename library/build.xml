@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="RosAndroid" default="help" basedir=".">
+<project name="RosAndroid" default="help">
 
 <!-- The local.properties file is created and updated by the 'android'
      tool.
@@ -48,21 +48,6 @@
 <!-- extension targets. Uncomment the ones where you want to do custom work
      in between standard targets -->
 
-    <target name="-pre-build">
-      <copy todir="${basedir}/libs" overwrite="true">
-        <fileset dir="${basedir}/../java/dist">
-          <filename name="*.jar"/>
-        </fileset>
-      </copy>
-      <copy todir="${basedir}/libs" overwrite="true">
-        <fileset dir="${basedir}/../java/lib">
-          <exclude name="junit*.jar"/>
-          <exclude name="mockito*.jar"/>
-          <filename name="*.jar"/>
-        </fileset>
-      </copy>
-    </target>
-
 <!--
     <target name="-pre-build">
     </target>
@@ -98,5 +83,4 @@
     <path id="android.libraries.src"><path refid="project.libraries.src" /></path>
     <path id="android.libraries.jars"><path refid="project.libraries.jars" /></path>
     <setup />
-
 </project>

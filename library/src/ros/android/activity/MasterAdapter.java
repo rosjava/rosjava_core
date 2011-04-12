@@ -67,16 +67,6 @@ public class MasterAdapter extends BaseAdapter {
   }
 
   @Override
-  public boolean areAllItemsEnabled() {
-    return false;
-  }
-
-  @Override
-  public boolean isEnabled( int position ) {
-    return master_items_.get( position ).isOk();
-  }
-
-  @Override
   public Object getItem(int position) {
     return null;
   }
