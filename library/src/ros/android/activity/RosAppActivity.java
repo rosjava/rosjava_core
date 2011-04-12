@@ -33,12 +33,6 @@
 
 package ros.android.activity;
 
-import android.widget.Toast;
-
-import org.ros.message.app_manager.AppStatus;
-
-import org.ros.MessageListener;
-
 import org.ros.Node;
 import org.ros.app_manager.AppManager;
 import org.ros.app_manager.AppManagerNotAvailableException;

@@ -98,16 +98,18 @@ public class RosActivity extends Activity {
     if (node == null) {
       masterChooser.loadCurrentRobot();
       if (masterChooser.hasRobot()) {
+        Toast.makeText(this, "attaching to robot", Toast.LENGTH_SHORT).show();
         try {
-          node = new Node("listener", masterChooser.createContext());
+          node = new Node("android", masterChooser.createContext());
         } catch (Exception e) {
           Log.e("RosAndroid", "Exception while creating node: " + e.getMessage());
           node = null;
           setErrorMessage("failed to create node" + e.getMessage());
           setErrorException(e);
         }
-      } else // we don't have a master yet.
-      {
+      } else {
+        Toast.makeText(this, "finding a robot", Toast.LENGTH_SHORT).show();
+        // we don't have a master yet.
         masterChooser.launchChooserActivity();
         // Launching the master chooser activity causes this activity
         // to pause. this.onActivityResult() is called with the
