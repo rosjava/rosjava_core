@@ -67,4 +67,8 @@ public class Publisher<MessageType extends Message> {
     return messageClass;
   }
 
+  public void shutdown() {
+    publisher.shutdown();
+  }
+
 }
