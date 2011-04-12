@@ -60,10 +60,11 @@ public class Node implements Namespace {
   private final org.ros.internal.node.Node node;
   private final RosoutLogger log;
   private final TimeProvider timeProvider;
+  private Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher;
 
   /**
-   * @param name Node name. This identifies this node to the rest of the ROS
-   *        graph.
+   * @param name
+   *          Node name. This identifies this node to the rest of the ROS graph.
    * @param context
    * @throws RosInitException
    */
@@ -94,13 +95,11 @@ public class Node implements Namespace {
       if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
-        node =
-            org.ros.internal.node.Node.createPrivate(nodeName, context.getRosMasterUri(),
-                context.getXmlRpcPort(), context.getTcpRosPort());
+        node = org.ros.internal.node.Node.createPrivate(nodeName, context.getRosMasterUri(),
+            context.getXmlRpcPort(), context.getTcpRosPort());
       } else {
-        node =
-            org.ros.internal.node.Node.createPublic(nodeName, context.getRosMasterUri(),
-                context.getHostName(), context.getXmlRpcPort(), context.getTcpRosPort());
+        node = org.ros.internal.node.Node.createPublic(nodeName, context.getRosMasterUri(),
+            context.getHostName(), context.getXmlRpcPort(), context.getTcpRosPort());
       }
     } catch (Exception e) {
       throw new RosInitException(e);
@@ -108,8 +107,7 @@ public class Node implements Namespace {
 
     // TODO(damonkohler): Move the creation and management of the RosoutLogger
     // into the internal.Node class.
-    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
-        createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
+    rosoutPublisher = createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
     log.setRosoutPublisher(rosoutPublisher);
   }
 
@@ -119,11 +117,10 @@ public class Node implements Namespace {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message message = messageClass.newInstance();
-      TopicDefinition topicDefinition =
-          new TopicDefinition(new GraphName(resolvedTopicName),
-              MessageDefinition.createFromMessage(message));
-      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
-          node.createPublisher(topicDefinition, messageClass, new MessageSerializer<MessageType>());
+      TopicDefinition topicDefinition = new TopicDefinition(new GraphName(resolvedTopicName),
+          MessageDefinition.createFromMessage(message));
+      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl = node.createPublisher(
+          topicDefinition, messageClass, new MessageSerializer<MessageType>());
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (Exception e) {
       throw new RosInitException(e);
@@ -137,12 +134,10 @@ public class Node implements Namespace {
     try {
       String resolvedTopicName = resolveName(topicName);
       Message message = messageClass.newInstance();
-      TopicDefinition topicDefinition =
-          new TopicDefinition(new GraphName(resolvedTopicName),
-              MessageDefinition.createFromMessage(message));
-      org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
-          node.createSubscriber(topicDefinition, messageClass,
-              new MessageDeserializer<MessageType>(messageClass));
+      TopicDefinition topicDefinition = new TopicDefinition(new GraphName(resolvedTopicName),
+          MessageDefinition.createFromMessage(message));
+      org.ros.internal.node.topic.Subscriber<MessageType> subscriber = node.createSubscriber(
+          topicDefinition, messageClass, new MessageDeserializer<MessageType>(messageClass));
       subscriber.addMessageListener(callback);
       return new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriber);
     } catch (Exception e) {
@@ -214,6 +209,7 @@ public class Node implements Namespace {
   }
 
   public void stop() {
+    rosoutPublisher.shutdown();
     node.stop();
   }
 
