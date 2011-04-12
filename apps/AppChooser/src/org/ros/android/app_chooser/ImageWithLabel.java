@@ -30,11 +30,11 @@
 package org.ros.android.app_chooser;
 
 public class ImageWithLabel {
-  public ImageWithLabel( int image_resource_id, String label ) {
-    image_resource_id_ = image_resource_id;
-    label_ = label;
+  public ImageWithLabel(int imageResourceId, String label) {
+    this.imageResourceId = imageResourceId;
+    this.label = label;
   }
 
-  public int image_resource_id_;
-  public String label_;
+  public int imageResourceId;
+  public String label;
 }

@@ -38,8 +38,7 @@ import org.ros.app_manager.AppNotInstalledException;
 import org.ros.exceptions.RosInitException;
 import ros.android.activity.RosAppActivity;
 
-public class StubAppActivity extends RosAppActivity
-{
+public class StubAppActivity extends RosAppActivity {
   private String robotAppName;
   private String robotAppDisplayName;
   private TextView statusView;
@@ -49,80 +48,82 @@ public class StubAppActivity extends RosAppActivity
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    robotAppName = getIntent().getStringExtra( AppLauncher.PACKAGE + ".robot_app_name" );
-    robotAppDisplayName = getIntent().getStringExtra( AppLauncher.PACKAGE + ".robot_app_display_name" );
-    
-    setTitle( robotAppDisplayName );
+    robotAppName = getIntent().getStringExtra(AppLauncher.PACKAGE + ".robot_app_name");
+    robotAppDisplayName = getIntent().getStringExtra(
+        AppLauncher.PACKAGE + ".robot_app_display_name");
+
+    setTitle(robotAppDisplayName);
     setContentView(R.layout.stub_app);
-    statusView = (TextView) findViewById( R.id.status_view );
+    statusView = (TextView) findViewById(R.id.status_view);
   }
 
-  public void onStartClicked( View view ) {
-    setStatus( "Starting..." );
+  public void onStartClicked(View view) {
+    setStatus("Starting...");
     // ensureAppRunning( robotAppName, new AppStartCallback() {
-    //     public void startResult( boolean success, int errorCode, String message ) {
-    //       if( !success ) {
-    //         safeSetStatus( "failure!" /*...*/);
-    //       } else {
-    //         safeSetStatus( "running" );
-    //       }
-    //     }
-    //   });
+    // public void startResult( boolean success, int errorCode, String message )
+    // {
+    // if( !success ) {
+    // safeSetStatus( "failure!" /*...*/);
+    // } else {
+    // safeSetStatus( "running" );
+    // }
+    // }
+    // });
 
     Thread starterThread = new Thread() {
-        @Override
-        public void run() {
-          try {
-            ensureAppRunning( robotAppName );
-            safeSetStatus( "Running" );
-          } catch( AppNotInstalledException ex ) {
-            safeSetStatus( "App not installed on robot: " + ex.getMessage() );
-          } catch( AppManagerNotAvailableException ex ) {
-            safeSetStatus( "App Manager not available: " + ex.getMessage() );
-          } catch( RosInitException ex ) {
-            safeSetStatus( "Ros init exception: " + ex.getMessage() );
-          }
+      @Override
+      public void run() {
+        try {
+          ensureAppRunning(robotAppName);
+          safeSetStatus("Running");
+        } catch (AppNotInstalledException ex) {
+          safeSetStatus("App not installed on robot: " + ex.getMessage());
+        } catch (AppManagerNotAvailableException ex) {
+          safeSetStatus("App Manager not available: " + ex.getMessage());
+        } catch (RosInitException ex) {
+          safeSetStatus("Ros init exception: " + ex.getMessage());
         }
-      };
+      }
+    };
     starterThread.start();
   }
 
-  public void onStopClicked( View view ) {
-    setStatus( "Stopping..." );
+  public void onStopClicked(View view) {
+    setStatus("Stopping...");
     Thread stopperThread = new Thread() {
-        @Override
-        public void run() {
-          try {
-            AppManager appMan = createAppManager();
-            appMan.stopApp( robotAppName );
-            safeSetStatus( "Stopped." );
-          } catch( AppManagerNotAvailableException ex ) {
-            safeSetStatus( "App Manager not available: " + ex.getMessage() );
-          } catch( RosInitException ex ) {
-            safeSetStatus( "Ros init exception: " + ex.getMessage() );
-          }
+      @Override
+      public void run() {
+        try {
+          AppManager appMan = createAppManager();
+          appMan.stopApp(robotAppName);
+          safeSetStatus("Stopped.");
+        } catch (AppManagerNotAvailableException ex) {
+          safeSetStatus("App Manager not available: " + ex.getMessage());
+        } catch (RosInitException ex) {
+          safeSetStatus("Ros init exception: " + ex.getMessage());
         }
-      };
+      }
+    };
     stopperThread.start();
   }
 
-  public void onExitClicked( View view ) {
+  public void onExitClicked(View view) {
     finish();
   }
 
   /**
-   * Set the status text.  Safe to call from any thread.
+   * Set the status text. Safe to call from any thread.
    */
-  private void safeSetStatus( final String status ) {
-    statusView.post( new Runnable() {
-        @Override
-        public void run() {
-          setStatus( status );
-        }
-      });
+  private void safeSetStatus(final String status) {
+    statusView.post(new Runnable() {
+      @Override
+      public void run() {
+        setStatus(status);
+      }
+    });
   }
 
-  private void setStatus( String status ) {
-    statusView.setText( status );
+  private void setStatus(String status) {
+    statusView.setText(status);
   }
 }

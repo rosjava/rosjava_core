@@ -37,43 +37,42 @@ import java.util.List;
 import org.ros.message.app_manager.ClientApp;
 import org.ros.message.app_manager.KeyValue;
 
-/** Convenience class which populates HashMaps with manager_data and
- * app_data from the corresponding KeyValue arrays in the ClientApp
- * message. */
+/**
+ * Convenience class which populates HashMaps with manager_data and app_data
+ * from the corresponding KeyValue arrays in the ClientApp message.
+ */
 public class ClientAppData {
-  public HashMap<String,String> manager_data_;
-  public List<KeyValue> app_data_;
+  public HashMap<String, String> managerData;
+  public List<KeyValue> appData;
 
-  public ClientAppData( ClientApp client_app_msg ) {
-    manager_data_ = keyValueListToMap( client_app_msg.manager_data );
-    app_data_ = client_app_msg.app_data;
+  public ClientAppData(ClientApp clientApp) {
+    managerData = keyValueListToMap(clientApp.manager_data);
+    appData = clientApp.app_data;
   }
 
   public Intent createIntent() {
     Intent intent = new Intent();
 
     // Set up standard intent fields.
-    intent.setAction( manager_data_.get( "intent-action" ));
-    intent.addCategory( manager_data_.get( "intent-category" ));
-    intent.setType( manager_data_.get( "intent-type" ));
+    intent.setAction(managerData.get("intent-action"));
+    intent.addCategory(managerData.get("intent-category"));
+    intent.setType(managerData.get("intent-type"));
     // Can we handle classname and package name?
 
     // Copy all app data to "extra" data in the intent.
-    for( int i = 0; i < app_data_.size(); i++ )
-    {
-      KeyValue kv = app_data_.get( i );
-      intent.putExtra( kv.key, kv.value );
+    for (int i = 0; i < appData.size(); i++) {
+      KeyValue kv = appData.get(i);
+      intent.putExtra(kv.key, kv.value);
     }
 
     return intent;
   }
 
-  private HashMap<String,String> keyValueListToMap( List<KeyValue> kvl ) {
-    HashMap<String,String> map = new HashMap<String,String>();
-    for( int i = 0; i < kvl.size(); i++ )
-    {
-      KeyValue kv = kvl.get( i );
-      map.put( kv.key, kv.value );
+  private HashMap<String, String> keyValueListToMap(List<KeyValue> kvl) {
+    HashMap<String, String> map = new HashMap<String, String>();
+    for (int i = 0; i < kvl.size(); i++) {
+      KeyValue kv = kvl.get(i);
+      map.put(kv.key, kv.value);
     }
     return map;
   }

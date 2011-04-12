@@ -35,18 +35,17 @@ import android.view.Gravity;
 import android.widget.TextView;
 
 public class LabelledIconView extends TextView {
-  public LabelledIconView( Context context ) {
-    super( context );
-    setGravity( Gravity.CENTER );
+  public LabelledIconView(Context context) {
+    super(context);
+    setGravity(Gravity.CENTER);
   }
 
-  public void setIcon( int image_resource ) {
+  public void setIcon(int imageResource) {
     Drawable drawable = null;
-    if( image_resource != 0 )
-    {
-      drawable = getContext().getResources().getDrawable( image_resource );
-      drawable.setBounds( 0, 0, 85, 85 );
+    if (imageResource != 0) {
+      drawable = getContext().getResources().getDrawable(imageResource);
+      drawable.setBounds(0, 0, 85, 85);
     }
-    setCompoundDrawables( null, drawable, null, null );
+    setCompoundDrawables(null, drawable, null, null);
   }
 }

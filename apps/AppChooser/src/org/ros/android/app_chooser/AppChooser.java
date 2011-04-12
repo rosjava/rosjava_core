@@ -44,10 +44,11 @@ import ros.android.util.RobotDescription;
 
 import java.util.ArrayList;
 
-/** Show a grid of applications that a given robot is capable of, and
- * launch whichever is chosen. */
-public class AppChooser extends RosActivity
-{
+/**
+ * Show a grid of applications that a given robot is capable of, and launch
+ * whichever is chosen.
+ */
+public class AppChooser extends RosActivity {
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -67,40 +68,35 @@ public class AppChooser extends RosActivity
     gridview.setAdapter(new AppAdapter(this, apps));
 
     gridview.setOnItemClickListener(new OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-          AppLauncher.launch( AppChooser.this, apps.get( position ));
-        }
-      });
+      @Override
+      public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+        AppLauncher.launch(AppChooser.this, apps.get(position));
+      }
+    });
   }
 
-  public void chooseNewMasterClicked( View view ) {
+  public void chooseNewMasterClicked(View view) {
     chooseNewMaster();
   }
 
   public ArrayList<App> getAppList() {
     try {
       RobotDescription robot = getCurrentRobot();
-      AppManager app_man = new AppManager( getNode(), robot.robotName );
+      AppManager app_man = new AppManager(getNode(), robot.robotName);
       return app_man.getAvailableApps();
-    }
-    catch( AppManagerNotAvailableException ex )
-    {
+    } catch (AppManagerNotAvailableException ex) {
       setStatus("AppManager not available");
       return null;
-    }
-    catch( RosInitException ex )
-    {
+    } catch (RosInitException ex) {
       setStatus("Ros init exception: " + ex.getMessage());
       return null;
     }
   }
 
-  private void setStatus( String status_message ) {
-    TextView status_view = (TextView) findViewById(R.id.status_view);
-    if( status_view != null )
-    {
-      status_view.setText( status_message );
+  private void setStatus(String status_message) {
+    TextView statusView = (TextView) findViewById(R.id.status_view);
+    if (statusView != null) {
+      statusView.setText(status_message);
     }
   }
 }
