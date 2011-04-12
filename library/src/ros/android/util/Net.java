@@ -44,9 +44,9 @@ public class Net {
   static public String getNonLoopbackHostName() {
     try {
       String address = null;
-      for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
-          .hasMoreElements();) {
+      for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
         NetworkInterface intf = en.nextElement();
+        Log.i("RosAndroid", "Interface: " + intf.getName());
         for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
             .hasMoreElements();) {
           InetAddress inetAddress = enumIpAddr.nextElement();
