@@ -35,7 +35,6 @@ import org.ros.message.sensor_msgs.CompressedImage;
  * A camera node that publishes images and camera_info
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
- * 
  */
 public class SensorImageView extends ImageView implements MessageListener<CompressedImage>,
     Runnable {
@@ -43,17 +42,14 @@ public class SensorImageView extends ImageView implements MessageListener<Compre
 
   public SensorImageView(Context ctx) {
     super(ctx);
-    // bitmap = Bitmap.createBitmap(width, height, config)
   }
 
   public SensorImageView(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
-    // TODO Auto-generated constructor stub
   }
 
   public SensorImageView(Context context, AttributeSet attrs) {
     super(context, attrs);
-    // TODO Auto-generated constructor stub
   }
 
   public void init(Node node, String topic) throws RosInitException {
@@ -62,6 +58,7 @@ public class SensorImageView extends ImageView implements MessageListener<Compre
 
   public void stop() {
     imageSub.cancel();
+    imageSub = null;
   }
 
   Bitmap bitmap;
@@ -103,7 +100,6 @@ public class SensorImageView extends ImageView implements MessageListener<Compre
   @Override
   public void run() {
     setImageBitmap(bitmap);
-
   }
 
 }
