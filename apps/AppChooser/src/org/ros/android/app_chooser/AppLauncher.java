@@ -31,16 +31,14 @@ package org.ros.android.app_chooser;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ActivityNotFoundException;
 import android.util.Log;
-
-import java.util.ArrayList;
-
 import org.ros.message.app_manager.App;
 import org.ros.message.app_manager.ClientApp;
-import org.ros.message.app_manager.KeyValue;
+
+import java.util.ArrayList;
 
 public class AppLauncher {
   static private final String CLIENT_TYPE = "android";
@@ -103,6 +101,7 @@ public class AppLauncher {
     dialog.setTitle( "Android app not installed." );
     dialog.setMessage( "This robot app requires a client user interface app, but none of the applicable android apps are installed." );
     dialog.setPositiveButton( "OK", new DialogInterface.OnClickListener() {
+      @Override
       public void onClick( DialogInterface dlog, int i) {
         dlog.dismiss();
       }
@@ -125,6 +124,7 @@ public class AppLauncher {
       dialog.setTitle( "Android ROS stub app not installed." );
       dialog.setMessage( "This robot app requires the stub client user interface app, but it is missing." );
       dialog.setPositiveButton( "OK", new DialogInterface.OnClickListener() {
+          @Override
           public void onClick( DialogInterface dlog, int i) {
             dlog.dismiss();
           }

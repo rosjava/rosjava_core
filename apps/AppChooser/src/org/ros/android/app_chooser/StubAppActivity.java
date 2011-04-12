@@ -30,15 +30,12 @@
 package org.ros.android.app_chooser;
 
 import android.os.Bundle;
-import android.content.Intent;
 import android.view.View;
 import android.widget.TextView;
-
 import org.ros.app_manager.AppManager;
-import org.ros.app_manager.AppNotInstalledException;
 import org.ros.app_manager.AppManagerNotAvailableException;
+import org.ros.app_manager.AppNotInstalledException;
 import org.ros.exceptions.RosInitException;
-
 import ros.android.activity.RosAppActivity;
 
 public class StubAppActivity extends RosAppActivity
@@ -73,6 +70,7 @@ public class StubAppActivity extends RosAppActivity
     //   });
 
     Thread starterThread = new Thread() {
+        @Override
         public void run() {
           try {
             ensureAppRunning( robotAppName );
@@ -92,6 +90,7 @@ public class StubAppActivity extends RosAppActivity
   public void onStopClicked( View view ) {
     setStatus( "Stopping..." );
     Thread stopperThread = new Thread() {
+        @Override
         public void run() {
           try {
             AppManager appMan = createAppManager();
@@ -116,6 +115,7 @@ public class StubAppActivity extends RosAppActivity
    */
   private void safeSetStatus( final String status ) {
     statusView.post( new Runnable() {
+        @Override
         public void run() {
           setStatus( status );
         }
