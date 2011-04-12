@@ -80,7 +80,7 @@ public class Subscriber<MessageType> extends Topic {
         while (!Thread.currentThread().isInterrupted()) {
           MessageType message = in.take();
           if (DEBUG) {
-            log.info("Received message: " + message);
+            log.info("Received message: " + message + " "+ message.getClass().getCanonicalName());
           }
           for (MessageListener<MessageType> listener : listeners) {
             if (Thread.currentThread().isInterrupted()) {

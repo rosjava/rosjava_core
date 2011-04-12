@@ -19,8 +19,8 @@ package org.ros.internal.node.client;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
-import org.apache.xmlrpc.client.util.ClientFactory;
 import org.ros.internal.node.server.NodeServer;
+import org.ros.internal.node.xmlrpc.XmlRpcClientFactory;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -34,7 +34,8 @@ public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
 
   protected final NodeType node;
   private final URI uri;
-
+  private static final int XMLRPC_TIMEOUT = 10 * 1000; // 10 seconds
+   
   public NodeClient(URI uri, Class<NodeType> interfaceClass) throws MalformedURLException {
     this.uri = uri;
 
@@ -47,9 +48,9 @@ public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
     client.setTransportFactory(new XmlRpcCommonsTransportFactory(client));
     client.setConfig(config);
 
-    ClientFactory factory = new ClientFactory(client);
+    XmlRpcClientFactory<NodeType> factory = new XmlRpcClientFactory<NodeType>(client);
     node =
-        interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, ""));
+        interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, "", XMLRPC_TIMEOUT));
   }
 
   /**
