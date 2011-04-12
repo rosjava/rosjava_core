@@ -37,7 +37,7 @@ public class IncomingMessageQueue<MessageType> {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
       ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
-      messages.put(deserializer.deserialize(buffer.toByteBuffer()));
+      messages.put(deserializer.<MessageType>deserialize(buffer.toByteBuffer()));
     }
   }
 
