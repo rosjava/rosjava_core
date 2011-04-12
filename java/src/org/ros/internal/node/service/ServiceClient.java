@@ -128,7 +128,7 @@ public class ServiceClient<ResponseMessageType> {
       Preconditions.checkNotNull(listener);
       ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
       ByteBuffer buffer = response.getMessage().toByteBuffer();
-      listener.onNewMessage(deserializer.deserialize(buffer));
+      listener.onNewMessage(deserializer.<ResponseMessageType>deserialize(buffer));
     }
   }
 

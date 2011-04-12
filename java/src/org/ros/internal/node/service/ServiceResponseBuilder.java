@@ -36,7 +36,7 @@ public abstract class ServiceResponseBuilder<RequestType, ResponseType> {
   }
 
   ByteBuffer handleRequest(ByteBuffer buffer) {
-    RequestType request = deserializer.deserialize(buffer);
+    RequestType request = deserializer.<RequestType>deserialize(buffer);
     ResponseType response = build(request);
     return serializer.serialize(response);
   }
