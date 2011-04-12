@@ -258,6 +258,13 @@ public class Node {
    * Stops the node.
    */
   public void stop() {
+    for (Publisher<?> pub : topicManager.getPublishers()) { 
+      pub.shutdown();
+    }
+    for (Subscriber<?> sub : topicManager.getSubscribers()) { 
+      sub.shutdown();
+    }
+    //TODO: need to shutdown services as well
     slaveServer.shutdown();
     tcpRosServer.shutdown();
   }
