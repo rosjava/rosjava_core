@@ -18,8 +18,11 @@ package ros.android.activity;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,9 +40,11 @@ public class RosActivity extends Activity {
   private Exception errorException;
   private String errorMessage;
   private WifiManager wifiManager;
+  private Handler uiThreadHandler = new Handler();
 
   private static final int WIFI_DISABLED_DIALOG_ID = 9999999;
   private static final int WIFI_ENABLED_BUT_NOT_CONNECTED_DIALOG_ID = 9999998;
+  private static final int WAITING_FOR_WIFI_DIALOG_ID = 9999997;
 
   public RosActivity() {
     masterChooser = new MasterChooser( this );
@@ -102,6 +107,12 @@ public class RosActivity extends Activity {
     Button button;
     switch( id )
     {
+    case WAITING_FOR_WIFI_DIALOG_ID:
+      ProgressDialog pd = new ProgressDialog( this );
+      pd.setMessage("Waiting for wifi connection...");
+      pd.setIndeterminate(true);
+      dialog = pd;
+      break;
     case WIFI_DISABLED_DIALOG_ID:
       dialog = new Dialog( this );
       dialog.setContentView( R.layout.wireless_disabled_dialog );
@@ -118,6 +129,7 @@ public class RosActivity extends Activity {
           @Override
           public void onClick( View v ) {
             wifiManager.setWifiEnabled( true );
+            waitForWifiConnection();
             dismissDialog( WIFI_DISABLED_DIALOG_ID );
           }
         });
@@ -139,13 +151,47 @@ public class RosActivity extends Activity {
     return dialog;
   }
 
-  private void warnIfWifiDown() {
+  /**
+   * Start a thread which waits for the WIFI connection to become
+   * valid, then restarts the activity.
+   */
+  private void waitForWifiConnection() {
+    showDialog( WAITING_FOR_WIFI_DIALOG_ID );
+    Thread waiter = new Thread() {
+        public void run() {
+          while( wifiManager.getConnectionInfo() == null ) {
+            try {
+              sleep( 500 /*ms*/ );
+            } catch (Exception ex) {}
+          }
+          uiThreadHandler.post( new Runnable() {
+              public void run() {
+                dismissDialog( WAITING_FOR_WIFI_DIALOG_ID );
+              }
+            });
+        }
+      };
+    waiter.setDaemon(true);
+    waiter.start();
+  }
+
+  /**
+   * If wifi is disabled or disconnected, this shows a warning dialog
+   * and returns true.  If wifi is connected, does nothing and returns
+   * true.
+   * @returns true if wifi is down or disconnected, false otherwise.
+   */
+  private boolean warnIfWifiDown() {
+    wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
     if( !wifiManager.isWifiEnabled() ) {
       showDialog( WIFI_DISABLED_DIALOG_ID );
+      return true;
     } else if( wifiManager.getConnectionInfo() == null ) {
       showDialog( WIFI_ENABLED_BUT_NOT_CONNECTED_DIALOG_ID );
+      return true;
     } else {
       Log.i( "RosAndroid", "wifi seems OK." );
+      return false;
     }
   }
 
@@ -158,11 +204,9 @@ public class RosActivity extends Activity {
   @Override
   protected void onResume() {
     super.onResume();
-    Log.i("RosAndroid", "getting wifi manager");
-    wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-    Log.i("RosAndroid", "got wifi manager");
-    warnIfWifiDown();
-    Log.i("RosAndroid", "maybe doing warning dialog");
+    if( warnIfWifiDown() ) {
+      return;
+    }
     if( node == null ) {
       masterChooser.loadCurrentRobot();
       if (masterChooser.hasRobot()) {
@@ -204,5 +248,4 @@ public class RosActivity extends Activity {
     }
     return node;
   }
-
 }
