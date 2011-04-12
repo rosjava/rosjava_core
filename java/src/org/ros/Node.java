@@ -18,6 +18,8 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.node.server.MasterServer;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exceptions.RosInitException;
@@ -248,4 +250,27 @@ public class Node implements Namespace {
     return new NodeNamespace(this, namespace);
   }
 
+  /**
+   * Poll for whether or not Node is current fully registered with
+   * {@link MasterServer}.
+   * 
+   * @return true if Node is fully registered with {@link MasterServer}.
+   *         {@code isRegistered()} can go to false if new publisher or
+   *         subscribers are created.
+   */
+  public boolean isRegistered() {
+    return node.isRegistered();
+  }
+
+  /**
+   * Poll for whether or not registration with the {@link MasterServer} is
+   * proceeding normally. If this returns false, it means that the
+   * {@link MasterServer} is out of contact or is misbehaving.
+   * 
+   * @return true if Node registrations are proceeding normally with
+   *         {@link MasterServer}.
+   */
+  public boolean isRegistrationOk() {
+    return node.isRegistrationOk();
+  }
 }

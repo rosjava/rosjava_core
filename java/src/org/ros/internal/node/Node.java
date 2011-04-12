@@ -72,24 +72,25 @@ public class Node {
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
   private final TcpRosServer tcpRosServer;
+  private final MasterRegistration masterRegistration;
+
+  private boolean started;
 
   public static Node createPublic(GraphName nodeName, URI masterUri, String advertiseHostname,
       int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
       URISyntaxException {
-    Node node =
-        new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
-            new AdvertiseAddress(advertiseHostname), BindAddress.createPublic(xmlRpcBindPort),
-            new AdvertiseAddress(advertiseHostname));
+    Node node = new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
+        new AdvertiseAddress(advertiseHostname), BindAddress.createPublic(xmlRpcBindPort),
+        new AdvertiseAddress(advertiseHostname));
     node.start();
     return node;
   }
 
   public static Node createPrivate(GraphName nodeName, URI masterUri, int xmlRpcBindPort,
       int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
-    Node node =
-        new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
-            AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
-            AdvertiseAddress.createPrivate());
+    Node node = new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
+        AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
+        AdvertiseAddress.createPrivate());
     node.start();
     return node;
   }
@@ -98,15 +99,18 @@ public class Node {
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
       AdvertiseAddress xmlRpcAdvertiseAddress) throws MalformedURLException {
     this.nodeName = nodeName;
+    started = false;
     executor = Executors.newCachedThreadPool();
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    tcpRosServer =
-        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
-    slaveServer =
-        new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress, masterClient,
-            topicManager, serviceManager, tcpRosServer);
+    tcpRosServer = new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager,
+        serviceManager);
+    slaveServer = new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress,
+        masterClient, topicManager, serviceManager, tcpRosServer);
+
+    masterRegistration = new MasterRegistration(masterClient);
+    topicManager.setListener(masterRegistration);
   }
 
   /**
@@ -115,8 +119,10 @@ public class Node {
    * is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition {@link TopicDefinition} that is subscribed to
-   * @param messageClass {@link Message} class for topic
+   * @param topicDefinition
+   *          {@link TopicDefinition} that is subscribed to
+   * @param messageClass
+   *          {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -134,15 +140,14 @@ public class Node {
       if (topicManager.hasSubscriber(topicName)) {
         subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
       } else {
-        subscriber =
-            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
-                executor, deserializer);
+        subscriber = Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition,
+            messageClass, executor, deserializer);
         createdNewSubscriber = true;
       }
     }
 
     if (createdNewSubscriber) {
-      slaveServer.addSubscriber(subscriber);
+      topicManager.putSubscriber(topicName, subscriber);
     }
     return subscriber;
   }
@@ -153,8 +158,10 @@ public class Node {
    * registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition {@link TopicDefinition} that is being published
-   * @param messageClass {@link Message} class for topic
+   * @param topicDefinition
+   *          {@link TopicDefinition} that is being published
+   * @param messageClass
+   *          {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -179,7 +186,7 @@ public class Node {
     }
 
     if (createdNewPublisher) {
-      slaveServer.addPublisher(publisher);
+      topicManager.putPublisher(publisher.getTopicName().toString(), publisher);
     }
     return publisher;
   }
@@ -189,9 +196,10 @@ public class Node {
    * are cached and reused per service. When a new {@link ServiceServer} is
    * generated, it is registered with the {@link MasterServer}.
    * 
-   * @param serviceDefinition the {@link ServiceDefinition} that is being served
-   * @param responseBuilder the {@link ServiceResponseBuilder} that is used to
-   *        build responses
+   * @param serviceDefinition
+   *          the {@link ServiceDefinition} that is being served
+   * @param responseBuilder
+   *          the {@link ServiceResponseBuilder} that is used to build responses
    * @return a {@link ServiceServer} instance
    * @throws Exception
    */
@@ -206,9 +214,8 @@ public class Node {
       if (serviceManager.hasServiceServer(name)) {
         serviceServer = serviceManager.getServiceServer(name);
       } else {
-        serviceServer =
-            new ServiceServer(serviceDefinition, responseBuilder,
-                tcpRosServer.getAdvertiseAddress());
+        serviceServer = new ServiceServer(serviceDefinition, responseBuilder,
+            tcpRosServer.getAdvertiseAddress());
         createdNewService = true;
       }
     }
@@ -225,7 +232,8 @@ public class Node {
    * created, it is connected to the {@link ServiceServer}.
    * 
    * @param <ResponseMessageType>
-   * @param serviceIdentifier the {@link ServiceIdentifier} of the server
+   * @param serviceIdentifier
+   *          the {@link ServiceIdentifier} of the server
    * @return a {@link ServiceClient} instance
    */
   @SuppressWarnings("unchecked")
@@ -251,22 +259,28 @@ public class Node {
   }
 
   void start() throws XmlRpcException, IOException, URISyntaxException {
+    if (started) {
+      throw new IllegalStateException("Already started.");
+    }
+    started = true;
     slaveServer.start();
+    masterRegistration.start(slaveServer.toSlaveIdentifier());
   }
 
   /**
    * Stops the node.
    */
   public void stop() {
-    for (Publisher<?> pub : topicManager.getPublishers()) { 
+    for (Publisher<?> pub : topicManager.getPublishers()) {
       pub.shutdown();
     }
-    for (Subscriber<?> sub : topicManager.getSubscribers()) { 
+    for (Subscriber<?> sub : topicManager.getSubscribers()) {
       sub.shutdown();
     }
-    //TODO: need to shutdown services as well
+    // TODO: need to shutdown services as well
     slaveServer.shutdown();
     tcpRosServer.shutdown();
+    masterRegistration.shutdown();
   }
 
   @VisibleForTesting
@@ -290,11 +304,11 @@ public class Node {
       throws RemoteException {
     Response<URI> response;
     try {
-      response =
-          masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
+      response = masterClient
+          .lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
       if (response.getStatusCode() == StatusCode.SUCCESS) {
-        ServiceDefinition serviceDefinition =
-            new ServiceDefinition(serviceName, serviceType.getDataType(), serviceType.getMD5Sum());
+        ServiceDefinition serviceDefinition = new ServiceDefinition(serviceName,
+            serviceType.getDataType(), serviceType.getMD5Sum());
         return new ServiceIdentifier(response.getResult(), serviceDefinition);
       } else {
         return null;
@@ -304,6 +318,19 @@ public class Node {
       log.error("master returned invalid URI for lookupService", e);
       throw new RemoteException(StatusCode.FAILURE, "master returned invalid URI");
     }
+  }
+
+  /**
+   * @return true if Node is fully registered with {@link MasterServer}.
+   *         {@code isRegistered()} can go to false if new publisher or
+   *         subscribers are created.
+   */
+  public boolean isRegistered() {
+    return masterRegistration.getPendingSize() == 0;
+  }
+
+  public boolean isRegistrationOk() {
+    return masterRegistration.isMasterRegistrationOk();
   }
 
 }

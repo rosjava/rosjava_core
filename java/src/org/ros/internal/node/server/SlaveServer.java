@@ -24,7 +24,6 @@ import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
-import org.ros.internal.node.response.Response;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.Publisher;
@@ -57,7 +56,7 @@ public class SlaveServer extends NodeServer {
   private final ServiceManager serviceManager;
   private final TcpRosServer tcpRosServer;
 
-  private static List<PublisherIdentifier> buildPublisherIdentifierList(
+  public static List<PublisherIdentifier> buildPublisherIdentifierList(
       Collection<URI> publisherUriList, TopicDefinition topicDefinition) {
     List<PublisherIdentifier> publishers = Lists.newArrayList();
     for (URI uri : publisherUriList) {
@@ -97,35 +96,6 @@ public class SlaveServer extends NodeServer {
     super.shutdown();
   }
 
-  public void addPublisher(Publisher<?> publisher) throws URISyntaxException, RemoteException {
-    topicManager.putPublisher(publisher.getTopicName().toString(), publisher);
-    masterClient.registerPublisher(publisher.toPublisherIdentifier(toSlaveIdentifier()));
-  }
-
-  /**
-   * Informs this {@link SlaveServer} of a new {@link Subscriber}. If there are
-   * multiple {@link Subscriber}s for the same topic, this should only be called
-   * for the first.
-   * 
-   * <p>
-   * This call blocks on remote call to the {@link MasterServer}.
-   * 
-   * @param subscriber
-   * @return List of current publisher XML-RPC slave URIs for topic.
-   * @throws IOException
-   * @throws URISyntaxException
-   * @throws RemoteException
-   */
-  public List<PublisherIdentifier> addSubscriber(Subscriber<?> subscriber) throws IOException,
-      URISyntaxException, RemoteException {
-    topicManager.putSubscriber(subscriber.getTopicName().toString(), subscriber);
-    Response<List<URI>> response = masterClient.registerSubscriber(toSlaveIdentifier(), subscriber);
-    List<PublisherIdentifier> publishers = buildPublisherIdentifierList(response.getResult(),
-        subscriber.getTopicDefinition());
-    subscriber.updatePublishers(publishers);
-    return publishers;
-  }
-
   /**
    * @param server
    * @throws URISyntaxException
@@ -134,6 +104,7 @@ public class SlaveServer extends NodeServer {
    */
   public void addService(ServiceServer server) throws URISyntaxException,
       MalformedURLException, RemoteException {
+    //TODO(kwc): convert to MasterRegistration job.  When we do, we can also get rid of masterClient.
     serviceManager.putServiceServer(server.getName().toString(), server);
     masterClient.registerService(toSlaveIdentifier(), server);
   }

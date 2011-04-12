@@ -14,24 +14,16 @@
  * the License.
  */
 
-package org.ros.internal.node.server;
+package org.ros.internal.node.topic;
 
 /**
- * @author damonkohler@google.com (Damon Kohler)
+ * Listen to creation of new publisher and subscriber instances.
+ * 
+ * @author kwc@willowgarage.com (Ken Conley)
  */
-public class ServerException extends Exception {
+public interface TopicListener {
+
+  public void publisherAdded(String topicName, Publisher<?> publisher);
+  public void subscriberAdded(String topicName, Subscriber<?> subscriber);
   
-  private static final long serialVersionUID = 1L;
-
-  public ServerException(String message) {
-    super(message);
-  }
-
-  /**
-   * @param e the wrapped {@link Exception}
-   */
-  public ServerException(Exception e) {
-    super(e);
-  }
-
 }

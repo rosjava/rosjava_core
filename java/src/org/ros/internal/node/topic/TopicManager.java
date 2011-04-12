@@ -31,10 +31,15 @@ public class TopicManager {
 
   private final Map<String, Subscriber<?>> subscribers;
   private final Map<String, Publisher<?>> publishers;
+  private TopicListener listener;
 
   public TopicManager() {
     publishers = Maps.newConcurrentMap();
     subscribers = Maps.newConcurrentMap();
+  }
+
+  public void setListener(TopicListener listener) {
+    this.listener = listener;
   }
 
   public boolean hasSubscriber(String topicName) {
@@ -55,10 +60,16 @@ public class TopicManager {
 
   public void putPublisher(String topicName, Publisher<?> publisher) {
     publishers.put(topicName, publisher);
+    if (listener != null) {
+      listener.publisherAdded(topicName, publisher);
+    }
   }
 
   public void putSubscriber(String topicName, Subscriber<?> subscriber) {
     subscribers.put(topicName, subscriber);
+    if (listener != null) {
+      listener.subscriberAdded(topicName, subscriber);
+    }
   }
 
   public List<Subscriber<?>> getSubscribers() {

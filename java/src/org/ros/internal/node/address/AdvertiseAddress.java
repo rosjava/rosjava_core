@@ -71,7 +71,7 @@ public class AdvertiseAddress implements Address {
     try {
       return new URI(scheme, null, host, portCallable.call(), null, null, null);
     } catch (Exception e) {
-      throw new RuntimeException();
+      throw new RuntimeException(e);
     }
   }
 

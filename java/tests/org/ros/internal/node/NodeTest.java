@@ -44,7 +44,6 @@ public class NodeTest {
     String hostName = InetAddress.getLocalHost().getCanonicalHostName();
     
     Node node = Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
-    node.start();
 
     InetSocketAddress tcpRosAddress = node.getTcpRosServer().getAddress();
     assertTrue(tcpRosAddress.getPort() > 0);
