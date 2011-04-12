@@ -24,28 +24,25 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
-import android.widget.ListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
+import org.yaml.snakeyaml.Yaml;
+import ros.android.util.Net;
+import ros.android.util.RobotDescription;
+import ros.android.util.SdCardSetup;
+import ros.android.util.zxing.IntentIntegrator;
+import ros.android.util.zxing.IntentResult;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.BufferedReader;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import ros.android.util.zxing.IntentResult;
-import ros.android.util.zxing.IntentIntegrator;
-import ros.android.util.SdCardSetup;
-import ros.android.util.Net;
-import ros.android.util.RobotDescription;
-
-import org.yaml.snakeyaml.Yaml;
+import java.util.List;
 
 public class MasterChooserActivity extends Activity {
 
@@ -55,90 +52,73 @@ public class MasterChooserActivity extends Activity {
 
   public static final String ROBOT_DESCRIPTION_EXTRA = "org.ros.android.RobotDescription";
 
-  private List<RobotDescription> robots_; // don't modify this without immediately calling updateListView().
+  // don't modify this without immediately calling updateListView().
+  private List<RobotDescription> robots;
   private WifiManager wifiManager;
 
   public MasterChooserActivity() {
-    robots_ = new ArrayList<RobotDescription>();
+    robots = new ArrayList<RobotDescription>();
   }
 
   private File getRobotListFile() {
-    if( !SdCardSetup.isReady() )
-    {
-      SdCardSetup.promptUserForMount( this );
+    if (!SdCardSetup.isReady()) {
+      SdCardSetup.promptUserForMount(this);
       return null;
-    }
-    else
-    {
-      try
-      {
-        File ros_dir = SdCardSetup.getRosDir();
-        File robot_list_file = new File( ros_dir, "robots.yaml" );
-        if( ! robot_list_file.exists() )
-        {
-          Log.i( "RosAndroid", "robots.yaml file does not exist, creating." );
-          robot_list_file.createNewFile();
+    } else {
+      try {
+        File rosDir = SdCardSetup.getRosDir();
+        File robotListFile = new File(rosDir, "robots.yaml");
+        if (!robotListFile.exists()) {
+          Log.i("RosAndroid", "robots.yaml file does not exist, creating.");
+          robotListFile.createNewFile();
         }
-        return robot_list_file;
-      }
-      catch( Exception ex )
-      {
-        Log.e( "RosAndroid", "exception in getRobotListFile: " + ex.getMessage() );
+        return robotListFile;
+      } catch (Exception ex) {
+        Log.e("RosAndroid", "exception in getRobotListFile: " + ex.getMessage());
         return null;
       }
     }
   }
 
   public void writeRobotList() {
-    File robot_list_file = getRobotListFile();
-    if( robot_list_file == null )
-    {
-      Log.e( "RosAndroid", "writeNewRobot(): no robots file." );
+    File robotListFile = getRobotListFile();
+    if (robotListFile == null) {
+      Log.e("RosAndroid", "writeNewRobot(): no robots file.");
       return;
     }
 
-    try
-    {
-      FileWriter writer = new FileWriter( robot_list_file );
+    try {
+      FileWriter writer = new FileWriter(robotListFile);
       Yaml yaml = new Yaml();
-      yaml.dump( robots_, writer );
+      yaml.dump(robots, writer);
       writer.close();
-      Log.i( "RosAndroid", "Wrote robots.yaml file." );
-    }
-    catch( Exception ex )
-    {
-      Log.e( "RosAndroid", "exception writing robots.yaml to sdcard: " + ex.getMessage() );
+      Log.i("RosAndroid", "Wrote robots.yaml file.");
+    } catch (Exception ex) {
+      Log.e("RosAndroid", "exception writing robots.yaml to sdcard: " + ex.getMessage());
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void readRobotList() {
-    try
-    {
-      File robot_list_file = getRobotListFile();
-      if( robot_list_file == null )
-      {
-        Log.e( "RosAndroid", "readRobotList(): no robots.yaml file." );
+    try {
+      File robotListFile = getRobotListFile();
+      if (robotListFile == null) {
+        Log.e("RosAndroid", "readRobotList(): no robots.yaml file.");
         return;
       }
 
-      BufferedReader reader = new BufferedReader( new FileReader( robot_list_file ));
-      try
-      {
+      BufferedReader reader = new BufferedReader(new FileReader(robotListFile));
+      try {
         Yaml yaml = new Yaml();
-        robots_ = (List<RobotDescription>) yaml.load( reader );
-        if( robots_ == null )
-        {
-          robots_ = new ArrayList<RobotDescription>();
+        robots = (List<RobotDescription>) yaml.load(reader);
+        if (robots == null) {
+          robots = new ArrayList<RobotDescription>();
         }
-      }
-      finally
-      {
+      } finally {
         reader.close();
       }
-    }
-    catch( Exception ex )
-    {
-      Log.e( "RosAndroid", "exception reading list of previous master URIs: " + ex.getMessage() );
+    } catch (Exception ex) {
+      Log.e("RosAndroid", "exception reading list of previous master URIs: " + ex.getMessage());
     }
   }
 
@@ -146,7 +126,7 @@ public class MasterChooserActivity extends Activity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setTitle( "Choose a ROS Master" );
+    setTitle("Choose a ROS Master");
   }
 
   @Override
@@ -159,31 +139,31 @@ public class MasterChooserActivity extends Activity {
   }
 
   private void warnIfWifiDown() {
-    if( !wifiManager.isWifiEnabled() ) {
-      showDialog( WIFI_DISABLED_DIALOG_ID );
-    } else if( wifiManager.getConnectionInfo() == null ) {
-      showDialog( WIFI_ENABLED_BUT_NOT_CONNECTED_DIALOG_ID );
+    if (!wifiManager.isWifiEnabled()) {
+      showDialog(WIFI_DISABLED_DIALOG_ID);
+    } else if (wifiManager.getConnectionInfo() == null) {
+      showDialog(WIFI_ENABLED_BUT_NOT_CONNECTED_DIALOG_ID);
     } else {
-      Log.i( "RosAndroid", "wifi seems OK." );
+      Log.i("RosAndroid", "wifi seems OK.");
     }
   }
 
   private void updateListView() {
     setContentView(R.layout.master_chooser);
     ListView listview = (ListView) findViewById(R.id.master_list);
-    listview.setAdapter( new MasterAdapter( this, robots_, Net.getNonLoopbackHostName() ));
+    listview.setAdapter(new MasterAdapter(this, robots, Net.getNonLoopbackHostName()));
     listview.setOnItemClickListener(new OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-          choose( position );
-        }
-      });
+      @Override
+      public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+        choose(position);
+      }
+    });
   }
 
-  private void choose( int position ) {
+  private void choose(int position) {
     Intent result_intent = new Intent();
-    result_intent.putExtra( ROBOT_DESCRIPTION_EXTRA, robots_.get( position ));
-    setResult( RESULT_OK, result_intent );
+    result_intent.putExtra(ROBOT_DESCRIPTION_EXTRA, robots.get(position));
+    setResult(RESULT_OK, result_intent);
     finish();
   }
 
@@ -191,18 +171,16 @@ public class MasterChooserActivity extends Activity {
   public void onActivityResult(int requestCode, int resultCode, Intent intent) {
     IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
     if (scanResult != null) {
-      addMaster( scanResult.getContents() );
-    }
-    else
-    {
+      addMaster(scanResult.getContents());
+    } else {
       Toast.makeText(this, "Scan failed", Toast.LENGTH_SHORT).show();
     }
   }
 
-  private void addMaster( String master_uri ) {
+  private void addMaster(String master_uri) {
     RobotDescription new_robot = new RobotDescription();
     new_robot.masterUri = master_uri;
-    robots_.add( new_robot );
+    robots.add(new_robot);
     onRobotsChanged();
   }
 
@@ -212,80 +190,77 @@ public class MasterChooserActivity extends Activity {
   }
 
   @Override
-  protected Dialog onCreateDialog( int id ) {
+  protected Dialog onCreateDialog(int id) {
     Dialog dialog;
     Button button;
-    switch( id )
-    {
+    switch (id) {
     case ADD_URI_DIALOG_ID:
-      dialog = new Dialog( this );
-      dialog.setContentView( R.layout.add_uri_dialog );
-      dialog.setTitle( "Add a robot" );
-      EditText uri_field = (EditText) dialog.findViewById( R.id.uri_editor );
-      uri_field.setOnKeyListener( new URIFieldKeyListener() );
-      button = (Button) dialog.findViewById( R.id.scan_robot_button );
-      button.setOnClickListener( new View.OnClickListener() {
-          @Override
-          public void onClick( View v ) {
-            scanRobotClicked( v );
-          }
-        });
+      dialog = new Dialog(this);
+      dialog.setContentView(R.layout.add_uri_dialog);
+      dialog.setTitle("Add a robot");
+      EditText uriField = (EditText) dialog.findViewById(R.id.uri_editor);
+      uriField.setOnKeyListener(new URIFieldKeyListener());
+      button = (Button) dialog.findViewById(R.id.scan_robot_button);
+      button.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          scanRobotClicked(v);
+        }
+      });
       break;
     case WIFI_DISABLED_DIALOG_ID:
-      dialog = new Dialog( this );
-      dialog.setContentView( R.layout.wireless_disabled_dialog );
-      dialog.setTitle( "Wifi network disabled." );
-      button = (Button) dialog.findViewById( R.id.ok_button );
-      button.setOnClickListener( new View.OnClickListener() {
-          @Override
-          public void onClick( View v ) {
-            dismissDialog( WIFI_DISABLED_DIALOG_ID );
-          }
-        });
-      button = (Button) dialog.findViewById( R.id.enable_button );
-      button.setOnClickListener( new View.OnClickListener() {
-          @Override
-          public void onClick( View v ) {
-            wifiManager.setWifiEnabled( true );
-            dismissDialog( WIFI_DISABLED_DIALOG_ID );
-          }
-        });
+      dialog = new Dialog(this);
+      dialog.setContentView(R.layout.wireless_disabled_dialog);
+      dialog.setTitle("Wifi network disabled.");
+      button = (Button) dialog.findViewById(R.id.ok_button);
+      button.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          dismissDialog(WIFI_DISABLED_DIALOG_ID);
+        }
+      });
+      button = (Button) dialog.findViewById(R.id.enable_button);
+      button.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          wifiManager.setWifiEnabled(true);
+          dismissDialog(WIFI_DISABLED_DIALOG_ID);
+        }
+      });
       break;
     case WIFI_ENABLED_BUT_NOT_CONNECTED_DIALOG_ID:
-      dialog = new Dialog( this );
-      dialog.setContentView( R.layout.wireless_enabled_but_not_connected_dialog );
-      dialog.setTitle( "Wifi not connected." );
-      button = (Button) dialog.findViewById( R.id.ok_button );
-      button.setOnClickListener( new View.OnClickListener() {
-          @Override
-          public void onClick( View v ) {
-            dismissDialog( WIFI_ENABLED_BUT_NOT_CONNECTED_DIALOG_ID );
-          }
-        });
+      dialog = new Dialog(this);
+      dialog.setContentView(R.layout.wireless_enabled_but_not_connected_dialog);
+      dialog.setTitle("Wifi not connected.");
+      button = (Button) dialog.findViewById(R.id.ok_button);
+      button.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          dismissDialog(WIFI_ENABLED_BUT_NOT_CONNECTED_DIALOG_ID);
+        }
+      });
     default:
       dialog = null;
     }
     return dialog;
   }
 
-  public void addRobotClicked( View view ) {
-    showDialog( ADD_URI_DIALOG_ID );
+  public void addRobotClicked(View view) {
+    showDialog(ADD_URI_DIALOG_ID);
   }
 
-  public void scanRobotClicked( View view ) {
-    dismissDialog( ADD_URI_DIALOG_ID );
-    IntentIntegrator.initiateScan( this );
+  public void scanRobotClicked(View view) {
+    dismissDialog(ADD_URI_DIALOG_ID);
+    IntentIntegrator.initiateScan(this);
   }
 
   public class URIFieldKeyListener implements View.OnKeyListener {
     @Override
-    public boolean onKey( View view, int key_code, KeyEvent event ) {
-      if( event.getAction() == KeyEvent.ACTION_DOWN &&
-          key_code == KeyEvent.KEYCODE_ENTER )
-      {
-        EditText uri_field = (EditText) view;
-        addMaster( uri_field.getText().toString() );
-        dismissDialog( ADD_URI_DIALOG_ID );
+    public boolean onKey(View view, int key_code, KeyEvent event) {
+      if (event.getAction() == KeyEvent.ACTION_DOWN && key_code == KeyEvent.KEYCODE_ENTER) {
+        EditText uriField = (EditText) view;
+        addMaster(uriField.getText().toString());
+        dismissDialog(ADD_URI_DIALOG_ID);
         return true;
       }
       return false;

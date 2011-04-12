@@ -40,30 +40,27 @@ import java.util.ArrayList;
 import ros.android.util.RobotDescription;
 
 public class MasterAdapter extends BaseAdapter {
-  private Context context_;
-  private String my_hostname_;
-  private List<MasterItem> master_items_;
+  private Context context;
+  private String myHostname;
+  private List<MasterItem> masterItems;
 
-  public MasterAdapter(MasterChooserActivity mca, List<RobotDescription> robots, String my_hostname ) {
-    context_ = mca;
-    my_hostname_ = my_hostname;
-    master_items_ = new ArrayList<MasterItem>();
-    if( robots != null )
-    {
-      for( int i = 0; i < robots.size(); i++ )
-      {
-        master_items_.add( new MasterItem( robots.get( i ), my_hostname_, mca ));
+  public MasterAdapter(MasterChooserActivity mca, List<RobotDescription> robots, String myHostname) {
+    context = mca;
+    this.myHostname = myHostname;
+    masterItems = new ArrayList<MasterItem>();
+    if (robots != null) {
+      for (int i = 0; i < robots.size(); i++) {
+        masterItems.add(new MasterItem(robots.get(i), myHostname, mca));
       }
     }
   }
 
   @Override
   public int getCount() {
-    if( master_items_ == null )
-    {
+    if (masterItems == null) {
       return 0;
     }
-    return master_items_.size();
+    return masterItems.size();
   }
 
   @Override
@@ -79,6 +76,6 @@ public class MasterAdapter extends BaseAdapter {
   // create a new View for each item referenced by the Adapter
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
-    return master_items_.get( position ).getView( context_, convertView, parent );
+    return masterItems.get(position).getView(context, convertView, parent);
   }
 }
