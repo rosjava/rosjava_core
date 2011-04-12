@@ -115,22 +115,27 @@ public class MasterChecker {
 
     @Override
     public void run() {
-      try
-      {
-        Node node = new Node( "master_checker_" + new Random().nextInt(),
-                              MasterChooser.createContext( robot_description_.masterUri, my_host_name_ ));
-        ParameterClient param_client = node.createParameterClient();
-        robot_description_.robotName = (String) param_client.getParam( "robot/name" );
-        robot_description_.robotType = (String) param_client.getParam( "robot/type" );
-        robot_description_.timeLastSeen = new Date(); // current time.
-        found_master_callback_.receive( robot_description_ );
-      }
-      catch( Exception ex )
-      {
-        Log.e( "RosAndroid",
-               "Exception while creating node in MasterChecker for master URI " + robot_description_.masterUri +
-               " with my_host_name = " + my_host_name_ );
-        failure_callback_.handleFailure( "exception" );
+      while(true) {
+        try {
+          Node node = new Node( "master_checker_" + new Random().nextInt(),
+                                MasterChooser.createContext( robot_description_.masterUri, my_host_name_ ));
+          ParameterClient param_client = node.createParameterClient();
+          robot_description_.robotName = (String) param_client.getParam( "robot/name" );
+          robot_description_.robotType = (String) param_client.getParam( "robot/type" );
+          robot_description_.timeLastSeen = new Date(); // current time.
+          found_master_callback_.receive( robot_description_ );
+          return;
+        }
+        catch( Exception ex )
+        {
+          Log.e( "RosAndroid",
+                 "Exception while creating node in MasterChecker for master URI " + robot_description_.masterUri +
+                 " with my_host_name = " + my_host_name_ );
+          failure_callback_.handleFailure( "exception" );
+        }
+        try {
+          sleep(1000/*ms*/);
+        } catch (Exception ex) {}
       }
     }
   }

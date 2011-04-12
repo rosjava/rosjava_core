@@ -35,6 +35,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -103,6 +104,12 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
   }
 
   private void populateView() {
+    boolean statusOk = connection_status_.equals("ok");
+
+    ProgressBar progress = (ProgressBar) view_.findViewById(R.id.progress_circle);
+    progress.setIndeterminate( true );
+    progress.setVisibility( statusOk ? View.GONE : View.VISIBLE );
+
     TextView tv;
     tv = (TextView) view_.findViewById( R.id.uri );
     tv.setText( desc_.masterUri );
@@ -114,6 +121,7 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver, Maste
     tv.setText( connection_status_ );
 
     ImageView iv = (ImageView) view_.findViewById( R.id.robot_icon );
+    iv.setVisibility( statusOk ? View.VISIBLE : View.GONE );
     if( desc_.robotType == null )
     {
       iv.setImageResource( R.drawable.question_mark );
