@@ -62,6 +62,7 @@ public class AppManagerCb {
 
       @Override
       public void run() {
+// add "try" here.  node.lookupService() throws if ros master is down.
         ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("list_apps"),
             new ListApps());
         if (serviceIdentifier == null) {

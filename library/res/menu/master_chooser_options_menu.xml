@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@+id/add_robot"
+        android:title="Add Robot" />
+  <item android:id="@+id/delete_unresponsive"
+        android:title="Delete Unresponsive Robots" />
+  <item android:id="@+id/delete_all"
+        android:title="Delete All Robots" />
+</menu>

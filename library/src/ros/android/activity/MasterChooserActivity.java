@@ -23,6 +23,9 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -198,6 +201,23 @@ public class MasterChooserActivity extends Activity {
     updateListView();
   }
 
+  private void deleteUnresponsiveRobots() {
+    Iterator<RobotDescription> iter = robots.iterator();
+    while( iter.hasNext() ) {
+      RobotDescription robot = iter.next();
+      if( robot == null || robot.connectionStatus == null || !robot.connectionStatus.equals( "ok" )) {
+        Log.i("RosAndroid", "Removing robot with connection status '" + robot.connectionStatus + "'");
+        iter.remove();
+      }
+    }
+    onRobotsChanged();
+  }
+
+  private void deleteAllRobots() {
+    robots.clear();
+    onRobotsChanged();
+  }
+
   @Override
   protected Dialog onCreateDialog(int id) {
     Dialog dialog;
@@ -261,6 +281,30 @@ public class MasterChooserActivity extends Activity {
   public void scanRobotClicked(View view) {
     dismissDialog(ADD_URI_DIALOG_ID);
     IntentIntegrator.initiateScan(this);
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.master_chooser_options_menu, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+    case R.id.add_robot:
+      showDialog( ADD_URI_DIALOG_ID );
+      return true;
+    case R.id.delete_unresponsive:
+      deleteUnresponsiveRobots();
+      return true;
+    case R.id.delete_all:
+      deleteAllRobots();
+      return true;
+    default:
+      return super.onOptionsItemSelected(item);
+    }
   }
 
   public class URIFieldKeyListener implements View.OnKeyListener {

@@ -32,6 +32,9 @@ package ros.android.util;
 import java.util.Date;
 
 public class RobotDescription implements java.io.Serializable {
+  public static final String CONNECTING = "connecting...";
+  public static final String OK = "ok";
+
   private static final long serialVersionUID = 1L;
   public String masterUri;
   public String robotName;

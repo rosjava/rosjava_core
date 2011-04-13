@@ -49,32 +49,31 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver,
   private MasterChecker checker;
   private View view;
   private RobotDescription description;
-  private String connectionStatus;
   private MasterChooserActivity parentMca;
 
   public MasterItem(RobotDescription robotDescription, String myHostname,
       MasterChooserActivity parentMca) {
     this.parentMca = parentMca;
     this.description = robotDescription;
-    connectionStatus = "...";
+    this.description.connectionStatus = RobotDescription.CONNECTING;
     checker = new MasterChecker(myHostname, this, this);
     checker.beginChecking(this.description.masterUri);
   }
 
   public boolean isOk() {
-    return connectionStatus == "ok";
+    return this.description.connectionStatus.equals( RobotDescription.OK );
   }
 
   @Override
   public void receive(RobotDescription robotDescription) {
     description.copyFrom(robotDescription);
-    connectionStatus = "ok";
+    description.connectionStatus = RobotDescription.OK;
     safePopulateView();
   }
 
   @Override
   public void handleFailure(String reason) {
-    connectionStatus = reason;
+    description.connectionStatus = reason;
     safePopulateView();
   }
 
@@ -103,7 +102,7 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver,
   }
 
   private void populateView() {
-    boolean statusOk = connectionStatus.equals("ok");
+    boolean statusOk = description.connectionStatus.equals("ok");
 
     ProgressBar progress = (ProgressBar) view.findViewById(R.id.progress_circle);
     progress.setIndeterminate(true);
@@ -117,7 +116,7 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver,
     tv.setText(description.robotName);
 
     tv = (TextView) view.findViewById(R.id.status);
-    tv.setText(connectionStatus);
+    tv.setText(description.connectionStatus);
 
     ImageView iv = (ImageView) view.findViewById(R.id.robot_icon);
     iv.setVisibility(statusOk ? View.VISIBLE : View.GONE);
