@@ -22,6 +22,7 @@ import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 
@@ -40,7 +41,8 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
 
   /**
    * @param subscriber
-   * @param slaveIdentifier Identifier of the subscriber's slave.
+   * @param slaveIdentifier
+   *          Identifier of the subscriber's slave.
    * @param publisherIdentifier
    */
   public UpdatePublisherRunnable(Subscriber<MessageType> subscriber,
@@ -55,9 +57,8 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
     SlaveClient slaveClient;
     try {
       slaveClient = new SlaveClient(slaveIdentifier.getName(), publisherIdentifier.getSlaveUri());
-      Response<ProtocolDescription> response =
-          slaveClient.requestTopic(this.subscriber.getTopicName().toString(),
-              ProtocolNames.SUPPORTED);
+      Response<ProtocolDescription> response = slaveClient.requestTopic(this.subscriber
+          .getTopicName().toString(), ProtocolNames.SUPPORTED);
       // TODO(kwc): all of this logic really belongs in a protocol handler
       // registry.
       ProtocolDescription selected = response.getResult();
@@ -70,6 +71,9 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
       log.error(e);
     } catch (RemoteException e) {
       // TODO(damonkohler): Retry logic is needed at the XML-RPC layer.
+      log.error(e);
+    } catch (XmlRpcTimeoutException e) {
+      // TODO see above note re: retry
       log.error(e);
     } catch (RuntimeException e) {
       // TODO(kwc):

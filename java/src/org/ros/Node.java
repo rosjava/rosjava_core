@@ -18,8 +18,6 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.node.server.MasterServer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exceptions.RosInitException;
@@ -28,6 +26,7 @@ import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.RosoutLogger;
 import org.ros.internal.node.client.TimeProvider;
 import org.ros.internal.node.client.WallclockProvider;
+import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
@@ -36,6 +35,7 @@ import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.MessageDefinition;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.xmlrpc.Master;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.message.Message;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
@@ -178,6 +178,9 @@ public class Node implements Namespace {
     try {
       return node.lookupService(resolvedServiceName, serviceType);
     } catch (RemoteException e) {
+      return null;
+    } catch (XmlRpcTimeoutException e) {
+      // TODO(kwc): change timeout policies
       return null;
     }
   }

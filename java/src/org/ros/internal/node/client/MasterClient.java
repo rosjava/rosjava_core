@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.client;
 
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
+
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.Response;
@@ -64,9 +66,10 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @return a {@link Response} with a void result
    * @throws URISyntaxException
    * @throws RemoteException
+   * @throws XmlRpcTimeoutException 
    */
   public Response<Void> registerService(SlaveIdentifier slave, ServiceServer service)
-      throws URISyntaxException, RemoteException {
+      throws URISyntaxException, RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.registerService(slave.getName().toString(), service
         .getName().toString(), service.getUri().toString(), slave.getUri().toString()),
         new VoidResultFactory());
@@ -82,9 +85,10 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    *         result
    * @throws URISyntaxException
    * @throws RemoteException
+   * @throws XmlRpcTimeoutException 
    */
   public Response<Integer> unregisterService(SlaveIdentifier slave, ServiceServer service)
-      throws URISyntaxException, RemoteException {
+      throws URISyntaxException, RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.unregisterService(slave.getName().toString(), service
         .getName().toString(), service.getUri().toString()), new IntegerResultFactory());
   }
@@ -103,9 +107,10 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    *         as the result
    * @throws URISyntaxException
    * @throws RemoteException
+   * @throws XmlRpcTimeoutException 
    */
   public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
-      throws URISyntaxException, RemoteException {
+      throws URISyntaxException, RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.registerSubscriber(slave.getName().toString(), subscriber
         .getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri().toString()),
         new UriListResultFactory());
@@ -119,9 +124,10 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @return a {@link Response} with the number of unregistered subscribers as
    *         the result
    * @throws RemoteException
+   * @throws XmlRpcTimeoutException 
    */
   public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
-      throws RemoteException {
+      throws RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.unregisterSubscriber(slave.getName().toString(),
         subscriber.getTopicName().toString(), slave.getUri().toString()),
         new IntegerResultFactory());
@@ -137,9 +143,10 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    *         published {@link Topic}.
    * @throws URISyntaxException
    * @throws RemoteException
+   * @throws XmlRpcTimeoutException 
    */
   public Response<List<URI>> registerPublisher(PublisherIdentifier publisher)
-      throws URISyntaxException, RemoteException {
+      throws URISyntaxException, RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.registerPublisher(publisher.getNodeName().toString(),
         publisher.getTopicName().toString(), publisher.getTopicMessageType(), publisher
             .getSlaveUri().toString()), new UriListResultFactory());
@@ -153,9 +160,10 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @return a {@link Response} with the number of unregistered
    *         {@link Publisher}s as the result
    * @throws RemoteException
+   * @throws XmlRpcTimeoutException 
    */
   public Response<Integer> unregisterPublisher(PublisherIdentifier publisher)
-      throws RemoteException {
+      throws RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.unregisterPublisher(publisher.getNodeName().toString(),
         publisher.getTopicName().toString(), publisher.getSlaveUri().toString()),
         new IntegerResultFactory());
@@ -170,9 +178,10 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    *         as a result
    * @throws URISyntaxException
    * @throws RemoteException
+   * @throws XmlRpcTimeoutException 
    */
   public Response<URI> lookupNode(SlaveIdentifier slave, String nodeName)
-      throws URISyntaxException, RemoteException {
+      throws URISyntaxException, RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.lookupNode(slave.getName().toString(), nodeName),
         new UriResultFactory());
   }
@@ -185,8 +194,9 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @throws URISyntaxException
    * @throws RemoteException If {@code StatusCode.FAILURE} or
    *         {@code StatusCode.ERROR} is returned by {@link MasterServer}.
+   * @throws XmlRpcTimeoutException 
    */
-  public Response<URI> getUri(SlaveIdentifier slave) throws URISyntaxException, RemoteException {
+  public Response<URI> getUri(SlaveIdentifier slave) throws URISyntaxException, RemoteException, XmlRpcTimeoutException {
     return Response
         .fromListChecked(node.getUri(slave.getName().toString()), new UriResultFactory());
   }
@@ -201,9 +211,10 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @throws URISyntaxException
    * @throws RemoteException If {@code StatusCode.FAILURE} is returned by
    *         {@link MasterServer}.
+   * @throws XmlRpcTimeoutException 
    */
   public Response<URI> lookupService(SlaveIdentifier slave, String serviceName)
-      throws URISyntaxException, RemoteException {
+      throws URISyntaxException, RemoteException, XmlRpcTimeoutException {
     return Response.fromListCheckedFailure(
         node.lookupService(slave.getName().toString(), serviceName), new UriResultFactory());
   }

@@ -24,6 +24,7 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.TopicDefinitionListResultFactory;
 import org.ros.internal.node.response.UriResultFactory;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.ProtocolDescription;
 
 import java.net.MalformedURLException;
@@ -51,7 +52,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
     throw new UnsupportedOperationException();
   }
 
-  public Response<URI> getMasterUri() throws RemoteException {
+  public Response<URI> getMasterUri() throws RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.getMasterUri(nodeName.toString()), new UriResultFactory());
   }
 
@@ -59,16 +60,16 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
     throw new UnsupportedOperationException();
   }
 
-  public Response<Integer> getPid() throws RemoteException {
+  public Response<Integer> getPid() throws RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.getPid(nodeName.toString()), new IntegerResultFactory());
   }
 
-  public Response<List<TopicDefinition>> getSubscriptions() throws RemoteException {
+  public Response<List<TopicDefinition>> getSubscriptions() throws RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.getSubscriptions(nodeName.toString()),
         new TopicDefinitionListResultFactory());
   }
 
-  public Response<List<TopicDefinition>> getPublications() throws RemoteException {
+  public Response<List<TopicDefinition>> getPublications() throws RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.getPublications(nodeName.toString()),
         new TopicDefinitionListResultFactory());
   }
@@ -82,7 +83,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
   }
 
   public Response<ProtocolDescription> requestTopic(String topic,
-      Collection<String> requestedProtocols) throws RemoteException {
+      Collection<String> requestedProtocols) throws RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(
         node.requestTopic(nodeName.toString(), topic, new Object[][] {requestedProtocols.toArray()}),
         new ProtocolDescriptionResultFactory());

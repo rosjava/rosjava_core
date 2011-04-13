@@ -32,6 +32,7 @@ import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.SlaveImpl;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
@@ -101,9 +102,10 @@ public class SlaveServer extends NodeServer {
    * @throws URISyntaxException
    * @throws MalformedURLException
    * @throws RemoteException
+   * @throws XmlRpcTimeoutException 
    */
   public void addService(ServiceServer server) throws URISyntaxException,
-      MalformedURLException, RemoteException {
+      MalformedURLException, RemoteException, XmlRpcTimeoutException {
     //TODO(kwc): convert to MasterRegistration job.  When we do, we can also get rid of masterClient.
     serviceManager.putServiceServer(server.getName().toString(), server);
     masterClient.registerService(toSlaveIdentifier(), server);

@@ -32,6 +32,7 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.tcp.TcpRosServer;
 
 import java.io.IOException;
@@ -65,13 +66,13 @@ public class MasterSlaveIntegrationTest {
   }
 
   @Test
-  public void testGetMasterUri() throws RemoteException {
+  public void testGetMasterUri() throws RemoteException, XmlRpcTimeoutException {
     Response<URI> response = slaveClient.getMasterUri();
     assertEquals(masterServer.getUri(), response.getResult());
   }
 
   @Test
-  public void testGetPid() throws RemoteException {
+  public void testGetPid() throws RemoteException, XmlRpcTimeoutException {
     Response<Integer> response = slaveClient.getPid();
     assertTrue(response.getResult() > 0);
   }

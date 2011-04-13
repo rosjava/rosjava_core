@@ -18,15 +18,16 @@ package org.ros.internal.node;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xmlrpc.client.TimingOutCallback.TimeoutException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
+import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicListener;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -70,12 +71,12 @@ public class MasterRegistration implements TopicListener {
 
   abstract class RegistrationJob {
 
-    public abstract void doJob() throws RemoteException, TimeoutException;
+    public abstract void doJob() throws RemoteException, XmlRpcTimeoutException;
 
     public boolean run() {
       try {
         doJob();
-      } catch (TimeoutException e) {
+      } catch (XmlRpcTimeoutException e) {
         log.error("timeout communication with master", e);
         return false;
       } catch (RemoteException e) {
@@ -95,7 +96,7 @@ public class MasterRegistration implements TopicListener {
     }
 
     @Override
-    public void doJob() throws RemoteException, TimeoutException {
+    public void doJob() throws RemoteException, XmlRpcTimeoutException {
       try {
         masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
       } catch (URISyntaxException e) {
@@ -114,7 +115,7 @@ public class MasterRegistration implements TopicListener {
     }
 
     @Override
-    public void doJob() throws RemoteException, TimeoutException {
+    public void doJob() throws RemoteException, XmlRpcTimeoutException {
       Response<List<URI>> response;
       try {
         response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
@@ -171,7 +172,7 @@ public class MasterRegistration implements TopicListener {
 
   public void start(SlaveIdentifier slaveIdentifier) {
     if (this.slaveIdentifier != null) {
-       throw new IllegalStateException("cannot call start() more than once");
+      throw new IllegalStateException("cannot call start() more than once");
     }
     this.slaveIdentifier = slaveIdentifier;
     registrationThread.start();

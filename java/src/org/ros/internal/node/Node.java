@@ -18,6 +18,8 @@ package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
@@ -301,7 +303,7 @@ public class Node {
   }
 
   public ServiceIdentifier lookupService(GraphName serviceName, Service<?, ?> serviceType)
-      throws RemoteException {
+      throws RemoteException, XmlRpcTimeoutException {
     Response<URI> response;
     try {
       response = masterClient
