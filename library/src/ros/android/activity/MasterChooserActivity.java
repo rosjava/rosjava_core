@@ -38,6 +38,7 @@ import java.io.BufferedReader;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import ros.android.util.zxing.IntentResult;
 import ros.android.util.zxing.IntentIntegrator;
@@ -202,6 +203,14 @@ public class MasterChooserActivity extends Activity {
   private void addMaster( String master_uri ) {
     RobotDescription new_robot = new RobotDescription();
     new_robot.masterUri = master_uri;
+    Iterator<RobotDescription> iter = robots_.iterator();
+    while( iter.hasNext() ) {
+      RobotDescription robot = iter.next();
+      if( robot.masterUri.equals( master_uri )) {
+        Toast.makeText(this, "That robot is already listed.", Toast.LENGTH_SHORT).show();
+        return;
+      }
+    }
     robots_.add( new_robot );
     onRobotsChanged();
   }
