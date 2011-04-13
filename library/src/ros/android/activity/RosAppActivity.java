@@ -33,17 +33,24 @@
 
 package ros.android.activity;
 
+import org.ros.app_manager.BasicAppManagerCallback.TimeoutException;
+
+import org.ros.app_manager.AppManagerException;
+
+import org.ros.service.app_manager.StartApp;
+
+import org.ros.app_manager.BasicAppManagerCallback;
+
+import org.ros.app_manager.AppManagerCb;
+
+import android.util.Log;
 import org.ros.Node;
 import org.ros.app_manager.AppManager;
-import org.ros.app_manager.AppManagerNotAvailableException;
-import org.ros.app_manager.AppNotInstalledException;
+import org.ros.app_manager.StartAppFuture;
 import org.ros.exceptions.RosInitException;
-import org.ros.message.app_manager.App;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
 import ros.android.util.RobotDescription;
-
-import java.util.ArrayList;
 
 /**
  * Activity for Android that acts as a client for an external ROS app.
@@ -61,7 +68,20 @@ public class RosAppActivity extends RosActivity {
     if (robotDescription == null) {
       throw new RosInitException("no robot available");
     } else {
+      Log.i("RosAndroid", "Using Robot: " + robotDescription.robotName + " "
+          + robotDescription.masterUri);
       return new AppManager(getNode(), robotDescription.robotName);
+    }
+  }
+
+  protected AppManagerCb createAppManagerCb() throws RosInitException {
+    RobotDescription robotDescription = getCurrentRobot();
+    if (robotDescription == null) {
+      throw new RosInitException("no robot available");
+    } else {
+      Log.i("RosAndroid", "Using Robot: " + robotDescription.robotName + " "
+          + robotDescription.masterUri);
+      return new AppManagerCb(getNode(), robotDescription.robotName);
     }
   }
 
@@ -77,36 +97,62 @@ public class RosAppActivity extends RosActivity {
     return node.createNamespace(NameResolver.join(robotDescription.robotName, "application"));
   }
 
+  public boolean startApp(final String appName) {
+    AppManager appManager;
+    final BasicAppManagerCallback<StartApp.Response> callback;
+    try {
+      appManager = createAppManager();
+      callback = new BasicAppManagerCallback<StartApp.Response>();
+      appManager.startApp(appName, callback);
+      callback.waitForResponse(10 * 1000);
+      return true;
+    } catch (RosInitException e1) {
+      return false;
+    } catch (AppManagerException e) {
+      return false;
+    } catch (TimeoutException e) {
+      return false;
+    }
+  }
+
   /**
    * Start ROS app if it is not already running.
    * 
    * @param appName
+   * @param restart
+   *          If true, will restart the app if it is already running.
+   * @param statusCallback
    * @throws RosInitException
-   * @throws AppManagerNotAvailableException
-   * @throws AppNotInstalledException
    */
-  public void ensureAppRunning(String appName) throws RosInitException,
-      AppManagerNotAvailableException, AppNotInstalledException {
-    // TODO(kwc) create an explicit start app routine instead
+  public void startAppCb(String appName, boolean restart, final AppStartCallback callback)
+      throws RosInitException {
+    AppManagerCb appManager = createAppManagerCb();
+    final StartAppFuture startAppFuture = new StartAppFuture(appManager, appName, restart);
+    startAppFuture.start();
 
-    AppManager appManager = createAppManager();
-    ArrayList<App> availableApps = appManager.getAvailableApps();
-    boolean installed = false;
-    for (App app : availableApps) {
-      if (app.name.equals(appName)) {
-        installed = true;
+    Thread thread = new Thread(new Runnable() {
+
+      @Override
+      public void run() {
+        try {
+          long timeoutT = System.currentTimeMillis() + 30 * 1000;
+          while (startAppFuture.getResultCode() == StartAppFuture.PENDING
+              && System.currentTimeMillis() < timeoutT) {
+            Thread.sleep(100);
+          }
+          if (startAppFuture.getResultCode() != StartAppFuture.SUCCESS) {
+            callback.appStartResult(false, "Failed to start: " + startAppFuture.getResultMessage());
+          } else {
+            callback.appStartResult(true, "success");
+          }
+
+        } catch (InterruptedException e) {
+          callback.appStartResult(false, "Cancelled");
+        }
       }
-    }
-    if (!installed) {
-      throw new AppNotInstalledException("App is not installed");
-    }
-    ArrayList<App> runningApps = appManager.getRunningApps();
-    for (App app : runningApps) {
-      if (app.name.equals(appName)) {
-        return;
-      }
-    }
-    appManager.startApp(appName);
+
+    });
+    thread.start();
   }
 
   @Override
