@@ -4,6 +4,7 @@
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:padding="10dp"
+              android:gravity="center"
               >
   <TextView android:text="Enter master URI:"
             android:layout_width="fill_parent"
@@ -21,4 +22,8 @@
           android:layout_height="wrap_content"
           android:drawableLeft="@drawable/qrcode"
           android:id="@+id/scan_robot_button"/>
+  <Button android:text="Cancel"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:id="@+id/cancel_button"/>
 </LinearLayout>

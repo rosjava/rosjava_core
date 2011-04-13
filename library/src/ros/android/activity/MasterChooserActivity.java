@@ -236,6 +236,13 @@ public class MasterChooserActivity extends Activity {
           scanRobotClicked(v);
         }
       });
+      button = (Button) dialog.findViewById(R.id.cancel_button);
+      button.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          dismissDialog( ADD_URI_DIALOG_ID );
+        }
+      });
       break;
     case WIFI_DISABLED_DIALOG_ID:
       dialog = new Dialog(this);
