@@ -18,6 +18,8 @@
  */
 package org.ros.internal.node.xmlrpc;
 
+import org.apache.xmlrpc.XmlRpcException;
+
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.common.TypeConverter;
 import org.apache.xmlrpc.common.TypeConverterFactory;
@@ -115,8 +117,8 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
    *          method "bar" in the handler, then the full method name would be
    *          "Foo.bar".
    */
-  public Object newInstance(ClassLoader pClassLoader, final Class<NodeType> pClass, final String pRemoteName,
-      final int timeout) {
+  public Object newInstance(ClassLoader pClassLoader, final Class<NodeType> pClass,
+      final String pRemoteName, final int timeout) {
     return Proxy.newProxyInstance(pClassLoader, new Class[] { pClass }, new InvocationHandler() {
       @SuppressWarnings("unchecked")
       @Override
@@ -136,7 +138,7 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
           client.executeAsync(methodName, pArgs, callback);
           result = callback.waitForResponse();
           // result = client.execute(methodName, pArgs);
-        } catch (XmlRpcInvocationException e) {
+        } catch (XmlRpcException e) {
           Throwable t = e.linkedException;
           if (t instanceof RuntimeException) {
             throw t;
@@ -150,8 +152,11 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
               throw t;
             }
           }
+          // TODO(kwc): should probably change this to be a different exception
+          // type, but need to prevent the undeclaredthrowables from leaking
+          // out.
           throw new RemoteException(StatusCode.FAILURE, t.getMessage());
-          //throw new UndeclaredThrowableException(t);
+          // throw new UndeclaredThrowableException(t);
         }
         TypeConverter typeConverter = typeConverterFactory.getTypeConverter(pMethod.getReturnType());
         return typeConverter.convert(result);
