@@ -324,7 +324,10 @@ public class MasterChooserActivity extends Activity {
     public boolean onKey(View view, int keyCode, KeyEvent event) {
       if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
         EditText uriField = (EditText) view;
-        addMaster(uriField.getText().toString());
+        String newMasterUri = uriField.getText().toString();
+        if( newMasterUri != null && newMasterUri.length() > 0 ) {
+          addMaster(newMasterUri);
+        }
         dismissDialog(ADD_URI_DIALOG_ID);
         return true;
       }

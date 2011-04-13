@@ -60,11 +60,6 @@ public class MasterChecker {
   private String my_host_name_;
 
   /** Constructor.  Should not take any time. */
-  public MasterChecker( String my_host_name, RobotDescriptionReceiver found_master_callback ) {
-    this( my_host_name, found_master_callback, null );
-  }
-
-  /** Constructor.  Should not take any time. */
   public MasterChecker( String my_host_name, RobotDescriptionReceiver found_master_callback, FailureHandler failure_callback ) {
     my_host_name_ = my_host_name;
     found_master_callback_ = found_master_callback;
@@ -76,6 +71,10 @@ public class MasterChecker {
    * Returns immediately. */
   public void beginChecking( String master_uri ) {
     stopChecking();
+    if( master_uri == null || master_uri.equals("") ) {
+      failure_callback_.handleFailure( "empty master URI" );
+      return;
+    }
     thread_ = new CheckerThread( my_host_name_, found_master_callback_, failure_callback_ );
     thread_.robot_description_.masterUri = master_uri;
     thread_.robot_description_.robotName = null;
