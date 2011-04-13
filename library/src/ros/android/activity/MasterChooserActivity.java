@@ -287,7 +287,12 @@ public class MasterChooserActivity extends Activity {
 
   public void scanRobotClicked(View view) {
     dismissDialog(ADD_URI_DIALOG_ID);
-    IntentIntegrator.initiateScan(this);
+    IntentIntegrator.initiateScan(this,
+                                  IntentIntegrator.DEFAULT_TITLE,
+                                  IntentIntegrator.DEFAULT_MESSAGE,
+                                  IntentIntegrator.DEFAULT_YES,
+                                  IntentIntegrator.DEFAULT_NO,
+                                  IntentIntegrator.QR_CODE_TYPES);
   }
 
   @Override
