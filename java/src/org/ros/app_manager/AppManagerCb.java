@@ -32,7 +32,6 @@
  */
 package org.ros.app_manager;
 
-import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceIdentifier;
@@ -47,75 +46,75 @@ import org.ros.service.app_manager.StopApp;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class AppManager {
+public class AppManagerCb {
 
   private final Node node;
-  private ServiceClient<ListApps.Response> listAppsClient;
-  private ServiceClient<StopApp.Response> stopAppClient;
-  private ServiceClient<StartApp.Response> startAppClient;
   private NameResolver resolver;
 
-  public AppManager(Node node, String robotName) {
+  public AppManagerCb(Node node, String robotName) {
     this.node = node;
-    listAppsClient = null;
-    stopAppClient = null;
-    startAppClient = null;
-
     resolver = node.getResolver().createResolver(robotName);
   }
 
-  private void initListApps() throws AppManagerException {
-    if (listAppsClient == null) {
-      ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("list_apps"),
-          new ListApps());
-      if (serviceIdentifier == null) {
-        throw new AppManagerException();
+  public void listApps(final AppManagerCallback<ListApps.Response> callback) {
+
+    Thread callThread = new Thread(new Runnable() {
+
+      @Override
+      public void run() {
+        ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("list_apps"),
+            new ListApps());
+        if (serviceIdentifier == null) {
+          callback.callFailed(new AppManagerException());
+        } else {
+          ServiceClient<ListApps.Response> listAppsClient = node
+              .createServiceClient(serviceIdentifier, ListApps.Response.class);
+          listAppsClient.call(new ListApps.Request(), callback);
+        }
       }
-      listAppsClient = node.createServiceClient(serviceIdentifier, ListApps.Response.class);
-    }
+    });
+    callThread.start();
+
   }
 
-  private void initStartApp() throws AppManagerException {
-    if (startAppClient == null) {
-      ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("start_app"),
-          new StartApp());
-      if (serviceIdentifier == null) {
-        throw new AppManagerException();
+  public void startApp(final String appName, final AppManagerCallback<StartApp.Response> callback) {
+    Thread callThread = new Thread(new Runnable() {
+
+      @Override
+      public void run() {
+        ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("start_app"),
+            new StartApp());
+        if (serviceIdentifier == null) {
+          callback.callFailed(new AppManagerException());
+        }
+        ServiceClient<StartApp.Response> startAppClient = node.createServiceClient(
+            serviceIdentifier, StartApp.Response.class);
+        StartApp.Request request = new StartApp.Request();
+        request.name = appName;
+        startAppClient.call(request, callback);
       }
-      startAppClient = node.createServiceClient(serviceIdentifier, StartApp.Response.class);
-    }
+    });
+    callThread.start();
   }
 
-  private void initStopApp() throws AppManagerException {
-    if (stopAppClient == null) {
-      ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("stop_app"),
-          new StopApp());
-      if (serviceIdentifier == null) {
-        throw new AppManagerException();
+  public void stopApp(final String appName, final AppManagerCallback<StopApp.Response> callback) {
+    Thread callThread = new Thread(new Runnable() {
+
+      @Override
+      public void run() {
+        ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("stop_app"),
+            new StopApp());
+        if (serviceIdentifier == null) {
+          callback.callFailed(new AppManagerException());
+        } else {
+          ServiceClient<StopApp.Response> stopAppClient = node
+              .createServiceClient(serviceIdentifier, StopApp.Response.class);
+          StopApp.Request request = new StopApp.Request();
+          request.name = appName;
+          stopAppClient.call(request, callback);
+        }
       }
-      stopAppClient = node.createServiceClient(serviceIdentifier, StopApp.Response.class);
-    }
-  }
-
-  public void listApps(MessageListener<ListApps.Response> callback)
-      throws AppManagerException {
-    initListApps();
-    listAppsClient.call(new ListApps.Request(), callback);
-  }
-
-  public void startApp(String appName, MessageListener<StartApp.Response> callback)
-      throws AppManagerException {
-    initStartApp();
-    StartApp.Request request = new StartApp.Request();
-    request.name = appName;
-    startAppClient.call(request, callback);
-  }
-
-  public void stopApp(String appName, MessageListener<StopApp.Response> callback)
-      throws AppManagerException {
-    initStopApp();
-    StopApp.Request request = new StopApp.Request();
-    request.name = appName;
-    stopAppClient.call(request, callback);
+    });
+    callThread.start();
   }
 }

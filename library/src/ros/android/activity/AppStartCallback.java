@@ -30,18 +30,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.ros.app_manager;
 
-public class AppManagerNotAvailableException extends AppManagerException {
+package ros.android.activity;
 
-  public AppManagerNotAvailableException(String string) {
-    super(string);
-  }
+public interface AppStartCallback {
 
-  public AppManagerNotAvailableException() {
-    super();
-  }
-  
-  private static final long serialVersionUID = 1L;
+  public void appStartResult(boolean success, String message);
 
 }

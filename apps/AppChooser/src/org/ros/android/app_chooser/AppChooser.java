@@ -29,6 +29,8 @@
 
 package org.ros.android.app_chooser;
 
+import org.ros.app_manager.AppManagerException;
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -36,9 +38,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.TextView;
 import org.ros.app_manager.AppManager;
-import org.ros.app_manager.AppManagerNotAvailableException;
+import org.ros.app_manager.BasicAppManagerCallback;
 import org.ros.exceptions.RosInitException;
 import org.ros.message.app_manager.App;
+import org.ros.service.app_manager.ListApps;
 import ros.android.activity.RosActivity;
 import ros.android.util.RobotDescription;
 
@@ -83,12 +86,18 @@ public class AppChooser extends RosActivity {
     try {
       RobotDescription robot = getCurrentRobot();
       AppManager app_man = new AppManager(getNode(), robot.robotName);
-      return app_man.getAvailableApps();
-    } catch (AppManagerNotAvailableException ex) {
+      // TODO: make non-blocking
+      BasicAppManagerCallback<ListApps.Response> callback = new BasicAppManagerCallback<ListApps.Response>();
+      app_man.listApps(callback);
+      return callback.waitForResponse(30 * 1000).available_apps;
+    } catch (BasicAppManagerCallback.TimeoutException ex) {
       setStatus("AppManager not available");
       return null;
     } catch (RosInitException ex) {
       setStatus("Ros init exception: " + ex.getMessage());
+      return null;
+    } catch (AppManagerException e) {
+      setStatus("AppManagerException: " + e.getMessage());
       return null;
     }
   }

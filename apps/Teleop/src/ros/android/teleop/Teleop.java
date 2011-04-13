@@ -16,13 +16,6 @@
 
 package ros.android.teleop;
 
-import org.ros.Subscriber;
-
-import android.widget.Toast;
-
-import org.ros.MessageListener;
-import org.ros.message.app_manager.AppStatus;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -33,32 +26,32 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 import org.ros.Node;
 import org.ros.Publisher;
-import org.ros.app_manager.AppManagerNotAvailableException;
-import org.ros.app_manager.AppNotInstalledException;
+import org.ros.Subscriber;
 import org.ros.exceptions.RosInitException;
+import org.ros.message.app_manager.AppStatus;
 import org.ros.message.geometry_msgs.Twist;
 import org.ros.namespace.Namespace;
+import ros.android.activity.AppStartCallback;
 import ros.android.activity.RosAppActivity;
-import ros.android.sensor.GravityTeleop;
 import ros.android.views.SensorImageView;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class Teleop extends RosAppActivity implements OnTouchListener {
+public class Teleop extends RosAppActivity implements OnTouchListener, AppStartCallback {
   private Publisher<Twist> twistPub;
   private SensorImageView imageView;
   private Thread pubThread;
-  private GravityTeleop sensor;
   private boolean deadman;
   private Twist touchCartesianMessage;
   private Twist stopMessage;
   private float motionY;
   private float motionX;
-  private boolean gravityMode;
   private Subscriber<AppStatus> statusSub;
+  private Thread startThread;
 
   /** Called when the activity is first created. */
   @Override
@@ -73,23 +66,20 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
     mainView.setOnTouchListener(this);
 
     imageView = (SensorImageView) findViewById(R.id.image);
-    //imageView.setOnTouchListener(this);
-    sensor = new GravityTeleop();
-    deadman = false;
+    // imageView.setOnTouchListener(this);
     stopMessage = new Twist();
     touchCartesianMessage = new Twist();
   }
 
   @Override
   protected void onPause() {
-    deadman = false;
-    sensor.stop(this);
     twistPub = null;
+    deadman = false;
     if (imageView != null) {
       imageView.stop();
       imageView = null;
     }
-    if (statusSub != null) { 
+    if (statusSub != null) {
       statusSub.cancel();
       statusSub = null;
     }
@@ -97,47 +87,29 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
       pubThread.interrupt();
       pubThread = null;
     }
+    if (startThread != null && startThread.isAlive()) {
+      startThread.interrupt();
+      startThread = null;
+    }
     super.onPause();
   }
 
-  protected void attachToastToAppStatus() throws RosInitException { 
-    Namespace appNamespace = getAppNamespace();
-    statusSub = appNamespace.createSubscriber("app_status", new MessageListener<AppStatus>() {
-      @Override
-      public void onNewMessage(final AppStatus message) {
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            Toast.makeText(Teleop.this, message.status, Toast.LENGTH_LONG).show();
-          }
-        });
-
-      }
-    }, AppStatus.class);
-  }
-  
-  @Override
-  protected void onResume() {
-    // TODO(kwc): needs a whole lot of tuning
-    Toast.makeText(Teleop.this, "loading", Toast.LENGTH_SHORT).show();
-    super.onResume();
-
+  private void initRos() {
     try {
-      Toast.makeText(Teleop.this, "starting app", Toast.LENGTH_SHORT).show();
-      ensureAppRunning("turtlebot_teleop/android_teleop");
-      Toast.makeText(Teleop.this, "app started", Toast.LENGTH_SHORT).show();
-      
-      attachToastToAppStatus();
-      
-      sensor.start(this);
-
+      Log.i("Teleop", "getNode()");
       Node node = getNode();
       Namespace appNamespace = getAppNamespace();
       imageView = (SensorImageView) findViewById(R.id.image);
+      Log.i("Teleop", "init imageView");
       imageView.init(node, appNamespace.resolveName("camera/rgb/image_color/compressed"));
-      imageView.setSelected(true);
+      imageView.post(new Runnable() {
 
-      // TODO(kwc): I don't like cmd_vel being in the turtlebot_node namespace
+        @Override
+        public void run() {
+          imageView.setSelected(true);
+        }
+      });
+      Log.i("Teleop", "init twistPub");
       twistPub = appNamespace.createPublisher("turtlebot_node/cmd_vel", Twist.class);
 
       pubThread = new Thread(new Runnable() {
@@ -148,12 +120,7 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
           try {
             while (true) {
               // 10Hz
-              if (gravityMode) {
-                message = sensor.getTwist();
-              } else {
-                message = touchCartesianMessage;
-              }
-
+              message = touchCartesianMessage;
               if (deadman && message != null) {
                 twistPub.publish(message);
                 Log.i("Teleop", "twist: " + message.angular.x + " " + message.angular.z);
@@ -167,19 +134,22 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
           }
         }
       });
+      Log.i("Teleop", "started pub thread");
       pubThread.start();
     } catch (RosInitException e) {
       Log.e("Teleop", e.getMessage());
-    } catch (AppManagerNotAvailableException e) {
-      // TODO(kwc) need permanent way of display app launch failure to user
-      Log.e("Teleop", e.getMessage());
-      Toast.makeText(Teleop.this, e.getMessage(), Toast.LENGTH_LONG).show();
-    } catch (AppNotInstalledException e) {
-      // TODO(kwc) display message to user that app cannot be run on this robot
-      Log.e("Teleop", e.getMessage());
-      Toast.makeText(Teleop.this, e.getMessage(), Toast.LENGTH_LONG).show();
     }
+  }
 
+  @Override
+  protected void onResume() {
+    super.onResume();
+    Toast.makeText(Teleop.this, "starting app", Toast.LENGTH_LONG).show();
+    Log.i("Teleop", "startAppFuture");
+    // startAppCb("turtlebot_teleop/android_teleop", true, this);
+    if (startApp("turtlebot_teleop/android_teleop")) {
+      initRos();
+    }
   }
 
   @Override
@@ -191,15 +161,7 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
-    switch (item.getItemId()) {
-    case R.id.gravity:
-      gravityMode = true;
-      break;
-    case R.id.touch:
-      gravityMode = false;
-      break;
-    }
-    // TODO Auto-generated method stub
+    // TODO: REMOVE
     return super.onOptionsItemSelected(item);
   }
 
@@ -223,6 +185,23 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
       deadman = false;
     }
     return true;
+  }
+
+  @Override
+  public void appStartResult(boolean success, final String message) {
+    Log.i("Teleop", "appStartResult" + success);
+    View mainView = findViewById(R.id.image);
+    if (success) {
+      initRos();
+    } else {
+      mainView.post(new Runnable() {
+
+        @Override
+        public void run() {
+          Toast.makeText(Teleop.this, message, Toast.LENGTH_LONG).show();
+        }
+      });
+    }
   }
 
 }

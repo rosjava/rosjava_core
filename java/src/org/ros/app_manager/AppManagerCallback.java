@@ -33,12 +33,17 @@
 
 package org.ros.app_manager;
 
-public class AppNotInstalledException extends AppManagerException {
+import org.ros.message.Message;
 
-  public AppNotInstalledException(String string) {
-    super(string);
-  }
+import org.ros.MessageListener;
 
-  private static final long serialVersionUID = 1L;
+/**
+ * @author kwc@willowgarage.com (Ken Conley)
+ * 
+ * @param <T>
+ */
+public interface AppManagerCallback<T extends Message> extends MessageListener<T> {
 
+  public void callFailed(AppManagerException e);
+  
 }

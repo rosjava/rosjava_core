@@ -35,8 +35,6 @@ package org.ros.app_manager;
 
 import org.ros.message.Message;
 
-import org.ros.MessageListener;
-
 /**
  * Message listener implementation that enables blocking-style execution of
  * service calls. This implementation is intended for services as it only
@@ -47,11 +45,12 @@ import org.ros.MessageListener;
  * 
  * @param <T>
  */
-public class BasicMessageListener<T extends Message> implements MessageListener<T> {
+public class BasicAppManagerCallback<T extends Message> implements AppManagerCallback<T> {
 
   private T response;
+  private AppManagerException failure;
 
-  public BasicMessageListener() {
+  public BasicAppManagerCallback() {
     response = null;
   }
 
@@ -64,23 +63,31 @@ public class BasicMessageListener<T extends Message> implements MessageListener<
     return response;
   }
 
-  public T waitForResponse(long timeout) throws TimeoutException {
+  @Override
+  public void callFailed(AppManagerException e) {
+    this.failure = e;
+  }
+
+  public T waitForResponse(long timeout) throws TimeoutException, AppManagerException {
     // TODO: need equivalent of node.ok()
     long timeoutT = System.currentTimeMillis() + timeout;
-    while (getResponse() == null && System.currentTimeMillis() < timeoutT) {
+    while (response == null && failure == null && System.currentTimeMillis() < timeoutT) {
       try {
         Thread.sleep(10);
       } catch (InterruptedException e) {
       }
     }
-    T response = getResponse();
+    if (failure != null) {
+      // re-throw
+      throw failure;
+    }
     if (response == null) {
       throw new TimeoutException();
     }
     return response;
   }
 
-  static class TimeoutException extends Exception {
+  public static class TimeoutException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
