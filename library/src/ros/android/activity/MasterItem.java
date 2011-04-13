@@ -52,7 +52,8 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver,
   private String connectionStatus;
   private MasterChooserActivity parentMca;
 
-  public MasterItem(RobotDescription robotDescription, String myHostname, MasterChooserActivity parentMca) {
+  public MasterItem(RobotDescription robotDescription, String myHostname,
+      MasterChooserActivity parentMca) {
     this.parentMca = parentMca;
     this.description = robotDescription;
     connectionStatus = "...";
@@ -102,11 +103,11 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver,
   }
 
   private void populateView() {
-    boolean statusOk = connection_status_.equals("ok");
+    boolean statusOk = connectionStatus.equals("ok");
 
-    ProgressBar progress = (ProgressBar) view_.findViewById(R.id.progress_circle);
-    progress.setIndeterminate( true );
-    progress.setVisibility( statusOk ? View.GONE : View.VISIBLE );
+    ProgressBar progress = (ProgressBar) view.findViewById(R.id.progress_circle);
+    progress.setIndeterminate(true);
+    progress.setVisibility(statusOk ? View.GONE : View.VISIBLE);
 
     TextView tv;
     tv = (TextView) view.findViewById(R.id.uri);
@@ -119,7 +120,7 @@ public class MasterItem implements MasterChecker.RobotDescriptionReceiver,
     tv.setText(connectionStatus);
 
     ImageView iv = (ImageView) view.findViewById(R.id.robot_icon);
-    iv.setVisibility( statusOk ? View.VISIBLE : View.GONE );
+    iv.setVisibility(statusOk ? View.VISIBLE : View.GONE);
     if (description.robotType == null) {
       iv.setImageResource(R.drawable.question_mark);
     } else if (description.robotType.equals("pr2")) {
