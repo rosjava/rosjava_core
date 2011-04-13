@@ -29,21 +29,19 @@
 
 package org.ros.android.app_chooser;
 
-import org.ros.app_manager.AppManagerException;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.TextView;
-import org.ros.app_manager.AppManager;
-import org.ros.app_manager.BasicAppManagerCallback;
+import org.ros.app_manager.AppManagerCallback;
+import org.ros.app_manager.AppManagerCb;
+import org.ros.app_manager.AppManagerException;
 import org.ros.exceptions.RosInitException;
 import org.ros.message.app_manager.App;
 import org.ros.service.app_manager.ListApps;
-import ros.android.activity.RosActivity;
-import ros.android.util.RobotDescription;
+import ros.android.activity.RosAppActivity;
 
 import java.util.ArrayList;
 
@@ -51,7 +49,7 @@ import java.util.ArrayList;
  * Show a grid of applications that a given robot is capable of, and launch
  * whichever is chosen.
  */
-public class AppChooser extends RosActivity {
+public class AppChooser extends RosAppActivity {
   /** Called when the activity is first created. */
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -66,46 +64,61 @@ public class AppChooser extends RosActivity {
 
   private void updateList() {
     setContentView(R.layout.main);
-    final ArrayList<App> apps = getAppList();
-    GridView gridview = (GridView) findViewById(R.id.gridview);
-    gridview.setAdapter(new AppAdapter(this, apps));
+    // TODO: start spinner
+    try {
+      AppManagerCb appManager = createAppManagerCb();
+      appManager.listApps(new AppManagerCallback<ListApps.Response>() {
 
-    gridview.setOnItemClickListener(new OnItemClickListener() {
-      @Override
-      public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-        AppLauncher.launch(AppChooser.this, apps.get(position));
-      }
-    });
+        @Override
+        public void onNewMessage(ListApps.Response message) {
+          final GridView gridview = (GridView) findViewById(R.id.gridview);
+          final ArrayList<App> apps = message.available_apps;
+          gridview.post(new Runnable() {
+            @Override
+            public void run() {
+              gridview.setAdapter(new AppAdapter(AppChooser.this, apps));
+              gridview.setOnItemClickListener(new OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                  AppLauncher.launch(AppChooser.this, apps.get(position));
+                }
+              });
+            }
+          });
+        }
+
+        @Override
+        public void callFailed(AppManagerException e) {
+          safeSetStatus("unable to retrieve app list");
+        }
+      });
+    } catch (RosInitException e) {
+      setStatus("cannot communicate with robot");
+    }
+
   }
 
   public void chooseNewMasterClicked(View view) {
     chooseNewMaster();
   }
 
-  public ArrayList<App> getAppList() {
-    try {
-      RobotDescription robot = getCurrentRobot();
-      AppManager app_man = new AppManager(getNode(), robot.robotName);
-      // TODO: make non-blocking
-      BasicAppManagerCallback<ListApps.Response> callback = new BasicAppManagerCallback<ListApps.Response>();
-      app_man.listApps(callback);
-      return callback.waitForResponse(30 * 1000).available_apps;
-    } catch (BasicAppManagerCallback.TimeoutException ex) {
-      setStatus("AppManager not available");
-      return null;
-    } catch (RosInitException ex) {
-      setStatus("Ros init exception: " + ex.getMessage());
-      return null;
-    } catch (AppManagerException e) {
-      setStatus("AppManagerException: " + e.getMessage());
-      return null;
-    }
-  }
-
   private void setStatus(String status_message) {
     TextView statusView = (TextView) findViewById(R.id.status_view);
     if (statusView != null) {
       statusView.setText(status_message);
+    }
+  }
+
+  private void safeSetStatus(final String statusMessage) {
+    final TextView statusView = (TextView) findViewById(R.id.status_view);
+    if (statusView != null) {
+      statusView.post(new Runnable() {
+
+        @Override
+        public void run() {
+          statusView.setText(statusMessage);
+        }
+      });
     }
   }
 }
