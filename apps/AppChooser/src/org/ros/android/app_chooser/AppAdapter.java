@@ -29,11 +29,15 @@
 
 package org.ros.android.app_chooser;
 
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.LayoutInflater;
 import org.ros.message.app_manager.App;
 import java.util.ArrayList;
 
@@ -69,16 +73,21 @@ public class AppAdapter extends BaseAdapter {
    */
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
-    TextView newView;
-    // If it's not recycled, initialize some attributes.
-    if (convertView == null) {
-      newView = new TextView(context);
-    } else {
-      newView = (TextView) convertView;
-    }
-
+    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    // Using convert_view here seems to cause the wrong view to show
+    // up sometimes, so I'm always making new ones. (hersh: am I really sure of this??)
+    View view = inflater.inflate(R.layout.app_item, null);
     App app = apps.get(position);
-    newView.setText(app.display_name);
-    return newView;
+    if( app.icon.data.length > 0 && app.icon.format != null &&
+        (app.icon.format.equals("jpeg") || app.icon.format.equals("png")) ) {
+      Bitmap iconBitmap = BitmapFactory.decodeByteArray( app.icon.data, 0, app.icon.data.length );
+      if( iconBitmap != null ) {
+        ImageView iv = (ImageView) view.findViewById(R.id.icon);
+        iv.setImageBitmap(iconBitmap);
+      }
+    }
+    TextView tv = (TextView) view.findViewById(R.id.name);
+    tv.setText(app.display_name);
+    return view;
   }
 }
