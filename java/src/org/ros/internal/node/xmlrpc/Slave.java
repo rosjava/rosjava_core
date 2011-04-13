@@ -23,30 +23,31 @@ import java.util.List;
  */
 public interface Slave extends Node {
 
-  public List<Object> getBusStats(String callerId);
+  public List<Object> getBusStats(String callerId) throws XmlRpcTimeoutException;
 
-  public List<Object> getBusInfo(String callerId);
+  public List<Object> getBusInfo(String callerId) throws XmlRpcTimeoutException;
 
-  public List<Object> getMasterUri(String callerId);
+  public List<Object> getMasterUri(String callerId) throws XmlRpcTimeoutException;
 
-  public List<Object> shutdown(String callerId, String message);
+  public List<Object> shutdown(String callerId, String message) throws XmlRpcTimeoutException;
 
-  public List<Object> getPid(String callerId);
+  public List<Object> getPid(String callerId) throws XmlRpcTimeoutException;
 
-  public List<Object> getSubscriptions(String callerId);
+  public List<Object> getSubscriptions(String callerId) throws XmlRpcTimeoutException;
 
   /**
    * Retrieve a list of topics that this node publishes.
    * 
-   * @param callerId ROS caller ID.
+   * @param callerId
+   *          ROS caller ID.
    * @return topicList is a list of topics published by this node and is of the
    *         form [ [topic1, topicType1]...[topicN, topicTypeN]]]
    */
-  public List<Object> getPublications(String callerId);
+  public List<Object> getPublications(String callerId) throws XmlRpcTimeoutException;
 
-  public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue);
+  public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) throws XmlRpcTimeoutException;
 
-  public List<Object> publisherUpdate(String callerId, String topic, Object[] publishers);
+  public List<Object> publisherUpdate(String callerId, String topic, Object[] publishers) throws XmlRpcTimeoutException;
 
   /**
    * Publisher node API method called by a subscriber node. This requests that
@@ -56,12 +57,14 @@ public interface Slave extends Node {
    * connection. For example, for a TCP/IP-based connection, the source node may
    * return a port number of TCP/IP server.
    * 
-   * @param callerId ROS caller ID
-   * @param topic topic name
-   * @param protocols list of desired protocols for communication in order of
-   *        preference
+   * @param callerId
+   *          ROS caller ID
+   * @param topic
+   *          topic name
+   * @param protocols
+   *          list of desired protocols for communication in order of preference
    * @return protocolParams or empty list if there are no compatible protocols
    */
-  public List<Object> requestTopic(String callerId, String topic, Object[] protocols);
+  public List<Object> requestTopic(String callerId, String topic, Object[] protocols) throws XmlRpcTimeoutException;
 
 }

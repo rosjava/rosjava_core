@@ -27,17 +27,21 @@ public interface Master extends Node {
   /**
    * Register the caller as a provider of the specified service.
    * 
-   * @param callerId ROS caller ID
-   * @param service Fully-qualified name of service
-   * @param serviceApi XML-RPC URI of caller node
+   * @param callerId
+   *          ROS caller ID
+   * @param service
+   *          Fully-qualified name of service
+   * @param serviceApi
+   *          XML-RPC URI of caller node
    * @param callerApi
    * @return ignore
    * @throws URISyntaxException
    */
   public List<Object> registerService(String callerId, String service, String serviceApi,
-      String callerApi) throws URISyntaxException;
+      String callerApi) throws URISyntaxException, XmlRpcTimeoutException;
 
-  public List<Object> unregisterService(String callerId, String service, String serviceApi);
+  public List<Object> unregisterService(String callerId, String service, String serviceApi)
+      throws XmlRpcTimeoutException;
 
   /**
    * Subscribe the caller to the specified topic. In addition to receiving a
@@ -45,45 +49,54 @@ public interface Master extends Node {
    * of new publishers via the publisherUpdate API.
    * 
    * 
-   * @param callerId ROS caller ID
-   * @param topic Fully-qualified name of topic
-   * @param topicType topic type, must be a package-resource name, i.e. the .msg
-   *        name
-   * @param callerApi API URI of subscriber to register. Will be used for new
-   *        publisher notifications
+   * @param callerId
+   *          ROS caller ID
+   * @param topic
+   *          Fully-qualified name of topic
+   * @param topicType
+   *          topic type, must be a package-resource name, i.e. the .msg name
+   * @param callerApi
+   *          API URI of subscriber to register. Will be used for new publisher
+   *          notifications
    * @return publishers as a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic
    * @throws URISyntaxException
    */
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
-      String callerApi) throws URISyntaxException;
+      String callerApi) throws URISyntaxException, XmlRpcTimeoutException;
 
-  public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi);
+  public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi)
+      throws XmlRpcTimeoutException;
 
   /**
    * Register the caller as a publisher the topic.
    * 
-   * @param callerId ROS caller ID
-   * @param topic fully-qualified name of topic to register
-   * @param topicType topic type, must be a package-resource name, i.e. the .msg
-   *        name.
-   * @param callerApi API URI of publisher to register
+   * @param callerId
+   *          ROS caller ID
+   * @param topic
+   *          fully-qualified name of topic to register
+   * @param topicType
+   *          topic type, must be a package-resource name, i.e. the .msg name.
+   * @param callerApi
+   *          API URI of publisher to register
    * @return list of current subscribers of topic in the form of XML-RPC URIs
    * @throws URISyntaxException
    */
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) throws URISyntaxException;
+      String callerApi) throws URISyntaxException, XmlRpcTimeoutException;
 
-  public List<Object> unregisterPublisher(String callerId, String topic, String callerApi);
+  public List<Object> unregisterPublisher(String callerId, String topic, String callerApi)
+      throws XmlRpcTimeoutException;
 
-  public List<Object> lookupNode(String callerId, String nodeName);
+  public List<Object> lookupNode(String callerId, String nodeName) throws XmlRpcTimeoutException;
 
-  public List<Object> getPublishedTopics(String callerId, String subgraph);
+  public List<Object> getPublishedTopics(String callerId, String subgraph)
+      throws XmlRpcTimeoutException;
 
-  public List<Object> getSystemState(String callerId);
+  public List<Object> getSystemState(String callerId) throws XmlRpcTimeoutException;
 
-  public List<Object> getUri(String callerId);
+  public List<Object> getUri(String callerId) throws XmlRpcTimeoutException;
 
-  public List<Object> lookupService(String callerId, String service);
+  public List<Object> lookupService(String callerId, String service) throws XmlRpcTimeoutException;
 
 }

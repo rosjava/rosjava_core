@@ -18,17 +18,17 @@
  */
 package org.ros.internal.node.xmlrpc;
 
-import org.apache.xmlrpc.client.TimingOutCallback;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.common.TypeConverter;
 import org.apache.xmlrpc.common.TypeConverterFactory;
 import org.apache.xmlrpc.common.TypeConverterFactoryImpl;
 import org.apache.xmlrpc.common.XmlRpcInvocationException;
+import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.response.StatusCode;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.UndeclaredThrowableException;
 
 /**
  * <p>
@@ -118,6 +118,7 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
   public Object newInstance(ClassLoader pClassLoader, final Class<NodeType> pClass, final String pRemoteName,
       final int timeout) {
     return Proxy.newProxyInstance(pClassLoader, new Class[] { pClass }, new InvocationHandler() {
+      @SuppressWarnings("unchecked")
       @Override
       public Object invoke(Object pProxy, Method pMethod, Object[] pArgs) throws Throwable {
         if (isObjectMethodLocal() && pMethod.getDeclaringClass().equals(Object.class)) {
@@ -149,7 +150,8 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
               throw t;
             }
           }
-          throw new UndeclaredThrowableException(t);
+          throw new RemoteException(StatusCode.FAILURE, t.getMessage());
+          //throw new UndeclaredThrowableException(t);
         }
         TypeConverter typeConverter = typeConverterFactory.getTypeConverter(pMethod.getReturnType());
         return typeConverter.convert(result);
