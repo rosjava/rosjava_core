@@ -29,15 +29,14 @@
 
 package ros.android.activity;
 
-import android.widget.BaseAdapter;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.List;
-import java.util.ArrayList;
-
+import android.widget.BaseAdapter;
 import ros.android.util.RobotDescription;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MasterAdapter extends BaseAdapter {
   private Context context;

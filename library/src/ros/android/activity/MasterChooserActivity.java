@@ -42,9 +42,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 public class MasterChooserActivity extends Activity {
 
@@ -179,18 +178,18 @@ public class MasterChooserActivity extends Activity {
     }
   }
 
-  private void addMaster(String master_uri) {
-    RobotDescription new_robot = new RobotDescription();
-    new_robot.masterUri = master_uri;
+  private void addMaster(String masterUri) {
+    RobotDescription newRobot = new RobotDescription();
+    newRobot.masterUri = masterUri;
     Iterator<RobotDescription> iter = robots.iterator();
-    while( iter.hasNext() ) {
+    while (iter.hasNext()) {
       RobotDescription robot = iter.next();
-      if( robot.masterUri.equals( master_uri )) {
+      if (robot.masterUri.equals(masterUri)) {
         Toast.makeText(this, "That robot is already listed.", Toast.LENGTH_SHORT).show();
         return;
       }
     }
-    robots.add( new_robot );
+    robots.add(newRobot);
     onRobotsChanged();
   }
 
@@ -266,8 +265,8 @@ public class MasterChooserActivity extends Activity {
 
   public class URIFieldKeyListener implements View.OnKeyListener {
     @Override
-    public boolean onKey(View view, int key_code, KeyEvent event) {
-      if (event.getAction() == KeyEvent.ACTION_DOWN && key_code == KeyEvent.KEYCODE_ENTER) {
+    public boolean onKey(View view, int keyCode, KeyEvent event) {
+      if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
         EditText uriField = (EditText) view;
         addMaster(uriField.getText().toString());
         dismissDialog(ADD_URI_DIALOG_ID);
