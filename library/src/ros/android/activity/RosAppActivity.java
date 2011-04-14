@@ -33,21 +33,10 @@
 
 package ros.android.activity;
 
-import org.ros.app_manager.BasicAppManagerCallback.TimeoutException;
-
-import org.ros.app_manager.AppManagerException;
-
-import org.ros.service.app_manager.StartApp;
-
-import org.ros.app_manager.BasicAppManagerCallback;
-
-import org.ros.app_manager.AppManagerCb;
-
 import android.util.Log;
 import org.ros.Node;
-import org.ros.app_manager.AppManager;
-import org.ros.app_manager.StartAppFuture;
 import org.ros.exceptions.RosInitException;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
 import ros.android.util.RobotDescription;
@@ -59,105 +48,45 @@ import ros.android.util.RobotDescription;
  */
 public class RosAppActivity extends RosActivity {
 
+  protected AppManager appManager;
+
   public RosAppActivity() {
 
   }
 
-  protected AppManager createAppManager() throws RosInitException {
-    RobotDescription robotDescription = getCurrentRobot();
+  private AppManager createAppManagerCb(Node node, RobotDescription robotDescription)
+      throws RosInitException, XmlRpcTimeoutException {
     if (robotDescription == null) {
       throw new RosInitException("no robot available");
     } else {
       Log.i("RosAndroid", "Using Robot: " + robotDescription.robotName + " "
           + robotDescription.masterUri);
-      return new AppManager(getNode(), robotDescription.robotName);
+      return AppManager.create(node, robotDescription.robotName);
     }
   }
 
-  protected AppManagerCb createAppManagerCb() throws RosInitException {
+  protected Namespace getAppNamespace(Node node) throws RosInitException {
     RobotDescription robotDescription = getCurrentRobot();
     if (robotDescription == null) {
       throw new RosInitException("no robot available");
-    } else {
-      Log.i("RosAndroid", "Using Robot: " + robotDescription.robotName + " "
-          + robotDescription.masterUri);
-      return new AppManagerCb(getNode(), robotDescription.robotName);
-    }
-  }
-
-  protected Namespace getAppNamespace() throws RosInitException {
-    RobotDescription robotDescription = getCurrentRobot();
-    if (robotDescription == null) {
-      throw new RosInitException("no robot available");
-    }
-    Node node = getNode();
-    if (node == null) {
-      throw new RosInitException("node not available");
     }
     return node.createNamespace(NameResolver.join(robotDescription.robotName, "application"));
   }
 
-  public boolean startApp(final String appName) {
-    AppManager appManager;
-    final BasicAppManagerCallback<StartApp.Response> callback;
-    try {
-      appManager = createAppManager();
-      callback = new BasicAppManagerCallback<StartApp.Response>();
-      appManager.startApp(appName, callback);
-      callback.waitForResponse(10 * 1000);
-      return true;
-    } catch (RosInitException e1) {
-      return false;
-    } catch (AppManagerException e) {
-      return false;
-    } catch (TimeoutException e) {
-      return false;
-    }
-  }
-
-  /**
-   * Start ROS app if it is not already running.
-   * 
-   * @param appName
-   * @param restart
-   *          If true, will restart the app if it is already running.
-   * @param statusCallback
-   * @throws RosInitException
-   */
-  public void startAppCb(String appName, boolean restart, final AppStartCallback callback)
-      throws RosInitException {
-    AppManagerCb appManager = createAppManagerCb();
-    final StartAppFuture startAppFuture = new StartAppFuture(appManager, appName, restart);
-    startAppFuture.start();
-
-    Thread thread = new Thread(new Runnable() {
-
-      @Override
-      public void run() {
-        try {
-          long timeoutT = System.currentTimeMillis() + 30 * 1000;
-          while (startAppFuture.getResultCode() == StartAppFuture.PENDING
-              && System.currentTimeMillis() < timeoutT) {
-            Thread.sleep(100);
-          }
-          if (startAppFuture.getResultCode() != StartAppFuture.SUCCESS) {
-            callback.appStartResult(false, "Failed to start: " + startAppFuture.getResultMessage());
-          } else {
-            callback.appStartResult(true, "success");
-          }
-
-        } catch (InterruptedException e) {
-          callback.appStartResult(false, "Cancelled");
-        }
-      }
-
-    });
-    thread.start();
-  }
-
   @Override
-  protected void onResume() {
-    super.onResume();
+  protected void onNodeCreate(Node node) {
+    Log.i("RosAndroid", "RosAppActivity.onNodeCreate");
+    super.onNodeCreate(node);
+    RobotDescription robotDescription = getCurrentRobot();
+    try {
+      appManager = createAppManagerCb(node, robotDescription);
+    } catch (RosInitException e) {
+      Log.e("RosAndroid", "ros init failed", e);
+      appManager = null;
+    } catch (XmlRpcTimeoutException e) {
+      Log.e("RosAndroid", "ros init failed", e);
+      appManager = null;
+    }
   }
 
 }

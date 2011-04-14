@@ -29,6 +29,7 @@ import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicListener;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -80,6 +81,10 @@ public class MasterRegistration implements TopicListener {
         log.error("timeout communication with master", e);
         return false;
       } catch (RemoteException e) {
+        log.error("remote exception from master", e);
+        return false;
+      } catch (UndeclaredThrowableException e) {
+        // artifact of java reflect API and apache xmlrpc library.
         log.error("remote exception from master", e);
         return false;
       }

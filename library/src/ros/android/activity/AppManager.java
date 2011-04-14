@@ -30,11 +30,14 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package org.ros.app_manager;
+package ros.android.activity;
 
+import android.util.Log;
 import org.ros.Node;
+import org.ros.app_manager.AppManagerCallback;
 import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.namespace.NameResolver;
 import org.ros.service.app_manager.ListApps;
 import org.ros.service.app_manager.StartApp;
@@ -46,76 +49,54 @@ import org.ros.service.app_manager.StopApp;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class AppManagerCb {
+public class AppManager {
 
   private final Node node;
-  private NameResolver resolver;
+  private AppManagerIdentifier appManagerIdentifier;
 
-  public AppManagerCb(Node node, String robotName) {
+  public AppManager(AppManagerIdentifier appManagerIdentifier, Node node) {
     this.node = node;
-    resolver = node.getResolver().createResolver(robotName);
+    this.appManagerIdentifier = appManagerIdentifier;
   }
 
   public void listApps(final AppManagerCallback<ListApps.Response> callback) {
-
-    Thread callThread = new Thread(new Runnable() {
-
-      @Override
-      public void run() {
-// add "try" here.  node.lookupService() throws if ros master is down.
-        ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("list_apps"),
-            new ListApps());
-        if (serviceIdentifier == null) {
-          callback.callFailed(new AppManagerException());
-        } else {
-          ServiceClient<ListApps.Response> listAppsClient = node
-              .createServiceClient(serviceIdentifier, ListApps.Response.class);
-          listAppsClient.call(new ListApps.Request(), callback);
-        }
-      }
-    });
-    callThread.start();
-
+    ServiceIdentifier serviceIdentifier = appManagerIdentifier.getListAppsIdentifier();
+    ServiceClient<ListApps.Response> listAppsClient = node.createServiceClient(serviceIdentifier,
+        ListApps.Response.class);
+    listAppsClient.call(new ListApps.Request(), callback);
   }
 
   public void startApp(final String appName, final AppManagerCallback<StartApp.Response> callback) {
-    Thread callThread = new Thread(new Runnable() {
-
-      @Override
-      public void run() {
-        ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("start_app"),
-            new StartApp());
-        if (serviceIdentifier == null) {
-          callback.callFailed(new AppManagerException());
-        }
-        ServiceClient<StartApp.Response> startAppClient = node.createServiceClient(
-            serviceIdentifier, StartApp.Response.class);
-        StartApp.Request request = new StartApp.Request();
-        request.name = appName;
-        startAppClient.call(request, callback);
-      }
-    });
-    callThread.start();
+    ServiceIdentifier serviceIdentifier = appManagerIdentifier.getStartAppIdentifier();
+    ServiceClient<StartApp.Response> startAppClient = node.createServiceClient(serviceIdentifier,
+        StartApp.Response.class);
+    StartApp.Request request = new StartApp.Request();
+    request.name = appName;
+    startAppClient.call(request, callback);
   }
 
   public void stopApp(final String appName, final AppManagerCallback<StopApp.Response> callback) {
-    Thread callThread = new Thread(new Runnable() {
+    ServiceIdentifier serviceIdentifier = appManagerIdentifier.getStopAppIdentifier();
+    ServiceClient<StopApp.Response> stopAppClient = node.createServiceClient(serviceIdentifier,
+        StopApp.Response.class);
+    StopApp.Request request = new StopApp.Request();
+    request.name = appName;
+    stopAppClient.call(request, callback);
+  }
 
-      @Override
-      public void run() {
-        ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("stop_app"),
-            new StopApp());
-        if (serviceIdentifier == null) {
-          callback.callFailed(new AppManagerException());
-        } else {
-          ServiceClient<StopApp.Response> stopAppClient = node
-              .createServiceClient(serviceIdentifier, StopApp.Response.class);
-          StopApp.Request request = new StopApp.Request();
-          request.name = appName;
-          stopAppClient.call(request, callback);
-        }
-      }
-    });
-    callThread.start();
+  /**
+   * Blocks until App Manager is located.
+   * 
+   * @param node
+   * @param robotName
+   * @return
+   */
+  public static AppManager create(Node node, String robotName) throws XmlRpcTimeoutException {
+    NameResolver resolver = node.getResolver().createResolver(robotName);
+    ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("list_apps"),
+        new ListApps());
+    AppManagerIdentifier appManagerIdentifier = new AppManagerIdentifier(resolver,
+        serviceIdentifier.getUri());
+    return new AppManager(appManagerIdentifier, node);
   }
 }
