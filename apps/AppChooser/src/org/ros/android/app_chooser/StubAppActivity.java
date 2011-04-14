@@ -30,13 +30,11 @@
 package org.ros.android.app_chooser;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import org.ros.app_manager.AppManagerCallback;
 import org.ros.app_manager.AppManagerException;
 import org.ros.message.app_manager.StatusCodes;
-import org.ros.service.app_manager.ListApps;
 import org.ros.service.app_manager.StartApp;
 import org.ros.service.app_manager.StopApp;
 import ros.android.activity.AppStartCallback;

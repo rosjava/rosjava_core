@@ -32,7 +32,6 @@
  */
 package ros.android.activity;
 
-import android.util.Log;
 import org.ros.Node;
 import org.ros.app_manager.AppManagerCallback;
 import org.ros.internal.node.service.ServiceClient;
