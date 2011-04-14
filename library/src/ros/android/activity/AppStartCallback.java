@@ -35,6 +35,6 @@ package ros.android.activity;
 
 public interface AppStartCallback {
 
-  public void appStartResult(boolean success, String message);
+  public void appStartResult(boolean success, int resultCode, String message);
 
 }

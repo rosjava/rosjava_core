@@ -29,16 +29,15 @@
 
 package org.ros.android.app_chooser;
 
-import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.TextView;
+import org.ros.Node;
 import org.ros.app_manager.AppManagerCallback;
-import org.ros.app_manager.AppManagerCb;
 import org.ros.app_manager.AppManagerException;
-import org.ros.exceptions.RosInitException;
 import org.ros.message.app_manager.App;
 import org.ros.service.app_manager.ListApps;
 import ros.android.activity.RosAppActivity;
@@ -50,52 +49,79 @@ import java.util.ArrayList;
  * whichever is chosen.
  */
 public class AppChooser extends RosAppActivity {
-  /** Called when the activity is first created. */
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+
+  private ArrayList<App> availableAppsCache;
+  private long availableAppsCacheTime;
+
+  public AppChooser() {
+    availableAppsCache = new ArrayList<App>();
+    availableAppsCacheTime = 0;
   }
 
   @Override
   protected void onResume() {
     super.onResume();
-    updateList();
-  }
 
-  private void updateList() {
     setContentView(R.layout.main);
     // TODO: start spinner
-    try {
-      AppManagerCb appManager = createAppManagerCb();
-      appManager.listApps(new AppManagerCallback<ListApps.Response>() {
+    updateAppList(availableAppsCache);
+  }
 
-        @Override
-        public void onNewMessage(ListApps.Response message) {
-          final GridView gridview = (GridView) findViewById(R.id.gridview);
-          final ArrayList<App> apps = message.available_apps;
-          gridview.post(new Runnable() {
-            @Override
-            public void run() {
-              gridview.setAdapter(new AppAdapter(AppChooser.this, apps));
-              gridview.setOnItemClickListener(new OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                  AppLauncher.launch(AppChooser.this, apps.get(position));
-                }
-              });
-            }
-          });
-        }
+  /**
+   * Must be run in UI thread.
+   * 
+   * @param apps
+   */
+  protected void updateAppList(final ArrayList<App> apps) {
+    Log.i("RosAndroid", "updating gridview");
+    GridView gridview = (GridView) findViewById(R.id.gridview);
+    gridview.setAdapter(new AppAdapter(AppChooser.this, apps));
+    gridview.setOnItemClickListener(new OnItemClickListener() {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+        AppLauncher.launch(AppChooser.this, apps.get(position));
+      }
+    });
+    Log.i("RosAndroid", "gridview updated");
+  }
 
-        @Override
-        public void callFailed(AppManagerException e) {
-          safeSetStatus("unable to retrieve app list");
-        }
-      });
-    } catch (RosInitException e) {
-      setStatus("cannot communicate with robot");
+  @Override
+  protected void onNodeCreate(Node node) {
+    Log.i("RosAndroid", "AppChooser.onNodeCreate");
+    super.onNodeCreate(node);
+    if (System.currentTimeMillis() - availableAppsCacheTime < 2 * 1000) {
+      Log.i("RosAndroid", "using app cache");
+      return;
     }
 
+    Log.i("RosAndroid", "sending list apps request");
+    appManager.listApps(new AppManagerCallback<ListApps.Response>() {
+
+      @Override
+      public void onNewMessage(ListApps.Response message) {
+        availableAppsCache = message.available_apps;
+        Log.i("RosAndroid", "ListApps.Response: " + availableAppsCache.size() + " apps");
+        availableAppsCacheTime = System.currentTimeMillis();
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            updateAppList(availableAppsCache);
+          }
+        });
+      }
+
+      @Override
+      public void callFailed(AppManagerException e) {
+        safeSetStatus("unable to retrieve app list");
+      }
+    });
+
+  }
+
+  @Override
+  protected void onNodeDestroy(Node node) {
+    Log.i("RosAndroid", "onNodeDestroy");
+    super.onNodeDestroy(node);
   }
 
   public void chooseNewMasterClicked(View view) {

@@ -30,13 +30,14 @@
 package org.ros.android.app_chooser;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import org.ros.app_manager.AppManagerCallback;
-import org.ros.app_manager.AppManagerCb;
 import org.ros.app_manager.AppManagerException;
-import org.ros.exceptions.RosInitException;
 import org.ros.message.app_manager.StatusCodes;
+import org.ros.service.app_manager.ListApps;
+import org.ros.service.app_manager.StartApp;
 import org.ros.service.app_manager.StopApp;
 import ros.android.activity.AppStartCallback;
 import ros.android.activity.RosAppActivity;
@@ -60,41 +61,49 @@ public class StubAppActivity extends RosAppActivity implements AppStartCallback 
     statusView = (TextView) findViewById(R.id.status_view);
   }
 
+  private void startApp() {
+    appManager.startApp(robotAppName, new AppManagerCallback<StartApp.Response>() {
+      @Override
+      public void onNewMessage(StartApp.Response message) {
+        if (message.started) {
+          safeSetStatus("started");
+        } else {
+          safeSetStatus(message.message);
+        }
+      }
+
+      @Override
+      public void callFailed(AppManagerException e) {
+        safeSetStatus("Failed: " + e.getMessage());
+      }
+    });
+  }
+
   public void onStartClicked(View view) {
     setStatus("Starting...");
-    try {
-      startAppCb(robotAppName, true, this);
-      setStatus("Launching");
-    } catch (RosInitException e1) {
-      safeSetStatus("Initailization error!");
-      return;
-    }
+    // TODO: add guard so that we cannot start multiple times
+    startApp();
+    setStatus("Launching");
   }
 
   public void onStopClicked(View view) {
     setStatus("Stopping...");
-    AppManagerCb appMan;
-    try {
-      appMan = createAppManagerCb();
-      appMan.stopApp("*", new AppManagerCallback<StopApp.Response>() {
+    appManager.stopApp("*", new AppManagerCallback<StopApp.Response>() {
 
-        @Override
-        public void onNewMessage(StopApp.Response message) {
-          if (message.stopped || message.error_code == StatusCodes.NOT_RUNNING) {
-            safeSetStatus("Stopped.");
-          } else {
-            safeSetStatus("ERROR: " + message.message);
-          }
+      @Override
+      public void onNewMessage(StopApp.Response message) {
+        if (message.stopped || message.error_code == StatusCodes.NOT_RUNNING) {
+          safeSetStatus("Stopped.");
+        } else {
+          safeSetStatus("ERROR: " + message.message);
         }
+      }
 
-        @Override
-        public void callFailed(AppManagerException e) {
-          safeSetStatus("Failed: cannot contact robot!");
-        }
-      });
-    } catch (RosInitException e1) {
-      safeSetStatus("Initialization error");
-    }
+      @Override
+      public void callFailed(AppManagerException e) {
+        safeSetStatus("Failed: cannot contact robot!");
+      }
+    });
   }
 
   public void onExitClicked(View view) {
@@ -118,7 +127,7 @@ public class StubAppActivity extends RosAppActivity implements AppStartCallback 
   }
 
   @Override
-  public void appStartResult(boolean success, String message) {
+  public void appStartResult(boolean success, int resultCode, String message) {
     if (success) {
       safeSetStatus("started");
     } else {

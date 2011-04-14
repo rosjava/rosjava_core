@@ -30,18 +30,20 @@ import android.widget.Toast;
 import org.ros.Node;
 import org.ros.Publisher;
 import org.ros.Subscriber;
+import org.ros.app_manager.AppManagerCallback;
+import org.ros.app_manager.AppManagerException;
 import org.ros.exceptions.RosInitException;
 import org.ros.message.app_manager.AppStatus;
 import org.ros.message.geometry_msgs.Twist;
 import org.ros.namespace.Namespace;
-import ros.android.activity.AppStartCallback;
+import org.ros.service.app_manager.StartApp;
 import ros.android.activity.RosAppActivity;
 import ros.android.views.SensorImageView;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class Teleop extends RosAppActivity implements OnTouchListener, AppStartCallback {
+public class Teleop extends RosAppActivity implements OnTouchListener {
   private Publisher<Twist> twistPub;
   private SensorImageView imageView;
   private Thread pubThread;
@@ -51,7 +53,6 @@ public class Teleop extends RosAppActivity implements OnTouchListener, AppStartC
   private float motionY;
   private float motionX;
   private Subscriber<AppStatus> statusSub;
-  private Thread startThread;
 
   /** Called when the activity is first created. */
   @Override
@@ -72,9 +73,12 @@ public class Teleop extends RosAppActivity implements OnTouchListener, AppStartC
   }
 
   @Override
-  protected void onPause() {
-    twistPub = null;
+  protected void onNodeDestroy(Node node) {
     deadman = false;
+    if (twistPub != null) {
+      twistPub.shutdown();
+      twistPub = null;
+    }
     if (imageView != null) {
       imageView.stop();
       imageView = null;
@@ -87,18 +91,14 @@ public class Teleop extends RosAppActivity implements OnTouchListener, AppStartC
       pubThread.interrupt();
       pubThread = null;
     }
-    if (startThread != null && startThread.isAlive()) {
-      startThread.interrupt();
-      startThread = null;
-    }
-    super.onPause();
+    super.onNodeDestroy(node);
   }
 
   private void initRos() {
     try {
       Log.i("Teleop", "getNode()");
       Node node = getNode();
-      Namespace appNamespace = getAppNamespace();
+      Namespace appNamespace = getAppNamespace(node);
       imageView = (SensorImageView) findViewById(R.id.image);
       Log.i("Teleop", "init imageView");
       imageView.init(node, appNamespace.resolveName("camera/rgb/image_color/compressed"));
@@ -145,11 +145,37 @@ public class Teleop extends RosAppActivity implements OnTouchListener, AppStartC
   protected void onResume() {
     super.onResume();
     Toast.makeText(Teleop.this, "starting app", Toast.LENGTH_LONG).show();
+  }
+
+  @Override
+  protected void onNodeCreate(Node node) {
     Log.i("Teleop", "startAppFuture");
-    // startAppCb("turtlebot_teleop/android_teleop", true, this);
-    if (startApp("turtlebot_teleop/android_teleop")) {
-      initRos();
-    }
+    super.onNodeCreate(node);
+    startApp();
+  }
+
+  private void startApp() {
+    appManager.startApp("turtlebot_teleop/android_teleop",
+        new AppManagerCallback<StartApp.Response>() {
+          @Override
+          public void onNewMessage(StartApp.Response message) {
+            initRos();
+            //TODO(kwc): add status code for app already running
+            /*
+            if (message.started) {
+              safeToastStatus("started");
+              initRos();
+            } else {
+              safeToastStatus(message.message);
+            }
+            */
+          }
+
+          @Override
+          public void callFailed(AppManagerException e) {
+            safeToastStatus("Failed: " + e.getMessage());
+          }
+        });
   }
 
   @Override
@@ -187,21 +213,13 @@ public class Teleop extends RosAppActivity implements OnTouchListener, AppStartC
     return true;
   }
 
-  @Override
-  public void appStartResult(boolean success, final String message) {
-    Log.i("Teleop", "appStartResult" + success);
-    View mainView = findViewById(R.id.image);
-    if (success) {
-      initRos();
-    } else {
-      mainView.post(new Runnable() {
-
-        @Override
-        public void run() {
-          Toast.makeText(Teleop.this, message, Toast.LENGTH_LONG).show();
-        }
-      });
-    }
+  private void safeToastStatus(final String message) {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        Toast.makeText(Teleop.this, message, Toast.LENGTH_SHORT).show();
+      }
+    });
   }
 
 }

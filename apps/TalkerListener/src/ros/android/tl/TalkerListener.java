@@ -40,8 +40,14 @@ public class TalkerListener extends RosActivity {
   }
 
   @Override
-  protected void onPause() {
-    super.onPause();
+  protected void onResume() {
+    super.onResume();
+    setContentView(R.layout.main);
+    setText("loading");
+  }
+
+  @Override
+  protected void onNodeDestroy(Node node) {
     if (pubThread != null) {
       pubThread.interrupt();
     }
@@ -49,13 +55,8 @@ public class TalkerListener extends RosActivity {
   }
 
   @Override
-  protected void onResume() {
-    super.onResume();
-    setContentView(R.layout.main);
+  protected void onNodeCreate(Node node) {
     try {
-      Node node = getNode();
-      setText("loading");
-
       Log.i("RosAndroid", "Setting up sub /chatter");
       node.createSubscriber("chatter", new MessageListener<org.ros.message.std_msgs.String>() {
         @Override
@@ -79,7 +80,6 @@ public class TalkerListener extends RosActivity {
 
         @Override
         public void run() {
-
           try {
             while (true) {
               pub.publish(message);
