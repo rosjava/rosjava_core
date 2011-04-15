@@ -30,9 +30,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.ros.app_manager;
 
+/**
+ * @author kwc@willowgarage.com (Ken Conley)
+ */
 public class AppManagerException extends Exception {
+
+  public AppManagerException(Exception e) {
+    super(e);
+  }
 
   public AppManagerException(String string) {
     super(string);
@@ -41,7 +49,5 @@ public class AppManagerException extends Exception {
   public AppManagerException() {
     super();
   }
-
-  private static final long serialVersionUID = 1L;
 
 }

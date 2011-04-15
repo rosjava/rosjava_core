@@ -19,14 +19,17 @@ package org.ros;
 import org.ros.message.Message;
 
 /**
- * Listener for new messages received on a topic.
+ * A callback for asynchronous, message-related operations that can succeed or
+ * fail.
  * 
  * @author damonkohler@google.com (Damon Kohler)
- *
+ * 
  * @param <MessageType> {@link Message} type
  */
 public interface MessageListener<MessageType> {
   
-  public void onNewMessage(MessageType message);
-  
+  void onSuccess(MessageType message);
+
+  void onFailure(Exception e);
+
 }

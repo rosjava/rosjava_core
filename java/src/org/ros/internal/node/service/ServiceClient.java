@@ -31,13 +31,15 @@ import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 import org.ros.MessageDeserializer;
 import org.ros.MessageListener;
 import org.ros.internal.namespace.GraphName;
+import org.ros.internal.node.RemoteException;
+import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
@@ -47,6 +49,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Executors;
@@ -67,44 +70,8 @@ public class ServiceClient<ResponseMessageType> {
 
   private Channel channel;
 
-  private enum DecodingState {
+  enum DecodingState {
     ERROR_CODE, MESSAGE_LENGTH, MESSAGE
-  }
-
-  private final class ResponseDecoder extends ReplayingDecoder<DecodingState> {
-    private ServiceServerResponse response;
-
-    public ResponseDecoder() {
-      reset();
-    }
-
-    @SuppressWarnings("fallthrough")
-    @Override
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer,
-        DecodingState state) throws Exception {
-      switch (state) {
-        case ERROR_CODE:
-          response.setErrorCode(buffer.readByte());
-          checkpoint(DecodingState.MESSAGE_LENGTH);
-        case MESSAGE_LENGTH:
-          response.setMessageLength(buffer.readInt());
-          checkpoint(DecodingState.MESSAGE);
-        case MESSAGE:
-          response.setMessage(buffer.readBytes(response.getMessageLength()));
-          try {
-            return response;
-          } finally {
-            reset();
-          }
-        default:
-          throw new IllegalStateException();
-      }
-    }
-
-    private void reset() {
-      checkpoint(DecodingState.ERROR_CODE);
-      response = new ServiceServerResponse();
-    }
   }
 
   private final class HandshakeHandler extends SimpleChannelHandler {
@@ -116,7 +83,7 @@ public class ServiceClient<ResponseMessageType> {
       ChannelPipeline pipeline = e.getChannel().getPipeline();
       pipeline.remove(TcpClientPipelineFactory.LENGTH_FIELD_BASED_FRAME_DECODER);
       pipeline.remove(this);
-      pipeline.addLast("ResponseDecoder", new ResponseDecoder());
+      pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<ResponseMessageType>());
       pipeline.addLast("ResponseHandler", new ResponseHandler());
     }
   }
@@ -128,7 +95,17 @@ public class ServiceClient<ResponseMessageType> {
       Preconditions.checkNotNull(listener);
       ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
       ByteBuffer buffer = response.getMessage().toByteBuffer();
-      listener.onNewMessage(deserializer.<ResponseMessageType>deserialize(buffer));
+      if (response.getErrorCode() == 1) {
+        listener.onSuccess(deserializer.<ResponseMessageType>deserialize(buffer));
+      } else {
+        String message = Charset.forName("US-ASCII").decode(buffer).toString();
+        listener.onFailure(new RemoteException(StatusCode.ERROR, message));
+      }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+      throw new RuntimeException(e.getCause());
     }
   }
 

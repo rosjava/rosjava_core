@@ -35,12 +35,13 @@ public abstract class ServiceResponseBuilder<RequestType, ResponseType> {
     this.deserializer = deserializer;
   }
 
-  ByteBuffer handleRequest(ByteBuffer buffer) {
+  ByteBuffer handleRequest(ByteBuffer buffer) throws ServiceException {
     RequestType request = deserializer.<RequestType>deserialize(buffer);
-    ResponseType response = build(request);
+    ResponseType response;
+    response = build(request);
     return serializer.serialize(response);
   }
 
-  abstract ResponseType build(RequestType requestMessage);
+  abstract ResponseType build(RequestType requestMessage) throws ServiceException;
 
 }

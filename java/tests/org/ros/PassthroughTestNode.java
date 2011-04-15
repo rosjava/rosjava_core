@@ -42,8 +42,13 @@ public class PassthroughTestNode implements NodeMain {
     MessageListener<org.ros.message.std_msgs.String> string_cb =
         new MessageListener<org.ros.message.std_msgs.String>() {
           @Override
-          public void onNewMessage(org.ros.message.std_msgs.String m) {
+          public void onSuccess(org.ros.message.std_msgs.String m) {
             pub_string.publish(m);
+          }
+
+          @Override
+          public void onFailure(Exception e) {
+            throw new RuntimeException(e);
           }
         };
     node.createSubscriber("string_in", string_cb, org.ros.message.std_msgs.String.class);
@@ -54,8 +59,13 @@ public class PassthroughTestNode implements NodeMain {
     MessageListener<org.ros.message.std_msgs.Int64> int64_cb =
         new MessageListener<org.ros.message.std_msgs.Int64>() {
           @Override
-          public void onNewMessage(org.ros.message.std_msgs.Int64 m) {
+          public void onSuccess(org.ros.message.std_msgs.Int64 m) {
             pub_int64.publish(m);
+          }
+
+          @Override
+          public void onFailure(Exception e) {
+            throw new RuntimeException(e);
           }
         };
     node.createSubscriber("int64_in", int64_cb, org.ros.message.std_msgs.Int64.class);
@@ -66,10 +76,15 @@ public class PassthroughTestNode implements NodeMain {
     MessageListener<org.ros.message.test_ros.TestHeader> header_cb =
         new MessageListener<org.ros.message.test_ros.TestHeader>() {
           @Override
-          public void onNewMessage(org.ros.message.test_ros.TestHeader m) {
+          public void onSuccess(org.ros.message.test_ros.TestHeader m) {
             m.orig_caller_id = m.caller_id;
             m.caller_id = node.getName();
             pub_header.publish(m);
+          }
+
+          @Override
+          public void onFailure(Exception e) {
+            throw new RuntimeException(e);
           }
         };
     node.createSubscriber("test_header_in", header_cb, org.ros.message.test_ros.TestHeader.class);
@@ -80,8 +95,13 @@ public class PassthroughTestNode implements NodeMain {
     MessageListener<org.ros.message.test_ros.Composite> composite_cb =
         new MessageListener<org.ros.message.test_ros.Composite>() {
           @Override
-          public void onNewMessage(org.ros.message.test_ros.Composite m) {
+          public void onSuccess(org.ros.message.test_ros.Composite m) {
             pub_composite.publish(m);
+          }
+
+          @Override
+          public void onFailure(Exception e) {
+            throw new RuntimeException(e);
           }
         };
     node.createSubscriber("composite_in", composite_cb, org.ros.message.test_ros.Composite.class);

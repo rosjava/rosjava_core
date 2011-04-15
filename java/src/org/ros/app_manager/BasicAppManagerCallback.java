@@ -33,6 +33,7 @@
 
 package org.ros.app_manager;
 
+import org.ros.MessageListener;
 import org.ros.message.Message;
 
 /**
@@ -45,7 +46,7 @@ import org.ros.message.Message;
  * 
  * @param <T>
  */
-public class BasicAppManagerCallback<T extends Message> implements AppManagerCallback<T> {
+public class BasicAppManagerCallback<T extends Message> implements MessageListener<T> {
 
   private T response;
   private AppManagerException failure;
@@ -55,7 +56,7 @@ public class BasicAppManagerCallback<T extends Message> implements AppManagerCal
   }
 
   @Override
-  public void onNewMessage(T message) {
+  public void onSuccess(T message) {
     response = message;
   }
 
@@ -64,8 +65,8 @@ public class BasicAppManagerCallback<T extends Message> implements AppManagerCal
   }
 
   @Override
-  public void callFailed(AppManagerException e) {
-    this.failure = e;
+  public void onFailure(Exception e) {
+    this.failure = new AppManagerException(e);
   }
 
   public T waitForResponse(long timeout) throws TimeoutException, AppManagerException {

@@ -74,9 +74,14 @@ public class TopicIntegrationTest {
     final CountDownLatch messageReceived = new CountDownLatch(1);
     subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
       @Override
-      public void onNewMessage(org.ros.message.std_msgs.String message) {
+      public void onSuccess(org.ros.message.std_msgs.String message) {
         assertEquals(helloMessage, message);
         messageReceived.countDown();
+      }
+
+      @Override
+      public void onFailure(Exception e) {
+        throw new RuntimeException(e);
       }
     });
 
