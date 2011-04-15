@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.xmlrpc;
 
+import org.ros.internal.node.RemoteException;
+
 import java.util.List;
 
 /**
@@ -23,17 +25,17 @@ import java.util.List;
  */
 public interface Slave extends Node {
 
-  public List<Object> getBusStats(String callerId) throws XmlRpcTimeoutException;
+  public List<Object> getBusStats(String callerId) throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> getBusInfo(String callerId) throws XmlRpcTimeoutException;
+  public List<Object> getBusInfo(String callerId) throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> getMasterUri(String callerId) throws XmlRpcTimeoutException;
+  public List<Object> getMasterUri(String callerId) throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> shutdown(String callerId, String message) throws XmlRpcTimeoutException;
+  public List<Object> shutdown(String callerId, String message) throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> getPid(String callerId) throws XmlRpcTimeoutException;
+  public List<Object> getPid(String callerId) throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> getSubscriptions(String callerId) throws XmlRpcTimeoutException;
+  public List<Object> getSubscriptions(String callerId) throws XmlRpcTimeoutException, RemoteException;
 
   /**
    * Retrieve a list of topics that this node publishes.
@@ -43,11 +45,11 @@ public interface Slave extends Node {
    * @return topicList is a list of topics published by this node and is of the
    *         form [ [topic1, topicType1]...[topicN, topicTypeN]]]
    */
-  public List<Object> getPublications(String callerId) throws XmlRpcTimeoutException;
+  public List<Object> getPublications(String callerId) throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) throws XmlRpcTimeoutException;
+  public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> publisherUpdate(String callerId, String topic, Object[] publishers) throws XmlRpcTimeoutException;
+  public List<Object> publisherUpdate(String callerId, String topic, Object[] publishers) throws XmlRpcTimeoutException, RemoteException;
 
   /**
    * Publisher node API method called by a subscriber node. This requests that
@@ -65,6 +67,6 @@ public interface Slave extends Node {
    *          list of desired protocols for communication in order of preference
    * @return protocolParams or empty list if there are no compatible protocols
    */
-  public List<Object> requestTopic(String callerId, String topic, Object[] protocols) throws XmlRpcTimeoutException;
+  public List<Object> requestTopic(String callerId, String topic, Object[] protocols) throws XmlRpcTimeoutException, RemoteException;
 
 }

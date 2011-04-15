@@ -30,10 +30,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 package ros.android.activity;
 
+import org.ros.MessageListener;
 import org.ros.Node;
-import org.ros.app_manager.AppManagerCallback;
 import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
@@ -58,14 +59,14 @@ public class AppManager {
     this.appManagerIdentifier = appManagerIdentifier;
   }
 
-  public void listApps(final AppManagerCallback<ListApps.Response> callback) {
+  public void listApps(final MessageListener<ListApps.Response> callback) {
     ServiceIdentifier serviceIdentifier = appManagerIdentifier.getListAppsIdentifier();
     ServiceClient<ListApps.Response> listAppsClient = node.createServiceClient(serviceIdentifier,
         ListApps.Response.class);
     listAppsClient.call(new ListApps.Request(), callback);
   }
 
-  public void startApp(final String appName, final AppManagerCallback<StartApp.Response> callback) {
+  public void startApp(final String appName, final MessageListener<StartApp.Response> callback) {
     ServiceIdentifier serviceIdentifier = appManagerIdentifier.getStartAppIdentifier();
     ServiceClient<StartApp.Response> startAppClient = node.createServiceClient(serviceIdentifier,
         StartApp.Response.class);
@@ -74,7 +75,7 @@ public class AppManager {
     startAppClient.call(request, callback);
   }
 
-  public void stopApp(final String appName, final AppManagerCallback<StopApp.Response> callback) {
+  public void stopApp(final String appName, final MessageListener<StopApp.Response> callback) {
     ServiceIdentifier serviceIdentifier = appManagerIdentifier.getStopAppIdentifier();
     ServiceClient<StopApp.Response> stopAppClient = node.createServiceClient(serviceIdentifier,
         StopApp.Response.class);
@@ -89,11 +90,15 @@ public class AppManager {
    * @param node
    * @param robotName
    * @return
+   * @throws AppManagerNotAvailableException
    */
-  public static AppManager create(Node node, String robotName) throws XmlRpcTimeoutException {
+  public static AppManager create(Node node, String robotName) throws XmlRpcTimeoutException, AppManagerNotAvailableException {
     NameResolver resolver = node.getResolver().createResolver(robotName);
     ServiceIdentifier serviceIdentifier = node.lookupService(resolver.resolveName("list_apps"),
         new ListApps());
+    if (serviceIdentifier == null) { 
+      throw new AppManagerNotAvailableException();
+    }
     AppManagerIdentifier appManagerIdentifier = new AppManagerIdentifier(resolver,
         serviceIdentifier.getUri());
     return new AppManager(appManagerIdentifier, node);

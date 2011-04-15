@@ -55,7 +55,7 @@ public class RosAppActivity extends RosActivity {
   }
 
   private AppManager createAppManagerCb(Node node, RobotDescription robotDescription)
-      throws RosInitException, XmlRpcTimeoutException {
+      throws RosInitException, XmlRpcTimeoutException, AppManagerNotAvailableException {
     if (robotDescription == null) {
       throw new RosInitException("no robot available");
     } else {
@@ -84,6 +84,9 @@ public class RosAppActivity extends RosActivity {
       Log.e("RosAndroid", "ros init failed", e);
       appManager = null;
     } catch (XmlRpcTimeoutException e) {
+      Log.e("RosAndroid", "ros init failed", e);
+      appManager = null;
+    } catch (AppManagerNotAvailableException e) {
       Log.e("RosAndroid", "ros init failed", e);
       appManager = null;
     }

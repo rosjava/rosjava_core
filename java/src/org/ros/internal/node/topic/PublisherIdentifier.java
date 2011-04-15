@@ -30,6 +30,12 @@ public class PublisherIdentifier {
   private final TopicDefinition topicDefinition;
 
   public PublisherIdentifier(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition) {
+    if (slaveIdentifier == null) { 
+      throw new NullPointerException();
+    }
+    if (topicDefinition == null) { 
+      throw new NullPointerException();
+    }
     this.slaveIdentifier = slaveIdentifier;
     this.topicDefinition = topicDefinition;
   }

@@ -32,8 +32,7 @@ package org.ros.android.app_chooser;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import org.ros.app_manager.AppManagerCallback;
-import org.ros.app_manager.AppManagerException;
+import org.ros.MessageListener;
 import org.ros.message.app_manager.StatusCodes;
 import org.ros.service.app_manager.StartApp;
 import org.ros.service.app_manager.StopApp;
@@ -60,9 +59,9 @@ public class StubAppActivity extends RosAppActivity implements AppStartCallback 
   }
 
   private void startApp() {
-    appManager.startApp(robotAppName, new AppManagerCallback<StartApp.Response>() {
+    appManager.startApp(robotAppName, new MessageListener<StartApp.Response>() {
       @Override
-      public void onNewMessage(StartApp.Response message) {
+      public void onSuccess(StartApp.Response message) {
         if (message.started) {
           safeSetStatus("started");
         } else {
@@ -71,7 +70,7 @@ public class StubAppActivity extends RosAppActivity implements AppStartCallback 
       }
 
       @Override
-      public void callFailed(AppManagerException e) {
+      public void onFailure(Exception e) {
         safeSetStatus("Failed: " + e.getMessage());
       }
     });
@@ -86,10 +85,10 @@ public class StubAppActivity extends RosAppActivity implements AppStartCallback 
 
   public void onStopClicked(View view) {
     setStatus("Stopping...");
-    appManager.stopApp("*", new AppManagerCallback<StopApp.Response>() {
+    appManager.stopApp("*", new MessageListener<StopApp.Response>() {
 
       @Override
-      public void onNewMessage(StopApp.Response message) {
+      public void onSuccess(StopApp.Response message) {
         if (message.stopped || message.error_code == StatusCodes.NOT_RUNNING) {
           safeSetStatus("Stopped.");
         } else {
@@ -98,7 +97,7 @@ public class StubAppActivity extends RosAppActivity implements AppStartCallback 
       }
 
       @Override
-      public void callFailed(AppManagerException e) {
+      public void onFailure(Exception e) {
         safeSetStatus("Failed: cannot contact robot!");
       }
     });

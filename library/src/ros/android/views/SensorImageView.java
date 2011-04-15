@@ -64,9 +64,14 @@ public class SensorImageView extends ImageView implements MessageListener<Compre
   Bitmap bitmap;
 
   @Override
-  public void onNewMessage(CompressedImage message) {
+  public void onSuccess(CompressedImage message) {
     bitmap = BitmapFactory.decodeByteArray(message.data, 0, message.data.length);
     post(this);
+  }
+
+  @Override
+  public void onFailure(Exception e) {
+    // TODO Auto-generated method stub
   }
 
   /**

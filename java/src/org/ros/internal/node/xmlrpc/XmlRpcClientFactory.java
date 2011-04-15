@@ -19,12 +19,10 @@
 package org.ros.internal.node.xmlrpc;
 
 import org.apache.xmlrpc.XmlRpcException;
-
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.common.TypeConverter;
 import org.apache.xmlrpc.common.TypeConverterFactory;
 import org.apache.xmlrpc.common.TypeConverterFactoryImpl;
-import org.apache.xmlrpc.common.XmlRpcInvocationException;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.StatusCode;
 
@@ -140,6 +138,10 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
           // result = client.execute(methodName, pArgs);
         } catch (XmlRpcException e) {
           Throwable t = e.linkedException;
+          if (t == null) { 
+            //TODO: deal with this much more cleanly
+            throw new RemoteException(StatusCode.FAILURE, "unknown error");
+          }
           if (t instanceof RuntimeException) {
             throw t;
           }

@@ -172,10 +172,12 @@ public class MasterRegistration implements TopicListener {
 
   public void shutdown() {
     registrationThread.interrupt();
-    slaveIdentifier = null;
   }
 
   public void start(SlaveIdentifier slaveIdentifier) {
+    if (slaveIdentifier == null) { 
+      throw new NullPointerException();
+    }
     if (this.slaveIdentifier != null) {
       throw new IllegalStateException("cannot call start() more than once");
     }

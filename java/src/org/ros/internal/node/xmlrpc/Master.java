@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.xmlrpc;
 
+import org.ros.internal.node.RemoteException;
+
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -38,10 +40,10 @@ public interface Master extends Node {
    * @throws URISyntaxException
    */
   public List<Object> registerService(String callerId, String service, String serviceApi,
-      String callerApi) throws URISyntaxException, XmlRpcTimeoutException;
+      String callerApi) throws URISyntaxException, XmlRpcTimeoutException, RemoteException;
 
   public List<Object> unregisterService(String callerId, String service, String serviceApi)
-      throws XmlRpcTimeoutException;
+      throws XmlRpcTimeoutException, RemoteException;
 
   /**
    * Subscribe the caller to the specified topic. In addition to receiving a
@@ -63,10 +65,10 @@ public interface Master extends Node {
    * @throws URISyntaxException
    */
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
-      String callerApi) throws URISyntaxException, XmlRpcTimeoutException;
+      String callerApi) throws URISyntaxException, XmlRpcTimeoutException, RemoteException;
 
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi)
-      throws XmlRpcTimeoutException;
+      throws XmlRpcTimeoutException, RemoteException;
 
   /**
    * Register the caller as a publisher the topic.
@@ -83,20 +85,20 @@ public interface Master extends Node {
    * @throws URISyntaxException
    */
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) throws URISyntaxException, XmlRpcTimeoutException;
+      String callerApi) throws URISyntaxException, RemoteException, XmlRpcTimeoutException;
 
   public List<Object> unregisterPublisher(String callerId, String topic, String callerApi)
-      throws XmlRpcTimeoutException;
+      throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> lookupNode(String callerId, String nodeName) throws XmlRpcTimeoutException;
+  public List<Object> lookupNode(String callerId, String nodeName) throws XmlRpcTimeoutException, RemoteException;
 
   public List<Object> getPublishedTopics(String callerId, String subgraph)
-      throws XmlRpcTimeoutException;
+      throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> getSystemState(String callerId) throws XmlRpcTimeoutException;
+  public List<Object> getSystemState(String callerId) throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> getUri(String callerId) throws XmlRpcTimeoutException;
+  public List<Object> getUri(String callerId) throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> lookupService(String callerId, String service) throws XmlRpcTimeoutException;
+  public List<Object> lookupService(String callerId, String service) throws XmlRpcTimeoutException, RemoteException;
 
 }

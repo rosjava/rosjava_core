@@ -165,9 +165,9 @@ public class MasterChooserActivity extends Activity {
   }
 
   private void choose(int position) {
-    Intent result_intent = new Intent();
-    result_intent.putExtra(ROBOT_DESCRIPTION_EXTRA, robots.get(position));
-    setResult(RESULT_OK, result_intent);
+    Intent resultIntent = new Intent();
+    resultIntent.putExtra(ROBOT_DESCRIPTION_EXTRA, robots.get(position));
+    setResult(RESULT_OK, resultIntent);
     finish();
   }
 

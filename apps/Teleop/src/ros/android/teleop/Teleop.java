@@ -27,12 +27,12 @@ import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
+import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.Publisher;
 import org.ros.Subscriber;
-import org.ros.app_manager.AppManagerCallback;
-import org.ros.app_manager.AppManagerException;
 import org.ros.exceptions.RosInitException;
+import org.ros.message.Message;
 import org.ros.message.app_manager.AppStatus;
 import org.ros.message.geometry_msgs.Twist;
 import org.ros.namespace.Namespace;
@@ -48,8 +48,7 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
   private SensorImageView imageView;
   private Thread pubThread;
   private boolean deadman;
-  private Twist touchCartesianMessage;
-  private Twist stopMessage;
+  private Twist touchCmdMessage;
   private float motionY;
   private float motionX;
   private Subscriber<AppStatus> statusSub;
@@ -68,8 +67,7 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
 
     imageView = (SensorImageView) findViewById(R.id.image);
     // imageView.setOnTouchListener(this);
-    stopMessage = new Twist();
-    touchCartesianMessage = new Twist();
+    touchCmdMessage = new Twist();
   }
 
   @Override
@@ -94,6 +92,25 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
     super.onNodeDestroy(node);
   }
 
+  private <T extends Message> void createPublisherThread(final Publisher<T> pub, final T message,
+      final int rate) {
+    pubThread = new Thread(new Runnable() {
+
+      @Override
+      public void run() {
+        try {
+          while (true) {
+            pub.publish(message);
+            Thread.sleep(1000 / rate);
+          }
+        } catch (InterruptedException e) {
+        }
+      }
+    });
+    Log.i("Teleop", "started pub thread");
+    pubThread.start();
+  }
+
   private void initRos() {
     try {
       Log.i("Teleop", "getNode()");
@@ -111,31 +128,7 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
       });
       Log.i("Teleop", "init twistPub");
       twistPub = appNamespace.createPublisher("turtlebot_node/cmd_vel", Twist.class);
-
-      pubThread = new Thread(new Runnable() {
-
-        @Override
-        public void run() {
-          Twist message;
-          try {
-            while (true) {
-              // 10Hz
-              message = touchCartesianMessage;
-              if (deadman && message != null) {
-                twistPub.publish(message);
-                Log.i("Teleop", "twist: " + message.angular.x + " " + message.angular.z);
-              } else {
-                Log.i("Teleop", "stop");
-                twistPub.publish(stopMessage);
-              }
-              Thread.sleep(100);
-            }
-          } catch (InterruptedException e) {
-          }
-        }
-      });
-      Log.i("Teleop", "started pub thread");
-      pubThread.start();
+      createPublisherThread(twistPub, touchCmdMessage, 10);
     } catch (RosInitException e) {
       Log.e("Teleop", e.getMessage());
     }
@@ -156,23 +149,19 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
 
   private void startApp() {
     appManager.startApp("turtlebot_teleop/android_teleop",
-        new AppManagerCallback<StartApp.Response>() {
+        new MessageListener<StartApp.Response>() {
           @Override
-          public void onNewMessage(StartApp.Response message) {
+          public void onSuccess(StartApp.Response message) {
             initRos();
-            //TODO(kwc): add status code for app already running
+            // TODO(kwc): add status code for app already running
             /*
-            if (message.started) {
-              safeToastStatus("started");
-              initRos();
-            } else {
-              safeToastStatus(message.message);
-            }
-            */
+             * if (message.started) { safeToastStatus("started"); initRos(); }
+             * else { safeToastStatus(message.message); }
+             */
           }
 
           @Override
-          public void callFailed(AppManagerException e) {
+          public void onFailure(Exception e) {
             safeToastStatus("Failed: " + e.getMessage());
           }
         });
@@ -200,15 +189,21 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
       motionX = (motionEvent.getX() - (arg0.getWidth() / 2)) / (arg0.getWidth());
       motionY = (motionEvent.getY() - (arg0.getHeight() / 2)) / (arg0.getHeight());
 
-      touchCartesianMessage.linear.x = -motionY;
-      touchCartesianMessage.linear.y = 0;
-      touchCartesianMessage.linear.z = 0;
-      touchCartesianMessage.angular.x = 0;
-      touchCartesianMessage.angular.y = 0;
-      touchCartesianMessage.angular.z = -2 * motionX;
+      touchCmdMessage.linear.x = -motionY;
+      touchCmdMessage.linear.y = 0;
+      touchCmdMessage.linear.z = 0;
+      touchCmdMessage.angular.x = 0;
+      touchCmdMessage.angular.y = 0;
+      touchCmdMessage.angular.z = -2 * motionX;
 
     } else {
       deadman = false;
+      touchCmdMessage.linear.x = 0;
+      touchCmdMessage.linear.y = 0;
+      touchCmdMessage.linear.z = 0;
+      touchCmdMessage.angular.x = 0;
+      touchCmdMessage.angular.y = 0;
+      touchCmdMessage.angular.z = 0;
     }
     return true;
   }

@@ -60,7 +60,7 @@ public class TalkerListener extends RosActivity {
       Log.i("RosAndroid", "Setting up sub /chatter");
       node.createSubscriber("chatter", new MessageListener<org.ros.message.std_msgs.String>() {
         @Override
-        public void onNewMessage(final org.ros.message.std_msgs.String message) {
+        public void onSuccess(final org.ros.message.std_msgs.String message) {
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -68,6 +68,10 @@ public class TalkerListener extends RosActivity {
             }
           });
 
+        }
+
+        @Override
+        public void onFailure(Exception e) { 
         }
       }, org.ros.message.std_msgs.String.class);
 

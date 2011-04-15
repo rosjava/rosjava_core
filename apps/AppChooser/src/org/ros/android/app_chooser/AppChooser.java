@@ -35,9 +35,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.TextView;
+import org.ros.MessageListener;
 import org.ros.Node;
-import org.ros.app_manager.AppManagerCallback;
-import org.ros.app_manager.AppManagerException;
 import org.ros.message.app_manager.App;
 import org.ros.service.app_manager.ListApps;
 import ros.android.activity.RosAppActivity;
@@ -93,12 +92,15 @@ public class AppChooser extends RosAppActivity {
       Log.i("RosAndroid", "using app cache");
       return;
     }
-
+    if (appManager == null) {
+      safeSetStatus("Robot not available");
+      return;
+    }
     Log.i("RosAndroid", "sending list apps request");
-    appManager.listApps(new AppManagerCallback<ListApps.Response>() {
+    appManager.listApps(new MessageListener<ListApps.Response>() {
 
       @Override
-      public void onNewMessage(ListApps.Response message) {
+      public void onSuccess(ListApps.Response message) {
         availableAppsCache = message.available_apps;
         Log.i("RosAndroid", "ListApps.Response: " + availableAppsCache.size() + " apps");
         availableAppsCacheTime = System.currentTimeMillis();
@@ -111,8 +113,9 @@ public class AppChooser extends RosAppActivity {
       }
 
       @Override
-      public void callFailed(AppManagerException e) {
-        safeSetStatus("unable to retrieve app list");
+      public void onFailure(Exception e) {
+        // TODO Auto-generated method stub
+        
       }
     });
 
