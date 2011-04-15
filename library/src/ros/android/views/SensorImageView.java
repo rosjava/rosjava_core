@@ -57,7 +57,9 @@ public class SensorImageView extends ImageView implements MessageListener<Compre
   }
 
   public void stop() {
-    imageSub.cancel();
+    if( imageSub != null ) {
+      imageSub.cancel();
+    }
     imageSub = null;
   }
 

@@ -91,8 +91,10 @@ public class TcpRosServer {
     ChannelGroupFuture groupFuture = channelGroup.close();
     groupFuture.awaitUninterruptibly();
     
-    ChannelFuture future = channel.close();
-    future.awaitUninterruptibly();
+    if(channel != null) {
+      ChannelFuture future = channel.close();
+      future.awaitUninterruptibly();
+    }
     channelFactory.releaseExternalResources();
     bootstrap.releaseExternalResources();
     channel = null;
