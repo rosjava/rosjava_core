@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              >
+  <RelativeLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:id="@+id/diagnostic_layout">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp"
+              android:text="Diagnostic"
+              android:layout_alignParentLeft="true"
+              android:id="@+id/diagnostic_label"/>
+    <ImageButton android:layout_width="35dp" android:layout_height="35dp" android:scaleType="fitCenter" android:padding="0dp"
+                 android:src="@drawable/wrench"
+                 android:layout_below="@id/diagnostic_label"
+                 android:layout_alignParentLeft="true"
+                 android:id="@+id/diagnostics_button"/>
+    <ImageButton android:layout_width="35dp" android:layout_height="35dp" android:scaleType="fitCenter" android:padding="0dp"
+                 android:src="@drawable/speech_bubble"
+                 android:layout_below="@id/diagnostic_label"
+                 android:layout_toRightOf="@id/diagnostics_button"
+                 android:id="@+id/rosout_button"/>
+    <ImageButton android:layout_width="35dp" android:layout_height="35dp" android:scaleType="fitCenter" android:padding="0dp"
+                 android:gravity="center"
+                 android:src="@drawable/gear"
+                 android:layout_below="@id/diagnostic_label"
+                 android:layout_toRightOf="@id/rosout_button"
+                 android:id="@+id/mode_button"/>
+  </RelativeLayout>
+
+  <RelativeLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:id="@+id/breakers_layout">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp"
+              android:text="Breakers"
+              android:layout_alignParentLeft="true"
+              android:id="@+id/breakers_label"/>
+    <Button android:layout_width="35dp" android:layout_height="35dp" android:textSize="20sp" android:padding="0dp"
+            android:text="1"
+            android:layout_below="@id/breakers_label"
+            android:layout_alignParentLeft="true"
+            android:id="@+id/breaker_1_button"/>
+    <Button android:layout_width="35dp" android:layout_height="35dp" android:textSize="20sp" android:padding="0dp"
+            android:text="2"
+            android:layout_below="@id/breakers_label"
+            android:layout_toRightOf="@id/breaker_1_button"
+            android:id="@+id/breaker_2_button"/>
+    <Button android:layout_width="35dp" android:layout_height="35dp" android:textSize="20sp" android:padding="0dp"
+            android:gravity="center"
+            android:text="3"
+            android:layout_below="@id/breakers_label"
+            android:layout_toRightOf="@id/breaker_2_button"
+            android:id="@+id/breaker_3_button"/>
+  </RelativeLayout>
+
+  <LinearLayout android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dp">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp"
+              android:text="Robot"/>
+    <ProgressBar android:layout_width="40dp" android:layout_height="25dp"
+                 style="?android:attr/progressBarStyleHorizontal"
+                 android:id="@+id/robot_battery_bar"/>
+  </LinearLayout>
+
+  <LinearLayout android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dp">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp"
+              android:text="Laptop"/>
+    <ProgressBar android:layout_width="40dp" android:layout_height="25dp"
+                 style="?android:attr/progressBarStyleHorizontal"
+                 android:id="@+id/laptop_battery_bar"/>
+  </LinearLayout>
+</LinearLayout>
