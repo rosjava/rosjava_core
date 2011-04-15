@@ -58,9 +58,16 @@
                 android:paddingLeft="5dp">
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp"
               android:text="Robot"/>
-    <ProgressBar android:layout_width="40dp" android:layout_height="25dp"
-                 style="?android:attr/progressBarStyleHorizontal"
-                 android:id="@+id/robot_battery_bar"/>
+    <FrameLayout android:layout_width="40dp" android:layout_height="25dp">
+      <ProgressBar android:layout_width="40dp" android:layout_height="25dp"
+                   style="?android:attr/progressBarStyleHorizontal"
+                   android:id="@+id/robot_battery_bar"/>
+      <ImageView android:layout_width="25dp" android:layout_height="15dp"
+                 android:src="@drawable/power_plug"
+                 android:layout_gravity="center"
+                 android:visibility="invisible"
+                 android:id="@+id/robot_charging_indicator"/>
+    </FrameLayout>
   </LinearLayout>
 
   <LinearLayout android:orientation="vertical"
@@ -69,8 +76,15 @@
                 android:paddingLeft="5dp">
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp"
               android:text="Laptop"/>
-    <ProgressBar android:layout_width="40dp" android:layout_height="25dp"
-                 style="?android:attr/progressBarStyleHorizontal"
-                 android:id="@+id/laptop_battery_bar"/>
+    <FrameLayout android:layout_width="40dp" android:layout_height="25dp">
+      <ProgressBar android:layout_width="40dp" android:layout_height="25dp"
+                   style="?android:attr/progressBarStyleHorizontal"
+                   android:id="@+id/laptop_battery_bar"/>
+      <ImageView android:layout_width="25dp" android:layout_height="15dp"
+                 android:src="@drawable/power_plug"
+                 android:layout_gravity="center"
+                 android:visibility="invisible"
+                 android:id="@+id/laptop_charging_indicator"/>
+    </FrameLayout>
   </LinearLayout>
 </LinearLayout>

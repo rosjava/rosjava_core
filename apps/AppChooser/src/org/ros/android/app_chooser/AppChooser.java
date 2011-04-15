@@ -29,6 +29,7 @@
 
 package org.ros.android.app_chooser;
 
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -40,6 +41,7 @@ import org.ros.Node;
 import org.ros.message.app_manager.App;
 import org.ros.service.app_manager.ListApps;
 import ros.android.activity.RosAppActivity;
+import ros.android.views.TurtlebotDashboard;
 
 import java.util.ArrayList;
 
@@ -51,6 +53,7 @@ public class AppChooser extends RosAppActivity {
 
   private ArrayList<App> availableAppsCache;
   private long availableAppsCacheTime;
+  private TurtlebotDashboard dashboard;
 
   public AppChooser() {
     availableAppsCache = new ArrayList<App>();
@@ -58,10 +61,15 @@ public class AppChooser extends RosAppActivity {
   }
 
   @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.main);
+    dashboard = (TurtlebotDashboard) findViewById( R.id.dashboard );
+  }
+
+  @Override
   protected void onResume() {
     super.onResume();
-
-    setContentView(R.layout.main);
     // TODO: start spinner
     updateAppList(availableAppsCache);
   }
@@ -88,6 +96,7 @@ public class AppChooser extends RosAppActivity {
   protected void onNodeCreate(Node node) {
     Log.i("RosAndroid", "AppChooser.onNodeCreate");
     super.onNodeCreate(node);
+    dashboard.setNode(node);
     if (System.currentTimeMillis() - availableAppsCacheTime < 2 * 1000) {
       Log.i("RosAndroid", "using app cache");
       return;
@@ -125,6 +134,7 @@ public class AppChooser extends RosAppActivity {
   protected void onNodeDestroy(Node node) {
     Log.i("RosAndroid", "onNodeDestroy");
     super.onNodeDestroy(node);
+    dashboard.setNode(null);
   }
 
   public void chooseNewMasterClicked(View view) {
