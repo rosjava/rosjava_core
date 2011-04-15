@@ -54,6 +54,7 @@ public class AppChooser extends RosAppActivity {
   private ArrayList<App> availableAppsCache;
   private long availableAppsCacheTime;
   private TurtlebotDashboard dashboard;
+  private TextView robotNameView;
 
   public AppChooser() {
     availableAppsCache = new ArrayList<App>();
@@ -65,6 +66,7 @@ public class AppChooser extends RosAppActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
     dashboard = (TurtlebotDashboard) findViewById( R.id.dashboard );
+    robotNameView = (TextView) findViewById( R.id.robot_name_view );
   }
 
   @Override
@@ -96,7 +98,15 @@ public class AppChooser extends RosAppActivity {
   protected void onNodeCreate(Node node) {
     Log.i("RosAndroid", "AppChooser.onNodeCreate");
     super.onNodeCreate(node);
+    runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          robotNameView.setText( getCurrentRobot().robotName );
+        }
+      });
+
     dashboard.setNode(node);
+
     if (System.currentTimeMillis() - availableAppsCacheTime < 2 * 1000) {
       Log.i("RosAndroid", "using app cache");
       return;

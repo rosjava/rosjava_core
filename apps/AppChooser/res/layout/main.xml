@@ -4,9 +4,16 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-  <ros.android.views.TurtlebotDashboard android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:id="@+id/dashboard"/>
+  <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content"
+                android:background="#ff404040">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:id="@+id/robot_name_view"
+              android:textSize="30sp"/>
+    <ros.android.views.TurtlebotDashboard android:layout_width="wrap_content"
+                                          android:layout_height="wrap_content"
+                                          android:id="@+id/dashboard"/>
+  </LinearLayout>
   <GridView android:id="@+id/gridview"
             android:layout_width="fill_parent" 
             android:layout_height="fill_parent"
