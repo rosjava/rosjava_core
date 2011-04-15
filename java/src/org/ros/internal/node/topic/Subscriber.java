@@ -87,7 +87,7 @@ public class Subscriber<MessageType> extends Topic {
               break;
             }
             // TODO(damonkohler): Recycle Message objects to avoid GC.
-            listener.onNewMessage(message);
+            listener.onSuccess(message);
           }
         }
       } catch (InterruptedException e) {

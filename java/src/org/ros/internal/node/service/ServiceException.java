@@ -14,27 +14,26 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.internal.node.service;
 
-import org.ros.internal.node.response.StatusCode;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RemoteException extends Exception {
+public class ServiceException extends Exception {
 
-  private final StatusCode statusCode;
-
-  public RemoteException(StatusCode statusCode, String message) {
+  public ServiceException(String message) {
     super(message);
-    this.statusCode = statusCode;
   }
 
-  /**
-   * @return the status code
-   */
-  public StatusCode getStatusCode() {
-    return statusCode;
+  public ChannelBuffer getMessageAsChannelBuffer() {
+    ByteBuffer encodedMessage = Charset.forName("US-ASCII").encode(getMessage());
+    return ChannelBuffers.wrappedBuffer(encodedMessage);
   }
 
 }

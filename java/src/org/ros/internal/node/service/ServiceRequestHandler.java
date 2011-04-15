@@ -35,16 +35,24 @@ class ServiceRequestHandler extends SimpleChannelHandler {
   }
 
   @Override
-  public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-    ChannelBuffer requestBuffer = (ChannelBuffer) e.getMessage();
-    ChannelBuffer responseBuffer =
-        ChannelBuffers.wrappedBuffer(responseBuilder.handleRequest(requestBuffer.toByteBuffer()));
+  public void messageReceived(ChannelHandlerContext context, MessageEvent event) {
+    ChannelBuffer requestBuffer = (ChannelBuffer) event.getMessage();
     ServiceServerResponse response = new ServiceServerResponse();
-    // TODO(damonkohler): Support changing error code.
+    ChannelBuffer responseBuffer;
+    try {
+      responseBuffer =
+          ChannelBuffers.wrappedBuffer(responseBuilder.handleRequest(requestBuffer.toByteBuffer()));
+    } catch (ServiceException e) {
+      response.setErrorCode(0);
+      response.setMessageLength(e.getMessage().length());
+      response.setMessage(e.getMessageAsChannelBuffer());
+      context.getChannel().write(response);
+      return;
+    }
     response.setErrorCode(1);
     response.setMessageLength(responseBuffer.readableBytes());
     response.setMessage(responseBuffer);
-    ctx.getChannel().write(response);
+    context.getChannel().write(response);
   }
 
 }

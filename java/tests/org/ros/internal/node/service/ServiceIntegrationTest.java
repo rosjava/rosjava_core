@@ -18,6 +18,7 @@ package org.ros.internal.node.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
@@ -84,11 +85,63 @@ public class ServiceIntegrationTest {
     final CountDownLatch latch = new CountDownLatch(1);
     client.call(request, new MessageListener<AddTwoInts.Response>() {
       @Override
-      public void onNewMessage(AddTwoInts.Response message) {
+      public void onSuccess(AddTwoInts.Response message) {
         assertEquals(message.sum, 4);
+        latch.countDown();
+      }
+
+      @Override
+      public void onFailure(Exception e) {
+        throw new RuntimeException(e);
+      }
+    });
+    assertTrue(latch.await(1, TimeUnit.SECONDS));
+  }
+
+  @Test
+  public void RequestFailureTest() throws Exception {
+    ServiceDefinition definition =
+        new ServiceDefinition(new GraphName("/add_two_ints"), AddTwoInts.__s_getDataType(),
+            AddTwoInts.__s_getMD5Sum());
+
+    final String errorMessage = "Error!";
+
+    Node serverNode = Node.createPrivate(new GraphName("/server"), masterServer.getUri(), 0, 0);
+    ServiceServer server =
+        serverNode.createServiceServer(definition,
+            new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>(
+                new MessageSerializer<AddTwoInts.Response>(),
+                new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class)) {
+              @Override
+              public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
+                throw new ServiceException(errorMessage);
+              }
+            });
+
+    Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
+    ServiceClient<AddTwoInts.Response> client =
+        clientNode.createServiceClient(new ServiceIdentifier(server.getUri(), definition),
+            new MessageDeserializer<AddTwoInts.Response>(AddTwoInts.Response.class));
+
+    // TODO(damonkohler): This is a hack that we should remove once it's
+    // possible to block on a connection being established.
+    Thread.sleep(100);
+
+    AddTwoInts.Request request = new AddTwoInts.Request();
+    final CountDownLatch latch = new CountDownLatch(1);
+    client.call(request, new MessageListener<AddTwoInts.Response>() {
+      @Override
+      public void onSuccess(AddTwoInts.Response message) {
+        fail();
+      }
+
+      @Override
+      public void onFailure(Exception e) {
+        assertEquals(e.getMessage(), errorMessage);
         latch.countDown();
       }
     });
     assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
+
 }

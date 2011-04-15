@@ -115,7 +115,6 @@ public class AppManager {
       throws AppManagerException {
     initStopApp();
     StopApp.Request request = new StopApp.Request();
-    request.name = appName;
     stopAppClient.call(request, callback);
   }
 }

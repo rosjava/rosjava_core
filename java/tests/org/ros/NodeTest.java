@@ -86,7 +86,12 @@ public class NodeTest {
 
     MessageListener<Int64> callback = new MessageListener<Int64>() {
       @Override
-      public void onNewMessage(Int64 message) {
+      public void onSuccess(Int64 message) {
+      }
+
+      @Override
+      public void onFailure(Exception e) {
+        throw new RuntimeException(e);
       }
     };
 

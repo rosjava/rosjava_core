@@ -41,8 +41,13 @@ public class Listener implements NodeMain {
       final Log log = node.getLog();
       node.createSubscriber("chatter", new MessageListener<org.ros.message.std_msgs.String>() {
         @Override
-        public void onNewMessage(org.ros.message.std_msgs.String message) {
+        public void onSuccess(org.ros.message.std_msgs.String message) {
           log.info("I heard: \"" + message.data + "\"");
+        }
+
+        @Override
+        public void onFailure(Exception e) {
+          throw new RuntimeException(e);
         }
       }, org.ros.message.std_msgs.String.class);
     } catch (Exception e) {
