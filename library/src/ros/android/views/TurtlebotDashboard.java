@@ -30,6 +30,7 @@
 package ros.android.views;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -46,17 +47,20 @@ import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.Subscriber;
 import org.ros.exceptions.RosInitException;
+import org.ros.internal.node.service.ServiceClient;
+import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
+import org.ros.namespace.NameResolver;
 import org.ros.message.diagnostic_msgs.DiagnosticArray;
 import org.ros.message.diagnostic_msgs.DiagnosticStatus;
 import org.ros.message.diagnostic_msgs.KeyValue;
+import org.ros.service.turtlebot_node.SetTurtlebotMode;
+import org.ros.message.turtlebot_node.TurtlebotSensorState;
 
 import ros.android.activity.R;
 
 public class TurtlebotDashboard extends LinearLayout {
-  private ImageButton diagnosticsButton;
-  private ImageButton rosoutButton;
   private ImageButton modeButton;
-  private Button[] breakerButtons = new Button[3];
   private ProgressBar robotBatteryBar;
   private ProgressBar laptopBatteryBar;
   private View robotChargingIndicator;
@@ -64,6 +68,10 @@ public class TurtlebotDashboard extends LinearLayout {
 
   private Node node;
   private Subscriber<DiagnosticArray> diagnosticSubscriber;
+  private ServiceClient<SetTurtlebotMode.Response> modeServiceClient;
+  private ServiceIdentifier modeServiceIdentifier;
+
+  private boolean powerOn = false;
 
   public TurtlebotDashboard(Context context) {
     super(context);
@@ -74,10 +82,6 @@ public class TurtlebotDashboard extends LinearLayout {
   public TurtlebotDashboard(Context context, AttributeSet attrs) {
     super(context, attrs);
     Log.i("RosAndroid", "TurtlebotDashboard constructor2.");
-// TODO: make orientation settable in xml. (?)
-//    TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TurtlebotDashboard);
-//    CharSequence s = a.getString(R.styleable.TurtlebotDashboard_orientation);
-//    a.recycle();
     inflateSelf(context);
   }
 
@@ -86,21 +90,19 @@ public class TurtlebotDashboard extends LinearLayout {
     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.turtlebot_dashboard, this);
 
-    diagnosticsButton = (ImageButton) findViewById(R.id.diagnostics_button);
-    rosoutButton = (ImageButton) findViewById(R.id.rosout_button);
     modeButton = (ImageButton) findViewById(R.id.mode_button);
-
-    breakerButtons[0] = (Button) findViewById(R.id.breaker_1_button);
-    breakerButtons[1] = (Button) findViewById(R.id.breaker_2_button);
-    breakerButtons[2] = (Button) findViewById(R.id.breaker_3_button);
+    modeButton.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          onModeButtonClicked();
+        }
+      });
 
     robotBatteryBar = (ProgressBar) findViewById(R.id.robot_battery_bar);
     laptopBatteryBar = (ProgressBar) findViewById(R.id.laptop_battery_bar);
 
     robotChargingIndicator = (View) findViewById(R.id.robot_charging_indicator);
     laptopChargingIndicator = (View) findViewById(R.id.laptop_charging_indicator);
-
-    // TODO: set all controls gray initially meaning no data has arrived.
   }
 
   /**
@@ -151,6 +153,14 @@ public class TurtlebotDashboard extends LinearLayout {
         public void onFailure(Exception e) { 
         }
       }, DiagnosticArray.class);
+
+    NameResolver resolver = node.getResolver().createResolver("/turtlebot_node");
+    modeServiceIdentifier = node.lookupService(resolver.resolveName("set_operation_mode"), new SetTurtlebotMode());
+    if(modeServiceIdentifier == null ) {
+      Log.e("RosAndroid", "modeServiceIdentifier is null");
+    } else {
+      Log.i("RosAndroid", "modeServiceIdentifier is not null");
+    }
   }
 
   private void disconnectNode() {
@@ -162,6 +172,7 @@ public class TurtlebotDashboard extends LinearLayout {
    * Populate view with new diagnostic data.  This must be called in the UI thread.
    */
   private void handleDiagnosticArray(DiagnosticArray msg) {
+    String mode = null;
     for(DiagnosticStatus status: msg.status) {
       if(status.name.equals("/Power System/Battery")) {
         populateBatteryFromStatus( robotBatteryBar, robotChargingIndicator, status );
@@ -169,6 +180,52 @@ public class TurtlebotDashboard extends LinearLayout {
       if(status.name.equals("/Power System/Laptop Battery")) {
         populateBatteryFromStatus( laptopBatteryBar, laptopChargingIndicator, status );
       }
+      if(status.name.equals("/Mode/Operating Mode")) {
+        mode = status.message;
+      }
+    }
+    showMode(mode);
+  }
+
+  private void onModeButtonClicked() {
+    Log.i("RosAndroid", "onModeButtonClicked()" );
+    if( modeServiceIdentifier != null ) {
+      powerOn = !powerOn;
+
+      SetTurtlebotMode.Request request = new SetTurtlebotMode.Request();
+      if( powerOn ) {
+        Log.i("RosAndroid", "onModeButtonClicked(): turning on" );
+        request.mode = TurtlebotSensorState.OI_MODE_FULL;
+      } else {
+        Log.i("RosAndroid", "onModeButtonClicked(): turning off" );
+        request.mode = TurtlebotSensorState.OI_MODE_PASSIVE;
+      }
+      // TODO: can't I save the modeServiceClient?
+      modeServiceClient = node.createServiceClient(modeServiceIdentifier, SetTurtlebotMode.Response.class);
+      modeServiceClient.call( request,
+                              new MessageListener<SetTurtlebotMode.Response>() {
+                                @Override public void onSuccess( final SetTurtlebotMode.Response msg ) {}
+                                @Override public void onFailure(Exception e) {} } );
+      // TODO: put visual indicator that we are waiting for this to take effect.
+      Log.i("RosAndroid", "onModeButtonClicked(): serviceClient.call() returned." );
+    }
+  }
+
+  private void showMode( String mode ) {
+    Log.i("RosAndroid", "showMode(" + mode + ")");
+    if( mode == null ) {
+      modeButton.setBackgroundColor(Color.GRAY);
+    } else if( mode.equals("Full") ) {
+      modeButton.setBackgroundColor(Color.GREEN);
+      powerOn = true;
+    } else if( mode.equals("Safe") ) {
+      modeButton.setBackgroundColor(Color.YELLOW);
+      powerOn = true;
+    } else if( mode.equals("Passive") ) {
+      modeButton.setBackgroundColor(Color.RED);
+      powerOn = false;
+    } else {
+      modeButton.setBackgroundColor(Color.GRAY);
     }
   }
 
