@@ -55,6 +55,7 @@ import org.ros.message.diagnostic_msgs.DiagnosticArray;
 import org.ros.message.diagnostic_msgs.DiagnosticStatus;
 import org.ros.message.diagnostic_msgs.KeyValue;
 import org.ros.service.turtlebot_node.SetTurtlebotMode;
+import org.ros.service.turtlebot_node.SetDigitalOutputs;
 import org.ros.message.turtlebot_node.TurtlebotSensorState;
 
 import ros.android.activity.R;
@@ -68,8 +69,8 @@ public class TurtlebotDashboard extends LinearLayout {
 
   private Node node;
   private Subscriber<DiagnosticArray> diagnosticSubscriber;
-  private ServiceClient<SetTurtlebotMode.Response> modeServiceClient;
   private ServiceIdentifier modeServiceIdentifier;
+  private ServiceIdentifier setDigOutServiceIdentifier;
 
   private boolean powerOn = false;
 
@@ -156,11 +157,7 @@ public class TurtlebotDashboard extends LinearLayout {
 
     NameResolver resolver = node.getResolver().createResolver("/turtlebot_node");
     modeServiceIdentifier = node.lookupService(resolver.resolveName("set_operation_mode"), new SetTurtlebotMode());
-    if(modeServiceIdentifier == null ) {
-      Log.e("RosAndroid", "modeServiceIdentifier is null");
-    } else {
-      Log.i("RosAndroid", "modeServiceIdentifier is not null");
-    }
+    setDigOutServiceIdentifier = node.lookupService(resolver.resolveName("set_digital_outputs"), new SetDigitalOutputs());
   }
 
   private void disconnectNode() {
@@ -189,23 +186,36 @@ public class TurtlebotDashboard extends LinearLayout {
 
   private void onModeButtonClicked() {
     Log.i("RosAndroid", "onModeButtonClicked()" );
-    if( modeServiceIdentifier != null ) {
+    if( modeServiceIdentifier != null && setDigOutServiceIdentifier != null ) {
       powerOn = !powerOn;
 
-      SetTurtlebotMode.Request request = new SetTurtlebotMode.Request();
+      SetTurtlebotMode.Request modeRequest = new SetTurtlebotMode.Request();
+      SetDigitalOutputs.Request setDigOutRequest = new SetDigitalOutputs.Request();
+      setDigOutRequest.digital_out_1 = 0;
+      setDigOutRequest.digital_out_2 = 0;
       if( powerOn ) {
         Log.i("RosAndroid", "onModeButtonClicked(): turning on" );
-        request.mode = TurtlebotSensorState.OI_MODE_FULL;
+        modeRequest.mode = TurtlebotSensorState.OI_MODE_FULL;
+        setDigOutRequest.digital_out_0 = 1; // main breaker on
       } else {
         Log.i("RosAndroid", "onModeButtonClicked(): turning off" );
-        request.mode = TurtlebotSensorState.OI_MODE_PASSIVE;
+        modeRequest.mode = TurtlebotSensorState.OI_MODE_PASSIVE;
+        setDigOutRequest.digital_out_0 = 0; // main breaker off
       }
-      // TODO: can't I save the modeServiceClient?
-      modeServiceClient = node.createServiceClient(modeServiceIdentifier, SetTurtlebotMode.Response.class);
-      modeServiceClient.call( request,
+      // TODO: can't I save the modeServiceClient?  Causes trouble.
+      ServiceClient<SetTurtlebotMode.Response> modeServiceClient =
+        node.createServiceClient(modeServiceIdentifier, SetTurtlebotMode.Response.class);
+      modeServiceClient.call( modeRequest,
                               new MessageListener<SetTurtlebotMode.Response>() {
                                 @Override public void onSuccess( final SetTurtlebotMode.Response msg ) {}
                                 @Override public void onFailure(Exception e) {} } );
+
+      ServiceClient<SetDigitalOutputs.Response> setDigOutServiceClient =
+        node.createServiceClient(setDigOutServiceIdentifier, SetDigitalOutputs.Response.class);
+      setDigOutServiceClient.call( setDigOutRequest,
+                                   new MessageListener<SetDigitalOutputs.Response>() {
+                                     @Override public void onSuccess( final SetDigitalOutputs.Response msg ) {}
+                                     @Override public void onFailure(Exception e) {} } );
       // TODO: put visual indicator that we are waiting for this to take effect.
       Log.i("RosAndroid", "onModeButtonClicked(): serviceClient.call() returned." );
     }
