@@ -131,6 +131,7 @@ public class MasterChooserActivity extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setTitle("Choose a ROS Master");
+    readRobotList();
   }
 
   @Override
