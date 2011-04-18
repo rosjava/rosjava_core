@@ -17,3 +17,11 @@
 - svn:
     local-name: multimaster_experimental
     uri: https://code.ros.org/svn/ros/stacks/multimaster_experimental/trunk
+- hg:
+    local-name: turtlebot
+    uri: https://kforge.ros.org/turtlebot/turtlebot
+    version: default
+- hg:
+    local-name: openni_kinect
+    uri: https://kforge.ros.org/openni/openni_ros
+    version: default

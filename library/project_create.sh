@@ -1,2 +1,1 @@
-android update lib-project \
---path . --target 8
+android update lib-project --target 11 --path .

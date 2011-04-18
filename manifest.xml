@@ -1,7 +1,7 @@
 <package>
   <description brief="ROS Java (pure) client library">
 
-    rosjava is a pure Java client library for ROS.  It is meant to be compatible with Android. 
+    rosjava is a pure Java client library for ROS.  It is meant to be compatible with Android.
 
   </description>
   <author>Damon Kohler/damonkohler@google.com</author>
@@ -15,5 +15,6 @@
   <depend package="rostest"/>
   <depend package="test_ros"/>
   <depend package="app_manager"/>
+  <depend package="turtlebot_node"/>
 </package>
 
