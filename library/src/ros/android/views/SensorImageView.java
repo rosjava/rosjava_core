@@ -15,21 +15,19 @@
  */
 package ros.android.views;
 
-import android.graphics.Color;
-
-import android.util.Log;
-
-import org.ros.message.sensor_msgs.Image;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
+
 import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.exceptions.RosInitException;
 import org.ros.message.sensor_msgs.CompressedImage;
+import org.ros.message.sensor_msgs.Image;
 
 /**
  * A camera node that publishes images and camera_info
@@ -66,14 +64,9 @@ public class SensorImageView extends ImageView implements MessageListener<Compre
   Bitmap bitmap;
 
   @Override
-  public void onSuccess(CompressedImage message) {
+  public void onNewMessage(CompressedImage message) {
     bitmap = BitmapFactory.decodeByteArray(message.data, 0, message.data.length);
     post(this);
-  }
-
-  @Override
-  public void onFailure(Exception e) {
-    // TODO Auto-generated method stub
   }
 
   /**

@@ -23,7 +23,7 @@ import static org.junit.Assert.fail;
 import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.MessageListener;
+import org.ros.ServiceResponseListener;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.Node;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -83,7 +83,7 @@ public class ServiceIntegrationTest {
     request.a = 2;
     request.b = 2;
     final CountDownLatch latch = new CountDownLatch(1);
-    client.call(request, new MessageListener<AddTwoInts.Response>() {
+    client.call(request, new ServiceResponseListener<AddTwoInts.Response>() {
       @Override
       public void onSuccess(AddTwoInts.Response message) {
         assertEquals(message.sum, 4);
@@ -129,7 +129,7 @@ public class ServiceIntegrationTest {
 
     AddTwoInts.Request request = new AddTwoInts.Request();
     final CountDownLatch latch = new CountDownLatch(1);
-    client.call(request, new MessageListener<AddTwoInts.Response>() {
+    client.call(request, new ServiceResponseListener<AddTwoInts.Response>() {
       @Override
       public void onSuccess(AddTwoInts.Response message) {
         fail();

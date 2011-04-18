@@ -36,10 +36,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.TextView;
-import org.ros.MessageListener;
+
 import org.ros.Node;
+import org.ros.ServiceResponseListener;
 import org.ros.message.app_manager.App;
 import org.ros.service.app_manager.ListApps;
+
 import ros.android.activity.RosAppActivity;
 import ros.android.views.TurtlebotDashboard;
 
@@ -116,8 +118,7 @@ public class AppChooser extends RosAppActivity {
       return;
     }
     Log.i("RosAndroid", "sending list apps request");
-    appManager.listApps(new MessageListener<ListApps.Response>() {
-
+    appManager.listApps(new ServiceResponseListener<ListApps.Response>() {
       @Override
       public void onSuccess(ListApps.Response message) {
         availableAppsCache = message.available_apps;
@@ -133,8 +134,6 @@ public class AppChooser extends RosAppActivity {
 
       @Override
       public void onFailure(Exception e) {
-        // TODO Auto-generated method stub
-        
       }
     });
 

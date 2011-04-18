@@ -32,10 +32,12 @@ package org.ros.android.app_chooser;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import org.ros.MessageListener;
+
+import org.ros.ServiceResponseListener;
 import org.ros.message.app_manager.StatusCodes;
 import org.ros.service.app_manager.StartApp;
 import org.ros.service.app_manager.StopApp;
+
 import ros.android.activity.AppStartCallback;
 import ros.android.activity.RosAppActivity;
 
@@ -59,7 +61,7 @@ public class StubAppActivity extends RosAppActivity implements AppStartCallback 
   }
 
   private void startApp() {
-    appManager.startApp(robotAppName, new MessageListener<StartApp.Response>() {
+    appManager.startApp(robotAppName, new ServiceResponseListener<StartApp.Response>() {
       @Override
       public void onSuccess(StartApp.Response message) {
         if (message.started) {
@@ -85,7 +87,7 @@ public class StubAppActivity extends RosAppActivity implements AppStartCallback 
 
   public void onStopClicked(View view) {
     setStatus("Stopping...");
-    appManager.stopApp("*", new MessageListener<StopApp.Response>() {
+    appManager.stopApp("*", new ServiceResponseListener<StopApp.Response>() {
 
       @Override
       public void onSuccess(StopApp.Response message) {

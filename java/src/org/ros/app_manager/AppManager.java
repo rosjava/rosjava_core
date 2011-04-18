@@ -32,8 +32,8 @@
  */
 package org.ros.app_manager;
 
-import org.ros.MessageListener;
 import org.ros.Node;
+import org.ros.ServiceResponseListener;
 import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.namespace.NameResolver;
@@ -97,13 +97,13 @@ public class AppManager {
     }
   }
 
-  public void listApps(MessageListener<ListApps.Response> callback)
+  public void listApps(ServiceResponseListener<ListApps.Response> callback)
       throws AppManagerException {
     initListApps();
     listAppsClient.call(new ListApps.Request(), callback);
   }
 
-  public void startApp(String appName, MessageListener<StartApp.Response> callback)
+  public void startApp(String appName, ServiceResponseListener<StartApp.Response> callback)
       throws AppManagerException {
     initStartApp();
     StartApp.Request request = new StartApp.Request();
@@ -111,7 +111,7 @@ public class AppManager {
     startAppClient.call(request, callback);
   }
 
-  public void stopApp(String appName, MessageListener<StopApp.Response> callback)
+  public void stopApp(String appName, ServiceResponseListener<StopApp.Response> callback)
       throws AppManagerException {
     initStopApp();
     StopApp.Request request = new StopApp.Request();

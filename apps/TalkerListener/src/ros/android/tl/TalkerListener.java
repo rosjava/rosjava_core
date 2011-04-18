@@ -19,10 +19,12 @@ package ros.android.tl;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+
 import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.Publisher;
 import org.ros.exceptions.RosInitException;
+
 import ros.android.activity.RosActivity;
 
 /**
@@ -60,7 +62,7 @@ public class TalkerListener extends RosActivity {
       Log.i("RosAndroid", "Setting up sub /chatter");
       node.createSubscriber("chatter", new MessageListener<org.ros.message.std_msgs.String>() {
         @Override
-        public void onSuccess(final org.ros.message.std_msgs.String message) {
+        public void onNewMessage(final org.ros.message.std_msgs.String message) {
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -68,10 +70,6 @@ public class TalkerListener extends RosActivity {
             }
           });
 
-        }
-
-        @Override
-        public void onFailure(Exception e) { 
         }
       }, org.ros.message.std_msgs.String.class);
 

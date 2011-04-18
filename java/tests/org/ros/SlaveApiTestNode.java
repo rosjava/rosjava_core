@@ -38,13 +38,8 @@ public class SlaveApiTestNode implements NodeMain {
     MessageListener<org.ros.message.std_msgs.String> chatter_cb =
         new MessageListener<org.ros.message.std_msgs.String>() {
           @Override
-          public void onSuccess(org.ros.message.std_msgs.String m) {
+          public void onNewMessage(org.ros.message.std_msgs.String m) {
             System.out.println("String: " + m.data);
-          }
-
-          @Override
-          public void onFailure(Exception e) {
-            throw new RuntimeException(e);
           }
         };
 
@@ -54,12 +49,7 @@ public class SlaveApiTestNode implements NodeMain {
     Publisher<Int64> pub_int64_pubsub = node.createPublisher("int64", Int64.class);
     MessageListener<Int64> int64_cb = new MessageListener<Int64>() {
       @Override
-      public void onSuccess(Int64 m) {
-      }
-
-      @Override
-      public void onFailure(Exception e) {
-        throw new RuntimeException(e);
+      public void onNewMessage(Int64 m) {
       }
     };
 

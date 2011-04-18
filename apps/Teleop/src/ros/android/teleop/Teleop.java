@@ -27,9 +27,10 @@ import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
-import org.ros.MessageListener;
+
 import org.ros.Node;
 import org.ros.Publisher;
+import org.ros.ServiceResponseListener;
 import org.ros.Subscriber;
 import org.ros.exceptions.RosInitException;
 import org.ros.message.Message;
@@ -37,6 +38,7 @@ import org.ros.message.app_manager.AppStatus;
 import org.ros.message.geometry_msgs.Twist;
 import org.ros.namespace.Namespace;
 import org.ros.service.app_manager.StartApp;
+
 import ros.android.activity.RosAppActivity;
 import ros.android.views.SensorImageView;
 
@@ -149,7 +151,7 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
 
   private void startApp() {
     appManager.startApp("turtlebot_teleop/android_teleop",
-        new MessageListener<StartApp.Response>() {
+        new ServiceResponseListener<StartApp.Response>() {
           @Override
           public void onSuccess(StartApp.Response message) {
             initRos();

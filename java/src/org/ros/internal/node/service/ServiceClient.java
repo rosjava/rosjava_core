@@ -36,7 +36,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.MessageDeserializer;
-import org.ros.MessageListener;
+import org.ros.ServiceResponseListener;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.StatusCode;
@@ -63,7 +63,7 @@ public class ServiceClient<ResponseMessageType> {
   private static final Log log = LogFactory.getLog(ServiceClient.class);
 
   private final MessageDeserializer<ResponseMessageType> deserializer;
-  private final Queue<MessageListener<ResponseMessageType>> messageListeners;
+  private final Queue<ServiceResponseListener<ResponseMessageType>> messageListeners;
   private final Map<String, String> header;
   private final ChannelFactory channelFactory;
   private final ClientBootstrap bootstrap;
@@ -91,7 +91,7 @@ public class ServiceClient<ResponseMessageType> {
   private final class ResponseHandler extends SimpleChannelHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-      MessageListener<ResponseMessageType> listener = messageListeners.poll();
+      ServiceResponseListener<ResponseMessageType> listener = messageListeners.poll();
       Preconditions.checkNotNull(listener);
       ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
       ByteBuffer buffer = response.getMessage().toByteBuffer();
@@ -178,7 +178,7 @@ public class ServiceClient<ResponseMessageType> {
   /**
    * @param message
    */
-  public void call(Message message, MessageListener<ResponseMessageType> listener) {
+  public void call(Message message, ServiceResponseListener<ResponseMessageType> listener) {
     // TODO(damonkohler): Make use of sequence number.
     ChannelBuffer buffer =
         ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, message.serialize(0));
