@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.transport.ConnectionHeaderFields;
 

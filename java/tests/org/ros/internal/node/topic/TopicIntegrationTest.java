@@ -23,6 +23,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.MessageListener;
+import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.Node;
 import org.ros.internal.node.RemoteException;

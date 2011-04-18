@@ -18,8 +18,8 @@ package org.ros.internal.node.response;
 
 import com.google.common.collect.Lists;
 
+import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.topic.MessageDefinition;
 import org.ros.internal.node.topic.TopicDefinition;
 
 import java.util.Arrays;
