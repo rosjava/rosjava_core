@@ -39,7 +39,7 @@ class ServiceResponseHandler<ResponseMessageType> extends SimpleChannelHandler {
   private final Queue<ServiceResponseListener<ResponseMessageType>> responseListeners;
   private final MessageDeserializer<ResponseMessageType> deserializer;
 
-  public ServiceResponseHandler(
+  ServiceResponseHandler(
       Queue<ServiceResponseListener<ResponseMessageType>> messageListeners,
       MessageDeserializer<ResponseMessageType> deserializer) {
     this.responseListeners = messageListeners;

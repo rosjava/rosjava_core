@@ -62,7 +62,16 @@ public class Node implements Namespace {
   private final org.ros.internal.node.Node node;
   private final RosoutLogger log;
   private final TimeProvider timeProvider;
-  private Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher;
+  private final Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher;
+  private final MessageSerializerFactory<Message> messageSerializerFactory;
+
+  private final class PregeneratedCodeMessageSerializerFactory
+      implements MessageSerializerFactory<Message> {
+    @Override
+    public <MessageType extends Message> org.ros.MessageSerializer<MessageType> create() {
+      return new MessageSerializer<MessageType>();
+    }
+  }
 
   /**
    * @param name Node name. This identifies this node to the rest of the ROS
@@ -73,6 +82,7 @@ public class Node implements Namespace {
   public Node(String name, NodeContext context) throws RosInitException {
     Preconditions.checkNotNull(context);
     Preconditions.checkNotNull(name);
+    messageSerializerFactory = new PregeneratedCodeMessageSerializerFactory();
     this.context = context;
     NameResolver parentResolver = context.getParentResolver();
     String baseName;
@@ -125,7 +135,8 @@ public class Node implements Namespace {
           new TopicDefinition(new GraphName(resolvedTopicName), MessageDefinition.create(
               message.getDataType(), message.getMessageDefinition()));
       org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
-          node.createPublisher(topicDefinition, messageClass, new MessageSerializer<MessageType>());
+          node.createPublisher(topicDefinition, messageClass,
+              messageSerializerFactory.<MessageType>create());
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (Exception e) {
       throw new RosInitException(e);
