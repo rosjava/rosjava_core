@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/java"/>
-	<classpathentry kind="lib" path="/java/lib/mockito-all-1.8.5.jar"/>
-	<classpathentry kind="lib" path="/java/lib/netty-3.2.4.Final.jar"/>
-	<classpathentry kind="lib" path="/java/lib/guava-r07.jar"/>
-	<classpathentry kind="lib" path="/java/lib/commons-httpclient-3.1.jar"/>
-	<classpathentry kind="lib" path="/RosAndroid/libs/snakeyaml-android-1.8-SNAPSHOT.jar"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="src" path="RosAndroid_src"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java"/>
+	<classpathentry kind="lib" path="/RosAndroid/libs/snakeyaml-android-1.8-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

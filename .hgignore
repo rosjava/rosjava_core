@@ -7,8 +7,6 @@ syntax: glob
 *.DS_Store
 *~
 *.log
-.project
-.classpath
 .cproject
 .settings
 library/libs/*.jar
