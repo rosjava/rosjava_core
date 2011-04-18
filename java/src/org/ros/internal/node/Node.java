@@ -18,8 +18,6 @@ package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
@@ -44,6 +42,7 @@ import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 import org.ros.message.Service;
@@ -82,18 +81,20 @@ public class Node {
   public static Node createPublic(GraphName nodeName, URI masterUri, String advertiseHostname,
       int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
       URISyntaxException {
-    Node node = new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
-        new AdvertiseAddress(advertiseHostname), BindAddress.createPublic(xmlRpcBindPort),
-        new AdvertiseAddress(advertiseHostname));
+    Node node =
+        new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
+            new AdvertiseAddress(advertiseHostname), BindAddress.createPublic(xmlRpcBindPort),
+            new AdvertiseAddress(advertiseHostname));
     node.start();
     return node;
   }
 
   public static Node createPrivate(GraphName nodeName, URI masterUri, int xmlRpcBindPort,
       int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
-    Node node = new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
-        AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
-        AdvertiseAddress.createPrivate());
+    Node node =
+        new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
+            AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
+            AdvertiseAddress.createPrivate());
     node.start();
     return node;
   }
@@ -107,10 +108,11 @@ public class Node {
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    tcpRosServer = new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager,
-        serviceManager);
-    slaveServer = new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress,
-        masterClient, topicManager, serviceManager, tcpRosServer);
+    tcpRosServer =
+        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
+    slaveServer =
+        new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress, masterClient,
+            topicManager, serviceManager, tcpRosServer);
 
     masterRegistration = new MasterRegistration(masterClient);
     topicManager.setListener(masterRegistration);
@@ -122,10 +124,8 @@ public class Node {
    * is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition
-   *          {@link TopicDefinition} that is subscribed to
-   * @param messageClass
-   *          {@link Message} class for topic
+   * @param topicDefinition {@link TopicDefinition} that is subscribed to
+   * @param messageClass {@link Message} class for topic
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
@@ -143,8 +143,9 @@ public class Node {
       if (topicManager.hasSubscriber(topicName)) {
         subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
       } else {
-        subscriber = Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition,
-            messageClass, executor, deserializer);
+        subscriber =
+            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
+                executor, deserializer);
         createdNewSubscriber = true;
       }
     }
@@ -161,18 +162,14 @@ public class Node {
    * registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition
-   *          {@link TopicDefinition} that is being published
-   * @param messageClass
-   *          {@link Message} class for topic
+   * @param topicDefinition {@link TopicDefinition} that is being published
    * @return a {@link Subscriber} instance
    * @throws RemoteException
    * @throws URISyntaxException
    * @throws IOException
    */
   @SuppressWarnings("unchecked")
-  public <MessageType extends Message> Publisher<MessageType> createPublisher(
-      TopicDefinition topicDefinition, Class<MessageType> messageClass,
+  public <MessageType> Publisher<MessageType> createPublisher(TopicDefinition topicDefinition,
       MessageSerializer<MessageType> serializer) throws IOException, URISyntaxException,
       RemoteException {
     String topicName = topicDefinition.getName().toString();
@@ -199,10 +196,9 @@ public class Node {
    * are cached and reused per service. When a new {@link ServiceServer} is
    * generated, it is registered with the {@link MasterServer}.
    * 
-   * @param serviceDefinition
-   *          the {@link ServiceDefinition} that is being served
-   * @param responseBuilder
-   *          the {@link ServiceResponseBuilder} that is used to build responses
+   * @param serviceDefinition the {@link ServiceDefinition} that is being served
+   * @param responseBuilder the {@link ServiceResponseBuilder} that is used to
+   *        build responses
    * @return a {@link ServiceServer} instance
    * @throws Exception
    */
@@ -217,8 +213,9 @@ public class Node {
       if (serviceManager.hasServiceServer(name)) {
         serviceServer = serviceManager.getServiceServer(name);
       } else {
-        serviceServer = new ServiceServer(serviceDefinition, responseBuilder,
-            tcpRosServer.getAdvertiseAddress());
+        serviceServer =
+            new ServiceServer(serviceDefinition, responseBuilder,
+                tcpRosServer.getAdvertiseAddress());
         createdNewService = true;
       }
     }
@@ -235,8 +232,7 @@ public class Node {
    * created, it is connected to the {@link ServiceServer}.
    * 
    * @param <ResponseMessageType>
-   * @param serviceIdentifier
-   *          the {@link ServiceIdentifier} of the server
+   * @param serviceIdentifier the {@link ServiceIdentifier} of the server
    * @return a {@link ServiceClient} instance
    */
   @SuppressWarnings("unchecked")
@@ -307,11 +303,11 @@ public class Node {
       throws RemoteException, XmlRpcTimeoutException {
     Response<URI> response;
     try {
-      response = masterClient
-          .lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
+      response =
+          masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
       if (response.getStatusCode() == StatusCode.SUCCESS) {
-        ServiceDefinition serviceDefinition = new ServiceDefinition(serviceName,
-            serviceType.getDataType(), serviceType.getMD5Sum());
+        ServiceDefinition serviceDefinition =
+            new ServiceDefinition(serviceName, serviceType.getDataType(), serviceType.getMD5Sum());
         return new ServiceIdentifier(response.getResult(), serviceDefinition);
       } else {
         return null;
@@ -320,8 +316,8 @@ public class Node {
       // TODO(kwc) what should be the error policy here be?
       log.error("master returned invalid URI for lookupService", e);
       throw new RemoteException(StatusCode.FAILURE, "master returned invalid URI");
-    } catch (UndeclaredThrowableException e) { 
-      //TODO: add more general IO error
+    } catch (UndeclaredThrowableException e) {
+      // TODO: add more general IO error
       log.error("undeclared throwable leaked through API", e);
       throw new XmlRpcTimeoutException(0, "unable to commnicate with master");
     }

@@ -62,7 +62,7 @@ public class TopicIntegrationTest {
     Node publisherNode =
         Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0, 0);
     Publisher<org.ros.message.std_msgs.String> publisher =
-        publisherNode.createPublisher(topicDefinition, org.ros.message.std_msgs.String.class,
+        publisherNode.createPublisher(topicDefinition,
             new MessageSerializer<org.ros.message.std_msgs.String>());
 
     Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);

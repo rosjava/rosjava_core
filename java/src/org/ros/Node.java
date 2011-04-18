@@ -66,7 +66,8 @@ public class Node implements Namespace {
   private final MessageSerializerFactory<Message> messageSerializerFactory;
 
   private final class PregeneratedCodeMessageSerializerFactory
-      implements MessageSerializerFactory<Message> {
+      implements
+        MessageSerializerFactory<Message> {
     @Override
     public <MessageType extends Message> org.ros.MessageSerializer<MessageType> create() {
       return new MessageSerializer<MessageType>();
@@ -135,8 +136,7 @@ public class Node implements Namespace {
           new TopicDefinition(new GraphName(resolvedTopicName), MessageDefinition.create(
               message.getDataType(), message.getMessageDefinition()));
       org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
-          node.createPublisher(topicDefinition, messageClass,
-              messageSerializerFactory.<MessageType>create());
+          node.createPublisher(topicDefinition, messageSerializerFactory.<MessageType>create());
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
     } catch (Exception e) {
       throw new RosInitException(e);
