@@ -31,15 +31,12 @@ import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.MessageDeserializer;
 import org.ros.ServiceResponseListener;
 import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
@@ -47,9 +44,7 @@ import org.ros.message.Message;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Executors;
@@ -62,8 +57,8 @@ public class ServiceClient<ResponseMessageType> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
 
-  private final MessageDeserializer<ResponseMessageType> deserializer;
-  private final Queue<ServiceResponseListener<ResponseMessageType>> messageListeners;
+  final MessageDeserializer<ResponseMessageType> deserializer;
+  final Queue<ServiceResponseListener<ResponseMessageType>> responseListeners;
   private final Map<String, String> header;
   private final ChannelFactory channelFactory;
   private final ClientBootstrap bootstrap;
@@ -84,28 +79,8 @@ public class ServiceClient<ResponseMessageType> {
       pipeline.remove(TcpClientPipelineFactory.LENGTH_FIELD_BASED_FRAME_DECODER);
       pipeline.remove(this);
       pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<ResponseMessageType>());
-      pipeline.addLast("ResponseHandler", new ResponseHandler());
-    }
-  }
-
-  private final class ResponseHandler extends SimpleChannelHandler {
-    @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-      ServiceResponseListener<ResponseMessageType> listener = messageListeners.poll();
-      Preconditions.checkNotNull(listener);
-      ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
-      ByteBuffer buffer = response.getMessage().toByteBuffer();
-      if (response.getErrorCode() == 1) {
-        listener.onSuccess(deserializer.<ResponseMessageType>deserialize(buffer));
-      } else {
-        String message = Charset.forName("US-ASCII").decode(buffer).toString();
-        listener.onFailure(new RemoteException(StatusCode.ERROR, message));
-      }
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-      throw new RuntimeException(e.getCause());
+      pipeline.addLast("ResponseHandler", new ServiceResponseHandler<ResponseMessageType>(
+          responseListeners, deserializer));
     }
   }
 
@@ -117,7 +92,7 @@ public class ServiceClient<ResponseMessageType> {
   private ServiceClient(GraphName nodeName, ServiceIdentifier serviceIdentifier,
       MessageDeserializer<ResponseMessageType> deserializer) {
     this.deserializer = deserializer;
-    messageListeners = Lists.newLinkedList();
+    responseListeners = Lists.newLinkedList();
     header =
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
@@ -182,7 +157,7 @@ public class ServiceClient<ResponseMessageType> {
     // TODO(damonkohler): Make use of sequence number.
     ChannelBuffer buffer =
         ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, message.serialize(0));
-    messageListeners.add(listener);
+    responseListeners.add(listener);
     channel.write(buffer);
   }
 
