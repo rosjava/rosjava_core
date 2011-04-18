@@ -22,7 +22,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -35,24 +34,24 @@ class ServiceRequestHandler extends SimpleChannelHandler {
   }
 
   @Override
-  public void messageReceived(ChannelHandlerContext context, MessageEvent event) {
-    ChannelBuffer requestBuffer = (ChannelBuffer) event.getMessage();
+  public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
+    ChannelBuffer requestBuffer = (ChannelBuffer) e.getMessage();
     ServiceServerResponse response = new ServiceServerResponse();
     ChannelBuffer responseBuffer;
     try {
       responseBuffer =
           ChannelBuffers.wrappedBuffer(responseBuilder.handleRequest(requestBuffer.toByteBuffer()));
-    } catch (ServiceException e) {
+    } catch (ServiceException ex) {
       response.setErrorCode(0);
-      response.setMessageLength(e.getMessage().length());
-      response.setMessage(e.getMessageAsChannelBuffer());
-      context.getChannel().write(response);
+      response.setMessageLength(ex.getMessage().length());
+      response.setMessage(ex.getMessageAsChannelBuffer());
+      ctx.getChannel().write(response);
       return;
     }
     response.setErrorCode(1);
     response.setMessageLength(responseBuffer.readableBytes());
     response.setMessage(responseBuffer);
-    context.getChannel().write(response);
+    ctx.getChannel().write(response);
   }
 
 }
