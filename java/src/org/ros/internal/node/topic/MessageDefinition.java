@@ -20,8 +20,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 import org.ros.internal.transport.ConnectionHeaderFields;
-import org.ros.message.Message;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 /**
@@ -29,27 +32,55 @@ import java.util.Map;
  */
 public class MessageDefinition {
 
-  private final String type;
-  private final String md5Checksum;
+  private static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a',
+      'b', 'c', 'd', 'e', 'f'};
 
-  public static MessageDefinition createFromMessage(Message message) {
-    return new MessageDefinition(message.getDataType(), message.getMD5Sum());
+  private static final MessageDigest digest;
+
+  static {
+    try {
+      digest = MessageDigest.getInstance("MD5");
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException(e);
+    }
   }
+
+  private final String type;
+  private final String definition;
+  private final String md5Checksum;
 
   public static MessageDefinition createFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TYPE));
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.MD5_CHECKSUM));
-    return new MessageDefinition(header.get(ConnectionHeaderFields.TYPE),
+    return new MessageDefinition(header.get(ConnectionHeaderFields.TYPE), null,
         header.get(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 
-  public static MessageDefinition createMessageDefinition(String type) {
-    return new MessageDefinition(type, null);
+  public static MessageDefinition createFromTypeName(String type) {
+    return new MessageDefinition(type, null, null);
   }
 
-  private MessageDefinition(String type, String md5Checksum) {
+  private static String md5(String definition) {
+    ByteBuffer input = Charset.forName("US-ASCII").encode(definition);
+    digest.update(input);
+    byte[] buffer = digest.digest();
+    int length = buffer.length;
+    char[] md5 = new char[length << 1];
+    for (int i = 0, j = 0; i < length; i++) {
+      md5[j++] = HEX_DIGITS[(0xF0 & buffer[i]) >>> 4];
+      md5[j++] = HEX_DIGITS[0x0F & buffer[i]];
+    }
+    return new String(md5);
+  }
+
+  public static MessageDefinition create(String type, String definition) {
+    return new MessageDefinition(type, definition, md5(definition));
+  }
+
+  private MessageDefinition(String type, String definition, String md5Checksum) {
     Preconditions.checkNotNull(type);
     this.type = type;
+    this.definition = definition;
     this.md5Checksum = md5Checksum;
   }
 
@@ -57,10 +88,22 @@ public class MessageDefinition {
     return type;
   }
 
+  public String getDefinition() {
+    Preconditions.checkNotNull(definition);
+    return definition;
+  }
+
+  public String getMd5Checksum() {
+    Preconditions.checkNotNull(md5Checksum);
+    return md5Checksum;
+  }
+
   public Map<String, String> toHeader() {
     Preconditions.checkNotNull(md5Checksum);
-    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.TYPE, type)
-        .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum).build();
+    return new ImmutableMap.Builder<String, String>()
+        .put(ConnectionHeaderFields.TYPE, type)
+        .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum)
+        .build();
   }
 
   @Override

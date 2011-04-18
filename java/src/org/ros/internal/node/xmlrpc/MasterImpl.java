@@ -76,7 +76,7 @@ public class MasterImpl implements Master {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName(topic),
-            MessageDefinition.createMessageDefinition(topicType));
+            MessageDefinition.createFromTypeName(topicType));
     PublisherIdentifier description = new PublisherIdentifier(slaveIdentifier, topicDefinition);
     List<SubscriberIdentifier> subscribers = master.registerPublisher(callerId, description);
     List<String> urls = Lists.newArrayList();
@@ -104,7 +104,7 @@ public class MasterImpl implements Master {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName(topic),
-            MessageDefinition.createMessageDefinition(topicType));
+            MessageDefinition.createFromTypeName(topicType));
     List<PublisherIdentifier> publishers =
         master.registerSubscriber(new SubscriberIdentifier(slaveIdentifier, topicDefinition));
     List<String> urls = Lists.newArrayList();

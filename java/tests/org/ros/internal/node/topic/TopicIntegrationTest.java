@@ -53,20 +53,22 @@ public class TopicIntegrationTest {
   @Test
   public void testOnePublisherToOneSubscriber() throws URISyntaxException, RemoteException,
       IOException, InterruptedException, XmlRpcException {
-    TopicDefinition topicDefinition = new TopicDefinition(new GraphName("/foo"),
-        MessageDefinition.createFromMessage(new org.ros.message.std_msgs.String()));
+    TopicDefinition topicDefinition =
+        new TopicDefinition(new GraphName("/foo"), MessageDefinition.create(
+            org.ros.message.std_msgs.String.__s_getDataType(),
+            org.ros.message.std_msgs.String.__s_getMessageDefinition()));
 
-    Node publisherNode = Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0,
-        0);
-    Publisher<org.ros.message.std_msgs.String> publisher = publisherNode.createPublisher(
-        topicDefinition, org.ros.message.std_msgs.String.class,
-        new MessageSerializer<org.ros.message.std_msgs.String>());
+    Node publisherNode =
+        Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0, 0);
+    Publisher<org.ros.message.std_msgs.String> publisher =
+        publisherNode.createPublisher(topicDefinition, org.ros.message.std_msgs.String.class,
+            new MessageSerializer<org.ros.message.std_msgs.String>());
 
     Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
-    Subscriber<org.ros.message.std_msgs.String> subscriber = publisherNode.createSubscriber(
-        topicDefinition, org.ros.message.std_msgs.String.class,
-        new MessageDeserializer<org.ros.message.std_msgs.String>(
-            org.ros.message.std_msgs.String.class));
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        publisherNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
 
     final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
     helloMessage.data = "Hello, ROS!";

@@ -58,7 +58,7 @@ public class MasterImplTest {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName("/topic"),
-            MessageDefinition.createMessageDefinition("msg"));
+            MessageDefinition.createFromTypeName("msg"));
     SubscriberIdentifier subscriberDescription =
         new SubscriberIdentifier(slaveIdentifier, topicDefinition);
     when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
@@ -88,7 +88,7 @@ public class MasterImplTest {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName("/topic"),
-            MessageDefinition.createMessageDefinition("msg"));
+            MessageDefinition.createFromTypeName("msg"));
     PublisherIdentifier publisherDescription =
         new PublisherIdentifier(slaveIdentifier, topicDefinition);
     when(mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any())).thenReturn(
