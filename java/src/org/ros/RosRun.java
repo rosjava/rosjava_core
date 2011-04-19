@@ -16,10 +16,10 @@
 
 package org.ros;
 
+import com.google.common.collect.Lists;
+
 import org.ros.exceptions.RosInitException;
 import org.ros.exceptions.RosNameException;
-
-import java.util.Arrays;
 
 /**
  * This is a rosrun-compatible loader for rosjava-based nodes.
@@ -44,18 +44,13 @@ public class RosRun {
       printUsage();
       System.exit(1);
     }
-    
-    String nodeClassName = argv[0];
-    String[] nodeArgs = new String[argv.length - 1];
 
-    // TODO(damonkohler): Use commons logging?
-    System.out.println("Loading node class: " + nodeClassName);
-    System.arraycopy(argv, 1, nodeArgs, 0, nodeArgs.length);
-
-    RosLoader rosLoader = new CommandLineLoader(nodeArgs);
+    CommandLineLoader loader = new CommandLineLoader(Lists.newArrayList(argv));
+    String nodeClassName = loader.getNodeClassName();
+    System.out.println("Loading node class: " + loader.getNodeClassName());
     NodeContext nodeContext = null;
     try {
-      nodeContext = rosLoader.createContext();
+      nodeContext = loader.createContext();
     } catch (RosInitException e1) {
       e1.printStackTrace();
       System.exit(2);
@@ -63,7 +58,7 @@ public class RosRun {
 
     NodeMain nodeMain = null;
     try {
-      nodeMain = rosLoader.loadClass(nodeClassName);
+      nodeMain = loader.loadClass(nodeClassName);
     } catch (ClassNotFoundException e) {
       System.err.println("Unable to locate node: " + nodeClassName);
       System.exit(3);
@@ -78,7 +73,7 @@ public class RosRun {
     }
 
     try {
-      nodeMain.run(Arrays.asList(argv), nodeContext);
+      nodeMain.run(loader.getArgv(), nodeContext);
     } catch (RosInitException e) {
       e.printStackTrace();
       System.exit(6);

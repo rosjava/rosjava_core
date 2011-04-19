@@ -16,6 +16,9 @@
 
 package org.ros;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+
 import org.ros.exceptions.RosInitException;
 import org.ros.internal.loader.CommandLine;
 import org.ros.internal.loader.EnvironmentVariables;
@@ -28,8 +31,9 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,8 +44,9 @@ import java.util.Map;
  */
 public class CommandLineLoader extends RosLoader {
 
-  private final String[] cleanCommandLineArgs;
-  private final String[] commandLineArgs;
+  private final List<String> argv;
+  private final List<String> nodeArguments;
+  private final List<String> nodeRemappings;
   private final Map<String, String> environment;
 
   /**
@@ -49,30 +54,36 @@ public class CommandLineLoader extends RosLoader {
    * Environment variables will be pulled from default {@link System}
    * environment variables.
    * 
-   * @param commandLineArgs command-line arguments
+   * @param argv command-line arguments
    */
-  public CommandLineLoader(String[] commandLineArgs) {
-    this(commandLineArgs, System.getenv());
+  public CommandLineLoader(List<String> argv) {
+    this(argv, System.getenv());
   }
 
   /**
    * Create new {@link CommandLineLoader} with specified command-line arguments
    * and environment variables.
    * 
-   * @param commandLineArgs command-line arguments
+   * @param argv command-line arguments
    * @param env environment variables
    */
-  public CommandLineLoader(String[] commandLineArgs, Map<String, String> env) {
+  public CommandLineLoader(List<String> argv, Map<String, String> env) {
+    Preconditions.checkArgument(argv.size() > 0);
+    this.argv = argv;
     this.environment = env;
-    this.commandLineArgs = commandLineArgs;
-
-    LinkedList<String> clean = new LinkedList<String>();
-    for (String x : commandLineArgs) {
-      if (!x.contains(":=")) {
-        clean.add(x);
+    nodeArguments = Lists.newArrayList();
+    nodeRemappings = Lists.newArrayList();
+    for (String argument : argv.subList(1, argv.size())) {
+      if (argument.contains(":=")) {
+        nodeRemappings.add(argument);
+      } else {
+        nodeArguments.add(argument);
       }
     }
-    cleanCommandLineArgs = clean.toArray(new String[0]);
+  }
+
+  public String getNodeClassName() {
+    return argv.get(0);
   }
 
   /**
@@ -81,9 +92,9 @@ public class CommandLineLoader extends RosLoader {
    */
   @Override
   public NodeContext createContext() throws RosInitException {
-    Map<String, String> specialRemappings = getSpecialRemappings(commandLineArgs);
+    Map<String, String> specialRemappings = getSpecialRemappings();
     String namespace = getNamespace(specialRemappings, environment);
-    HashMap<GraphName, GraphName> remappings = parseRemappings(commandLineArgs);
+    Map<GraphName, GraphName> remappings = parseRemappings();
     NameResolver resolver = new NameResolver(namespace, remappings);
 
     NodeContext context = new NodeContext();
@@ -111,24 +122,25 @@ public class CommandLineLoader extends RosLoader {
   /**
    * @return command-line arguments without ROS remapping arguments
    */
-  public String[] getCleanCommandLineArgs() {
-    return cleanCommandLineArgs;
+  public List<String> getNodeArguments() {
+    return Collections.unmodifiableList(nodeArguments);
   }
 
   /**
-   * @return the original command-line arguments
+   * @return the original command-line node arguments
    */
-  public String[] getCommandLineArgs() {
-    return commandLineArgs;
+  public List<String> getArgv() {
+    return Collections.unmodifiableList(argv);
   }
 
-  private Map<String, String> getSpecialRemappings(String[] commandLineArgs) {
+  private Map<String, String> getSpecialRemappings() {
     HashMap<String, String> specialRemappings = new HashMap<String, String>();
-    for (String arg : commandLineArgs) {
-      if (arg.contains(":=") && arg.startsWith("__")) {
-        String[] remap = arg.split(":=");
+    for (String remapping : nodeRemappings) {
+      Preconditions.checkState(remapping.contains(":="));
+      if (remapping.startsWith("__")) {
+        String[] remap = remapping.split(":=");
         if (remap.length > 2) {
-          throw new IllegalArgumentException("invalid command-line args");
+          throw new IllegalArgumentException("Invalid remapping argument: " + remapping);
         }
         specialRemappings.put(remap[0], remap[1]);
       }
@@ -164,7 +176,6 @@ public class CommandLineLoader extends RosLoader {
    * 
    * @param specialRemappings
    * @param env
-   * @return
    */
   private String getNamespace(Map<String, String> specialRemappings, Map<String, String> env) {
 
@@ -213,22 +224,24 @@ public class CommandLineLoader extends RosLoader {
     }
   }
 
-  private String[] getRosPackagePath(Map<String, String> specialRemappings, Map<String, String> env) {
+  private List<String> getRosPackagePath(Map<String, String> specialRemappings,
+      Map<String, String> env) {
     if (env.containsKey(EnvironmentVariables.ROS_PACKAGE_PATH)) {
       String path = env.get(EnvironmentVariables.ROS_PACKAGE_PATH);
-      return path.split(File.pathSeparator);
+      return Lists.newArrayList(path.split(File.pathSeparator));
     } else {
-      return new String[] {};
+      return Lists.newArrayList();
     }
   }
 
-  private HashMap<GraphName, GraphName> parseRemappings(String[] commandLineArgs) {
+  private HashMap<GraphName, GraphName> parseRemappings() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
-    for (String arg : commandLineArgs) {
-      if (arg.contains(":=") && !arg.startsWith("__")) {
-        String[] remap = arg.split(":=");
+    for (String remapping : nodeRemappings) {
+      Preconditions.checkState(remapping.contains(":="));
+      if (!remapping.startsWith("__")) {
+        String[] remap = remapping.split(":=");
         if (remap.length > 2) {
-          throw new IllegalArgumentException("invalid command-line args");
+          throw new IllegalArgumentException("Invalid remapping argument: " + remapping);
         }
         remappings.put(new GraphName(remap[0]), new GraphName(remap[1]));
       }

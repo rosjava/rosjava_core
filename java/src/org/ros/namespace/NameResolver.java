@@ -21,7 +21,8 @@ import com.google.common.base.Preconditions;
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -30,10 +31,10 @@ import java.util.HashMap;
 public class NameResolver {
 
   private final String namespace;
-  private HashMap<GraphName, GraphName> remappings;
+  private final Map<GraphName, GraphName> remappings;
 
-  public NameResolver(String namespace, HashMap<GraphName, GraphName> remappings) {
-    this.remappings = remappings;
+  public NameResolver(String namespace, Map<GraphName, GraphName> remappings) {
+    this.remappings = Collections.unmodifiableMap(remappings);
     this.namespace = GraphName.canonicalizeName(namespace);
   }
 
@@ -111,7 +112,7 @@ public class NameResolver {
     return rmname;
   }
 
-  public HashMap<GraphName, GraphName> getRemappings() {
+  public Map<GraphName, GraphName> getRemappings() {
     return remappings;
   }
 
@@ -124,9 +125,9 @@ public class NameResolver {
   }
 
   /**
-   * Construct a new {@link NameResolver} with a copy of this resolver's
-   * remappings. The namespace of the new resolver will be the value of the name
-   * parameter resolved in this namespace.
+   * Construct a new {@link NameResolver} with the same remappings as this
+   * resolver has. The namespace of the new resolver will be the value of the
+   * name parameter resolved in this namespace.
    * 
    * @param name
    * @return {@link NameResolver} relative to the current namespace.
@@ -134,6 +135,6 @@ public class NameResolver {
   @SuppressWarnings("unchecked")
   public NameResolver createResolver(String name) {
     String resolverNamespace = resolveName(name);
-    return new NameResolver(resolverNamespace, (HashMap<GraphName, GraphName>) remappings.clone());
+    return new NameResolver(resolverNamespace, remappings);
   }
 }

@@ -64,7 +64,7 @@ public class NodeTest {
     // addresses.
     Map<String, String> env = new HashMap<String, String>();
     env.put("ROS_MASTER_URI", masterUri.toString());
-    CommandLineLoader loader = new CommandLineLoader(new String[] {}, env);
+    CommandLineLoader loader = new CommandLineLoader(Lists.<String>newArrayList("Foo"), env);
     nodeContext = loader.createContext();
   }
 
@@ -117,7 +117,7 @@ public class NodeTest {
     // addresses.
     Map<String, String> env = new HashMap<String, String>();
     env.put("ROS_MASTER_URI", masterUri.toString());
-    CommandLineLoader loader = new CommandLineLoader(new String[] {}, env);
+    CommandLineLoader loader = new CommandLineLoader(Lists.<String>newArrayList("Foo"), env);
     NodeContext nodeContext = loader.createContext();
 
     Node node = new Node("test_addresses", nodeContext);

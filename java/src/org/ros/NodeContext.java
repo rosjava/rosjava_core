@@ -18,6 +18,7 @@ package org.ros;
 import org.ros.namespace.NameResolver;
 
 import java.net.URI;
+import java.util.List;
 
 /**
  * Stores contextual information about a ROS node, including common ROS
@@ -27,11 +28,12 @@ import java.net.URI;
  * @author kwc@willowgarage.com (Ken Conley)
  */
 public class NodeContext {
+
   private NameResolver resolver;
   private URI rosMasterUri;
   private String hostName;
   private String rosRoot;
-  private String[] rosPackagePath;
+  private List<String> rosPackagePath;
   private int tcpRosPort;
   private int xmlRpcPort;
   private String nodeNameOverride;
@@ -73,15 +75,15 @@ public class NodeContext {
     this.rosRoot = rosRoot;
   }
 
-  public void setRosRoot(String[] rosPackagePath) {
+  public void setRosRoot(List<String> rosPackagePath) {
     this.rosPackagePath = rosPackagePath;
   }
 
-  public String[] getRosPackagePath() {
+  public List<String> getRosPackagePath() {
     return rosPackagePath;
   }
 
-  public void setRosPackagePath(String[] rosPackagePath) {
+  public void setRosPackagePath(List<String> rosPackagePath) {
     this.rosPackagePath = rosPackagePath;
   }
 

@@ -13,11 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.namespace;
 
+import org.ros.Node;
 import org.ros.internal.namespace.GraphName;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Resolver for {@link Node} names. Node namespace must handle the ~name syntax
@@ -34,7 +36,7 @@ public class NodeNameResolver extends NameResolver {
    * @param remappings
    */
   private NodeNameResolver(String defaultNamespace, String privateNamespace,
-      HashMap<GraphName, GraphName> remappings) {
+      Map<GraphName, GraphName> remappings) {
     super(defaultNamespace, remappings);
     this.privateNamespace = privateNamespace;
   }
