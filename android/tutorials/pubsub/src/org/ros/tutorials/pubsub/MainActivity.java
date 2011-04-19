@@ -16,18 +16,38 @@
 
 package org.ros.tutorials.pubsub;
 
+import com.google.common.collect.Lists;
+
 import android.app.Activity;
 import android.os.Bundle;
+
+import org.ros.NodeRunner;
+import org.ros.RosCore;
+import org.ros.exceptions.RosInitException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MainActivity extends Activity {
 
+  private final NodeRunner nodeRunner;
+
+  public MainActivity() {
+    super();
+    nodeRunner = NodeRunner.createDefault();
+  }
+
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
+    try {
+      nodeRunner.run(new RosCore(), Lists.newArrayList("RosCore"));
+      nodeRunner.run(new Talker(), Lists.newArrayList("Talker"));
+      nodeRunner.run(new Listener(), Lists.newArrayList("Listener"));
+    } catch (RosInitException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

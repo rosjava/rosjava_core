@@ -19,31 +19,15 @@ package org.ros.internal.message;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MessageDefinition {
-
-  private static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a',
-      'b', 'c', 'd', 'e', 'f'};
-
-  private static final MessageDigest digest;
-
-  static {
-    try {
-      digest = MessageDigest.getInstance("MD5");
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
-    }
-  }
 
   private final String type;
   private final String definition;
@@ -60,21 +44,8 @@ public class MessageDefinition {
     return new MessageDefinition(type, null, null);
   }
 
-  private static String md5(String definition) {
-    ByteBuffer input = Charset.forName("US-ASCII").encode(definition);
-    digest.update(input);
-    byte[] buffer = digest.digest();
-    int length = buffer.length;
-    char[] md5 = new char[length << 1];
-    for (int i = 0, j = 0; i < length; i++) {
-      md5[j++] = HEX_DIGITS[(0xF0 & buffer[i]) >>> 4];
-      md5[j++] = HEX_DIGITS[0x0F & buffer[i]];
-    }
-    return new String(md5);
-  }
-
   public static MessageDefinition create(String type, String definition) {
-    return new MessageDefinition(type, definition, md5(definition));
+    return new MessageDefinition(type, definition, DigestUtils.md5Hex(definition));
   }
 
   private MessageDefinition(String type, String definition, String md5Checksum) {
