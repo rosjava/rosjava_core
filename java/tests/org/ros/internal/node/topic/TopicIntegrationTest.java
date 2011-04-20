@@ -57,7 +57,8 @@ public class TopicIntegrationTest {
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName("/foo"), MessageDefinition.create(
             org.ros.message.std_msgs.String.__s_getDataType(),
-            org.ros.message.std_msgs.String.__s_getMessageDefinition()));
+            org.ros.message.std_msgs.String.__s_getMessageDefinition(),
+            org.ros.message.std_msgs.String.__s_getMD5Sum()));
 
     Node publisherNode =
         Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0, 0);

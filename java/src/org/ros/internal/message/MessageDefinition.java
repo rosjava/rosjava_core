@@ -19,7 +19,6 @@ package org.ros.internal.message;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
 import java.util.Map;
@@ -44,8 +43,10 @@ public class MessageDefinition {
     return new MessageDefinition(type, null, null);
   }
 
-  public static MessageDefinition create(String type, String definition) {
-    return new MessageDefinition(type, definition, DigestUtils.md5Hex(definition));
+  // TODO(damonkohler): Change this factory method to calculate the MD5 from the
+  // definition.
+  public static MessageDefinition create(String type, String definition, String md5Checksum) {
+    return new MessageDefinition(type, definition, md5Checksum);
   }
 
   private MessageDefinition(String type, String definition, String md5Checksum) {

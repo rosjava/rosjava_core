@@ -27,11 +27,11 @@ public class MessageDefinitionTest {
 
   @Test
   public void testMd5Checksum() {
-    MessageDefinition definition = MessageDefinition.create("foo", "foo");
-    assertEquals("acbd18db4cc2f85cedef654fccc4a4d8", definition.getMd5Checksum());
-    org.ros.message.std_msgs.String message = new org.ros.message.std_msgs.String();
-    definition = MessageDefinition.create(message.getDataType(), message.getMessageDefinition());
-    assertEquals(message.getMD5Sum(), message.getMD5Sum());
+    org.ros.message.rosgraph_msgs.Log message = new org.ros.message.rosgraph_msgs.Log();
+    MessageDefinition definition =
+        MessageDefinition.create(message.getDataType(), message.getMessageDefinition(),
+            message.getMD5Sum());
+    assertEquals(message.getMD5Sum(), definition.getMd5Checksum());
   }
 
 }
