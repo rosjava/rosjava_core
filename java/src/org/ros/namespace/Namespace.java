@@ -16,8 +16,6 @@
 
 package org.ros.namespace;
 
-import java.net.URI;
-
 import org.ros.MessageListener;
 import org.ros.ParameterClient;
 import org.ros.Publisher;
@@ -30,6 +28,8 @@ import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.message.Message;
+
+import java.net.URI;
 
 /**
  * Interface for the ROS namespace specification.
@@ -70,7 +70,7 @@ public interface Namespace {
    *         been initialized or other wackyness. TODO specify exceptions that
    *         might be thrown here.
    */
-  public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topicName,
+  public <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
       MessageListener<MessageType> messageCallback, Class<MessageType> messageClass) throws RosInitException;
 
   /**

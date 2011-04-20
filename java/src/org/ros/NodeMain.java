@@ -16,8 +16,6 @@
 
 package org.ros;
 
-import java.util.List;
-
 /**
  * Defines a {@link Node} entry point.
  * 
@@ -26,11 +24,11 @@ import java.util.List;
 public interface NodeMain {
 
   /**
-   * Called to start your {@link Node}.
+   * {@link Node} entry point.
    * 
-   * @param argv
-   * @param nodeContext the {@link NodeContext} that will be passed to the {@link Node}
+   * @param nodeContext the {@link NodeContext} that will be passed to the
+   *        {@link Node}
    */
-  public void run(List<String> argv, NodeContext nodeContext) throws Exception;
+  public void run(NodeContext nodeContext) throws Exception;
 
 }

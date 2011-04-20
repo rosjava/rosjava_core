@@ -120,7 +120,7 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
       Namespace appNamespace = getAppNamespace(node);
       imageView = (SensorImageView) findViewById(R.id.image);
       Log.i("Teleop", "init imageView");
-      imageView.init(node, appNamespace.resolveName("camera/rgb/image_color/compressed"));
+      imageView.start(node, appNamespace.resolveName("camera/rgb/image_color/compressed"));
       imageView.post(new Runnable() {
 
         @Override

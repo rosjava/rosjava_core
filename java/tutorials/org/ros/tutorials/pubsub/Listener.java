@@ -23,8 +23,6 @@ import org.ros.NodeContext;
 import org.ros.NodeMain;
 import org.ros.Subscriber;
 
-import java.util.List;
-
 /**
  * This is a simple rosjava {@link Subscriber} {@link Node}. It assumes an
  * external roscore is already running.
@@ -34,7 +32,7 @@ import java.util.List;
 public class Listener implements NodeMain {
 
   @Override
-  public void run(List<String> argv, NodeContext context) {
+  public void run(NodeContext context) {
     Node node = null;
     try {
       node = new Node("listener", context);

@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package org.ros.tutorials.pubsub;
+package ros.android.activity;
 
 public final class R {
     public static final class attr {

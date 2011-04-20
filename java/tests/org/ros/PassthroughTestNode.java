@@ -18,8 +18,6 @@ package org.ros;
 
 import org.ros.exceptions.RosInitException;
 
-import java.util.List;
-
 /**
  * This node is used in rostest end-to-end integration tests with other client
  * libraries.
@@ -29,7 +27,7 @@ import java.util.List;
 public class PassthroughTestNode implements NodeMain {
 
   @Override
-  public void run(List<String> argv, NodeContext nodeContext) throws RosInitException {
+  public void run(NodeContext nodeContext) throws RosInitException {
     final Node node = new Node("test_node", nodeContext);
 
     // The goal of the passthrough node is simply to retransmit the messages

@@ -144,12 +144,12 @@ public class Node implements Namespace {
   }
 
   @Override
-  public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topicName,
+  public <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
       final MessageListener<MessageType> callback, Class<MessageType> messageClass)
       throws RosInitException {
     try {
       String resolvedTopicName = resolveName(topicName);
-      Message message = messageClass.newInstance();
+      Message message = (Message) messageClass.newInstance();
       TopicDefinition topicDefinition =
           new TopicDefinition(new GraphName(resolvedTopicName), MessageDefinition.create(
               message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));

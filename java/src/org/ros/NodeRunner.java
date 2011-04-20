@@ -37,6 +37,7 @@ public class NodeRunner {
     this.executor = executor;
   }
 
+  // TODO(damonkohler): The CommandLineLoader is not appropriate here.
   public void run(final NodeMain node, final List<String> argv) throws RosInitException {
     final CommandLineLoader loader = new CommandLineLoader(argv);
     final NodeContext nodeContext = loader.createContext();
@@ -44,7 +45,7 @@ public class NodeRunner {
       @Override
       public void run() {
         try {
-          node.run(loader.getArgv(), nodeContext);
+          node.run(nodeContext);
         } catch (Exception e) {
           throw new RuntimeException(e);
         }

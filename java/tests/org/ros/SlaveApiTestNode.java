@@ -19,8 +19,6 @@ package org.ros;
 import org.ros.exceptions.RosInitException;
 import org.ros.message.std_msgs.Int64;
 
-import java.util.List;
-
 /**
  * This node is used to test the slave API externally using rostest.
  * 
@@ -29,7 +27,7 @@ import java.util.List;
 public class SlaveApiTestNode implements NodeMain {
 
   @Override
-  public void run(List<String> argv, NodeContext nodeContext) throws RosInitException {
+  public void run(NodeContext nodeContext) throws RosInitException {
     final Node node = new Node("test_node", nodeContext);
 
     // Basic chatter in/out test.

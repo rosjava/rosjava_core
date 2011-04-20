@@ -14,27 +14,13 @@
  * the License.
  */
 
-package org.ros;
-
-import org.ros.internal.node.address.AdvertiseAddress;
-import org.ros.internal.node.address.BindAddress;
-import org.ros.internal.node.server.MasterServer;
+package ros.android.views;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosCore implements NodeMain {
+public interface MessageCallable<ReturnType, MessageType> {
 
-  private final MasterServer masterServer;
-
-  public RosCore() {
-    masterServer =
-        new MasterServer(BindAddress.createPrivate(11311), AdvertiseAddress.createPrivate());
-  }
-
-  @Override
-  public void run(NodeContext nodeContext) throws Exception {
-    masterServer.start();
-  }
+  ReturnType call(MessageType message);
 
 }

@@ -21,12 +21,10 @@ import org.ros.message.geometry_msgs.Point;
 import org.ros.message.geometry_msgs.PoseStamped;
 import org.ros.message.geometry_msgs.Quaternion;
 
-import java.util.List;
-
 public class SampleNode implements NodeMain {
 
   @Override
-  public void run(List<String> argv, NodeContext nodeContext) throws RosInitException {
+  public void run(NodeContext nodeContext) throws RosInitException {
     Node node = new Node("sample_rosjava_node", nodeContext);
    
     Publisher<PoseStamped> pub_pose = node.createPublisher("pose", PoseStamped.class);

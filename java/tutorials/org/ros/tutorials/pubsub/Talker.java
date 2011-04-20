@@ -21,8 +21,6 @@ import org.ros.NodeContext;
 import org.ros.NodeMain;
 import org.ros.Publisher;
 
-import java.util.List;
-
 /**
  * This is a simple rosjava {@link Publisher} {@link Node}. It assumes an
  * external roscore is already running.
@@ -33,14 +31,12 @@ import java.util.List;
 public class Talker implements NodeMain {
 
   @Override
-  public void run(List<String> argv, NodeContext context) {
+  public void run(NodeContext context) {
     Node node = null;
     try {
       node = new Node("talker", context);
-      
       Publisher<org.ros.message.std_msgs.String> publisher =
           node.createPublisher("chatter", org.ros.message.std_msgs.String.class);
-
       int seq = 0;
       while (true) {
         org.ros.message.std_msgs.String str = new org.ros.message.std_msgs.String();

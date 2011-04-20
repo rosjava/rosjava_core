@@ -16,17 +16,20 @@
 
 package org.ros.message;
 
+import com.google.common.base.Preconditions;
+
 import java.nio.ByteBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageDeserializer<MessageType extends Message>
+public class MessageDeserializer<MessageType>
     implements org.ros.MessageDeserializer<MessageType> {
 
   private final Class<MessageType> messageClass;
 
   public MessageDeserializer(Class<MessageType> messageClass) {
+    Preconditions.checkArgument(Message.class.isAssignableFrom(messageClass));
     this.messageClass = messageClass;
   }
 
@@ -38,7 +41,7 @@ public class MessageDeserializer<MessageType extends Message>
     } catch (Exception e) {
       throw new RuntimeException();
     }
-    message.deserialize(buffer);
+    ((Message) message).deserialize(buffer);
     return message;
   }
 

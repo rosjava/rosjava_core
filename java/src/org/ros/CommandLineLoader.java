@@ -86,6 +86,8 @@ public class CommandLineLoader extends RosLoader {
     return argv.get(0);
   }
 
+  // TODO(damonkohler): The NodeContext should possibly have access to
+  // remappings and arguments.
   /**
    * Create NodeContext according to ROS command-line and environment
    * specification.

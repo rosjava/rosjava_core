@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
 import org.ros.namespace.NameResolver;
@@ -30,8 +31,8 @@ import java.util.List;
 public class NodeContext {
 
   private NameResolver resolver;
-  private URI rosMasterUri;
-  private String hostName;
+  private URI masterUri;
+  private String hostname;
   private String rosRoot;
   private List<String> rosPackagePath;
   private int tcpRosPort;
@@ -60,11 +61,11 @@ public class NodeContext {
   }
 
   public URI getRosMasterUri() {
-    return rosMasterUri;
+    return masterUri;
   }
 
   public void setRosMasterUri(URI rosMasterUri) {
-    this.rosMasterUri = rosMasterUri;
+    this.masterUri = rosMasterUri;
   }
 
   public String getRosRoot() {
@@ -91,7 +92,7 @@ public class NodeContext {
    * @return host name/address to use when advertising this node via URLs.
    */
   public String getHostName() {
-    return hostName;
+    return hostname;
   }
 
   /**
@@ -100,7 +101,7 @@ public class NodeContext {
    * @param hostName
    */
   public void setHostName(String hostName) {
-    this.hostName = hostName;
+    this.hostname = hostName;
   }
 
   /**

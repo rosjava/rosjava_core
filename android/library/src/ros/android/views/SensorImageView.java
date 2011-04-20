@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package ros.android.views;
 
 import android.content.Context;
@@ -34,9 +35,13 @@ import org.ros.message.sensor_msgs.Image;
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
-public class SensorImageView extends ImageView implements MessageListener<CompressedImage>,
-    Runnable {
+public class SensorImageView extends ImageView
+    implements
+      MessageListener<CompressedImage>,
+      Runnable {
+
   private org.ros.Subscriber<CompressedImage> imageSub;
+  private Bitmap bitmap;
 
   public SensorImageView(Context ctx) {
     super(ctx);
@@ -50,18 +55,16 @@ public class SensorImageView extends ImageView implements MessageListener<Compre
     super(context, attrs);
   }
 
-  public void init(Node node, String topic) throws RosInitException {
+  public void start(Node node, String topic) throws RosInitException {
     imageSub = node.createSubscriber(topic, this, CompressedImage.class);
   }
 
   public void stop() {
-    if( imageSub != null ) {
+    if (imageSub != null) {
       imageSub.cancel();
     }
     imageSub = null;
   }
-
-  Bitmap bitmap;
 
   @Override
   public void onNewMessage(CompressedImage message) {
@@ -83,8 +86,8 @@ public class SensorImageView extends ImageView implements MessageListener<Compre
     // if the bitmap is a different size or null allocate it.
     if (bitmap == null || bitmap.getWidth() != message.width
         || bitmap.getHeight() != message.height) {
-      bitmap = Bitmap.createBitmap((int) message.width, (int) message.height,
-          Bitmap.Config.ARGB_8888);
+      bitmap =
+          Bitmap.createBitmap((int) message.width, (int) message.height, Bitmap.Config.ARGB_8888);
     }
     // copy the message data into the bitmap.
     for (int x = 0; x < message.width; x++) {

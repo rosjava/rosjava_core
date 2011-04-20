@@ -56,7 +56,7 @@ public class NodeNamespace implements Namespace {
   }
 
   @Override
-  public <MessageType extends Message> Subscriber<MessageType> createSubscriber(String topicName,
+  public <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
       MessageListener<MessageType> messageCallback, Class<MessageType> messageClass)
       throws RosInitException {
     String pushedName = pushNameIntoNamespace(topicName);

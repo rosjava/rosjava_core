@@ -18,8 +18,10 @@ package ros.android.ImageView;
 
 import android.os.Bundle;
 import android.util.Log;
+
 import org.ros.Node;
 import org.ros.exceptions.RosInitException;
+
 import ros.android.activity.RosActivity;
 import ros.android.views.SensorImageView;
 
@@ -47,7 +49,7 @@ public class ImageView extends RosActivity {
 
       SensorImageView imageSub = (SensorImageView) findViewById(R.id.image);
       // subscribe to the compressed version of image_color
-      imageSub.init(node, "/camera/rgb/image_color/compressed");
+      imageSub.start(node, "/camera/rgb/image_color/compressed");
 
     } catch (RosInitException e) {
       Log.e("ImageView", e.getMessage());

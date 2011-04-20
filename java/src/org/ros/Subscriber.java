@@ -25,7 +25,7 @@ import org.ros.message.Message;
  * 
  * @param <MessageType>
  */
-public class Subscriber<MessageType extends Message> {
+public class Subscriber<MessageType> {
 
   private final Class<MessageType> messageClass;
   private final String topicName;

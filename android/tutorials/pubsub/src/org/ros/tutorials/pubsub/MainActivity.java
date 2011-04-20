@@ -23,7 +23,9 @@ import android.os.Bundle;
 
 import org.ros.NodeRunner;
 import org.ros.RosCore;
-import org.ros.exceptions.RosInitException;
+
+import ros.android.views.MessageCallable;
+import ros.android.views.RosTextView;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -37,15 +39,32 @@ public class MainActivity extends Activity {
     nodeRunner = NodeRunner.createDefault();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
+    RosTextView<org.ros.message.std_msgs.String> rosTextView =
+        (RosTextView<org.ros.message.std_msgs.String>) findViewById(R.id.text);
+    rosTextView.setTopicName("/chatter");
+    rosTextView.setMessageClass(org.ros.message.std_msgs.String.class);
+    rosTextView
+        .setMessageToStringCallable(new MessageCallable<String, org.ros.message.std_msgs.String>() {
+          @Override
+          public String call(org.ros.message.std_msgs.String message) {
+            return message.data;
+          }
+        });
     try {
-      nodeRunner.run(new RosCore(), Lists.newArrayList("RosCore"));
-      nodeRunner.run(new Talker(), Lists.newArrayList("Talker"));
-      nodeRunner.run(new Listener(), Lists.newArrayList("Listener"));
-    } catch (RosInitException e) {
+      // TODO(damonkohler): The master needs to be set via some sort of
+      // NodeContext builder.
+      nodeRunner.run(new RosCore(),
+          Lists.newArrayList("RosCore", "__master:=http://localhost:11311/"));
+      nodeRunner.run(new Talker(),
+          Lists.newArrayList("Talker", "__master:=http://localhost:11311/"));
+      nodeRunner.run(rosTextView,
+          Lists.newArrayList("Listener", "__master:=http://localhost:11311/"));
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }

@@ -73,7 +73,7 @@ public class RosRun {
     }
 
     try {
-      nodeMain.run(loader.getArgv(), nodeContext);
+      nodeMain.run(nodeContext);
     } catch (RosInitException e) {
       e.printStackTrace();
       System.exit(6);
