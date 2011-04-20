@@ -19,19 +19,26 @@ package org.ros.internal.node.server;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.ros.internal.namespace.GraphName;
+import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
+import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.xmlrpc.MasterImpl;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -73,6 +80,19 @@ public class MasterServer extends NodeServer {
     slaves.put(name, description);
   }
 
+  private void publisherUpdate(String topicName) throws MalformedURLException,
+      XmlRpcTimeoutException, RemoteException {
+    for (SlaveIdentifier slaveIdentifier : slaves.values()) {
+      // TODO(damonkohler): Should the master server know its node name here?
+      SlaveClient client = new SlaveClient(GraphName.createUnknown(), slaveIdentifier.getUri());
+      List<URI> publisherUris = Lists.newArrayList();
+      for (PublisherIdentifier identifier : publishers.get(topicName)) {
+        publisherUris.add(identifier.getSlaveUri());
+      }
+      client.publisherUpdate(topicName, publisherUris);
+    }
+  }
+
   /**
    * Subscribe the caller to the specified topic. In addition to receiving a
    * list of current publishers, the subscriber will also receive notifications
@@ -99,11 +119,16 @@ public class MasterServer extends NodeServer {
    * 
    * @param callerId ROS caller ID
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
+   * @throws RemoteException
+   * @throws XmlRpcTimeoutException
+   * @throws MalformedURLException
    */
   public List<SubscriberIdentifier> registerPublisher(String callerId,
-      PublisherIdentifier description) {
+      PublisherIdentifier description) throws MalformedURLException, XmlRpcTimeoutException,
+      RemoteException {
     publishers.put(description.getTopicName().toString(), description);
     addSlave(description.getSlaveIdentifier());
+    publisherUpdate(description.getTopicName().toString());
     return ImmutableList.copyOf(subscribers.get(description.getTopicName().toString()));
   }
 

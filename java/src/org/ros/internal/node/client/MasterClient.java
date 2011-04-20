@@ -16,8 +16,6 @@
 
 package org.ros.internal.node.client;
 
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.Response;
@@ -33,6 +31,7 @@ import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -143,10 +142,11 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    *         published {@link Topic}.
    * @throws URISyntaxException
    * @throws RemoteException
-   * @throws XmlRpcTimeoutException 
+   * @throws XmlRpcTimeoutException
+   * @throws MalformedURLException
    */
   public Response<List<URI>> registerPublisher(PublisherIdentifier publisher)
-      throws URISyntaxException, RemoteException, XmlRpcTimeoutException {
+      throws URISyntaxException, RemoteException, XmlRpcTimeoutException, MalformedURLException {
     return Response.fromListChecked(node.registerPublisher(publisher.getNodeName().toString(),
         publisher.getTopicName().toString(), publisher.getTopicMessageType(), publisher
             .getSlaveUri().toString()), new UriListResultFactory());

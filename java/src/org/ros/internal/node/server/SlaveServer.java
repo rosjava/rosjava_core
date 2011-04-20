@@ -172,9 +172,9 @@ public class SlaveServer extends NodeServer {
     if (topicManager.hasSubscriber(topicName)) {
       Subscriber<?> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
-      List<PublisherIdentifier> pubIdentifiers = buildPublisherIdentifierList(publisherUris,
+      List<PublisherIdentifier> identifiers = buildPublisherIdentifierList(publisherUris,
           topicDefinition);
-      subscriber.updatePublishers(pubIdentifiers);
+      subscriber.updatePublishers(identifiers);
     }
   }
 

@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.TextView;
 
 import org.ros.MessageListener;
@@ -65,14 +64,12 @@ public class RosTextView<T> extends TextView implements NodeMain {
 
   @Override
   public void run(NodeContext nodeContext) throws RosInitException {
-    Log.i("Foo", "Starting");
     Preconditions.checkState(node == null);
     node = new Node("/anonymous", nodeContext);
     node.createSubscriber(topicName, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
         if (callable != null) {
-          Log.i("Foo", "foo");
           post(new Runnable() {
             @Override
             public void run() {

@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
+import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -29,6 +30,7 @@ import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicDefinition;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -72,11 +74,11 @@ public class MasterImpl implements Master {
 
   @Override
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) throws URISyntaxException {
+      String callerApi) throws URISyntaxException, MalformedURLException, XmlRpcTimeoutException,
+      RemoteException {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName(topic),
-            MessageDefinition.createFromTypeName(topicType));
+        new TopicDefinition(new GraphName(topic), MessageDefinition.createFromTypeName(topicType));
     PublisherIdentifier description = new PublisherIdentifier(slaveIdentifier, topicDefinition);
     List<SubscriberIdentifier> subscribers = master.registerPublisher(callerId, description);
     List<String> urls = Lists.newArrayList();
@@ -103,8 +105,7 @@ public class MasterImpl implements Master {
       String callerApi) throws URISyntaxException {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName(topic),
-            MessageDefinition.createFromTypeName(topicType));
+        new TopicDefinition(new GraphName(topic), MessageDefinition.createFromTypeName(topicType));
     List<PublisherIdentifier> publishers =
         master.registerSubscriber(new SubscriberIdentifier(slaveIdentifier, topicDefinition));
     List<String> urls = Lists.newArrayList();

@@ -18,6 +18,7 @@ package org.ros.internal.node.xmlrpc;
 
 import org.ros.internal.node.RemoteException;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -73,19 +74,18 @@ public interface Master extends Node {
   /**
    * Register the caller as a publisher the topic.
    * 
-   * @param callerId
-   *          ROS caller ID
-   * @param topic
-   *          fully-qualified name of topic to register
-   * @param topicType
-   *          topic type, must be a package-resource name, i.e. the .msg name.
-   * @param callerApi
-   *          API URI of publisher to register
+   * @param callerId ROS caller ID
+   * @param topic fully-qualified name of topic to register
+   * @param topicType topic type, must be a package-resource name, i.e. the .msg
+   *        name.
+   * @param callerApi API URI of publisher to register
    * @return list of current subscribers of topic in the form of XML-RPC URIs
    * @throws URISyntaxException
+   * @throws MalformedURLException
    */
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) throws URISyntaxException, RemoteException, XmlRpcTimeoutException;
+      String callerApi) throws URISyntaxException, RemoteException, XmlRpcTimeoutException,
+      MalformedURLException;
 
   public List<Object> unregisterPublisher(String callerId, String topic, String callerApi)
       throws XmlRpcTimeoutException, RemoteException;

@@ -30,6 +30,7 @@ import org.ros.internal.node.topic.TopicListener;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
 import java.lang.reflect.UndeclaredThrowableException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -66,15 +67,18 @@ public class MasterRegistration implements TopicListener {
         }
       } catch (InterruptedException e) {
         // Cancel-able
+      } catch (MalformedURLException e) {
+        throw new RuntimeException(e);
       }
     }
   }
 
   abstract class RegistrationJob {
 
-    public abstract void doJob() throws RemoteException, XmlRpcTimeoutException;
+    public abstract void doJob() throws RemoteException, XmlRpcTimeoutException,
+        MalformedURLException;
 
-    public boolean run() {
+    public boolean run() throws MalformedURLException {
       try {
         doJob();
       } catch (XmlRpcTimeoutException e) {
@@ -101,7 +105,7 @@ public class MasterRegistration implements TopicListener {
     }
 
     @Override
-    public void doJob() throws RemoteException, XmlRpcTimeoutException {
+    public void doJob() throws RemoteException, XmlRpcTimeoutException, MalformedURLException {
       try {
         masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
       } catch (URISyntaxException e) {

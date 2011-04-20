@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
+import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -33,6 +34,7 @@ import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicDefinition;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -42,7 +44,8 @@ import java.util.List;
 public class MasterImplTest {
 
   @Test
-  public void testRegisterPublisherWithNoSubscribers() throws URISyntaxException {
+  public void testRegisterPublisherWithNoSubscribers() throws URISyntaxException,
+      MalformedURLException, XmlRpcTimeoutException, RemoteException {
     MasterServer mockMaster = mock(MasterServer.class);
     when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
         .thenReturn(Lists.<SubscriberIdentifier>newArrayList());
@@ -53,7 +56,8 @@ public class MasterImplTest {
   }
 
   @Test
-  public void testRegisterPublisher() throws URISyntaxException {
+  public void testRegisterPublisher() throws URISyntaxException, MalformedURLException,
+      XmlRpcTimeoutException, RemoteException {
     MasterServer mockMaster = mock(MasterServer.class);
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
     TopicDefinition topicDefinition =
