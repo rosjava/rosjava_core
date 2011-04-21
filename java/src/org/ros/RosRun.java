@@ -48,9 +48,9 @@ public class RosRun {
     CommandLineLoader loader = new CommandLineLoader(Lists.newArrayList(argv));
     String nodeClassName = loader.getNodeClassName();
     System.out.println("Loading node class: " + loader.getNodeClassName());
-    NodeContext nodeContext = null;
+    NodeConfiguration nodeConfiguration = null;
     try {
-      nodeContext = loader.createContext();
+      nodeConfiguration = loader.createConfiguration();
     } catch (RosInitException e1) {
       e1.printStackTrace();
       System.exit(2);
@@ -73,7 +73,7 @@ public class RosRun {
     }
 
     try {
-      nodeMain.run(nodeContext);
+      nodeMain.run(nodeConfiguration);
     } catch (RosInitException e) {
       e.printStackTrace();
       System.exit(6);

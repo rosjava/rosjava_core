@@ -50,7 +50,7 @@ public class NodeTest {
 
   private MasterServer master;
   private URI masterUri;
-  private NodeContext nodeContext;
+  private NodeConfiguration nodeConfiguration;
 
   @Before
   public void setUp() throws XmlRpcException, IOException, RosInitException {
@@ -65,13 +65,13 @@ public class NodeTest {
     Map<String, String> env = new HashMap<String, String>();
     env.put("ROS_MASTER_URI", masterUri.toString());
     CommandLineLoader loader = new CommandLineLoader(Lists.<String>newArrayList("Foo"), env);
-    nodeContext = loader.createContext();
+    nodeConfiguration = loader.createConfiguration();
   }
 
   @Test
   public void testResolveName() throws RosInitException {
-    nodeContext.setParentResolver(new NameResolver("/ns1", new HashMap<GraphName, GraphName>()));
-    Node node = new Node("test_resolver", nodeContext);
+    nodeConfiguration.setParentResolver(new NameResolver("/ns1", new HashMap<GraphName, GraphName>()));
+    Node node = new Node("test_resolver", nodeConfiguration);
 
     assertEquals("/foo", node.resolveName("/foo"));
     assertEquals("/ns1/foo", node.resolveName("foo"));
@@ -118,9 +118,9 @@ public class NodeTest {
     Map<String, String> env = new HashMap<String, String>();
     env.put("ROS_MASTER_URI", masterUri.toString());
     CommandLineLoader loader = new CommandLineLoader(Lists.<String>newArrayList("Foo"), env);
-    NodeContext nodeContext = loader.createContext();
+    NodeConfiguration nodeConfiguration = loader.createConfiguration();
 
-    Node node = new Node("test_addresses", nodeContext);
+    Node node = new Node("test_addresses", nodeConfiguration);
     node.createPublisher("test_addresses_pub", Int64.class);
 
     URI uri = node.getUri();

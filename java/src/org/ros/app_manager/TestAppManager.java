@@ -18,7 +18,7 @@ package org.ros.app_manager;
 
 import org.apache.commons.logging.Log;
 import org.ros.Node;
-import org.ros.NodeContext;
+import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
 import org.ros.message.app_manager.App;
 import org.ros.service.app_manager.ListApps;
@@ -34,7 +34,7 @@ public class TestAppManager implements NodeMain {
   private AppManager appManager;
 
   @Override
-  public void run(NodeContext context) {
+  public void run(NodeConfiguration context) {
     Node node = null;
     try {
       node = new Node("app_manager_client", context);

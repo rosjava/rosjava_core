@@ -228,7 +228,7 @@ public class RosActivity extends Activity {
       @Override
       public void run() {
         try {
-          node = new Node("android", masterChooser.createContext());
+          node = new Node("android", masterChooser.createConfiguration());
         } catch (Exception e) {
           Log.e("RosAndroid", "Exception while creating node: " + e.getMessage());
           node = null;

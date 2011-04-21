@@ -17,7 +17,7 @@
 package org.ros.tutorials.pubsub;
 
 import org.ros.Node;
-import org.ros.NodeContext;
+import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
 import org.ros.Publisher;
 
@@ -31,7 +31,7 @@ import org.ros.Publisher;
 public class Talker implements NodeMain {
 
   @Override
-  public void run(NodeContext context) {
+  public void run(NodeConfiguration context) {
     Node node = null;
     try {
       node = new Node("talker", context);

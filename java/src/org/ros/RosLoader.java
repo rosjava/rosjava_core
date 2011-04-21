@@ -26,7 +26,7 @@ import org.ros.exceptions.RosInitException;
  */
 public abstract class RosLoader {
 
-  public abstract NodeContext createContext() throws RosInitException;
+  public abstract NodeConfiguration createConfiguration() throws RosInitException;
 
   /**
    * @param name the name of the class

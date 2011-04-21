@@ -27,8 +27,8 @@ import org.ros.message.std_msgs.Int64;
 public class SlaveApiTestNode implements NodeMain {
 
   @Override
-  public void run(NodeContext nodeContext) throws RosInitException {
-    final Node node = new Node("test_node", nodeContext);
+  public void run(NodeConfiguration nodeConfiguration) throws RosInitException {
+    final Node node = new Node("test_node", nodeConfiguration);
 
     // Basic chatter in/out test.
     Publisher<org.ros.message.std_msgs.String> pub_string =

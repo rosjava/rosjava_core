@@ -24,22 +24,22 @@ import org.ros.namespace.NameResolver;
 
 import java.util.HashMap;
 
-public class NodeContextTest {
+public class NodeConfigurationTest {
 
   @Test
   public void testNodeContext() {
-    NodeContext nodeContext = new NodeContext();
-    assertEquals(null, nodeContext.getParentResolver());
+    NodeConfiguration nodeConfiguration = new NodeConfiguration();
+    assertEquals(null, nodeConfiguration.getParentResolver());
   }
 
   @Test
   public void testResolver() {
-    NodeContext nodeContext = new NodeContext();
-    assertEquals(null, nodeContext.getParentResolver());
+    NodeConfiguration nodeConfiguration = new NodeConfiguration();
+    assertEquals(null, nodeConfiguration.getParentResolver());
 
     NameResolver resolver = new NameResolver("/test", new HashMap<GraphName, GraphName>());
-    nodeContext.setParentResolver(resolver);
-    assertEquals(resolver, nodeContext.getParentResolver());
+    nodeConfiguration.setParentResolver(resolver);
+    assertEquals(resolver, nodeConfiguration.getParentResolver());
   }
 
 }

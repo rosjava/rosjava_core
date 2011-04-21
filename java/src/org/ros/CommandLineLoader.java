@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Create {@link NodeContext} instances using a ROS command-line and environment
+ * Create {@link NodeConfiguration} instances using a ROS command-line and environment
  * specification.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
@@ -86,20 +86,20 @@ public class CommandLineLoader extends RosLoader {
     return argv.get(0);
   }
 
-  // TODO(damonkohler): The NodeContext should possibly have access to
+  // TODO(damonkohler): The NodeConfiguration should possibly have access to
   // remappings and arguments.
   /**
-   * Create NodeContext according to ROS command-line and environment
+   * Create NodeConfiguration according to ROS command-line and environment
    * specification.
    */
   @Override
-  public NodeContext createContext() throws RosInitException {
+  public NodeConfiguration createConfiguration() throws RosInitException {
     Map<String, String> specialRemappings = getSpecialRemappings();
     String namespace = getNamespace(specialRemappings, environment);
     Map<GraphName, GraphName> remappings = parseRemappings();
     NameResolver resolver = new NameResolver(namespace, remappings);
 
-    NodeContext context = new NodeContext();
+    NodeConfiguration context = new NodeConfiguration();
     context.setParentResolver(resolver);
     context.setRosRoot(getRosRoot(specialRemappings, environment));
     context.setRosPackagePath(getRosPackagePath(specialRemappings, environment));

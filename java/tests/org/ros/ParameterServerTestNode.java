@@ -38,10 +38,10 @@ public class ParameterServerTestNode implements NodeMain {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void run(NodeContext nodeContext) throws RosInitException {
+  public void run(NodeConfiguration nodeConfiguration) throws RosInitException {
     try {
       // Node is only used to publish results.
-      final Node node = new Node("param_client", nodeContext);
+      final Node node = new Node("param_client", nodeConfiguration);
 
       Publisher<org.ros.message.std_msgs.String> pub_tilde =
           node.createPublisher("tilde", org.ros.message.std_msgs.String.class);

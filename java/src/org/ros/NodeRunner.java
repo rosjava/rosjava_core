@@ -40,12 +40,12 @@ public class NodeRunner {
   // TODO(damonkohler): The CommandLineLoader is not appropriate here.
   public void run(final NodeMain node, final List<String> argv) throws RosInitException {
     final CommandLineLoader loader = new CommandLineLoader(argv);
-    final NodeContext nodeContext = loader.createContext();
+    final NodeConfiguration nodeConfiguration = loader.createConfiguration();
     executor.execute(new Runnable() {
       @Override
       public void run() {
         try {
-          node.run(nodeContext);
+          node.run(nodeConfiguration);
         } catch (Exception e) {
           throw new RuntimeException(e);
         }

@@ -28,7 +28,7 @@ import java.util.List;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class NodeContext {
+public class NodeConfiguration {
 
   private NameResolver resolver;
   private URI masterUri;
@@ -42,7 +42,7 @@ public class NodeContext {
   /**
    * default context
    */
-  public NodeContext() {
+  public NodeConfiguration() {
     resolver = null;
     tcpRosPort = 0;
     xmlRpcPort = 0;

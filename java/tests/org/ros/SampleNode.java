@@ -24,8 +24,8 @@ import org.ros.message.geometry_msgs.Quaternion;
 public class SampleNode implements NodeMain {
 
   @Override
-  public void run(NodeContext nodeContext) throws RosInitException {
-    Node node = new Node("sample_rosjava_node", nodeContext);
+  public void run(NodeConfiguration nodeConfiguration) throws RosInitException {
+    Node node = new Node("sample_rosjava_node", nodeConfiguration);
    
     Publisher<PoseStamped> pub_pose = node.createPublisher("pose", PoseStamped.class);
 

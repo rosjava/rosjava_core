@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
         });
     try {
       // TODO(damonkohler): The master needs to be set via some sort of
-      // NodeContext builder.
+      // NodeConfiguration builder.
       nodeRunner.run(new RosCore(),
           Lists.newArrayList("RosCore", "__master:=http://localhost:11311/"));
       nodeRunner.run(new Talker(),

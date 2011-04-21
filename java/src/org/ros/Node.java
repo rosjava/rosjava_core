@@ -56,7 +56,7 @@ import java.net.URI;
 // handles.
 public class Node implements Namespace {
 
-  private final NodeContext context;
+  private final NodeConfiguration context;
   private final NodeNameResolver resolver;
   private final GraphName nodeName;
   private final org.ros.internal.node.Node node;
@@ -80,7 +80,7 @@ public class Node implements Namespace {
    * @param context
    * @throws RosInitException
    */
-  public Node(String name, NodeContext context) throws RosInitException {
+  public Node(String name, NodeConfiguration context) throws RosInitException {
     Preconditions.checkNotNull(context);
     Preconditions.checkNotNull(name);
     messageSerializerFactory = new PregeneratedCodeMessageSerializerFactory();

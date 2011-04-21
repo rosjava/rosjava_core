@@ -33,7 +33,7 @@ public class RosCore implements NodeMain {
   }
 
   @Override
-  public void run(NodeContext nodeContext) throws Exception {
+  public void run(NodeConfiguration nodeConfiguration) throws Exception {
     masterServer.start();
   }
 

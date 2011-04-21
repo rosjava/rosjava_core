@@ -20,13 +20,15 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.util.Log;
-import org.ros.NodeContext;
+
+import org.ros.NodeConfiguration;
 import org.ros.RosLoader;
 import org.ros.exceptions.RosInitException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
 import org.yaml.snakeyaml.Yaml;
+
 import ros.android.activity.MasterChooserActivity;
 
 import java.io.BufferedReader;
@@ -189,11 +191,11 @@ public class MasterChooser extends RosLoader {
    * invalid or if we can't get a hostname for the device we are running on.
    */
   @Override
-  public NodeContext createContext() throws RosInitException {
-    return createContext(currentRobot.masterUri, Net.getNonLoopbackHostName());
+  public NodeConfiguration createConfiguration() throws RosInitException {
+    return createConfiguration(currentRobot.masterUri, Net.getNonLoopbackHostName());
   }
 
-  static public NodeContext createContext(String masterUri, String myHostName)
+  static public NodeConfiguration createConfiguration(String masterUri, String myHostName)
       throws RosInitException {
     if (masterUri == null) {
       throw new RosInitException("ROS Master URI is not set");
@@ -202,7 +204,7 @@ public class MasterChooser extends RosLoader {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     NameResolver resolver = new NameResolver(namespace, remappings);
 
-    NodeContext context = new NodeContext();
+    NodeConfiguration context = new NodeConfiguration();
     context.setParentResolver(resolver);
     context.setRosRoot("fixme");
     context.setRosPackagePath(null);
