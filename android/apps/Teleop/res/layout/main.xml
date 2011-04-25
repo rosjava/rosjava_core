@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-	<ros.android.views.SensorImageView
-		android:layout_height="fill_parent" android:src="@drawable/icon"
-		android:id="@+id/image" android:layout_width="fill_parent">
-	</ros.android.views.SensorImageView>
+              android:orientation="horizontal"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+	<ros.android.views.SensorImageView android:layout_width="fill_parent"
+                                     android:layout_height="fill_parent"
+                                     android:layout_weight="2"
+                                     android:src="@drawable/icon"
+                                     android:id="@+id/image"/>
+  <LinearLayout android:orientation="vertical"
+                android:gravity="right"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent">
+    <ros.android.views.TurtlebotDashboard android:layout_width="wrap_content"
+                                          android:layout_height="wrap_content"
+                                          android:id="@+id/dashboard"/>
+    <!-- placeholders... -->
+    <ImageButton android:layout_width="160dp"
+                 android:layout_height="fill_parent"
+                 android:layout_weight="1"
+                 android:src="@drawable/map"
+                 android:id="@+id/map_button"/>
+    <ImageView android:layout_width="160dp"
+               android:layout_height="160dp"
+               android:src="@drawable/joystick"
+               android:id="@+id/joystick"/>
+  </LinearLayout>
 </LinearLayout>

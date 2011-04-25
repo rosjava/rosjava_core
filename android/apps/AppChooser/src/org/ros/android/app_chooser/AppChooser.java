@@ -74,6 +74,7 @@ public class AppChooser extends RosAppActivity {
   @Override
   protected void onResume() {
     super.onResume();
+    setStatus("");
     // TODO: start spinner
     updateAppList(availableAppsCache);
   }
@@ -134,6 +135,7 @@ public class AppChooser extends RosAppActivity {
 
       @Override
       public void onFailure(Exception e) {
+        safeSetStatus(e.getMessage());
       }
     });
 

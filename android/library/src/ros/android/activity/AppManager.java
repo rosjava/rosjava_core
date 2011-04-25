@@ -57,28 +57,40 @@ public class AppManager {
 
   public void listApps(final ServiceResponseListener<ListApps.Response> callback) {
     ServiceIdentifier serviceIdentifier = appManagerIdentifier.getListAppsIdentifier();
-    ServiceClient<ListApps.Response> listAppsClient =
+    try {
+      ServiceClient<ListApps.Response> listAppsClient =
         node.createServiceClient(serviceIdentifier, ListApps.Response.class);
-    listAppsClient.call(new ListApps.Request(), callback);
+      listAppsClient.call(new ListApps.Request(), callback);
+    } catch(Exception ex) {
+      callback.onFailure(ex);
+    }
   }
 
   public void startApp(final String appName,
       final ServiceResponseListener<StartApp.Response> callback) {
     ServiceIdentifier serviceIdentifier = appManagerIdentifier.getStartAppIdentifier();
-    ServiceClient<StartApp.Response> startAppClient =
+    try {
+      ServiceClient<StartApp.Response> startAppClient =
         node.createServiceClient(serviceIdentifier, StartApp.Response.class);
-    StartApp.Request request = new StartApp.Request();
-    request.name = appName;
-    startAppClient.call(request, callback);
+      StartApp.Request request = new StartApp.Request();
+      request.name = appName;
+      startAppClient.call(request, callback);
+    } catch(Exception ex) {
+      callback.onFailure(ex);
+    }
   }
 
   public void stopApp(final String appName, final ServiceResponseListener<StopApp.Response> callback) {
     ServiceIdentifier serviceIdentifier = appManagerIdentifier.getStopAppIdentifier();
-    ServiceClient<StopApp.Response> stopAppClient =
+    try {
+      ServiceClient<StopApp.Response> stopAppClient =
         node.createServiceClient(serviceIdentifier, StopApp.Response.class);
-    StopApp.Request request = new StopApp.Request();
-    request.name = appName;
-    stopAppClient.call(request, callback);
+      StopApp.Request request = new StopApp.Request();
+      request.name = appName;
+      stopAppClient.call(request, callback);
+    } catch(Exception ex) {
+      callback.onFailure(ex);
+    }
   }
 
   /**

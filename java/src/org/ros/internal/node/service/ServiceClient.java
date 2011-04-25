@@ -126,7 +126,8 @@ public class ServiceClient<ResponseMessageType> {
         log.info("Connected to: " + channel.getRemoteAddress());
       }
     } else {
-      throw new RuntimeException(future.getCause());
+      throw new RuntimeException("ServiceClient.connect() failed to connect to host " + uri.getHost() + " on port " + uri.getPort(),
+                                 future.getCause());
     }
     ChannelBuffer encodedHeader = ConnectionHeader.encode(header);
     channel.write(encodedHeader).awaitUninterruptibly();

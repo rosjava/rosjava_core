@@ -41,6 +41,7 @@ import org.ros.service.app_manager.StartApp;
 
 import ros.android.activity.RosAppActivity;
 import ros.android.views.SensorImageView;
+import ros.android.views.TurtlebotDashboard;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
@@ -54,6 +55,7 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
   private float motionY;
   private float motionX;
   private Subscriber<AppStatus> statusSub;
+  private TurtlebotDashboard dashboard;
 
   /** Called when the activity is first created. */
   @Override
@@ -64,12 +66,14 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
         WindowManager.LayoutParams.FLAG_FULLSCREEN);
     setContentView(R.layout.main);
 
-    View mainView = findViewById(R.id.image);
-    mainView.setOnTouchListener(this);
+    View joyView = findViewById(R.id.joystick);
+    joyView.setOnTouchListener(this);
 
     imageView = (SensorImageView) findViewById(R.id.image);
     // imageView.setOnTouchListener(this);
     touchCmdMessage = new Twist();
+
+    dashboard = (TurtlebotDashboard) findViewById( R.id.dashboard );
   }
 
   @Override
@@ -91,6 +95,7 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
       pubThread.interrupt();
       pubThread = null;
     }
+    dashboard.setNode(null);
     super.onNodeDestroy(node);
   }
 
@@ -146,6 +151,7 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
   protected void onNodeCreate(Node node) {
     Log.i("Teleop", "startAppFuture");
     super.onNodeCreate(node);
+    dashboard.setNode(node);
     startApp();
   }
 
@@ -191,12 +197,12 @@ public class Teleop extends RosAppActivity implements OnTouchListener {
       motionX = (motionEvent.getX() - (arg0.getWidth() / 2)) / (arg0.getWidth());
       motionY = (motionEvent.getY() - (arg0.getHeight() / 2)) / (arg0.getHeight());
 
-      touchCmdMessage.linear.x = -motionY;
+      touchCmdMessage.linear.x = -2 * motionY;
       touchCmdMessage.linear.y = 0;
       touchCmdMessage.linear.z = 0;
       touchCmdMessage.angular.x = 0;
       touchCmdMessage.angular.y = 0;
-      touchCmdMessage.angular.z = -2 * motionX;
+      touchCmdMessage.angular.z = -5 * motionX;
 
     } else {
       deadman = false;
