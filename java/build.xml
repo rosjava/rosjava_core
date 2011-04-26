@@ -60,6 +60,7 @@
           <arg value="app_manager" />
           <arg value="dynamic_reconfigure" />
           <arg value="turtlebot_node" />
+          <arg value="nav_msgs" />
         </exec>
     </target>
 
@@ -78,6 +79,7 @@
           <arg value="app_manager" />
           <arg value="dynamic_reconfigure" />
           <arg value="turtlebot_node" />
+          <arg value="nav_msgs" />
         </exec>
     </target>
 
