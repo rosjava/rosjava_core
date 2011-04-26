@@ -34,10 +34,10 @@ public class TestAppManager implements NodeMain {
   private AppManager appManager;
 
   @Override
-  public void run(NodeConfiguration context) {
+  public void run(NodeConfiguration configuration) {
     Node node = null;
     try {
-      node = new Node("app_manager_client", context);
+      node = new Node("app_manager_client", configuration);
       final Log log = node.getLog();
       log.info("Creating app manager");
       appManager = new AppManager(node, "turtlebot");

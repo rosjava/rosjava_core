@@ -31,10 +31,10 @@ import org.ros.Publisher;
 public class Talker implements NodeMain {
 
   @Override
-  public void run(NodeConfiguration context) {
+  public void run(NodeConfiguration configuration) {
     Node node = null;
     try {
-      node = new Node("talker", context);
+      node = new Node("talker", configuration);
       Publisher<org.ros.message.std_msgs.String> publisher =
           node.createPublisher("chatter", org.ros.message.std_msgs.String.class);
       int seq = 0;

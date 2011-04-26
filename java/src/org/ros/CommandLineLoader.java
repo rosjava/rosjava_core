@@ -99,26 +99,26 @@ public class CommandLineLoader extends RosLoader {
     Map<GraphName, GraphName> remappings = parseRemappings();
     NameResolver resolver = new NameResolver(namespace, remappings);
 
-    NodeConfiguration context = new NodeConfiguration();
-    context.setParentResolver(resolver);
-    context.setRosRoot(getRosRoot(specialRemappings, environment));
-    context.setRosPackagePath(getRosPackagePath(specialRemappings, environment));
-    context.setRosMasterUri(getRosMasterUri(specialRemappings, environment));
+    NodeConfiguration configuration = new NodeConfiguration();
+    configuration.setParentResolver(resolver);
+    configuration.setRosRoot(getRosRoot(specialRemappings, environment));
+    configuration.setRosPackagePath(getRosPackagePath(specialRemappings, environment));
+    configuration.setRosMasterUri(getRosMasterUri(specialRemappings, environment));
 
     if (specialRemappings.containsKey(CommandLine.NODE_NAME)) {
-      context.setNodeNameOverride(specialRemappings.get(CommandLine.NODE_NAME));
+      configuration.setNodeNameOverride(specialRemappings.get(CommandLine.NODE_NAME));
     }
     String addressOverride = getAddressOverride(specialRemappings, environment);
     if (addressOverride != null) {
-      context.setHostName(addressOverride);
+      configuration.setHostName(addressOverride);
     } else {
       try {
-        context.setHostName(InetAddress.getLocalHost().getCanonicalHostName());
+        configuration.setHostName(InetAddress.getLocalHost().getCanonicalHostName());
       } catch (UnknownHostException e) {
         throw new RosInitException(e);
       }
     }
-    return context;
+    return configuration;
   }
 
   /**
