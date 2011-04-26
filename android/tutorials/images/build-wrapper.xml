@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="build-wrapper" default="compile">
+
+  <import file="build.xml"/>
+
+  <property name="rosjava.root" location="../../.."/>
+  <property name="rosandroid.library" location="${rosjava.root}/android/library"/>
+
+  <!-- It is critical to put these path declarations *after* the
+       "setup" tag in build.xml.  They have no effect if placed before
+       it.  -->
+  <path id="project.libraries.jars">
+    <fileset dir="${rosjava.root}/java/lib">
+      <exclude name="junit*.jar"/>
+      <exclude name="mockito*.jar"/>
+      <include name="**/*.jar"/>
+    </fileset>
+    <fileset dir="${rosandroid.library}/libs">
+      <include name="**/*.jar"/>
+    </fileset>
+    <fileset dir="${rosjava.root}/java/dist">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="project.libraries.src">
+    <!-- Including xmlrpc in the .src is important because it gets
+         the XmlRpcClient.properties file from there, which doesn't
+         happen if you just pull in the .jar file above. -->
+    <pathelement location="${rosjava.root}/java/build/xmlrpc"/>
+
+    <!-- Could probably create a .jar file in ${rosandroid.library}, but
+         this way is fine too. -->
+    <pathelement location="${rosandroid.library}/src"/>
+  </path>
+</project>
+
