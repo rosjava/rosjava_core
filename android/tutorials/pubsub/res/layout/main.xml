@@ -7,6 +7,6 @@
 <ros.android.views.RosTextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
-    android:text="@string/hello"
+    android:textSize="30dip"
     android:id="@+id/text"/>
 </LinearLayout>

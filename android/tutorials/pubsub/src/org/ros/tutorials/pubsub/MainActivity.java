@@ -38,6 +38,12 @@ public class MainActivity extends Activity {
     super();
     nodeRunner = NodeRunner.createDefault();
   }
+  
+  @Override
+  protected void onPause() {
+    super.onPause();
+    finish();
+  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -61,10 +67,9 @@ public class MainActivity extends Activity {
       RosCore rosCore = new RosCore();
       nodeRunner.run(rosCore, Lists.newArrayList("RosCore", "__master:=foo"));
       rosCore.awaitStart();
-      nodeRunner.run(new Talker(),
-          Lists.newArrayList("Talker", "__master:=" + rosCore.getUri().toString()));
-      nodeRunner.run(rosTextView,
-          Lists.newArrayList("Listener", "__master:=" + rosCore.getUri().toString()));
+      String uri = "__master:=" + rosCore.getUri().toString();
+      nodeRunner.run(new Talker(), Lists.newArrayList("Talker", uri));
+      nodeRunner.run(rosTextView, Lists.newArrayList("Listener", uri));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
