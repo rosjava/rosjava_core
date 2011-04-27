@@ -204,22 +204,22 @@ public class MasterChooser extends RosLoader {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     NameResolver resolver = new NameResolver(namespace, remappings);
 
-    NodeConfiguration context = new NodeConfiguration();
-    context.setParentResolver(resolver);
-    context.setRosRoot("fixme");
-    context.setRosPackagePath(null);
+    NodeConfiguration configuration = new NodeConfiguration();
+    configuration.setParentResolver(resolver);
+    configuration.setRosRoot("fixme");
+    configuration.setRosPackagePath(null);
     try {
-      context.setRosMasterUri(new URI(masterUri));
+      configuration.setRosMasterUri(new URI(masterUri));
     } catch (URISyntaxException ex) {
       throw new RosInitException("ROS Master URI (" + masterUri + ") is invalid: "
           + ex.getMessage());
     }
 
     if (myHostName != null) {
-      context.setHostName(myHostName);
+      configuration.setHostName(myHostName);
     } else {
       throw new RosInitException("Could not get a hostname for this device.");
     }
-    return context;
+    return configuration;
   }
 }

@@ -32,10 +32,10 @@ import org.ros.Subscriber;
 public class Listener implements NodeMain {
 
   @Override
-  public void run(NodeConfiguration context) {
+  public void run(NodeConfiguration configuration) {
     Node node = null;
     try {
-      node = new Node("listener", context);
+      node = new Node("listener", configuration);
       final Log log = node.getLog();
       node.createSubscriber("chatter", new MessageListener<org.ros.message.std_msgs.String>() {
         @Override

@@ -56,7 +56,7 @@ import java.net.URI;
 // handles.
 public class Node implements Namespace {
 
-  private final NodeConfiguration context;
+  private final NodeConfiguration configuration;
   private final NodeNameResolver resolver;
   private final GraphName nodeName;
   private final org.ros.internal.node.Node node;
@@ -77,17 +77,17 @@ public class Node implements Namespace {
   /**
    * @param name Node name. This identifies this node to the rest of the ROS
    *        graph.
-   * @param context
+   * @param configuration
    * @throws RosInitException
    */
-  public Node(String name, NodeConfiguration context) throws RosInitException {
-    Preconditions.checkNotNull(context);
+  public Node(String name, NodeConfiguration configuration) throws RosInitException {
+    Preconditions.checkNotNull(configuration);
     Preconditions.checkNotNull(name);
     messageSerializerFactory = new PregeneratedCodeMessageSerializerFactory();
-    this.context = context;
-    NameResolver parentResolver = context.getParentResolver();
+    this.configuration = configuration;
+    NameResolver parentResolver = configuration.getParentResolver();
     String baseName;
-    String nodeNameOverride = context.getNodeNameOverride();
+    String nodeNameOverride = configuration.getNodeNameOverride();
     if (nodeNameOverride != null) {
       baseName = nodeNameOverride;
     } else {
@@ -102,19 +102,19 @@ public class Node implements Namespace {
     log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
 
     try {
-      if (context.getHostName() == null) {
-        throw new NullPointerException("context.getHostName() cannot be null");
+      if (configuration.getHostName() == null) {
+        throw new NullPointerException("configuration.getHostName() cannot be null");
       }
-      if (context.getHostName().equals("localhost") || context.getHostName().startsWith("127.0.0.")) {
+      if (configuration.getHostName().equals("localhost") || configuration.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
         node =
-            org.ros.internal.node.Node.createPrivate(nodeName, context.getRosMasterUri(),
-                context.getXmlRpcPort(), context.getTcpRosPort());
+            org.ros.internal.node.Node.createPrivate(nodeName, configuration.getRosMasterUri(),
+                configuration.getXmlRpcPort(), configuration.getTcpRosPort());
       } else {
         node =
-            org.ros.internal.node.Node.createPublic(nodeName, context.getRosMasterUri(),
-                context.getHostName(), context.getXmlRpcPort(), context.getTcpRosPort());
+            org.ros.internal.node.Node.createPublic(nodeName, configuration.getRosMasterUri(),
+                configuration.getHostName(), configuration.getXmlRpcPort(), configuration.getTcpRosPort());
       }
     } catch (Exception e) {
       throw new RosInitException(e);
@@ -239,7 +239,7 @@ public class Node implements Namespace {
    */
   @Override
   public URI getMasterUri() {
-    return context.getRosMasterUri();
+    return configuration.getRosMasterUri();
   }
 
   @Override
