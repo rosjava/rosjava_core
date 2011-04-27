@@ -39,6 +39,12 @@ public class MainActivity extends Activity {
     super();
     nodeRunner = NodeRunner.createDefault();
   }
+  
+  @Override
+  protected void onPause() {
+    super.onPause();
+    finish();
+  }
 
   @SuppressWarnings("unchecked")
   @Override
