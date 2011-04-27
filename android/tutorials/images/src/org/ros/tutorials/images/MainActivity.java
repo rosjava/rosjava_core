@@ -22,8 +22,9 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import org.ros.NodeRunner;
-import org.ros.RosCore;
-import org.ros.message.sensor_msgs.CompressedImage;
+import org.ros.message.sensor_msgs.Image;
+
+import ros.android.views.BitmapFromImage;
 
 import ros.android.views.BitmapFromCompressedImage;
 import ros.android.views.RosImageView;
@@ -46,18 +47,15 @@ public class MainActivity extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    RosImageView<CompressedImage> rosImageView =
-        (RosImageView<CompressedImage>) findViewById(R.id.image);
-    rosImageView.setTopicName("/camera/rgb/image_color/compressed");
-    rosImageView.setMessageClass(org.ros.message.sensor_msgs.CompressedImage.class);
-    rosImageView.setMessageToBitmapCallable(new BitmapFromCompressedImage());
+    RosImageView<Image> rosImageView = (RosImageView<Image>) findViewById(R.id.image);
+    rosImageView.setTopicName("/usb_cam/image_raw");
+    rosImageView.setMessageClass(org.ros.message.sensor_msgs.Image.class);
+    rosImageView.setMessageToBitmapCallable(new BitmapFromImage());
     try {
       // TODO(damonkohler): The master needs to be set via some sort of
       // NodeConfiguration builder.
-      nodeRunner.run(new RosCore(),
-          Lists.newArrayList("RosCore", "__master:=http://localhost:11311/"));
       nodeRunner.run(rosImageView,
-          Lists.newArrayList("Watcher", "__master:=http://localhost:11311/"));
+          Lists.newArrayList("Watcher", "__master:=http://192.168.144.238:11311/"));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

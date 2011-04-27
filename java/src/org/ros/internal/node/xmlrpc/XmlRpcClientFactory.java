@@ -29,6 +29,7 @@ import org.ros.internal.node.response.StatusCode;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.UndeclaredThrowableException;
 
 /**
  * <p>
@@ -118,7 +119,7 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
   public Object newInstance(ClassLoader pClassLoader, final Class<NodeType> pClass,
       final String pRemoteName, final int timeout) {
     return Proxy.newProxyInstance(pClassLoader, new Class[] { pClass }, new InvocationHandler() {
-      @SuppressWarnings("unchecked")
+      @SuppressWarnings({"rawtypes", "unchecked"})
       @Override
       public Object invoke(Object pProxy, Method pMethod, Object[] pArgs) throws Throwable {
         if (isObjectMethodLocal() && pMethod.getDeclaringClass().equals(Object.class)) {
@@ -139,26 +140,19 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
         } catch (XmlRpcException e) {
           Throwable t = e.linkedException;
           if (t == null) { 
-            //TODO: deal with this much more cleanly
-            throw new RemoteException(StatusCode.FAILURE, "unknown error");
+            throw new RuntimeException(e);
           }
           if (t instanceof RuntimeException) {
             throw t;
           }
-          @SuppressWarnings("rawtypes")
           Class[] exceptionTypes = pMethod.getExceptionTypes();
           for (int i = 0; i < exceptionTypes.length; i++) {
-            @SuppressWarnings("rawtypes")
             Class c = exceptionTypes[i];
             if (c.isAssignableFrom(t.getClass())) {
               throw t;
             }
           }
-          // TODO(kwc): should probably change this to be a different exception
-          // type, but need to prevent the undeclaredthrowables from leaking
-          // out.
-          throw new RemoteException(StatusCode.FAILURE, t.getMessage());
-          // throw new UndeclaredThrowableException(t);
+          throw new RuntimeException(t);
         }
         TypeConverter typeConverter = typeConverterFactory.getTypeConverter(pMethod.getReturnType());
         return typeConverter.convert(result);

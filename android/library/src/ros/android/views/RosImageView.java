@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 
 import org.ros.MessageListener;
@@ -75,9 +76,11 @@ public class RosImageView<T> extends ImageView implements NodeMain {
         post(new Runnable() {
           @Override
           public void run() {
+            Log.e("foo", "here");
             setImageBitmap(callable.call(message));
           }
         });
+        postInvalidate();
       }
     }, messageClass);
   }

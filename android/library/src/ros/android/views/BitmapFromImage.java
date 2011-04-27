@@ -35,10 +35,10 @@ public class BitmapFromImage implements MessageCallable<Bitmap, Image> {
         Bitmap.createBitmap((int) message.width, (int) message.height, Bitmap.Config.ARGB_8888);
     for (int x = 0; x < message.width; x++) {
       for (int y = 0; y < message.height; y++) {
-        byte red = message.data[(int) (y * message.step + x)];
-        byte green = message.data[(int) (y * message.step + x + 1)];
-        byte blue = message.data[(int) (y * message.step + x + 2)];
-        bitmap.setPixel(x, y, Color.argb(1, blue, green, red));
+        byte red = message.data[(int) (y * message.step + 3 * x)];
+        byte green = message.data[(int) (y * message.step + 3 * x + 1)];
+        byte blue = message.data[(int) (y * message.step + 3 * x + 2)];
+        bitmap.setPixel(x, y, Color.argb(255, red & 0xFF, green & 0xFF, blue & 0xFF));
       }
     }
     return bitmap;
