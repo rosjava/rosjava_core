@@ -54,14 +54,6 @@
           <arg value="geometry_msgs" />
           <arg value="sensor_msgs" />
           <arg value="test_ros" />
-<<<<<<< local
-=======
-          <arg value="diagnostic_msgs" />
-          <arg value="app_manager" />
-          <arg value="dynamic_reconfigure" />
-          <arg value="turtlebot_node" />
-          <arg value="nav_msgs" />
->>>>>>> other
         </exec>
     </target>
 
@@ -74,14 +66,6 @@
           <!-- list of packages to generate for -->
           <arg value="std_srvs" />
           <arg value="test_ros" />
-<<<<<<< local
-=======
-          <arg value="diagnostic_msgs" />
-          <arg value="app_manager" />
-          <arg value="dynamic_reconfigure" />
-          <arg value="turtlebot_node" />
-          <arg value="nav_msgs" />
->>>>>>> other
         </exec>
     </target>
 
