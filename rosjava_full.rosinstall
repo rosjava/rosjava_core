@@ -11,17 +11,3 @@
 - svn:
     local-name: common_msgs
     uri: https://code.ros.org/svn/ros-pkg/stacks/common_msgs/tags/common_msgs-1.4.0
-- svn:
-    local-name: joy
-    uri: https://code.ros.org/svn/ros-pkg/stacks/joystick_drivers/tags/joystick_drivers-1.4.0/joy
-- svn:
-    local-name: multimaster_experimental
-    uri: https://code.ros.org/svn/ros/stacks/multimaster_experimental/trunk
-- hg:
-    local-name: turtlebot
-    uri: https://kforge.ros.org/turtlebot/turtlebot
-    version: default
-- hg:
-    local-name: openni_kinect
-    uri: https://kforge.ros.org/openni/openni_ros
-    version: default
