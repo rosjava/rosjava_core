@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package org.ros.tutorials.images;
+package org.ros.tutorials.image_transport;
 
 public final class R {
     public static final class attr {
@@ -79,7 +79,7 @@ containing a value of this type.
            <colgroup align="left" />
            <colgroup align="left" />
            <tr><th>Attribute</th><th>Description</th></tr>
-           <tr><td><code>{@link #TurtlebotDashboard_orientation org.ros.tutorials.images:orientation}</code></td><td></td></tr>
+           <tr><td><code>{@link #TurtlebotDashboard_orientation org.ros.tutorials.image_transport:orientation}</code></td><td></td></tr>
            </table>
            @see #TurtlebotDashboard_orientation
          */
@@ -87,7 +87,7 @@ containing a value of this type.
             0x7f010000
         };
         /**
-          <p>This symbol is the offset where the {@link org.ros.tutorials.images.R.attr#orientation}
+          <p>This symbol is the offset where the {@link org.ros.tutorials.image_transport.R.attr#orientation}
           attribute's value can be found in the {@link #TurtlebotDashboard} array.
 
 
