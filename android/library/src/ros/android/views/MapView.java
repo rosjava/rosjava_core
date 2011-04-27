@@ -46,6 +46,7 @@ import org.ros.message.nav_msgs.MapMetaData;
 public class MapView extends ImageView {
   private Subscriber<OccupancyGrid> mapSubscriber;
   private Node node;
+  private Bitmap bitmap;
 
   public MapView(Context ctx) {
     super(ctx);
@@ -115,8 +116,13 @@ public class MapView extends ImageView {
    */
   private void handleMap(OccupancyGrid msg) {
     Log.i("RosAndroid", "MapView.handleMap()");
-    // First version is rough: just the image.
-    Bitmap bitmap = Bitmap.createBitmap((int)msg.info.width, (int)msg.info.height, Bitmap.Config.ARGB_8888);
+    if( bitmap != null && (bitmap.getWidth() != (int)msg.info.width || bitmap.getHeight() != (int)msg.info.height)) {
+      bitmap.recycle();
+      bitmap = null;
+    }
+    if( bitmap == null ) {
+      bitmap = Bitmap.createBitmap((int)msg.info.width, (int)msg.info.height, Bitmap.Config.RGB_565);
+    }
 
     // copy the map data into the bitmap.
     int data_i = 0;
@@ -129,19 +135,17 @@ public class MapView extends ImageView {
         int blue = 128;
         switch(cell) {
         case 100:
-          Log.i("RosAndroid", "got 100!");
           red = 255;
           green = 255;
           blue = 255;
           break;
         case 0:
-          Log.i("RosAndroid", "got 0!");
           red = 0;
           green = 0;
           blue = 0;
           break;
         }
-        bitmap.setPixel(x, y, Color.argb(1, blue, green, red));
+        bitmap.setPixel(x, y, Color.rgb(blue, green, red));
       }
     }
     setImageBitmap(bitmap);

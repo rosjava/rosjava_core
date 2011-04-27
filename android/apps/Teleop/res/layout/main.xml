@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="horizontal"
               android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
+              android:layout_height="fill_parent"
+              android:id="@+id/main_layout">
 	<ros.android.views.SensorImageView android:layout_width="fill_parent"
                                      android:layout_height="fill_parent"
                                      android:layout_weight="2"
@@ -11,7 +12,8 @@
   <LinearLayout android:orientation="vertical"
                 android:gravity="right"
                 android:layout_width="wrap_content"
-                android:layout_height="fill_parent">
+                android:layout_height="fill_parent"
+                android:id="@+id/side_layout">
     <ros.android.views.TurtlebotDashboard android:layout_width="wrap_content"
                                           android:layout_height="wrap_content"
                                           android:id="@+id/dashboard"/>
