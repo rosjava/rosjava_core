@@ -58,12 +58,13 @@ public class MainActivity extends Activity {
     try {
       // TODO(damonkohler): The master needs to be set via some sort of
       // NodeConfiguration builder.
-      nodeRunner.run(new RosCore(),
-          Lists.newArrayList("RosCore", "__master:=http://localhost:11311/"));
+      RosCore rosCore = new RosCore();
+      nodeRunner.run(rosCore, Lists.newArrayList("RosCore", "__master:=foo"));
+      rosCore.awaitStart();
       nodeRunner.run(new Talker(),
-          Lists.newArrayList("Talker", "__master:=http://localhost:11311/"));
+          Lists.newArrayList("Talker", "__master:=" + rosCore.getUri().toString()));
       nodeRunner.run(rosTextView,
-          Lists.newArrayList("Listener", "__master:=http://localhost:11311/"));
+          Lists.newArrayList("Listener", "__master:=" + rosCore.getUri().toString()));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

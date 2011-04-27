@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -41,6 +43,7 @@ public class NodeServer {
 
   private final WebServer server;
   private final AdvertiseAddress advertiseAddress;
+  private final CountDownLatch startLatch;
 
   public NodeServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
     InetSocketAddress address = bindAddress.toInetSocketAddress();
@@ -52,6 +55,7 @@ public class NodeServer {
         return server.getPort();
       }
     });
+    startLatch = new CountDownLatch(1);
   }
 
   public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass, T instance)
@@ -68,6 +72,7 @@ public class NodeServer {
     if (DEBUG) {
       log.info("Bound to: " + getUri());
     }
+    startLatch.countDown();
   }
 
   void shutdown() {
@@ -76,6 +81,14 @@ public class NodeServer {
 
   public URI getUri() {
     return advertiseAddress.toUri("http");
+  }
+  
+  public void awaitStart() throws InterruptedException {
+    startLatch.await();
+  }
+  
+  public boolean awaitStartWithTimeout(long timeout, TimeUnit unit) throws InterruptedException {
+    return startLatch.await(timeout, unit);
   }
 
 }

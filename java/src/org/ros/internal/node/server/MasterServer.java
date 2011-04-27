@@ -159,10 +159,6 @@ public class MasterServer extends NodeServer {
     return null;
   }
 
-  public List<Object> getUri(String callerId) {
-    return null;
-  }
-
   /**
    * Lookup the provider of a particular service.
    * 
@@ -174,4 +170,5 @@ public class MasterServer extends NodeServer {
   public ServiceIdentifier lookupService(String callerId, String service) {
     return services.get(service);
   }
+  
 }

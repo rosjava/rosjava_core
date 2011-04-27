@@ -20,6 +20,8 @@ import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 
+import java.net.URI;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -35,6 +37,18 @@ public class RosCore implements NodeMain {
   @Override
   public void run(NodeConfiguration nodeConfiguration) throws Exception {
     masterServer.start();
+  }
+  
+  public URI getUri() {
+    return masterServer.getUri();
+  }
+  
+  public void awaitStart() {
+    try {
+      masterServer.awaitStart();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }
