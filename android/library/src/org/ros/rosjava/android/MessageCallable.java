@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.rosjava.android.views;
+package org.ros.rosjava.android;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

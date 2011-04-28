@@ -24,7 +24,7 @@ import android.os.Bundle;
 import org.ros.NodeRunner;
 import org.ros.RosCore;
 
-import org.ros.rosjava.android.views.MessageCallable;
+import org.ros.rosjava.android.MessageCallable;
 import org.ros.rosjava.android.views.RosTextView;
 
 /**

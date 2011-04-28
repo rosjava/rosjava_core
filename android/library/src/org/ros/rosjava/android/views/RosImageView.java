@@ -27,6 +27,7 @@ import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
+import org.ros.rosjava.android.MessageCallable;
 
 /**
  * A camera node that publishes images and camera_info

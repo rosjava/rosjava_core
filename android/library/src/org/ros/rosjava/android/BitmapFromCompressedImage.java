@@ -20,7 +20,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import org.ros.message.sensor_msgs.CompressedImage;
-import org.ros.rosjava.android.views.MessageCallable;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
