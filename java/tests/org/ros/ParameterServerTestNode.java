@@ -38,7 +38,7 @@ public class ParameterServerTestNode implements NodeMain {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void run(NodeConfiguration nodeConfiguration) throws RosInitException {
+  public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
     try {
       // Node is only used to publish results.
       final Node node = new Node("param_client", nodeConfiguration);

@@ -73,7 +73,7 @@ public class RosRun {
     }
 
     try {
-      nodeMain.run(nodeConfiguration);
+      nodeMain.main(nodeConfiguration);
     } catch (RosInitException e) {
       e.printStackTrace();
       System.exit(6);

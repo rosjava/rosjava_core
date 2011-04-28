@@ -29,6 +29,6 @@ public interface NodeMain {
    * @param nodeConfiguration the {@link NodeConfiguration} that will be passed to the
    *        {@link Node}
    */
-  public void run(NodeConfiguration nodeConfiguration) throws Exception;
+  void main(NodeConfiguration nodeConfiguration) throws Exception;
 
 }

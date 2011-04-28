@@ -51,7 +51,7 @@ public class CameraPublisher implements NodeMain, PreviewCallback {
   }
 
   @Override
-  public void run(NodeConfiguration nodeConfiguration) throws RosInitException {
+  public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
     node = new Node("/anonymous", nodeConfiguration);
     NameResolver resolver = node.getResolver().createResolver("camera");
     // create image and camera info topics on local namespace

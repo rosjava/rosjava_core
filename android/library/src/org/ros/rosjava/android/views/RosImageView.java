@@ -67,7 +67,7 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   }
 
   @Override
-  public void run(NodeConfiguration nodeConfiguration) throws Exception {
+  public void main(NodeConfiguration nodeConfiguration) throws Exception {
     Preconditions.checkState(node == null);
     node = new Node("/anonymous", nodeConfiguration);
     node.createSubscriber(topicName, new MessageListener<T>() {

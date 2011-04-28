@@ -31,7 +31,7 @@ import org.ros.Publisher;
 public class Talker implements NodeMain {
 
   @Override
-  public void run(NodeConfiguration configuration) {
+  public void main(NodeConfiguration configuration) {
     Node node = null;
     try {
       node = new Node("talker", configuration);

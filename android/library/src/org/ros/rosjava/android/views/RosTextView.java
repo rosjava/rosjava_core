@@ -64,7 +64,7 @@ public class RosTextView<T> extends TextView implements NodeMain {
   }
 
   @Override
-  public void run(NodeConfiguration nodeConfiguration) throws RosInitException {
+  public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
     Preconditions.checkState(node == null);
     node = new Node("/anonymous", nodeConfiguration);
     node.createSubscriber(topicName, new MessageListener<T>() {

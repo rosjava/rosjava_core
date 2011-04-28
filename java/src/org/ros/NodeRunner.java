@@ -45,7 +45,7 @@ public class NodeRunner {
       @Override
       public void run() {
         try {
-          node.run(nodeConfiguration);
+          node.main(nodeConfiguration);
         } catch (Exception e) {
           throw new RuntimeException(e);
         }

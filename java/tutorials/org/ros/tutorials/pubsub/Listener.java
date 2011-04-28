@@ -32,7 +32,7 @@ import org.ros.Subscriber;
 public class Listener implements NodeMain {
 
   @Override
-  public void run(NodeConfiguration configuration) {
+  public void main(NodeConfiguration configuration) {
     Node node = null;
     try {
       node = new Node("listener", configuration);
