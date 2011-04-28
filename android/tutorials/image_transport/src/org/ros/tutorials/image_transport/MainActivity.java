@@ -24,8 +24,8 @@ import android.os.Bundle;
 import org.ros.NodeRunner;
 import org.ros.message.sensor_msgs.CompressedImage;
 
-import ros.android.views.BitmapFromCompressedImage;
-import ros.android.views.RosImageView;
+import org.ros.rosjava.android.BitmapFromCompressedImage;
+import org.ros.rosjava.android.views.RosImageView;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)

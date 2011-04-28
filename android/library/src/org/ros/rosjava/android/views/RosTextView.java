@@ -14,42 +14,39 @@
  * the License.
  */
 
-package ros.android.views;
+package org.ros.rosjava.android.views;
 
 import com.google.common.base.Preconditions;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.util.AttributeSet;
-import android.widget.ImageView;
+import android.widget.TextView;
 
 import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
+import org.ros.exceptions.RosInitException;
 
 /**
- * A camera node that publishes images and camera_info
- * 
- * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosImageView<T> extends ImageView implements NodeMain {
+public class RosTextView<T> extends TextView implements NodeMain {
 
   private String topicName;
   private Class<T> messageClass;
-  private MessageCallable<Bitmap, T> callable;
+  private MessageCallable<String, T> callable;
   private Node node;
 
-  public RosImageView(Context context) {
+  public RosTextView(Context context) {
     super(context);
   }
 
-  public RosImageView(Context context, AttributeSet attrs) {
+  public RosTextView(Context context, AttributeSet attrs) {
     super(context, attrs);
   }
 
-  public RosImageView(Context context, AttributeSet attrs, int defStyle) {
+  public RosTextView(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
   }
 
@@ -60,24 +57,33 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   public void setMessageClass(Class<T> messageClass) {
     this.messageClass = messageClass;
   }
-  
-  public void setMessageToBitmapCallable(MessageCallable<Bitmap, T> callable) {
+
+  public void setMessageToStringCallable(MessageCallable<String, T> callable) {
     this.callable = callable;
   }
 
   @Override
-  public void run(NodeConfiguration nodeConfiguration) throws Exception {
+  public void run(NodeConfiguration nodeConfiguration) throws RosInitException {
     Preconditions.checkState(node == null);
     node = new Node("/anonymous", nodeConfiguration);
     node.createSubscriber(topicName, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
-        post(new Runnable() {
-          @Override
-          public void run() {
-            setImageBitmap(callable.call(message));
-          }
-        });
+        if (callable != null) {
+          post(new Runnable() {
+            @Override
+            public void run() {
+              setText(callable.call(message));
+            }
+          });
+        } else {
+          post(new Runnable() {
+            @Override
+            public void run() {
+              setText(message.toString());
+            }
+          });
+        }
         postInvalidate();
       }
     }, messageClass);

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package ros.android.views;
+package org.ros.rosjava.android.views;
 
 import android.content.Context;
 import android.graphics.Bitmap;

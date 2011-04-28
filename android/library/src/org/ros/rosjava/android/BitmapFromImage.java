@@ -14,7 +14,7 @@
  * the License.
  */
 
-package ros.android.views;
+package org.ros.rosjava.android;
 
 import com.google.common.base.Preconditions;
 
@@ -22,6 +22,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 
 import org.ros.message.sensor_msgs.Image;
+import org.ros.rosjava.android.views.MessageCallable;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
