@@ -12,9 +12,4 @@ syntax: glob
 .cproject
 .settings
 syntax: regexp
-build/.*
-android/(bin|gen)/.*
-(apps/.*|library)/(bin|gen)/.*
-(apps/.*|library)/local.properties
-(apps/.*|library)/proguard.cfg
-java/(bin|build|dist|msg_gen|srv_gen)/.*
+(bin|build|dist|msg_gen|srv_gen|gen)/.*
