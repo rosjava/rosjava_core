@@ -13,14 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.android.camera;
 
-import android.util.Log;
+package org.ros.rosjava.android;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
+import android.util.Log;
+
 import org.ros.Node;
+import org.ros.NodeConfiguration;
+import org.ros.NodeMain;
 import org.ros.Publisher;
 import org.ros.exceptions.RosInitException;
 import org.ros.message.Time;
@@ -32,31 +35,29 @@ import org.ros.namespace.NameResolver;
  * A camera node that publishes images and camera_info
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
- * 
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosCameraPub implements PreviewCallback {
+public class CameraPublisher implements NodeMain, PreviewCallback {
+
+  private Node node;
   private Publisher<Image> imagePublisher;
   private Publisher<CameraInfo> cameraInfoPublisher;
   private Image image;
   private CameraInfo cameraInfo;
 
-  /**
-   * @param masterURI
-   *          Uri of our ros master to use.
-   * @param node_name
-   *          The name of this node. the camera node name
-   */
-  public RosCameraPub() {
+  public CameraPublisher() {
     image = new Image();
     cameraInfo = new CameraInfo();
   }
 
-  public void init(Node node) throws RosInitException {
+  @Override
+  public void run(NodeConfiguration nodeConfiguration) throws RosInitException {
+    node = new Node("/anonymous", nodeConfiguration);
     NameResolver resolver = node.getResolver().createResolver("camera");
     // create image and camera info topics on local namespace
     imagePublisher = node.createPublisher(resolver.resolveName("image_raw"), Image.class);
-    cameraInfoPublisher = node.createPublisher(resolver.resolveName("camera_info"),
-        CameraInfo.class);
+    cameraInfoPublisher =
+        node.createPublisher(resolver.resolveName("camera_info"), CameraInfo.class);
   }
 
   public void stop() {
@@ -71,11 +72,10 @@ public class RosCameraPub implements PreviewCallback {
       Log.i("RosAndroid", "onPreviewFrame: not initialized");
       return;
     }
-    //Log.i("RosAndroid", "onPreviewFrame");
+    // Log.i("RosAndroid", "onPreviewFrame");
 
     Size sz = camera.getParameters().getPreviewSize();
-    if (image.data == null || image.data.length != data.length)
-      image.data = new byte[data.length];
+    if (image.data == null || image.data.length != data.length) image.data = new byte[data.length];
 
     // TODO(ethan) right now serialization is deferred. When serialization
     // happens inline, we don't need to copy.
@@ -97,7 +97,7 @@ public class RosCameraPub implements PreviewCallback {
     cameraInfo.width = sz.width;
     cameraInfo.height = sz.height;
     cameraInfoPublisher.publish(cameraInfo);
-    //Log.i("RosAndroid", "onPreviewFrame complete");
+    // Log.i("RosAndroid", "onPreviewFrame complete");
     // FIXME camera calibration parameters.
   }
 

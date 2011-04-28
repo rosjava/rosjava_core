@@ -13,9 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.android.camera;
 
-import org.ros.android.camera.R;
+import android.R;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
@@ -32,8 +34,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+
 import org.ros.exceptions.RosInitException;
-import ros.android.activity.RosActivity;
+import org.ros.rosjava.android.CameraPublisher;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,63 +44,52 @@ import java.util.List;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
- * 
  */
-public class RosCamera extends RosActivity {
-  private Preview mPreview;
-
-  Camera mCamera;
-  int cameraCurrentlyLocked;
-
+public class MainActivity extends Activity {
+  
+  private final CameraPublisher publisher;
+  
+  private Preview preview;
+  private Camera camera;
+  
   // The first rear facing camera
   int defaultCameraId;
-
-  private RosCameraPub rosCameraPublisher;
+  
+  int cameraCurrentlyLocked;
+  
+  public MainActivity() {
+    publisher = new CameraPublisher();
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
-    // Hide the window title.
     requestWindowFeature(Window.FEATURE_NO_TITLE);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-    // Create a RelativeLayout container that will hold a SurfaceView,
-    // and set it as the content of our activity.
-    mPreview = new Preview(this);
-    setContentView(mPreview);
-
-    rosCameraPublisher = new RosCameraPub();
+    preview = new Preview(this);
+    setContentView(preview);
   }
 
   @Override
   protected void onResume() {
     super.onResume();
     // Open the default i.e. the first rear facing camera.
-    mCamera = Camera.open();
+    camera = Camera.open();
     cameraCurrentlyLocked = defaultCameraId;
-    mPreview.setCamera(mCamera);
-
-    try {
-      rosCameraPublisher.init(getNode());
-      mPreview.setCallback(rosCameraPublisher);
-    } catch (RosInitException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
+    preview.setCamera(camera);
+    preview.setCallback(publisher);
   }
 
   @Override
   protected void onPause() {
     super.onPause();
-    rosCameraPublisher.stop();
+    publisher.stop();
     // Because the Camera object is a shared resource, it's very
     // important to release it when the activity is paused.
-    if (mCamera != null) {
-      mPreview.setCamera(null);
-      mCamera.release();
-      mCamera = null;
+    if (camera != null) {
+      preview.setCamera(null);
+      camera.release();
+      camera = null;
     }
 
   }
