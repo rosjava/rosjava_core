@@ -276,7 +276,7 @@ public class Node {
     for (Subscriber<?> sub : topicManager.getSubscribers()) {
       sub.shutdown();
     }
-    // TODO: need to shutdown services as well
+    // TODO(damonkohler): Shutdown services as well.
     slaveServer.shutdown();
     tcpRosServer.shutdown();
     masterRegistration.shutdown();

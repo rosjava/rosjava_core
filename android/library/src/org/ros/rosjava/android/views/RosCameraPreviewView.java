@@ -39,7 +39,6 @@ import org.ros.namespace.NameResolver;
 public class RosCameraPreviewView extends CameraPreviewView implements NodeMain {
   
   private Node node;
-  private String topicName;
   private Publisher<Image> imagePublisher;
   private Publisher<CameraInfo> cameraInfoPublisher;
   
@@ -48,30 +47,27 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
     public void onPreviewFrame(byte[] data, Camera camera) {
       Image image = new Image();
       CameraInfo cameraInfo = new CameraInfo();
-      Size sz = camera.getParameters().getPreviewSize();
-      if (image.data == null || image.data.length != data.length) image.data = new byte[data.length];
+      String frameId = "android_camera";
 
       // TODO(ethan) right now serialization is deferred. When serialization
-      // happens inline, we don't need to copy.
+      // happens inline, we won't need to copy.
+      image.data = new byte[data.length];
       System.arraycopy(data, 0, image.data, 0, data.length);
 
-      image.encoding = "8UC1"; // just plain old buffer
-      image.step = sz.width;
-      image.width = sz.width;
-      image.height = sz.height + sz.height / 2; // yuv image, y is top width
-                                                // *height, uv are width*height/2
-                                                // on the end.
+      image.encoding = "8UC1";
+      Size size = camera.getParameters().getPreviewSize();
+      image.step = size.width;
+      image.width = size.width;
+      image.height = size.height + size.height / 2;
       image.header.stamp = Time.fromMillis(System.currentTimeMillis());
-      image.header.frame_id = "android_camera";
+      image.header.frame_id = frameId;
       imagePublisher.publish(image);
-      cameraInfo.header.stamp = image.header.stamp; // give camera info the same
-                                                    // stamp as image
-      cameraInfo.header.frame_id = "android_camera"; // TODO externalize this
-                                                     // somehow.
-      cameraInfo.width = sz.width;
-      cameraInfo.height = sz.height;
+      
+      cameraInfo.header.stamp = image.header.stamp;
+      cameraInfo.header.frame_id = frameId;
+      cameraInfo.width = size.width;
+      cameraInfo.height = size.height;
       cameraInfoPublisher.publish(cameraInfo);
-      // FIXME camera calibration parameters.
     }
   }
   
@@ -92,7 +88,6 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
     Preconditions.checkState(node == null);
     node = new Node("/anonymous", nodeConfiguration);
     NameResolver resolver = node.getResolver().createResolver("camera");
-    // create image and camera info topics on local namespace
     imagePublisher = node.createPublisher(resolver.resolveName("image_raw"), Image.class);
     cameraInfoPublisher =
         node.createPublisher(resolver.resolveName("camera_info"), CameraInfo.class);
