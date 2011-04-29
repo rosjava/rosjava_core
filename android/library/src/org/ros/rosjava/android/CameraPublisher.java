@@ -69,10 +69,8 @@ public class CameraPublisher implements NodeMain, PreviewCallback {
   @Override
   public void onPreviewFrame(byte[] data, Camera camera) {
     if (imagePublisher == null || cameraInfoPublisher == null) {
-      Log.i("RosAndroid", "onPreviewFrame: not initialized");
       return;
     }
-    // Log.i("RosAndroid", "onPreviewFrame");
 
     Size sz = camera.getParameters().getPreviewSize();
     if (image.data == null || image.data.length != data.length) image.data = new byte[data.length];
