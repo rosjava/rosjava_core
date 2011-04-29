@@ -19,27 +19,23 @@ package org.ros.android.camera;
 import android.app.Activity;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
-import org.ros.rosjava.android.CameraPublisher;
-import org.ros.rosjava.android.views.CameraPreviewView;
+import org.ros.rosjava.android.views.RosCameraPreviewView;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MainActivity extends Activity {
-  
-  private final CameraPublisher publisher;
-  
-  private CameraPreviewView preview;
+
+  private RosCameraPreviewView preview;
   private int cameraId;
-  
+
   public MainActivity() {
-    publisher = new CameraPublisher();
   }
 
   @Override
@@ -47,35 +43,44 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     requestWindowFeature(Window.FEATURE_NO_TITLE);
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-    preview = new CameraPreviewView(this);
+    preview = new RosCameraPreviewView(this);
     setContentView(preview);
   }
 
   @Override
   protected void onResume() {
     super.onResume();
-    cameraId = 1;
+    cameraId = 0;
     preview.setCamera(Camera.open(cameraId));
-    preview.setPreviewCallback(publisher);
   }
-  
+
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     if (event.getAction() == MotionEvent.ACTION_UP) {
-      int numCameras = Camera.getNumberOfCameras();
-      cameraId = (cameraId + 1) % numCameras;
-      Log.i("RosCamera", "Switching to " + cameraId);
-      preview.releaseCamera();
-      preview.setCamera(Camera.open(cameraId));
+      int numberOfCameras = Camera.getNumberOfCameras();
+      final Toast toast;
+      if (numberOfCameras > 1) {
+        cameraId = (cameraId + 1) % numberOfCameras;
+        preview.releaseCamera();
+        preview.setCamera(Camera.open(cameraId));
+        toast = Toast.makeText(this, "Switching cameras.", Toast.LENGTH_SHORT);
+      } else {
+        toast = Toast.makeText(this, "No alternative cameras to switch to.", Toast.LENGTH_SHORT);
+      }
+      runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          toast.show();
+        }
+      });
     }
     return true;
   }
- 
+
   @Override
   protected void onPause() {
     super.onPause();
     preview.releaseCamera();
-    publisher.stop();
   }
 
 }
