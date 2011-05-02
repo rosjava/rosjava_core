@@ -31,7 +31,7 @@ public class RosCore implements NodeMain {
 
   public RosCore() {
     masterServer =
-        new MasterServer(BindAddress.createPrivate(11311), AdvertiseAddress.createPrivate());
+        new MasterServer(BindAddress.createPrivate(0), AdvertiseAddress.createPrivate());
   }
 
   @Override
