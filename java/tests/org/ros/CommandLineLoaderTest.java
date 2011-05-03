@@ -116,7 +116,7 @@ public class CommandLineLoaderTest extends TestCase {
     NodeConfiguration nodeConfiguration = loader.createConfiguration();
     assertEquals(defaultMasterUri, nodeConfiguration.getRosMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
-    assertEquals(Namespace.GLOBAL_NS, nodeConfiguration.getParentResolver().getNamespace());
+    assertEquals(Namespace.GLOBAL, nodeConfiguration.getParentResolver().getNamespace());
     // Default is the hostname + FQDN.
     assertEquals(InetAddress.getLocalHost().getCanonicalHostName(), nodeConfiguration.getHostName());
 

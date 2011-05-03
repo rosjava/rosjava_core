@@ -25,7 +25,7 @@ public class NodeNameResolverTest extends NameResolverTest {
   public void testResolveNameOneArg() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     GraphName nodeName = new GraphName("/node");
-    NodeNameResolver r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL_NS, remappings),
+    NodeNameResolver r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL, remappings),
         nodeName);
 
     assertEquals("/foo", r.resolveName("foo"));
@@ -38,7 +38,7 @@ public class NodeNameResolverTest extends NameResolverTest {
     assertEquals("/node/foo", r.resolveName("~/foo"));
 
     nodeName = new GraphName("/ns1/node");
-    r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL_NS, remappings), nodeName);
+    r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL, remappings), nodeName);
     assertEquals("/ns1/node/foo", r.resolveName("~foo"));
     assertEquals("/ns1/node/foo", r.resolveName("~/foo"));
     assertEquals("/ns1/node/foo/bar", r.resolveName("~/foo/bar"));
@@ -65,7 +65,7 @@ public class NodeNameResolverTest extends NameResolverTest {
   @Override
   public NameResolver createGlobalResolver(HashMap<GraphName, GraphName> remappings) {
     GraphName nodeName = new GraphName("/node");
-    NodeNameResolver r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL_NS, remappings),
+    NodeNameResolver r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL, remappings),
         nodeName);
     return r;
   }

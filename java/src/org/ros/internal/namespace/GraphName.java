@@ -68,7 +68,7 @@ public class GraphName {
   public static String canonicalizeName(String name) {
     validateName(name);
     // Trim trailing slashes for canonical representation.
-    while (!name.equals(Namespace.GLOBAL_NS) && name.endsWith("/")) {
+    while (!name.equals(Namespace.GLOBAL) && name.endsWith("/")) {
       name = name.substring(0, name.length() - 1);
     }
     if (name.startsWith("~/")) {
@@ -144,15 +144,15 @@ public class GraphName {
     if (name.length() == 0) {
       return new GraphName("");
     }
-    if (name.equals(Namespace.GLOBAL_NS)) {
-      return new GraphName(Namespace.GLOBAL_NS);
+    if (name.equals(Namespace.GLOBAL)) {
+      return new GraphName(Namespace.GLOBAL);
     }
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > 1) {
       return new GraphName(name.substring(0, slashIdx));
     } else {
       if (isGlobal()) {
-        return new GraphName(Namespace.GLOBAL_NS);
+        return new GraphName(Namespace.GLOBAL);
       } else {
         return new GraphName("");
       }

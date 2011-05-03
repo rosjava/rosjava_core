@@ -30,7 +30,7 @@ public class NameResolverTest extends TestCase {
   }
 
   public NameResolver createGlobalResolver(HashMap<GraphName, GraphName> remappings) {
-    return new NameResolver(Namespace.GLOBAL_NS, remappings);
+    return new NameResolver(Namespace.GLOBAL, remappings);
   }
 
   @Test
@@ -65,12 +65,12 @@ public class NameResolverTest extends TestCase {
     } catch (IllegalArgumentException e) {
     }
 
-    assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
-    assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, Namespace.GLOBAL_NS));
-    assertEquals(Namespace.GLOBAL_NS, r.resolveName("/anything/bar", Namespace.GLOBAL_NS));
+    assertEquals(Namespace.GLOBAL, r.resolveName(Namespace.GLOBAL, ""));
+    assertEquals(Namespace.GLOBAL, r.resolveName(Namespace.GLOBAL, Namespace.GLOBAL));
+    assertEquals(Namespace.GLOBAL, r.resolveName("/anything/bar", Namespace.GLOBAL));
 
     assertEquals("/ns1/node", r.resolveName("/ns1/node", ""));
-    assertEquals(Namespace.GLOBAL_NS, r.resolveName(Namespace.GLOBAL_NS, ""));
+    assertEquals(Namespace.GLOBAL, r.resolveName(Namespace.GLOBAL, ""));
 
     // relative namespaces get resolved to default namespace
     assertEquals("/foo", r.resolveName("/", "foo"));

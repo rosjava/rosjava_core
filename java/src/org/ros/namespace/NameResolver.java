@@ -17,6 +17,7 @@
 package org.ros.namespace;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 import org.ros.exceptions.RosNameException;
 import org.ros.internal.namespace.GraphName;
@@ -38,6 +39,10 @@ public class NameResolver {
     this.namespace = GraphName.canonicalizeName(namespace);
   }
 
+  public static NameResolver createDefault() {
+    return new NameResolver(Namespace.GLOBAL, Maps.<GraphName, GraphName>newHashMap());
+  }
+  
   public String getNamespace() {
     return namespace;
   }
@@ -91,8 +96,8 @@ public class NameResolver {
   public static String join(GraphName name1, GraphName name2) {
     if (name2.isGlobal() || name1.toString().equals("")) {
       return name2.toString();
-    } else if (name1.equals(Namespace.GLOBAL_NS)) {
-      return Namespace.GLOBAL_NS + name2.toString();
+    } else if (name1.equals(Namespace.GLOBAL)) {
+      return Namespace.GLOBAL + name2.toString();
     } else {
       return new GraphName(name1.toString() + "/" + name2.toString()).toString();
     }

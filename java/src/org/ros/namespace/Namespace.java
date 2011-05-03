@@ -29,6 +29,6 @@ public interface Namespace {
   /**
    * This is the global namespace, think root "/".
    */
-  public final static String GLOBAL_NS = "/";
+  public final static String GLOBAL = "/";
 
 }

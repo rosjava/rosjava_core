@@ -31,11 +31,13 @@ import java.net.URI;
  * @param <NodeType>
  */
 public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
+  
+  private static final int XMLRPC_TIMEOUT = 10 * 1000; // 10 seconds
+
+  private final URI uri;
 
   protected final NodeType node;
-  private final URI uri;
-  private static final int XMLRPC_TIMEOUT = 10 * 1000; // 10 seconds
-   
+  
   public NodeClient(URI uri, Class<NodeType> interfaceClass) throws MalformedURLException {
     this.uri = uri;
 
@@ -50,7 +52,8 @@ public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
 
     XmlRpcClientFactory<NodeType> factory = new XmlRpcClientFactory<NodeType>(client);
     node =
-        interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, "", XMLRPC_TIMEOUT));
+        interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, "",
+            XMLRPC_TIMEOUT));
   }
 
   /**

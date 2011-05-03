@@ -16,11 +16,34 @@
 
 package org.ros;
 
+import org.ros.namespace.NameResolver;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class NodeConfigurationBuilder {
+  
+  private final NodeConfiguration nodeConfiguration;
+  private NameResolver parentResolver;
 
+  public NodeConfigurationBuilder() {
+    nodeConfiguration = new NodeConfiguration();
+  }
   
-  
+  public void setParentResolver(NameResolver parentResolver) {
+    this.parentResolver = parentResolver;
+  }
+
+  public NameResolver getParentResolver() {
+    return parentResolver;
+  }
+
+  public NodeConfiguration build() {
+    if (getParentResolver() == null) {
+      setParentResolver(NameResolver.createDefault());
+    }
+    nodeConfiguration.setParentResolver(getParentResolver());
+    return nodeConfiguration;
+  }
+
 }

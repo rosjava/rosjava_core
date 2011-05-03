@@ -16,11 +16,13 @@
 
 package org.ros;
 
-import com.google.common.base.Preconditions;
+import java.net.MalformedURLException;
+import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exceptions.RosInitException;
+import org.ros.exceptions.RosNameException;
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
@@ -42,11 +44,9 @@ import org.ros.message.MessageSerializer;
 import org.ros.message.Service;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
-import org.ros.namespace.Namespace;
 import org.ros.namespace.NodeNameResolver;
 
-import java.net.MalformedURLException;
-import java.net.URI;
+import com.google.common.base.Preconditions;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -206,7 +206,6 @@ public class Node {
     return node.createServiceServer(serviceDefinition, responseBuilder);
   }
 
-  @Override
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType>
       createServiceClient(ServiceIdentifier serviceIdentifier,
           Class<ResponseMessageType> responseMessageClass) {
@@ -295,10 +294,9 @@ public class Node {
     return resolver;
   }
 
-  @Override
   public ParameterClient createParameterClient() {
     try {
-      return ParameterClient.createFromNamespace(this);
+      return ParameterClient.create(getName(), getMasterUri(), resolver);
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }

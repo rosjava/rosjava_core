@@ -16,7 +16,9 @@
 
 package org.ros;
 
-import org.ros.namespace.Namespace;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,10 +26,6 @@ import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.namespace.NameResolver;
-
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.util.List;
 
 /**
  * Get and set values on the ROS Parameter Server.
@@ -48,18 +46,11 @@ public class ParameterClient {
     this.resolver = resolver;
   }
 
-  public static ParameterClient createFromNamespace(Namespace namespace)
-      throws MalformedURLException {
-    org.ros.internal.node.client.ParameterClient parameterServer = new org.ros.internal.node.client.ParameterClient(
-        namespace.getMasterUri());
-    return new ParameterClient(namespace.getName(), parameterServer, namespace.getResolver());
-  }
-
-  public static ParameterClient createStandalone(String callerId, URI masterUri,
+  public static ParameterClient create(String callerId, URI masterUri,
       NameResolver resolver) throws MalformedURLException {
-    org.ros.internal.node.client.ParameterClient parameterServer = new org.ros.internal.node.client.ParameterClient(
-        masterUri);
-    return new ParameterClient(callerId, parameterServer, resolver);
+    org.ros.internal.node.client.ParameterClient client =
+        new org.ros.internal.node.client.ParameterClient(masterUri);
+    return new ParameterClient(callerId, client, resolver);
   }
 
   public Object getParam(String parameterName) throws RemoteException {
