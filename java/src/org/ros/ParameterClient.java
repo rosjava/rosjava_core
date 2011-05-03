@@ -33,8 +33,10 @@ import org.ros.namespace.NameResolver;
  * @author kwc@willowgarage.com (Ken Conley)
  */
 public class ParameterClient {
+  
   private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(ParameterClient.class);
+  
   private final org.ros.internal.node.client.ParameterClient parameterServer;
   private final String callerId;
   private final NameResolver resolver;
