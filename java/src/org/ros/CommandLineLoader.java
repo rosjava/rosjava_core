@@ -180,13 +180,11 @@ public class CommandLineLoader extends RosLoader {
    * @param env
    */
   private String getNamespace(Map<String, String> specialRemappings, Map<String, String> env) {
-
     String namespace = Namespace.GLOBAL_NS;
     if (specialRemappings.containsKey(CommandLine.ROS_NAMESPACE)) {
-      namespace =
-          new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal().toString();
+      namespace = new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal();
     } else if (env.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
-      namespace = new GraphName(env.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal().toString();
+      namespace = new GraphName(env.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
     }
     return namespace;
   }

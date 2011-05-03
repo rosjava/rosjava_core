@@ -35,6 +35,7 @@ import java.net.URI;
  * Interface for the ROS namespace specification.
  * 
  * @see "http://www.ros.org/wiki/Names"
+ * @author kwc@willowgarage.com (Ken Conley)
  */
 public interface Namespace {
 

@@ -132,7 +132,6 @@ public class NameResolver {
    * @param name
    * @return {@link NameResolver} relative to the current namespace.
    */
-  @SuppressWarnings("unchecked")
   public NameResolver createResolver(String name) {
     String resolverNamespace = resolveName(name);
     return new NameResolver(resolverNamespace, remappings);

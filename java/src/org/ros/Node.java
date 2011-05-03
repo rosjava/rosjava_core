@@ -52,8 +52,6 @@ import java.net.URI;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  */
-// TODO(kwc): add createNamespace method to enable creation of new Namespace
-// handles.
 public class Node implements Namespace {
 
   private final NodeConfiguration configuration;
@@ -65,9 +63,8 @@ public class Node implements Namespace {
   private final Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher;
   private final MessageSerializerFactory<Message> messageSerializerFactory;
 
-  private final class PregeneratedCodeMessageSerializerFactory
-      implements
-        MessageSerializerFactory<Message> {
+  private final class PregeneratedCodeMessageSerializerFactory implements
+      MessageSerializerFactory<Message> {
     @Override
     public <MessageType extends Message> org.ros.MessageSerializer<MessageType> create() {
       return new MessageSerializer<MessageType>();
@@ -75,8 +72,8 @@ public class Node implements Namespace {
   }
 
   /**
-   * @param name Node name. This identifies this node to the rest of the ROS
-   *        graph.
+   * @param name
+   *          Node name. This identifies this node to the rest of the ROS graph.
    * @param configuration
    * @throws RosInitException
    */
@@ -105,7 +102,8 @@ public class Node implements Namespace {
       if (configuration.getHostName() == null) {
         throw new NullPointerException("configuration.getHostName() cannot be null");
       }
-      if (configuration.getHostName().equals("localhost") || configuration.getHostName().startsWith("127.0.0.")) {
+      if (configuration.getHostName().equals("localhost")
+          || configuration.getHostName().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
         node =
@@ -114,7 +112,8 @@ public class Node implements Namespace {
       } else {
         node =
             org.ros.internal.node.Node.createPublic(nodeName, configuration.getRosMasterUri(),
-                configuration.getHostName(), configuration.getXmlRpcPort(), configuration.getTcpRosPort());
+                configuration.getHostName(), configuration.getXmlRpcPort(),
+                configuration.getTcpRosPort());
       }
     } catch (Exception e) {
       throw new RosInitException(e);
@@ -171,8 +170,9 @@ public class Node implements Namespace {
   }
 
   @Override
-  public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType> createServiceClient(
-      ServiceIdentifier serviceIdentifier, Class<ResponseMessageType> responseMessageClass) {
+  public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType>
+      createServiceClient(ServiceIdentifier serviceIdentifier,
+          Class<ResponseMessageType> responseMessageClass) {
     return node.createServiceClient(serviceIdentifier,
         new MessageDeserializer<ResponseMessageType>(responseMessageClass));
   }
@@ -252,9 +252,7 @@ public class Node implements Namespace {
     try {
       return ParameterClient.createFromNamespace(this);
     } catch (MalformedURLException e) {
-      // Convert to unchecked exception as this really shouldn't happen as URL
-      // is already validated.
-      throw new RuntimeException("MalformedURLException should not have been thrown: " + e);
+      throw new RuntimeException(e);
     }
   }
 
@@ -263,10 +261,6 @@ public class Node implements Namespace {
    */
   public URI getUri() {
     return node.getUri();
-  }
-
-  public NodeNamespace createNamespace(String namespace) {
-    return new NodeNamespace(this, namespace);
   }
 
   /**
