@@ -99,11 +99,11 @@ public class Node {
     log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
 
     try {
-      if (configuration.getHostName() == null) {
+      if (configuration.getHost() == null) {
         throw new NullPointerException("configuration.getHostName() cannot be null");
       }
-      if (configuration.getHostName().equals("localhost")
-          || configuration.getHostName().startsWith("127.0.0.")) {
+      if (configuration.getHost().equals("localhost")
+          || configuration.getHost().startsWith("127.0.0.")) {
         // If we are advertising as localhost, explicitly bind to loopback-only.
         // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
         node =
@@ -112,7 +112,7 @@ public class Node {
       } else {
         node =
             org.ros.internal.node.Node.createPublic(nodeName, configuration.getRosMasterUri(),
-                configuration.getHostName(), configuration.getXmlRpcPort(),
+                configuration.getHost(), configuration.getXmlRpcPort(),
                 configuration.getTcpRosPort());
       }
     } catch (Exception e) {

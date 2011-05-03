@@ -110,10 +110,10 @@ public class CommandLineLoader extends RosLoader {
     }
     String addressOverride = getAddressOverride(specialRemappings, environment);
     if (addressOverride != null) {
-      configuration.setHostName(addressOverride);
+      configuration.setHost(addressOverride);
     } else {
       try {
-        configuration.setHostName(InetAddress.getLocalHost().getCanonicalHostName());
+        configuration.setHost(InetAddress.getLocalHost().getCanonicalHostName());
       } catch (UnknownHostException e) {
         throw new RosInitException(e);
       }

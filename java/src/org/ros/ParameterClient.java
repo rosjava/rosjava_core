@@ -34,7 +34,7 @@ import org.ros.namespace.NameResolver;
  */
 public class ParameterClient {
   
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ParameterClient.class);
   
   private final org.ros.internal.node.client.ParameterClient parameterServer;

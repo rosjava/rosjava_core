@@ -32,7 +32,7 @@ public class NodeConfiguration {
 
   private NameResolver resolver;
   private URI masterUri;
-  private String hostname;
+  private String host;
   private String rosRoot;
   private List<String> rosPackagePath;
   private int tcpRosPort;
@@ -91,17 +91,17 @@ public class NodeConfiguration {
   /**
    * @return host name/address to use when advertising this node via URLs.
    */
-  public String getHostName() {
-    return hostname;
+  public String getHost() {
+    return host;
   }
 
   /**
    * Set host name/address to use when advertising this node via URLs.
    * 
-   * @param hostName
+   * @param host
    */
-  public void setHostName(String hostName) {
-    this.hostname = hostName;
+  public void setHost(String host) {
+    this.host = host;
   }
 
   /**

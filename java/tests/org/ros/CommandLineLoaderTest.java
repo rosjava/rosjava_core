@@ -118,7 +118,7 @@ public class CommandLineLoaderTest extends TestCase {
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
     assertEquals(Namespace.GLOBAL, nodeConfiguration.getParentResolver().getNamespace());
     // Default is the hostname + FQDN.
-    assertEquals(InetAddress.getLocalHost().getCanonicalHostName(), nodeConfiguration.getHostName());
+    assertEquals(InetAddress.getLocalHost().getCanonicalHostName(), nodeConfiguration.getHost());
 
     // Construct artificial environment. Set optional environment variables.
     env = getDefaultEnv();
@@ -130,7 +130,7 @@ public class CommandLineLoaderTest extends TestCase {
 
     assertEquals(defaultMasterUri, nodeConfiguration.getRosMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
-    assertEquals("192.168.0.1", nodeConfiguration.getHostName());
+    assertEquals("192.168.0.1", nodeConfiguration.getHost());
     assertEquals("/foo/bar", nodeConfiguration.getParentResolver().getNamespace());
     Assert.assertEquals(rosPackagePathList, nodeConfiguration.getRosPackagePath());
 
@@ -149,11 +149,12 @@ public class CommandLineLoaderTest extends TestCase {
   }
 
   @Test
-  public void testcreateConfigurationCommandLine() throws RosInitException, URISyntaxException {
+  public void testCreateConfigurationCommandLine() throws RosInitException, URISyntaxException {
     Map<String, String> env = getDefaultEnv();
 
     // Test __name override
-    NodeConfiguration nodeConfiguration = new CommandLineLoader(emptyArgv, env).createConfiguration();
+    NodeConfiguration nodeConfiguration =
+        new CommandLineLoader(emptyArgv, env).createConfiguration();
     assertEquals(null, nodeConfiguration.getNodeNameOverride());
     List<String> args = Lists.newArrayList("Foo", "__name:=newname");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
@@ -190,17 +191,17 @@ public class CommandLineLoaderTest extends TestCase {
     env = getDefaultEnv();
     args = Lists.newArrayList("Foo", CommandLine.ROS_IP + ":=192.168.0.2");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
-    assertEquals("192.168.0.2", nodeConfiguration.getHostName());
+    assertEquals("192.168.0.2", nodeConfiguration.getHost());
 
     // Verify multiple options work together.
     env = getDefaultEnv();
     args =
         Lists.newArrayList("Foo", CommandLine.ROS_NAMESPACE + ":=baz/bar/", "ignore",
-            CommandLine.ROS_MASTER_URI + ":=http://override:22622", "--bad",
-            CommandLine.ROS_IP + ":=192.168.0.2");
+            CommandLine.ROS_MASTER_URI + ":=http://override:22622", "--bad", CommandLine.ROS_IP
+                + ":=192.168.0.2");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getRosMasterUri());
-    assertEquals("192.168.0.2", nodeConfiguration.getHostName());
+    assertEquals("192.168.0.2", nodeConfiguration.getHost());
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
   }
 
