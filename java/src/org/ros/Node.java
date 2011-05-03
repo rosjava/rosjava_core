@@ -52,7 +52,7 @@ import java.net.URI;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class Node implements Namespace {
+public class Node {
 
   private final NodeConfiguration configuration;
   private final NodeNameResolver resolver;
@@ -125,7 +125,19 @@ public class Node implements Namespace {
     log.setRosoutPublisher(rosoutPublisher);
   }
 
-  @Override
+  /**
+   * @param <MessageType>
+   *          The message type to create the publisher for
+   * @param topicName
+   *          The topic name, will be pushed down under this namespace unless
+   *          '/' is prepended.
+   * @param messageClass
+   *          The Class object of the topic message type.
+   * @return A handle to a publisher that may be used to publish messages of
+   *         type MessageType
+   * @throws RosInitException
+   *           May throw if the system is not in a proper state.
+   */
   public <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
       Class<MessageType> messageClass) throws RosInitException {
     try {
@@ -142,7 +154,26 @@ public class Node implements Namespace {
     }
   }
 
-  @Override
+  /**
+   * @param <MessageType>
+   *          The message type to create the Subscriber for.
+   * @param topicName
+   *          The topic name to be subscribed to. This may be "bar" "/foo/bar"
+   *          "~my" and will be auto resolved.
+   * @param messageCallback
+   *          The callback to be registered to this subscription. This will be
+   *          called asynchronously any time that a message is published on the
+   *          topic.
+   * @param messageClass
+   *          The class of the message type that is being published on the
+   *          topic.
+   * @return A handle to a Subscriber that may be used to subscribe messages of
+   *         type MessageType.
+   * @throws RosInitException
+   *           The subscriber may fail if the Ros system has not been
+   *           initialized or other wackyness. TODO specify exceptions that
+   *           might be thrown here.
+   */
   public <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
       final MessageListener<MessageType> callback, Class<MessageType> messageClass)
       throws RosInitException {
@@ -162,7 +193,13 @@ public class Node implements Namespace {
     }
   }
 
-  @Override
+  /**
+   * Create a {@link ParameterClient} to query and set parameters on the ROS
+   * parameter server.
+   * 
+   * @return {@link ParameterClient} with {@link NameResolver} in this
+   *         namespace.
+   */
   public <RequestType, ResponseType> ServiceServer createServiceServer(
       ServiceDefinition serviceDefinition,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
@@ -212,7 +249,9 @@ public class Node implements Namespace {
     return timeProvider.getCurrentTime();
   }
 
-  @Override
+  /**
+   * @return The fully resolved name of this namespace, e.g. "/foo/bar/boop".
+   */
   public String getName() {
     return nodeName.toString();
   }
@@ -224,7 +263,15 @@ public class Node implements Namespace {
     return log;
   }
 
-  @Override
+  /**
+   * Resolve the given name, using ROS conventions, into a full ROS namespace
+   * name. Will be relative to the current namespace unless the name is global.
+   * 
+   * @param name
+   *          The name to resolve.
+   * @return Fully resolved ros namespace name.
+   * @throws RosNameException
+   */
   public String resolveName(String name) {
     return resolver.resolveName(name);
   }
@@ -237,13 +284,14 @@ public class Node implements Namespace {
   /**
    * @return {@link URI} of {@link Master} that this node is attached to.
    */
-  @Override
   public URI getMasterUri() {
     return configuration.getRosMasterUri();
   }
 
-  @Override
-  public NodeNameResolver getResolver() {
+  /**
+   * @return {@link NameResolver} for this namespace.
+   */
+   public NodeNameResolver getResolver() {
     return resolver;
   }
 

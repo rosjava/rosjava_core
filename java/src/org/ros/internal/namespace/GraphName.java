@@ -45,12 +45,11 @@ public class GraphName {
   public GraphName(String name) {
     Preconditions.checkNotNull(name);
     validateName(name);
-    // Intern all ROS names as there is not likely to be much variety.
-    this.name = canonicalizeName(name).intern();
+    this.name = canonicalizeName(name);
   }
 
   public static boolean validateName(String name) {
-    // allow empty name
+    // Allow empty names.
     if (name.length() > 0) {
       if (!name.matches(VALID_ROS_NAME_PATTERN)) {
         throw new RosNameException("Invalid unix name, may not contain special characters.");
@@ -68,7 +67,7 @@ public class GraphName {
    */
   public static String canonicalizeName(String name) {
     validateName(name);
-    // trim trailing slashes for canonical representation
+    // Trim trailing slashes for canonical representation.
     while (!name.equals(Namespace.GLOBAL_NS) && name.endsWith("/")) {
       name = name.substring(0, name.length() - 1);
     }
