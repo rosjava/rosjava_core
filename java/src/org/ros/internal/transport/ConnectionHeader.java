@@ -71,7 +71,12 @@ public class ConnectionHeader {
         throw new IllegalStateException("Invalid line in handshake header: [" + field + "]");
       }
       String[] keyAndValue = field.split("=");
-      result.put(keyAndValue[0], keyAndValue[1]);
+      if (keyAndValue.length == 1) {
+        // TODO(damonkohler): Is this the right behavior? Write a test.
+        result.put(keyAndValue[0], "");
+      } else {
+        result.put(keyAndValue[0], keyAndValue[1]);
+      }
     }
     if (DEBUG) {
       log.info("Decoded header: " + result);

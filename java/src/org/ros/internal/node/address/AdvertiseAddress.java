@@ -29,7 +29,7 @@ import java.util.concurrent.Callable;
  * between an address that should be used for binding a server port and one that
  * should be advertised to external entities.
  * 
- * An {@link AdvertiseAddress} enforces lazy lookups of port information to
+ * An {@link AdvertiseAddress} encourages lazy lookups of port information to
  * prevent accidentally storing a bind port (e.g. 0 for OS picked) instead of
  * the advertised port.
  * 
@@ -53,6 +53,27 @@ public class AdvertiseAddress implements Address {
     this.host = host;
   }
   
+  public String getHost() {
+    return host;
+  }
+  
+  public void setStaticPort(final int port) {
+    portCallable = new Callable<Integer>() {
+      @Override
+      public Integer call() throws Exception {
+        return port;
+      }
+    };
+  }
+  
+  public int getPort() {
+    try {
+      return portCallable.call();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
   public void setPortCallable(Callable<Integer> portCallable) {
     this.portCallable = portCallable;
   }
@@ -60,7 +81,7 @@ public class AdvertiseAddress implements Address {
   public InetSocketAddress toInetSocketAddress() {
     Preconditions.checkNotNull(portCallable);
     try {
-      return InetSocketAddress.createUnresolved(host, portCallable.call());
+      return new InetSocketAddress(host, portCallable.call());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

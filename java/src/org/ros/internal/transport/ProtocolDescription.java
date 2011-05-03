@@ -16,10 +16,12 @@
 
 package org.ros.internal.transport;
 
-import com.google.common.collect.Lists;
-
 import java.net.InetSocketAddress;
 import java.util.List;
+
+import org.ros.internal.node.address.AdvertiseAddress;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -27,37 +29,34 @@ import java.util.List;
 public class ProtocolDescription {
 
   private final String name;
-  private final InetSocketAddress address;
+  private final AdvertiseAddress address;
 
-  public ProtocolDescription(String name, InetSocketAddress address) {
+  public ProtocolDescription(String name, AdvertiseAddress address) {
     this.name = name;
-    // Copying the InetSocketAddress like this is necessary in order to support
-    // serializing and deserializing ProtocolDescriptions as pairs of Strings.
-    this.address = new InetSocketAddress(address.getHostName(), address.getPort());
+    this.address = address;
   }
 
   public String getName() {
     return name;
   }
 
-  public InetSocketAddress getAddress() {
+  public AdvertiseAddress getAdverstiseAddress() {
     return address;
+  }
+  
+  public InetSocketAddress getAddress() {
+    return address.toInetSocketAddress();
   }
 
   public List<Object> toList() {
-    return Lists.newArrayList((Object) name, address.getHostName(), address.getPort());
+    return Lists.newArrayList((Object) name, address.getHost(), address.getPort());
   }
 
   @Override
   public String toString() {
-    return "Protocol<" + name + ", " + getAddress() + ">";
+    return "Protocol<" + name + ", " + getAdverstiseAddress() + ">";
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -67,23 +66,25 @@ public class ProtocolDescription {
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
     ProtocolDescription other = (ProtocolDescription) obj;
     if (address == null) {
-      if (other.address != null) return false;
-    } else if (!address.equals(other.address)) return false;
+      if (other.address != null)
+        return false;
+    } else if (!address.equals(other.address))
+      return false;
     if (name == null) {
-      if (other.name != null) return false;
-    } else if (!name.equals(other.name)) return false;
+      if (other.name != null)
+        return false;
+    } else if (!name.equals(other.name))
+      return false;
     return true;
   }
 

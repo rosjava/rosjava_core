@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.topic;
 
+import java.net.MalformedURLException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.RemoteException;
@@ -25,8 +27,6 @@ import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
-
-import java.net.MalformedURLException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

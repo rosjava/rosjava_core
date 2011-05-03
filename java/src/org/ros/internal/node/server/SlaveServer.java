@@ -188,7 +188,7 @@ public class SlaveServer extends NodeServer {
     for (String protocol : protocols) {
       if (protocol.equals(ProtocolNames.TCPROS)) {
         try {
-          return new TcpRosProtocolDescription(tcpRosServer.getAddress());
+          return new TcpRosProtocolDescription(tcpRosServer.getAdvertiseAddress());
         } catch (Exception e) {
           throw new ServerException(e);
         }

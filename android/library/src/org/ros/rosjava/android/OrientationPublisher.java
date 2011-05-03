@@ -35,7 +35,7 @@ import org.ros.message.geometry_msgs.Quaternion;
 public class OrientationPublisher implements NodeMain {
 
   private final SensorManager sensorManager;
-  
+
   private final class OrientationListener implements SensorEventListener {
 
     private final Publisher<PoseStamped> publisher;
@@ -86,12 +86,10 @@ public class OrientationPublisher implements NodeMain {
     Node node = null;
     try {
       node = new Node("orientation", configuration);
-      final Publisher<org.ros.message.geometry_msgs.PoseStamped> publisher =
-          node.createPublisher("android/orientation",
-              org.ros.message.geometry_msgs.PoseStamped.class);
+      final Publisher<org.ros.message.geometry_msgs.PoseStamped> publisher = node.createPublisher(
+          "android/orientation", org.ros.message.geometry_msgs.PoseStamped.class);
       Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-      sensorManager.registerListener(new OrientationListener(publisher), sensor,
-          SensorManager.SENSOR_DELAY_FASTEST);
+      sensorManager.registerListener(new OrientationListener(publisher), sensor, 100000 /* 10 Hz */);
       // TODO(damonkohler): Make this cancelable.
       while (true) {
         Thread.sleep(10000);

@@ -44,6 +44,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class MasterRegistration implements TopicListener {
 
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Node.class);
 
   class MasterRegistrationThread extends Thread {
@@ -82,15 +83,14 @@ public class MasterRegistration implements TopicListener {
       try {
         doJob();
       } catch (XmlRpcTimeoutException e) {
-        log.error("timeout communication with master", e);
+        log.error("Timeout communication with master.", e);
         return false;
       } catch (RemoteException e) {
-        log.error("remote exception from master", e);
+        log.error("Remote exception from master.", e);
         return false;
       } catch (UndeclaredThrowableException e) {
-        // artifact of java reflect API and apache xmlrpc library.
-        log.error("remote exception from master", e);
-        return false;
+        // Artifact of Java reflection API and the Apache XML-RPC library.
+        throw new RuntimeException(e);
       }
       return true;
     }
@@ -147,6 +147,9 @@ public class MasterRegistration implements TopicListener {
 
   public MasterRegistration(MasterClient masterClient) {
     this.masterClient = masterClient;
+    if (DEBUG) {
+      log.info("Remote URI: " + masterClient.getRemoteUri());
+    }
     registrationOk = false;
     registrationQueue = new ConcurrentLinkedQueue<RegistrationJob>();
     registrationThread = new MasterRegistrationThread();

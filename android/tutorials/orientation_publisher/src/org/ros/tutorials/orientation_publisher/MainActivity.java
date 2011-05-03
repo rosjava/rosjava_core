@@ -16,18 +16,17 @@
 
 package org.ros.tutorials.orientation_publisher;
 
-import com.google.common.collect.Lists;
+import org.ros.NodeRunner;
+import org.ros.rosjava.android.MessageCallable;
+import org.ros.rosjava.android.OrientationPublisher;
+import org.ros.rosjava.android.tutorials.orientation_publisher.R;
+import org.ros.rosjava.android.views.RosTextView;
 
 import android.app.Activity;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
-import org.ros.NodeRunner;
-import org.ros.RosCore;
-import org.ros.rosjava.android.MessageCallable;
-import org.ros.rosjava.android.OrientationPublisher;
-import org.ros.rosjava.android.tutorials.orientation_publisher.R;
-import org.ros.rosjava.android.views.RosTextView;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -65,14 +64,10 @@ public class MainActivity extends Activity {
           }
         });
     try {
-      // TODO(damonkohler): The master needs to be set via some sort of
-      // NodeConfiguration builder.
-      RosCore rosCore = new RosCore();
-      nodeRunner.run(rosCore, Lists.newArrayList("RosCore", "__master:=foo"));
-      rosCore.awaitStart();
-      String uri = "__master:=" + rosCore.getUri().toString();
+      // TODO(damonkohler): The master needs to be set via some sort of configuration builder.
+      String uri = "__master:=http://10.68.0.1:11311";
       nodeRunner.run(new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE)),
-          Lists.newArrayList("Orientation", uri));
+          Lists.newArrayList("Orientation", uri, "__ip:=10.68.0.171"));
       nodeRunner.run(rosTextView, Lists.newArrayList("Text", uri));
     } catch (Exception e) {
       throw new RuntimeException(e);

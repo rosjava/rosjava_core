@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.ros.internal.namespace.GraphName;
+import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
 import org.ros.internal.node.server.SlaveServer;
@@ -70,9 +71,9 @@ public class SlaveImplTest {
   @Test
   public void testRequestTopic() throws ServerException {
     SlaveServer mockSlave = mock(SlaveServer.class);
-    InetSocketAddress localhost = InetSocketAddress.createUnresolved("localhost", 1234);
-
-    TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(localhost);
+    AdvertiseAddress address = AdvertiseAddress.createPrivate();
+    address.setStaticPort(1234);
+    TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(address);
     when(
         mockSlave.requestTopic(Matchers.<String>any(),
             Matchers.eq(Sets.newHashSet(ProtocolNames.TCPROS, ProtocolNames.UDPROS)))).thenReturn(

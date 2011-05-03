@@ -16,17 +16,16 @@
 
 package org.ros.internal.transport.tcp;
 
+import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
-
-import java.net.InetSocketAddress;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TcpRosProtocolDescription extends ProtocolDescription {
 
-  public TcpRosProtocolDescription(InetSocketAddress address) {
+  public TcpRosProtocolDescription(AdvertiseAddress address) {
     super(ProtocolNames.TCPROS, address);
   }
 

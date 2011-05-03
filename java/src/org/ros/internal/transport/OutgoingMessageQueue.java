@@ -16,6 +16,8 @@
 
 package org.ros.internal.transport;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -29,6 +31,9 @@ import org.ros.MessageSerializer;
  */
 public class OutgoingMessageQueue<MessageType> {
 
+  private static final boolean DEBUG = false;
+  private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
+  
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
   private final ChannelGroup channelGroup;
@@ -44,9 +49,16 @@ public class OutgoingMessageQueue<MessageType> {
           ChannelBuffer buffer =
               ChannelBuffers.wrappedBuffer(serializer.serialize(messages.take()));
           channelGroup.write(buffer);
+          if (DEBUG) {
+            // TODO(damonkohler): Add a utility method for a better ChannelBuffer.toString() method.
+            log.info("Wrote " + buffer.toString());
+          }
         }
       } catch (InterruptedException e) {
         // Cancelable
+        if (DEBUG) {
+          log.info("Interrupted.");
+        }
       }
     }
 

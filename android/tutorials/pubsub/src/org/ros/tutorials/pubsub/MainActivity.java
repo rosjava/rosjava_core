@@ -16,16 +16,15 @@
 
 package org.ros.tutorials.pubsub;
 
-import com.google.common.collect.Lists;
+import org.ros.NodeRunner;
+import org.ros.RosCore;
+import org.ros.rosjava.android.MessageCallable;
+import org.ros.rosjava.android.views.RosTextView;
 
 import android.app.Activity;
 import android.os.Bundle;
 
-import org.ros.NodeRunner;
-import org.ros.RosCore;
-
-import org.ros.rosjava.android.MessageCallable;
-import org.ros.rosjava.android.views.RosTextView;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

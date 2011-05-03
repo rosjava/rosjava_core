@@ -133,7 +133,7 @@ public class NodeTest {
     Response<ProtocolDescription> response =
         slaveClient.requestTopic("test_addresses_pub", Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();
-    InetSocketAddress tcpRosAddress = result.getAddress();
+    InetSocketAddress tcpRosAddress = result.getAdverstiseAddress().toInetSocketAddress();
     checkHostName(tcpRosAddress.getHostName());
   }
 

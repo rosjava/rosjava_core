@@ -16,6 +16,8 @@
 
 package org.ros.internal.transport;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -26,6 +28,10 @@ import org.jboss.netty.channel.group.ChannelGroup;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ConnectionTrackingHandler extends SimpleChannelHandler {
+
+  private static final boolean DEBUG = false;
+  private static final Log log = LogFactory.getLog(ConnectionTrackingHandler.class);
+  
   private final ChannelGroup channelGroup;
   
   public ConnectionTrackingHandler(ChannelGroup channelGroup) {
@@ -34,6 +40,9 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
   
   @Override
   public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
+    if (DEBUG) {
+      log.info("New channel added: " + e.getChannel().toString());
+    }
     channelGroup.add(e.getChannel());
   }
 
@@ -42,4 +51,5 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
     e.getChannel().close();
     throw new RuntimeException(e.getCause());
   }
+  
 }
