@@ -39,9 +39,6 @@ public class NodeConfiguration {
   private int xmlRpcPort;
   private String nodeNameOverride;
 
-  /**
-   * default context
-   */
   public NodeConfiguration() {
     resolver = null;
     tcpRosPort = 0;

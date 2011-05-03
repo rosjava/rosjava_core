@@ -13,44 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.exceptions;
 
 /**
- * @author "Ethan Rublee ethan.rublee@gmail.com"
- *
+ * @author ethan.rublee@gmail.com (Ethan Rublee) 
  */
 public class RosRuntimeException extends RuntimeException {
 
-  /**
-   * @param exception
-   */
   public RosRuntimeException(final Exception exception) {
     super(exception);
   }
-  /**
-   * @param message
-   * @param throwable
-   */
+
   public RosRuntimeException(final String message, final Throwable throwable) {
-    super(message,throwable);
+    super(message, throwable);
   }
-  /**
-   * @param message
-   */
+
   public RosRuntimeException(final String message) {
     super(message);
   }
-  
-//  /**
-//   * @param object
-//   */
-//  public RosException(final Object object) {
-//    super(object.toString());
-//  }
-  
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
 }
