@@ -29,6 +29,7 @@ import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicListener;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -42,7 +43,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class MasterRegistration implements TopicListener {
+public class MasterRegistration implements TopicListener, UncaughtExceptionHandler {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Node.class);
@@ -144,6 +145,7 @@ public class MasterRegistration implements TopicListener {
   private SlaveIdentifier slaveIdentifier;
   private boolean registrationOk;
   private final MasterRegistrationThread registrationThread;
+  private Throwable masterRegistrationError;
 
   public MasterRegistration(MasterClient masterClient) {
     this.masterClient = masterClient;
@@ -153,6 +155,7 @@ public class MasterRegistration implements TopicListener {
     registrationOk = false;
     registrationQueue = new ConcurrentLinkedQueue<RegistrationJob>();
     registrationThread = new MasterRegistrationThread();
+    registrationThread.setUncaughtExceptionHandler(this);
   }
 
   public int getPendingSize() {
@@ -182,7 +185,7 @@ public class MasterRegistration implements TopicListener {
   }
 
   public void start(SlaveIdentifier slaveIdentifier) {
-    if (slaveIdentifier == null) { 
+    if (slaveIdentifier == null) {
       throw new NullPointerException();
     }
     if (this.slaveIdentifier != null) {
@@ -190,5 +193,19 @@ public class MasterRegistration implements TopicListener {
     }
     this.slaveIdentifier = slaveIdentifier;
     registrationThread.start();
+  }
+
+  @Override
+  public void uncaughtException(Thread thread, Throwable throwable) {
+    setMasterRegistrationOk(false);
+    setMasterRegistrationError(throwable);
+  }
+
+  public Throwable getMasterRegistrationError() {
+    return this.masterRegistrationError;
+  }
+
+  private void setMasterRegistrationError(Throwable throwable) {
+    this.masterRegistrationError = throwable;
   }
 }
