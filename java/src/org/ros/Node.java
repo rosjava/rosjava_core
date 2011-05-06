@@ -100,7 +100,7 @@ public class Node {
 
     try {
       if (configuration.getHost() == null) {
-        throw new NullPointerException("configuration.getHostName() cannot be null");
+        throw new NullPointerException("configuration.getHost() cannot be null");
       }
       if (configuration.getHost().equals("localhost")
           || configuration.getHost().startsWith("127.0.0.")) {

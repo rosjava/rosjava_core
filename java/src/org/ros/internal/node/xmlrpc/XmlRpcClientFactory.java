@@ -23,13 +23,10 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.common.TypeConverter;
 import org.apache.xmlrpc.common.TypeConverterFactory;
 import org.apache.xmlrpc.common.TypeConverterFactoryImpl;
-import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.response.StatusCode;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.UndeclaredThrowableException;
 
 /**
  * <p>
@@ -119,7 +116,7 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
   public Object newInstance(ClassLoader pClassLoader, final Class<NodeType> pClass,
       final String pRemoteName, final int timeout) {
     return Proxy.newProxyInstance(pClassLoader, new Class[] { pClass }, new InvocationHandler() {
-      @SuppressWarnings({"rawtypes", "unchecked"})
+      @SuppressWarnings({ "rawtypes", "unchecked" })
       @Override
       public Object invoke(Object pProxy, Method pMethod, Object[] pArgs) throws Throwable {
         if (isObjectMethodLocal() && pMethod.getDeclaringClass().equals(Object.class)) {
@@ -137,9 +134,11 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
           client.executeAsync(methodName, pArgs, callback);
           result = callback.waitForResponse();
           // result = client.execute(methodName, pArgs);
+        } catch (InterruptedException e) {
+          throw new XmlRpcTimeoutException(0, "timeout");
         } catch (XmlRpcException e) {
           Throwable t = e.linkedException;
-          if (t == null) { 
+          if (t == null) {
             throw new RuntimeException(e);
           }
           if (t instanceof RuntimeException) {
