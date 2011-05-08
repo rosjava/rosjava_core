@@ -1,0 +1,4 @@
+- hg:
+    local-name: rosjava
+    uri: https://rosjava.googlecode.com/hg
+    version: default
