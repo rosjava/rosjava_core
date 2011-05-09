@@ -136,6 +136,8 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
           client.executeAsync(methodName, pArgs, callback);
           result = callback.waitForResponse();
           // result = client.execute(methodName, pArgs);
+        } catch (InterruptedException e) {
+          throw new XmlRpcTimeoutException(0, "timeout");
         } catch (XmlRpcException e) {
           Throwable t = e.linkedException;
           if (t == null) { 

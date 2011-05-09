@@ -8,6 +8,3 @@
     local-name: rosjava
     uri: https://rosjava.googlecode.com/hg
     version: default
-- svn:
-    local-name: common_msgs
-    uri: https://code.ros.org/svn/ros-pkg/stacks/common_msgs/tags/common_msgs-1.4.0
