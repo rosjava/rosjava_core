@@ -20,10 +20,8 @@ import com.google.common.collect.Lists;
 
 import android.app.Activity;
 import android.os.Bundle;
-
 import org.ros.NodeRunner;
 import org.ros.message.sensor_msgs.CompressedImage;
-
 import org.ros.rosjava.android.BitmapFromCompressedImage;
 import org.ros.rosjava.android.views.RosImageView;
 
@@ -39,7 +37,7 @@ public class MainActivity extends Activity {
     super();
     nodeRunner = NodeRunner.createDefault();
   }
-  
+
   @Override
   protected void onPause() {
     super.onPause();
@@ -51,16 +49,15 @@ public class MainActivity extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    RosImageView<CompressedImage> image =
-        (RosImageView<CompressedImage>) findViewById(R.id.image);
-    image.setTopicName("/usb_cam/image_raw/compressed");
+    RosImageView<CompressedImage> image = (RosImageView<CompressedImage>) findViewById(R.id.image);
+    image.setTopicName("/camera/image_raw");
     image.setMessageClass(org.ros.message.sensor_msgs.CompressedImage.class);
     image.setMessageToBitmapCallable(new BitmapFromCompressedImage());
     try {
       // TODO(damonkohler): The master needs to be set via some sort of
       // NodeConfiguration builder.
       nodeRunner.run(image,
-          Lists.newArrayList("Compressed", "__master:=http://192.168.144.238:11311/"));
+          Lists.newArrayList("Compressed", "__ip:=192.168.1.114", "__master:=http://192.168.1.112:11311/"));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

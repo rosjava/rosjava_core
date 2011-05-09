@@ -31,16 +31,15 @@ public class BindAddress implements Address {
   private final InetSocketAddress address;
 
   public BindAddress(InetSocketAddress address) {
-    this.address = new InetSocketAddress(address.getAddress(), address.getPort());
+    this.address = address;
   }
 
   /**
    * @param port the port to bind to
    * @return a {@link BindAddress} instance with specified port that will bind
    *         to all network interfaces on the host
-   * @throws UnknownHostException
    */
-  public static BindAddress createPublic(int port) throws UnknownHostException {
+  public static BindAddress createPublic(int port) {
     return new BindAddress(new InetSocketAddress(port));
   }
 

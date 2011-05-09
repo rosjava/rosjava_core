@@ -35,6 +35,8 @@ import org.ros.message.geometry_msgs.Quaternion;
 public class OrientationPublisher implements NodeMain {
 
   private final SensorManager sensorManager;
+  
+  private boolean enabled;
 
   private final class OrientationListener implements SensorEventListener {
 
@@ -72,13 +74,16 @@ public class OrientationPublisher implements NodeMain {
         pose.header.stamp = Time.fromMillis(System.currentTimeMillis());
         pose.pose.position = origin;
         pose.pose.orientation = orientation;
-        publisher.publish(pose);
+        if (enabled) {
+          publisher.publish(pose);
+        }
       }
     }
   }
 
   public OrientationPublisher(SensorManager sensorManager) {
     this.sensorManager = sensorManager;
+    setEnabled(false);
   }
 
   @Override
@@ -89,7 +94,7 @@ public class OrientationPublisher implements NodeMain {
       final Publisher<org.ros.message.geometry_msgs.PoseStamped> publisher = node.createPublisher(
           "android/orientation", org.ros.message.geometry_msgs.PoseStamped.class);
       Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-      sensorManager.registerListener(new OrientationListener(publisher), sensor, 100000 /* 10 Hz */);
+      sensorManager.registerListener(new OrientationListener(publisher), sensor, 500000 /* 10 Hz */);
       // TODO(damonkohler): Make this cancelable.
       while (true) {
         Thread.sleep(10000);
@@ -101,6 +106,14 @@ public class OrientationPublisher implements NodeMain {
         e.printStackTrace();
       }
     }
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
   }
 
 }

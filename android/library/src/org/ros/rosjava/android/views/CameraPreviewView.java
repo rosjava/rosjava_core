@@ -18,8 +18,11 @@ package org.ros.rosjava.android.views;
 
 import com.google.common.base.Preconditions;
 
+import android.graphics.Rect;
+
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
@@ -29,7 +32,9 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,8 +55,13 @@ public class CameraPreviewView extends ViewGroup {
   private final class BufferingPreviewCallback implements PreviewCallback {
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
+      // TODO(damonkohler): This is pretty awful and causing a lot of GC.
+      Size size = camera.getParameters().getPreviewSize();
+      YuvImage image = new YuvImage(data, ImageFormat.NV21, size.width, size.height, null);
+      ByteArrayOutputStream stream = new ByteArrayOutputStream(512);
+      Preconditions.checkState(image.compressToJpeg(new Rect(0, 0, size.width, size.height), 80, stream));
       if (previewCallback != null) {
-        previewCallback.onPreviewFrame(data, camera);
+        previewCallback.onPreviewFrame(stream.toByteArray(), camera);
       }
       camera.addCallbackBuffer(data);
     }
@@ -175,8 +185,8 @@ public class CameraPreviewView extends ViewGroup {
   private void setupBufferingPreviewCallback() {
     previewBuffers = new ArrayList<byte[]>();
     Size size = camera.getParameters().getPreviewSize();
-    int format1 = camera.getParameters().getPreviewFormat();
-    int bits_per_pixel = ImageFormat.getBitsPerPixel(format1);
+    int format = camera.getParameters().getPreviewFormat();
+    int bits_per_pixel = ImageFormat.getBitsPerPixel(format);
     previewBuffers.add(new byte[size.height * size.width * bits_per_pixel / 8]);
     for (byte[] x : previewBuffers) {
       camera.addCallbackBuffer(x);

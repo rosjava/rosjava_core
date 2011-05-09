@@ -14,19 +14,21 @@
  * the License.
  */
 
-package org.ros.tutorials.orientation_publisher;
+package org.ros.rosjava.android.pan_tilt_camera;
 
 import com.google.common.collect.Lists;
+
+import android.view.MotionEvent;
 
 import android.app.Activity;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 import org.ros.NodeRunner;
-import org.ros.rosjava.android.MessageCallable;
+import org.ros.message.sensor_msgs.CompressedImage;
+import org.ros.rosjava.android.BitmapFromCompressedImage;
 import org.ros.rosjava.android.OrientationPublisher;
-import org.ros.rosjava.android.tutorials.orientation_publisher.R;
-import org.ros.rosjava.android.views.RosTextView;
+import org.ros.rosjava.android.views.RosImageView;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -39,19 +41,20 @@ import java.util.Enumeration;
 public class MainActivity extends Activity {
 
   private final NodeRunner nodeRunner;
+  
+  private OrientationPublisher orientationPublisher;
 
   public MainActivity() {
     super();
     nodeRunner = NodeRunner.createDefault();
   }
-
+  
   @Override
   protected void onPause() {
     super.onPause();
-    finish();
+    android.os.Process.killProcess(android.os.Process.myPid());
   }
 
-  // TODO(damonkohler): Pull this out some place.s
   private static String getNonLoopbackHostName() {
     try {
       String address = null;
@@ -83,28 +86,31 @@ public class MainActivity extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    RosTextView<org.ros.message.geometry_msgs.PoseStamped> rosTextView =
-        (RosTextView<org.ros.message.geometry_msgs.PoseStamped>) findViewById(R.id.text);
-    rosTextView.setTopicName("/android/orientation");
-    rosTextView.setMessageClass(org.ros.message.geometry_msgs.PoseStamped.class);
-    rosTextView
-        .setMessageToStringCallable(new MessageCallable<String, org.ros.message.geometry_msgs.PoseStamped>() {
-          @Override
-          public String call(org.ros.message.geometry_msgs.PoseStamped message) {
-            return "x: " + message.pose.orientation.x + "\ny: " + message.pose.orientation.y
-                + "\nz: " + message.pose.orientation.z + "\nw: " + message.pose.orientation.w;
-          }
-        });
+    RosImageView<CompressedImage> image = (RosImageView<CompressedImage>) findViewById(R.id.image);
+    image.setTopicName("/slow_image");
+    image.setMessageClass(org.ros.message.sensor_msgs.CompressedImage.class);
+    image.setMessageToBitmapCallable(new BitmapFromCompressedImage());
     try {
       // TODO(damonkohler): The master needs to be set via some sort of
       // configuration builder.
       String uri = "__master:=http://10.68.0.1:11311";
-      nodeRunner.run(new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE)),
+      orientationPublisher = new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE));
+      nodeRunner.run(orientationPublisher,
           Lists.newArrayList("Orientation", uri, "__ip:=" + getNonLoopbackHostName()));
-      nodeRunner.run(rosTextView, Lists.newArrayList("Text", uri));
+      nodeRunner.run(image, Lists.newArrayList("Compressed", "__master:=http://10.68.0.1:11311/"));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  @Override
+  public boolean onTouchEvent(MotionEvent event) {
+    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+      orientationPublisher.setEnabled(true);     
+    } else if (event.getAction() == MotionEvent.ACTION_UP) {
+      orientationPublisher.setEnabled(false);
+    }
+    return true;
   }
 
 }

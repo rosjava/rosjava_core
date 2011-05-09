@@ -29,20 +29,20 @@ public class RosCore implements NodeMain {
 
   private final MasterServer masterServer;
 
-  public RosCore() {
+  public RosCore(int port) {
     masterServer =
-        new MasterServer(BindAddress.createPrivate(0), AdvertiseAddress.createPrivate());
+        new MasterServer(BindAddress.createPublic(port), AdvertiseAddress.createPublic());
   }
 
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws Exception {
     masterServer.start();
   }
-  
+
   public URI getUri() {
     return masterServer.getUri();
   }
-  
+
   public void awaitStart() {
     try {
       masterServer.awaitStart();

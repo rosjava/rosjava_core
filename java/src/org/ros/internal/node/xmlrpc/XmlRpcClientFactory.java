@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.    
  */
+
 package org.ros.internal.node.xmlrpc;
 
 import org.apache.xmlrpc.XmlRpcException;
@@ -23,13 +24,10 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.common.TypeConverter;
 import org.apache.xmlrpc.common.TypeConverterFactory;
 import org.apache.xmlrpc.common.TypeConverterFactoryImpl;
-import org.ros.internal.node.RemoteException;
-import org.ros.internal.node.response.StatusCode;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.UndeclaredThrowableException;
 
 /**
  * <p>
@@ -43,6 +41,7 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
 
   private final XmlRpcClient client;
   private final TypeConverterFactory typeConverterFactory;
+  
   private boolean objectMethodLocal;
 
   /**
@@ -140,7 +139,7 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
         } catch (XmlRpcException e) {
           Throwable t = e.linkedException;
           if (t == null) { 
-            throw new RuntimeException(e);
+            throw new RuntimeException(t);
           }
           if (t instanceof RuntimeException) {
             throw t;

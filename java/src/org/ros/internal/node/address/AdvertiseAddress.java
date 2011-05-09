@@ -38,25 +38,35 @@ import java.util.concurrent.Callable;
 public class AdvertiseAddress implements Address {
 
   private final String host;
-  
+
   private Callable<Integer> portCallable;
 
   public static AdvertiseAddress createPrivate() {
     return new AdvertiseAddress(LOOPBACK);
   }
-  
-  public static AdvertiseAddress createPublic() throws UnknownHostException {
-    return new AdvertiseAddress(InetAddress.getLocalHost().getCanonicalHostName());
+
+  /**
+   * Best effort method, returns a new {@link AdvertiseAddress} where the host
+   * is determined automatically.
+   * 
+   * @return a suitable {@link AdvertiseAddress} for a publicly accessible {@link BindAddress}
+   */
+  public static AdvertiseAddress createPublic() {
+    try {
+      return new AdvertiseAddress(InetAddress.getLocalHost().getCanonicalHostName());
+    } catch (UnknownHostException e) {
+      throw new RuntimeException(e);
+    }
   }
-  
+
   public AdvertiseAddress(String host) {
     this.host = host;
   }
-  
+
   public String getHost() {
     return host;
   }
-  
+
   public void setStaticPort(final int port) {
     portCallable = new Callable<Integer>() {
       @Override
@@ -65,7 +75,7 @@ public class AdvertiseAddress implements Address {
       }
     };
   }
-  
+
   public int getPort() {
     try {
       return portCallable.call();
@@ -73,7 +83,7 @@ public class AdvertiseAddress implements Address {
       throw new RuntimeException(e);
     }
   }
-  
+
   public void setPortCallable(Callable<Integer> portCallable) {
     this.portCallable = portCallable;
   }
@@ -123,15 +133,21 @@ public class AdvertiseAddress implements Address {
   @Override
   public boolean equals(Object obj) {
     Preconditions.checkNotNull(portCallable);
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
     AdvertiseAddress other = (AdvertiseAddress) obj;
     if (host == null) {
-      if (other.host != null) return false;
-    } else if (!host.equals(other.host)) return false;
+      if (other.host != null)
+        return false;
+    } else if (!host.equals(other.host))
+      return false;
     try {
-      if (portCallable.call() != other.portCallable.call()) return false;
+      if (portCallable.call() != other.portCallable.call())
+        return false;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

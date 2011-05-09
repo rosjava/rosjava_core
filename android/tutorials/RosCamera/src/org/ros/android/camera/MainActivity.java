@@ -16,6 +16,10 @@
 
 package org.ros.android.camera;
 
+import com.google.common.collect.Lists;
+
+import org.ros.RosCore;
+
 import android.app.Activity;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -23,7 +27,7 @@ import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
-
+import org.ros.NodeRunner;
 import org.ros.rosjava.android.views.RosCameraPreviewView;
 
 /**
@@ -32,10 +36,13 @@ import org.ros.rosjava.android.views.RosCameraPreviewView;
  */
 public class MainActivity extends Activity {
 
+  private final NodeRunner nodeRunner;
+
   private RosCameraPreviewView preview;
   private int cameraId;
 
   public MainActivity() {
+    nodeRunner = NodeRunner.createDefault();
   }
 
   @Override
@@ -45,6 +52,17 @@ public class MainActivity extends Activity {
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     preview = new RosCameraPreviewView(this);
     setContentView(preview);
+    try {
+      RosCore rosCore = new RosCore(11311);
+      nodeRunner.run(rosCore, Lists.newArrayList("RosCore", "__master:=foo"));
+      rosCore.awaitStart();
+      // TODO(damonkohler): The master needs to be set via some sort of
+      // NodeConfiguration builder.
+      nodeRunner.run(preview,
+          Lists.newArrayList("Camera", "__ip:=192.168.1.112", "__master:=http://192.168.1.112:11311/"));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
