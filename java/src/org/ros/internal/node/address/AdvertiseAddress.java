@@ -60,6 +60,7 @@ public class AdvertiseAddress implements Address {
   }
 
   public AdvertiseAddress(String host) {
+    Preconditions.checkNotNull(host);
     this.host = host;
   }
 

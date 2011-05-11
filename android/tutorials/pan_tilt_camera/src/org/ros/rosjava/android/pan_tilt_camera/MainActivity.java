@@ -18,12 +18,11 @@ package org.ros.rosjava.android.pan_tilt_camera;
 
 import com.google.common.collect.Lists;
 
-import android.view.MotionEvent;
-
 import android.app.Activity;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import org.ros.NodeRunner;
 import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.rosjava.android.BitmapFromCompressedImage;
@@ -41,14 +40,14 @@ import java.util.Enumeration;
 public class MainActivity extends Activity {
 
   private final NodeRunner nodeRunner;
-  
+
   private OrientationPublisher orientationPublisher;
 
   public MainActivity() {
     super();
     nodeRunner = NodeRunner.createDefault();
   }
-  
+
   @Override
   protected void onPause() {
     super.onPause();
@@ -78,7 +77,7 @@ public class MainActivity extends Activity {
     } catch (SocketException ex) {
       Log.i("RosAndroid", "SocketException: " + ex.getMessage());
     }
-    return null;
+    throw new RuntimeException("No non-loopback interface.");
   }
 
   @SuppressWarnings("unchecked")
@@ -94,19 +93,20 @@ public class MainActivity extends Activity {
       // TODO(damonkohler): The master needs to be set via some sort of
       // configuration builder.
       String uri = "__master:=http://10.68.0.1:11311";
-      orientationPublisher = new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE));
-      nodeRunner.run(orientationPublisher,
-          Lists.newArrayList("Orientation", uri, "__ip:=" + getNonLoopbackHostName()));
-      nodeRunner.run(image, Lists.newArrayList("Compressed", "__master:=http://10.68.0.1:11311/"));
+      String ip = "__ip:=" + getNonLoopbackHostName();
+      orientationPublisher =
+          new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE));
+      nodeRunner.run(orientationPublisher, Lists.newArrayList("Orientation", uri, ip));
+      nodeRunner.run(image, Lists.newArrayList("Compressed", uri, ip));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
-  
+
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     if (event.getAction() == MotionEvent.ACTION_DOWN) {
-      orientationPublisher.setEnabled(true);     
+      orientationPublisher.setEnabled(true);
     } else if (event.getAction() == MotionEvent.ACTION_UP) {
       orientationPublisher.setEnabled(false);
     }
