@@ -65,8 +65,10 @@ public class RosTextView<T> extends TextView implements NodeMain {
 
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
-    Preconditions.checkState(node == null);
-    node = new Node("/anonymous", nodeConfiguration);
+    if (node == null) {
+      Preconditions.checkNotNull(nodeConfiguration);
+      node = new Node("/anonymous", nodeConfiguration);
+    }
     node.createSubscriber(topicName, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
@@ -93,6 +95,11 @@ public class RosTextView<T> extends TextView implements NodeMain {
   public void stop() {
     Preconditions.checkNotNull(node);
     node.stop();
+  }
+
+  public void setNode(Node node) {
+    Preconditions.checkState(node == null);
+    this.node = node;
   }
 
 }
