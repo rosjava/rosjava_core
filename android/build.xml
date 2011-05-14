@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="compile" name="android">
+  <import file="../build-common.xml" />
+
+  <target name="compile">
+    <subant target="compile">
+      <property name="external.libs.dir" location="../java/lib" />
+      <property name="jar.libs.dir" location="../java/lib" />
+      <dirset dir=".">
+        <include name="library" />
+        <include name="tutorials/*" />
+      </dirset>
+    </subant>
+  </target>
+
+  <target name="clean">
+    <subant target="clean">
+      <dirset dir=".">
+        <include name="library" />
+        <include name="tutorials/*" />
+      </dirset>
+    </subant>
+  </target>
+</project>

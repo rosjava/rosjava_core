@@ -1,28 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="compile" name="rosjava">
-  
-  <target name="init">
-      <ant dir="java" target="init" />
+<project default="dist" name="rosjava">
+  <target name="dist">    
+    <ant dir="java" target="dist.dependencies" />
+    <ant dir="android" target="dist.dependencies" />
   </target>
 
-  <target name="msg_gen">
-      <ant dir="java" target="msg_gen" />
-  </target>
-
-  <target name="srv_gen">
-      <ant dir="java" target="srv_gen" />
-  </target>
-
-  <target name="compile">
-      <ant dir="java" target="compile" />
+  <target name="test" depends="dist">
+    <ant dir="java" target="test" />
   </target>
 
   <target name="clean">    
-      <ant dir="java" target="clean" />
+    <ant dir="java" target="clean" />
+    <ant dir="java/apache-xmlrpc-3.1.3-src" target="clean" />
+    <ant dir="java/ws-commons-util-1.0.2-src" target="clean" />
+    <ant dir="android" target="clean" />
   </target>
-
-  <target name="dist">    
-      <ant dir="java" target="dist" />
-  </target>
-
 </project>

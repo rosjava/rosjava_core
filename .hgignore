@@ -12,4 +12,4 @@ syntax: glob
 .cproject
 .settings
 syntax: regexp
-(bin|build|dist|msg_gen|srv_gen|gen)/.*
+(bin|build|dist|msg_gen|srv_gen|gen|test_output)/.*
