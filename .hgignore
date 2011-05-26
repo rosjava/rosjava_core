@@ -9,7 +9,9 @@ syntax: glob
 *.log
 *.ap_
 *.apk
+local.properties
 .cproject
 .settings
+java/lib/rosjava.jar
 syntax: regexp
 (bin|build|dist|msg_gen|srv_gen|gen|test_output)/.*

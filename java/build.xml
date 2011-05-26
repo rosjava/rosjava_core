@@ -4,7 +4,7 @@
 
   <property name="msg-gen" location="${gen}/msg_gen/java" />
   <property name="srv-gen" location="${gen}/srv_gen/java" />
-  
+
   <property name="jar.rosjava" location="${dist}/rosjava.jar" />
 
   <path id="jar.classpath">
@@ -29,7 +29,7 @@
   </target>
 
   <target name="msg-gen" depends="check-msg-gen-skip" unless="msg-gen.skip">
-    <echo message="Building commonly used ROS messages..." />    
+    <echo message="Building commonly used ROS messages..." />
 
     <exec executable="../scripts/java_msgs.py">
       <arg value="-o ${msg-gen}" />
@@ -48,7 +48,7 @@
   </target>
 
   <target name="srv-gen" depends="check-srv-gen-skip" unless="srv-gen.skip">
-    <echo message="Building commonly used ROS services..." />    
+    <echo message="Building commonly used ROS services..." />
 
     <exec executable="../scripts/java_srvs.py">
       <arg value="-o ${srv-gen}" />
@@ -57,7 +57,6 @@
       <arg value="std_srvs" />
       <arg value="test_ros" />
     </exec>
-    <touch file="${srv-gen-skip-file}" />
   </target>
 
   <target name="compile" depends="msg-gen, srv-gen">
@@ -118,7 +117,7 @@
       <classpath>
         <path refid="jar.classpath"/>
       </classpath>
-    </manifestclasspath>  
+    </manifestclasspath>
     <jar destfile="${jar.rosjava}">
       <manifest>
         <attribute name="Main-Class" value="org.ros.RosRun" />
