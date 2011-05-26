@@ -160,7 +160,7 @@ public class Node {
    * @param topicName
    *          The topic name to be subscribed to. This may be "bar" "/foo/bar"
    *          "~my" and will be auto resolved.
-   * @param messageCallback
+   * @param callback
    *          The callback to be registered to this subscription. This will be
    *          called asynchronously any time that a message is published on the
    *          topic.
