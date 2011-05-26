@@ -17,7 +17,6 @@
 package org.ros.internal.node.address;
 
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 
 /**
  * A wrapper for {@link InetSocketAddress} that emphasizes the difference
