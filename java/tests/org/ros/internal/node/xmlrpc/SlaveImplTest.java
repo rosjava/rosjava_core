@@ -34,7 +34,6 @@ import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 
 /**
