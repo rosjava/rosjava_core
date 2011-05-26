@@ -19,55 +19,86 @@ package org.ros.internal.transport.tcp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
-import org.ros.internal.node.service.ServiceManager;
-import org.ros.internal.node.topic.TopicManager;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class TcpRosServerTest {
 
-  /**
-   * Basic test to exercise getAddress() semantics. Higher-level integration
-   * tests are dependent on consistent behavior here.
-   */
   @Test
-  public void testGetAddress() throws Exception {
-    TopicManager topicManagerMock = mock(TopicManager.class);
-    ServiceManager serviceManagerMock = mock(ServiceManager.class);
+  public void testGetAddressFailsIfServerNotRunning() {
     TcpRosServer tcpRosServer =
-        new TcpRosServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic(),
-            topicManagerMock, serviceManagerMock);
+        new TcpRosServer(BindAddress.createPublic(0), new AdvertiseAddress("foo"), null, null);
 
-    // Not really sure of the right behavior here, but getAddress() raises
-    // before start and should also raise after shutdown.
     try {
       tcpRosServer.getAddress();
       fail();
     } catch (RuntimeException e) {
+      // getAddress() must fail when the server is not running.
     }
 
     tcpRosServer.start();
-
     InetSocketAddress address = tcpRosServer.getAddress();
     assertTrue(address.getPort() > 0);
-    assertEquals(InetAddress.getLocalHost().getCanonicalHostName(), address.getHostName());
-
+    assertEquals("foo", address.getHostName());
     tcpRosServer.shutdown();
-    // Not really sure of the right behavior here, but getAddress() raises
-    // before start and should also raise after shutdown.
+
     try {
       tcpRosServer.getAddress();
       fail();
     } catch (RuntimeException e) {
+      // getAddress() must fail when the server is not running.
+    }
+  }
+
+  @Test
+  public void testFailIfPortTaken() {
+    TcpRosServer firstServer =
+        new TcpRosServer(BindAddress.createPublic(11311), new AdvertiseAddress("foo"), null, null);
+    TcpRosServer secondServer =
+        new TcpRosServer(BindAddress.createPublic(11311), new AdvertiseAddress("foo"), null, null);
+    firstServer.start();
+    try {
+      secondServer.start();
+      fail();
+    } catch (RuntimeException e) {
+      // Starting a server on an already used port must fail.
+    }
+    firstServer.shutdown();
+  }
+
+  @Test
+  public void testFailIfStartedWhileRunning() {
+    TcpRosServer tcpRosServer =
+        new TcpRosServer(BindAddress.createPublic(0), new AdvertiseAddress("foo"), null, null);
+    tcpRosServer.start();
+    try {
+      tcpRosServer.start();
+      fail();
+    } catch (RuntimeException e) {
+      // Starting the server twice must fail.
+    }
+    tcpRosServer.shutdown();
+  }
+
+  @Test
+  public void testFailIfShutdownWhileNotRunning() {
+    TcpRosServer tcpRosServer =
+        new TcpRosServer(BindAddress.createPublic(0), new AdvertiseAddress("foo"), null, null);
+    tcpRosServer.start();
+    tcpRosServer.shutdown();
+    try {
+      tcpRosServer.shutdown();
+      fail();
+    } catch (RuntimeException e) {
+      // Shutting down the server twice must fail.
     }
   }
 

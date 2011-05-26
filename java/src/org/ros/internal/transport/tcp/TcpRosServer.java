@@ -16,6 +16,8 @@
 
 package org.ros.internal.transport.tcp;
 
+import com.google.common.base.Preconditions;
+
 import org.jboss.netty.channel.ChannelFuture;
 
 import org.apache.commons.logging.Log;
@@ -48,16 +50,24 @@ public class TcpRosServer {
 
   private final BindAddress bindAddress;
   private final AdvertiseAddress advertiseAddress;
-  private final ChannelGroup channelGroup;
-  private final ChannelFactory channelFactory;
-  private final ServerBootstrap bootstrap;
-
+  private final TopicManager topicManager;
+  private final ServiceManager serviceManager;
+  
+  private ChannelGroup channelGroup;
+  private ChannelFactory channelFactory;
+  private ServerBootstrap bootstrap;
   private Channel channel;
 
   public TcpRosServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress,
       TopicManager topicManager, ServiceManager serviceManager) {
     this.bindAddress = bindAddress;
     this.advertiseAddress = advertiseAddress;
+    this.topicManager = topicManager;
+    this.serviceManager = serviceManager;
+  }
+
+  public void start() {
+    Preconditions.checkState(channel == null);
     channelGroup = new DefaultChannelGroup();
     channelFactory =
         new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
@@ -68,9 +78,6 @@ public class TcpRosServer {
     TcpServerPipelineFactory pipelineFactory =
         new TcpServerPipelineFactory(channelGroup, topicManager, serviceManager);
     bootstrap.setPipelineFactory(pipelineFactory);
-  }
-
-  public void start() {
     channel = bootstrap.bind(bindAddress.toInetSocketAddress());
     advertiseAddress.setPortCallable(new Callable<Integer>() {
       @Override
@@ -85,16 +92,14 @@ public class TcpRosServer {
   }
 
   public void shutdown() {
+    Preconditions.checkNotNull(channel);
     if (DEBUG) {
       log.info("Shutting down: " + getAddress());
     }
     ChannelGroupFuture groupFuture = channelGroup.close();
     groupFuture.awaitUninterruptibly();
-    
-    if(channel != null) {
-      ChannelFuture future = channel.close();
-      future.awaitUninterruptibly();
-    }
+    ChannelFuture future = channel.close();
+    future.awaitUninterruptibly();
     channelFactory.releaseExternalResources();
     bootstrap.releaseExternalResources();
     channel = null;
