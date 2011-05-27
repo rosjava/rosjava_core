@@ -79,8 +79,12 @@ public class OutgoingMessageQueue<MessageType> {
     messages.put(message);
   }
 
-  public void shutdown() throws InterruptedException {
-    thread.cancel().await();
+  public void shutdown() {
+    try {
+      thread.cancel().await();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void start() {

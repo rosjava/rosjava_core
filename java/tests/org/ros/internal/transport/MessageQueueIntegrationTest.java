@@ -17,6 +17,7 @@
 package org.ros.internal.transport;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -48,7 +49,7 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageImplQueueIntegrationTest {
+public class MessageQueueIntegrationTest {
 
   private OutgoingMessageQueue<Message> out;
 
@@ -67,11 +68,80 @@ public class MessageImplQueueIntegrationTest {
   }
 
   @Test
+  public void testStartFailsIfRunning() {
+    try {
+      out.start();
+      fail();
+    } catch (RuntimeException e) {
+      // start() must fail if the queue is already running.
+    }
+  }
+
+  @Test
+  public void testStartFailsAfterShutdown() {
+    out.shutdown();
+    try {
+      out.start();
+      fail();
+    } catch (RuntimeException e) {
+      // start() must fail if the queue has been started and stopped once
+      // already.
+    }
+  }
+
+  @Test
   public void testSendAndReceiveMessage() throws InterruptedException {
+    Channel serverChannel = buildServerChannel();
+
+    IncomingMessageQueue<org.ros.message.std_msgs.String> firstIncomingQueue =
+        new IncomingMessageQueue<org.ros.message.std_msgs.String>(
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
+
+    connectIncomingMessageQueue(firstIncomingQueue, serverChannel);
+
+    IncomingMessageQueue<org.ros.message.std_msgs.String> secondIncomingQueue =
+        new IncomingMessageQueue<org.ros.message.std_msgs.String>(
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
+
+    connectIncomingMessageQueue(secondIncomingQueue, serverChannel);
+
+    // TODO(damonkohler): Ugly hack because we can't yet determine when the
+    // connection handshake has completed.
+    Thread.sleep(100);
+
+    org.ros.message.std_msgs.String hello = new org.ros.message.std_msgs.String();
+    hello.data = "Would you like to play a game?";
+    out.put(hello);
+    assertEquals(firstIncomingQueue.take(), hello);
+    assertEquals(secondIncomingQueue.take(), hello);
+  }
+
+  private void connectIncomingMessageQueue(
+      final IncomingMessageQueue<org.ros.message.std_msgs.String> in, Channel serverChannel) {
+    ChannelFactory clientChannelFactory =
+        new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
+            Executors.newCachedThreadPool());
+    ClientBootstrap clientBootstrap = new ClientBootstrap(clientChannelFactory);
+    clientBootstrap.setOption("bufferFactory",
+        new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    TcpClientPipelineFactory clientPipelineFactory = new TcpClientPipelineFactory() {
+      @Override
+      public ChannelPipeline getPipeline() {
+        ChannelPipeline pipeline = super.getPipeline();
+        pipeline.addLast("ClientHandler", in.createChannelHandler());
+        return pipeline;
+      }
+    };
+    clientBootstrap.setPipelineFactory(clientPipelineFactory);
+    clientBootstrap.connect(serverChannel.getLocalAddress()).awaitUninterruptibly();
+  }
+
+  private Channel buildServerChannel() {
     ChannelGroup serverChannelGroup = new DefaultChannelGroup();
     TopicManager topicManager = new TopicManager();
     ServiceManager serviceManager = new ServiceManager();
-
     NioServerSocketChannelFactory channelFactory =
         new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
@@ -90,38 +160,6 @@ public class MessageImplQueueIntegrationTest {
         };
     bootstrap.setPipelineFactory(serverPipelineFactory);
     Channel serverChannel = bootstrap.bind(new InetSocketAddress(0));
-
-    // TODO(damonkohler): Test connecting multiple incoming queues to single
-    // outgoing queue and visa versa.
-    final IncomingMessageQueue<org.ros.message.std_msgs.String> in =
-        new IncomingMessageQueue<org.ros.message.std_msgs.String>(
-            new MessageDeserializer<org.ros.message.std_msgs.String>(
-                org.ros.message.std_msgs.String.class));
-
-    ChannelFactory clientChannelFactory =
-        new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool());
-    ClientBootstrap clientBootstrap = new ClientBootstrap(clientChannelFactory);
-    clientBootstrap.setOption("bufferFactory",
-        new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-    TcpClientPipelineFactory clientPipelineFactory = new TcpClientPipelineFactory() {
-      @Override
-      public ChannelPipeline getPipeline() {
-        ChannelPipeline pipeline = super.getPipeline();
-        pipeline.addLast("ClientHandler", in.createChannelHandler());
-        return pipeline;
-      }
-    };
-    clientBootstrap.setPipelineFactory(clientPipelineFactory);
-    clientBootstrap.connect(serverChannel.getLocalAddress()).awaitUninterruptibly();
-
-    // TODO(damonkohler): Ugly hack because we can't yet determine when the
-    // connection has been established.
-    Thread.sleep(100);
-
-    org.ros.message.std_msgs.String hello = new org.ros.message.std_msgs.String();
-    hello.data = "Would you like to play a game?";
-    out.put(hello);
-    assertEquals(in.take(), hello);
+    return serverChannel;
   }
 }

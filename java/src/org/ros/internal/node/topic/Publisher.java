@@ -53,11 +53,7 @@ public class Publisher<MessageType> extends Topic {
   }
 
   public void shutdown() {
-    try {
-      out.shutdown();
-    } catch (InterruptedException e) {
-      log.error("Failed to shutdown outgoing message queue.", e);
-    }
+    out.shutdown();
   }
 
   public PublisherIdentifier toPublisherIdentifier(SlaveIdentifier description) {

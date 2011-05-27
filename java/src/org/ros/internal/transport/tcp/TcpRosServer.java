@@ -68,16 +68,16 @@ public class TcpRosServer {
 
   public void start() {
     Preconditions.checkState(channel == null);
-    channelGroup = new DefaultChannelGroup();
     channelFactory =
         new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
     bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-    TcpServerPipelineFactory pipelineFactory =
-        new TcpServerPipelineFactory(channelGroup, topicManager, serviceManager);
-    bootstrap.setPipelineFactory(pipelineFactory);
+    channelGroup = new DefaultChannelGroup();
+    bootstrap.setPipelineFactory(new TcpServerPipelineFactory(channelGroup, topicManager,
+        serviceManager));
+    
     channel = bootstrap.bind(bindAddress.toInetSocketAddress());
     advertiseAddress.setPortCallable(new Callable<Integer>() {
       @Override
