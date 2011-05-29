@@ -5,7 +5,8 @@ function update {
 }
 
 update "RosCamera"
-update "Teleop"
+# Teleop is broken.
+# update "Teleop"
 update "image_transport"
 update "orientation_publisher"
 update "pan_tilt_camera"
