@@ -47,7 +47,6 @@ import org.ros.message.Message;
 import org.ros.message.Service;
 
 import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.Executor;
@@ -310,13 +309,8 @@ public class Node {
         return null;
       }
     } catch (URISyntaxException e) {
-      // TODO(kwc) what should be the error policy here be?
-      log.error("master returned invalid URI for lookupService", e);
-      throw new RemoteException(StatusCode.FAILURE, "master returned invalid URI");
-    } catch (UndeclaredThrowableException e) {
-      // TODO: add more general IO error
-      log.error("undeclared throwable leaked through API", e);
-      throw new XmlRpcTimeoutException(0, "unable to commnicate with master");
+      log.error("Master returned invalid URI for lookupService().", e);
+      throw new RemoteException(StatusCode.FAILURE, "Master returned invalid URI.");
     }
   }
 
