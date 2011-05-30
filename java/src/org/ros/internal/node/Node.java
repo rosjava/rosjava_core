@@ -20,7 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xmlrpc.XmlRpcException;
 import org.ros.MessageDeserializer;
 import org.ros.MessageSerializer;
 import org.ros.internal.namespace.GraphName;
@@ -49,7 +48,6 @@ import org.ros.message.Service;
 
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.Executor;
@@ -79,8 +77,7 @@ public class Node {
   private boolean started;
 
   public static Node createPublic(GraphName nodeName, URI masterUri, String advertiseHostname,
-      int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
-      URISyntaxException {
+      int xmlRpcBindPort, int tcpRosBindPort) {
     Node node =
         new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
             new AdvertiseAddress(advertiseHostname), BindAddress.createPublic(xmlRpcBindPort),
@@ -90,7 +87,7 @@ public class Node {
   }
 
   public static Node createPrivate(GraphName nodeName, URI masterUri, int xmlRpcBindPort,
-      int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
+      int tcpRosBindPort) {
     Node node =
         new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
             AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
@@ -101,7 +98,7 @@ public class Node {
 
   Node(GraphName nodeName, URI masterUri, BindAddress tcpRosBindAddress,
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
-      AdvertiseAddress xmlRpcAdvertiseAddress) throws MalformedURLException {
+      AdvertiseAddress xmlRpcAdvertiseAddress) {
     this.nodeName = nodeName;
     started = false;
     executor = Executors.newCachedThreadPool();
@@ -257,7 +254,7 @@ public class Node {
     return serviceClient;
   }
 
-  void start() throws XmlRpcException, IOException, URISyntaxException {
+  void start() {
     if (started) {
       throw new IllegalStateException("Already started.");
     }

@@ -24,7 +24,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -36,7 +35,6 @@ import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.xmlrpc.MasterImpl;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
@@ -62,7 +60,7 @@ public class MasterServer extends NodeServer {
         Multimaps.synchronizedMultimap(ArrayListMultimap.<String, SubscriberIdentifier>create());
   }
 
-  public void start() throws XmlRpcException, IOException {
+  public void start() {
     super.start(org.ros.internal.node.xmlrpc.MasterImpl.class, new MasterImpl(this));
   }
 

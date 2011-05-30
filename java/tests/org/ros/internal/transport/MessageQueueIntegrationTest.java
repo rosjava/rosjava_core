@@ -67,7 +67,6 @@ public class MessageQueueIntegrationTest {
   public void setup() {
     out = new OutgoingMessageQueue<Message>(new MessageSerializer<Message>());
     out.start();
-    
     in = new IncomingMessageQueue<org.ros.message.std_msgs.String>(
         new MessageDeserializer<org.ros.message.std_msgs.String>(
             org.ros.message.std_msgs.String.class));
@@ -127,12 +126,6 @@ public class MessageQueueIntegrationTest {
   @Test
   public void testSendAfterIncomingQueueShutdown() throws InterruptedException {
     Channel serverChannel = buildServerChannel();
-
-    IncomingMessageQueue<org.ros.message.std_msgs.String> in =
-        new IncomingMessageQueue<org.ros.message.std_msgs.String>(
-            new MessageDeserializer<org.ros.message.std_msgs.String>(
-                org.ros.message.std_msgs.String.class));
-
     ChannelFuture future = connectIncomingMessageQueue(in, serverChannel);
 
     // TODO(damonkohler): Ugly hack because we can't yet determine when the

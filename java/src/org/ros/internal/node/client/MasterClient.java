@@ -50,9 +50,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * {@link MasterServer} URI.
    * 
    * @param uri the {@link URI} of the {@link MasterServer} to connect to
-   * @throws MalformedURLException
    */
-  public MasterClient(URI uri) throws MalformedURLException {
+  public MasterClient(URI uri) {
     super(uri, org.ros.internal.node.xmlrpc.Master.class);
   }
 

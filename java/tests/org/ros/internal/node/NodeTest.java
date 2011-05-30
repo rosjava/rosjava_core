@@ -18,7 +18,9 @@ package org.ros.internal.node;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -28,22 +30,54 @@ import org.ros.internal.node.server.MasterServer;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class NodeTest {
 
+  private MasterServer masterServer;
+
+  @Before
+  public void setup() {
+    masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+    masterServer.start();
+  }
+
+  @Test
+  public void testFailIfStartedWhileRunning() throws UnknownHostException {
+    String hostName = InetAddress.getLocalHost().getCanonicalHostName();
+    Node node =
+        Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
+    try {
+      node.start();
+      fail();
+    } catch (RuntimeException e) {
+      // Calling start() while the node is running must fail.
+    }
+  }
+
+  @Test
+  public void testFailIfStoppedWhileNotRunning() throws UnknownHostException {
+    String hostName = InetAddress.getLocalHost().getCanonicalHostName();
+    Node node =
+        Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
+    node.stop();
+    try {
+      node.stop();
+      fail();
+    } catch (RuntimeException e) {
+      // Calling stop() while the node is not running must fail.
+    }
+  }
+
   @Test
   public void testCreatePublic() throws Exception {
-    MasterServer masterServer =
-        new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
-    masterServer.start();
-
-
     String hostName = InetAddress.getLocalHost().getCanonicalHostName();
-    
-    Node node = Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
+    Node node =
+        Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
 
     InetSocketAddress tcpRosAddress = node.getTcpRosServer().getAddress();
     assertTrue(tcpRosAddress.getPort() > 0);

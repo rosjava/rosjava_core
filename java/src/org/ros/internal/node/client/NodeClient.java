@@ -38,11 +38,15 @@ public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
 
   protected final NodeType node;
   
-  public NodeClient(URI uri, Class<NodeType> interfaceClass) throws MalformedURLException {
+  public NodeClient(URI uri, Class<NodeType> interfaceClass) {
     this.uri = uri;
 
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-    config.setServerURL(uri.toURL());
+    try {
+      config.setServerURL(uri.toURL());
+    } catch (MalformedURLException e) {
+      throw new RuntimeException(e);
+    }
     config.setConnectionTimeout(60 * 1000);
     config.setReplyTimeout(60 * 1000);
 

@@ -18,7 +18,6 @@ package org.ros.internal.node.server;
 
 import com.google.common.collect.Lists;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -38,7 +37,6 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
 
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -82,12 +80,8 @@ public class SlaveServer extends NodeServer {
    * Start the XML-RPC server. This start() routine requires that the
    * {@link TcpRosServer} is initialized first so that the slave server returns
    * correct information when topics are requested.
-   * 
-   * @throws XmlRpcException
-   * @throws IOException
-   * @throws URISyntaxException
    */
-  public void start() throws XmlRpcException, IOException, URISyntaxException {
+  public void start() {
     super.start(org.ros.internal.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
     tcpRosServer.start();
   }
