@@ -16,6 +16,8 @@
 
 package org.ros.internal.transport;
 
+import com.google.common.base.Preconditions;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -96,6 +98,7 @@ public class OutgoingMessageQueue<MessageType> {
    *        {@link ChannelGroup}
    */
   public void addChannel(Channel channel) {
+    Preconditions.checkState(thread.isAlive());
     channelGroup.add(channel);
   }
 
