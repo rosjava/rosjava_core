@@ -26,30 +26,30 @@ import java.util.Map;
  */
 public class Topic {
 
-  private final TopicDefinition description;
+  private final TopicDefinition topicDefinition;
 
-  public Topic(TopicDefinition description) {
-    this.description = description;
+  public Topic(TopicDefinition topicDefinition) {
+    this.topicDefinition = topicDefinition;
   }
   
   public TopicDefinition getTopicDefinition() {
-    return description;
+    return topicDefinition;
   }
  
   public List<String> getTopicDefinitionAsList() {
-    return description.toList();
+    return topicDefinition.toList();
   }
   
   public GraphName getTopicName() {
-    return description.getName();
+    return topicDefinition.getName();
   }
   
   public String getTopicMessageType() {
-    return description.getMessageType();
+    return topicDefinition.getMessageType();
   }
   
   public Map<String, String> getTopicDefinitionHeader() {
-    return description.toHeader();
+    return topicDefinition.toHeader();
   }
 
 }

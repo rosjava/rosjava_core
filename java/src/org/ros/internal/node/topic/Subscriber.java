@@ -123,16 +123,16 @@ public class Subscriber<MessageType> extends Topic {
     return new Subscriber<S>(slaveIdentifier, description, deserializer, executor);
   }
 
-  private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition description,
+  private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
       MessageDeserializer<MessageType> deserializer, Executor executor) {
-    super(description);
+    super(topicDefinition);
     this.executor = executor;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new IncomingMessageQueue<MessageType>(deserializer);
     this.slaveIdentifier = slaveIdentifier;
     header =
         ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
-            .putAll(description.toHeader()).build();
+            .putAll(topicDefinition.toHeader()).build();
     knownPublishers = Sets.newHashSet();
     channelGroup = new DefaultChannelGroup();
     channelFactory =

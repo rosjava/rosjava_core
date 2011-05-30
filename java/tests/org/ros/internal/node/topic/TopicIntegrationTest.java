@@ -19,7 +19,6 @@ package org.ros.internal.node.topic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.MessageListener;
@@ -46,14 +45,14 @@ public class TopicIntegrationTest {
   private MasterServer masterServer;
 
   @Before
-  public void setUp() throws XmlRpcException, IOException {
+  public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
   }
 
   @Test
   public void testOnePublisherToOneSubscriber() throws URISyntaxException, RemoteException,
-      IOException, InterruptedException, XmlRpcException {
+      IOException, InterruptedException {
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName("/foo"), MessageDefinition.create(
             org.ros.message.std_msgs.String.__s_getDataType(),
