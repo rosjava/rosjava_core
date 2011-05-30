@@ -30,7 +30,6 @@ import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.ProtocolDescription;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -42,7 +41,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
 
   private final GraphName nodeName;
 
-  public SlaveClient(GraphName nodeName, URI uri) throws MalformedURLException {
+  public SlaveClient(GraphName nodeName, URI uri) {
     super(uri, org.ros.internal.node.xmlrpc.Slave.class);
     this.nodeName = nodeName;
   }

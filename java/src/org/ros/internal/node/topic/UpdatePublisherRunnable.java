@@ -16,8 +16,6 @@
 
 package org.ros.internal.node.topic;
 
-import java.net.MalformedURLException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.RemoteException;
@@ -67,8 +65,6 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
       } else {
         log.error("Publisher returned unsupported protocol selection: " + response);
       }
-    } catch (MalformedURLException e) {
-      log.error(e);
     } catch (RemoteException e) {
       // TODO(damonkohler): Retry logic is needed at the XML-RPC layer.
       log.error(e);

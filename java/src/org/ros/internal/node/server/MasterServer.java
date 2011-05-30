@@ -82,11 +82,7 @@ public class MasterServer extends NodeServer {
     for (SlaveIdentifier slaveIdentifier : slaves.values()) {
       // TODO(damonkohler): Should the master server know its node name here?
       SlaveClient client;
-      try {
-        client = new SlaveClient(GraphName.createUnknown(), slaveIdentifier.getUri());
-      } catch (MalformedURLException e) {
-        throw new RuntimeException(e);
-      }
+      client = new SlaveClient(GraphName.createUnknown(), slaveIdentifier.getUri());
       List<URI> publisherUris = Lists.newArrayList();
       for (PublisherIdentifier identifier : publishers.get(topicName)) {
         publisherUris.add(identifier.getSlaveUri());
@@ -117,8 +113,7 @@ public class MasterServer extends NodeServer {
   /**
    * Register the caller as a publisher the topic.
    * 
-   * @param callerId
-   *          ROS caller ID
+   * @param callerId ROS caller ID
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
    * @throws RemoteException
    * @throws XmlRpcTimeoutException
@@ -142,10 +137,8 @@ public class MasterServer extends NodeServer {
    * API is for looking information about publishers and subscribers. Use
    * lookupService instead to lookup ROS-RPC URIs.
    * 
-   * @param callerId
-   *          ROS caller ID
-   * @param nodeName
-   *          name of node to lookup
+   * @param callerId ROS caller ID
+   * @param nodeName name of node to lookup
    * @return a {@link SlaveIdentifier} for the node with the given name
    */
   public SlaveIdentifier lookupNode(String callerId, String nodeName) {
@@ -165,10 +158,8 @@ public class MasterServer extends NodeServer {
   /**
    * Lookup the provider of a particular service.
    * 
-   * @param callerId
-   *          ROS caller ID
-   * @param service
-   *          Fully-qualified name of service
+   * @param callerId ROS caller ID
+   * @param service Fully-qualified name of service
    * @return service URI that provides address and port of the service. Fails if
    *         there is no provider.
    */
