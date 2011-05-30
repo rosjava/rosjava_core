@@ -34,9 +34,12 @@ public class SlaveIdentifier {
   private final GraphName name;
   private final URI uri;
 
-  public static SlaveIdentifier createFromStrings(String nodeName, String uri)
-      throws URISyntaxException {
-    return new SlaveIdentifier(new GraphName(nodeName), new URI(uri));
+  public static SlaveIdentifier createFromStrings(String nodeName, String uri) {
+    try {
+      return new SlaveIdentifier(new GraphName(nodeName), new URI(uri));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public SlaveIdentifier(GraphName name, URI uri) {

@@ -30,6 +30,7 @@ import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
@@ -80,7 +81,7 @@ public class Subscriber<MessageType> extends Topic {
         while (!Thread.currentThread().isInterrupted()) {
           MessageType message = in.take();
           if (DEBUG) {
-            log.info("Received message: " + message + " "+ message.getClass().getCanonicalName());
+            log.info("Received message: " + message + " " + message.getClass().getCanonicalName());
           }
           for (MessageListener<MessageType> listener : listeners) {
             if (Thread.currentThread().isInterrupted()) {
@@ -114,6 +115,13 @@ public class Subscriber<MessageType> extends Topic {
       ChannelPipeline pipeline = channel.getPipeline();
       pipeline.remove(this);
       pipeline.addLast("MessageHandler", in.createChannelHandler());
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+      // TODO(damonkohler): This is where we need some reconnection logic and
+      // allow users to listen for disconnects, etc.
+      throw new RuntimeException(e.getCause());
     }
   }
 

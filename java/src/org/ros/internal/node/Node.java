@@ -46,7 +46,6 @@ import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 import org.ros.message.Service;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.Executor;
@@ -123,14 +122,10 @@ public class Node {
    * @param topicDefinition {@link TopicDefinition} that is subscribed to
    * @param messageClass {@link Message} class for topic
    * @return a {@link Subscriber} instance
-   * @throws RemoteException
-   * @throws URISyntaxException
-   * @throws IOException
    */
   @SuppressWarnings("unchecked")
   public <MessageType> Subscriber<MessageType> createSubscriber(TopicDefinition topicDefinition,
-      Class<MessageType> messageClass, MessageDeserializer<MessageType> deserializer)
-      throws IOException, URISyntaxException, RemoteException {
+      Class<MessageType> messageClass, MessageDeserializer<MessageType> deserializer) {
     String topicName = topicDefinition.getName().toString();
     Subscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
@@ -160,14 +155,10 @@ public class Node {
    * @param <MessageType>
    * @param topicDefinition {@link TopicDefinition} that is being published
    * @return a {@link Subscriber} instance
-   * @throws RemoteException
-   * @throws URISyntaxException
-   * @throws IOException
    */
   @SuppressWarnings("unchecked")
   public <MessageType> Publisher<MessageType> createPublisher(TopicDefinition topicDefinition,
-      MessageSerializer<MessageType> serializer) throws IOException, URISyntaxException,
-      RemoteException {
+      MessageSerializer<MessageType> serializer) {
     String topicName = topicDefinition.getName().toString();
     Publisher<MessageType> publisher;
     boolean createdNewPublisher = false;

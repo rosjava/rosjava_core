@@ -18,6 +18,7 @@ package org.ros.internal.node.topic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,15 +26,14 @@ import org.ros.MessageListener;
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.Node;
-import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -51,8 +51,7 @@ public class TopicIntegrationTest {
   }
 
   @Test
-  public void testOnePublisherToOneSubscriber() throws URISyntaxException, RemoteException,
-      IOException, InterruptedException {
+  public void testOnePublisherToOneSubscriber() throws InterruptedException {
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName("/foo"), MessageDefinition.create(
             org.ros.message.std_msgs.String.__s_getDataType(),
@@ -65,9 +64,10 @@ public class TopicIntegrationTest {
         publisherNode.createPublisher(topicDefinition,
             new MessageSerializer<org.ros.message.std_msgs.String>());
 
-    Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
+    Node subscriberNode =
+        Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
-        publisherNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
+        subscriberNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
             new MessageDeserializer<org.ros.message.std_msgs.String>(
                 org.ros.message.std_msgs.String.class));
 
@@ -85,12 +85,45 @@ public class TopicIntegrationTest {
 
     // TODO(damonkohler): Ugly hack because we can't currently detect when the
     // servers have settled into their connections.
-    long timeoutTime = System.currentTimeMillis() + 2000;
-    while (!publisherNode.isRegistered() && System.currentTimeMillis() < timeoutTime) {
+    long timeoutTime = System.currentTimeMillis() + 100;
+    while (!publisherNode.isRegistered() || !subscriberNode.isRegistered()) {
+      if (System.currentTimeMillis() > timeoutTime) {
+        fail();
+      }
       Thread.sleep(100);
     }
+    
+    // TODO(damonkohler): Ugly hack because we can't currently detect when the
+    // servers have settled into their connections.
+    Thread.sleep(500);
 
     publisher.publish(helloMessage);
-    assertTrue(messageReceived.await(1, TimeUnit.SECONDS));
+    assertTrue(messageReceived.await(100, TimeUnit.MILLISECONDS));
+  }
+
+  @Test
+  public void testAddDisconnectedPublisher() {
+    TopicDefinition topicDefinition =
+        new TopicDefinition(new GraphName("/foo"), MessageDefinition.create(
+            org.ros.message.std_msgs.String.__s_getDataType(),
+            org.ros.message.std_msgs.String.__s_getMessageDefinition(),
+            org.ros.message.std_msgs.String.__s_getMD5Sum()));
+
+    Node subscriberNode =
+        Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        subscriberNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
+
+    try {
+      subscriber.addPublisher(
+          new PublisherIdentifier(SlaveIdentifier.createFromStrings("foo", "http://foo"),
+              topicDefinition), new InetSocketAddress(1234));
+      fail();
+    } catch (RuntimeException e) {
+      // Connecting to a disconnected publisher should fail.
+    }
+
   }
 }
