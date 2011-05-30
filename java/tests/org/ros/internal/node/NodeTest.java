@@ -90,4 +90,19 @@ public class NodeTest {
     node.stop();
   }
 
+  @Test
+  public void testCreatePrivate() {
+    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
+
+    InetSocketAddress tcpRosAddress = node.getTcpRosServer().getAddress();
+    assertTrue(tcpRosAddress.getPort() > 0);
+    assertTrue(tcpRosAddress.getAddress().isLoopbackAddress());
+
+    URI uri = node.getSlaveServer().getUri();
+    assertTrue(uri.getPort() > 0);
+    assertTrue(new InetSocketAddress(uri.getHost(), uri.getPort()).getAddress().isLoopbackAddress());
+
+    node.stop();
+  }
+
 }

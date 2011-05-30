@@ -18,6 +18,7 @@
 package org.ros.internal.node.xmlrpc;
 
 import org.apache.xmlrpc.XmlRpcException;
+import org.apache.xmlrpc.client.TimingOutCallback;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.common.TypeConverter;
 import org.apache.xmlrpc.common.TypeConverterFactory;
@@ -131,8 +132,10 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
           TimingOutCallback callback = new TimingOutCallback(timeout);
           client.executeAsync(methodName, pArgs, callback);
           result = callback.waitForResponse();
+        } catch (TimingOutCallback.TimeoutException e) {
+          throw new XmlRpcTimeoutException(e);
         } catch (InterruptedException e) {
-          throw new XmlRpcTimeoutException();
+          throw new XmlRpcTimeoutException(e);
         } catch (UndeclaredThrowableException e) {
           throw new RuntimeException(e);
         } catch (XmlRpcException e) {

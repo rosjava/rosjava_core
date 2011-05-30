@@ -16,16 +16,17 @@
 
 package org.ros.internal.node.xmlrpc;
 
-import org.apache.xmlrpc.XmlRpcException;
-
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class XmlRpcTimeoutException extends XmlRpcException {
-
+public class XmlRpcTimeoutException extends RuntimeException {
+  
   public XmlRpcTimeoutException() {
-    super(0, "XML-RPC timeout.");
+  }
+
+  public XmlRpcTimeoutException(Exception e) {
+    super(e);
   }
 
 }
