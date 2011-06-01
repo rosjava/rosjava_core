@@ -256,12 +256,12 @@ public class Node {
   /**
    * Stops the node.
    */
-  public void stop() {
-    for (Publisher<?> pub : topicManager.getPublishers()) {
-      pub.shutdown();
+  public void shutdown() {
+    for (Publisher<?> publisher : topicManager.getPublishers()) {
+      publisher.shutdown();
     }
-    for (Subscriber<?> sub : topicManager.getSubscribers()) {
-      sub.shutdown();
+    for (Subscriber<?> subscriber : topicManager.getSubscribers()) {
+      subscriber.shutdown();
     }
     // TODO(damonkohler): Shutdown services as well.
     slaveServer.shutdown();

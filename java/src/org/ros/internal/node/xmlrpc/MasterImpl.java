@@ -74,8 +74,7 @@ public class MasterImpl implements Master {
 
   @Override
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) throws URISyntaxException, MalformedURLException, XmlRpcTimeoutException,
-      RemoteException {
+      String callerApi) throws MalformedURLException, XmlRpcTimeoutException, RemoteException {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName(topic), MessageDefinition.createFromTypeName(topicType));
@@ -102,7 +101,7 @@ public class MasterImpl implements Master {
 
   @Override
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
-      String callerApi) throws URISyntaxException {
+      String callerApi) {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName(topic), MessageDefinition.createFromTypeName(topicType));

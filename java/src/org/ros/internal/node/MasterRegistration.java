@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * {@link MasterServer}.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class MasterRegistration implements TopicListener, UncaughtExceptionHandler {
 
@@ -109,8 +110,8 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
     public void doJob() throws RemoteException, XmlRpcTimeoutException, MalformedURLException {
       try {
         masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
+        publisher.signalRegistrationDone();
       } catch (URISyntaxException e) {
-        // convert to RuntimeException as this generally can't happen.
         throw new RuntimeException(e);
       }
     }
@@ -132,8 +133,8 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
         List<PublisherIdentifier> publishers = SlaveServer.buildPublisherIdentifierList(
             response.getResult(), subscriber.getTopicDefinition());
         subscriber.updatePublishers(publishers);
+        subscriber.signalRegistrationDone();
       } catch (URISyntaxException e) {
-        // convert to RuntimeException as this generally can't happen.
         throw new RuntimeException(e);
       }
     }

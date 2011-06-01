@@ -16,23 +16,17 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
@@ -40,7 +34,6 @@ import org.ros.MessageDeserializer;
 import org.ros.MessageListener;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
-import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
@@ -50,7 +43,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
@@ -70,7 +62,6 @@ public class Subscriber<MessageType> extends Topic {
   private final IncomingMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
   private final ChannelFactory channelFactory;
-  private final ChannelGroup channelGroup;
   private final Set<PublisherIdentifier> knownPublishers;
   private final SlaveIdentifier slaveIdentifier;
 
@@ -104,27 +95,6 @@ public class Subscriber<MessageType> extends Topic {
     }
   }
 
-  private final class HandshakeHandler extends SimpleChannelHandler {
-    @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-      ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
-      // TODO(damonkohler): Handle handshake errors.
-      handshake(incomingBuffer);
-      Channel channel = e.getChannel();
-      channelGroup.add(channel);
-      ChannelPipeline pipeline = channel.getPipeline();
-      pipeline.remove(this);
-      pipeline.addLast("MessageHandler", in.createChannelHandler());
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-      // TODO(damonkohler): This is where we need some reconnection logic and
-      // allow users to listen for disconnects, etc.
-      throw new RuntimeException(e.getCause());
-    }
-  }
-
   public static <S> Subscriber<S> create(SlaveIdentifier slaveIdentifier,
       TopicDefinition description, Class<S> messageClass, Executor executor,
       MessageDeserializer<S> deserializer) {
@@ -142,7 +112,6 @@ public class Subscriber<MessageType> extends Topic {
         ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
             .putAll(topicDefinition.toHeader()).build();
     knownPublishers = Sets.newHashSet();
-    channelGroup = new DefaultChannelGroup();
     channelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
@@ -179,7 +148,8 @@ public class Subscriber<MessageType> extends Topic {
       @Override
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();
-        pipeline.addLast("HandshakeHandler", new HandshakeHandler());
+        pipeline.addLast("SubscriberHandshakeHandler", new SubscriberHandshakeHandler<MessageType>(
+            header, in));
         return pipeline;
       }
     };
@@ -232,18 +202,6 @@ public class Subscriber<MessageType> extends Topic {
    */
   public ImmutableMap<String, String> getHeader() {
     return header;
-  }
-
-  private void handshake(ChannelBuffer buffer) {
-    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
-    if (DEBUG) {
-      log.info("Outgoing handshake header: " + header);
-      log.info("Incoming handshake header: " + incomingHeader);
-    }
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
-        header.get(ConnectionHeaderFields.TYPE)));
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
-        header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
   }
 
 }

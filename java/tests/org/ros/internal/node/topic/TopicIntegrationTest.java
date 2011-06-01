@@ -82,17 +82,10 @@ public class TopicIntegrationTest {
         messageReceived.countDown();
       }
     });
-
-    // TODO(damonkohler): Ugly hack because we can't currently detect when the
-    // servers have settled into their connections.
-    long timeoutTime = System.currentTimeMillis() + 100;
-    while (!publisherNode.isRegistered() || !subscriberNode.isRegistered()) {
-      if (System.currentTimeMillis() > timeoutTime) {
-        fail();
-      }
-      Thread.sleep(100);
-    }
     
+    publisher.awaitRegistration(100, TimeUnit.MILLISECONDS);
+    subscriber.awaitRegistration(100, TimeUnit.MILLISECONDS);
+
     // TODO(damonkohler): Ugly hack because we can't currently detect when the
     // servers have settled into their connections.
     Thread.sleep(500);
@@ -124,6 +117,6 @@ public class TopicIntegrationTest {
     } catch (RuntimeException e) {
       // Connecting to a disconnected publisher should fail.
     }
-
   }
+
 }

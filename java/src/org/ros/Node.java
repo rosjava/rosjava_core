@@ -277,7 +277,7 @@ public class Node {
 
   public void stop() {
     rosoutPublisher.shutdown();
-    node.stop();
+    node.shutdown();
   }
 
   /**

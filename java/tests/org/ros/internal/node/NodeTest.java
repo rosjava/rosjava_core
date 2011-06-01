@@ -64,9 +64,9 @@ public class NodeTest {
     String hostName = InetAddress.getLocalHost().getCanonicalHostName();
     Node node =
         Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
-    node.stop();
+    node.shutdown();
     try {
-      node.stop();
+      node.shutdown();
       fail();
     } catch (RuntimeException e) {
       // Calling stop() while the node is not running must fail.
@@ -87,7 +87,7 @@ public class NodeTest {
     assertTrue(uri.getPort() > 0);
     assertEquals(hostName, uri.getHost());
 
-    node.stop();
+    node.shutdown();
   }
 
   @Test
@@ -102,7 +102,7 @@ public class NodeTest {
     assertTrue(uri.getPort() > 0);
     assertTrue(new InetSocketAddress(uri.getHost(), uri.getPort()).getAddress().isLoopbackAddress());
 
-    node.stop();
+    node.shutdown();
   }
 
 }

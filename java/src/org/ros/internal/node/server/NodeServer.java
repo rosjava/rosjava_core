@@ -94,7 +94,7 @@ public class NodeServer {
     startLatch.await();
   }
   
-  public boolean awaitStartWithTimeout(long timeout, TimeUnit unit) throws InterruptedException {
+  public boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
     return startLatch.await(timeout, unit);
   }
 
