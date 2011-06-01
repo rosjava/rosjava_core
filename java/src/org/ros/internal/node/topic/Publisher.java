@@ -34,7 +34,7 @@ import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
- *
+ * 
  * @param <MessageType>
  */
 public class Publisher<MessageType> extends Topic {

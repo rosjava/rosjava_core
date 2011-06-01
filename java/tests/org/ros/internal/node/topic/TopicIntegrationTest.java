@@ -60,7 +60,7 @@ public class TopicIntegrationTest {
 
     Node publisherNode =
         Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0, 0);
-    Publisher<org.ros.message.std_msgs.String> publisher =
+    final Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.createPublisher(topicDefinition,
             new MessageSerializer<org.ros.message.std_msgs.String>());
 
@@ -82,16 +82,18 @@ public class TopicIntegrationTest {
         messageReceived.countDown();
       }
     });
-    
+
     publisher.awaitRegistration(100, TimeUnit.MILLISECONDS);
     subscriber.awaitRegistration(100, TimeUnit.MILLISECONDS);
 
-    // TODO(damonkohler): Ugly hack because we can't currently detect when the
-    // servers have settled into their connections.
-    Thread.sleep(500);
-
-    publisher.publish(helloMessage);
+    RepeatingPublisher<org.ros.message.std_msgs.String> repeatingPublisher =
+        new RepeatingPublisher<org.ros.message.std_msgs.String>(publisher, helloMessage, 1000);
+    repeatingPublisher.start();
+    
     assertTrue(messageReceived.await(100, TimeUnit.MILLISECONDS));
+
+    repeatingPublisher.cancel();
+    publisher.shutdown();
   }
 
   @Test

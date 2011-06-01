@@ -19,6 +19,7 @@ package org.ros.internal.transport;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.MessageDeserializer;
@@ -39,6 +40,11 @@ public class IncomingMessageQueue<MessageType> {
       ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
       messages.put(deserializer.<MessageType>deserialize(buffer.toByteBuffer()));
     }
+    
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+      throw new RuntimeException(e.getCause());
+    }
   }
 
   public IncomingMessageQueue(MessageDeserializer<MessageType> deserializer) {
@@ -49,7 +55,7 @@ public class IncomingMessageQueue<MessageType> {
   public MessageType take() throws InterruptedException {
     return messages.take();
   }
- 
+
   public ChannelHandler createChannelHandler() {
     return new MessageHandler();
   }

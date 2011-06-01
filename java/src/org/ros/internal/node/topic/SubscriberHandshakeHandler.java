@@ -66,7 +66,6 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
-    // TODO(damonkohler): Handle handshake errors.
     handshake(incomingBuffer);
     Channel channel = e.getChannel();
     ChannelPipeline pipeline = channel.getPipeline();
@@ -76,8 +75,6 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-    // TODO(damonkohler): This is where we need some reconnection logic and
-    // allow users to listen for disconnects, etc.
     throw new RuntimeException(e.getCause());
   }
 
