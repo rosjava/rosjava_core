@@ -69,7 +69,6 @@ public class Node {
   private final SlaveServer slaveServer;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
-  private final TcpRosServer tcpRosServer;
   private final MasterRegistration masterRegistration;
 
   private boolean started;
@@ -103,7 +102,7 @@ public class Node {
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    tcpRosServer =
+    TcpRosServer tcpRosServer =
         new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
     slaveServer =
         new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress, masterClient,
@@ -201,8 +200,7 @@ public class Node {
         serviceServer = serviceManager.getServiceServer(name);
       } else {
         serviceServer =
-            new ServiceServer(serviceDefinition, responseBuilder,
-                tcpRosServer.getAdvertiseAddress());
+            new ServiceServer(serviceDefinition, responseBuilder, slaveServer.getAdvertiseAddress());
         createdNewService = true;
       }
     }
@@ -265,13 +263,7 @@ public class Node {
     }
     // TODO(damonkohler): Shutdown services as well.
     slaveServer.shutdown();
-    tcpRosServer.shutdown();
     masterRegistration.shutdown();
-  }
-
-  @VisibleForTesting
-  TcpRosServer getTcpRosServer() {
-    return tcpRosServer;
   }
 
   @VisibleForTesting

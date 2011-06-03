@@ -90,6 +90,14 @@ public class NodeServer {
     return advertiseAddress.toUri("http");
   }
   
+  public InetSocketAddress getAddress() {
+    return advertiseAddress.toInetSocketAddress();
+  }
+  
+  public AdvertiseAddress getAdvertiseAddress() {
+    return advertiseAddress;
+  }
+  
   public void awaitStart() throws InterruptedException {
     startLatch.await();
   }

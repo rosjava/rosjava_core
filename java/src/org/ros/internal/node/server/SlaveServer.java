@@ -89,6 +89,7 @@ public class SlaveServer extends NodeServer {
   @Override
   public void shutdown() {
     super.shutdown();
+    tcpRosServer.shutdown();
   }
 
   /**
@@ -119,11 +120,6 @@ public class SlaveServer extends NodeServer {
 
   public URI getMasterUri(String callerId) {
     return masterClient.getRemoteUri();
-  }
-
-  public void shutdown(String callerId, String message) {
-    super.shutdown();
-    tcpRosServer.shutdown();
   }
 
   /**

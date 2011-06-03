@@ -68,7 +68,10 @@ public class SlaveImpl implements Slave {
 
   @Override
   public List<Object> shutdown(String callerId, String message) {
-    slave.shutdown(callerId, message);
+    log.info("Shutdown requested by " + callerId + " with message \"" + message + "\"");
+    // TODO(damonkohler): It's possible that the callerId and message will be
+    // useful to the slave in the future. For now, we can just ignore it.
+    slave.shutdown();
     return Response.createSuccess("Shutdown successful.", null).toList();
   }
 
