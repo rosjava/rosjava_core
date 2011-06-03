@@ -35,7 +35,6 @@ import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.xmlrpc.MasterImpl;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -117,11 +116,9 @@ public class MasterServer extends NodeServer {
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
    * @throws RemoteException
    * @throws XmlRpcTimeoutException
-   * @throws MalformedURLException
    */
   public List<SubscriberIdentifier> registerPublisher(String callerId,
-      PublisherIdentifier description) throws MalformedURLException, XmlRpcTimeoutException,
-      RemoteException {
+      PublisherIdentifier description) throws XmlRpcTimeoutException, RemoteException {
     publishers.put(description.getTopicName().toString(), description);
     addSlave(description.getSlaveIdentifier());
     publisherUpdate(description.getTopicName().toString());

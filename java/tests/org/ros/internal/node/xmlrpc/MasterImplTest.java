@@ -34,8 +34,6 @@ import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicDefinition;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -44,8 +42,8 @@ import java.util.List;
 public class MasterImplTest {
 
   @Test
-  public void testRegisterPublisherWithNoSubscribers() throws URISyntaxException,
-      MalformedURLException, XmlRpcTimeoutException, RemoteException {
+  public void testRegisterPublisherWithNoSubscribers() throws XmlRpcTimeoutException,
+      RemoteException {
     MasterServer mockMaster = mock(MasterServer.class);
     when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
         .thenReturn(Lists.<SubscriberIdentifier>newArrayList());
@@ -56,13 +54,11 @@ public class MasterImplTest {
   }
 
   @Test
-  public void testRegisterPublisher() throws URISyntaxException, MalformedURLException,
-      XmlRpcTimeoutException, RemoteException {
+  public void testRegisterPublisher() throws XmlRpcTimeoutException, RemoteException {
     MasterServer mockMaster = mock(MasterServer.class);
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
     TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName("/topic"),
-            MessageDefinition.createFromTypeName("msg"));
+        new TopicDefinition(new GraphName("/topic"), MessageDefinition.createFromTypeName("msg"));
     SubscriberIdentifier subscriberDescription =
         new SubscriberIdentifier(slaveIdentifier, topicDefinition);
     when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
@@ -76,7 +72,7 @@ public class MasterImplTest {
   }
 
   @Test
-  public void testRegisterSubscriberWithNoSubscribers() throws URISyntaxException {
+  public void testRegisterSubscriberWithNoSubscribers() {
     MasterServer mockMaster = mock(MasterServer.class);
     when(mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any())).thenReturn(
         Lists.<PublisherIdentifier>newArrayList());
@@ -87,12 +83,11 @@ public class MasterImplTest {
   }
 
   @Test
-  public void testRegisterSubscriber() throws URISyntaxException {
+  public void testRegisterSubscriber() {
     MasterServer mockMaster = mock(MasterServer.class);
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
     TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName("/topic"),
-            MessageDefinition.createFromTypeName("msg"));
+        new TopicDefinition(new GraphName("/topic"), MessageDefinition.createFromTypeName("msg"));
     PublisherIdentifier publisherDescription =
         new PublisherIdentifier(slaveIdentifier, topicDefinition);
     when(mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any())).thenReturn(

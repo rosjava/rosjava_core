@@ -47,7 +47,6 @@ import org.ros.message.Message;
 import org.ros.message.Service;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -69,6 +68,7 @@ public class Node {
   private final SlaveServer slaveServer;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
+  private final TcpRosServer tcpRosServer;
   private final MasterRegistration masterRegistration;
 
   private boolean started;
@@ -102,7 +102,7 @@ public class Node {
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    TcpRosServer tcpRosServer =
+    tcpRosServer =
         new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
     slaveServer =
         new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress, masterClient,
@@ -200,7 +200,8 @@ public class Node {
         serviceServer = serviceManager.getServiceServer(name);
       } else {
         serviceServer =
-            new ServiceServer(serviceDefinition, responseBuilder, slaveServer.getAdvertiseAddress());
+            new ServiceServer(serviceDefinition, responseBuilder,
+                tcpRosServer.getAdvertiseAddress());
         createdNewService = true;
       }
     }
@@ -257,9 +258,29 @@ public class Node {
   public void shutdown() {
     for (Publisher<?> publisher : topicManager.getPublishers()) {
       publisher.shutdown();
+      // NOTE(damonkohler): We don't want to raise potentially spurious
+      // exceptions during shutdown that would interrupt the process. This is
+      // simply best effort cleanup.
+      try {
+        masterClient.unregisterPublisher(slaveServer.toSlaveIdentifier(), publisher);
+      } catch (XmlRpcTimeoutException e) {
+        log.error(e);
+      } catch (RemoteException e) {
+        log.error(e);
+      }
     }
     for (Subscriber<?> subscriber : topicManager.getSubscribers()) {
       subscriber.shutdown();
+      // NOTE(damonkohler): We don't want to raise potentially spurious
+      // exceptions during shutdown that would interrupt the process. This is
+      // simply best effort cleanup.
+      try {
+        masterClient.unregisterSubscriber(slaveServer.toSlaveIdentifier(), subscriber);
+      } catch (XmlRpcTimeoutException e) {
+        log.error(e);
+      } catch (RemoteException e) {
+        log.error(e);
+      }
     }
     // TODO(damonkohler): Shutdown services as well.
     slaveServer.shutdown();
@@ -281,26 +302,20 @@ public class Node {
   public ServiceIdentifier lookupService(GraphName serviceName, Service<?, ?> serviceType)
       throws RemoteException, XmlRpcTimeoutException {
     Response<URI> response;
-    try {
-      response =
-          masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
-      if (response.getStatusCode() == StatusCode.SUCCESS) {
-        ServiceDefinition serviceDefinition =
-            new ServiceDefinition(serviceName, serviceType.getDataType(), serviceType.getMD5Sum());
-        return new ServiceIdentifier(response.getResult(), serviceDefinition);
-      } else {
-        return null;
-      }
-    } catch (URISyntaxException e) {
-      log.error("Master returned invalid URI for lookupService().", e);
-      throw new RemoteException(StatusCode.FAILURE, "Master returned invalid URI.");
+    response = masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
+    if (response.getStatusCode() == StatusCode.SUCCESS) {
+      ServiceDefinition serviceDefinition =
+          new ServiceDefinition(serviceName, serviceType.getDataType(), serviceType.getMD5Sum());
+      return new ServiceIdentifier(response.getResult(), serviceDefinition);
+    } else {
+      return null;
     }
   }
 
   /**
    * @return true if Node is fully registered with {@link MasterServer}.
-   *         {@code isRegistered()} can go to false if new publisher or
-   *         subscribers are created.
+   *         {@code isRegistered()} can become {@code false} if new
+   *         {@link Publisher}s or {@link Subscriber}s are created.
    */
   public boolean isRegistered() {
     return masterRegistration.getPendingSize() == 0;

@@ -30,7 +30,6 @@ import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicDefinition;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -74,7 +73,7 @@ public class MasterImpl implements Master {
 
   @Override
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) throws MalformedURLException, XmlRpcTimeoutException, RemoteException {
+      String callerApi) throws XmlRpcTimeoutException, RemoteException {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName(topic), MessageDefinition.createFromTypeName(topicType));

@@ -33,7 +33,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -107,13 +106,9 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
     }
 
     @Override
-    public void doJob() throws RemoteException, XmlRpcTimeoutException, MalformedURLException {
-      try {
-        masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
-        publisher.signalRegistrationDone();
-      } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
-      }
+    public void doJob() throws RemoteException, XmlRpcTimeoutException {
+      masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
+      publisher.signalRegistrationDone();
     }
   }
 
@@ -128,15 +123,12 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
     @Override
     public void doJob() throws RemoteException, XmlRpcTimeoutException {
       Response<List<URI>> response;
-      try {
-        response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
-        List<PublisherIdentifier> publishers = SlaveServer.buildPublisherIdentifierList(
-            response.getResult(), subscriber.getTopicDefinition());
-        subscriber.updatePublishers(publishers);
-        subscriber.signalRegistrationDone();
-      } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
-      }
+      response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
+      List<PublisherIdentifier> publishers =
+          SlaveServer.buildPublisherIdentifierList(response.getResult(),
+              subscriber.getTopicDefinition());
+      subscriber.updatePublishers(publishers);
+      subscriber.signalRegistrationDone();
     }
 
   }
