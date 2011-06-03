@@ -67,9 +67,10 @@ public class MessageQueueIntegrationTest {
   public void setup() {
     out = new OutgoingMessageQueue<Message>(new MessageSerializer<Message>());
     out.start();
-    in = new IncomingMessageQueue<org.ros.message.std_msgs.String>(
-        new MessageDeserializer<org.ros.message.std_msgs.String>(
-            org.ros.message.std_msgs.String.class));
+    in =
+        new IncomingMessageQueue<org.ros.message.std_msgs.String>(
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
   }
 
   @Test
@@ -112,10 +113,6 @@ public class MessageQueueIntegrationTest {
 
     connectIncomingMessageQueue(secondIncomingQueue, serverChannel);
 
-    // TODO(damonkohler): Ugly hack because we can't yet determine when the
-    // connection handshake has completed.
-    Thread.sleep(100);
-
     org.ros.message.std_msgs.String hello = new org.ros.message.std_msgs.String();
     hello.data = "Would you like to play a game?";
     out.put(hello);
@@ -127,10 +124,6 @@ public class MessageQueueIntegrationTest {
   public void testSendAfterIncomingQueueShutdown() throws InterruptedException {
     Channel serverChannel = buildServerChannel();
     ChannelFuture future = connectIncomingMessageQueue(in, serverChannel);
-
-    // TODO(damonkohler): Ugly hack because we can't yet determine when the
-    // connection handshake has completed.
-    Thread.sleep(100);
 
     future.getChannel().close().await();
 
@@ -144,26 +137,18 @@ public class MessageQueueIntegrationTest {
     Channel serverChannel = buildServerChannel();
     connectIncomingMessageQueue(in, serverChannel);
 
-    // TODO(damonkohler): Ugly hack because we can't yet determine when the
-    // connection handshake has completed.
-    Thread.sleep(100);
-
     serverChannel.close().await();
 
     org.ros.message.std_msgs.String hello = new org.ros.message.std_msgs.String();
     hello.data = "Would you like to play a game?";
     out.put(hello);
   }
-  
+
   @Test
   public void testSendAfterOutgoingQueueShutdown() throws InterruptedException {
     Channel serverChannel = buildServerChannel();
 
     connectIncomingMessageQueue(in, serverChannel);
-
-    // TODO(damonkohler): Ugly hack because we can't yet determine when the
-    // connection handshake has completed.
-    Thread.sleep(100);
 
     out.shutdown();
 
@@ -171,7 +156,7 @@ public class MessageQueueIntegrationTest {
     hello.data = "Would you like to play a game?";
     out.put(hello);
   }
-  
+
   private ChannelFuture connectIncomingMessageQueue(
       final IncomingMessageQueue<org.ros.message.std_msgs.String> in, Channel serverChannel)
       throws InterruptedException {
@@ -208,6 +193,8 @@ public class MessageQueueIntegrationTest {
           @Override
           public ChannelPipeline getPipeline() {
             ChannelPipeline pipeline = super.getPipeline();
+            // We're not interested in testing the handshake here. Removing it
+            // means connections are established immediately.
             pipeline.remove(TcpServerPipelineFactory.HANDSHAKE_HANDLER);
             pipeline.addLast("ServerHandler", new ServerHandler());
             return pipeline;
