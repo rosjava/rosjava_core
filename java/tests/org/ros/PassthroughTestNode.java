@@ -83,15 +83,6 @@ public class PassthroughTestNode implements NodeMain {
           }
         };
     node.createSubscriber("composite_in", composite_cb, org.ros.message.test_ros.Composite.class);
-
-    // just spin until exit
-    while (true) {
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
-
   }
+
 }
