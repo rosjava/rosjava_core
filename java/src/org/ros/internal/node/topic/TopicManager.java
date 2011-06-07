@@ -19,6 +19,8 @@ package org.ros.internal.node.topic;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
+import org.ros.internal.namespace.GraphName;
+
 import java.util.List;
 import java.util.Map;
 
@@ -26,11 +28,12 @@ import java.util.Map;
  * Stores internal Publisher and Subscriber instances.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class TopicManager {
 
-  private final Map<String, Subscriber<?>> subscribers;
-  private final Map<String, Publisher<?>> publishers;
+  private final Map<GraphName, Subscriber<?>> subscribers;
+  private final Map<GraphName, Publisher<?>> publishers;
   private TopicListener listener;
 
   public TopicManager() {
@@ -43,32 +46,32 @@ public class TopicManager {
   }
 
   public boolean hasSubscriber(String topicName) {
-    return subscribers.containsKey(topicName);
+    return subscribers.containsKey(new GraphName(topicName));
   }
 
   public boolean hasPublisher(String topicName) {
-    return publishers.containsKey(topicName);
+    return publishers.containsKey(new GraphName(topicName));
   }
 
   public Publisher<?> getPublisher(String topicName) {
-    return publishers.get(topicName);
+    return publishers.get(new GraphName(topicName));
   }
 
   public Subscriber<?> getSubscriber(String topicName) {
-    return subscribers.get(topicName);
+    return subscribers.get(new GraphName(topicName));
   }
 
-  public void putPublisher(String topicName, Publisher<?> publisher) {
-    publishers.put(topicName, publisher);
+  public void putPublisher(Publisher<?> publisher) {
+    publishers.put(publisher.getTopicName(), publisher);
     if (listener != null) {
-      listener.publisherAdded(topicName, publisher);
+      listener.publisherAdded(publisher);
     }
   }
 
-  public void putSubscriber(String topicName, Subscriber<?> subscriber) {
-    subscribers.put(topicName, subscriber);
+  public void putSubscriber(Subscriber<?> subscriber) {
+    subscribers.put(subscriber.getTopicName(), subscriber);
     if (listener != null) {
-      listener.subscriberAdded(topicName, subscriber);
+      listener.subscriberAdded(subscriber);
     }
   }
 

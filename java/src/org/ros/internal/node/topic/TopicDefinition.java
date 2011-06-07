@@ -32,22 +32,33 @@ import java.util.Map;
  */
 public class TopicDefinition {
 
-  private final GraphName name;
+  private final TopicIdentifier topicIdentifier;
   private final MessageDefinition messageDefinition;
 
   public static TopicDefinition createFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));
-    return new TopicDefinition(new GraphName(header.get(ConnectionHeaderFields.TOPIC)),
+    GraphName name = new GraphName(header.get(ConnectionHeaderFields.TOPIC));
+    return new TopicDefinition(new TopicIdentifier(name),
         MessageDefinition.createFromHeader(header));
   }
 
-  public TopicDefinition(GraphName name, MessageDefinition messageDefinition) {
-    this.name = name;
+  public static TopicDefinition create(GraphName name, MessageDefinition messageDefinition) {
+    return new TopicDefinition(new TopicIdentifier(name), messageDefinition);
+  }
+
+  public TopicDefinition(TopicIdentifier topicIdentifier, MessageDefinition messageDefinition) {
+    Preconditions.checkNotNull(topicIdentifier);
+    Preconditions.checkNotNull(messageDefinition);
+    this.topicIdentifier = topicIdentifier;
     this.messageDefinition = messageDefinition;
   }
 
+  public TopicIdentifier getIdentifier() {
+    return topicIdentifier;
+  }
+
   public GraphName getName() {
-    return name;
+    return topicIdentifier.getName();
   }
 
   public String getMessageType() {
@@ -56,39 +67,28 @@ public class TopicDefinition {
 
   public Map<String, String> toHeader() {
     return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.TOPIC, name.toString())
-        .putAll(messageDefinition.toHeader())
-        .build();
+        .put(ConnectionHeaderFields.TOPIC, getName().toString())
+        .putAll(messageDefinition.toHeader()).build();
   }
 
   public List<String> toList() {
-    return Lists.newArrayList(name.toString(), getMessageType());
+    return Lists.newArrayList(getName().toString(), getMessageType());
   }
 
   @Override
   public String toString() {
-    return "TopicDefinition<" + name + ", " + messageDefinition.toString() + ">";
+    return "TopicDefinition<" + topicIdentifier + ", " + messageDefinition.toString() + ">";
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((messageDefinition == null) ? 0 : messageDefinition.hashCode());
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((topicIdentifier == null) ? 0 : topicIdentifier.hashCode());
     return result;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) return true;
@@ -98,9 +98,9 @@ public class TopicDefinition {
     if (messageDefinition == null) {
       if (other.messageDefinition != null) return false;
     } else if (!messageDefinition.equals(other.messageDefinition)) return false;
-    if (name == null) {
-      if (other.name != null) return false;
-    } else if (!name.equals(other.name)) return false;
+    if (topicIdentifier == null) {
+      if (other.topicIdentifier != null) return false;
+    } else if (!topicIdentifier.equals(other.topicIdentifier)) return false;
     return true;
   }
 

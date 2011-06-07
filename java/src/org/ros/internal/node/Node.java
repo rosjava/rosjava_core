@@ -141,7 +141,7 @@ public class Node {
     }
 
     if (createdNewSubscriber) {
-      topicManager.putSubscriber(topicName, subscriber);
+      topicManager.putSubscriber(subscriber);
     }
     return subscriber;
   }
@@ -172,7 +172,7 @@ public class Node {
     }
 
     if (createdNewPublisher) {
-      topicManager.putPublisher(publisher.getTopicName().toString(), publisher);
+      topicManager.putPublisher(publisher);
     }
     return publisher;
   }

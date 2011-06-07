@@ -16,8 +16,6 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.SlaveIdentifier;
 
@@ -27,41 +25,34 @@ import java.net.URI;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class PublisherIdentifier {
-
+  
   private final SlaveIdentifier slaveIdentifier;
-  private final TopicDefinition topicDefinition;
-
-  public PublisherIdentifier(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition) {
-    Preconditions.checkNotNull(slaveIdentifier);
-    Preconditions.checkNotNull(topicDefinition);
+  private final TopicIdentifier topicIdentifier;
+  
+  public PublisherIdentifier(SlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
     this.slaveIdentifier = slaveIdentifier;
-    this.topicDefinition = topicDefinition;
+    this.topicIdentifier = topicIdentifier;
   }
 
   public SlaveIdentifier getSlaveIdentifier() {
     return slaveIdentifier;
   }
-
-  public GraphName getNodeName() {
-    return slaveIdentifier.getName();
-  }
-
-  public URI getSlaveUri() {
+  
+  public URI getUri() {
     return slaveIdentifier.getUri();
   }
-
-  public GraphName getTopicName() {
-    return topicDefinition.getName();
+  
+  public TopicIdentifier getTopicIdentifier() {
+    return topicIdentifier;
   }
   
-  public String getTopicMessageType() {
-    return topicDefinition.getMessageType();
+  public GraphName getTopicName() {
+    return topicIdentifier.getName();
   }
-
+  
   @Override
   public String toString() {
-    return "PublisherIdentifier<" + slaveIdentifier.toString() + ", "
-        + topicDefinition.toString() + ">";
+    return "PublisherIdentifier<" + slaveIdentifier + ", " + topicIdentifier +">";
   }
 
   @Override
@@ -69,7 +60,7 @@ public class PublisherIdentifier {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((slaveIdentifier == null) ? 0 : slaveIdentifier.hashCode());
-    result = prime * result + ((topicDefinition == null) ? 0 : topicDefinition.hashCode());
+    result = prime * result + ((topicIdentifier == null) ? 0 : topicIdentifier.hashCode());
     return result;
   }
 
@@ -82,9 +73,9 @@ public class PublisherIdentifier {
     if (slaveIdentifier == null) {
       if (other.slaveIdentifier != null) return false;
     } else if (!slaveIdentifier.equals(other.slaveIdentifier)) return false;
-    if (topicDefinition == null) {
-      if (other.topicDefinition != null) return false;
-    } else if (!topicDefinition.equals(other.topicDefinition)) return false;
+    if (topicIdentifier == null) {
+      if (other.topicIdentifier != null) return false;
+    } else if (!topicIdentifier.equals(other.topicIdentifier)) return false;
     return true;
   }
 

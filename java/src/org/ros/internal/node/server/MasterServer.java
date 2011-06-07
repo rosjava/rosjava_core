@@ -17,7 +17,7 @@
 package org.ros.internal.node.server;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -30,6 +30,7 @@ import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.xmlrpc.MasterImpl;
@@ -53,10 +54,9 @@ public class MasterServer extends NodeServer {
     super(bindAddress, advertiseAddress);
     slaves = Maps.newConcurrentMap();
     services = Maps.newConcurrentMap();
-    publishers =
-        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, PublisherIdentifier>create());
+    publishers = Multimaps.synchronizedMultimap(HashMultimap.<String, PublisherIdentifier>create());
     subscribers =
-        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, SubscriberIdentifier>create());
+        Multimaps.synchronizedMultimap(HashMultimap.<String, SubscriberIdentifier>create());
   }
 
   public void start() {
@@ -88,8 +88,8 @@ public class MasterServer extends NodeServer {
       SlaveClient client;
       client = new SlaveClient(GraphName.createUnknown(), slaveIdentifier.getUri());
       List<URI> publisherUris = Lists.newArrayList();
-      for (PublisherIdentifier identifier : publishers.get(topicName)) {
-        publisherUris.add(identifier.getSlaveUri());
+      for (PublisherIdentifier publisherIdentifier : publishers.get(topicName)) {
+        publisherUris.add(publisherIdentifier.getUri());
       }
       client.publisherUpdate(topicName, publisherUris);
     }
@@ -129,10 +129,10 @@ public class MasterServer extends NodeServer {
     return ImmutableList.copyOf(subscribers.get(publisher.getTopicName().toString()));
   }
 
-  public int unregisterPublisher(PublisherIdentifier publisherIdentifier) {
-    String topicName = publisherIdentifier.getTopicName().toString();
+  public int unregisterPublisher(PublisherDefinition publisherDefinition) {
+    String topicName = publisherDefinition.getTopicName().toString();
     if (publishers.containsKey(topicName)) {
-      publishers.remove(topicName, publisherIdentifier);
+      publishers.remove(topicName, publisherDefinition);
       return 1;
     }
     return 0;

@@ -37,7 +37,7 @@ public class TopicDefinitionListResultFactory implements ResultFactory<List<Topi
     for (Object topic : topics) {
       String name = (String) ((Object[]) topic)[0];
       String type = (String) ((Object[]) topic)[1];
-      descriptions.add(new TopicDefinition(new GraphName(name), MessageDefinition
+      descriptions.add(TopicDefinition.create(new GraphName(name), MessageDefinition
           .createFromTypeName(type)));
     }
     return descriptions;

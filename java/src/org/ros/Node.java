@@ -144,8 +144,8 @@ public class Node {
       String resolvedTopicName = resolveName(topicName);
       Message message = messageClass.newInstance();
       TopicDefinition topicDefinition =
-          new TopicDefinition(new GraphName(resolvedTopicName), MessageDefinition.create(
-              message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
+          TopicDefinition.create(new GraphName(resolvedTopicName), MessageDefinition.create(
+          message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
       org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
           node.createPublisher(topicDefinition, messageSerializerFactory.<MessageType>create());
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
@@ -181,8 +181,8 @@ public class Node {
       String resolvedTopicName = resolveName(topicName);
       Message message = (Message) messageClass.newInstance();
       TopicDefinition topicDefinition =
-          new TopicDefinition(new GraphName(resolvedTopicName), MessageDefinition.create(
-              message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
+          TopicDefinition.create(new GraphName(resolvedTopicName), MessageDefinition.create(
+          message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
       org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
           node.createSubscriber(topicDefinition, messageClass,
               new MessageDeserializer<MessageType>(messageClass));

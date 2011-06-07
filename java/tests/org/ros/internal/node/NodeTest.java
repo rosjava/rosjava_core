@@ -116,10 +116,10 @@ public class NodeTest {
   public void testPubSubRegistration() throws InterruptedException {
     Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
     TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName("/foo"), MessageDefinition.create(
-            org.ros.message.std_msgs.String.__s_getDataType(),
-            org.ros.message.std_msgs.String.__s_getMessageDefinition(),
-            org.ros.message.std_msgs.String.__s_getMD5Sum()));
+        TopicDefinition.create(new GraphName("/foo"), MessageDefinition.create(
+        org.ros.message.std_msgs.String.__s_getDataType(),
+        org.ros.message.std_msgs.String.__s_getMessageDefinition(),
+        org.ros.message.std_msgs.String.__s_getMD5Sum()));
 
     Publisher<org.ros.message.std_msgs.String> publisher =
         node.createPublisher(topicDefinition,

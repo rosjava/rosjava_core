@@ -24,7 +24,7 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.topic.Publisher;
-import org.ros.internal.node.topic.PublisherIdentifier;
+import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicListener;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
@@ -99,7 +99,7 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
 
   class PublisherRegistrationJob extends RegistrationJob {
 
-    private Publisher<?> publisher;
+    private final Publisher<?> publisher;
 
     public PublisherRegistrationJob(Publisher<?> publisher) {
       this.publisher = publisher;
@@ -124,7 +124,7 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
     public void doJob() throws RemoteException, XmlRpcTimeoutException {
       Response<List<URI>> response;
       response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
-      List<PublisherIdentifier> publishers =
+      List<PublisherDefinition> publishers =
           SlaveServer.buildPublisherIdentifierList(response.getResult(),
               subscriber.getTopicDefinition());
       subscriber.updatePublishers(publishers);
@@ -135,9 +135,10 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
 
   private final ConcurrentLinkedQueue<RegistrationJob> registrationQueue;
   private final MasterClient masterClient;
+  private final MasterRegistrationThread registrationThread;
+  
   private SlaveIdentifier slaveIdentifier;
   private boolean registrationOk;
-  private final MasterRegistrationThread registrationThread;
   private Throwable masterRegistrationError;
 
   public MasterRegistration(MasterClient masterClient) {
@@ -164,12 +165,12 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
   }
 
   @Override
-  public void publisherAdded(String topicName, Publisher<?> publisher) {
+  public void publisherAdded(Publisher<?> publisher) {
     registrationQueue.add(new PublisherRegistrationJob(publisher));
   }
 
   @Override
-  public void subscriberAdded(String topicName, Subscriber<?> subscriber) {
+  public void subscriberAdded(Subscriber<?> subscriber) {
     registrationQueue.add(new SubcriberRegistrationJob(subscriber));
   }
 

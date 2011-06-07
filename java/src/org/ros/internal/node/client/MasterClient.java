@@ -27,7 +27,7 @@ import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.Publisher;
-import org.ros.internal.node.topic.PublisherIdentifier;
+import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.topic.TopicDefinition;
@@ -111,9 +111,9 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
       throws RemoteException, XmlRpcTimeoutException {
     try {
-      return Response.fromListChecked(node.registerSubscriber(slave.getName().toString(), subscriber
-          .getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri().toString()),
-          new UriListResultFactory());
+      return Response.fromListChecked(node.registerSubscriber(slave.getName().toString(),
+          subscriber.getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri()
+              .toString()), new UriListResultFactory());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
@@ -137,9 +137,9 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   }
 
   /**
-   * Registers the specified {@link PublisherIdentifier}.
+   * Registers the specified {@link PublisherDefinition}.
    * 
-   * @param publisher the {@link PublisherIdentifier} of the {@link Publisher}
+   * @param publisher the {@link PublisherDefinition} of the {@link Publisher}
    *        to register
    * @return a {@link Response} with a {@link List} of the current
    *         {@link SlaveServer} URIs which have {@link Subscriber}s for the
@@ -147,12 +147,12 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @throws RemoteException
    * @throws XmlRpcTimeoutException
    */
-  public Response<List<URI>> registerPublisher(PublisherIdentifier publisher)
+  public Response<List<URI>> registerPublisher(PublisherDefinition publisher)
       throws RemoteException, XmlRpcTimeoutException {
     try {
-      return Response.fromListChecked(node.registerPublisher(publisher.getNodeName().toString(),
-          publisher.getTopicName().toString(), publisher.getTopicMessageType(), publisher
-              .getSlaveUri().toString()), new UriListResultFactory());
+      return Response.fromListChecked(node.registerPublisher(publisher.getSlaveName().toString(),
+          publisher.getTopicName().toString(), publisher.getTopicMessageType(), publisher.getUri()
+              .toString()), new UriListResultFactory());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     } catch (MalformedURLException e) {
@@ -161,9 +161,9 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   }
 
   /**
-   * Unregisters the specified {@link PublisherIdentifier}.
+   * Unregisters the specified {@link PublisherDefinition}.
    * 
-   * @param publisher the {@link PublisherIdentifier} of the {@link Publisher}
+   * @param publisher the {@link PublisherDefinition} of the {@link Publisher}
    *        to unregister
    * @return a {@link Response} with the number of unregistered
    *         {@link Publisher}s as the result

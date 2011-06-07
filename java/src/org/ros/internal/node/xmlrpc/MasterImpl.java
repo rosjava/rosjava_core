@@ -29,6 +29,7 @@ import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.topic.TopicIdentifier;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -75,10 +76,9 @@ public class MasterImpl implements Master {
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
       String callerApi) throws XmlRpcTimeoutException, RemoteException {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
-    TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName(topic), MessageDefinition.createFromTypeName(topicType));
-    PublisherIdentifier description = new PublisherIdentifier(slaveIdentifier, topicDefinition);
-    List<SubscriberIdentifier> subscribers = master.registerPublisher(description);
+    PublisherIdentifier publisherIdentifier =
+        new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(new GraphName(topic)));
+    List<SubscriberIdentifier> subscribers = master.registerPublisher(publisherIdentifier);
     List<String> urls = Lists.newArrayList();
     for (SubscriberIdentifier subscriberDescription : subscribers) {
       urls.add(subscriberDescription.getSlaveUri().toString());
@@ -87,7 +87,7 @@ public class MasterImpl implements Master {
   }
 
   @Override
-  public List<Object> unregisterPublisher(String callerId, String topic, String callerApi) {
+  public List<Object> unregisterPublisher(String callerId, String topicName, String slaveUri) {
     return Response.createFailure("Unsupported operation.", 0).toList();
   }
 
@@ -129,12 +129,13 @@ public class MasterImpl implements Master {
       String callerApi) {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName(topic), MessageDefinition.createFromTypeName(topicType));
+        TopicDefinition.create(new GraphName(topic),
+            MessageDefinition.createFromTypeName(topicType));
     List<PublisherIdentifier> publishers =
         master.registerSubscriber(new SubscriberIdentifier(slaveIdentifier, topicDefinition));
     List<String> urls = Lists.newArrayList();
-    for (PublisherIdentifier publisherDescription : publishers) {
-      urls.add(publisherDescription.getSlaveUri().toString());
+    for (PublisherIdentifier publisherIdentifier : publishers) {
+      urls.add(publisherIdentifier.getUri().toString());
     }
     return Response.createSuccess("Success", urls).toList();
   }

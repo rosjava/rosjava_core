@@ -17,12 +17,14 @@
 package org.ros.internal.node.xmlrpc;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
 
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
@@ -33,6 +35,7 @@ import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.topic.TopicIdentifier;
 
 import java.util.List;
 
@@ -45,30 +48,38 @@ public class MasterImplTest {
   public void testRegisterPublisherWithNoSubscribers() throws XmlRpcTimeoutException,
       RemoteException {
     MasterServer mockMaster = mock(MasterServer.class);
-    when(mockMaster.registerPublisher(Matchers.<PublisherIdentifier>any()))
-        .thenReturn(Lists.<SubscriberIdentifier>newArrayList());
+    when(mockMaster.registerPublisher(Matchers.<PublisherIdentifier>any())).thenReturn(
+        Lists.<SubscriberIdentifier>newArrayList());
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response = master.registerPublisher("/caller", "/foo", "/bar", "http://baz");
-    assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
-    assertEquals(response.get(2), Lists.newArrayList());
+    assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
+    assertEquals(Lists.newArrayList(), response.get(2));
   }
 
   @Test
   public void testRegisterPublisher() throws XmlRpcTimeoutException, RemoteException {
     MasterServer mockMaster = mock(MasterServer.class);
-    SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
-    TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName("/topic"), MessageDefinition.createFromTypeName("msg"));
+    final SlaveIdentifier slaveIdentifier =
+        SlaveIdentifier.createFromStrings("/slave", "http://api");
+    final TopicDefinition topicDefinition =
+        TopicDefinition
+            .create(new GraphName("/topic"), MessageDefinition.createFromTypeName("msg"));
     SubscriberIdentifier subscriberDescription =
         new SubscriberIdentifier(slaveIdentifier, topicDefinition);
-    when(mockMaster.registerPublisher(Matchers.<PublisherIdentifier>any()))
-        .thenReturn(Lists.<SubscriberIdentifier>newArrayList(subscriberDescription));
+    when(mockMaster.registerPublisher(argThat(new ArgumentMatcher<PublisherIdentifier>() {
+      @Override
+      public boolean matches(Object argument) {
+        PublisherIdentifier publisherIdentifier = (PublisherIdentifier) argument;
+        return publisherIdentifier.getTopicIdentifier().equals(topicDefinition.getIdentifier())
+            && publisherIdentifier.getSlaveIdentifier().equals(slaveIdentifier);
+      }
+    }))).thenReturn(Lists.<SubscriberIdentifier>newArrayList(subscriberDescription));
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response =
         master.registerPublisher("/slave", "/topic", "/topicType", "http://api");
-    assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
-    assertEquals(response.get(2),
-        Lists.newArrayList(subscriberDescription.getSlaveUri().toString()));
+    assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
+    assertEquals(Lists.newArrayList(subscriberDescription.getSlaveUri().toString()),
+        response.get(2));
   }
 
   @Test
@@ -78,25 +89,23 @@ public class MasterImplTest {
         Lists.<PublisherIdentifier>newArrayList());
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response = master.registerSubscriber("/caller", "/foo", "/bar", "http://baz");
-    assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
-    assertEquals(response.get(2), Lists.newArrayList());
+    assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
+    assertEquals(Lists.newArrayList(), response.get(2));
   }
 
   @Test
   public void testRegisterSubscriber() {
     MasterServer mockMaster = mock(MasterServer.class);
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
-    TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName("/topic"), MessageDefinition.createFromTypeName("msg"));
-    PublisherIdentifier publisherDescription =
-        new PublisherIdentifier(slaveIdentifier, topicDefinition);
+    PublisherIdentifier publisherIdentifier =
+        new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(new GraphName("/topic")));
     when(mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any())).thenReturn(
-        Lists.<PublisherIdentifier>newArrayList(publisherDescription));
+        Lists.<PublisherIdentifier>newArrayList(publisherIdentifier));
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response =
         master.registerSubscriber("/slave", "/topic", "/topicType", "http://api");
-    assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
-    assertEquals(response.get(2), Lists.newArrayList(publisherDescription.getSlaveUri().toString()));
+    assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
+    assertEquals(Lists.newArrayList(publisherIdentifier.getUri().toString()), response.get(2));
   }
 
 }

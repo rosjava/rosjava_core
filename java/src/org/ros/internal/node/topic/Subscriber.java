@@ -60,7 +60,7 @@ public class Subscriber<MessageType> extends Topic {
   private final IncomingMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
   private final ChannelFactory channelFactory;
-  private final Set<PublisherIdentifier> knownPublishers;
+  private final Set<PublisherDefinition> knownPublishers;
   private final SlaveIdentifier slaveIdentifier;
 
   private final class MessageReadingThread extends Thread {
@@ -138,7 +138,7 @@ public class Subscriber<MessageType> extends Topic {
     }
   }
 
-  public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
+  public synchronized void addPublisher(PublisherDefinition publisherDefinition,
       InetSocketAddress address) {
     // TODO(damonkohler): Release bootstrap resources on shutdown.
     ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
@@ -166,7 +166,7 @@ public class Subscriber<MessageType> extends Topic {
     if (DEBUG) {
       log.info("Connected to: " + channel.getRemoteAddress());
     }
-    knownPublishers.add(publisherIdentifier);
+    knownPublishers.add(publisherDefinition);
   }
 
   /**
@@ -176,15 +176,15 @@ public class Subscriber<MessageType> extends Topic {
    * @param publishers {@link List} of {@link Publisher}s for the subscribed
    *        topic
    */
-  public synchronized void updatePublishers(Collection<PublisherIdentifier> publishers) {
+  public synchronized void updatePublishers(Collection<PublisherDefinition> publishers) {
     // Find new connections.
-    ArrayList<PublisherIdentifier> newPublishers = new ArrayList<PublisherIdentifier>();
-    for (PublisherIdentifier publisher : publishers) {
+    ArrayList<PublisherDefinition> newPublishers = new ArrayList<PublisherDefinition>();
+    for (PublisherDefinition publisher : publishers) {
       if (!knownPublishers.contains(publisher)) {
         newPublishers.add(publisher);
       }
     }
-    for (final PublisherIdentifier publisher : newPublishers) {
+    for (final PublisherDefinition publisher : newPublishers) {
       executor.execute(new UpdatePublisherRunnable<MessageType>(this, this.slaveIdentifier,
           publisher));
     }

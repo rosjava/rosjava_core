@@ -16,67 +16,67 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.base.Preconditions;
 
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.transport.ConnectionHeaderFields;
 
 import java.net.URI;
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SubscriberIdentifier {
+public class PublisherDefinition {
 
-  private final SlaveIdentifier slaveIdentifier;
+  private final PublisherIdentifier publisherIdentifier;
   private final TopicDefinition topicDefinition;
 
-  public static SubscriberIdentifier createFromHeader(Map<String, String> header) {
-    // TODO(damonkohler): Update SlaveIdentifier to handle the case where the
-    // URI is not set.
-    SlaveIdentifier slaveIdentifier =
-        new SlaveIdentifier(new GraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
-    return new SubscriberIdentifier(slaveIdentifier, TopicDefinition.createFromHeader(header));
+  public static PublisherDefinition createPublisherDefinition(SlaveIdentifier slaveIdentifier,
+      TopicDefinition topicDefinition) {
+    return new PublisherDefinition(new PublisherIdentifier(slaveIdentifier,
+        topicDefinition.getIdentifier()), topicDefinition);
   }
 
-  public SubscriberIdentifier(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition) {
-    this.slaveIdentifier = slaveIdentifier;
+  public PublisherDefinition(PublisherIdentifier publisherIdentifier,
+      TopicDefinition topicDefinition) {
+    Preconditions.checkNotNull(publisherIdentifier);
+    Preconditions.checkNotNull(topicDefinition);
+    Preconditions.checkArgument(publisherIdentifier.getTopicIdentifier().equals(
+        topicDefinition.getIdentifier()));
+    this.publisherIdentifier = publisherIdentifier;
     this.topicDefinition = topicDefinition;
   }
 
   public SlaveIdentifier getSlaveIdentifier() {
-    return slaveIdentifier;
+    return publisherIdentifier.getSlaveIdentifier();
   }
 
-  public GraphName getNodeName() {
-    return slaveIdentifier.getName();
+  public GraphName getSlaveName() {
+    return publisherIdentifier.getSlaveIdentifier().getName();
   }
 
-  public URI getSlaveUri() {
-    return slaveIdentifier.getUri();
+  public URI getUri() {
+    return publisherIdentifier.getUri();
   }
 
   public GraphName getTopicName() {
     return topicDefinition.getName();
   }
 
-  public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>().putAll(slaveIdentifier.toHeader())
-        .putAll(topicDefinition.toHeader()).build();
+  public String getTopicMessageType() {
+    return topicDefinition.getMessageType();
   }
-  
+
   @Override
   public String toString() {
-    return "SubscriberIdentifier<" + slaveIdentifier + ", " + topicDefinition + ">";
+    return "PublisherDefinition<" + publisherIdentifier + ", " + topicDefinition + ">";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((slaveIdentifier == null) ? 0 : slaveIdentifier.hashCode());
+    result = prime * result + ((publisherIdentifier == null) ? 0 : publisherIdentifier.hashCode());
     result = prime * result + ((topicDefinition == null) ? 0 : topicDefinition.hashCode());
     return result;
   }
@@ -86,14 +86,14 @@ public class SubscriberIdentifier {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    SubscriberIdentifier other = (SubscriberIdentifier) obj;
-    if (slaveIdentifier == null) {
-      if (other.slaveIdentifier != null) return false;
-    } else if (!slaveIdentifier.equals(other.slaveIdentifier)) return false;
+    PublisherDefinition other = (PublisherDefinition) obj;
+    if (publisherIdentifier == null) {
+      if (other.publisherIdentifier != null) return false;
+    } else if (!publisherIdentifier.equals(other.publisherIdentifier)) return false;
     if (topicDefinition == null) {
       if (other.topicDefinition != null) return false;
     } else if (!topicDefinition.equals(other.topicDefinition)) return false;
     return true;
   }
-  
+
 }

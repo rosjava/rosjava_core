@@ -45,8 +45,8 @@ public class Publisher<MessageType> extends Topic {
   private final List<SubscriberIdentifier> subscribers;
   private final OutgoingMessageQueue<MessageType> out;
 
-  public Publisher(TopicDefinition description, MessageSerializer<MessageType> serializer) {
-    super(description);
+  public Publisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer) {
+    super(topicDefinition);
     subscribers = Lists.newArrayList();
     out = new OutgoingMessageQueue<MessageType>(serializer);
     out.start();
@@ -56,8 +56,8 @@ public class Publisher<MessageType> extends Topic {
     out.shutdown();
   }
 
-  public PublisherIdentifier toPublisherIdentifier(SlaveIdentifier description) {
-    return new PublisherIdentifier(description, getTopicDefinition());
+  public PublisherDefinition toPublisherIdentifier(SlaveIdentifier description) {
+    return PublisherDefinition.createPublisherDefinition(description, getTopicDefinition());
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
@@ -96,6 +96,11 @@ public class Publisher<MessageType> extends Topic {
       log.info("Adding channel: " + channel);
     }
     out.addChannel(channel);
+  }
+  
+  @Override
+  public String toString() {
+    return "Publisher<" + getTopicDefinition() + ">";
   }
 
 }
