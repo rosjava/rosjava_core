@@ -26,16 +26,11 @@ import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
-import org.ros.internal.message.MessageDefinition;
-import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
-import org.ros.internal.node.topic.TopicDefinition;
-import org.ros.internal.node.topic.TopicIdentifier;
 
 import java.util.List;
 
@@ -59,27 +54,23 @@ public class MasterImplTest {
   @Test
   public void testRegisterPublisher() throws XmlRpcTimeoutException, RemoteException {
     MasterServer mockMaster = mock(MasterServer.class);
-    final SlaveIdentifier slaveIdentifier =
-        SlaveIdentifier.createFromStrings("/slave", "http://api");
-    final TopicDefinition topicDefinition =
-        TopicDefinition
-            .create(new GraphName("/topic"), MessageDefinition.createFromTypeName("msg"));
-    SubscriberIdentifier subscriberDescription =
-        new SubscriberIdentifier(slaveIdentifier, topicDefinition);
+    final SubscriberIdentifier subscriberIdentifier =
+        SubscriberIdentifier.createFromStrings("/slave", "http://api", "/topic");
     when(mockMaster.registerPublisher(argThat(new ArgumentMatcher<PublisherIdentifier>() {
       @Override
       public boolean matches(Object argument) {
         PublisherIdentifier publisherIdentifier = (PublisherIdentifier) argument;
-        return publisherIdentifier.getTopicIdentifier().equals(topicDefinition.getIdentifier())
-            && publisherIdentifier.getSlaveIdentifier().equals(slaveIdentifier);
+        return publisherIdentifier.getTopicIdentifier().equals(
+            subscriberIdentifier.getTopicIdentifier())
+            && publisherIdentifier.getSlaveIdentifier().equals(
+                subscriberIdentifier.getSlaveIdentifier());
       }
-    }))).thenReturn(Lists.<SubscriberIdentifier>newArrayList(subscriberDescription));
+    }))).thenReturn(Lists.<SubscriberIdentifier>newArrayList(subscriberIdentifier));
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response =
         master.registerPublisher("/slave", "/topic", "/topicType", "http://api");
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
-    assertEquals(Lists.newArrayList(subscriberDescription.getSlaveUri().toString()),
-        response.get(2));
+    assertEquals(Lists.newArrayList(subscriberIdentifier.getUri().toString()), response.get(2));
   }
 
   @Test
@@ -96,11 +87,18 @@ public class MasterImplTest {
   @Test
   public void testRegisterSubscriber() {
     MasterServer mockMaster = mock(MasterServer.class);
-    SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings("/slave", "http://api");
-    PublisherIdentifier publisherIdentifier =
-        new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(new GraphName("/topic")));
-    when(mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any())).thenReturn(
-        Lists.<PublisherIdentifier>newArrayList(publisherIdentifier));
+    final PublisherIdentifier publisherIdentifier =
+        PublisherIdentifier.createFromStrings("/slave", "http://api", "/topic");
+    when(mockMaster.registerSubscriber(argThat(new ArgumentMatcher<SubscriberIdentifier>() {
+      @Override
+      public boolean matches(Object argument) {
+        SubscriberIdentifier subscriberIdentifier = (SubscriberIdentifier) argument;
+        return subscriberIdentifier.getTopicIdentifier().equals(
+            subscriberIdentifier.getTopicIdentifier())
+            && subscriberIdentifier.getSlaveIdentifier().equals(
+                subscriberIdentifier.getSlaveIdentifier());
+      }
+    }))).thenReturn(Lists.<PublisherIdentifier>newArrayList(publisherIdentifier));
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response =
         master.registerSubscriber("/slave", "/topic", "/topicType", "http://api");

@@ -42,7 +42,7 @@ public class Publisher<MessageType> extends Topic {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
-  private final List<SubscriberIdentifier> subscribers;
+  private final List<SubscriberDefinition> subscribers;
   private final OutgoingMessageQueue<MessageType> out;
 
   public Publisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer) {
@@ -86,7 +86,7 @@ public class Publisher<MessageType> extends Topic {
         header.get(ConnectionHeaderFields.TYPE)));
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
-    SubscriberIdentifier subscriber = SubscriberIdentifier.createFromHeader(incomingHeader);
+    SubscriberDefinition subscriber = SubscriberDefinition.createFromHeader(incomingHeader);
     subscribers.add(subscriber);
     return ConnectionHeader.encode(header);
   }

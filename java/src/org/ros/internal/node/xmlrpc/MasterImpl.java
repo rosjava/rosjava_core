@@ -18,7 +18,6 @@ package org.ros.internal.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.Response;
@@ -28,7 +27,6 @@ import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
-import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicIdentifier;
 
 import java.net.URI;
@@ -80,8 +78,8 @@ public class MasterImpl implements Master {
         new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(new GraphName(topic)));
     List<SubscriberIdentifier> subscribers = master.registerPublisher(publisherIdentifier);
     List<String> urls = Lists.newArrayList();
-    for (SubscriberIdentifier subscriberDescription : subscribers) {
-      urls.add(subscriberDescription.getSlaveUri().toString());
+    for (SubscriberIdentifier subscriberIdentifier : subscribers) {
+      urls.add(subscriberIdentifier.getUri().toString());
     }
     return Response.createSuccess("Success", urls).toList();
   }
@@ -128,14 +126,11 @@ public class MasterImpl implements Master {
   }
 
   @Override
-  public List<Object> registerSubscriber(String callerId, String topic, String topicType,
+  public List<Object> registerSubscriber(String callerId, String topicName, String topicType,
       String callerApi) {
-    SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
-    TopicDefinition topicDefinition =
-        TopicDefinition.create(new GraphName(topic),
-            MessageDefinition.createFromTypeName(topicType));
     List<PublisherIdentifier> publishers =
-        master.registerSubscriber(new SubscriberIdentifier(slaveIdentifier, topicDefinition));
+        master.registerSubscriber(SubscriberIdentifier.createFromStrings(callerId, callerApi,
+            topicName));
     List<String> urls = Lists.newArrayList();
     for (PublisherIdentifier publisherIdentifier : publishers) {
       urls.add(publisherIdentifier.getUri().toString());

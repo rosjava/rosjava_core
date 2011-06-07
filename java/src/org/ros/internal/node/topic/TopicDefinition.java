@@ -53,7 +53,7 @@ public class TopicDefinition {
     this.messageDefinition = messageDefinition;
   }
 
-  public TopicIdentifier getIdentifier() {
+  public TopicIdentifier toIdentifier() {
     return topicIdentifier;
   }
 
