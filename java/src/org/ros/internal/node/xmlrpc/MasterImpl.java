@@ -78,7 +78,7 @@ public class MasterImpl implements Master {
     TopicDefinition topicDefinition =
         new TopicDefinition(new GraphName(topic), MessageDefinition.createFromTypeName(topicType));
     PublisherIdentifier description = new PublisherIdentifier(slaveIdentifier, topicDefinition);
-    List<SubscriberIdentifier> subscribers = master.registerPublisher(callerId, description);
+    List<SubscriberIdentifier> subscribers = master.registerPublisher(description);
     List<String> urls = Lists.newArrayList();
     for (SubscriberIdentifier subscriberDescription : subscribers) {
       urls.add(subscriberDescription.getSlaveUri().toString());
@@ -87,15 +87,41 @@ public class MasterImpl implements Master {
   }
 
   @Override
+  public List<Object> unregisterPublisher(String callerId, String topic, String callerApi) {
+    return Response.createFailure("Unsupported operation.", 0).toList();
+  }
+
+  @Override
   public List<Object> registerService(String callerId, String serviceName, String serviceApi,
-      String callerApi) throws URISyntaxException {
+      String callerApi) {
     // TODO(damonkohler): Pull out factory methods to avoid passing in the null
     // type and md5Checksum here.
-    ServiceIdentifier description =
-        new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(
-            new GraphName(serviceName), null, null));
-    master.registerService(description);
+    ServiceIdentifier serviceIdentifier;
+    try {
+      serviceIdentifier =
+          new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(new GraphName(
+              serviceName), null, null));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+    master.registerService(serviceIdentifier);
     return Response.createSuccess("Success", 0).toList();
+  }
+
+  @Override
+  public List<Object> unregisterService(String callerId, String serviceName, String serviceApi) {
+    // TODO(damonkohler): Pull out factory methods to avoid passing in the null
+    // type and md5Checksum here.
+    ServiceIdentifier description;
+    try {
+      description =
+          new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(new GraphName(
+              serviceName), null, null));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+    int result = master.unregisterService(description);
+    return Response.createSuccess("Success", result).toList();
   }
 
   @Override
@@ -114,18 +140,8 @@ public class MasterImpl implements Master {
   }
 
   @Override
-  public List<Object> unregisterPublisher(String callerId, String topic, String callerApi) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public List<Object> unregisterService(String callerId, String service, String serviceApi) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi) {
-    throw new UnsupportedOperationException();
+    return Response.createFailure("Unsupported operation.", 0).toList();
   }
 
 }

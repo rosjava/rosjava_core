@@ -22,15 +22,22 @@ import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.topic.Publisher;
+import org.ros.internal.node.topic.Subscriber;
+import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageSerializer;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
@@ -103,6 +110,35 @@ public class NodeTest {
     assertTrue(new InetSocketAddress(uri.getHost(), uri.getPort()).getAddress().isLoopbackAddress());
 
     node.shutdown();
+  }
+
+  @Test
+  public void testPubSubRegistration() throws InterruptedException {
+    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
+    TopicDefinition topicDefinition =
+        new TopicDefinition(new GraphName("/foo"), MessageDefinition.create(
+            org.ros.message.std_msgs.String.__s_getDataType(),
+            org.ros.message.std_msgs.String.__s_getMessageDefinition(),
+            org.ros.message.std_msgs.String.__s_getMD5Sum()));
+
+    Publisher<org.ros.message.std_msgs.String> publisher =
+        node.createPublisher(topicDefinition,
+            new MessageSerializer<org.ros.message.std_msgs.String>());
+    assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
+
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        node.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
+    assertTrue(subscriber.awaitRegistration(1, TimeUnit.SECONDS));
+
+    assertEquals(1, masterServer.getRegisteredPublishers().size());
+    assertEquals(1, masterServer.getRegisteredSubscribers().size());
+
+    node.shutdown();
+
+    assertEquals(0, masterServer.getRegisteredPublishers().size());
+    assertEquals(0, masterServer.getRegisteredSubscribers().size());
   }
 
 }

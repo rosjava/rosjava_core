@@ -30,12 +30,9 @@ public interface Master extends Node {
   /**
    * Register the caller as a provider of the specified service.
    * 
-   * @param callerId
-   *          ROS caller ID
-   * @param service
-   *          Fully-qualified name of service
-   * @param serviceApi
-   *          XML-RPC URI of caller node
+   * @param callerId ROS caller ID
+   * @param service Fully-qualified name of service
+   * @param serviceApi XML-RPC URI of caller node
    * @param callerApi
    * @return ignore
    * @throws URISyntaxException
@@ -43,6 +40,19 @@ public interface Master extends Node {
   public List<Object> registerService(String callerId, String service, String serviceApi,
       String callerApi) throws URISyntaxException, XmlRpcTimeoutException, RemoteException;
 
+  /**
+   * Unregister the caller as a provider of the specified service.
+   * 
+   * @param callerId ROS caller ID
+   * @param service Fully-qualified name of service
+   * @param serviceApi API URI of service to unregister. Unregistration will
+   *        only occur if current registration matches.
+   * @return Number of unregistrations (either 0 or 1). If this is zero it means
+   *         that the caller was not registered as a service provider. The call
+   *         still succeeds as the intended final state is reached.
+   * @throws XmlRpcTimeoutException
+   * @throws RemoteException
+   */
   public List<Object> unregisterService(String callerId, String service, String serviceApi)
       throws XmlRpcTimeoutException, RemoteException;
 
@@ -52,21 +62,19 @@ public interface Master extends Node {
    * of new publishers via the publisherUpdate API.
    * 
    * 
-   * @param callerId
-   *          ROS caller ID
-   * @param topic
-   *          Fully-qualified name of topic
-   * @param topicType
-   *          topic type, must be a package-resource name, i.e. the .msg name
-   * @param callerApi
-   *          API URI of subscriber to register. Will be used for new publisher
-   *          notifications
+   * @param callerId ROS caller ID
+   * @param topic Fully-qualified name of topic
+   * @param topicType topic type, must be a package-resource name, i.e. the .msg
+   *        name
+   * @param callerApi API URI of subscriber to register. Will be used for new
+   *        publisher notifications
    * @return publishers as a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic
    * @throws URISyntaxException
    */
   public List<Object> registerSubscriber(String callerId, String topic, String topicType,
       String callerApi) throws URISyntaxException, XmlRpcTimeoutException, RemoteException;
+
 
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi)
       throws XmlRpcTimeoutException, RemoteException;
@@ -87,18 +95,34 @@ public interface Master extends Node {
       String callerApi) throws URISyntaxException, RemoteException, XmlRpcTimeoutException,
       MalformedURLException;
 
+  /**
+   * Unregister the caller as a publisher of the topic.
+   * 
+   * @param callerId ROS caller ID
+   * @param topic Fully-qualified name of topic.
+   * @param callerApi API URI of publisher to unregister. Unregistration will only
+   *        occur if current registration matches.
+   * @return If numUnsubscribed is zero it means that the caller was not
+   *         registered as a subscriber. The call still succeeds as the intended
+   *         final state is reached.
+   * @throws XmlRpcTimeoutException
+   * @throws RemoteException
+   */
   public List<Object> unregisterPublisher(String callerId, String topic, String callerApi)
       throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> lookupNode(String callerId, String nodeName) throws XmlRpcTimeoutException, RemoteException;
+  public List<Object> lookupNode(String callerId, String nodeName) throws XmlRpcTimeoutException,
+      RemoteException;
 
   public List<Object> getPublishedTopics(String callerId, String subgraph)
       throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> getSystemState(String callerId) throws XmlRpcTimeoutException, RemoteException;
+  public List<Object> getSystemState(String callerId) throws XmlRpcTimeoutException,
+      RemoteException;
 
   public List<Object> getUri(String callerId) throws XmlRpcTimeoutException, RemoteException;
 
-  public List<Object> lookupService(String callerId, String service) throws XmlRpcTimeoutException, RemoteException;
+  public List<Object> lookupService(String callerId, String service) throws XmlRpcTimeoutException,
+      RemoteException;
 
 }

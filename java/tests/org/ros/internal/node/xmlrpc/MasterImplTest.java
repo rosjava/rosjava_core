@@ -45,7 +45,7 @@ public class MasterImplTest {
   public void testRegisterPublisherWithNoSubscribers() throws XmlRpcTimeoutException,
       RemoteException {
     MasterServer mockMaster = mock(MasterServer.class);
-    when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
+    when(mockMaster.registerPublisher(Matchers.<PublisherIdentifier>any()))
         .thenReturn(Lists.<SubscriberIdentifier>newArrayList());
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response = master.registerPublisher("/caller", "/foo", "/bar", "http://baz");
@@ -61,7 +61,7 @@ public class MasterImplTest {
         new TopicDefinition(new GraphName("/topic"), MessageDefinition.createFromTypeName("msg"));
     SubscriberIdentifier subscriberDescription =
         new SubscriberIdentifier(slaveIdentifier, topicDefinition);
-    when(mockMaster.registerPublisher(Matchers.<String>any(), Matchers.<PublisherIdentifier>any()))
+    when(mockMaster.registerPublisher(Matchers.<PublisherIdentifier>any()))
         .thenReturn(Lists.<SubscriberIdentifier>newArrayList(subscriberDescription));
     MasterImpl master = new MasterImpl(mockMaster);
     List<Object> response =

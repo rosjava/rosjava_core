@@ -67,8 +67,13 @@ public class MasterServer extends NodeServer {
     services.put(description.getName().toString(), description);
   }
 
-  public List<Object> unregisterService(String callerId, String service, String serviceApi) {
-    return null;
+  public int unregisterService(ServiceIdentifier serviceIdentifier) {
+    String name = serviceIdentifier.getName().toString();
+    if (services.containsKey(name)) {
+      services.remove(name);
+      return 1;
+    }
+    return 0;
   }
 
   private void addSlave(SlaveIdentifier description) {
@@ -95,14 +100,14 @@ public class MasterServer extends NodeServer {
    * list of current publishers, the subscriber will also receive notifications
    * of new publishers via the publisherUpdate API.
    * 
-   * @param description
+   * @param subscriberIdentifier
    * @return Publishers is a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic.
    */
-  public List<PublisherIdentifier> registerSubscriber(SubscriberIdentifier description) {
-    subscribers.put(description.getTopicName().toString(), description);
-    addSlave(description.getSlaveIdentifier());
-    return ImmutableList.copyOf(publishers.get(description.getTopicName().toString()));
+  public List<PublisherIdentifier> registerSubscriber(SubscriberIdentifier subscriberIdentifier) {
+    subscribers.put(subscriberIdentifier.getTopicName().toString(), subscriberIdentifier);
+    addSlave(subscriberIdentifier.getSlaveIdentifier());
+    return ImmutableList.copyOf(publishers.get(subscriberIdentifier.getTopicName().toString()));
   }
 
   public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi) {
@@ -112,21 +117,25 @@ public class MasterServer extends NodeServer {
   /**
    * Register the caller as a publisher the topic.
    * 
-   * @param callerId ROS caller ID
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
    * @throws RemoteException
    * @throws XmlRpcTimeoutException
    */
-  public List<SubscriberIdentifier> registerPublisher(String callerId,
-      PublisherIdentifier description) throws XmlRpcTimeoutException, RemoteException {
-    publishers.put(description.getTopicName().toString(), description);
-    addSlave(description.getSlaveIdentifier());
-    publisherUpdate(description.getTopicName().toString());
-    return ImmutableList.copyOf(subscribers.get(description.getTopicName().toString()));
+  public List<SubscriberIdentifier> registerPublisher(PublisherIdentifier publisher)
+      throws XmlRpcTimeoutException, RemoteException {
+    publishers.put(publisher.getTopicName().toString(), publisher);
+    addSlave(publisher.getSlaveIdentifier());
+    publisherUpdate(publisher.getTopicName().toString());
+    return ImmutableList.copyOf(subscribers.get(publisher.getTopicName().toString()));
   }
 
-  public List<Object> unregisterPublisher(String callerId, String topic, String callerApi) {
-    return null;
+  public int unregisterPublisher(PublisherIdentifier publisherIdentifier) {
+    String topicName = publisherIdentifier.getTopicName().toString();
+    if (publishers.containsKey(topicName)) {
+      publishers.remove(topicName, publisherIdentifier);
+      return 1;
+    }
+    return 0;
   }
 
   /**
@@ -142,10 +151,12 @@ public class MasterServer extends NodeServer {
     return slaves.get(nodeName);
   }
 
-  public List<PublisherIdentifier> getPublishedTopics(String callerId, String subgraph) {
-    // TODO(damonkohler): Add support for subgraph filtering.
-    Preconditions.checkArgument(subgraph.length() == 0);
+  public List<PublisherIdentifier> getRegisteredPublishers() {
     return ImmutableList.copyOf(publishers.values());
+  }
+
+  public List<SubscriberIdentifier> getRegisteredSubscribers() {
+    return ImmutableList.copyOf(subscribers.values());
   }
 
   public List<Object> getSystemState(String callerId) {

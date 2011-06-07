@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.topic;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.SlaveIdentifier;
 
@@ -30,12 +32,8 @@ public class PublisherIdentifier {
   private final TopicDefinition topicDefinition;
 
   public PublisherIdentifier(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition) {
-    if (slaveIdentifier == null) { 
-      throw new NullPointerException();
-    }
-    if (topicDefinition == null) { 
-      throw new NullPointerException();
-    }
+    Preconditions.checkNotNull(slaveIdentifier);
+    Preconditions.checkNotNull(topicDefinition);
     this.slaveIdentifier = slaveIdentifier;
     this.topicDefinition = topicDefinition;
   }
