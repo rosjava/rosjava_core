@@ -139,8 +139,11 @@ public class MasterImpl implements Master {
   }
 
   @Override
-  public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi) {
-    return Response.createFailure("Unsupported operation.", 0).toList();
+  public List<Object> unregisterSubscriber(String callerId, String topicName, String callerApi) {
+    SubscriberIdentifier subscriberIdentifier =
+        SubscriberIdentifier.createFromStrings(callerId, callerApi, topicName);
+    return Response.createSuccess("Success", master.unregisterSubscriber(subscriberIdentifier))
+        .toList();
   }
 
 }

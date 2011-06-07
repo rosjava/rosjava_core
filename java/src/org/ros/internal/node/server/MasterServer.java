@@ -109,8 +109,13 @@ public class MasterServer extends NodeServer {
     return ImmutableList.copyOf(publishers.get(subscriberIdentifier.getTopicName().toString()));
   }
 
-  public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi) {
-    return null;
+  public int unregisterSubscriber(SubscriberIdentifier subscriberIdentifier) {
+    String topicName = subscriberIdentifier.getTopicName().toString();
+    if (subscribers.containsKey(topicName)) {
+      subscribers.remove(topicName, subscriberIdentifier);
+      return 1;
+    }
+    return 0;
   }
 
   /**

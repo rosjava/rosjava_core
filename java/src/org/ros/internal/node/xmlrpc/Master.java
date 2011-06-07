@@ -63,7 +63,7 @@ public interface Master extends Node {
    * 
    * 
    * @param callerId ROS caller ID
-   * @param topic Fully-qualified name of topic
+   * @param topicName Fully-qualified name of topic
    * @param topicType topic type, must be a package-resource name, i.e. the .msg
    *        name
    * @param callerApi API URI of subscriber to register. Will be used for new
@@ -72,11 +72,11 @@ public interface Master extends Node {
    *         publishing the specified topic
    * @throws URISyntaxException
    */
-  public List<Object> registerSubscriber(String callerId, String topic, String topicType,
+  public List<Object> registerSubscriber(String callerId, String topicName, String topicType,
       String callerApi) throws URISyntaxException, XmlRpcTimeoutException, RemoteException;
 
 
-  public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi)
+  public List<Object> unregisterSubscriber(String callerId, String topicName, String callerApi)
       throws XmlRpcTimeoutException, RemoteException;
 
   /**
@@ -99,7 +99,7 @@ public interface Master extends Node {
    * Unregister the caller as a publisher of the topic.
    * 
    * @param callerId ROS caller ID
-   * @param topic Fully-qualified name of topic.
+   * @param topicName Fully-qualified name of topic.
    * @param callerApi API URI of publisher to unregister. Unregistration will only
    *        occur if current registration matches.
    * @return If numUnsubscribed is zero it means that the caller was not
@@ -108,7 +108,7 @@ public interface Master extends Node {
    * @throws XmlRpcTimeoutException
    * @throws RemoteException
    */
-  public List<Object> unregisterPublisher(String callerId, String topic, String callerApi)
+  public List<Object> unregisterPublisher(String callerId, String topicName, String callerApi)
       throws XmlRpcTimeoutException, RemoteException;
 
   public List<Object> lookupNode(String callerId, String nodeName) throws XmlRpcTimeoutException,
