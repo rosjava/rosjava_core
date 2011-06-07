@@ -87,8 +87,11 @@ public class MasterImpl implements Master {
   }
 
   @Override
-  public List<Object> unregisterPublisher(String callerId, String topicName, String slaveUri) {
-    return Response.createFailure("Unsupported operation.", 0).toList();
+  public List<Object> unregisterPublisher(String callerId, String topicName, String callerApi) {
+    PublisherIdentifier publisherIdentifier =
+        PublisherIdentifier.createFromStrings(callerId, callerApi, topicName);
+    return Response.createSuccess("Success", master.unregisterPublisher(publisherIdentifier))
+        .toList();
   }
 
   @Override

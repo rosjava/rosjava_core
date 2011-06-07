@@ -100,7 +100,7 @@ public interface Master extends Node {
    * 
    * @param callerId ROS caller ID
    * @param topic Fully-qualified name of topic.
-   * @param slaveUri API URI of publisher to unregister. Unregistration will only
+   * @param callerApi API URI of publisher to unregister. Unregistration will only
    *        occur if current registration matches.
    * @return If numUnsubscribed is zero it means that the caller was not
    *         registered as a subscriber. The call still succeeds as the intended
@@ -108,7 +108,7 @@ public interface Master extends Node {
    * @throws XmlRpcTimeoutException
    * @throws RemoteException
    */
-  public List<Object> unregisterPublisher(String callerId, String topic, String slaveUri)
+  public List<Object> unregisterPublisher(String callerId, String topic, String callerApi)
       throws XmlRpcTimeoutException, RemoteException;
 
   public List<Object> lookupNode(String callerId, String nodeName) throws XmlRpcTimeoutException,

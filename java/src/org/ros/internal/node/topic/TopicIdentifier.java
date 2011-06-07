@@ -25,6 +25,10 @@ public class TopicIdentifier {
   
   private final GraphName name;
   
+  public static TopicIdentifier createFromString(String topicName) {
+    return new TopicIdentifier(new GraphName(topicName));
+  }
+
   public TopicIdentifier(GraphName name) {
     this.name = name;
   }

@@ -25,10 +25,15 @@ import java.net.URI;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class PublisherIdentifier {
-  
+
   private final SlaveIdentifier slaveIdentifier;
   private final TopicIdentifier topicIdentifier;
-  
+
+  public static PublisherIdentifier createFromStrings(String nodeName, String uri, String topicName) {
+    return new PublisherIdentifier(SlaveIdentifier.createFromStrings(nodeName, uri),
+        TopicIdentifier.createFromString(topicName));
+  }
+
   public PublisherIdentifier(SlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
     this.slaveIdentifier = slaveIdentifier;
     this.topicIdentifier = topicIdentifier;
@@ -37,22 +42,22 @@ public class PublisherIdentifier {
   public SlaveIdentifier getSlaveIdentifier() {
     return slaveIdentifier;
   }
-  
+
   public URI getUri() {
     return slaveIdentifier.getUri();
   }
-  
+
   public TopicIdentifier getTopicIdentifier() {
     return topicIdentifier;
   }
-  
+
   public GraphName getTopicName() {
     return topicIdentifier.getName();
   }
-  
+
   @Override
   public String toString() {
-    return "PublisherIdentifier<" + slaveIdentifier + ", " + topicIdentifier +">";
+    return "PublisherIdentifier<" + slaveIdentifier + ", " + topicIdentifier + ">";
   }
 
   @Override

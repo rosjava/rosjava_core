@@ -30,7 +30,6 @@ import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.service.ServiceIdentifier;
-import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.xmlrpc.MasterImpl;
@@ -76,10 +75,10 @@ public class MasterServer extends NodeServer {
     return 0;
   }
 
-  private void addSlave(SlaveIdentifier description) {
-    String name = description.getName().toString();
-    Preconditions.checkState(slaves.get(name) == null || slaves.get(name).equals(description));
-    slaves.put(name, description);
+  private void addSlave(SlaveIdentifier slaveIdentifier) {
+    String name = slaveIdentifier.getName().toString();
+    Preconditions.checkState(slaves.get(name) == null || slaves.get(name).equals(slaveIdentifier));
+    slaves.put(name, slaveIdentifier);
   }
 
   private void publisherUpdate(String topicName) throws XmlRpcTimeoutException, RemoteException {
@@ -129,10 +128,10 @@ public class MasterServer extends NodeServer {
     return ImmutableList.copyOf(subscribers.get(publisher.getTopicName().toString()));
   }
 
-  public int unregisterPublisher(PublisherDefinition publisherDefinition) {
-    String topicName = publisherDefinition.getTopicName().toString();
+  public int unregisterPublisher(PublisherIdentifier publisherIdentifier) {
+    String topicName = publisherIdentifier.getTopicName().toString();
     if (publishers.containsKey(topicName)) {
-      publishers.remove(topicName, publisherDefinition);
+      publishers.remove(topicName, publisherIdentifier);
       return 1;
     }
     return 0;
@@ -143,12 +142,11 @@ public class MasterServer extends NodeServer {
    * API is for looking information about publishers and subscribers. Use
    * lookupService instead to lookup ROS-RPC URIs.
    * 
-   * @param callerId ROS caller ID
-   * @param nodeName name of node to lookup
+   * @param slaveName name of node to lookup
    * @return a {@link SlaveIdentifier} for the node with the given name
    */
-  public SlaveIdentifier lookupNode(String callerId, String nodeName) {
-    return slaves.get(nodeName);
+  public SlaveIdentifier lookupNode(String slaveName) {
+    return slaves.get(slaveName);
   }
 
   public List<PublisherIdentifier> getRegisteredPublishers() {
