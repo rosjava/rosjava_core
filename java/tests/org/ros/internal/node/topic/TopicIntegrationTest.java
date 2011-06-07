@@ -54,9 +54,9 @@ public class TopicIntegrationTest {
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
     TopicDefinition topicDefinition =
         TopicDefinition.create(new GraphName("/foo"), MessageDefinition.create(
-        org.ros.message.std_msgs.String.__s_getDataType(),
-        org.ros.message.std_msgs.String.__s_getMessageDefinition(),
-        org.ros.message.std_msgs.String.__s_getMD5Sum()));
+            org.ros.message.std_msgs.String.__s_getDataType(),
+            org.ros.message.std_msgs.String.__s_getMessageDefinition(),
+            org.ros.message.std_msgs.String.__s_getMD5Sum()));
 
     Node publisherNode =
         Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0, 0);
@@ -89,7 +89,7 @@ public class TopicIntegrationTest {
     RepeatingPublisher<org.ros.message.std_msgs.String> repeatingPublisher =
         new RepeatingPublisher<org.ros.message.std_msgs.String>(publisher, helloMessage, 1000);
     repeatingPublisher.start();
-    
+
     assertTrue(messageReceived.await(100, TimeUnit.MILLISECONDS));
 
     repeatingPublisher.cancel();
@@ -100,9 +100,9 @@ public class TopicIntegrationTest {
   public void testAddDisconnectedPublisher() {
     TopicDefinition topicDefinition =
         TopicDefinition.create(new GraphName("/foo"), MessageDefinition.create(
-        org.ros.message.std_msgs.String.__s_getDataType(),
-        org.ros.message.std_msgs.String.__s_getMessageDefinition(),
-        org.ros.message.std_msgs.String.__s_getMD5Sum()));
+            org.ros.message.std_msgs.String.__s_getDataType(),
+            org.ros.message.std_msgs.String.__s_getMessageDefinition(),
+            org.ros.message.std_msgs.String.__s_getMD5Sum()));
 
     Node subscriberNode =
         Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
@@ -113,7 +113,9 @@ public class TopicIntegrationTest {
 
     try {
       subscriber.addPublisher(
-          PublisherDefinition.createPublisherDefinition(SlaveIdentifier.createFromStrings("foo", "http://foo"), topicDefinition), new InetSocketAddress(1234));
+          PublisherDefinition.createPublisherDefinition(
+              SlaveIdentifier.createFromStrings("foo", "http://foo"), topicDefinition),
+          new InetSocketAddress(1234));
       fail();
     } catch (RuntimeException e) {
       // Connecting to a disconnected publisher should fail.

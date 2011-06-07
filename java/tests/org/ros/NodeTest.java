@@ -97,7 +97,6 @@ public class NodeTest {
   }
 
   void checkHostName(String hostName) {
-    System.out.println(hostName);
     assertTrue(!hostName.equals("0.0.0.0"));
     assertTrue(!hostName.equals("0:0:0:0:0:0:0:0"));
   }

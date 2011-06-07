@@ -51,10 +51,10 @@ public class TcpServerPipelineFactory implements ChannelPipelineFactory {
   @Override
   public ChannelPipeline getPipeline() {
     ChannelPipeline pipeline = pipeline();
+    pipeline.addLast(CONNECTION_TRACKING_HANDLER, connectionTrackingHandler);
     pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));
     pipeline.addLast(LENGTH_FIELD_BASED_FRAME_DECODER, new LengthFieldBasedFrameDecoder(
         Integer.MAX_VALUE, 0, 4, 0, 4));
-    pipeline.addLast(CONNECTION_TRACKING_HANDLER, connectionTrackingHandler);
     pipeline.addLast(HANDSHAKE_HANDLER, new TcpServerHandshakeHandler(topicManager, serviceManager));
     return pipeline;
   }
