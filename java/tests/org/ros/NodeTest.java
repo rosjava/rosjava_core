@@ -56,8 +56,6 @@ public class NodeTest {
     master.start();
     masterUri = master.getUri();
     checkHostName(masterUri.getHost());
-
-
     // Make sure that none of the publicly reported addresses are bind
     // addresses.
     Map<String, String> env = new HashMap<String, String>();
