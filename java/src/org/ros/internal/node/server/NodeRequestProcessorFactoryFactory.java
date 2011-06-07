@@ -34,7 +34,7 @@ class NodeRequestProcessorFactoryFactory<T extends org.ros.internal.node.xmlrpc.
     this.node = instance;
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings({"rawtypes"})
   @Override
   public RequestProcessorFactory getRequestProcessorFactory(Class unused) {
     return factory;
