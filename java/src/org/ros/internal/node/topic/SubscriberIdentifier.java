@@ -16,14 +16,10 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.transport.ConnectionHeaderFields;
 
 import java.net.URI;
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -31,40 +27,37 @@ import java.util.Map;
 public class SubscriberIdentifier {
 
   private final SlaveIdentifier slaveIdentifier;
-  private final TopicDefinition topicDefinition;
+  private final TopicIdentifier topicIdentifier;
 
-  public static SubscriberIdentifier createFromHeader(Map<String, String> header) {
-    // TODO(damonkohler): Update SlaveIdentifier to handle the case where the
-    // URI is not set.
-    SlaveIdentifier slaveIdentifier =
-        new SlaveIdentifier(new GraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
-    return new SubscriberIdentifier(slaveIdentifier, TopicDefinition.createFromHeader(header));
+  public static SubscriberIdentifier createFromStrings(String nodeName, String uri, String topicName) {
+    return new SubscriberIdentifier(SlaveIdentifier.createFromStrings(nodeName, uri),
+        TopicIdentifier.createFromString(topicName));
   }
 
-  public SubscriberIdentifier(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition) {
+  public SubscriberIdentifier(SlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
     this.slaveIdentifier = slaveIdentifier;
-    this.topicDefinition = topicDefinition;
+    this.topicIdentifier = topicIdentifier;
   }
 
   public SlaveIdentifier getSlaveIdentifier() {
     return slaveIdentifier;
   }
 
-  public GraphName getNodeName() {
-    return slaveIdentifier.getName();
-  }
-
-  public URI getSlaveUri() {
+  public URI getUri() {
     return slaveIdentifier.getUri();
   }
 
-  public GraphName getTopicName() {
-    return topicDefinition.getName();
+  public TopicIdentifier getTopicIdentifier() {
+    return topicIdentifier;
   }
 
-  public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>().putAll(slaveIdentifier.toHeader())
-        .putAll(topicDefinition.toHeader()).build();
+  public GraphName getTopicName() {
+    return topicIdentifier.getName();
+  }
+
+  @Override
+  public String toString() {
+    return "SubscriberIdentifier<" + slaveIdentifier + ", " + topicIdentifier + ">";
   }
 
   @Override
@@ -72,7 +65,7 @@ public class SubscriberIdentifier {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((slaveIdentifier == null) ? 0 : slaveIdentifier.hashCode());
-    result = prime * result + ((topicDefinition == null) ? 0 : topicDefinition.hashCode());
+    result = prime * result + ((topicIdentifier == null) ? 0 : topicIdentifier.hashCode());
     return result;
   }
 
@@ -85,10 +78,10 @@ public class SubscriberIdentifier {
     if (slaveIdentifier == null) {
       if (other.slaveIdentifier != null) return false;
     } else if (!slaveIdentifier.equals(other.slaveIdentifier)) return false;
-    if (topicDefinition == null) {
-      if (other.topicDefinition != null) return false;
-    } else if (!topicDefinition.equals(other.topicDefinition)) return false;
+    if (topicIdentifier == null) {
+      if (other.topicIdentifier != null) return false;
+    } else if (!topicIdentifier.equals(other.topicIdentifier)) return false;
     return true;
   }
-  
+
 }

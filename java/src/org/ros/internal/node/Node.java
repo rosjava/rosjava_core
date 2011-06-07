@@ -20,7 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xmlrpc.XmlRpcException;
 import org.ros.MessageDeserializer;
 import org.ros.MessageSerializer;
 import org.ros.internal.namespace.GraphName;
@@ -47,11 +46,7 @@ import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Message;
 import org.ros.message.Service;
 
-import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -79,8 +74,7 @@ public class Node {
   private boolean started;
 
   public static Node createPublic(GraphName nodeName, URI masterUri, String advertiseHostname,
-      int xmlRpcBindPort, int tcpRosBindPort) throws XmlRpcException, IOException,
-      URISyntaxException {
+      int xmlRpcBindPort, int tcpRosBindPort) {
     Node node =
         new Node(nodeName, masterUri, BindAddress.createPublic(tcpRosBindPort),
             new AdvertiseAddress(advertiseHostname), BindAddress.createPublic(xmlRpcBindPort),
@@ -90,7 +84,7 @@ public class Node {
   }
 
   public static Node createPrivate(GraphName nodeName, URI masterUri, int xmlRpcBindPort,
-      int tcpRosBindPort) throws XmlRpcException, IOException, URISyntaxException {
+      int tcpRosBindPort) {
     Node node =
         new Node(nodeName, masterUri, BindAddress.createPrivate(tcpRosBindPort),
             AdvertiseAddress.createPrivate(), BindAddress.createPrivate(xmlRpcBindPort),
@@ -101,7 +95,7 @@ public class Node {
 
   Node(GraphName nodeName, URI masterUri, BindAddress tcpRosBindAddress,
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
-      AdvertiseAddress xmlRpcAdvertiseAddress) throws MalformedURLException {
+      AdvertiseAddress xmlRpcAdvertiseAddress) {
     this.nodeName = nodeName;
     started = false;
     executor = Executors.newCachedThreadPool();
@@ -127,14 +121,10 @@ public class Node {
    * @param topicDefinition {@link TopicDefinition} that is subscribed to
    * @param messageClass {@link Message} class for topic
    * @return a {@link Subscriber} instance
-   * @throws RemoteException
-   * @throws URISyntaxException
-   * @throws IOException
    */
   @SuppressWarnings("unchecked")
   public <MessageType> Subscriber<MessageType> createSubscriber(TopicDefinition topicDefinition,
-      Class<MessageType> messageClass, MessageDeserializer<MessageType> deserializer)
-      throws IOException, URISyntaxException, RemoteException {
+      Class<MessageType> messageClass, MessageDeserializer<MessageType> deserializer) {
     String topicName = topicDefinition.getName().toString();
     Subscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
@@ -151,7 +141,7 @@ public class Node {
     }
 
     if (createdNewSubscriber) {
-      topicManager.putSubscriber(topicName, subscriber);
+      topicManager.putSubscriber(subscriber);
     }
     return subscriber;
   }
@@ -164,14 +154,10 @@ public class Node {
    * @param <MessageType>
    * @param topicDefinition {@link TopicDefinition} that is being published
    * @return a {@link Subscriber} instance
-   * @throws RemoteException
-   * @throws URISyntaxException
-   * @throws IOException
    */
   @SuppressWarnings("unchecked")
   public <MessageType> Publisher<MessageType> createPublisher(TopicDefinition topicDefinition,
-      MessageSerializer<MessageType> serializer) throws IOException, URISyntaxException,
-      RemoteException {
+      MessageSerializer<MessageType> serializer) {
     String topicName = topicDefinition.getName().toString();
     Publisher<MessageType> publisher;
     boolean createdNewPublisher = false;
@@ -186,7 +172,7 @@ public class Node {
     }
 
     if (createdNewPublisher) {
-      topicManager.putPublisher(publisher.getTopicName().toString(), publisher);
+      topicManager.putPublisher(publisher);
     }
     return publisher;
   }
@@ -257,7 +243,7 @@ public class Node {
     return serviceClient;
   }
 
-  void start() throws XmlRpcException, IOException, URISyntaxException {
+  void start() {
     if (started) {
       throw new IllegalStateException("Already started.");
     }
@@ -269,22 +255,36 @@ public class Node {
   /**
    * Stops the node.
    */
-  public void stop() {
-    for (Publisher<?> pub : topicManager.getPublishers()) {
-      pub.shutdown();
+  public void shutdown() {
+    for (Publisher<?> publisher : topicManager.getPublishers()) {
+      publisher.shutdown();
+      // NOTE(damonkohler): We don't want to raise potentially spurious
+      // exceptions during shutdown that would interrupt the process. This is
+      // simply best effort cleanup.
+      try {
+        masterClient.unregisterPublisher(slaveServer.toSlaveIdentifier(), publisher);
+      } catch (XmlRpcTimeoutException e) {
+        log.error(e);
+      } catch (RemoteException e) {
+        log.error(e);
+      }
     }
-    for (Subscriber<?> sub : topicManager.getSubscribers()) {
-      sub.shutdown();
+    for (Subscriber<?> subscriber : topicManager.getSubscribers()) {
+      subscriber.shutdown();
+      // NOTE(damonkohler): We don't want to raise potentially spurious
+      // exceptions during shutdown that would interrupt the process. This is
+      // simply best effort cleanup.
+      try {
+        masterClient.unregisterSubscriber(slaveServer.toSlaveIdentifier(), subscriber);
+      } catch (XmlRpcTimeoutException e) {
+        log.error(e);
+      } catch (RemoteException e) {
+        log.error(e);
+      }
     }
     // TODO(damonkohler): Shutdown services as well.
     slaveServer.shutdown();
-    tcpRosServer.shutdown();
     masterRegistration.shutdown();
-  }
-
-  @VisibleForTesting
-  TcpRosServer getTcpRosServer() {
-    return tcpRosServer;
   }
 
   @VisibleForTesting
@@ -302,31 +302,20 @@ public class Node {
   public ServiceIdentifier lookupService(GraphName serviceName, Service<?, ?> serviceType)
       throws RemoteException, XmlRpcTimeoutException {
     Response<URI> response;
-    try {
-      response =
-          masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
-      if (response.getStatusCode() == StatusCode.SUCCESS) {
-        ServiceDefinition serviceDefinition =
-            new ServiceDefinition(serviceName, serviceType.getDataType(), serviceType.getMD5Sum());
-        return new ServiceIdentifier(response.getResult(), serviceDefinition);
-      } else {
-        return null;
-      }
-    } catch (URISyntaxException e) {
-      // TODO(kwc) what should be the error policy here be?
-      log.error("master returned invalid URI for lookupService", e);
-      throw new RemoteException(StatusCode.FAILURE, "master returned invalid URI");
-    } catch (UndeclaredThrowableException e) {
-      // TODO: add more general IO error
-      log.error("undeclared throwable leaked through API", e);
-      throw new XmlRpcTimeoutException(0, "unable to commnicate with master");
+    response = masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
+    if (response.getStatusCode() == StatusCode.SUCCESS) {
+      ServiceDefinition serviceDefinition =
+          new ServiceDefinition(serviceName, serviceType.getDataType(), serviceType.getMD5Sum());
+      return new ServiceIdentifier(response.getResult(), serviceDefinition);
+    } else {
+      return null;
     }
   }
 
   /**
    * @return true if Node is fully registered with {@link MasterServer}.
-   *         {@code isRegistered()} can go to false if new publisher or
-   *         subscribers are created.
+   *         {@code isRegistered()} can become {@code false} if new
+   *         {@link Publisher}s or {@link Subscriber}s are created.
    */
   public boolean isRegistered() {
     return masterRegistration.getPendingSize() == 0;

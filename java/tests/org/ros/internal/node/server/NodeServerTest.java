@@ -20,14 +20,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Test;
 import org.ros.internal.node.address.Address;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.xmlrpc.Node;
 
-import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -39,7 +37,7 @@ public class NodeServerTest {
   }
 
   @Test
-  public void testGetPublicUri() throws XmlRpcException, IOException {
+  public void testGetPublicUri() {
     BindAddress bindAddress = BindAddress.createPublic(0);
     NodeServer nodeServer = new NodeServer(bindAddress, new AdvertiseAddress("override"));
     try {
@@ -57,7 +55,7 @@ public class NodeServerTest {
   }
   
   @Test
-  public void testGetPrivateUri() throws XmlRpcException, IOException {
+  public void testGetPrivateUri() {
     BindAddress bindAddress = BindAddress.createPrivate(0);
     NodeServer nodeServer = new NodeServer(bindAddress, AdvertiseAddress.createPrivate());
     try {

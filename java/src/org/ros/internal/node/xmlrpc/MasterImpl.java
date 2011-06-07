@@ -18,7 +18,6 @@ package org.ros.internal.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.Response;
@@ -28,9 +27,8 @@ import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
-import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.topic.TopicIdentifier;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -74,60 +72,78 @@ public class MasterImpl implements Master {
 
   @Override
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) throws URISyntaxException, MalformedURLException, XmlRpcTimeoutException,
-      RemoteException {
+      String callerApi) throws XmlRpcTimeoutException, RemoteException {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
-    TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName(topic), MessageDefinition.createFromTypeName(topicType));
-    PublisherIdentifier description = new PublisherIdentifier(slaveIdentifier, topicDefinition);
-    List<SubscriberIdentifier> subscribers = master.registerPublisher(callerId, description);
+    PublisherIdentifier publisherIdentifier =
+        new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(new GraphName(topic)));
+    List<SubscriberIdentifier> subscribers = master.registerPublisher(publisherIdentifier);
     List<String> urls = Lists.newArrayList();
-    for (SubscriberIdentifier subscriberDescription : subscribers) {
-      urls.add(subscriberDescription.getSlaveUri().toString());
+    for (SubscriberIdentifier subscriberIdentifier : subscribers) {
+      urls.add(subscriberIdentifier.getUri().toString());
     }
     return Response.createSuccess("Success", urls).toList();
+  }
+
+  @Override
+  public List<Object> unregisterPublisher(String callerId, String topicName, String callerApi) {
+    PublisherIdentifier publisherIdentifier =
+        PublisherIdentifier.createFromStrings(callerId, callerApi, topicName);
+    return Response.createSuccess("Success", master.unregisterPublisher(publisherIdentifier))
+        .toList();
   }
 
   @Override
   public List<Object> registerService(String callerId, String serviceName, String serviceApi,
-      String callerApi) throws URISyntaxException {
+      String callerApi) {
     // TODO(damonkohler): Pull out factory methods to avoid passing in the null
     // type and md5Checksum here.
-    ServiceIdentifier description =
-        new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(
-            new GraphName(serviceName), null, null));
-    master.registerService(description);
+    ServiceIdentifier serviceIdentifier;
+    try {
+      serviceIdentifier =
+          new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(new GraphName(
+              serviceName), null, null));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+    master.registerService(serviceIdentifier);
     return Response.createSuccess("Success", 0).toList();
   }
 
   @Override
-  public List<Object> registerSubscriber(String callerId, String topic, String topicType,
-      String callerApi) throws URISyntaxException {
-    SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
-    TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName(topic), MessageDefinition.createFromTypeName(topicType));
+  public List<Object> unregisterService(String callerId, String serviceName, String serviceApi) {
+    // TODO(damonkohler): Pull out factory methods to avoid passing in the null
+    // type and md5Checksum here.
+    ServiceIdentifier description;
+    try {
+      description =
+          new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(new GraphName(
+              serviceName), null, null));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+    int result = master.unregisterService(description);
+    return Response.createSuccess("Success", result).toList();
+  }
+
+  @Override
+  public List<Object> registerSubscriber(String callerId, String topicName, String topicType,
+      String callerApi) {
     List<PublisherIdentifier> publishers =
-        master.registerSubscriber(new SubscriberIdentifier(slaveIdentifier, topicDefinition));
+        master.registerSubscriber(SubscriberIdentifier.createFromStrings(callerId, callerApi,
+            topicName));
     List<String> urls = Lists.newArrayList();
-    for (PublisherIdentifier publisherDescription : publishers) {
-      urls.add(publisherDescription.getSlaveUri().toString());
+    for (PublisherIdentifier publisherIdentifier : publishers) {
+      urls.add(publisherIdentifier.getUri().toString());
     }
     return Response.createSuccess("Success", urls).toList();
   }
 
   @Override
-  public List<Object> unregisterPublisher(String callerId, String topic, String callerApi) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public List<Object> unregisterService(String callerId, String service, String serviceApi) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi) {
-    throw new UnsupportedOperationException();
+  public List<Object> unregisterSubscriber(String callerId, String topicName, String callerApi) {
+    SubscriberIdentifier subscriberIdentifier =
+        SubscriberIdentifier.createFromStrings(callerId, callerApi, topicName);
+    return Response.createSuccess("Success", master.unregisterSubscriber(subscriberIdentifier))
+        .toList();
   }
 
 }

@@ -18,7 +18,6 @@ package org.ros.internal.node.server;
 
 import com.google.common.collect.Lists;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -27,7 +26,7 @@ import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.Publisher;
-import org.ros.internal.node.topic.PublisherIdentifier;
+import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
@@ -38,7 +37,6 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
 
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -57,12 +55,12 @@ public class SlaveServer extends NodeServer {
   private final ServiceManager serviceManager;
   private final TcpRosServer tcpRosServer;
 
-  public static List<PublisherIdentifier> buildPublisherIdentifierList(
+  public static List<PublisherDefinition> buildPublisherIdentifierList(
       Collection<URI> publisherUriList, TopicDefinition topicDefinition) {
-    List<PublisherIdentifier> publishers = Lists.newArrayList();
+    List<PublisherDefinition> publishers = Lists.newArrayList();
     for (URI uri : publisherUriList) {
       SlaveIdentifier slaveIdentifier = SlaveIdentifier.createAnonymous(uri);
-      publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition));
+      publishers.add(PublisherDefinition.createPublisherDefinition(slaveIdentifier, topicDefinition));
     }
     return publishers;
   }
@@ -82,12 +80,8 @@ public class SlaveServer extends NodeServer {
    * Start the XML-RPC server. This start() routine requires that the
    * {@link TcpRosServer} is initialized first so that the slave server returns
    * correct information when topics are requested.
-   * 
-   * @throws XmlRpcException
-   * @throws IOException
-   * @throws URISyntaxException
    */
-  public void start() throws XmlRpcException, IOException, URISyntaxException {
+  public void start() {
     super.start(org.ros.internal.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
     tcpRosServer.start();
   }
@@ -95,6 +89,7 @@ public class SlaveServer extends NodeServer {
   @Override
   public void shutdown() {
     super.shutdown();
+    tcpRosServer.shutdown();
   }
 
   /**
@@ -125,11 +120,6 @@ public class SlaveServer extends NodeServer {
 
   public URI getMasterUri(String callerId) {
     return masterClient.getRemoteUri();
-  }
-
-  public void shutdown(String callerId, String message) {
-    super.shutdown();
-    tcpRosServer.shutdown();
   }
 
   /**
@@ -172,7 +162,7 @@ public class SlaveServer extends NodeServer {
     if (topicManager.hasSubscriber(topicName)) {
       Subscriber<?> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
-      List<PublisherIdentifier> identifiers = buildPublisherIdentifierList(publisherUris,
+      List<PublisherDefinition> identifiers = buildPublisherIdentifierList(publisherUris,
           topicDefinition);
       subscriber.updatePublishers(identifiers);
     }

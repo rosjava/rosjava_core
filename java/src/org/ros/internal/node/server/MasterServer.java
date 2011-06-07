@@ -17,14 +17,13 @@
 package org.ros.internal.node.server;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -36,8 +35,6 @@ import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.xmlrpc.MasterImpl;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -56,13 +53,12 @@ public class MasterServer extends NodeServer {
     super(bindAddress, advertiseAddress);
     slaves = Maps.newConcurrentMap();
     services = Maps.newConcurrentMap();
-    publishers =
-        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, PublisherIdentifier>create());
+    publishers = Multimaps.synchronizedMultimap(HashMultimap.<String, PublisherIdentifier>create());
     subscribers =
-        Multimaps.synchronizedMultimap(ArrayListMultimap.<String, SubscriberIdentifier>create());
+        Multimaps.synchronizedMultimap(HashMultimap.<String, SubscriberIdentifier>create());
   }
 
-  public void start() throws XmlRpcException, IOException {
+  public void start() {
     super.start(org.ros.internal.node.xmlrpc.MasterImpl.class, new MasterImpl(this));
   }
 
@@ -70,28 +66,29 @@ public class MasterServer extends NodeServer {
     services.put(description.getName().toString(), description);
   }
 
-  public List<Object> unregisterService(String callerId, String service, String serviceApi) {
-    return null;
+  public int unregisterService(ServiceIdentifier serviceIdentifier) {
+    String name = serviceIdentifier.getName().toString();
+    if (services.containsKey(name)) {
+      services.remove(name);
+      return 1;
+    }
+    return 0;
   }
 
-  private void addSlave(SlaveIdentifier description) {
-    String name = description.getName().toString();
-    Preconditions.checkState(slaves.get(name) == null || slaves.get(name).equals(description));
-    slaves.put(name, description);
+  private void addSlave(SlaveIdentifier slaveIdentifier) {
+    String name = slaveIdentifier.getName().toString();
+    Preconditions.checkState(slaves.get(name) == null || slaves.get(name).equals(slaveIdentifier));
+    slaves.put(name, slaveIdentifier);
   }
 
   private void publisherUpdate(String topicName) throws XmlRpcTimeoutException, RemoteException {
     for (SlaveIdentifier slaveIdentifier : slaves.values()) {
       // TODO(damonkohler): Should the master server know its node name here?
       SlaveClient client;
-      try {
-        client = new SlaveClient(GraphName.createUnknown(), slaveIdentifier.getUri());
-      } catch (MalformedURLException e) {
-        throw new RuntimeException(e);
-      }
+      client = new SlaveClient(GraphName.createUnknown(), slaveIdentifier.getUri());
       List<URI> publisherUris = Lists.newArrayList();
-      for (PublisherIdentifier identifier : publishers.get(topicName)) {
-        publisherUris.add(identifier.getSlaveUri());
+      for (PublisherIdentifier publisherIdentifier : publishers.get(topicName)) {
+        publisherUris.add(publisherIdentifier.getUri());
       }
       client.publisherUpdate(topicName, publisherUris);
     }
@@ -102,41 +99,47 @@ public class MasterServer extends NodeServer {
    * list of current publishers, the subscriber will also receive notifications
    * of new publishers via the publisherUpdate API.
    * 
-   * @param description
+   * @param subscriberIdentifier
    * @return Publishers is a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic.
    */
-  public List<PublisherIdentifier> registerSubscriber(SubscriberIdentifier description) {
-    subscribers.put(description.getTopicName().toString(), description);
-    addSlave(description.getSlaveIdentifier());
-    return ImmutableList.copyOf(publishers.get(description.getTopicName().toString()));
+  public List<PublisherIdentifier> registerSubscriber(SubscriberIdentifier subscriberIdentifier) {
+    subscribers.put(subscriberIdentifier.getTopicName().toString(), subscriberIdentifier);
+    addSlave(subscriberIdentifier.getSlaveIdentifier());
+    return ImmutableList.copyOf(publishers.get(subscriberIdentifier.getTopicName().toString()));
   }
 
-  public List<Object> unregisterSubscriber(String callerId, String topic, String callerApi) {
-    return null;
+  public int unregisterSubscriber(SubscriberIdentifier subscriberIdentifier) {
+    String topicName = subscriberIdentifier.getTopicName().toString();
+    if (subscribers.containsKey(topicName)) {
+      subscribers.remove(topicName, subscriberIdentifier);
+      return 1;
+    }
+    return 0;
   }
 
   /**
    * Register the caller as a publisher the topic.
    * 
-   * @param callerId
-   *          ROS caller ID
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
    * @throws RemoteException
    * @throws XmlRpcTimeoutException
-   * @throws MalformedURLException
    */
-  public List<SubscriberIdentifier> registerPublisher(String callerId,
-      PublisherIdentifier description) throws MalformedURLException, XmlRpcTimeoutException,
-      RemoteException {
-    publishers.put(description.getTopicName().toString(), description);
-    addSlave(description.getSlaveIdentifier());
-    publisherUpdate(description.getTopicName().toString());
-    return ImmutableList.copyOf(subscribers.get(description.getTopicName().toString()));
+  public List<SubscriberIdentifier> registerPublisher(PublisherIdentifier publisher)
+      throws XmlRpcTimeoutException, RemoteException {
+    publishers.put(publisher.getTopicName().toString(), publisher);
+    addSlave(publisher.getSlaveIdentifier());
+    publisherUpdate(publisher.getTopicName().toString());
+    return ImmutableList.copyOf(subscribers.get(publisher.getTopicName().toString()));
   }
 
-  public List<Object> unregisterPublisher(String callerId, String topic, String callerApi) {
-    return null;
+  public int unregisterPublisher(PublisherIdentifier publisherIdentifier) {
+    String topicName = publisherIdentifier.getTopicName().toString();
+    if (publishers.containsKey(topicName)) {
+      publishers.remove(topicName, publisherIdentifier);
+      return 1;
+    }
+    return 0;
   }
 
   /**
@@ -144,20 +147,19 @@ public class MasterServer extends NodeServer {
    * API is for looking information about publishers and subscribers. Use
    * lookupService instead to lookup ROS-RPC URIs.
    * 
-   * @param callerId
-   *          ROS caller ID
-   * @param nodeName
-   *          name of node to lookup
+   * @param slaveName name of node to lookup
    * @return a {@link SlaveIdentifier} for the node with the given name
    */
-  public SlaveIdentifier lookupNode(String callerId, String nodeName) {
-    return slaves.get(nodeName);
+  public SlaveIdentifier lookupNode(String slaveName) {
+    return slaves.get(slaveName);
   }
 
-  public List<PublisherIdentifier> getPublishedTopics(String callerId, String subgraph) {
-    // TODO(damonkohler): Add support for subgraph filtering.
-    Preconditions.checkArgument(subgraph.length() == 0);
+  public List<PublisherIdentifier> getRegisteredPublishers() {
     return ImmutableList.copyOf(publishers.values());
+  }
+
+  public List<SubscriberIdentifier> getRegisteredSubscribers() {
+    return ImmutableList.copyOf(subscribers.values());
   }
 
   public List<Object> getSystemState(String callerId) {
@@ -167,10 +169,8 @@ public class MasterServer extends NodeServer {
   /**
    * Lookup the provider of a particular service.
    * 
-   * @param callerId
-   *          ROS caller ID
-   * @param service
-   *          Fully-qualified name of service
+   * @param callerId ROS caller ID
+   * @param service Fully-qualified name of service
    * @return service URI that provides address and port of the service. Fails if
    *         there is no provider.
    */

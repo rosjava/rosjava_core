@@ -58,17 +58,24 @@ public class NodeServer {
     startLatch = new CountDownLatch(1);
   }
 
-  public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass, T instance)
-      throws XmlRpcException, IOException {
+  public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass, T instance) {
     XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
     PropertyHandlerMapping phm = new PropertyHandlerMapping();
     phm.setRequestProcessorFactoryFactory(new NodeRequestProcessorFactoryFactory<T>(instance));
-    phm.addHandler("", instanceClass);
+    try {
+      phm.addHandler("", instanceClass);
+    } catch (XmlRpcException e) {
+      throw new RuntimeException(e);
+    }
     xmlRpcServer.setHandlerMapping(phm);
     XmlRpcServerConfigImpl serverConfig = (XmlRpcServerConfigImpl) xmlRpcServer.getConfig();
     serverConfig.setEnabledForExtensions(false);
     serverConfig.setContentLengthOptional(false);
-    server.start();
+    try {
+      server.start();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     if (DEBUG) {
       log.info("Bound to: " + getUri());
     }
@@ -83,11 +90,19 @@ public class NodeServer {
     return advertiseAddress.toUri("http");
   }
   
+  public InetSocketAddress getAddress() {
+    return advertiseAddress.toInetSocketAddress();
+  }
+  
+  public AdvertiseAddress getAdvertiseAddress() {
+    return advertiseAddress;
+  }
+  
   public void awaitStart() throws InterruptedException {
     startLatch.await();
   }
   
-  public boolean awaitStartWithTimeout(long timeout, TimeUnit unit) throws InterruptedException {
+  public boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
     return startLatch.await(timeout, unit);
   }
 

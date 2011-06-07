@@ -49,7 +49,7 @@ public class IncomingMessageQueue<MessageType> {
   public MessageType take() throws InterruptedException {
     return messages.take();
   }
- 
+
   public ChannelHandler createChannelHandler() {
     return new MessageHandler();
   }

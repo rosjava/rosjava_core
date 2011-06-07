@@ -18,14 +18,11 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.node.service.ServiceManager;
@@ -44,8 +41,6 @@ import java.util.Map;
  */
 public class TcpServerHandshakeHandler extends SimpleChannelHandler {
   
-  private static final Log log = LogFactory.getLog(TcpServerHandshakeHandler.class);
-  
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
 
@@ -62,23 +57,23 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
     // this.
     Map<String, String> incomingHeader = ConnectionHeader.decode(incomingBuffer);
 
+    ChannelPipeline pipeline = e.getChannel().getPipeline();
     if (incomingHeader.containsKey(ConnectionHeaderFields.SERVICE)) {
       String serviceName = incomingHeader.get(ConnectionHeaderFields.SERVICE);
       Preconditions.checkState(serviceManager.hasServiceServer(serviceName));
       ServiceServer serviceServer = serviceManager.getServiceServer(serviceName);
-
       ChannelBuffer outgoingBuffer = serviceServer.finishHandshake(incomingHeader);
       if (outgoingBuffer == null) {
         // This is just a probe.
         e.getChannel().close();
       } else {
         e.getChannel().write(outgoingBuffer);
-        ChannelPipeline pipeline = e.getChannel().getPipeline();
         pipeline.replace(TcpServerPipelineFactory.LENGTH_FIELD_PREPENDER, "ServiceResponseEncoder",
             new ServiceResponseEncoder());
         pipeline.replace(this, "ServiceRequestHandler", serviceServer.createRequestHandler());
       }
     } else {
+      Preconditions.checkState(incomingHeader.containsKey(ConnectionHeaderFields.TOPIC));
       String topicName = incomingHeader.get(ConnectionHeaderFields.TOPIC);
       Preconditions.checkState(topicManager.hasPublisher(topicName));
       Publisher<?> publisher = topicManager.getPublisher(topicName);
@@ -89,17 +84,8 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
         throw new RuntimeException(future.getCause());
       }
       publisher.addChannel(channel);
+      pipeline.replace(this, "DiscardHandler", new SimpleChannelHandler());
     }
-
-    // TODO(damonkohler): What happens if the client doesn't like the handshake?
-    // TODO(damonkohler): Replace this handler with a discard handler in the
-    // pipeline.
   }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-    log.error("Incomming connection failed.", e.getCause());
-    e.getChannel().close();
-  }
-
+  
 }

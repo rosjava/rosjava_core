@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.ServiceResponseListener;
@@ -33,7 +32,6 @@ import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.message.srv.AddTwoInts;
 
-import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +43,7 @@ public class ServiceIntegrationTest {
   private MasterServer masterServer;
 
   @Before
-  public void setUp() throws XmlRpcException, IOException {
+  public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
   }

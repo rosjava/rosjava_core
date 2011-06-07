@@ -20,10 +20,11 @@ package org.ros.internal.node.topic;
  * Listen to creation of new publisher and subscriber instances.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public interface TopicListener {
 
-  public void publisherAdded(String topicName, Publisher<?> publisher);
-  public void subscriberAdded(String topicName, Subscriber<?> subscriber);
+  public void publisherAdded(Publisher<?> publisher);
+  public void subscriberAdded(Subscriber<?> subscriber);
   
 }

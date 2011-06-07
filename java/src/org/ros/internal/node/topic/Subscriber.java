@@ -16,30 +16,22 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
-import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.MessageDeserializer;
 import org.ros.MessageListener;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
-import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
@@ -49,7 +41,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
@@ -69,8 +60,7 @@ public class Subscriber<MessageType> extends Topic {
   private final IncomingMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
   private final ChannelFactory channelFactory;
-  private final ChannelGroup channelGroup;
-  private final Set<PublisherIdentifier> knownPublishers;
+  private final Set<PublisherDefinition> knownPublishers;
   private final SlaveIdentifier slaveIdentifier;
 
   private final class MessageReadingThread extends Thread {
@@ -80,7 +70,7 @@ public class Subscriber<MessageType> extends Topic {
         while (!Thread.currentThread().isInterrupted()) {
           MessageType message = in.take();
           if (DEBUG) {
-            log.info("Received message: " + message + " "+ message.getClass().getCanonicalName());
+            log.info("Received message: " + message + " " + message.getClass().getCanonicalName());
           }
           for (MessageListener<MessageType> listener : listeners) {
             if (Thread.currentThread().isInterrupted()) {
@@ -103,38 +93,23 @@ public class Subscriber<MessageType> extends Topic {
     }
   }
 
-  private final class HandshakeHandler extends SimpleChannelHandler {
-    @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-      ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
-      // TODO(damonkohler): Handle handshake errors.
-      handshake(incomingBuffer);
-      Channel channel = e.getChannel();
-      channelGroup.add(channel);
-      ChannelPipeline pipeline = channel.getPipeline();
-      pipeline.remove(this);
-      pipeline.addLast("MessageHandler", in.createChannelHandler());
-    }
-  }
-
   public static <S> Subscriber<S> create(SlaveIdentifier slaveIdentifier,
       TopicDefinition description, Class<S> messageClass, Executor executor,
       MessageDeserializer<S> deserializer) {
     return new Subscriber<S>(slaveIdentifier, description, deserializer, executor);
   }
 
-  private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition description,
+  private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
       MessageDeserializer<MessageType> deserializer, Executor executor) {
-    super(description);
+    super(topicDefinition);
     this.executor = executor;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
     this.in = new IncomingMessageQueue<MessageType>(deserializer);
     this.slaveIdentifier = slaveIdentifier;
     header =
         ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
-            .putAll(description.toHeader()).build();
+            .putAll(topicDefinition.toHeader()).build();
     knownPublishers = Sets.newHashSet();
-    channelGroup = new DefaultChannelGroup();
     channelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
@@ -163,7 +138,7 @@ public class Subscriber<MessageType> extends Topic {
     }
   }
 
-  public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
+  public synchronized void addPublisher(PublisherDefinition publisherDefinition,
       InetSocketAddress address) {
     // TODO(damonkohler): Release bootstrap resources on shutdown.
     ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
@@ -171,7 +146,8 @@ public class Subscriber<MessageType> extends Topic {
       @Override
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();
-        pipeline.addLast("HandshakeHandler", new HandshakeHandler());
+        pipeline.addLast("SubscriberHandshakeHandler", new SubscriberHandshakeHandler<MessageType>(
+            header, in));
         return pipeline;
       }
     };
@@ -190,7 +166,7 @@ public class Subscriber<MessageType> extends Topic {
     if (DEBUG) {
       log.info("Connected to: " + channel.getRemoteAddress());
     }
-    knownPublishers.add(publisherIdentifier);
+    knownPublishers.add(publisherDefinition);
   }
 
   /**
@@ -200,15 +176,15 @@ public class Subscriber<MessageType> extends Topic {
    * @param publishers {@link List} of {@link Publisher}s for the subscribed
    *        topic
    */
-  public synchronized void updatePublishers(Collection<PublisherIdentifier> publishers) {
+  public synchronized void updatePublishers(Collection<PublisherDefinition> publishers) {
     // Find new connections.
-    ArrayList<PublisherIdentifier> newPublishers = new ArrayList<PublisherIdentifier>();
-    for (PublisherIdentifier publisher : publishers) {
+    ArrayList<PublisherDefinition> newPublishers = new ArrayList<PublisherDefinition>();
+    for (PublisherDefinition publisher : publishers) {
       if (!knownPublishers.contains(publisher)) {
         newPublishers.add(publisher);
       }
     }
-    for (final PublisherIdentifier publisher : newPublishers) {
+    for (final PublisherDefinition publisher : newPublishers) {
       executor.execute(new UpdatePublisherRunnable<MessageType>(this, this.slaveIdentifier,
           publisher));
     }
@@ -224,18 +200,6 @@ public class Subscriber<MessageType> extends Topic {
    */
   public ImmutableMap<String, String> getHeader() {
     return header;
-  }
-
-  private void handshake(ChannelBuffer buffer) {
-    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
-    if (DEBUG) {
-      log.info("Outgoing handshake header: " + header);
-      log.info("Incoming handshake header: " + incomingHeader);
-    }
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
-        header.get(ConnectionHeaderFields.TYPE)));
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
-        header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
   }
 
 }

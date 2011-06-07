@@ -19,7 +19,6 @@ package org.ros.internal.node;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.namespace.GraphName;
@@ -35,9 +34,7 @@ import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.tcp.TcpRosServer;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -50,7 +47,7 @@ public class MasterSlaveIntegrationTest {
   private SlaveClient slaveClient;
 
   @Before
-  public void setUp() throws XmlRpcException, IOException, URISyntaxException {
+  public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());

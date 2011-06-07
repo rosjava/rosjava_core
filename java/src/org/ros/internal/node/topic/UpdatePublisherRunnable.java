@@ -16,8 +16,6 @@
 
 package org.ros.internal.node.topic;
 
-import java.net.MalformedURLException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.RemoteException;
@@ -36,39 +34,37 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
   private static final Log log = LogFactory.getLog(UpdatePublisherRunnable.class);
 
   private final Subscriber<MessageType> subscriber;
-  private final PublisherIdentifier publisherIdentifier;
+  private final PublisherDefinition publisherDefinition;
   private final SlaveIdentifier slaveIdentifier;
 
   /**
    * @param subscriber
    * @param slaveIdentifier
    *          Identifier of the subscriber's slave.
-   * @param publisherIdentifier
+   * @param publisherDefinition
    */
   public UpdatePublisherRunnable(Subscriber<MessageType> subscriber,
-      SlaveIdentifier slaveIdentifier, PublisherIdentifier publisherIdentifier) {
+      SlaveIdentifier slaveIdentifier, PublisherDefinition publisherDefinition) {
     this.subscriber = subscriber;
     this.slaveIdentifier = slaveIdentifier;
-    this.publisherIdentifier = publisherIdentifier;
+    this.publisherDefinition = publisherDefinition;
   }
 
   @Override
   public void run() {
     SlaveClient slaveClient;
     try {
-      slaveClient = new SlaveClient(slaveIdentifier.getName(), publisherIdentifier.getSlaveUri());
+      slaveClient = new SlaveClient(slaveIdentifier.getName(), publisherDefinition.getUri());
       Response<ProtocolDescription> response = slaveClient.requestTopic(this.subscriber
           .getTopicName().toString(), ProtocolNames.SUPPORTED);
       // TODO(kwc): all of this logic really belongs in a protocol handler
       // registry.
       ProtocolDescription selected = response.getResult();
       if (ProtocolNames.SUPPORTED.contains(selected.getName())) {
-        subscriber.addPublisher(publisherIdentifier, selected.getAddress());
+        subscriber.addPublisher(publisherDefinition, selected.getAddress());
       } else {
         log.error("Publisher returned unsupported protocol selection: " + response);
       }
-    } catch (MalformedURLException e) {
-      log.error(e);
     } catch (RemoteException e) {
       // TODO(damonkohler): Retry logic is needed at the XML-RPC layer.
       log.error(e);

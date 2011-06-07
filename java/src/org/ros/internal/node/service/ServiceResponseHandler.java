@@ -19,7 +19,6 @@ package org.ros.internal.node.service;
 import com.google.common.base.Preconditions;
 
 import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.MessageDeserializer;
@@ -58,11 +57,6 @@ class ServiceResponseHandler<ResponseMessageType> extends SimpleChannelHandler {
       String message = Charset.forName("US-ASCII").decode(buffer).toString();
       listener.onFailure(new RemoteException(StatusCode.ERROR, message));
     }
-  }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-    throw new RuntimeException(e.getCause());
   }
 
 }

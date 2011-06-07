@@ -18,23 +18,22 @@ package org.ros.internal.node.topic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.MessageListener;
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.Node;
-import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -46,29 +45,29 @@ public class TopicIntegrationTest {
   private MasterServer masterServer;
 
   @Before
-  public void setUp() throws XmlRpcException, IOException {
+  public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
   }
 
   @Test
-  public void testOnePublisherToOneSubscriber() throws URISyntaxException, RemoteException,
-      IOException, InterruptedException, XmlRpcException {
+  public void testOnePublisherToOneSubscriber() throws InterruptedException {
     TopicDefinition topicDefinition =
-        new TopicDefinition(new GraphName("/foo"), MessageDefinition.create(
+        TopicDefinition.create(new GraphName("/foo"), MessageDefinition.create(
             org.ros.message.std_msgs.String.__s_getDataType(),
             org.ros.message.std_msgs.String.__s_getMessageDefinition(),
             org.ros.message.std_msgs.String.__s_getMD5Sum()));
 
     Node publisherNode =
         Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0, 0);
-    Publisher<org.ros.message.std_msgs.String> publisher =
+    final Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.createPublisher(topicDefinition,
             new MessageSerializer<org.ros.message.std_msgs.String>());
 
-    Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
+    Node subscriberNode =
+        Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
-        publisherNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
+        subscriberNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
             new MessageDeserializer<org.ros.message.std_msgs.String>(
                 org.ros.message.std_msgs.String.class));
 
@@ -84,14 +83,43 @@ public class TopicIntegrationTest {
       }
     });
 
-    // TODO(damonkohler): Ugly hack because we can't currently detect when the
-    // servers have settled into their connections.
-    long timeoutTime = System.currentTimeMillis() + 2000;
-    while (!publisherNode.isRegistered() && System.currentTimeMillis() < timeoutTime) {
-      Thread.sleep(100);
-    }
+    publisher.awaitRegistration(100, TimeUnit.MILLISECONDS);
+    subscriber.awaitRegistration(100, TimeUnit.MILLISECONDS);
 
-    publisher.publish(helloMessage);
-    assertTrue(messageReceived.await(1, TimeUnit.SECONDS));
+    RepeatingPublisher<org.ros.message.std_msgs.String> repeatingPublisher =
+        new RepeatingPublisher<org.ros.message.std_msgs.String>(publisher, helloMessage, 1000);
+    repeatingPublisher.start();
+
+    assertTrue(messageReceived.await(100, TimeUnit.MILLISECONDS));
+
+    repeatingPublisher.cancel();
+    publisher.shutdown();
   }
+
+  @Test
+  public void testAddDisconnectedPublisher() {
+    TopicDefinition topicDefinition =
+        TopicDefinition.create(new GraphName("/foo"), MessageDefinition.create(
+            org.ros.message.std_msgs.String.__s_getDataType(),
+            org.ros.message.std_msgs.String.__s_getMessageDefinition(),
+            org.ros.message.std_msgs.String.__s_getMD5Sum()));
+
+    Node subscriberNode =
+        Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        subscriberNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
+
+    try {
+      subscriber.addPublisher(
+          PublisherDefinition.createPublisherDefinition(
+              SlaveIdentifier.createFromStrings("foo", "http://foo"), topicDefinition),
+          new InetSocketAddress(1234));
+      fail();
+    } catch (RuntimeException e) {
+      // Connecting to a disconnected publisher should fail.
+    }
+  }
+
 }

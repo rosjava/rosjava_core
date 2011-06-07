@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 
-import org.apache.xmlrpc.XmlRpcException;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.exceptions.RosInitException;
@@ -37,7 +36,6 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.std_msgs.Int64;
 import org.ros.namespace.NameResolver;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.HashMap;
@@ -53,13 +51,11 @@ public class NodeTest {
   private NodeConfiguration nodeConfiguration;
 
   @Before
-  public void setUp() throws XmlRpcException, IOException, RosInitException {
+  public void setUp() throws RosInitException {
     master = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     master.start();
     masterUri = master.getUri();
     checkHostName(masterUri.getHost());
-
-
     // Make sure that none of the publicly reported addresses are bind
     // addresses.
     Map<String, String> env = new HashMap<String, String>();
@@ -99,14 +95,12 @@ public class NodeTest {
   }
 
   void checkHostName(String hostName) {
-    System.out.println(hostName);
     assertTrue(!hostName.equals("0.0.0.0"));
     assertTrue(!hostName.equals("0:0:0:0:0:0:0:0"));
   }
 
   @Test
-  public void testPublicAddresses() throws RosInitException, RemoteException, XmlRpcException,
-      IOException {
+  public void testPublicAddresses() throws RosInitException, RemoteException {
     MasterServer master =
         new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     master.start();

@@ -34,7 +34,7 @@ import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
- *
+ * 
  * @param <MessageType>
  */
 public class Publisher<MessageType> extends Topic {
@@ -42,11 +42,11 @@ public class Publisher<MessageType> extends Topic {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
-  private final List<SubscriberIdentifier> subscribers;
+  private final List<SubscriberDefinition> subscribers;
   private final OutgoingMessageQueue<MessageType> out;
 
-  public Publisher(TopicDefinition description, MessageSerializer<MessageType> serializer) {
-    super(description);
+  public Publisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer) {
+    super(topicDefinition);
     subscribers = Lists.newArrayList();
     out = new OutgoingMessageQueue<MessageType>(serializer);
     out.start();
@@ -56,8 +56,8 @@ public class Publisher<MessageType> extends Topic {
     out.shutdown();
   }
 
-  public PublisherIdentifier toPublisherIdentifier(SlaveIdentifier description) {
-    return new PublisherIdentifier(description, getTopicDefinition());
+  public PublisherDefinition toPublisherIdentifier(SlaveIdentifier description) {
+    return PublisherDefinition.createPublisherDefinition(description, getTopicDefinition());
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
@@ -86,7 +86,7 @@ public class Publisher<MessageType> extends Topic {
         header.get(ConnectionHeaderFields.TYPE)));
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
-    SubscriberIdentifier subscriber = SubscriberIdentifier.createFromHeader(incomingHeader);
+    SubscriberDefinition subscriber = SubscriberDefinition.createFromHeader(incomingHeader);
     subscribers.add(subscriber);
     return ConnectionHeader.encode(header);
   }
@@ -96,6 +96,11 @@ public class Publisher<MessageType> extends Topic {
       log.info("Adding channel: " + channel);
     }
     out.addChannel(channel);
+  }
+  
+  @Override
+  public String toString() {
+    return "Publisher<" + getTopicDefinition() + ">";
   }
 
 }

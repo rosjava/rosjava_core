@@ -59,14 +59,12 @@ class ScalarField<ValueType> extends Field {
     type.serialize(value, buffer);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void deserialize(ByteBuffer buffer) {
     value = type.<ValueType>deserialize(buffer);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public int getSerializedSize() {
     Preconditions.checkNotNull(value);
       if (type instanceof MessageFieldType) {
