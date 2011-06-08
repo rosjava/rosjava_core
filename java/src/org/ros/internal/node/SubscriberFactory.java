@@ -25,6 +25,7 @@ import org.ros.internal.node.topic.TopicManager;
 import org.ros.message.Message;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -35,10 +36,10 @@ public class SubscriberFactory {
   private final TopicManager topicManager;
   private final Executor executor;
   
-  public SubscriberFactory(SlaveServer slaveServer, TopicManager topicManager, Executor executor) {
+  public SubscriberFactory(SlaveServer slaveServer, TopicManager topicManager) {
     this.slaveServer = slaveServer;
     this.topicManager = topicManager;
-    this.executor = executor;
+    this.executor = Executors.newCachedThreadPool();
   }
   
   /**

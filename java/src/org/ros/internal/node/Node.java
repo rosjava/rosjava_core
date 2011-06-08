@@ -44,8 +44,6 @@ import org.ros.message.Service;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * Implementation of a ROS node. A {@link Node} is responsible for managing
@@ -59,7 +57,6 @@ public class Node {
 
   private static final Log log = LogFactory.getLog(Node.class);
 
-  private final Executor executor;
   private final GraphName nodeName;
   private final MasterClient masterClient;
   private final SlaveServer slaveServer;
@@ -97,7 +94,6 @@ public class Node {
       AdvertiseAddress xmlRpcAdvertiseAddress) {
     this.nodeName = nodeName;
     started = false;
-    executor = Executors.newCachedThreadPool();
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
@@ -107,7 +103,7 @@ public class Node {
     masterRegistration = new MasterRegistration(masterClient);
     topicManager.setListener(masterRegistration);
     publisherFactory = new PublisherFactory(topicManager);
-    subscriberFactory = new SubscriberFactory(slaveServer, topicManager, executor);
+    subscriberFactory = new SubscriberFactory(slaveServer, topicManager);
     serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager);
   }
 
