@@ -27,7 +27,7 @@ import org.ros.Node;
 import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
 import org.ros.exception.RosInitException;
-t org.ros.rosjava.android.MessageCallable;
+import org.ros.rosjava.android.MessageCallable;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
