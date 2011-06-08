@@ -14,44 +14,25 @@
  * the License.
  */
 
-package org.ros.exceptions;
-
-import org.ros.internal.namespace.GraphName;
+package org.ros.exception;
 
 /**
- * Thrown in the case where a {@link GraphName} is invalid.
- * 
- * <p>
- * This is a {@link RuntimeException} because in most cases it is the result of
- * a programming error. In addition, it is not typically possible to recover
- * from this error.
- * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
-public class RosNameException extends RosRuntimeException {
+public class RosException extends Exception {
 
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * @param exception
-   */
-  public RosNameException(final Exception exception) {
+  public RosException(final Exception exception) {
     super(exception);
   }
-
-  /**
-   * @param message
-   * @param throwable
-   */
-  public RosNameException(final String message, final Throwable throwable) {
+  
+  public RosException(final String message, final Throwable throwable) {
     super(message, throwable);
   }
-
-  /**
-   * @param message
-   */
-  public RosNameException(final String message) {
+  
+  public RosException(final String message) {
     super(message);
   }
+  
+  private static final long serialVersionUID = 1L;
 
 }

@@ -14,19 +14,22 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.exception;
 
 /**
- * {@link RuntimeException} indicating that an invalid response was received to
- * a remote call.
- * 
- * @author kwc@willowgarage.com (Ken Conley)
+ * @author ethan.rublee@gmail.com (Ethan Rublee) 
  */
-public class InvalidResponseException extends RuntimeException {
+public class RosRuntimeException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
+  public RosRuntimeException(final Exception exception) {
+    super(exception);
+  }
 
-  public InvalidResponseException(String message) {
+  public RosRuntimeException(final String message, final Throwable throwable) {
+    super(message, throwable);
+  }
+
+  public RosRuntimeException(final String message) {
     super(message);
   }
 

@@ -18,6 +18,7 @@ package org.ros.internal.node;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
@@ -47,6 +48,14 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Node.class);
+
+  private final ConcurrentLinkedQueue<RegistrationJob> registrationQueue;
+  private final MasterClient masterClient;
+  private final MasterRegistrationThread registrationThread;
+  
+  private SlaveIdentifier slaveIdentifier;
+  private boolean registrationOk;
+  private Throwable masterRegistrationError;
 
   class MasterRegistrationThread extends Thread {
     @Override
@@ -132,14 +141,6 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
     }
 
   }
-
-  private final ConcurrentLinkedQueue<RegistrationJob> registrationQueue;
-  private final MasterClient masterClient;
-  private final MasterRegistrationThread registrationThread;
-  
-  private SlaveIdentifier slaveIdentifier;
-  private boolean registrationOk;
-  private Throwable masterRegistrationError;
 
   public MasterRegistration(MasterClient masterClient) {
     this.masterClient = masterClient;

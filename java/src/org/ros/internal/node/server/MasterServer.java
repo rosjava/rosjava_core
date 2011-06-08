@@ -24,8 +24,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;

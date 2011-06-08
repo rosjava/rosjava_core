@@ -18,9 +18,9 @@ package org.ros.internal.node.response;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.node.InvalidResponseException;
+import org.ros.internal.exception.InvalidResponseException;
+import org.ros.internal.exception.RemoteException;
 
-import org.ros.internal.node.RemoteException;
 
 import java.util.List;
 

@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;

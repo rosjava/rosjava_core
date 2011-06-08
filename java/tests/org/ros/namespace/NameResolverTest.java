@@ -18,7 +18,7 @@ package org.ros.namespace;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.ros.exceptions.RosNameException;
+import org.ros.exception.RosNameException;
 import org.ros.internal.namespace.GraphName;
 
 import java.util.HashMap;

@@ -16,7 +16,7 @@
 
 package org.ros;
 
-import org.ros.exceptions.RosInitException;
+import org.ros.exception.RosInitException;
 
 import java.util.List;
 import java.util.concurrent.Executor;

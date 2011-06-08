@@ -23,7 +23,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.MessageDeserializer;
 import org.ros.ServiceResponseListener;
-import org.ros.internal.node.RemoteException;
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.node.response.StatusCode;
 
 import java.nio.ByteBuffer;

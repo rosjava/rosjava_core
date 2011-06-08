@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.internal.node.RemoteException;
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.namespace.NameResolver;

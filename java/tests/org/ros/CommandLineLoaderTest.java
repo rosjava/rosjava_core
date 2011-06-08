@@ -23,7 +23,7 @@ import junit.framework.TestCase;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.ros.exceptions.RosInitException;
+import org.ros.exception.RosInitException;
 import org.ros.internal.loader.CommandLine;
 import org.ros.internal.loader.EnvironmentVariables;
 import org.ros.internal.namespace.GraphName;

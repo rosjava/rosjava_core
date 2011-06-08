@@ -23,9 +23,9 @@ import com.google.common.collect.Lists;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.exceptions.RosInitException;
+import org.ros.exception.RosInitException;
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;

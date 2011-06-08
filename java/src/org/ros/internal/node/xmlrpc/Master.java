@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.xmlrpc;
 
-import org.ros.internal.node.RemoteException;
+import org.ros.internal.exception.RemoteException;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;

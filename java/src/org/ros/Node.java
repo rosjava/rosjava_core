@@ -21,11 +21,11 @@ import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.exceptions.RosInitException;
-import org.ros.exceptions.RosNameException;
+import org.ros.exception.RosInitException;
+import org.ros.exception.RosNameException;
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.RosoutLogger;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceClient;

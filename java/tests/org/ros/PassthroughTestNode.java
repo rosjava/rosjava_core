@@ -16,7 +16,7 @@
 
 package org.ros;
 
-import org.ros.exceptions.RosInitException;
+import org.ros.exception.RosInitException;
 
 /**
  * This node is used in rostest end-to-end integration tests with other client

@@ -18,8 +18,8 @@ package org.ros;
 
 import com.google.common.collect.Lists;
 
-import org.ros.exceptions.RosInitException;
-import org.ros.exceptions.RosNameException;
+import org.ros.exception.RosInitException;
+import org.ros.exception.RosNameException;
 
 /**
  * This is a rosrun-compatible loader for rosjava-based nodes.

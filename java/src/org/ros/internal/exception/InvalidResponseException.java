@@ -13,38 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.exceptions;
 
+package org.ros.internal.exception;
 
 /**
- * Exception for errors initializing ROS state, inspired by rospy
- * @author ethan.rublee@gmail.com (Ethan Rublee)
+ * {@link RuntimeException} indicating that an invalid response was received to
+ * a remote call.
+ * 
+ * @author kwc@willowgarage.com (Ken Conley)
  */
-public class RosInitException extends RosException {
+public class InvalidResponseException extends RuntimeException {
 
-
-  private static final long serialVersionUID = 1L;
-
-
-  /**
-   * @param exception
-   */
-  public RosInitException(final Exception exception) {
-    super(exception);
-  }
-
-  /**
-   * @param message
-   * @param throwable
-   */
-  public RosInitException(final String message, final Throwable throwable) {
-    super(message,throwable);
-  }
-
-  /**
-   * @param message
-   */
-  public RosInitException(final String message) {
+  public InvalidResponseException(String message) {
     super(message);
   }
 

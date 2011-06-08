@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.client;
 
-import org.ros.internal.node.RemoteException;
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.UriListResultFactory;

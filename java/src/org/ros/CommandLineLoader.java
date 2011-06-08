@@ -19,7 +19,7 @@ package org.ros;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import org.ros.exceptions.RosInitException;
+import org.ros.exception.RosInitException;
 import org.ros.internal.loader.CommandLine;
 import org.ros.internal.loader.EnvironmentVariables;
 import org.ros.internal.namespace.GraphName;

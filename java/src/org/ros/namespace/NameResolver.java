@@ -19,7 +19,7 @@ package org.ros.namespace;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
-import org.ros.exceptions.RosNameException;
+import org.ros.exception.RosNameException;
 import org.ros.internal.namespace.GraphName;
 
 import java.util.Collections;

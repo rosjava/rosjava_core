@@ -18,7 +18,7 @@ package org.ros.internal.namespace;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.exceptions.RosNameException;
+import org.ros.exception.RosNameException;
 import org.ros.namespace.Namespace;
 
 /**

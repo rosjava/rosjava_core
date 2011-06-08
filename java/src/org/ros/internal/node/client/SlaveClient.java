@@ -18,8 +18,8 @@ package org.ros.internal.node.client;
 
 import com.google.common.collect.Lists;
 
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.RemoteException;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.ProtocolDescriptionResultFactory;
 import org.ros.internal.node.response.Response;

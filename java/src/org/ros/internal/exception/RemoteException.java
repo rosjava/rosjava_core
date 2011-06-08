@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.internal.exception;
 
 import org.ros.internal.node.response.StatusCode;
 

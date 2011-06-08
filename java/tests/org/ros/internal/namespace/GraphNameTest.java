@@ -18,7 +18,7 @@ package org.ros.internal.namespace;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.ros.exceptions.RosNameException;
+import org.ros.exception.RosNameException;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)

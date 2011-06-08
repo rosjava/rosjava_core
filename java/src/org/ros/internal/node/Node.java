@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.MessageDeserializer;
 import org.ros.MessageSerializer;
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;

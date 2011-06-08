@@ -17,8 +17,8 @@
 package org.ros;
 
 import org.apache.commons.logging.Log;
-import org.ros.exceptions.RosInitException;
-import org.ros.internal.node.RemoteException;
+import org.ros.exception.RosInitException;
+import org.ros.internal.exception.RemoteException;
 import org.ros.message.std_msgs.Bool;
 import org.ros.message.std_msgs.Float64;
 import org.ros.message.std_msgs.Int64;
