@@ -51,9 +51,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
- * Implementation of a ROS node. This implementation is responsible for the
- * managing the various node resources including XML-RPC, TCPROS servers, and
- * topic/service instances.
+ * Implementation of a ROS node. A {@link Node} is responsible for managing
+ * various resources including XML-RPC, TCPROS servers, and topic/service
+ * instances.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)

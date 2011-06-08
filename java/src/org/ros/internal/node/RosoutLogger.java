@@ -17,7 +17,7 @@
 package org.ros.internal.node;
 
 import org.ros.Publisher;
-import org.ros.internal.node.client.TimeProvider;
+import org.ros.internal.time.TimeProvider;
 
 import org.apache.commons.logging.Log;
 

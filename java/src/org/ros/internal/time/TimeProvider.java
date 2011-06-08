@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node.client;
+package org.ros.internal.time;
 
 import org.ros.message.Time;
 
