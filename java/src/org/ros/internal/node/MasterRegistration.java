@@ -51,15 +51,14 @@ import java.util.concurrent.Future;
 public class MasterRegistration implements TopicListener {
 
   private static final boolean DEBUG = false;
-  static final Log log = LogFactory.getLog(Node.class);
+  private static final Log log = LogFactory.getLog(Node.class);
 
   private final MasterClient masterClient;
   private final MasterRegistrationThread registrationThread;
-
   private final CompletionService<Response<?>> completionService;
   private final Map<Future<Response<?>>, Callable<Response<?>>> futures;
 
-  SlaveIdentifier slaveIdentifier;
+  private SlaveIdentifier slaveIdentifier;
   private boolean registrationOk;
 
   class MasterRegistrationThread extends Thread {
