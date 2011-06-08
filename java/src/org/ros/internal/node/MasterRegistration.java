@@ -16,9 +16,11 @@
 
 package org.ros.internal.node;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
@@ -28,14 +30,16 @@ import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicListener;
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Manages topic and service registrations of a {@link SlaveServer} with the
@@ -44,102 +48,43 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterRegistration implements TopicListener, UncaughtExceptionHandler {
+public class MasterRegistration implements TopicListener {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(Node.class);
+  static final Log log = LogFactory.getLog(Node.class);
 
-  private final ConcurrentLinkedQueue<RegistrationJob> registrationQueue;
   private final MasterClient masterClient;
   private final MasterRegistrationThread registrationThread;
-  
-  private SlaveIdentifier slaveIdentifier;
+
+  private final CompletionService<Response<?>> completionService;
+  private final Map<Future<Response<?>>, Callable<Response<?>>> futures;
+
+  SlaveIdentifier slaveIdentifier;
   private boolean registrationOk;
-  private Throwable masterRegistrationError;
 
   class MasterRegistrationThread extends Thread {
     @Override
     public void run() {
       try {
-        // It would be consolidate the number of threads we are using. The only
-        // necessity here is the ability to keep retrying jobs from this queue.
         while (!Thread.currentThread().isInterrupted()) {
-          if (registrationQueue.isEmpty()) {
-            Thread.sleep(100);
-          } else {
-            RegistrationJob job = registrationQueue.peek();
-            if (job.run()) {
-              registrationQueue.remove();
+          Future<Response<?>> response = completionService.take();
+          try {
+            if (response.get().isSuccess()) {
               setMasterRegistrationOk(true);
-            } else {
-              setMasterRegistrationOk(false);
+              futures.remove(response);
             }
+          } catch (ExecutionException e) {
+            setMasterRegistrationOk(false);
+            // Retry the registration task.
+            Callable<Response<?>> task = futures.get(response);
+            futures.remove(response);
+            completionService.submit(task);
           }
         }
       } catch (InterruptedException e) {
         // Cancel-able
-      } catch (MalformedURLException e) {
-        throw new RuntimeException(e);
       }
     }
-  }
-
-  abstract class RegistrationJob {
-
-    public abstract void doJob() throws RemoteException, XmlRpcTimeoutException,
-        MalformedURLException;
-
-    public boolean run() throws MalformedURLException {
-      try {
-        doJob();
-      } catch (XmlRpcTimeoutException e) {
-        log.error("Timeout communication with master.", e);
-        return false;
-      } catch (RemoteException e) {
-        log.error("Remote exception from master.", e);
-        return false;
-      } catch (UndeclaredThrowableException e) {
-        // Artifact of Java reflection API and the Apache XML-RPC library.
-        throw new RuntimeException(e);
-      }
-      return true;
-    }
-  }
-
-  class PublisherRegistrationJob extends RegistrationJob {
-
-    private final Publisher<?> publisher;
-
-    public PublisherRegistrationJob(Publisher<?> publisher) {
-      this.publisher = publisher;
-    }
-
-    @Override
-    public void doJob() throws RemoteException, XmlRpcTimeoutException {
-      masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
-      publisher.signalRegistrationDone();
-    }
-  }
-
-  class SubcriberRegistrationJob extends RegistrationJob {
-
-    private Subscriber<?> subscriber;
-
-    public SubcriberRegistrationJob(Subscriber<?> subscriber) {
-      this.subscriber = subscriber;
-    }
-
-    @Override
-    public void doJob() throws RemoteException, XmlRpcTimeoutException {
-      Response<List<URI>> response;
-      response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
-      List<PublisherDefinition> publishers =
-          SlaveServer.buildPublisherIdentifierList(response.getResult(),
-              subscriber.getTopicDefinition());
-      subscriber.updatePublishers(publishers);
-      subscriber.signalRegistrationDone();
-    }
-
   }
 
   public MasterRegistration(MasterClient masterClient) {
@@ -147,14 +92,14 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
     if (DEBUG) {
       log.info("Remote URI: " + masterClient.getRemoteUri());
     }
+    completionService = new ExecutorCompletionService<Response<?>>(Executors.newCachedThreadPool());
+    futures = Maps.newConcurrentMap();
     registrationOk = false;
-    registrationQueue = new ConcurrentLinkedQueue<RegistrationJob>();
     registrationThread = new MasterRegistrationThread();
-    registrationThread.setUncaughtExceptionHandler(this);
   }
 
   public int getPendingSize() {
-    return registrationQueue.size();
+    return futures.size();
   }
 
   public boolean isMasterRegistrationOk() {
@@ -165,42 +110,54 @@ public class MasterRegistration implements TopicListener, UncaughtExceptionHandl
     this.registrationOk = registrationOk;
   }
 
-  @Override
-  public void publisherAdded(Publisher<?> publisher) {
-    registrationQueue.add(new PublisherRegistrationJob(publisher));
+  private void submitCallable(Callable<Response<?>> task) {
+    Future<Response<?>> future = completionService.submit(task);
+    futures.put(future, task);
   }
 
   @Override
-  public void subscriberAdded(Subscriber<?> subscriber) {
-    registrationQueue.add(new SubcriberRegistrationJob(subscriber));
+  public void publisherAdded(final Publisher<?> publisher) {
+    submitCallable(new Callable<Response<?>>() {
+      @Override
+      public Response<?> call() throws Exception {
+        Response<List<URI>> response =
+            masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
+        publisher.signalRegistrationDone();
+        return response;
+      }
+    });
   }
 
-  public void shutdown() {
-    registrationThread.interrupt();
+  @Override
+  public void subscriberAdded(final Subscriber<?> subscriber) {
+    submitCallable(new Callable<Response<?>>() {
+      @Override
+      public Response<?> call() throws Exception {
+        Response<List<URI>> response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
+        List<PublisherDefinition> publishers =
+            SlaveServer.buildPublisherIdentifierList(response.getResult(),
+                subscriber.getTopicDefinition());
+        subscriber.updatePublishers(publishers);
+        subscriber.signalRegistrationDone();
+        return response;
+      }
+    });
   }
 
   public void start(SlaveIdentifier slaveIdentifier) {
-    if (slaveIdentifier == null) {
-      throw new NullPointerException();
-    }
-    if (this.slaveIdentifier != null) {
-      throw new IllegalStateException("cannot call start() more than once");
-    }
+    Preconditions.checkNotNull(slaveIdentifier);
+    Preconditions.checkState(this.slaveIdentifier == null, "Already started.");
     this.slaveIdentifier = slaveIdentifier;
     registrationThread.start();
   }
 
-  @Override
-  public void uncaughtException(Thread thread, Throwable throwable) {
-    setMasterRegistrationOk(false);
-    setMasterRegistrationError(throwable);
+  public void shutdown() {
+    registrationThread.interrupt();
+    synchronized (futures) {
+      for (Future<Response<?>> future : futures.keySet()) {
+        future.cancel(true);
+      }
+    }
   }
 
-  public Throwable getMasterRegistrationError() {
-    return this.masterRegistrationError;
-  }
-
-  private void setMasterRegistrationError(Throwable throwable) {
-    this.masterRegistrationError = throwable;
-  }
 }
