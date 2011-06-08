@@ -138,7 +138,8 @@ public class Node {
   }
 
   /**
-   * Stops the node.
+   * Shutdown the node and make a best effort attempt to unregister all
+   * {@link Publisher}s, {@link Subscriber}s, and {@link ServiceServer}s.
    */
   public void shutdown() {
     for (Publisher<?> publisher : topicManager.getPublishers()) {
