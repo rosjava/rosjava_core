@@ -43,7 +43,6 @@ import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.tcp.TcpRosServer;
-import org.ros.message.Message;
 import org.ros.message.Service;
 
 import java.net.URI;
@@ -112,135 +111,31 @@ public class Node {
     topicManager.setListener(masterRegistration);
   }
 
-  /**
-   * Gets or creates a {@link Subscriber} instance. {@link Subscriber}s are
-   * cached and reused per topic. When a new {@link Subscriber} is generated, it
-   * is registered with the {@link MasterServer}.
-   * 
-   * @param <MessageType>
-   * @param topicDefinition {@link TopicDefinition} that is subscribed to
-   * @param messageClass {@link Message} class for topic
-   * @return a {@link Subscriber} instance
-   */
-  @SuppressWarnings("unchecked")
   public <MessageType> Subscriber<MessageType> createSubscriber(TopicDefinition topicDefinition,
       Class<MessageType> messageClass, MessageDeserializer<MessageType> deserializer) {
-    String topicName = topicDefinition.getName().toString();
-    Subscriber<MessageType> subscriber;
-    boolean createdNewSubscriber = false;
-
-    synchronized (topicManager) {
-      if (topicManager.hasSubscriber(topicName)) {
-        subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
-      } else {
-        subscriber =
-            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
-                executor, deserializer);
-        createdNewSubscriber = true;
-      }
-    }
-
-    if (createdNewSubscriber) {
-      topicManager.putSubscriber(subscriber);
-    }
-    return subscriber;
+    SubscriberFactory factory = new SubscriberFactory(slaveServer, topicManager, executor);
+    return factory.create(topicDefinition, messageClass, deserializer);
   }
 
-  /**
-   * Gets or creates a {@link Publisher} instance. {@link Publisher}s are cached
-   * and reused per topic. When a new {@link Publisher} is generated, it is
-   * registered with the {@link MasterServer}.
-   * 
-   * @param <MessageType>
-   * @param topicDefinition {@link TopicDefinition} that is being published
-   * @return a {@link Subscriber} instance
-   */
-  @SuppressWarnings("unchecked")
   public <MessageType> Publisher<MessageType> createPublisher(TopicDefinition topicDefinition,
       MessageSerializer<MessageType> serializer) {
-    String topicName = topicDefinition.getName().toString();
-    Publisher<MessageType> publisher;
-    boolean createdNewPublisher = false;
-
-    synchronized (topicManager) {
-      if (topicManager.hasPublisher(topicName)) {
-        publisher = (Publisher<MessageType>) topicManager.getPublisher(topicName);
-      } else {
-        publisher = new Publisher<MessageType>(topicDefinition, serializer);
-        createdNewPublisher = true;
-      }
-    }
-
-    if (createdNewPublisher) {
-      topicManager.putPublisher(publisher);
-    }
-    return publisher;
+    PublisherFactory factory = new PublisherFactory(topicManager);
+    return factory.create(topicDefinition, serializer);
   }
 
-  /**
-   * Gets or creates a {@link ServiceServer} instance. {@link ServiceServer}s
-   * are cached and reused per service. When a new {@link ServiceServer} is
-   * generated, it is registered with the {@link MasterServer}.
-   * 
-   * @param serviceDefinition the {@link ServiceDefinition} that is being served
-   * @param responseBuilder the {@link ServiceResponseBuilder} that is used to
-   *        build responses
-   * @return a {@link ServiceServer} instance
-   * @throws Exception
-   */
   public <RequestType, ResponseType> ServiceServer createServiceServer(
       ServiceDefinition serviceDefinition,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
-    ServiceServer serviceServer;
-    String name = serviceDefinition.getName().toString();
-    boolean createdNewService = false;
-
-    synchronized (serviceManager) {
-      if (serviceManager.hasServiceServer(name)) {
-        serviceServer = serviceManager.getServiceServer(name);
-      } else {
-        serviceServer =
-            new ServiceServer(serviceDefinition, responseBuilder,
-                tcpRosServer.getAdvertiseAddress());
-        createdNewService = true;
-      }
-    }
-
-    if (createdNewService) {
-      slaveServer.addService(serviceServer);
-    }
-    return serviceServer;
+    ServiceFactory factory =
+        new ServiceFactory(nodeName, slaveServer, tcpRosServer, serviceManager);
+    return factory.createServiceServer(serviceDefinition, responseBuilder);
   }
 
-  /**
-   * Gets or creates a {@link ServiceClient} instance. {@link ServiceClient}s
-   * are cached and reused per service. When a new {@link ServiceClient} is
-   * created, it is connected to the {@link ServiceServer}.
-   * 
-   * @param <ResponseMessageType>
-   * @param serviceIdentifier the {@link ServiceIdentifier} of the server
-   * @return a {@link ServiceClient} instance
-   */
-  @SuppressWarnings("unchecked")
   public <ResponseMessageType> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, MessageDeserializer<ResponseMessageType> deserializer) {
-    ServiceClient<ResponseMessageType> serviceClient;
-    String name = serviceIdentifier.getName().toString();
-    boolean createdNewService = false;
-
-    synchronized (serviceManager) {
-      if (serviceManager.hasServiceClient(name)) {
-        serviceClient = (ServiceClient<ResponseMessageType>) serviceManager.getServiceClient(name);
-      } else {
-        serviceClient = ServiceClient.create(nodeName, serviceIdentifier, deserializer);
-        createdNewService = true;
-      }
-    }
-
-    if (createdNewService) {
-      serviceClient.connect(serviceIdentifier.getUri());
-    }
-    return serviceClient;
+    ServiceFactory factory =
+        new ServiceFactory(nodeName, slaveServer, tcpRosServer, serviceManager);
+    return factory.createServiceClient(serviceIdentifier, deserializer);
   }
 
   void start() {
