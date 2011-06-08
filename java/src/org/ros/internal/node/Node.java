@@ -142,11 +142,11 @@ public class Node {
    * {@link Publisher}s, {@link Subscriber}s, and {@link ServiceServer}s.
    */
   public void shutdown() {
+    // NOTE(damonkohler): We don't want to raise potentially spurious
+    // exceptions during shutdown that would interrupt the process. This is
+    // simply best effort cleanup.
     for (Publisher<?> publisher : topicManager.getPublishers()) {
       publisher.shutdown();
-      // NOTE(damonkohler): We don't want to raise potentially spurious
-      // exceptions during shutdown that would interrupt the process. This is
-      // simply best effort cleanup.
       try {
         masterClient.unregisterPublisher(slaveServer.toSlaveIdentifier(), publisher);
       } catch (XmlRpcTimeoutException e) {
@@ -157,9 +157,6 @@ public class Node {
     }
     for (Subscriber<?> subscriber : topicManager.getSubscribers()) {
       subscriber.shutdown();
-      // NOTE(damonkohler): We don't want to raise potentially spurious
-      // exceptions during shutdown that would interrupt the process. This is
-      // simply best effort cleanup.
       try {
         masterClient.unregisterSubscriber(slaveServer.toSlaveIdentifier(), subscriber);
       } catch (XmlRpcTimeoutException e) {
@@ -169,9 +166,6 @@ public class Node {
       }
     }
     for (ServiceServer serviceServer : serviceManager.getServiceServers()) {
-      // NOTE(damonkohler): We don't want to raise potentially spurious
-      // exceptions during shutdown that would interrupt the process. This is
-      // simply best effort cleanup.
       try {
         masterClient.unregisterService(slaveServer.toSlaveIdentifier(), serviceServer);
       } catch (XmlRpcTimeoutException e) {
