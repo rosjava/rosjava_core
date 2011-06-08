@@ -66,15 +66,21 @@ public class SlaveServer extends NodeServer {
     return publishers;
   }
 
-  public SlaveServer(GraphName nodeName, BindAddress xmlRpcServerAddress,
-      AdvertiseAddress advertiseAddress, MasterClient master, TopicManager topicManager,
-      ServiceManager serviceManager, TcpRosServer tcpRosServer) {
-    super(xmlRpcServerAddress, advertiseAddress);
+  public SlaveServer(GraphName nodeName, BindAddress tcpRosBindAddress,
+      AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
+      AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master, TopicManager topicManager,
+      ServiceManager serviceManager) {
+    super(xmlRpcBindAddress, xmlRpcAdvertiseAddress);
     this.nodeName = nodeName;
     this.masterClient = master;
     this.topicManager = topicManager;
     this.serviceManager = serviceManager;
-    this.tcpRosServer = tcpRosServer;
+    this.tcpRosServer =
+        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
+  }
+  
+  public AdvertiseAddress getTcpRosAdvertiseAddress() {
+    return tcpRosServer.getAdvertiseAddress();
   }
 
   /**

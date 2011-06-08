@@ -26,7 +26,6 @@ import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.service.ServiceServer;
-import org.ros.internal.transport.tcp.TcpRosServer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -35,14 +34,11 @@ public class ServiceFactory {
 
   private final GraphName nodeName;
   private final SlaveServer slaveServer;
-  private final TcpRosServer tcpRosServer;
   private final ServiceManager serviceManager;
 
-  public ServiceFactory(GraphName nodeName, SlaveServer slaveServer, TcpRosServer tcpRosServer,
-      ServiceManager serviceManager) {
+  public ServiceFactory(GraphName nodeName, SlaveServer slaveServer, ServiceManager serviceManager) {
     this.nodeName = nodeName;
     this.slaveServer = slaveServer;
-    this.tcpRosServer = tcpRosServer;
     this.serviceManager = serviceManager;
   }
 
@@ -70,7 +66,7 @@ public class ServiceFactory {
       } else {
         serviceServer =
             new ServiceServer(serviceDefinition, responseBuilder,
-                tcpRosServer.getAdvertiseAddress());
+                slaveServer.getTcpRosAdvertiseAddress());
         createdNewService = true;
       }
     }

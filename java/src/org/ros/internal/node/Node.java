@@ -40,7 +40,6 @@ import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Service;
 
 import java.net.InetSocketAddress;
@@ -66,7 +65,6 @@ public class Node {
   private final SlaveServer slaveServer;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
-  private final TcpRosServer tcpRosServer;
   private final MasterRegistration masterRegistration;
   private final SubscriberFactory subscriberFactory;
   private final ServiceFactory serviceFactory;
@@ -103,16 +101,14 @@ public class Node {
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
-    tcpRosServer =
-        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
     slaveServer =
-        new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress, masterClient,
-            topicManager, serviceManager, tcpRosServer);
+        new SlaveServer(nodeName, tcpRosBindAddress, tcpRosAdvertiseAddress, xmlRpcBindAddress,
+            xmlRpcAdvertiseAddress, masterClient, topicManager, serviceManager);
     masterRegistration = new MasterRegistration(masterClient);
     topicManager.setListener(masterRegistration);
     publisherFactory = new PublisherFactory(topicManager);
     subscriberFactory = new SubscriberFactory(slaveServer, topicManager, executor);
-    serviceFactory = new ServiceFactory(nodeName, slaveServer, tcpRosServer, serviceManager);
+    serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager);
   }
 
   public <MessageType> Subscriber<MessageType> createSubscriber(TopicDefinition topicDefinition,
@@ -197,7 +193,7 @@ public class Node {
   public URI getUri() {
     return slaveServer.getUri();
   }
-  
+
   public InetSocketAddress getAddress() {
     return slaveServer.getAddress();
   }

@@ -32,7 +32,6 @@ import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-import org.ros.internal.transport.tcp.TcpRosServer;
 
 import java.net.URI;
 
@@ -55,9 +54,8 @@ public class MasterSlaveIntegrationTest {
     ServiceManager serviceManager = new ServiceManager();
     slaveServer =
         new SlaveServer(new GraphName("/foo"), BindAddress.createPublic(0),
-            AdvertiseAddress.createPublic(), masterClient, topicManager, serviceManager,
-            new TcpRosServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic(),
-                topicManager, serviceManager));
+            AdvertiseAddress.createPublic(), BindAddress.createPublic(0),
+            AdvertiseAddress.createPublic(), masterClient, topicManager, serviceManager);
     slaveServer.start();
     slaveClient = new SlaveClient(new GraphName("/bar"), slaveServer.getUri());
   }
