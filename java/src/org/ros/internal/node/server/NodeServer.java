@@ -82,7 +82,7 @@ public class NodeServer {
     startLatch.countDown();
   }
 
-  void shutdown() {
+  public void shutdown() {
     server.shutdown();
   }
 

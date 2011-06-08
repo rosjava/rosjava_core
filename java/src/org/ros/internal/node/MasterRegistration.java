@@ -77,11 +77,11 @@ public class MasterRegistration implements TopicListener {
             // Retry the registration task.
             Callable<Response<?>> task = futures.get(response);
             futures.remove(response);
-            completionService.submit(task);
+            submitCallable(task);
           }
         }
       } catch (InterruptedException e) {
-        // Cancel-able
+        // Cancelable
       }
     }
   }
