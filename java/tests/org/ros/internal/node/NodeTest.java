@@ -35,7 +35,6 @@ import org.ros.message.MessageSerializer;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
@@ -85,30 +84,18 @@ public class NodeTest {
     String hostName = InetAddress.getLocalHost().getCanonicalHostName();
     Node node =
         Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
-
     InetSocketAddress tcpRosAddress = node.getAddress();
     assertTrue(tcpRosAddress.getPort() > 0);
     assertEquals(tcpRosAddress.getHostName(), hostName);
-
-    URI uri = node.getUri();
-    assertTrue(uri.getPort() > 0);
-    assertEquals(hostName, uri.getHost());
-
     node.shutdown();
   }
 
   @Test
   public void testCreatePrivate() {
     Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-
     InetSocketAddress tcpRosAddress = node.getAddress();
     assertTrue(tcpRosAddress.getPort() > 0);
     assertTrue(tcpRosAddress.getAddress().isLoopbackAddress());
-
-    URI uri = node.getUri();
-    assertTrue(uri.getPort() > 0);
-    assertTrue(new InetSocketAddress(uri.getHost(), uri.getPort()).getAddress().isLoopbackAddress());
-
     node.shutdown();
   }
 
