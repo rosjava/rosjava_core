@@ -70,11 +70,11 @@ public class MasterRegistration implements TopicListener {
           Future<Response<?>> response = completionService.take();
           try {
             if (response.get().isSuccess()) {
-              setMasterRegistrationOk(true);
+              registrationOk = true;
               futures.remove(response);
             }
           } catch (ExecutionException e) {
-            setMasterRegistrationOk(false);
+            registrationOk = false;
             // Retry the registration task.
             Callable<Response<?>> task = futures.get(response);
             futures.remove(response);
@@ -104,10 +104,6 @@ public class MasterRegistration implements TopicListener {
 
   public boolean isMasterRegistrationOk() {
     return registrationOk;
-  }
-
-  public void setMasterRegistrationOk(boolean registrationOk) {
-    this.registrationOk = registrationOk;
   }
 
   private void submitCallable(Callable<Response<?>> task) {
