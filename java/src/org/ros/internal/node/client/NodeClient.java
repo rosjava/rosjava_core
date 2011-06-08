@@ -31,24 +31,25 @@ import java.net.URI;
  * @param <NodeType>
  */
 public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
-  
+
+  private static final int CONNECTION_TIMEOUT = 60 * 1000; // 60 seconds
+  private static final int REPLY_TIMEOUT = 60 * 1000; // 60 seconds
   private static final int XMLRPC_TIMEOUT = 10 * 1000; // 10 seconds
 
   private final URI uri;
 
   protected final NodeType node;
-  
+
   public NodeClient(URI uri, Class<NodeType> interfaceClass) {
     this.uri = uri;
-
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
     try {
       config.setServerURL(uri.toURL());
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }
-    config.setConnectionTimeout(60 * 1000);
-    config.setReplyTimeout(60 * 1000);
+    config.setConnectionTimeout(CONNECTION_TIMEOUT);
+    config.setReplyTimeout(REPLY_TIMEOUT);
 
     XmlRpcClient client = new XmlRpcClient();
     client.setTransportFactory(new XmlRpcCommonsTransportFactory(client));

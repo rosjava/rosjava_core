@@ -85,6 +85,7 @@ public class MasterRegistration implements TopicListener {
             }
           } catch (ExecutionException e) {
             registrationOk = false;
+            log.error("Master registration failed and will be retried.");
             // Retry the registration task.
             final Callable<Response<?>> task = futures.get(response);
             futures.remove(response);
