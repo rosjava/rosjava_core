@@ -62,7 +62,7 @@ public class SlaveImpl implements Slave {
 
   @Override
   public List<Object> getMasterUri(String callerId) {
-    URI uri = slave.getMasterUri(callerId);
+    URI uri = slave.getMasterUri();
     return new Response<String>(StatusCode.SUCCESS, "", uri.toString()).toList();
   }
 
@@ -77,11 +77,11 @@ public class SlaveImpl implements Slave {
 
   @Override
   public List<Object> getPid(String callerId) {
+    int pid = slave.getPid();
     try {
-      int pid = slave.getPid(callerId);
-      return Response.createSuccess("pid: " + pid, pid).toList();
+      return Response.createSuccess("PID: " + pid, pid).toList();
     } catch (UnsupportedOperationException e) {
-      return Response.createFailure("cannot retrieve pid on this platform", -1).toList();
+      return Response.createFailure("Cannot retrieve PID on this platform.", -1).toList();
     }
   }
 
@@ -107,8 +107,7 @@ public class SlaveImpl implements Slave {
 
   @Override
   public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) {
-    // TODO(kwc) implement parameter subscriptions (low priority)
-    return Response.createError("paramUpdate is not supported", 0).toList();
+    return Response.createFailure("Unsupported operation.", 0).toList();
   }
 
   @Override
@@ -118,14 +117,14 @@ public class SlaveImpl implements Slave {
       for (Object publisher : publishers) {
         URI uri = new URI(publisher.toString());
         if (!uri.getScheme().equals("http") && !uri.getScheme().equals("https")) {
-          return Response.createError("unknown URI scheme sent in update", 0).toList();
+          return Response.createError("Unknown URI scheme sent in update.", 0).toList();
         }
         publisherUris.add(uri);
       }
       slave.publisherUpdate(callerId, topicName, publisherUris);
-      return Response.createSuccess("publisher update received", 0).toList();
+      return Response.createSuccess("Publisher update received.", 0).toList();
     } catch (URISyntaxException e) {
-      return Response.createError("invalid URI sent in update", 0).toList();
+      return Response.createError("Invalid URI sent in update.", 0).toList();
     }
   }
 

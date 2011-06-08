@@ -60,7 +60,8 @@ public class SlaveServer extends NodeServer {
     List<PublisherDefinition> publishers = Lists.newArrayList();
     for (URI uri : publisherUriList) {
       SlaveIdentifier slaveIdentifier = SlaveIdentifier.createAnonymous(uri);
-      publishers.add(PublisherDefinition.createPublisherDefinition(slaveIdentifier, topicDefinition));
+      publishers.add(PublisherDefinition
+          .createPublisherDefinition(slaveIdentifier, topicDefinition));
     }
     return publishers;
   }
@@ -97,11 +98,12 @@ public class SlaveServer extends NodeServer {
    * @throws URISyntaxException
    * @throws MalformedURLException
    * @throws RemoteException
-   * @throws XmlRpcTimeoutException 
+   * @throws XmlRpcTimeoutException
    */
-  public void addService(ServiceServer server) throws URISyntaxException,
-      MalformedURLException, RemoteException, XmlRpcTimeoutException {
-    //TODO(kwc): convert to MasterRegistration job.  When we do, we can also get rid of masterClient.
+  public void addService(ServiceServer server) throws URISyntaxException, MalformedURLException,
+      RemoteException, XmlRpcTimeoutException {
+    // TODO(kwc): convert to MasterRegistration job. When we do, we can also get
+    // rid of masterClient.
     serviceManager.putServiceServer(server.getName().toString(), server);
     masterClient.registerService(toSlaveIdentifier(), server);
   }
@@ -118,18 +120,17 @@ public class SlaveServer extends NodeServer {
     return Lists.newArrayList();
   }
 
-  public URI getMasterUri(String callerId) {
+  public URI getMasterUri() {
     return masterClient.getRemoteUri();
   }
 
   /**
-   * @param callerId
-   * @return PID of node process, if available.
+   * @return PID of node process if available, throws
+   *         {@link UnsupportedOperationException} otherwise.
    */
-  public Integer getPid(String callerId) {
-    // kwc: java has no standard way of getting pid, apparently. This is the
-    // recommended solution, but this needs to be tested on Android.
-    // MF.getName() returns '1234@localhost'.
+  public int getPid() {
+    // NOTE(kwc): Java has no standard way of getting PID. MF.getName()
+    // returns '1234@localhost'.
     try {
       String mxName = ManagementFactory.getRuntimeMXBean().getName();
       int idx = mxName.indexOf('@');
@@ -137,13 +138,13 @@ public class SlaveServer extends NodeServer {
         try {
           return Integer.parseInt(mxName.substring(0, idx));
         } catch (NumberFormatException e) {
-          // handled by exception below
+          return 0;
         }
       }
     } catch (NoClassDefFoundError e) {
-      // Android does not support ManagementFactory
+      // Android does not support ManagementFactory.
     }
-    return 0; //unsupported on this platform
+    throw new UnsupportedOperationException();
   }
 
   public List<Subscriber<?>> getSubscriptions() {
@@ -162,8 +163,8 @@ public class SlaveServer extends NodeServer {
     if (topicManager.hasSubscriber(topicName)) {
       Subscriber<?> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
-      List<PublisherDefinition> identifiers = buildPublisherIdentifierList(publisherUris,
-          topicDefinition);
+      List<PublisherDefinition> identifiers =
+          buildPublisherIdentifierList(publisherUris, topicDefinition);
       subscriber.updatePublishers(identifiers);
     }
   }
