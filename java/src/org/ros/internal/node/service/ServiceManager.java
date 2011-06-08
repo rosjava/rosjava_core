@@ -16,8 +16,10 @@
 
 package org.ros.internal.node.service;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,6 +57,10 @@ public class ServiceManager {
 
   public ServiceClient<?> getServiceClient(String serviceName) {
     return serviceClients.get(serviceName);
+  }
+
+  public List<ServiceServer> getServiceServers() {
+    return ImmutableList.copyOf(serviceServers.values());
   }
 
 }

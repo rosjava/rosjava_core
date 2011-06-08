@@ -69,6 +69,9 @@ public class Node {
   private final ServiceManager serviceManager;
   private final TcpRosServer tcpRosServer;
   private final MasterRegistration masterRegistration;
+  private final SubscriberFactory subscriberFactory;
+  private final ServiceFactory serviceFactory;
+  private final PublisherFactory publisherFactory;
 
   private boolean started;
 
@@ -106,36 +109,32 @@ public class Node {
     slaveServer =
         new SlaveServer(nodeName, xmlRpcBindAddress, xmlRpcAdvertiseAddress, masterClient,
             topicManager, serviceManager, tcpRosServer);
-
     masterRegistration = new MasterRegistration(masterClient);
     topicManager.setListener(masterRegistration);
+    publisherFactory = new PublisherFactory(topicManager);
+    subscriberFactory = new SubscriberFactory(slaveServer, topicManager, executor);
+    serviceFactory = new ServiceFactory(nodeName, slaveServer, tcpRosServer, serviceManager);
   }
 
   public <MessageType> Subscriber<MessageType> createSubscriber(TopicDefinition topicDefinition,
       Class<MessageType> messageClass, MessageDeserializer<MessageType> deserializer) {
-    SubscriberFactory factory = new SubscriberFactory(slaveServer, topicManager, executor);
-    return factory.create(topicDefinition, messageClass, deserializer);
+    return subscriberFactory.create(topicDefinition, messageClass, deserializer);
   }
 
   public <MessageType> Publisher<MessageType> createPublisher(TopicDefinition topicDefinition,
       MessageSerializer<MessageType> serializer) {
-    PublisherFactory factory = new PublisherFactory(topicManager);
-    return factory.create(topicDefinition, serializer);
+    return publisherFactory.create(topicDefinition, serializer);
   }
 
   public <RequestType, ResponseType> ServiceServer createServiceServer(
       ServiceDefinition serviceDefinition,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
-    ServiceFactory factory =
-        new ServiceFactory(nodeName, slaveServer, tcpRosServer, serviceManager);
-    return factory.createServiceServer(serviceDefinition, responseBuilder);
+    return serviceFactory.createServiceServer(serviceDefinition, responseBuilder);
   }
 
   public <ResponseMessageType> ServiceClient<ResponseMessageType> createServiceClient(
       ServiceIdentifier serviceIdentifier, MessageDeserializer<ResponseMessageType> deserializer) {
-    ServiceFactory factory =
-        new ServiceFactory(nodeName, slaveServer, tcpRosServer, serviceManager);
-    return factory.createServiceClient(serviceIdentifier, deserializer);
+    return serviceFactory.createServiceClient(serviceIdentifier, deserializer);
   }
 
   void start() {
@@ -177,7 +176,18 @@ public class Node {
         log.error(e);
       }
     }
-    // TODO(damonkohler): Shutdown services as well.
+    for (ServiceServer serviceServer : serviceManager.getServiceServers()) {
+      // NOTE(damonkohler): We don't want to raise potentially spurious
+      // exceptions during shutdown that would interrupt the process. This is
+      // simply best effort cleanup.
+      try {
+        masterClient.unregisterService(slaveServer.toSlaveIdentifier(), serviceServer);
+      } catch (XmlRpcTimeoutException e) {
+        log.error(e);
+      } catch (RemoteException e) {
+        log.error(e);
+      }
+    }
     slaveServer.shutdown();
     masterRegistration.shutdown();
   }
