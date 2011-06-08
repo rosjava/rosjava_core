@@ -86,11 +86,11 @@ public class NodeTest {
     Node node =
         Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
 
-    InetSocketAddress tcpRosAddress = node.getSlaveServer().getAddress();
+    InetSocketAddress tcpRosAddress = node.getAddress();
     assertTrue(tcpRosAddress.getPort() > 0);
     assertEquals(tcpRosAddress.getHostName(), hostName);
 
-    URI uri = node.getSlaveServer().getUri();
+    URI uri = node.getUri();
     assertTrue(uri.getPort() > 0);
     assertEquals(hostName, uri.getHost());
 
@@ -101,11 +101,11 @@ public class NodeTest {
   public void testCreatePrivate() {
     Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
 
-    InetSocketAddress tcpRosAddress = node.getSlaveServer().getAddress();
+    InetSocketAddress tcpRosAddress = node.getAddress();
     assertTrue(tcpRosAddress.getPort() > 0);
     assertTrue(tcpRosAddress.getAddress().isLoopbackAddress());
 
-    URI uri = node.getSlaveServer().getUri();
+    URI uri = node.getUri();
     assertTrue(uri.getPort() > 0);
     assertTrue(new InetSocketAddress(uri.getHost(), uri.getPort()).getAddress().isLoopbackAddress());
 

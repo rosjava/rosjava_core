@@ -16,8 +16,6 @@
 
 package org.ros.internal.node;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.MessageDeserializer;
@@ -45,6 +43,7 @@ import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.message.Service;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -192,22 +191,21 @@ public class Node {
     masterRegistration.shutdown();
   }
 
-  @VisibleForTesting
-  SlaveServer getSlaveServer() {
-    return slaveServer;
-  }
-
   /**
    * @return the {@link URI} of the {@link NodeServer}
    */
   public URI getUri() {
     return slaveServer.getUri();
   }
+  
+  public InetSocketAddress getAddress() {
+    return slaveServer.getAddress();
+  }
 
   public ServiceIdentifier lookupService(GraphName serviceName, Service<?, ?> serviceType)
       throws RemoteException, XmlRpcTimeoutException {
-    Response<URI> response;
-    response = masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
+    Response<URI> response =
+        masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       ServiceDefinition serviceDefinition =
           new ServiceDefinition(serviceName, serviceType.getDataType(), serviceType.getMD5Sum());

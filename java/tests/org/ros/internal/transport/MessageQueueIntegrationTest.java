@@ -124,9 +124,7 @@ public class MessageQueueIntegrationTest {
   public void testSendAfterIncomingQueueShutdown() throws InterruptedException {
     Channel serverChannel = buildServerChannel();
     ChannelFuture future = connectIncomingMessageQueue(in, serverChannel);
-
     future.getChannel().close().await();
-
     org.ros.message.std_msgs.String hello = new org.ros.message.std_msgs.String();
     hello.data = "Would you like to play a game?";
     out.put(hello);
@@ -136,9 +134,7 @@ public class MessageQueueIntegrationTest {
   public void testSendAfterServerChannelClosed() throws InterruptedException {
     Channel serverChannel = buildServerChannel();
     connectIncomingMessageQueue(in, serverChannel);
-
     serverChannel.close().await();
-
     org.ros.message.std_msgs.String hello = new org.ros.message.std_msgs.String();
     hello.data = "Would you like to play a game?";
     out.put(hello);
@@ -147,11 +143,8 @@ public class MessageQueueIntegrationTest {
   @Test
   public void testSendAfterOutgoingQueueShutdown() throws InterruptedException {
     Channel serverChannel = buildServerChannel();
-
     connectIncomingMessageQueue(in, serverChannel);
-
     out.shutdown();
-
     org.ros.message.std_msgs.String hello = new org.ros.message.std_msgs.String();
     hello.data = "Would you like to play a game?";
     out.put(hello);
