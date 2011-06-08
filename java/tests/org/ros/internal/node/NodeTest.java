@@ -17,8 +17,11 @@
 package org.ros.internal.node;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import com.google.common.net.InetAddresses;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,21 +84,56 @@ public class NodeTest {
 
   @Test
   public void testCreatePublic() throws Exception {
-    String hostName = InetAddress.getLocalHost().getCanonicalHostName();
+    String host = "foo";
     Node node =
-        Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
-    InetSocketAddress tcpRosAddress = node.getAddress();
-    assertTrue(tcpRosAddress.getPort() > 0);
-    assertEquals(tcpRosAddress.getHostName(), hostName);
+        Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), host, 0, 0);
+    InetSocketAddress nodeAddress = node.getAddress();
+    assertTrue(nodeAddress.getPort() > 0);
+    assertEquals(nodeAddress.getHostName(), host);
+    node.shutdown();
+  }
+
+  @Test
+  public void testCreatePublicResolves() throws Exception {
+    String host = InetAddress.getLocalHost().getCanonicalHostName();
+    assertFalse(InetAddresses.isInetAddress(host));
+    Node node =
+        Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), host, 0, 0);
+    InetSocketAddress nodeAddress = node.getAddress();
+    assertTrue(nodeAddress.getPort() > 0);
+    assertEquals(nodeAddress.getHostName(), host);
+    assertEquals(nodeAddress.getAddress(), InetAddress.getByName(host));
+    node.shutdown();
+  }
+
+  @Test
+  public void testCreatePublicWithIpv4() throws Exception {
+    String host = "1.2.3.4";
+    Node node =
+        Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), host, 0, 0);
+    InetSocketAddress nodeAddress = node.getAddress();
+    assertTrue(nodeAddress.getPort() > 0);
+    assertEquals(nodeAddress.getHostName(), host);
+    node.shutdown();
+  }
+
+  @Test
+  public void testCreatePublicWithIpv6() throws Exception {
+    String host = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    Node node =
+        Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), host, 0, 0);
+    InetSocketAddress nodeAddress = node.getAddress();
+    assertTrue(nodeAddress.getPort() > 0);
+    assertEquals(nodeAddress.getHostName(), host);
     node.shutdown();
   }
 
   @Test
   public void testCreatePrivate() {
     Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-    InetSocketAddress tcpRosAddress = node.getAddress();
-    assertTrue(tcpRosAddress.getPort() > 0);
-    assertTrue(tcpRosAddress.getAddress().isLoopbackAddress());
+    InetSocketAddress nodeAddress = node.getAddress();
+    assertTrue(nodeAddress.getPort() > 0);
+    assertTrue(nodeAddress.getAddress().isLoopbackAddress());
     node.shutdown();
   }
 

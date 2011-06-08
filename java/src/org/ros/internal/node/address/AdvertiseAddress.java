@@ -17,6 +17,7 @@
 package org.ros.internal.node.address;
 
 import com.google.common.base.Preconditions;
+import com.google.common.net.InetAddresses;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -49,7 +50,8 @@ public class AdvertiseAddress implements Address {
    * Best effort method, returns a new {@link AdvertiseAddress} where the host
    * is determined automatically.
    * 
-   * @return a suitable {@link AdvertiseAddress} for a publicly accessible {@link BindAddress}
+   * @return a suitable {@link AdvertiseAddress} for a publicly accessible
+   *         {@link BindAddress}
    */
   public static AdvertiseAddress createPublic() {
     try {
@@ -92,7 +94,15 @@ public class AdvertiseAddress implements Address {
   public InetSocketAddress toInetSocketAddress() {
     Preconditions.checkNotNull(portCallable);
     try {
-      return new InetSocketAddress(host, portCallable.call());
+      // NOTE(damonkohler): This fancy footwork ensures that if an IP address
+      // string is specified for the host we use that in place of a host name.
+      InetAddress address;
+      if (InetAddresses.isInetAddress(host)) {
+        address = InetAddress.getByAddress(host, InetAddresses.forString(host).getAddress());
+      } else {
+        address = InetAddress.getByName(host);
+      }
+      return new InetSocketAddress(address, portCallable.call());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -134,21 +144,15 @@ public class AdvertiseAddress implements Address {
   @Override
   public boolean equals(Object obj) {
     Preconditions.checkNotNull(portCallable);
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     AdvertiseAddress other = (AdvertiseAddress) obj;
     if (host == null) {
-      if (other.host != null)
-        return false;
-    } else if (!host.equals(other.host))
-      return false;
+      if (other.host != null) return false;
+    } else if (!host.equals(other.host)) return false;
     try {
-      if (portCallable.call() != other.portCallable.call())
-        return false;
+      if (portCallable.call() != other.portCallable.call()) return false;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
