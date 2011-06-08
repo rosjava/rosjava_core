@@ -40,6 +40,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Manages topic and service registrations of a {@link SlaveServer} with the
@@ -52,12 +54,18 @@ public class MasterRegistration implements TopicListener {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Node.class);
+  
+  private static final long DEFAULT_RETRY_DELAY = 5;
+  private static final TimeUnit DEFAULT_RETRY_TIME_UNIT = TimeUnit.SECONDS;
 
   private final MasterClient masterClient;
   private final MasterRegistrationThread registrationThread;
   private final CompletionService<Response<?>> completionService;
   private final Map<Future<Response<?>>, Callable<Response<?>>> futures;
+  private final ScheduledExecutorService retryExecutor;
 
+  private long retryDelay;
+  private TimeUnit retryTimeUnit;
   private SlaveIdentifier slaveIdentifier;
   private boolean registrationOk;
 
@@ -75,9 +83,14 @@ public class MasterRegistration implements TopicListener {
           } catch (ExecutionException e) {
             registrationOk = false;
             // Retry the registration task.
-            Callable<Response<?>> task = futures.get(response);
+            final Callable<Response<?>> task = futures.get(response);
             futures.remove(response);
-            submitCallable(task);
+            retryExecutor.schedule(new Runnable() {
+              @Override
+              public void run() {
+                submitCallable(task);
+              }
+            }, retryDelay, retryTimeUnit);
           }
         }
       } catch (InterruptedException e) {
@@ -88,13 +101,20 @@ public class MasterRegistration implements TopicListener {
 
   public MasterRegistration(MasterClient masterClient) {
     this.masterClient = masterClient;
+    setRetryDelay(DEFAULT_RETRY_DELAY, DEFAULT_RETRY_TIME_UNIT);
+    completionService = new ExecutorCompletionService<Response<?>>(Executors.newCachedThreadPool());
+    futures = Maps.newConcurrentMap();
+    retryExecutor = Executors.newSingleThreadScheduledExecutor();
+    registrationOk = false;
+    registrationThread = new MasterRegistrationThread();
     if (DEBUG) {
       log.info("Remote URI: " + masterClient.getRemoteUri());
     }
-    completionService = new ExecutorCompletionService<Response<?>>(Executors.newCachedThreadPool());
-    futures = Maps.newConcurrentMap();
-    registrationOk = false;
-    registrationThread = new MasterRegistrationThread();
+  }
+
+  public void setRetryDelay(long delay, TimeUnit unit) {
+    retryDelay = delay;
+    retryTimeUnit = unit;
   }
 
   public int getPendingSize() {
