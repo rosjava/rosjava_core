@@ -54,7 +54,7 @@ public class MasterRegistration implements TopicListener {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Node.class);
-  
+
   private static final long DEFAULT_RETRY_DELAY = 5;
   private static final TimeUnit DEFAULT_RETRY_TIME_UNIT = TimeUnit.SECONDS;
 
@@ -67,6 +67,9 @@ public class MasterRegistration implements TopicListener {
   private long retryDelay;
   private TimeUnit retryTimeUnit;
   private SlaveIdentifier slaveIdentifier;
+
+  // TODO(damonkohler): This flag isn't useful if the connection to the master
+  // is flaky. We need a better indicator.
   private boolean registrationOk;
 
   class MasterRegistrationThread extends Thread {
