@@ -28,10 +28,21 @@ import java.net.URI;
 public class RosCore implements NodeMain {
 
   private final MasterServer masterServer;
+  
+  public static RosCore createPublic(String host, int port) {
+    return new RosCore(BindAddress.createPublic(port), new AdvertiseAddress(host));
+  }
+ 
+  public static RosCore createPublic(int port) {
+    return new RosCore(BindAddress.createPublic(port), AdvertiseAddress.createPublic());
+  }
+  
+  public static RosCore createPrivate(int port) {
+    return new RosCore(BindAddress.createPrivate(port), AdvertiseAddress.createPrivate());
+  }
 
-  public RosCore(int port) {
-    masterServer =
-        new MasterServer(BindAddress.createPublic(port), AdvertiseAddress.createPublic());
+  private RosCore(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
+    masterServer = new MasterServer(bindAddress, advertiseAddress);
   }
 
   @Override
@@ -49,6 +60,11 @@ public class RosCore implements NodeMain {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public void shutdown() {
+    masterServer.shutdown();
   }
 
 }

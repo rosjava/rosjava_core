@@ -16,6 +16,8 @@
 
 package org.ros.tutorials.pubsub;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.Node;
 import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
@@ -30,9 +32,12 @@ import org.ros.Publisher;
  */
 public class Talker implements NodeMain {
 
+  private Node node;
+
   @Override
   public void main(NodeConfiguration configuration) {
-    Node node = null;
+    Preconditions.checkState(node == null);
+    Preconditions.checkNotNull(configuration);
     try {
       node = new Node("talker", configuration);
       Publisher<org.ros.message.std_msgs.String> publisher =
@@ -51,6 +56,12 @@ public class Talker implements NodeMain {
         e.printStackTrace();
       }
     }
+  }
+
+  @Override
+  public void shutdown() {
+    node.shutdown();
+    node = null;
   }
 
 }

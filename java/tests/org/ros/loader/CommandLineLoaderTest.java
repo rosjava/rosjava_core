@@ -14,24 +14,24 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.loader;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.ros.NodeConfiguration;
 import org.ros.exception.RosInitException;
-import org.ros.internal.loader.CommandLine;
-import org.ros.internal.loader.EnvironmentVariables;
 import org.ros.internal.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.Namespace;
 
 import java.io.File;
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
@@ -44,17 +44,23 @@ import java.util.Map;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class CommandLineLoaderTest extends TestCase {
+public class CommandLineLoaderTest {
 
-  private Object defaultMasterUri;
-  private String defaultRosRoot;
+  private URI defaultMasterUri;
+  private File defaultRosRoot;
   private List<String> emptyArgv;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  private HashMap<String, String> getDefaultEnv() {
+    HashMap<String, String> env = new HashMap<String, String>();
+    env.put(EnvironmentVariables.ROS_MASTER_URI, defaultMasterUri.toString());
+    env.put(EnvironmentVariables.ROS_ROOT, defaultRosRoot.getAbsolutePath());
+    return env;
+  }
+
+  @Before
+  public void setup() throws URISyntaxException {
     defaultMasterUri = new URI("http://localhost:33133");
-    defaultRosRoot = System.getProperty("user.dir");
+    defaultRosRoot = new File(System.getProperty("user.dir"));
     emptyArgv = Lists.newArrayList("Foo");
   }
 
@@ -98,27 +104,24 @@ public class CommandLineLoaderTest extends TestCase {
     // Failure: ROS_ROOT not set.
     String tmpDir = System.getProperty("java.io.tmpdir");
     String rosPackagePath = tmpDir + File.pathSeparator + defaultRosRoot;
-    List<String> rosPackagePathList = Lists.newArrayList(tmpDir, defaultRosRoot);
+    List<String> rosPackagePathList = Lists.newArrayList(tmpDir, defaultRosRoot.getAbsolutePath());
     Map<String, String> env = new HashMap<String, String>();
     CommandLineLoader loader = null;
     env = Maps.newHashMap();
-    env.put(EnvironmentVariables.ROS_ROOT, defaultRosRoot);
+    env.put(EnvironmentVariables.ROS_ROOT, defaultRosRoot.getAbsolutePath());
     loader = new CommandLineLoader(emptyArgv, env);
-    try {
-      loader.createConfiguration();
-      fail("should have raised RosInitException: no ROS_MASTER_URI");
-    } catch (RosInitException e) {
-    }
+    NodeConfiguration nodeConfiguration = loader.createConfiguration();
+    assertEquals(new URI(NodeConfiguration.DEFAULT_MASTER_URI), nodeConfiguration.getMasterUri());
 
     // Construct artificial environment. Set required environment variables.
     env = getDefaultEnv();
     loader = new CommandLineLoader(emptyArgv, env);
-    NodeConfiguration nodeConfiguration = loader.createConfiguration();
-    assertEquals(defaultMasterUri, nodeConfiguration.getRosMasterUri());
+    nodeConfiguration = loader.createConfiguration();
+    assertEquals(defaultMasterUri, nodeConfiguration.getMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
     assertEquals(Namespace.GLOBAL, nodeConfiguration.getParentResolver().getNamespace());
     // Default is the hostname + FQDN.
-    assertEquals(InetAddress.getLocalHost().getCanonicalHostName(), nodeConfiguration.getHost());
+    assertEquals(NodeConfiguration.DEFAULT_HOST, nodeConfiguration.getHost());
 
     // Construct artificial environment. Set optional environment variables.
     env = getDefaultEnv();
@@ -128,7 +131,7 @@ public class CommandLineLoaderTest extends TestCase {
     loader = new CommandLineLoader(emptyArgv, env);
     nodeConfiguration = loader.createConfiguration();
 
-    assertEquals(defaultMasterUri, nodeConfiguration.getRosMasterUri());
+    assertEquals(defaultMasterUri, nodeConfiguration.getMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
     assertEquals("192.168.0.1", nodeConfiguration.getHost());
     assertEquals("/foo/bar", nodeConfiguration.getParentResolver().getNamespace());
@@ -163,13 +166,13 @@ public class CommandLineLoaderTest extends TestCase {
     // Test ROS_MASTER_URI from command-line
     args = Lists.newArrayList("Foo", CommandLine.ROS_MASTER_URI + ":=http://override:22622");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
-    assertEquals(new URI("http://override:22622"), nodeConfiguration.getRosMasterUri());
+    assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
 
     // Test again with env var removed, make sure that it still behaves the
     // same.
     env.remove(EnvironmentVariables.ROS_MASTER_URI);
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
-    assertEquals(new URI("http://override:22622"), nodeConfiguration.getRosMasterUri());
+    assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
 
     // Test ROS namespace resolution and canonicalization
     String canonical = new GraphName("/baz/bar").toString();
@@ -200,16 +203,9 @@ public class CommandLineLoaderTest extends TestCase {
             CommandLine.ROS_MASTER_URI + ":=http://override:22622", "--bad", CommandLine.ROS_IP
                 + ":=192.168.0.2");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
-    assertEquals(new URI("http://override:22622"), nodeConfiguration.getRosMasterUri());
+    assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
     assertEquals("192.168.0.2", nodeConfiguration.getHost());
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
-  }
-
-  private HashMap<String, String> getDefaultEnv() {
-    HashMap<String, String> env = new HashMap<String, String>();
-    env.put(EnvironmentVariables.ROS_MASTER_URI, defaultMasterUri.toString());
-    env.put(EnvironmentVariables.ROS_ROOT, defaultRosRoot);
-    return env;
   }
 
   /**

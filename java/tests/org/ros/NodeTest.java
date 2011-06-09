@@ -33,6 +33,7 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
+import org.ros.loader.CommandLineLoader;
 import org.ros.message.std_msgs.Int64;
 import org.ros.namespace.NameResolver;
 

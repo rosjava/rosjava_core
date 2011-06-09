@@ -91,9 +91,11 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
     setPreviewCallback(new PublishingPreviewCallback());
   }
   
-  public void stop() {
+  @Override
+  public void shutdown() {
     Preconditions.checkNotNull(node);
-    node.stop();
+    node.shutdown();
+    node = null;
   }
 
 }

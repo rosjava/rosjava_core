@@ -31,9 +31,10 @@ import org.ros.Subscriber;
  */
 public class Listener implements NodeMain {
 
+  private Node node;
+
   @Override
   public void main(NodeConfiguration configuration) {
-    Node node = null;
     try {
       node = new Node("listener", configuration);
       final Log log = node.getLog();
@@ -50,6 +51,11 @@ public class Listener implements NodeMain {
         e.printStackTrace();
       }
     }
+  }
+
+  @Override
+  public void shutdown() {
+    node.shutdown();
   }
 
 }

@@ -16,9 +16,12 @@
 
 package org.ros;
 
+import org.ros.internal.node.address.Address;
 import org.ros.namespace.NameResolver;
 
+import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -27,54 +30,61 @@ import java.util.List;
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class NodeConfiguration {
+  
+  public static final String DEFAULT_HOST = Address.LOCALHOST;
+  public static final String DEFAULT_MASTER_URI = "http://" + DEFAULT_HOST + ":11311/";
 
-  private NameResolver resolver;
+  private NameResolver parentResolver;
   private URI masterUri;
   private String host;
-  private String rosRoot;
+  private File rosRoot;
   private List<String> rosPackagePath;
   private int tcpRosPort;
   private int xmlRpcPort;
   private String nodeNameOverride;
-
-  public NodeConfiguration() {
-    resolver = null;
-    tcpRosPort = 0;
-    xmlRpcPort = 0;
+  
+  public static NodeConfiguration createDefault() {
+    NodeConfiguration configuration = new NodeConfiguration();
+    try {
+      configuration.setMasterUri(new URI(DEFAULT_MASTER_URI));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+    configuration.setParentResolver(NameResolver.createDefault());
+    configuration.setHost(DEFAULT_HOST);
+    configuration.setTcpRosPort(0); // OS determined free port.
+    configuration.setXmlRpcPort(0); // OS determined free port.
+    return configuration;
   }
 
   /**
    * @return The {@link NameResolver} for a {@link Node}'s parent namespace.
-   * @see NameResolver
    */
   public NameResolver getParentResolver() {
-    return resolver;
+    return parentResolver;
   }
 
   public void setParentResolver(NameResolver resolver) {
-    this.resolver = resolver;
+    this.parentResolver = resolver;
   }
 
-  public URI getRosMasterUri() {
+  public URI getMasterUri() {
     return masterUri;
   }
 
-  public void setRosMasterUri(URI rosMasterUri) {
-    this.masterUri = rosMasterUri;
+  public void setMasterUri(URI masterUri) {
+    this.masterUri = masterUri;
   }
 
-  public String getRosRoot() {
+  public File getRosRoot() {
     return rosRoot;
   }
 
-  public void setRosRoot(String rosRoot) {
+  public void setRosRoot(File rosRoot) {
     this.rosRoot = rosRoot;
-  }
-
-  public void setRosRoot(List<String> rosPackagePath) {
-    this.rosPackagePath = rosPackagePath;
   }
 
   public List<String> getRosPackagePath() {

@@ -92,14 +92,16 @@ public class RosTextView<T> extends TextView implements NodeMain {
     }, messageClass);
   }
 
-  public void stop() {
-    Preconditions.checkNotNull(node);
-    node.stop();
-  }
-
   public void setNode(Node node) {
     Preconditions.checkState(node == null);
     this.node = node;
+  }
+
+  @Override
+  public void shutdown() {
+    Preconditions.checkNotNull(node);
+    node.shutdown();
+    node = null;
   }
 
 }

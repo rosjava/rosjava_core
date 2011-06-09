@@ -26,9 +26,11 @@ import org.ros.message.std_msgs.Int64;
  */
 public class SlaveApiTestNode implements NodeMain {
 
+  private Node node;
+
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
-    final Node node = new Node("test_node", nodeConfiguration);
+    node = new Node("test_node", nodeConfiguration);
 
     // Basic chatter in/out test.
     Publisher<org.ros.message.std_msgs.String> pub_string =
@@ -69,6 +71,11 @@ public class SlaveApiTestNode implements NodeMain {
         e.printStackTrace();
       }
     }
+  }
+
+  @Override
+  public void shutdown() {
+    node.shutdown();
   }
 
 }

@@ -16,8 +16,7 @@
 
 package org.ros;
 
-import java.net.MalformedURLException;
-import java.net.URI;
+import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +26,7 @@ import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RosoutLogger;
+import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceDefinition;
@@ -46,7 +46,9 @@ import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
 
-import com.google.common.base.Preconditions;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URI;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -99,19 +101,15 @@ public class Node {
     log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
 
     try {
-      if (configuration.getHost() == null) {
-        throw new NullPointerException("configuration.getHost() cannot be null");
-      }
-      if (configuration.getHost().equals("localhost")
-          || configuration.getHost().startsWith("127.0.0.")) {
-        // If we are advertising as localhost, explicitly bind to loopback-only.
-        // NOTE: technically 127.0.0.0/8 is loopback, not 127.0.0.1/24.
+      Preconditions.checkNotNull(configuration.getHost());
+      InetAddress host = InetAddressFactory.createFromHostString(configuration.getHost());
+      if (host.isLoopbackAddress()) {
         node =
-            org.ros.internal.node.Node.createPrivate(nodeName, configuration.getRosMasterUri(),
+            org.ros.internal.node.Node.createPrivate(nodeName, configuration.getMasterUri(),
                 configuration.getXmlRpcPort(), configuration.getTcpRosPort());
       } else {
         node =
-            org.ros.internal.node.Node.createPublic(nodeName, configuration.getRosMasterUri(),
+            org.ros.internal.node.Node.createPublic(nodeName, configuration.getMasterUri(),
                 configuration.getHost(), configuration.getXmlRpcPort(),
                 configuration.getTcpRosPort());
       }
@@ -275,7 +273,7 @@ public class Node {
     return resolver.resolveName(name);
   }
 
-  public void stop() {
+  public void shutdown() {
     rosoutPublisher.shutdown();
     node.shutdown();
   }
@@ -284,7 +282,7 @@ public class Node {
    * @return {@link URI} of {@link Master} that this node is attached to.
    */
   public URI getMasterUri() {
-    return configuration.getRosMasterUri();
+    return configuration.getMasterUri();
   }
 
   /**

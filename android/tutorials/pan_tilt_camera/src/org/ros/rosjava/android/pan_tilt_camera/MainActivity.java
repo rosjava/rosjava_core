@@ -21,18 +21,13 @@ import com.google.common.collect.Lists;
 import android.app.Activity;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MotionEvent;
+
 import org.ros.NodeRunner;
+import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.rosjava.android.BitmapFromCompressedImage;
 import org.ros.rosjava.android.OrientationPublisher;
 import org.ros.rosjava.android.views.RosImageView;
-
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -54,32 +49,6 @@ public class MainActivity extends Activity {
     android.os.Process.killProcess(android.os.Process.myPid());
   }
 
-  private static String getNonLoopbackHostName() {
-    try {
-      String address = null;
-      for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
-          .hasMoreElements();) {
-        NetworkInterface intf = en.nextElement();
-        Log.i("RosAndroid", "Interface: " + intf.getName());
-        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
-            .hasMoreElements();) {
-          InetAddress inetAddress = enumIpAddr.nextElement();
-          Log.i("RosAndroid", "Address: " + inetAddress.getHostAddress().toString());
-          // IPv4 only for now
-          if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
-            if (address == null)
-              address = inetAddress.getHostAddress().toString();
-          }
-        }
-      }
-      if (address != null)
-        return address;
-    } catch (SocketException ex) {
-      Log.i("RosAndroid", "SocketException: " + ex.getMessage());
-    }
-    throw new RuntimeException("No non-loopback interface.");
-  }
-
   @SuppressWarnings("unchecked")
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -93,7 +62,7 @@ public class MainActivity extends Activity {
       // TODO(damonkohler): The master needs to be set via some sort of
       // configuration builder.
       String uri = "__master:=http://10.68.0.1:11311";
-      String ip = "__ip:=" + getNonLoopbackHostName();
+      String ip = "__ip:=" + InetAddressFactory.createNonLoopback().getHostAddress();
       orientationPublisher =
           new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE));
       nodeRunner.run(orientationPublisher, Lists.newArrayList("Orientation", uri, ip));
@@ -101,16 +70,6 @@ public class MainActivity extends Activity {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  @Override
-  public boolean onTouchEvent(MotionEvent event) {
-    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-      orientationPublisher.setEnabled(true);
-    } else if (event.getAction() == MotionEvent.ACTION_UP) {
-      orientationPublisher.setEnabled(false);
-    }
-    return true;
   }
 
 }

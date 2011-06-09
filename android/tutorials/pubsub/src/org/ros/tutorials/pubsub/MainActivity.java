@@ -16,15 +16,14 @@
 
 package org.ros.tutorials.pubsub;
 
+import android.app.Activity;
+import android.os.Bundle;
+
+import org.ros.NodeConfiguration;
 import org.ros.NodeRunner;
 import org.ros.RosCore;
 import org.ros.rosjava.android.MessageCallable;
 import org.ros.rosjava.android.views.RosTextView;
-
-import android.app.Activity;
-import android.os.Bundle;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -32,25 +31,22 @@ import com.google.common.collect.Lists;
 public class MainActivity extends Activity {
 
   private final NodeRunner nodeRunner;
+  
+  private RosCore rosCore;
+  private RosTextView<org.ros.message.std_msgs.String> rosTextView;
+  private Talker talker;
 
   public MainActivity() {
     super();
     nodeRunner = NodeRunner.createDefault();
   }
   
-  @Override
-  protected void onPause() {
-    super.onPause();
-    finish();
-  }
-
   @SuppressWarnings("unchecked")
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    RosTextView<org.ros.message.std_msgs.String> rosTextView =
-        (RosTextView<org.ros.message.std_msgs.String>) findViewById(R.id.text);
+    rosTextView = (RosTextView<org.ros.message.std_msgs.String>) findViewById(R.id.text);
     rosTextView.setTopicName("/chatter");
     rosTextView.setMessageClass(org.ros.message.std_msgs.String.class);
     rosTextView
@@ -60,15 +56,28 @@ public class MainActivity extends Activity {
             return message.data;
           }
         });
+  }
+  
+  @Override
+  protected void onPause() {
+    super.onPause();
+    talker.shutdown();
+    rosTextView.shutdown();
+    rosCore.shutdown();
+  }
+  
+  @Override
+  protected void onResume() {
+    super.onResume();
     try {
-      RosCore rosCore = new RosCore(11311);
-      nodeRunner.run(rosCore, Lists.newArrayList("RosCore", "__master:=foo"));
+      rosCore = RosCore.createPublic(11311);
+      NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
+      nodeRunner.run(rosCore, nodeConfiguration);
       rosCore.awaitStart();
-      // TODO(damonkohler): The master needs to be set via some sort of
-      // NodeConfiguration builder.
-      String uri = "__master:=" + rosCore.getUri().toString();
-      nodeRunner.run(new Talker(), Lists.newArrayList("Talker", uri));
-      nodeRunner.run(rosTextView, Lists.newArrayList("Listener", uri));
+      nodeConfiguration.setMasterUri(rosCore.getUri());
+      talker = new Talker();
+      nodeRunner.run(talker, nodeConfiguration);
+      nodeRunner.run(rosTextView, nodeConfiguration);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

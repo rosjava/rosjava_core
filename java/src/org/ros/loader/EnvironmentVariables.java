@@ -13,22 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.internal.loader;
+
+package org.ros.loader;
 
 /**
- * Remapping keys used to override ROS environment and other configuration
- * settings from a command-line-based executation of a node. As of ROS 1.4, only
- * {@code CommandLine.NODE_NAME} and {@code CommandLine.ROS_NAMESPACE} are
- * required.
+ * ROS environment variables.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public interface CommandLine {
+public interface EnvironmentVariables {
 
-  public static String ROS_NAMESPACE = "__ns";
-  public static String ROS_IP = "__ip";
-  public static String ROS_MASTER_URI = "__master";
-  public static String TCPROS_PORT = "__tcpros_server_port";
-  public static String NODE_NAME = "__name";
+  public static String ROS_MASTER_URI = "ROS_MASTER_URI";
+  public static String ROS_IP = "ROS_IP";
+  public static String ROS_HOSTNAME = "ROS_HOSTNAME";
+  public static String ROS_NAMESPACE = "ROS_NAMESPACE";
+  public static String ROS_ROOT = "ROS_ROOT";
+  public static String ROS_PACKAGE_PATH = "ROS_PACKAGE_PATH";
 
 }

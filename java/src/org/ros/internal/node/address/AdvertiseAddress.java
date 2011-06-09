@@ -17,7 +17,6 @@
 package org.ros.internal.node.address;
 
 import com.google.common.base.Preconditions;
-import com.google.common.net.InetAddresses;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -36,14 +35,14 @@ import java.util.concurrent.Callable;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class AdvertiseAddress implements Address {
+public class AdvertiseAddress {
 
   private final String host;
 
   private Callable<Integer> portCallable;
 
   public static AdvertiseAddress createPrivate() {
-    return new AdvertiseAddress(LOOPBACK);
+    return new AdvertiseAddress(Address.LOOPBACK);
   }
 
   /**
@@ -94,14 +93,7 @@ public class AdvertiseAddress implements Address {
   public InetSocketAddress toInetSocketAddress() {
     Preconditions.checkNotNull(portCallable);
     try {
-      // NOTE(damonkohler): This fancy footwork ensures that if an IP address
-      // string is specified for the host we use that in place of a host name.
-      InetAddress address;
-      if (InetAddresses.isInetAddress(host)) {
-        address = InetAddress.getByAddress(host, InetAddresses.forString(host).getAddress());
-      } else {
-        address = InetAddress.getByName(host);
-      }
+      InetAddress address = InetAddressFactory.createFromHostString(host);
       return new InetSocketAddress(address, portCallable.call());
     } catch (Exception e) {
       throw new RuntimeException(e);

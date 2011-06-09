@@ -25,8 +25,8 @@ import java.net.InetSocketAddress;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class BindAddress implements Address {
-  
+public class BindAddress {
+
   private final InetSocketAddress address;
 
   public BindAddress(InetSocketAddress address) {
@@ -48,7 +48,7 @@ public class BindAddress implements Address {
    *         to the loopback interface on the host
    */
   public static BindAddress createPrivate(int port) {
-    return new BindAddress(new InetSocketAddress(LOOPBACK, port));
+    return new BindAddress(new InetSocketAddress(InetAddressFactory.createLoopback(), port));
   }
 
   @Override

@@ -32,6 +32,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public class MasterChooser extends Activity {
 
+  @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     AlertDialog.Builder builder = new AlertDialog.Builder(this);

@@ -36,12 +36,13 @@ import java.util.Map;
  */
 public class ParameterServerTestNode implements NodeMain {
 
+  private Node node;
+
   @SuppressWarnings("rawtypes")
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
     try {
-      // Node is only used to publish results.
-      final Node node = new Node("param_client", nodeConfiguration);
+      node = new Node("param_client", nodeConfiguration);
 
       Publisher<org.ros.message.std_msgs.String> pub_tilde =
           node.createPublisher("tilde", org.ros.message.std_msgs.String.class);
@@ -126,6 +127,11 @@ public class ParameterServerTestNode implements NodeMain {
     } catch (RemoteException e) {
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public void shutdown() {
+    node.shutdown();
   }
 
 }

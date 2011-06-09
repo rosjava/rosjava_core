@@ -16,10 +16,6 @@
 
 package org.ros.android.camera;
 
-import com.google.common.collect.Lists;
-
-import org.ros.RosCore;
-
 import android.app.Activity;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -27,7 +23,11 @@ import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
+
+import org.ros.NodeConfiguration;
 import org.ros.NodeRunner;
+import org.ros.RosCore;
+import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.rosjava.android.views.RosCameraPreviewView;
 
 /**
@@ -38,8 +38,9 @@ public class MainActivity extends Activity {
 
   private final NodeRunner nodeRunner;
 
-  private RosCameraPreviewView preview;
   private int cameraId;
+  private RosCameraPreviewView preview;
+  private RosCore rosCore;
 
   public MainActivity() {
     nodeRunner = NodeRunner.createDefault();
@@ -52,17 +53,6 @@ public class MainActivity extends Activity {
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     preview = new RosCameraPreviewView(this);
     setContentView(preview);
-    try {
-      RosCore rosCore = new RosCore(11311);
-      nodeRunner.run(rosCore, Lists.newArrayList("RosCore", "__master:=foo"));
-      rosCore.awaitStart();
-      // TODO(damonkohler): The master needs to be set via some sort of
-      // NodeConfiguration builder.
-      nodeRunner.run(preview,
-          Lists.newArrayList("Camera", "__ip:=192.168.1.112", "__master:=http://192.168.1.112:11311/"));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override
@@ -70,6 +60,18 @@ public class MainActivity extends Activity {
     super.onResume();
     cameraId = 0;
     preview.setCamera(Camera.open(cameraId));
+    try {
+      NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
+      String host = InetAddressFactory.createNonLoopback().getHostAddress();
+      nodeConfiguration.setHost(host);
+      rosCore = RosCore.createPublic(host, 11311);
+      nodeRunner.run(rosCore, nodeConfiguration);
+      rosCore.awaitStart();
+      nodeConfiguration.setMasterUri(rosCore.getUri());
+      nodeRunner.run(preview, nodeConfiguration);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
@@ -99,6 +101,8 @@ public class MainActivity extends Activity {
   protected void onPause() {
     super.onPause();
     preview.releaseCamera();
+    preview.shutdown();
+    rosCore.shutdown();
   }
 
 }

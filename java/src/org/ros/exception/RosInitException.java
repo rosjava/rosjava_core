@@ -13,18 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.exception;
 
+package org.ros.exception;
 
 /**
  * Exception for errors initializing ROS state, inspired by rospy
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
 public class RosInitException extends RosException {
-
-
-  private static final long serialVersionUID = 1L;
-
 
   /**
    * @param exception

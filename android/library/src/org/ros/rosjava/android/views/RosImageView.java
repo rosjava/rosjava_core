@@ -85,9 +85,11 @@ public class RosImageView<T> extends ImageView implements NodeMain {
     }, messageClass);
   }
 
-  public void stop() {
+  @Override
+  public void shutdown() {
     Preconditions.checkNotNull(node);
-    node.stop();
+    node.shutdown();
+    node = null;
   }
 
 }

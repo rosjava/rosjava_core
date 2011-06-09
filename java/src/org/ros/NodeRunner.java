@@ -17,6 +17,7 @@
 package org.ros;
 
 import org.ros.exception.RosInitException;
+import org.ros.loader.CommandLineLoader;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -52,5 +53,18 @@ public class NodeRunner {
       }
     });
   }
-  
+
+  public void run(final NodeMain node, final NodeConfiguration nodeConfiguration) {
+    executor.execute(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          node.main(nodeConfiguration);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
+  }
+
 }

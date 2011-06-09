@@ -17,9 +17,10 @@
 package org.ros;
 
 /**
- * Defines a {@link Node} entry point.
+ * Defines a {@link Node} entry point and shutdown routine.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public interface NodeMain {
 
@@ -30,5 +31,10 @@ public interface NodeMain {
    *        {@link Node}
    */
   void main(NodeConfiguration nodeConfiguration) throws Exception;
-
+  
+  /**
+   * {@link Node} shutdown routine.
+   */
+  void shutdown();
+  
 }

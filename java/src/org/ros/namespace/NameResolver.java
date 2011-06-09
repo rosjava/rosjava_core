@@ -34,15 +34,15 @@ public class NameResolver {
   private final String namespace;
   private final Map<GraphName, GraphName> remappings;
 
+  public static NameResolver createDefault() {
+    return new NameResolver(Namespace.GLOBAL, Maps.<GraphName, GraphName>newHashMap());
+  }
+
   public NameResolver(String namespace, Map<GraphName, GraphName> remappings) {
     this.remappings = Collections.unmodifiableMap(remappings);
     this.namespace = GraphName.canonicalizeName(namespace);
   }
 
-  public static NameResolver createDefault() {
-    return new NameResolver(Namespace.GLOBAL, Maps.<GraphName, GraphName>newHashMap());
-  }
-  
   public String getNamespace() {
     return namespace;
   }

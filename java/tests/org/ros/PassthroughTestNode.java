@@ -26,9 +26,11 @@ import org.ros.exception.RosInitException;
  */
 public class PassthroughTestNode implements NodeMain {
 
+  private Node node;
+
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
-    final Node node = new Node("test_node", nodeConfiguration);
+    node = new Node("test_node", nodeConfiguration);
 
     // The goal of the passthrough node is simply to retransmit the messages
     // sent to it. This allows us to external verify that the node is compatible
@@ -83,6 +85,11 @@ public class PassthroughTestNode implements NodeMain {
           }
         };
     node.createSubscriber("composite_in", composite_cb, org.ros.message.test_ros.Composite.class);
+  }
+
+  @Override
+  public void shutdown() {
+    node.shutdown();
   }
 
 }

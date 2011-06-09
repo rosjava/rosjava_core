@@ -16,22 +16,17 @@
 
 package org.ros.tutorials.orientation_publisher;
 
-import com.google.common.collect.Lists;
-
 import android.app.Activity;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.util.Log;
+
+import org.ros.NodeConfiguration;
 import org.ros.NodeRunner;
+import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.rosjava.android.MessageCallable;
 import org.ros.rosjava.android.OrientationPublisher;
 import org.ros.rosjava.android.tutorials.orientation_publisher.R;
 import org.ros.rosjava.android.views.RosTextView;
-
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -39,6 +34,7 @@ import java.util.Enumeration;
 public class MainActivity extends Activity {
 
   private final NodeRunner nodeRunner;
+  private OrientationPublisher publisher;
 
   public MainActivity() {
     super();
@@ -48,34 +44,6 @@ public class MainActivity extends Activity {
   @Override
   protected void onPause() {
     super.onPause();
-    finish();
-  }
-
-  // TODO(damonkohler): Pull this out some place.s
-  private static String getNonLoopbackHostName() {
-    try {
-      String address = null;
-      for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
-          .hasMoreElements();) {
-        NetworkInterface intf = en.nextElement();
-        Log.i("RosAndroid", "Interface: " + intf.getName());
-        for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr
-            .hasMoreElements();) {
-          InetAddress inetAddress = enumIpAddr.nextElement();
-          Log.i("RosAndroid", "Address: " + inetAddress.getHostAddress().toString());
-          // IPv4 only for now
-          if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
-            if (address == null)
-              address = inetAddress.getHostAddress().toString();
-          }
-        }
-      }
-      if (address != null)
-        return address;
-    } catch (SocketException ex) {
-      Log.i("RosAndroid", "SocketException: " + ex.getMessage());
-    }
-    return null;
   }
 
   @SuppressWarnings("unchecked")
@@ -96,12 +64,11 @@ public class MainActivity extends Activity {
           }
         });
     try {
-      // TODO(damonkohler): The master needs to be set via some sort of
-      // configuration builder.
-      String uri = "__master:=http://10.68.0.1:11311";
-      nodeRunner.run(new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE)),
-          Lists.newArrayList("Orientation", uri, "__ip:=" + getNonLoopbackHostName()));
-      nodeRunner.run(rosTextView, Lists.newArrayList("Text", uri));
+      NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
+      nodeConfiguration.setHost(InetAddressFactory.createNonLoopback().getHostAddress());
+      publisher = new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE));
+      nodeRunner.run(publisher, nodeConfiguration);
+      nodeRunner.run(rosTextView, nodeConfiguration);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
+import org.ros.loader.CommandLineLoader;
 
 /**
  * This is a rosrun-compatible loader for rosjava-based nodes.
