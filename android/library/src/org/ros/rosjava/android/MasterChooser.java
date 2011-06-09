@@ -16,15 +16,17 @@
 
 package org.ros.rosjava.android;
 
-import com.google.common.net.InetAddresses;
-
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
-import java.util.concurrent.CountDownLatch;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -35,27 +37,35 @@ public class MasterChooser extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-    builder.setTitle("IP Address");
-    final EditText input = new EditText(this);
-    builder.setView(input);
-    final CountDownLatch latch = new CountDownLatch(1);
-    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+    setContentView(R.layout.master_chooser);
+
+    final EditText uriText = (EditText) findViewById(R.id.master_chooser_uri);
+    final Button okButton = (Button) findViewById(R.id.master_chooser_ok);
+    final Button cancelButton = (Button) findViewById(R.id.master_chooser_cancel);
+
+    okButton.setOnClickListener(new OnClickListener() {
       @Override
-      public void onClick(DialogInterface dialog, int which) {
-        setResult(RESULT_CANCELED);
-      }
-    });
-    builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-      @Override
-      public void onClick(DialogInterface dialog, int which) {
-        String value = input.getText().toString();
-        if (InetAddresses.isInetAddress(value)) {
-          setResult(RESULT_OK, null);
+      public void onClick(View v) {
+        Intent intent = new Intent();
+        URI uri;
+        try {
+          uri = new URI(uriText.getText().toString());
+          intent.putExtra("ROS_MASTER_URI", uri);
+          setResult(RESULT_OK, intent);
+          finish();
+        } catch (URISyntaxException e) {
+          Toast.makeText(MasterChooser.this, "Invalid URI", Toast.LENGTH_SHORT).show();
         }
       }
     });
-    builder.show();
+    
+    cancelButton.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        setResult(RESULT_CANCELED);
+        finish();
+      }
+    });
   }
 
 }

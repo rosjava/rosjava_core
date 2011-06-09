@@ -93,9 +93,10 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
   
   @Override
   public void shutdown() {
-    Preconditions.checkNotNull(node);
-    node.shutdown();
-    node = null;
+    if (node != null) {
+      node.shutdown();
+      node = null;
+    }
   }
 
 }
