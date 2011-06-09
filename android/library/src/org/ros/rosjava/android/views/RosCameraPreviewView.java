@@ -22,6 +22,7 @@ import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.util.AttributeSet;
+
 import org.ros.Node;
 import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
@@ -29,7 +30,6 @@ import org.ros.Publisher;
 import org.ros.message.Time;
 import org.ros.message.sensor_msgs.CameraInfo;
 import org.ros.message.sensor_msgs.CompressedImage;
-import org.ros.message.sensor_msgs.Image;
 import org.ros.namespace.NameResolver;
 
 /**

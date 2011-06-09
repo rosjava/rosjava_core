@@ -18,10 +18,9 @@ package org.ros.rosjava.android.views;
 
 import com.google.common.base.Preconditions;
 
-import android.graphics.Rect;
-
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
@@ -34,7 +33,6 @@ import android.view.ViewGroup;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
