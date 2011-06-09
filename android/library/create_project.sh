@@ -1,1 +1,1 @@
-android update lib-project --target 11 --path .
+android update lib-project --target "android-9" --path .
