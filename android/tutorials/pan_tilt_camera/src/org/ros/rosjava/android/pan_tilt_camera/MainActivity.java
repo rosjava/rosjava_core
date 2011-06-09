@@ -16,12 +16,11 @@
 
 package org.ros.rosjava.android.pan_tilt_camera;
 
-import com.google.common.collect.Lists;
-
 import android.app.Activity;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
+import org.ros.NodeConfiguration;
 import org.ros.NodeRunner;
 import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.message.sensor_msgs.CompressedImage;
@@ -36,6 +35,7 @@ public class MainActivity extends Activity {
 
   private final NodeRunner nodeRunner;
 
+  private RosImageView<CompressedImage> image;
   private OrientationPublisher orientationPublisher;
 
   public MainActivity() {
@@ -43,33 +43,37 @@ public class MainActivity extends Activity {
     nodeRunner = NodeRunner.createDefault();
   }
 
-  @Override
-  protected void onPause() {
-    super.onPause();
-    android.os.Process.killProcess(android.os.Process.myPid());
-  }
-
   @SuppressWarnings("unchecked")
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    RosImageView<CompressedImage> image = (RosImageView<CompressedImage>) findViewById(R.id.image);
+    image = (RosImageView<CompressedImage>) findViewById(R.id.image);
     image.setTopicName("/slow_image");
     image.setMessageClass(org.ros.message.sensor_msgs.CompressedImage.class);
     image.setMessageToBitmapCallable(new BitmapFromCompressedImage());
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
     try {
-      // TODO(damonkohler): The master needs to be set via some sort of
-      // configuration builder.
-      String uri = "__master:=http://10.68.0.1:11311";
-      String ip = "__ip:=" + InetAddressFactory.createNonLoopback().getHostAddress();
+      NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
+      nodeConfiguration.setHost(InetAddressFactory.createNonLoopback().getHostAddress());
       orientationPublisher =
           new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE));
-      nodeRunner.run(orientationPublisher, Lists.newArrayList("Orientation", uri, ip));
-      nodeRunner.run(image, Lists.newArrayList("Compressed", uri, ip));
+      nodeRunner.run(orientationPublisher, nodeConfiguration);
+      nodeRunner.run(image, nodeConfiguration);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    image.shutdown();
+    orientationPublisher.shutdown();
   }
 
 }

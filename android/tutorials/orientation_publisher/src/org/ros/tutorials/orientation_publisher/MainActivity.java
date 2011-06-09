@@ -35,15 +35,11 @@ public class MainActivity extends Activity {
 
   private final NodeRunner nodeRunner;
   private OrientationPublisher publisher;
+  private RosTextView<org.ros.message.geometry_msgs.PoseStamped> rosTextView;
 
   public MainActivity() {
     super();
     nodeRunner = NodeRunner.createDefault();
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
   }
 
   @SuppressWarnings("unchecked")
@@ -51,8 +47,7 @@ public class MainActivity extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    RosTextView<org.ros.message.geometry_msgs.PoseStamped> rosTextView =
-        (RosTextView<org.ros.message.geometry_msgs.PoseStamped>) findViewById(R.id.text);
+    rosTextView = (RosTextView<org.ros.message.geometry_msgs.PoseStamped>) findViewById(R.id.text);
     rosTextView.setTopicName("/android/orientation");
     rosTextView.setMessageClass(org.ros.message.geometry_msgs.PoseStamped.class);
     rosTextView
@@ -63,15 +58,27 @@ public class MainActivity extends Activity {
                 + "\nz: " + message.pose.orientation.z + "\nw: " + message.pose.orientation.w;
           }
         });
+    publisher = new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE));
+  }
+  
+  @Override
+  protected void onResume() {
+    super.onResume();
     try {
       NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
       nodeConfiguration.setHost(InetAddressFactory.createNonLoopback().getHostAddress());
-      publisher = new OrientationPublisher((SensorManager) getSystemService(SENSOR_SERVICE));
       nodeRunner.run(publisher, nodeConfiguration);
       nodeRunner.run(rosTextView, nodeConfiguration);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    publisher.shutdown();
+    rosTextView.shutdown();
   }
 
 }
