@@ -70,7 +70,7 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   public void main(NodeConfiguration nodeConfiguration) throws Exception {
     Preconditions.checkState(node == null);
     // TODO(damonkohler): This node name needs to be unique.
-    node = new Node("/imageview", nodeConfiguration);
+    node = new Node("/android_image_view", nodeConfiguration);
     node.createSubscriber(topicName, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {

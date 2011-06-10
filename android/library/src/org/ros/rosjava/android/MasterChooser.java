@@ -25,6 +25,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.ros.NodeConfiguration;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -47,9 +49,11 @@ public class MasterChooser extends Activity {
       @Override
       public void onClick(View v) {
         Intent intent = new Intent();
-        URI uri;
         try {
-          uri = new URI(uriText.getText().toString());
+          URI uri = new URI(uriText.getText().toString());
+          if (uri.toString().length() == 0) {
+            uri = NodeConfiguration.DEFAULT_MASTER_URI;
+          }
           intent.putExtra("ROS_MASTER_URI", uri);
           setResult(RESULT_OK, intent);
           finish();
@@ -58,7 +62,7 @@ public class MasterChooser extends Activity {
         }
       }
     });
-    
+
     cancelButton.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {

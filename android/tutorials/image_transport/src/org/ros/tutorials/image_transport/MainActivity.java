@@ -17,6 +17,7 @@
 package org.ros.tutorials.image_transport;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 import org.ros.NodeConfiguration;
@@ -24,7 +25,11 @@ import org.ros.NodeRunner;
 import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.message.sensor_msgs.CompressedImage;
 import org.ros.rosjava.android.BitmapFromCompressedImage;
+import org.ros.rosjava.android.MasterChooser;
 import org.ros.rosjava.android.views.RosImageView;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -33,6 +38,8 @@ import org.ros.rosjava.android.views.RosImageView;
 public class MainActivity extends Activity {
 
   private final NodeRunner nodeRunner;
+  
+  private URI masterUri;
   private RosImageView<CompressedImage> image;
 
   public MainActivity() {
@@ -46,23 +53,40 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
     image = (RosImageView<CompressedImage>) findViewById(R.id.image);
-    image.setTopicName("/camera/image_raw");
+    image.setTopicName("/usb_cam/image_raw/compressed");
     image.setMessageClass(org.ros.message.sensor_msgs.CompressedImage.class);
     image.setMessageToBitmapCallable(new BitmapFromCompressedImage());
+    startActivityForResult(new Intent(this, MasterChooser.class), 0);
   }
 
   @Override
   protected void onResume() {
     super.onResume();
-    NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
-    nodeConfiguration.setHost(InetAddressFactory.createNonLoopback().getHostAddress());
-    nodeRunner.run(image, nodeConfiguration);
+    if (masterUri != null) {
+      NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
+      nodeConfiguration.setMasterUri(masterUri);
+      nodeConfiguration.setHost(InetAddressFactory.createNonLoopback().getHostAddress());
+      nodeRunner.run(image, nodeConfiguration);
+    }
   }
 
   @Override
   protected void onPause() {
     super.onPause();
-    image.shutdown();
+    if (masterUri != null) {
+      image.shutdown();
+    }
   }
+  
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == 0 && resultCode == RESULT_OK) {
+      try {
+        masterUri = new URI(data.getStringExtra("ROS_MASTER_URI"));
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  } 
 
 }

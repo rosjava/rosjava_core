@@ -78,9 +78,35 @@ public class SlaveImplTest {
             Matchers.eq(Sets.newHashSet(ProtocolNames.TCPROS, ProtocolNames.UDPROS)))).thenReturn(
         protocol);
     SlaveImpl slave = new SlaveImpl(mockSlave);
-    Object[][] protocols = new Object[][] { { ProtocolNames.TCPROS }, { ProtocolNames.UDPROS } };
+    Object[][] protocols = new Object[][] { {ProtocolNames.TCPROS}, {ProtocolNames.UDPROS}};
     List<Object> response = slave.requestTopic("/foo", "/bar", protocols);
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
     assertEquals(response.get(2), protocol.toList());
   }
+
+  @Test
+  public void testGetPid() {
+    SlaveServer mockSlave = mock(SlaveServer.class);
+    AdvertiseAddress address = AdvertiseAddress.createPrivate();
+    address.setStaticPort(1234);
+    TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(address);
+    when(mockSlave.getPid()).thenReturn(1234);
+    SlaveImpl slave = new SlaveImpl(mockSlave);
+    List<Object> response = slave.getPid("/foo");
+    assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
+    assertEquals(response.get(2), 1234);
+  }
+
+  @Test
+  public void testGetPidNotSupported() {
+    SlaveServer mockSlave = mock(SlaveServer.class);
+    AdvertiseAddress address = AdvertiseAddress.createPrivate();
+    address.setStaticPort(1234);
+    TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(address);
+    when(mockSlave.getPid()).thenThrow(new UnsupportedOperationException());
+    SlaveImpl slave = new SlaveImpl(mockSlave);
+    List<Object> response = slave.getPid("/foo");
+    assertEquals(response.get(0), StatusCode.FAILURE.toInt());
+  }
+
 }

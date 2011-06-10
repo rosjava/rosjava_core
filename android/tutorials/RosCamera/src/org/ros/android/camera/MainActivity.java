@@ -17,7 +17,6 @@
 package org.ros.android.camera;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -29,7 +28,6 @@ import org.ros.NodeConfiguration;
 import org.ros.NodeRunner;
 import org.ros.RosCore;
 import org.ros.internal.node.address.InetAddressFactory;
-import org.ros.rosjava.android.MasterChooser;
 import org.ros.rosjava.android.views.RosCameraPreviewView;
 
 /**
@@ -55,7 +53,6 @@ public class MainActivity extends Activity {
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     preview = new RosCameraPreviewView(this);
     setContentView(preview);
-    startActivityForResult(new Intent(this, MasterChooser.class), 0);
   }
 
   @Override
@@ -103,7 +100,6 @@ public class MainActivity extends Activity {
   @Override
   protected void onPause() {
     super.onPause();
-    preview.releaseCamera();
     preview.shutdown();
     rosCore.shutdown();
   }

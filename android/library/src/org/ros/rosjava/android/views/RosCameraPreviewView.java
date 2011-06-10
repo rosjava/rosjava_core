@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.Size;
 import android.util.AttributeSet;
 
 import org.ros.Node;
@@ -46,9 +47,9 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
     public void onPreviewFrame(byte[] data, Camera camera) {
       CompressedImage image = new CompressedImage();
       CameraInfo cameraInfo = new CameraInfo();
-      String frameId = "android_camera";
+      String frameId = "camera";
 
-      // TODO(ethan) right now serialization is deferred. When serialization
+      // TODO(ethan): Right now serialization is deferred. When serialization
       // happens inline, we won't need to copy.
       image.data = new byte[data.length];
       System.arraycopy(data, 0, image.data, 0, data.length);
@@ -61,9 +62,9 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
       cameraInfo.header.stamp = image.header.stamp;
       cameraInfo.header.frame_id = frameId;
       
-      // TODO(damonkohler): Get width and height correctly.
-      cameraInfo.width = 0;
-      cameraInfo.height = 0;
+      Size previewSize = camera.getParameters().getPreviewSize();
+      cameraInfo.width = previewSize.width;
+      cameraInfo.height = previewSize.height;
       cameraInfoPublisher.publish(cameraInfo);
     }
   }
@@ -97,6 +98,7 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
       node.shutdown();
       node = null;
     }
+    releaseCamera();
   }
 
 }

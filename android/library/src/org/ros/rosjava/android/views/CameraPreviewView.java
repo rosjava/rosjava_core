@@ -53,8 +53,15 @@ public class CameraPreviewView extends ViewGroup {
   private final class BufferingPreviewCallback implements PreviewCallback {
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
+      // TODO(damonkohler): There should be a way to avoid this case?
+      Size size;
+      try {
+        size = camera.getParameters().getPreviewSize();
+      } catch (RuntimeException e) {
+        // Camera not available.
+        return;
+      }
       // TODO(damonkohler): This is pretty awful and causing a lot of GC.
-      Size size = camera.getParameters().getPreviewSize();
       YuvImage image = new YuvImage(data, ImageFormat.NV21, size.width, size.height, null);
       ByteArrayOutputStream stream = new ByteArrayOutputStream(512);
       Preconditions.checkState(image.compressToJpeg(new Rect(0, 0, size.width, size.height), 80, stream));

@@ -77,8 +77,8 @@ public class SlaveImpl implements Slave {
 
   @Override
   public List<Object> getPid(String callerId) {
-    int pid = slave.getPid();
     try {
+      int pid = slave.getPid();
       return Response.createSuccess("PID: " + pid, pid).toList();
     } catch (UnsupportedOperationException e) {
       return Response.createFailure("Cannot retrieve PID on this platform.", -1).toList();
