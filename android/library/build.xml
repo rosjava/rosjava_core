@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="RosAndroid" default="help">
+<project name="." default="help">
 
 <!-- The local.properties file is created and updated by the 'android'
      tool.
@@ -75,13 +75,5 @@
              - customize to your needs.
     -->
     <setup />
-
-    <!-- see bug: http://code.google.com/p/android/issues/detail?id=13024 -->
-    <path id="android.libraries.src">
-      <path refid="project.libraries.src" />
-    </path>
-    <path id="android.libraries.jars">
-      <path refid="project.libraries.jars" />
-    </path>
 
 </project>
