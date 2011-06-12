@@ -16,72 +16,97 @@
 
 package org.ros.internal.node.address;
 
-import com.google.common.net.InetAddresses;
-
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import com.google.common.collect.Lists;
+import com.google.common.net.InetAddresses;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class InetAddressFactory {
 
+  private InetAddressFactory() {
+    // Utility class
+  }
+
+  private static boolean isIpv4(InetAddress address) {
+    return address.getAddress().length == 4;
+  }
+  
+  private static Collection<InetAddress> getAllInetAddresses() {
+    List<NetworkInterface> networkInterfaces;
+    try {
+      networkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+    } catch (SocketException e) {
+      throw new RuntimeException(e);
+    }
+    List<InetAddress> inetAddresses = Lists.newArrayList();
+    for (NetworkInterface networkInterface : networkInterfaces) {
+      inetAddresses.addAll(Collections.list(networkInterface.getInetAddresses()));
+    }
+    return inetAddresses;
+  }
+
+  public static InetAddress createNonLoopback() {
+    for (InetAddress address : getAllInetAddresses()) {
+      // IPv4 only for now.
+      if (!address.isLoopbackAddress() && isIpv4(address)) {
+        return address;
+      }
+    }
+    throw new RuntimeException("No non-loopback interface found.");
+  }
+
   /**
-   * Ensures that if an IP address string is specified for the host we use that
-   * in place of a host name.
+   * Creates an {@link InetAddress} with both an IP and a host set so that no
+   * further resolving will take place.
+   * 
+   * If an IP address string is specified, this method ensures that it will be
+   * used in place of a host name.
+   * 
+   * If a host name other than {@code Address.LOCALHOST} is specified, this
+   * method ensures that a non-loopback IP associated with the supplied host
+   * name will be used.
+   * 
+   * If the specified host name is {@code Address.LOCALHOST}, this method
+   * returns a loopback address.
    * 
    * @param host
    * @return an {@link InetAddress} with both an IP and a host set (no further
    *         resolving will take place)
    */
   public static InetAddress createFromHostString(String host) {
-    InetAddress address;
     try {
       if (InetAddresses.isInetAddress(host)) {
-        address = InetAddress.getByAddress(host, InetAddresses.forString(host).getAddress());
-      } else {
-        address = InetAddress.getByName(host);
+        return InetAddress.getByAddress(host, InetAddresses.forString(host).getAddress());
+      }
+      if (host.equals(Address.LOCALHOST)) {
+        return InetAddress.getByAddress(Address.LOCALHOST, InetAddresses
+            .forString(Address.LOOPBACK).getAddress());
+      }
+      InetAddress[] allAddressesByName = org.xbill.DNS.Address.getAllByName(host);
+      for (int i = 0; i < allAddressesByName.length; i++) {
+        InetAddress address = allAddressesByName[i];
+        // IPv4 only for now.
+        if (!address.isLoopbackAddress() && isIpv4(address)) {
+          return address;
+        }
       }
     } catch (UnknownHostException e) {
       throw new RuntimeException(e);
     }
-    return address;
+    throw new RuntimeException();
   }
 
   public static InetAddress createLoopback() {
     return createFromHostString(Address.LOOPBACK);
-  }
-
-  public static InetAddress createNonLoopback() {
-    try {
-      String address = null;
-      Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-      for (Enumeration<NetworkInterface> e = networkInterfaces; e.hasMoreElements();) {
-        NetworkInterface networkInterface = e.nextElement();
-        Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
-        for (Enumeration<InetAddress> eAddresses = inetAddresses; eAddresses.hasMoreElements();) {
-          InetAddress inetAddress = eAddresses.nextElement();
-          // IPv4 only for now.
-          if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
-            return inetAddress;
-          }
-        }
-      }
-    } catch (SocketException e) {
-      throw new RuntimeException(e);
-    }
-    throw new RuntimeException("No non-loopback interface found.");
-  }
-  
-  public static InetAddress copyHostAddressToHostName(InetAddress address) {
-    return createFromHostString(address.getHostAddress());
-  }
-
-  private InetAddressFactory() {
-    // Utility class
   }
 
 }

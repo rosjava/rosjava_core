@@ -25,6 +25,7 @@ import org.ros.internal.node.address.Address;
 import org.ros.internal.node.address.InetAddressFactory;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -46,8 +47,8 @@ public class AddressTest {
   }
   
   @Test
-  public void testPublicHost() {
-    String host = "foo";
+  public void testPublicHost() throws UnknownHostException {
+    String host = InetAddress.getLocalHost().getCanonicalHostName();
     InetAddress publicHost = InetAddressFactory.createFromHostString(host);
     assertEquals(host, publicHost.getHostName());
     assertFalse(publicHost.isLoopbackAddress());

@@ -84,17 +84,6 @@ public class NodeTest {
 
   @Test
   public void testCreatePublic() throws Exception {
-    String host = "foo";
-    Node node =
-        Node.createPublic(new GraphName("/node_name"), masterServer.getUri(), host, 0, 0);
-    InetSocketAddress nodeAddress = node.getAddress();
-    assertTrue(nodeAddress.getPort() > 0);
-    assertEquals(nodeAddress.getHostName(), host);
-    node.shutdown();
-  }
-
-  @Test
-  public void testCreatePublicResolves() throws Exception {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     assertFalse(InetAddresses.isInetAddress(host));
     Node node =
@@ -102,7 +91,6 @@ public class NodeTest {
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
-    assertEquals(nodeAddress.getAddress(), InetAddress.getByName(host));
     node.shutdown();
   }
 
