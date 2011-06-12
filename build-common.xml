@@ -10,9 +10,9 @@
   <property name="javac-target" value="1.6" />
   <property name="debuglevel" value="source,lines,vars" />
 
-  <target name="default" depends="dist" />
+  <target name="default" depends="init, compile, jar" />
 
-  <target name="dist.dependencies">
+  <target name="dist">
     <antcall target="depend.${ant.project.name}"/>
   </target>
 
@@ -30,8 +30,6 @@
   <target name="jar">
     <echo message="No JAR to buid for ${ant.project.name}." />
   </target>
-
-  <target name="dist" depends="init, compile, jar" />
 
   <target name="clean">
     <delete dir="${build}" />

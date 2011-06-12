@@ -4,8 +4,8 @@
 
   <target name="compile">
     <subant target="compile">
-      <property name="external.libs.dir" location="../java/lib" />
-      <property name="jar.libs.dir" location="../java/lib" />
+      <property name="external.libs.dir" location="../rosjava/lib" />
+      <property name="jar.libs.dir" location="../rosjava/lib" />
       <dirset dir=".">
         <include name="library" />
         <include name="tutorials/*" />

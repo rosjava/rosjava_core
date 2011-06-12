@@ -5,15 +5,15 @@
   <target name="depend.all" depends="depend.java, depend.android" />
 
   <target name="depend.ws-commons-util">
-    <ant dir="${dependencies.basedir}/java/ws-commons-util-1.0.2-src" inheritAll="false" />
+    <ant dir="${dependencies.basedir}/rosjava/ws-commons-util-1.0.2-src" inheritAll="false" />
   </target>
 
   <target name="depend.apache-xmlrpc" depends="depend.ws-commons-util">
-    <ant dir="${dependencies.basedir}/java/apache-xmlrpc-3.1.3-src" inheritAll="false" />
+    <ant dir="${dependencies.basedir}/rosjava/apache-xmlrpc-3.1.3-src" inheritAll="false" />
   </target>
 
   <target name="depend.java" depends="depend.apache-xmlrpc">
-    <ant dir="${dependencies.basedir}/java" inheritAll="false" />
+    <ant dir="${dependencies.basedir}/rosjava" inheritAll="false" />
   </target>
 
   <target name="depend.android" depends="depend.java">
