@@ -41,13 +41,23 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
   @Override
   public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
     if (DEBUG) {
-      log.info("New channel added: " + e.getChannel().toString());
+      log.info("Channel opened: " + e.getChannel().toString());
     }
     channelGroup.add(e.getChannel());
+  }
+  
+  @Override
+  public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+    if (DEBUG) {
+      log.info("Channel closed: " + e.getChannel().toString());
+    }
   }
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+    if (DEBUG) {
+      log.info("Channel exception: " + e.getChannel().toString());
+    }
     e.getChannel().close();
     throw new RuntimeException(e.getCause());
   }

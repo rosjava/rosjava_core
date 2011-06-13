@@ -83,14 +83,14 @@ public class TopicIntegrationTest {
       }
     });
 
-    publisher.awaitRegistration(100, TimeUnit.MILLISECONDS);
-    subscriber.awaitRegistration(100, TimeUnit.MILLISECONDS);
+    assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(subscriber.awaitRegistration(1, TimeUnit.SECONDS));
 
     RepeatingPublisher<org.ros.message.std_msgs.String> repeatingPublisher =
         new RepeatingPublisher<org.ros.message.std_msgs.String>(publisher, helloMessage, 1000);
     repeatingPublisher.start();
 
-    assertTrue(messageReceived.await(100, TimeUnit.MILLISECONDS));
+    assertTrue(messageReceived.await(1, TimeUnit.SECONDS));
 
     repeatingPublisher.cancel();
     publisher.shutdown();

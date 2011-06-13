@@ -16,42 +16,35 @@
 
 package org.ros.internal.transport.tcp;
 
-import static org.jboss.netty.channel.Channels.pipeline;
-
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
-import org.ros.internal.transport.ConnectionTrackingHandler;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TcpServerPipelineFactory implements ChannelPipelineFactory {
+public class TcpServerPipelineFactory extends ConnectionTrackingChannelPipelineFactory {
 
   public static final String LENGTH_FIELD_BASED_FRAME_DECODER = "LengthFieldBasedFrameDecoder";
   public static final String LENGTH_FIELD_PREPENDER = "LengthFieldPrepender";
   public static final String HANDSHAKE_HANDLER = "HandshakeHandler";
-  public static final String CONNECTION_TRACKING_HANDLER = "ConnectionTrackingHandler";
 
-  private final ConnectionTrackingHandler connectionTrackingHandler;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
 
   public TcpServerPipelineFactory(ChannelGroup channelGroup, TopicManager topicManager,
       ServiceManager serviceManager) {
-    this.connectionTrackingHandler = new ConnectionTrackingHandler(channelGroup);
+    super(channelGroup);
     this.topicManager = topicManager;
     this.serviceManager = serviceManager;
   }
 
   @Override
   public ChannelPipeline getPipeline() {
-    ChannelPipeline pipeline = pipeline();
-    pipeline.addLast(CONNECTION_TRACKING_HANDLER, connectionTrackingHandler);
+    ChannelPipeline pipeline = super.getPipeline();
     pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));
     pipeline.addLast(LENGTH_FIELD_BASED_FRAME_DECODER, new LengthFieldBasedFrameDecoder(
         Integer.MAX_VALUE, 0, 4, 0, 4));

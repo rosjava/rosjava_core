@@ -16,24 +16,26 @@
 
 package org.ros.internal.transport.tcp;
 
-import static org.jboss.netty.channel.Channels.pipeline;
-
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
+import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
 import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TcpClientPipelineFactory implements ChannelPipelineFactory {
-
+public class TcpClientPipelineFactory extends ConnectionTrackingChannelPipelineFactory {
+  
   public static final String LENGTH_FIELD_BASED_FRAME_DECODER = "LengthFieldBasedFrameDecoder";
   public static final String LENGTH_FIELD_PREPENDER = "LengthFieldPrepender";
+ 
+  public TcpClientPipelineFactory(ChannelGroup channelGroup) {
+    super(channelGroup);
+  }
 
-  @Override
+ @Override
   public ChannelPipeline getPipeline() {
-    ChannelPipeline pipeline = pipeline();
+    ChannelPipeline pipeline = super.getPipeline();
     pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));
     pipeline.addLast(LENGTH_FIELD_BASED_FRAME_DECODER, new LengthFieldBasedFrameDecoder(
         Integer.MAX_VALUE, 0, 4, 0, 4));

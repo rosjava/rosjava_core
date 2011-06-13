@@ -16,8 +16,7 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,14 +24,14 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -71,11 +70,6 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
     ChannelPipeline pipeline = channel.getPipeline();
     pipeline.remove(this);
     pipeline.addLast("MessageHandler", in.createChannelHandler());
-  }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-    throw new RuntimeException(e.getCause());
   }
 
 }

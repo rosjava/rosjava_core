@@ -27,6 +27,8 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.MessageDeserializer;
 import org.ros.MessageListener;
@@ -140,9 +142,8 @@ public class Subscriber<MessageType> extends Topic {
 
   public synchronized void addPublisher(PublisherDefinition publisherDefinition,
       InetSocketAddress address) {
-    // TODO(damonkohler): Release bootstrap resources on shutdown.
-    ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
-    TcpClientPipelineFactory factory = new TcpClientPipelineFactory() {
+    ChannelGroup clientChannelGroup = new DefaultChannelGroup();
+    TcpClientPipelineFactory factory = new TcpClientPipelineFactory(clientChannelGroup) {
       @Override
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();
@@ -151,6 +152,8 @@ public class Subscriber<MessageType> extends Topic {
         return pipeline;
       }
     };
+    // TODO(damonkohler): Release bootstrap resources on shutdown.
+    ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
     bootstrap.setPipelineFactory(factory);
     bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     // TODO(damonkohler): Add timeouts.

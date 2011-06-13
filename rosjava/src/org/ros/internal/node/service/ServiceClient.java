@@ -33,6 +33,8 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.MessageDeserializer;
 import org.ros.ServiceResponseListener;
@@ -57,8 +59,8 @@ public class ServiceClient<ResponseMessageType> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
 
-  final MessageDeserializer<ResponseMessageType> deserializer;
-  final Queue<ServiceResponseListener<ResponseMessageType>> responseListeners;
+  private final MessageDeserializer<ResponseMessageType> deserializer;
+  private final Queue<ServiceResponseListener<ResponseMessageType>> responseListeners;
   private final Map<String, String> header;
   private final ChannelFactory channelFactory;
   private final ClientBootstrap bootstrap;
@@ -103,7 +105,8 @@ public class ServiceClient<ResponseMessageType> {
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
     bootstrap = new ClientBootstrap(channelFactory);
-    TcpClientPipelineFactory factory = new TcpClientPipelineFactory() {
+    ChannelGroup clientChannelGroup = new DefaultChannelGroup();
+    TcpClientPipelineFactory factory = new TcpClientPipelineFactory(clientChannelGroup) {
       @Override
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();

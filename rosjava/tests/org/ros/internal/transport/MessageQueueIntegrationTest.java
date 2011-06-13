@@ -159,7 +159,8 @@ public class MessageQueueIntegrationTest {
     ClientBootstrap clientBootstrap = new ClientBootstrap(clientChannelFactory);
     clientBootstrap.setOption("bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-    TcpClientPipelineFactory clientPipelineFactory = new TcpClientPipelineFactory() {
+    ChannelGroup clientChannelGroup = new DefaultChannelGroup();
+    TcpClientPipelineFactory clientPipelineFactory = new TcpClientPipelineFactory(clientChannelGroup) {
       @Override
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();
@@ -172,7 +173,6 @@ public class MessageQueueIntegrationTest {
   }
 
   private Channel buildServerChannel() {
-    ChannelGroup serverChannelGroup = new DefaultChannelGroup();
     TopicManager topicManager = new TopicManager();
     ServiceManager serviceManager = new ServiceManager();
     NioServerSocketChannelFactory channelFactory =
@@ -181,6 +181,7 @@ public class MessageQueueIntegrationTest {
     ServerBootstrap bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    ChannelGroup serverChannelGroup = new DefaultChannelGroup();
     TcpServerPipelineFactory serverPipelineFactory =
         new TcpServerPipelineFactory(serverChannelGroup, topicManager, serviceManager) {
           @Override
