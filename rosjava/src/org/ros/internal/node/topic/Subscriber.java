@@ -17,6 +17,7 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
@@ -64,7 +65,9 @@ public class Subscriber<MessageType> extends Topic {
   private final ChannelFactory channelFactory;
   private final Set<PublisherDefinition> knownPublishers;
   private final SlaveIdentifier slaveIdentifier;
-
+  private final ChannelGroup channelGroup;
+  private final Collection<ClientBootstrap> bootstraps;
+  
   private final class MessageReadingThread extends Thread {
     @Override
     public void run() {
@@ -115,6 +118,8 @@ public class Subscriber<MessageType> extends Topic {
     channelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
+    channelGroup = new DefaultChannelGroup();
+    bootstraps = Lists.newArrayList();
     thread = new MessageReadingThread();
     thread.start();
   }
@@ -142,8 +147,7 @@ public class Subscriber<MessageType> extends Topic {
 
   public synchronized void addPublisher(PublisherDefinition publisherDefinition,
       InetSocketAddress address) {
-    ChannelGroup clientChannelGroup = new DefaultChannelGroup();
-    TcpClientPipelineFactory factory = new TcpClientPipelineFactory(clientChannelGroup) {
+    TcpClientPipelineFactory factory = new TcpClientPipelineFactory(channelGroup) {
       @Override
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();
@@ -152,10 +156,7 @@ public class Subscriber<MessageType> extends Topic {
         return pipeline;
       }
     };
-    // TODO(damonkohler): Release bootstrap resources on shutdown.
-    ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
-    bootstrap.setPipelineFactory(factory);
-    bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    ClientBootstrap bootstrap = createClientBootstrap(factory);
     // TODO(damonkohler): Add timeouts.
     ChannelFuture future = bootstrap.connect(address).awaitUninterruptibly();
     if (!future.isSuccess()) {
@@ -170,6 +171,14 @@ public class Subscriber<MessageType> extends Topic {
       log.info("Connected to: " + channel.getRemoteAddress());
     }
     knownPublishers.add(publisherDefinition);
+  }
+
+  private ClientBootstrap createClientBootstrap(TcpClientPipelineFactory factory) {
+    ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
+    bootstrap.setPipelineFactory(factory);
+    bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    bootstraps.add(bootstrap);
+    return bootstrap;
   }
 
   /**
@@ -195,6 +204,11 @@ public class Subscriber<MessageType> extends Topic {
 
   public void shutdown() {
     thread.cancel();
+    channelGroup.close().awaitUninterruptibly();
+    channelFactory.releaseExternalResources();
+    for (ClientBootstrap bootstrap : bootstraps) {
+      bootstrap.releaseExternalResources();
+    }
   }
 
   /**

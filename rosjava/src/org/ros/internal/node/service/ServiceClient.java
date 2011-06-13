@@ -64,12 +64,9 @@ public class ServiceClient<ResponseMessageType> {
   private final Map<String, String> header;
   private final ChannelFactory channelFactory;
   private final ClientBootstrap bootstrap;
+  private final ChannelGroup channelGroup;
 
   private Channel channel;
-
-  enum DecodingState {
-    ERROR_CODE, MESSAGE_LENGTH, MESSAGE
-  }
 
   private final class HandshakeHandler extends SimpleChannelHandler {
     @Override
@@ -105,8 +102,8 @@ public class ServiceClient<ResponseMessageType> {
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
     bootstrap = new ClientBootstrap(channelFactory);
-    ChannelGroup clientChannelGroup = new DefaultChannelGroup();
-    TcpClientPipelineFactory factory = new TcpClientPipelineFactory(clientChannelGroup) {
+    channelGroup = new DefaultChannelGroup();
+    TcpClientPipelineFactory factory = new TcpClientPipelineFactory(channelGroup) {
       @Override
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();
@@ -137,9 +134,10 @@ public class ServiceClient<ResponseMessageType> {
   }
 
   public void shutdown() {
-    channel.close().awaitUninterruptibly();
+    channelGroup.close().awaitUninterruptibly();
     channelFactory.releaseExternalResources();
     bootstrap.releaseExternalResources();
+    channel = null;
   }
 
   private void handshake(ChannelBuffer buffer) {

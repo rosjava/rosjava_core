@@ -20,13 +20,12 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
-import org.ros.internal.node.service.ServiceClient.DecodingState;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 class ServiceResponseDecoder<ResponseMessageType> extends
-    ReplayingDecoder<ServiceClient.DecodingState> {
+    ReplayingDecoder<ServiceResponseDecoderState> {
 
   private ServiceServerResponse response;
 
@@ -37,14 +36,14 @@ class ServiceResponseDecoder<ResponseMessageType> extends
   @SuppressWarnings("fallthrough")
   @Override
   protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer,
-      ServiceClient.DecodingState state) throws Exception {
+      ServiceResponseDecoderState state) throws Exception {
     switch (state) {
       case ERROR_CODE:
         response.setErrorCode(buffer.readByte());
-        checkpoint(DecodingState.MESSAGE_LENGTH);
+        checkpoint(ServiceResponseDecoderState.MESSAGE_LENGTH);
       case MESSAGE_LENGTH:
         response.setMessageLength(buffer.readInt());
-        checkpoint(DecodingState.MESSAGE);
+        checkpoint(ServiceResponseDecoderState.MESSAGE);
       case MESSAGE:
         response.setMessage(buffer.readBytes(response.getMessageLength()));
         try {
@@ -58,7 +57,7 @@ class ServiceResponseDecoder<ResponseMessageType> extends
   }
 
   private void reset() {
-    checkpoint(DecodingState.ERROR_CODE);
+    checkpoint(ServiceResponseDecoderState.ERROR_CODE);
     response = new ServiceServerResponse();
   }
 
