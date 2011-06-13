@@ -134,15 +134,6 @@ public class Subscriber<MessageType> extends Topic {
 
   public void removeMessageListener(MessageListener<MessageType> listener) {
     listeners.remove(listener);
-    // TODO(kwc): Contracts on who does setup/teardown of resources is really
-    // unclear right now. Also, we need to do much more cleanup than this, such
-    // as unregistering with the master. Similarly, there needs to be logic in
-    // addMessageCallbackListener to start the thread back up. Also, should we
-    // be using listeners as a proxy for the number of Subscriber handles, or
-    // should we track those explicitly?
-    if (listeners.size() == 0) {
-      thread.interrupt();
-    }
   }
 
   public synchronized void addPublisher(PublisherDefinition publisherDefinition,
