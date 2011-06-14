@@ -32,7 +32,7 @@
   <target name="msg-gen" depends="check-msg-gen-skip" unless="msg-gen.skip">
     <echo message="Building commonly used ROS messages..." />
 
-    <exec executable="../scripts/java_msgs.py">
+    <exec executable="scripts/java_msgs.py">
       <arg value="-o ${msg-gen}" />
 
       <!-- list of packages to generate messages for -->
@@ -51,7 +51,7 @@
   <target name="srv-gen" depends="check-srv-gen-skip" unless="srv-gen.skip">
     <echo message="Building commonly used ROS services..." />
 
-    <exec executable="../scripts/java_srvs.py">
+    <exec executable="scripts/java_srvs.py">
       <arg value="-o ${srv-gen}" />
 
       <!-- list of packages to generate for -->
