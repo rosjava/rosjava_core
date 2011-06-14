@@ -62,7 +62,6 @@ public class Node {
   private final org.ros.internal.node.Node node;
   private final RosoutLogger log;
   private final TimeProvider timeProvider;
-  private final Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher;
   private final MessageSerializerFactory<Message> messageSerializerFactory;
 
   private final class PregeneratedCodeMessageSerializerFactory implements
@@ -119,7 +118,8 @@ public class Node {
 
     // TODO(damonkohler): Move the creation and management of the RosoutLogger
     // into the internal.Node class.
-    rosoutPublisher = createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
+    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
+        createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
     log.setRosoutPublisher(rosoutPublisher);
   }
 
@@ -143,7 +143,7 @@ public class Node {
       Message message = messageClass.newInstance();
       TopicDefinition topicDefinition =
           TopicDefinition.create(new GraphName(resolvedTopicName), MessageDefinition.create(
-          message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
+              message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
       org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
           node.createPublisher(topicDefinition, messageSerializerFactory.<MessageType>create());
       return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
@@ -180,7 +180,7 @@ public class Node {
       Message message = (Message) messageClass.newInstance();
       TopicDefinition topicDefinition =
           TopicDefinition.create(new GraphName(resolvedTopicName), MessageDefinition.create(
-          message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
+              message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
       org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
           node.createSubscriber(topicDefinition, messageClass,
               new MessageDeserializer<MessageType>(messageClass));
@@ -274,7 +274,6 @@ public class Node {
   }
 
   public void shutdown() {
-    rosoutPublisher.shutdown();
     node.shutdown();
   }
 
@@ -288,7 +287,7 @@ public class Node {
   /**
    * @return {@link NameResolver} for this namespace.
    */
-   public NodeNameResolver getResolver() {
+  public NodeNameResolver getResolver() {
     return resolver;
   }
 

@@ -58,7 +58,6 @@ public class Node {
 
   private static final Log log = LogFactory.getLog(Node.class);
 
-  private final GraphName nodeName;
   private final MasterClient masterClient;
   private final SlaveServer slaveServer;
   private final TopicManager topicManager;
@@ -93,7 +92,6 @@ public class Node {
   Node(GraphName nodeName, URI masterUri, BindAddress tcpRosBindAddress,
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
       AdvertiseAddress xmlRpcAdvertiseAddress) {
-    this.nodeName = nodeName;
     started = false;
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
