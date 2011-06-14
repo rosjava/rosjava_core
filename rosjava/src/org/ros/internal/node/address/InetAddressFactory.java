@@ -20,6 +20,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +40,7 @@ public class InetAddressFactory {
   private static boolean isIpv4(InetAddress address) {
     return address.getAddress().length == 4;
   }
-  
+
   private static Collection<InetAddress> getAllInetAddresses() {
     List<NetworkInterface> networkInterfaces;
     try {
@@ -64,6 +65,20 @@ public class InetAddressFactory {
     throw new RuntimeException("No non-loopback interface found.");
   }
 
+  private static Collection<InetAddress> getAllInetAddressByName(String host) {
+    InetAddress[] allAddressesByName;
+    try {
+      allAddressesByName = org.xbill.DNS.Address.getAllByName(host);
+    } catch (UnknownHostException unused) {
+      try {
+        allAddressesByName = InetAddress.getAllByName(host);
+      } catch (UnknownHostException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return Arrays.asList(allAddressesByName);
+  }
+
   /**
    * Creates an {@link InetAddress} with both an IP and a host set so that no
    * further resolving will take place.
@@ -72,8 +87,8 @@ public class InetAddressFactory {
    * used in place of a host name.
    * 
    * If a host name other than {@code Address.LOCALHOST} is specified, this
-   * method ensures that a non-loopback IP associated with the supplied host
-   * name will be used.
+   * method trys to find a non-loopback IP associated with the supplied host
+   * name.
    * 
    * If the specified host name is {@code Address.LOCALHOST}, this method
    * returns a loopback address.
@@ -91,16 +106,21 @@ public class InetAddressFactory {
         return InetAddress.getByAddress(Address.LOCALHOST, InetAddresses
             .forString(Address.LOOPBACK).getAddress());
       }
-      InetAddress[] allAddressesByName = org.xbill.DNS.Address.getAllByName(host);
-      for (int i = 0; i < allAddressesByName.length; i++) {
-        InetAddress address = allAddressesByName[i];
-        // IPv4 only for now.
-        if (!address.isLoopbackAddress() && isIpv4(address)) {
-          return address;
-        }
-      }
     } catch (UnknownHostException e) {
       throw new RuntimeException(e);
+    }
+    Collection<InetAddress> allAddressesByName = getAllInetAddressByName(host);
+    // First, try to find a non-loopback IPv4 address.
+    for (InetAddress address : allAddressesByName) {
+      if (!address.isLoopbackAddress() && isIpv4(address)) {
+        return address;
+      }
+    }
+    // Return a loopback IPv4 address as a last resort.
+    for (InetAddress address : allAddressesByName) {
+      if (isIpv4(address)) {
+        return address;
+      }
     }
     throw new RuntimeException();
   }

@@ -45,12 +45,15 @@ public class AddressTest {
     assertEquals(Address.LOOPBACK, loopback.getHostName());
     assertTrue(loopback.isLoopbackAddress());
   }
-  
+
   @Test
   public void testPublicHost() throws UnknownHostException {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     InetAddress publicHost = InetAddressFactory.createFromHostString(host);
     assertEquals(host, publicHost.getHostName());
+    // TODO(damonkohler): This test fails if the host isn't registered with DNS.
+    // These tests need to be changed to inject behavior into the
+    // getAllInetAddressesByName() method.
     assertFalse(publicHost.isLoopbackAddress());
   }
 
