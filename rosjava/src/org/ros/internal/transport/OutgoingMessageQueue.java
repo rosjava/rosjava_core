@@ -24,7 +24,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.ros.MessageSerializer;
 
@@ -64,9 +63,8 @@ public class OutgoingMessageQueue<MessageType> {
       }
     }
 
-    public ChannelGroupFuture cancel() {
+    public void cancel() {
       interrupt();
-      return channelGroup.close();
     }
   }
 
@@ -82,11 +80,8 @@ public class OutgoingMessageQueue<MessageType> {
   }
 
   public void shutdown() {
-    try {
-      thread.cancel().await();
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+    thread.cancel();
+    channelGroup.close().awaitUninterruptibly();
   }
 
   public void start() {

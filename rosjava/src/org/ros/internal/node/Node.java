@@ -144,6 +144,8 @@ public class Node {
     // NOTE(damonkohler): We don't want to raise potentially spurious
     // exceptions during shutdown that would interrupt the process. This is
     // simply best effort cleanup.
+    slaveServer.shutdown();
+    masterRegistration.shutdown();
     for (Publisher<?> publisher : topicManager.getPublishers()) {
       publisher.shutdown();
       try {
@@ -173,8 +175,6 @@ public class Node {
         log.error(e);
       }
     }
-    slaveServer.shutdown();
-    masterRegistration.shutdown();
   }
 
   /**
