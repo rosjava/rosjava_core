@@ -15,6 +15,8 @@
  */
 package org.ros;
 
+import java.util.concurrent.TimeUnit;
+
 import org.ros.message.Message;
 
 /**
@@ -67,6 +69,36 @@ public class Publisher<MessageType extends Message> {
     return messageClass;
   }
 
+  /**
+   * Wait for the publisher to register with the master.
+   * 
+   * <p>
+   * This call blocks.
+   * 
+   * @throws InterruptedException
+   */
+  public void awaitRegistration() throws InterruptedException {
+    publisher.awaitRegistration();
+  }
+
+  /**
+   * Wait for the publisher to register with the master.
+   * 
+   * @param timeout
+   *          How long to wait for registration.
+   * @param unit
+   *          The units for how long to wait.
+   * @return True if the publisher registered with the master, false otherwise.
+   * 
+   * @throws InterruptedException
+   */
+  public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
+    return publisher.awaitRegistration(timeout, unit);
+  }
+
+  /**
+   * Shut the publisher down.
+   */
   public void shutdown() {
     publisher.shutdown();
   }
