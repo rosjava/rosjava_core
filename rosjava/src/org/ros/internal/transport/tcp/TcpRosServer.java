@@ -18,8 +18,6 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
 
-import org.jboss.netty.channel.ChannelFuture;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -27,7 +25,6 @@ import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -53,10 +50,10 @@ public class TcpRosServer {
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
   
-  private ChannelGroup channelGroup;
   private ChannelFactory channelFactory;
   private ServerBootstrap bootstrap;
-  private Channel channel;
+  private Channel outgoingChannel;
+  private ChannelGroup incomingChannelGroup;
 
   public TcpRosServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress,
       TopicManager topicManager, ServiceManager serviceManager) {
@@ -67,22 +64,22 @@ public class TcpRosServer {
   }
 
   public void start() {
-    Preconditions.checkState(channel == null);
+    Preconditions.checkState(outgoingChannel == null);
     channelFactory =
         new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
             Executors.newCachedThreadPool());
     bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-    channelGroup = new DefaultChannelGroup();
-    bootstrap.setPipelineFactory(new TcpServerPipelineFactory(channelGroup, topicManager,
+    incomingChannelGroup = new DefaultChannelGroup();
+    bootstrap.setPipelineFactory(new TcpServerPipelineFactory(incomingChannelGroup, topicManager,
         serviceManager));
     
-    channel = bootstrap.bind(bindAddress.toInetSocketAddress());
+    outgoingChannel = bootstrap.bind(bindAddress.toInetSocketAddress());
     advertiseAddress.setPortCallable(new Callable<Integer>() {
       @Override
       public Integer call() throws Exception {
-        return ((InetSocketAddress) channel.getLocalAddress()).getPort();
+        return ((InetSocketAddress) outgoingChannel.getLocalAddress()).getPort();
       }
     });
     if (DEBUG) {
@@ -92,17 +89,15 @@ public class TcpRosServer {
   }
 
   public void shutdown() {
-    Preconditions.checkNotNull(channel);
+    Preconditions.checkNotNull(outgoingChannel);
     if (DEBUG) {
       log.info("Shutting down: " + getAddress());
     }
-    ChannelGroupFuture groupFuture = channelGroup.close();
-    groupFuture.awaitUninterruptibly();
-    ChannelFuture future = channel.close();
-    future.awaitUninterruptibly();
+    incomingChannelGroup.close().awaitUninterruptibly();
+    outgoingChannel.close().awaitUninterruptibly();
     channelFactory.releaseExternalResources();
     bootstrap.releaseExternalResources();
-    channel = null;
+    outgoingChannel = null;
   }
 
   /**
