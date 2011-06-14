@@ -89,7 +89,6 @@ public class SlaveImplTest {
     SlaveServer mockSlave = mock(SlaveServer.class);
     AdvertiseAddress address = AdvertiseAddress.createPrivate();
     address.setStaticPort(1234);
-    TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(address);
     when(mockSlave.getPid()).thenReturn(1234);
     SlaveImpl slave = new SlaveImpl(mockSlave);
     List<Object> response = slave.getPid("/foo");
@@ -102,7 +101,6 @@ public class SlaveImplTest {
     SlaveServer mockSlave = mock(SlaveServer.class);
     AdvertiseAddress address = AdvertiseAddress.createPrivate();
     address.setStaticPort(1234);
-    TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(address);
     when(mockSlave.getPid()).thenThrow(new UnsupportedOperationException());
     SlaveImpl slave = new SlaveImpl(mockSlave);
     List<Object> response = slave.getPid("/foo");
