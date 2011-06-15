@@ -12,5 +12,7 @@
   <depend package="roslang"/>
   <depend package="rostest"/>
   <depend package="test_ros"/>
+
+  <rosdep name="java"/>
 </package>
 
