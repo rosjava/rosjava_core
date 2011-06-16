@@ -97,10 +97,9 @@ public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.Par
 
   public Response<Integer> unsubscribeParam(SlaveIdentifier slave, String parameterName)
       throws RemoteException {
-    return Response.fromListChecked(
-node.unsubscribeParam(slave.getName().toString(), slave.getUri()
-            .toString(), parameterName),
-        new IntegerResultFactory());
+    return Response
+        .fromListChecked(node.unsubscribeParam(slave.getName().toString(), slave.getUri()
+            .toString(), parameterName), new IntegerResultFactory());
   }
 
   public Response<List<String>> getParamNames(String callerId) throws RemoteException {
