@@ -16,7 +16,13 @@
 
 package org.ros.internal.node.server;
 
-import com.google.common.collect.Lists;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.List;
 
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
@@ -37,12 +43,7 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
 
-import java.lang.management.ManagementFactory;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -147,8 +148,13 @@ public class SlaveServer extends NodeServer {
           return 0;
         }
       }
-    } catch (NoClassDefFoundError e) {
-      // Android does not support ManagementFactory.
+    } catch (NoClassDefFoundError unused) {
+      // Android does not support ManagementFactory. Try to get the PID on Android.
+      try {
+        return (Integer) Class.forName("android.os.Process").getMethod("myPid").invoke(null);
+      } catch (Exception unused1) {
+        // Ignore this exception and fall through to the UnsupportedOperationException.
+      }
     }
     throw new UnsupportedOperationException();
   }
