@@ -22,7 +22,6 @@ import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
-import org.ros.message.Message;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -49,12 +48,11 @@ public class SubscriberFactory {
    * 
    * @param <MessageType>
    * @param topicDefinition {@link TopicDefinition} that is subscribed to
-   * @param messageClass {@link Message} class for topic
    * @return a {@link Subscriber} instance
    */
   @SuppressWarnings("unchecked")
   public <MessageType> Subscriber<MessageType> create(TopicDefinition topicDefinition,
-      Class<MessageType> messageClass, MessageDeserializer<MessageType> deserializer) {
+      MessageDeserializer<MessageType> deserializer) {
     String topicName = topicDefinition.getName().toString();
     Subscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
@@ -64,8 +62,8 @@ public class SubscriberFactory {
         subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
       } else {
         subscriber =
-            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, messageClass,
-                executor, deserializer);
+            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, executor,
+                deserializer);
         createdNewSubscriber = true;
       }
     }

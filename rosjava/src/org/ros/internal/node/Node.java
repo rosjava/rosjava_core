@@ -109,8 +109,8 @@ public class Node {
   }
 
   public <MessageType> Subscriber<MessageType> createSubscriber(TopicDefinition topicDefinition,
-      Class<MessageType> messageClass, MessageDeserializer<MessageType> deserializer) {
-    return subscriberFactory.create(topicDefinition, messageClass, deserializer);
+      MessageDeserializer<MessageType> deserializer) {
+    return subscriberFactory.create(topicDefinition, deserializer);
   }
 
   public <MessageType> Publisher<MessageType> createPublisher(TopicDefinition topicDefinition,

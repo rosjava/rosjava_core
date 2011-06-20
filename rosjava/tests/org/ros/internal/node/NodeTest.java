@@ -140,9 +140,8 @@ public class NodeTest {
     assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
 
     Subscriber<org.ros.message.std_msgs.String> subscriber =
-        node.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
-            new MessageDeserializer<org.ros.message.std_msgs.String>(
-                org.ros.message.std_msgs.String.class));
+        node.createSubscriber(topicDefinition, new MessageDeserializer<org.ros.message.std_msgs.String>(
+            org.ros.message.std_msgs.String.class));
     assertTrue(subscriber.awaitRegistration(1, TimeUnit.SECONDS));
 
     assertEquals(1, masterServer.getRegisteredPublishers().size());

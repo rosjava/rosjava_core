@@ -67,9 +67,8 @@ public class TopicIntegrationTest {
     Node subscriberNode =
         Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
-        subscriberNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
-            new MessageDeserializer<org.ros.message.std_msgs.String>(
-                org.ros.message.std_msgs.String.class));
+        subscriberNode.createSubscriber(topicDefinition, new MessageDeserializer<org.ros.message.std_msgs.String>(
+            org.ros.message.std_msgs.String.class));
 
     final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
     helloMessage.data = "Hello, ROS!";
@@ -107,9 +106,8 @@ public class TopicIntegrationTest {
     Node subscriberNode =
         Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
-        subscriberNode.createSubscriber(topicDefinition, org.ros.message.std_msgs.String.class,
-            new MessageDeserializer<org.ros.message.std_msgs.String>(
-                org.ros.message.std_msgs.String.class));
+        subscriberNode.createSubscriber(topicDefinition, new MessageDeserializer<org.ros.message.std_msgs.String>(
+            org.ros.message.std_msgs.String.class));
 
     try {
       subscriber.addPublisher(

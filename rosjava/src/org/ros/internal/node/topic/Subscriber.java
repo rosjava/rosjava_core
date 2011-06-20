@@ -99,8 +99,7 @@ public class Subscriber<MessageType> extends Topic {
   }
 
   public static <S> Subscriber<S> create(SlaveIdentifier slaveIdentifier,
-      TopicDefinition description, Class<S> messageClass, Executor executor,
-      MessageDeserializer<S> deserializer) {
+      TopicDefinition description, Executor executor, MessageDeserializer<S> deserializer) {
     return new Subscriber<S>(slaveIdentifier, description, deserializer, executor);
   }
 

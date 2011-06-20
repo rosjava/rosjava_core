@@ -182,8 +182,7 @@ public class Node {
           TopicDefinition.create(new GraphName(resolvedTopicName), MessageDefinition.create(
               message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
       org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
-          node.createSubscriber(topicDefinition, messageClass,
-              new MessageDeserializer<MessageType>(messageClass));
+          node.createSubscriber(topicDefinition, new MessageDeserializer<MessageType>(messageClass));
       subscriber.addMessageListener(callback);
       return new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriber);
     } catch (Exception e) {
