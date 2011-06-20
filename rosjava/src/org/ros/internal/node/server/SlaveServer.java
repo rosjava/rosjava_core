@@ -17,17 +17,15 @@
 package org.ros.internal.node.server;
 
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 
-import org.ros.internal.node.ParameterManager;
-
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
+import org.ros.internal.node.ParameterManager;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
