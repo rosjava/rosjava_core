@@ -62,6 +62,7 @@ public class Node {
   private final SlaveServer slaveServer;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
+  private final ParameterManager parameterManager;
   private final MasterRegistration masterRegistration;
   private final SubscriberFactory subscriberFactory;
   private final ServiceFactory serviceFactory;
@@ -96,9 +97,10 @@ public class Node {
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
+    parameterManager = new ParameterManager();
     slaveServer =
         new SlaveServer(nodeName, tcpRosBindAddress, tcpRosAdvertiseAddress, xmlRpcBindAddress,
-            xmlRpcAdvertiseAddress, masterClient, topicManager, serviceManager);
+            xmlRpcAdvertiseAddress, masterClient, topicManager, serviceManager, parameterManager);
     masterRegistration = new MasterRegistration(masterClient);
     topicManager.setListener(masterRegistration);
     publisherFactory = new PublisherFactory(topicManager);

@@ -106,8 +106,12 @@ public class SlaveImpl implements Slave {
   }
 
   @Override
-  public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) {
-    return Response.createFailure("Unsupported operation.", 0).toList();
+  public List<Object> paramUpdate(String callerId, String parameterKey, Object parameterValue) {
+    if (slave.paramUpdate(parameterKey, parameterValue) > 0) {
+      return Response.createSuccess("Success", null).toList();
+    }
+    return Response.createError("No subscribers for parameter key \"" + parameterKey + "\".", null)
+        .toList();
   }
 
   @Override

@@ -35,6 +35,7 @@ public class MasterRegistrationTest {
   private MasterRegistration masterRegistration;
   private TopicManager topicManager;
   private ServiceManager serviceManager;
+  private ParameterManager parameterManager;
   private SlaveServer slaveServer;
   private Publisher<org.ros.message.std_msgs.String> publisher;
 
@@ -55,10 +56,12 @@ public class MasterRegistrationTest {
     masterRegistration = new MasterRegistration(masterClient);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
+    parameterManager = new ParameterManager();
     slaveServer =
         new SlaveServer(new GraphName("/node"), BindAddress.createPrivate(0),
             AdvertiseAddress.createPrivate(), BindAddress.createPrivate(0),
-            AdvertiseAddress.createPrivate(), masterClient, topicManager, serviceManager);
+            AdvertiseAddress.createPrivate(), masterClient, topicManager, serviceManager,
+            parameterManager);
     slaveServer.start();
     masterRegistration.start(slaveServer.toSlaveIdentifier());
     publisher = new Publisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer);

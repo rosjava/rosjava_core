@@ -87,8 +87,10 @@ public class MasterServer extends NodeServer {
       SlaveClient client;
       client = new SlaveClient(GraphName.createUnknown(), slaveIdentifier.getUri());
       List<URI> publisherUris = Lists.newArrayList();
-      for (PublisherIdentifier publisherIdentifier : publishers.get(topicName)) {
-        publisherUris.add(publisherIdentifier.getUri());
+      synchronized (publishers) {
+        for (PublisherIdentifier publisherIdentifier : publishers.get(topicName)) {
+          publisherUris.add(publisherIdentifier.getUri());
+        }
       }
       client.publisherUpdate(topicName, publisherUris);
     }
@@ -106,7 +108,9 @@ public class MasterServer extends NodeServer {
   public List<PublisherIdentifier> registerSubscriber(SubscriberIdentifier subscriberIdentifier) {
     subscribers.put(subscriberIdentifier.getTopicName().toString(), subscriberIdentifier);
     addSlave(subscriberIdentifier.getSlaveIdentifier());
-    return ImmutableList.copyOf(publishers.get(subscriberIdentifier.getTopicName().toString()));
+    synchronized (publishers) {
+      return ImmutableList.copyOf(publishers.get(subscriberIdentifier.getTopicName().toString()));
+    }
   }
 
   public int unregisterSubscriber(SubscriberIdentifier subscriberIdentifier) {
@@ -130,7 +134,9 @@ public class MasterServer extends NodeServer {
     publishers.put(publisher.getTopicName().toString(), publisher);
     addSlave(publisher.getSlaveIdentifier());
     publisherUpdate(publisher.getTopicName().toString());
-    return ImmutableList.copyOf(subscribers.get(publisher.getTopicName().toString()));
+    synchronized (subscribers) {
+      return ImmutableList.copyOf(subscribers.get(publisher.getTopicName().toString()));
+    }
   }
 
   public int unregisterPublisher(PublisherIdentifier publisherIdentifier) {
@@ -147,7 +153,8 @@ public class MasterServer extends NodeServer {
    * API is for looking information about publishers and subscribers. Use
    * lookupService instead to lookup ROS-RPC URIs.
    * 
-   * @param slaveName name of node to lookup
+   * @param slaveName
+   *          name of node to lookup
    * @return a {@link SlaveIdentifier} for the node with the given name
    */
   public SlaveIdentifier lookupNode(String slaveName) {
@@ -155,11 +162,15 @@ public class MasterServer extends NodeServer {
   }
 
   public List<PublisherIdentifier> getRegisteredPublishers() {
-    return ImmutableList.copyOf(publishers.values());
+    synchronized (publishers) {
+      return ImmutableList.copyOf(publishers.values());
+    }
   }
 
   public List<SubscriberIdentifier> getRegisteredSubscribers() {
-    return ImmutableList.copyOf(subscribers.values());
+    synchronized (subscribers) {
+      return ImmutableList.copyOf(subscribers.values());
+    }
   }
 
   public List<Object> getSystemState(String callerId) {
@@ -169,8 +180,10 @@ public class MasterServer extends NodeServer {
   /**
    * Lookup the provider of a particular service.
    * 
-   * @param callerId ROS caller ID
-   * @param service Fully-qualified name of service
+   * @param callerId
+   *          ROS caller ID
+   * @param service
+   *          Fully-qualified name of service
    * @return service URI that provides address and port of the service. Fails if
    *         there is no provider.
    */

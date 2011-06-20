@@ -18,6 +18,8 @@ package org.ros.internal.node.server;
 
 import com.google.common.collect.Lists;
 
+import org.ros.internal.node.ParameterManager;
+
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -53,6 +55,7 @@ public class SlaveServer extends NodeServer {
   private final MasterClient masterClient;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
+  private final ParameterManager parameterManager;
   private final TcpRosServer tcpRosServer;
 
   public static List<PublisherDefinition> buildPublisherIdentifierList(
@@ -69,12 +72,13 @@ public class SlaveServer extends NodeServer {
   public SlaveServer(GraphName nodeName, BindAddress tcpRosBindAddress,
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
       AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master, TopicManager topicManager,
-      ServiceManager serviceManager) {
+      ServiceManager serviceManager, ParameterManager parameterManager) {
     super(xmlRpcBindAddress, xmlRpcAdvertiseAddress);
     this.nodeName = nodeName;
     this.masterClient = master;
     this.topicManager = topicManager;
     this.serviceManager = serviceManager;
+    this.parameterManager = parameterManager;
     this.tcpRosServer =
         new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
   }
@@ -161,8 +165,13 @@ public class SlaveServer extends NodeServer {
     return topicManager.getPublishers();
   }
 
-  public List<Object> paramUpdate(String callerId, String parameterKey, String parameterValue) {
-    throw new UnsupportedOperationException();
+  /**
+   * @param parameterKey
+   * @param parameterValue
+   * @return the number of parameter subscribers that received the update
+   */
+  public int paramUpdate(String parameterKey, Object parameterValue) {
+    return parameterManager.updateParameter(parameterKey, parameterValue);
   }
 
   public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {

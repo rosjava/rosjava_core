@@ -53,10 +53,12 @@ public class MasterSlaveIntegrationTest {
     masterClient = new MasterClient(masterServer.getUri());
     TopicManager topicManager = new TopicManager();
     ServiceManager serviceManager = new ServiceManager();
+    ParameterManager parameterManager = new ParameterManager();
     slaveServer =
         new SlaveServer(new GraphName("/foo"), BindAddress.createPublic(0),
             AdvertiseAddress.createPublic(), BindAddress.createPublic(0),
-            AdvertiseAddress.createPublic(), masterClient, topicManager, serviceManager);
+            AdvertiseAddress.createPublic(), masterClient, topicManager, serviceManager,
+            parameterManager);
     slaveServer.start();
     slaveClient = new SlaveClient(new GraphName("/bar"), slaveServer.getUri());
   }

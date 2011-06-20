@@ -16,6 +16,8 @@
 
 package org.ros;
 
+import org.ros.internal.node.xmlrpc.ParameterServer;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
@@ -28,7 +30,7 @@ import org.ros.internal.node.response.StatusCode;
 import org.ros.namespace.NameResolver;
 
 /**
- * Get and set values on the ROS Parameter Server.
+ * Provides access to the ROS {@link ParameterServer}.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
@@ -37,13 +39,13 @@ public class ParameterClient {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ParameterClient.class);
   
-  private final org.ros.internal.node.client.ParameterClient parameterServer;
+  private final org.ros.internal.node.client.ParameterClient parameterClient;
   private final String callerId;
   private final NameResolver resolver;
 
   private ParameterClient(String callerId,
-      org.ros.internal.node.client.ParameterClient parameterServer, NameResolver resolver) {
-    this.parameterServer = parameterServer;
+      org.ros.internal.node.client.ParameterClient parameterClient, NameResolver resolver) {
+    this.parameterClient = parameterClient;
     this.callerId = callerId;
     this.resolver = resolver;
   }
@@ -60,7 +62,7 @@ public class ParameterClient {
     if (DEBUG) {
       log.info("getParam(" + parameterName + " -> [resolved] " + resolvedName + ")");
     }
-    Response<Object> response = parameterServer.getParam(this.callerId, resolvedName);
+    Response<Object> response = parameterClient.getParam(this.callerId, resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();
     } else {
@@ -73,7 +75,7 @@ public class ParameterClient {
     if (DEBUG) {
       log.info("getParamDefault(" + parameterName + " -> [resolved] " + resolvedName + ")");
     }
-    Response<Object> response = parameterServer.getParam(this.callerId, resolvedName);
+    Response<Object> response = parameterClient.getParam(this.callerId, resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();
     } else {
@@ -83,7 +85,7 @@ public class ParameterClient {
 
   public boolean hasParam(String parameterName) throws RemoteException {
     String resolvedName = resolver.resolveName(parameterName);
-    return parameterServer.hasParam(this.callerId, resolvedName).getResult();
+    return parameterClient.hasParam(this.callerId, resolvedName).getResult();
   }
 
   public void deleteParam(String parameterName) throws RemoteException {
@@ -91,7 +93,7 @@ public class ParameterClient {
     if (DEBUG) {
       log.info("deleteParam(" + parameterName + " -> [resolved] " + resolvedName + ")");
     }
-    parameterServer.deleteParam(this.callerId, resolvedName);
+    parameterClient.deleteParam(this.callerId, resolvedName);
   }
 
   public void setParam(String parameterName, Object parameterValue) throws RemoteException {
@@ -99,12 +101,12 @@ public class ParameterClient {
     if (DEBUG) {
       log.info("setParam(" + parameterName + " -> [resolved] " + resolvedName + ")");
     }
-    parameterServer.setParam(this.callerId, resolvedName, parameterValue);
+    parameterClient.setParam(this.callerId, resolvedName, parameterValue);
   }
 
   public String searchParam(String parameterName) throws RemoteException {
     String resolvedName = resolver.resolveName(parameterName);
-    Response<String> response = parameterServer.searchParam(this.callerId, resolvedName);
+    Response<String> response = parameterClient.searchParam(this.callerId, resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();
     } else {
@@ -113,7 +115,7 @@ public class ParameterClient {
   }
 
   public List<String> getParamNames() throws RemoteException {
-    return parameterServer.getParamNames(this.callerId).getResult();
+    return parameterClient.getParamNames(this.callerId).getResult();
   }
 
 }

@@ -64,13 +64,12 @@ public class TcpRosServerTest {
   @Test
   public void testFailIfPortTaken() {
     TcpRosServer firstServer =
-        new TcpRosServer(BindAddress.createPublic(11311), AdvertiseAddress.createPublic(), null,
-            null);
-    TcpRosServer secondServer =
-        new TcpRosServer(BindAddress.createPublic(11311), AdvertiseAddress.createPublic(), null,
-            null);
+        new TcpRosServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic(), null, null);
     firstServer.start();
     try {
+      TcpRosServer secondServer =
+          new TcpRosServer(BindAddress.createPublic(firstServer.getAddress().getPort()),
+              AdvertiseAddress.createPublic(), null, null);
       secondServer.start();
       fail();
     } catch (RuntimeException e) {
