@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
 import java.util.concurrent.TimeUnit;
@@ -27,46 +28,35 @@ import org.ros.message.Message;
  *          The message type to template on. The publisher may only publish
  *          messages of this type.
  */
-public class Publisher<MessageType extends Message> {
+public class Publisher<MessageType> {
+
   private final org.ros.internal.node.topic.Publisher<MessageType> publisher;
   private final String topicName;
-  // deal with type erasure for generics
-  private final Class<MessageType> messageClass;
 
   /**
    * Default package level constructor
    * 
    * @param topicName
-   * @param messageClass
    */
-  Publisher(String topicName, Class<MessageType> messageClass,
-      org.ros.internal.node.topic.Publisher<MessageType> publisher) {
+  Publisher(String topicName, org.ros.internal.node.topic.Publisher<MessageType> publisher) {
     this.topicName = topicName;
-    this.messageClass = messageClass;
     this.publisher = publisher;
   }
 
   /**
-   * @param m
+   * @param message
    *          The {@link Message} to publish. This message will be available on
    *          the topic that this {@link Publisher} has been associated with.
    */
-  public void publish(MessageType m) {
+  public void publish(MessageType message) {
     // publisher is shared across multiple publisher instances, so lock access.
     synchronized (this) {
-      publisher.publish(m);
+      publisher.publish(message);
     }
   }
 
   public String getTopicName() {
     return topicName;
-  }
-
-  /**
-   * @return The {@link Message} class literal for the published topic.
-   */
-  public Class<MessageType> getTopicMessageClass() {
-    return messageClass;
   }
 
   /**

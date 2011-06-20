@@ -146,7 +146,7 @@ public class Node {
               message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
       org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
           node.createPublisher(topicDefinition, messageSerializerFactory.<MessageType>create());
-      return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
+      return new Publisher<MessageType>(resolveName(topicName), publisherImpl);
     } catch (Exception e) {
       throw new RosInitException(e);
     }
@@ -184,7 +184,7 @@ public class Node {
       org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
           node.createSubscriber(topicDefinition, new MessageDeserializer<MessageType>(messageClass));
       subscriber.addMessageListener(callback);
-      return new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriber);
+      return new Subscriber<MessageType>(resolvedTopicName, callback, subscriber);
     } catch (Exception e) {
       throw new RosInitException(e);
     }
