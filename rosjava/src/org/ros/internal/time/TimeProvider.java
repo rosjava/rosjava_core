@@ -18,11 +18,15 @@ package org.ros.internal.time;
 
 import org.ros.message.Time;
 
+/**
+ * Provide time.
+ *
+ * @author kwc@willowgarage.com (Ken Conley)
+ */
 public interface TimeProvider {
 
   /**
    * @return the current time of the system using rostime
    */
-  public Time getCurrentTime();
-
+  Time getCurrentTime();
 }

@@ -42,7 +42,7 @@ public class ParameterServerTestNode implements NodeMain {
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
     try {
-      node = new Node("param_client", nodeConfiguration);
+      node = new DefaultNode("param_client", nodeConfiguration);
 
       Publisher<org.ros.message.std_msgs.String> pub_tilde =
           node.createPublisher("tilde", org.ros.message.std_msgs.String.class);

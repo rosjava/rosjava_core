@@ -16,9 +16,9 @@
 
 package org.ros;
 
-import java.util.concurrent.TimeUnit;
-
 import org.ros.message.Message;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Handles a subscription to a ROS topic.
@@ -30,9 +30,14 @@ import org.ros.message.Message;
 public class Subscriber<MessageType> {
 
   private final Class<MessageType> messageClass;
+
+  /**
+   * Fully namespace qualified name of the subscriber.
+   */
   private final String topicName;
 
   private final org.ros.internal.node.topic.Subscriber<MessageType> subscriber;
+
   private final MessageListener<MessageType> messageListener;
 
   protected Subscriber(String topicName, MessageListener<MessageType> messageListener,

@@ -15,9 +15,9 @@
  */
 package org.ros;
 
-import java.util.concurrent.TimeUnit;
-
 import org.ros.message.Message;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * A handle for publishing messages of a particular type on a given topic.
@@ -28,8 +28,14 @@ import org.ros.message.Message;
  *          messages of this type.
  */
 public class Publisher<MessageType extends Message> {
+
   private final org.ros.internal.node.topic.Publisher<MessageType> publisher;
+  
+  /**
+   * Fully qualified namespace topic name for the publisher.
+   */
   private final String topicName;
+
   // deal with type erasure for generics
   private final Class<MessageType> messageClass;
 
@@ -58,6 +64,11 @@ public class Publisher<MessageType extends Message> {
     }
   }
 
+  /**
+   * Get the topic name for the publisher.
+   * 
+   * @return The fully-namespaced name of the publisher.
+   */
   public String getTopicName() {
     return topicName;
   }
@@ -94,6 +105,30 @@ public class Publisher<MessageType extends Message> {
    */
   public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
     return publisher.awaitRegistration(timeout, unit);
+  }
+  
+  /**
+   * Does the publisher have any connected subscribers?
+   * 
+   * <p>This will be about subscribers registered. If the subscriber didn't shut down
+   * properly it will not be unregistered.
+   * 
+   * @return True if there are connected subscribers, false otherwise.
+   */
+  public boolean hasSubscribers() {
+	  return publisher.hasSubscribers();
+  }
+  
+  /**
+   * Get the number of subscribers currently connected to the publisher.
+   * 
+   * <p>This will be about subscribers registered. If the subscriber didn't shut down
+   * properly it will not be unregistered.
+   * 
+   * @return The number of subscribers currently connected to the publisher.
+   */
+  public int getNumberSubscribers() {
+	  return publisher.getNumberSubscribers();
   }
 
   /**

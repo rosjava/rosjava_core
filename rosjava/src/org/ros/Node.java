@@ -16,112 +16,122 @@
 
 package org.ros;
 
-import com.google.common.base.Preconditions;
-
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
-import org.ros.internal.exception.RemoteException;
-import org.ros.internal.message.MessageDefinition;
-import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.RosoutLogger;
-import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.service.ServiceServer;
-import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.xmlrpc.Master;
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-import org.ros.internal.time.TimeProvider;
-import org.ros.internal.time.WallclockProvider;
 import org.ros.message.Message;
-import org.ros.message.MessageDeserializer;
-import org.ros.message.MessageSerializer;
 import org.ros.message.Service;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
 
-import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.URI;
 
 /**
- * @author ethan.rublee@gmail.com (Ethan Rublee)
- * @author kwc@willowgarage.com (Ken Conley)
+ * A node in the ROS graph.
+ * 
+ * <p>Nodes provide for communication with the ROS master. They are used for 
+ * creation of 
+ * 
+ * <ul>
+ * <li>{@link Publisher}</li>,
+ * <li>{@link Subscriber}</li>
+ * <li>{@link ParameterClient}</li>
+ * </ul>
+ * 
+ * <p>Lifetime of any objects created from a node are controlled by the creating
+ * node.
+ * 
+ * @author Keith M. Hughes
+ * @since Jun 20, 2011
  */
-public class Node {
-
-  private final NodeConfiguration configuration;
-  private final NodeNameResolver resolver;
-  private final GraphName nodeName;
-  private final org.ros.internal.node.Node node;
-  private final RosoutLogger log;
-  private final TimeProvider timeProvider;
-  private final MessageSerializerFactory<Message> messageSerializerFactory;
-
-  private final class PregeneratedCodeMessageSerializerFactory implements
-      MessageSerializerFactory<Message> {
-    @Override
-    public <MessageType extends Message> org.ros.MessageSerializer<MessageType> create() {
-      return new MessageSerializer<MessageType>();
-    }
-  }
+public interface Node {
 
   /**
-   * @param name
-   *          Node name. This identifies this node to the rest of the ROS graph.
-   * @param configuration
-   * @throws RosInitException
+   * @return The fully resolved name of this namespace, e.g. "/foo/bar/boop".
    */
-  public Node(String name, NodeConfiguration configuration) throws RosInitException {
-    Preconditions.checkNotNull(configuration);
-    Preconditions.checkNotNull(name);
-    messageSerializerFactory = new PregeneratedCodeMessageSerializerFactory();
-    this.configuration = configuration;
-    NameResolver parentResolver = configuration.getParentResolver();
-    String baseName;
-    String nodeNameOverride = configuration.getNodeNameOverride();
-    if (nodeNameOverride != null) {
-      baseName = nodeNameOverride;
-    } else {
-      baseName = name;
-    }
-    nodeName = new GraphName(NameResolver.join(parentResolver.getNamespace(), baseName));
-    resolver = NodeNameResolver.create(parentResolver, nodeName);
+  String getName();
 
-    // TODO (kwc): implement simulated time.
-    timeProvider = new WallclockProvider();
-    // Log for /rosout.
-    log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
+  /**
+   * Resolve the given name, using ROS conventions, into a full ROS namespace
+   * name. Will be relative to the current namespace unless the name is global.
+   * 
+   * @param name
+   *          The name to resolve.
+   * @return Fully resolved ros namespace name.
+   * @throws RosNameException
+   */
+  String resolveName(String name);
 
-    try {
-      Preconditions.checkNotNull(configuration.getHost());
-      InetAddress host = InetAddressFactory.createFromHostString(configuration.getHost());
-      if (host.isLoopbackAddress()) {
-        node =
-            org.ros.internal.node.Node.createPrivate(nodeName, configuration.getMasterUri(),
-                configuration.getXmlRpcPort(), configuration.getTcpRosPort());
-      } else {
-        node =
-            org.ros.internal.node.Node.createPublic(nodeName, configuration.getMasterUri(),
-                configuration.getHost(), configuration.getXmlRpcPort(),
-                configuration.getTcpRosPort());
-      }
-    } catch (Exception e) {
-      throw new RosInitException(e);
-    }
+  /**
+   * @return {@link NameResolver} for this namespace.
+   */
+  NodeNameResolver getResolver();
 
-    // TODO(damonkohler): Move the creation and management of the RosoutLogger
-    // into the internal.Node class.
-    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
-        createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
-    log.setRosoutPublisher(rosoutPublisher);
-  }
+  /**
+   * @return the {@link URI} of this {@link Node}
+   */
+  URI getUri();
+  
+  /**
+   * Is the node ok?
+   * 
+   * <p>"ok" means that the node is in the running state and registered with the master.
+   * 
+   * @return True if the node is OK, false otherwise.
+   */
+  boolean isOk();
+
+  /**
+   * Shut the node down.
+   */
+  void shutdown();
+
+  /**
+   * Poll for whether or not Node is current fully registered with
+   * {@link MasterServer}.
+   * 
+   * @return true if Node is fully registered with {@link MasterServer}.
+   *         {@code isRegistered()} can go to false if new publisher or
+   *         subscribers are created.
+   */
+  boolean isRegistered();
+
+  /**
+   * Poll for whether or not registration with the {@link MasterServer} is
+   * proceeding normally. If this returns false, it means that the
+   * {@link MasterServer} is out of contact or is misbehaving.
+   * 
+   * @return true if Node registrations are proceeding normally with
+   *         {@link MasterServer}.
+   */
+  boolean isRegistrationOk();
+
+  /**
+   * @return {@link URI} of {@link Master} that this node is attached to.
+   */
+  URI getMasterUri();
+
+  /**
+   * Returns the current time. In ROS, time can be wallclock (actual) or
+   * simulated, so it is important to use {@code Node.getCurrentTime()} instead
+   * of using the standard Java routines for determining the current time.
+   * 
+   * @return the current time
+   */
+  Time getCurrentTime();
+
+  /**
+   * @return Logger for this node, which will also perform logging to /rosout.
+   */
+  Log getLog();
 
   /**
    * @param <MessageType>
@@ -136,21 +146,8 @@ public class Node {
    * @throws RosInitException
    *           May throw if the system is not in a proper state.
    */
-  public <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
-      Class<MessageType> messageClass) throws RosInitException {
-    try {
-      String resolvedTopicName = resolveName(topicName);
-      Message message = messageClass.newInstance();
-      TopicDefinition topicDefinition =
-          TopicDefinition.create(new GraphName(resolvedTopicName), MessageDefinition.create(
-              message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
-      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
-          node.createPublisher(topicDefinition, messageSerializerFactory.<MessageType>create());
-      return new Publisher<MessageType>(resolveName(topicName), messageClass, publisherImpl);
-    } catch (Exception e) {
-      throw new RosInitException(e);
-    }
-  }
+  <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
+      Class<MessageType> messageClass) throws RosInitException;
 
   /**
    * @param <MessageType>
@@ -172,44 +169,37 @@ public class Node {
    *           initialized or other wackyness. TODO specify exceptions that
    *           might be thrown here.
    */
-  public <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
+  <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
       final MessageListener<MessageType> callback, Class<MessageType> messageClass)
-      throws RosInitException {
-    try {
-      String resolvedTopicName = resolveName(topicName);
-      Message message = (Message) messageClass.newInstance();
-      TopicDefinition topicDefinition =
-          TopicDefinition.create(new GraphName(resolvedTopicName), MessageDefinition.create(
-              message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
-      org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
-          node.createSubscriber(topicDefinition, messageClass,
-              new MessageDeserializer<MessageType>(messageClass));
-      subscriber.addMessageListener(callback);
-      return new Subscriber<MessageType>(resolvedTopicName, callback, messageClass, subscriber);
-    } catch (Exception e) {
-      throw new RosInitException(e);
-    }
-  }
-
+      throws RosInitException;
+  
   /**
-   * Create a {@link ParameterClient} to query and set parameters on the ROS
-   * parameter server.
+   * Create a server to response to a particular service.
    * 
-   * @return {@link ParameterClient} with {@link NameResolver} in this
-   *         namespace.
+   * @param <RequestType> Type for the request.
+   * @param <ResponseType> Type for the response.
+   * @param serviceDefinition Definition of the service.
+   * @param responseBuilder A builder for the response.
+   * 
+   * @return The service server which will handle the service requests.
+   * 
+   * @throws Exception
    */
   public <RequestType, ResponseType> ServiceServer createServiceServer(
       ServiceDefinition serviceDefinition,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
-    return node.createServiceServer(serviceDefinition, responseBuilder);
-  }
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception;
 
-  public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType>
+  /**
+   * Create a service client.
+   * 
+   * @param <ResponseMessageType> The message type of the response.
+   * @param serviceIdentifier Identifier for the service.
+   * @param responseMessageClass The message class for the response.
+   * @return
+   */
+  <ResponseMessageType extends Message> ServiceClient<ResponseMessageType>
       createServiceClient(ServiceIdentifier serviceIdentifier,
-          Class<ResponseMessageType> responseMessageClass) {
-    return node.createServiceClient(serviceIdentifier,
-        new MessageDeserializer<ResponseMessageType>(responseMessageClass));
-  }
+          Class<ResponseMessageType> responseMessageClass);
 
   /**
    * Returns a {@link ServiceIdentifier} for communicating with the current
@@ -221,112 +211,14 @@ public class Node {
    * @return {@link ServiceIdentifier} of current {@Service} provider
    *         or null if none present.
    */
-  public ServiceIdentifier lookupService(String serviceName, Service<?, ?> serviceType) {
-    // TODO(kwc) the need for the serviceType is an artifact of the
-    // ServiceIdentifier type. I would like to eliminate this need.
-    GraphName resolvedServiceName = new GraphName(resolveName(serviceName));
-    try {
-      return node.lookupService(resolvedServiceName, serviceType);
-    } catch (RemoteException e) {
-      return null;
-    } catch (XmlRpcTimeoutException e) {
-      // TODO(kwc): change timeout policies
-      return null;
-    }
-  }
+  ServiceIdentifier lookupService(String serviceName, Service<?, ?> serviceType);
 
   /**
-   * Returns the current time. In ROS, time can be wallclock (actual) or
-   * simulated, so it is important to use {@code Node.getCurrentTime()} instead
-   * of using the standard Java routines for determining the current time.
+   * Create a {@link ParameterClient} to query and set parameters on the ROS
+   * parameter server.
    * 
-   * @return the current time
+   * @return {@link ParameterClient} with {@link NameResolver} in this
+   *         namespace.
    */
-  public Time getCurrentTime() {
-    return timeProvider.getCurrentTime();
-  }
-
-  /**
-   * @return The fully resolved name of this namespace, e.g. "/foo/bar/boop".
-   */
-  public String getName() {
-    return nodeName.toString();
-  }
-
-  /**
-   * @return Logger for this node, which will also perform logging to /rosout.
-   */
-  public Log getLog() {
-    return log;
-  }
-
-  /**
-   * Resolve the given name, using ROS conventions, into a full ROS namespace
-   * name. Will be relative to the current namespace unless the name is global.
-   * 
-   * @param name
-   *          The name to resolve.
-   * @return Fully resolved ros namespace name.
-   * @throws RosNameException
-   */
-  public String resolveName(String name) {
-    return resolver.resolveName(name);
-  }
-
-  public void shutdown() {
-    node.shutdown();
-  }
-
-  /**
-   * @return {@link URI} of {@link Master} that this node is attached to.
-   */
-  public URI getMasterUri() {
-    return configuration.getMasterUri();
-  }
-
-  /**
-   * @return {@link NameResolver} for this namespace.
-   */
-  public NodeNameResolver getResolver() {
-    return resolver;
-  }
-
-  public ParameterClient createParameterClient() {
-    try {
-      return ParameterClient.create(getName(), getMasterUri(), resolver);
-    } catch (MalformedURLException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * @return the {@link URI} of this {@link Node}
-   */
-  public URI getUri() {
-    return node.getUri();
-  }
-
-  /**
-   * Poll for whether or not Node is current fully registered with
-   * {@link MasterServer}.
-   * 
-   * @return true if Node is fully registered with {@link MasterServer}.
-   *         {@code isRegistered()} can go to false if new publisher or
-   *         subscribers are created.
-   */
-  public boolean isRegistered() {
-    return node.isRegistered();
-  }
-
-  /**
-   * Poll for whether or not registration with the {@link MasterServer} is
-   * proceeding normally. If this returns false, it means that the
-   * {@link MasterServer} is out of contact or is misbehaving.
-   * 
-   * @return true if Node registrations are proceeding normally with
-   *         {@link MasterServer}.
-   */
-  public boolean isRegistrationOk() {
-    return node.isRegistrationOk();
-  }
+  ParameterClient createParameterClient();
 }
