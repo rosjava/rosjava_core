@@ -190,24 +190,16 @@ public class Node {
     }
   }
 
-  /**
-   * Create a {@link ParameterClient} to query and set parameters on the ROS
-   * parameter server.
-   * 
-   * @return {@link ParameterClient} with {@link NameResolver} in this
-   *         namespace.
-   */
   public <RequestType, ResponseType> ServiceServer createServiceServer(
       ServiceDefinition serviceDefinition,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
     return node.createServiceServer(serviceDefinition, responseBuilder);
   }
 
-  public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType>
-      createServiceClient(ServiceDefinition serviceDefinition,
-          Class<ResponseMessageType> responseMessageClass) {
-    return node.createServiceClient(serviceDefinition,
-        new MessageDeserializer<ResponseMessageType>(responseMessageClass));
+  public <ResponseType> ServiceClient<ResponseType> createServiceClient(
+      ServiceDefinition serviceDefinition, Class<ResponseType> responseMessageClass) {
+    return node.createServiceClient(serviceDefinition, new MessageDeserializer<ResponseType>(
+        responseMessageClass));
   }
 
   /**
@@ -287,6 +279,13 @@ public class Node {
     return resolver;
   }
 
+  /**
+   * Create a {@link ParameterClient} to query and set parameters on the ROS
+   * parameter server.
+   * 
+   * @return {@link ParameterClient} with {@link NameResolver} in this
+   *         namespace.
+   */
   public ParameterClient createParameterClient() {
     try {
       return ParameterClient.create(getName(), getMasterUri(), resolver);
