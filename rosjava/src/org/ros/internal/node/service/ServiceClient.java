@@ -84,11 +84,11 @@ public class ServiceClient<ResponseMessageType> {
   }
 
   public static <T> ServiceClient<T> create(GraphName nodeName,
-      ServiceIdentifier serviceIdentifier, MessageDeserializer<T> deserializer) {
-    return new ServiceClient<T>(nodeName, serviceIdentifier, deserializer);
+      ServiceDefinition serviceDefinition, MessageDeserializer<T> deserializer) {
+    return new ServiceClient<T>(nodeName, serviceDefinition, deserializer);
   }
 
-  private ServiceClient(GraphName nodeName, ServiceIdentifier serviceIdentifier,
+  private ServiceClient(GraphName nodeName, ServiceDefinition serviceDefinition,
       MessageDeserializer<ResponseMessageType> deserializer) {
     this.deserializer = deserializer;
     responseListeners = Lists.newLinkedList();
@@ -96,7 +96,7 @@ public class ServiceClient<ResponseMessageType> {
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
             // TODO(damonkohler): Support non-persistent connections.
-            .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceIdentifier.toHeader())
+            .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceDefinition.toHeader())
             .build();
     channelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),

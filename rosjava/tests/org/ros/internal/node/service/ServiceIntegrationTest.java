@@ -41,22 +41,24 @@ import java.util.concurrent.TimeUnit;
 public class ServiceIntegrationTest {
 
   private MasterServer masterServer;
+  private ServiceIdentifier serviceIdentifier;
+  private ServiceDefinition serviceDefinition;
 
   @Before
   public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
+    serviceIdentifier = new ServiceIdentifier(new GraphName("/add_two_ints"), null);
+    serviceDefinition =
+        new ServiceDefinition(serviceIdentifier, AddTwoInts.__s_getDataType(),
+            AddTwoInts.__s_getMD5Sum());
   }
 
   @Test
   public void PesistentServiceConnectionTest() throws Exception {
-    ServiceDefinition definition =
-        new ServiceDefinition(new GraphName("/add_two_ints"), AddTwoInts.__s_getDataType(),
-            AddTwoInts.__s_getMD5Sum());
-
     Node serverNode = Node.createPrivate(new GraphName("/server"), masterServer.getUri(), 0, 0);
     ServiceServer server =
-        serverNode.createServiceServer(definition,
+        serverNode.createServiceServer(serviceDefinition,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>(
                 new MessageSerializer<AddTwoInts.Response>(),
                 new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class)) {
@@ -70,7 +72,7 @@ public class ServiceIntegrationTest {
 
     Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
     ServiceClient<AddTwoInts.Response> client =
-        clientNode.createServiceClient(new ServiceIdentifier(server.getUri(), definition),
+        clientNode.createServiceClient(server.getDefinition(),
             new MessageDeserializer<AddTwoInts.Response>(AddTwoInts.Response.class));
 
     // TODO(damonkohler): This is a hack that we should remove once it's
@@ -98,15 +100,11 @@ public class ServiceIntegrationTest {
 
   @Test
   public void RequestFailureTest() throws Exception {
-    ServiceDefinition definition =
-        new ServiceDefinition(new GraphName("/add_two_ints"), AddTwoInts.__s_getDataType(),
-            AddTwoInts.__s_getMD5Sum());
-
     final String errorMessage = "Error!";
 
     Node serverNode = Node.createPrivate(new GraphName("/server"), masterServer.getUri(), 0, 0);
     ServiceServer server =
-        serverNode.createServiceServer(definition,
+        serverNode.createServiceServer(serviceDefinition,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>(
                 new MessageSerializer<AddTwoInts.Response>(),
                 new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class)) {
@@ -118,9 +116,9 @@ public class ServiceIntegrationTest {
 
     Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
     ServiceClient<AddTwoInts.Response> client =
-        clientNode.createServiceClient(new ServiceIdentifier(server.getUri(), definition),
+        clientNode.createServiceClient(server.getDefinition(),
             new MessageDeserializer<AddTwoInts.Response>(AddTwoInts.Response.class));
-
+    
     // TODO(damonkohler): This is a hack that we should remove once it's
     // possible to block on a connection being established.
     Thread.sleep(100);

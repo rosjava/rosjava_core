@@ -16,35 +16,25 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.ros.internal.namespace.GraphName;
-import org.ros.internal.transport.ConnectionHeaderFields;
 
 import java.net.URI;
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ServiceIdentifier {
 
+  private final GraphName name;
   private final URI uri;
-  private final ServiceDefinition serviceDefinition;
 
-  public ServiceIdentifier(URI uri, ServiceDefinition serviceDefinition) {
+  public ServiceIdentifier(GraphName name, URI uri) {
+    this.name = name;
     this.uri = uri;
-    this.serviceDefinition = serviceDefinition;
-  }
-
-  public Map<String, String> toHeader() {
-    return ImmutableMap.<String, String>builder()
-        .put(ConnectionHeaderFields.SERVICE, serviceDefinition.getName().toString())
-        .putAll(serviceDefinition.toHeader()).build();
   }
 
   public GraphName getName() {
-    return serviceDefinition.getName();
+    return name;
   }
 
   public URI getUri() {
@@ -53,11 +43,38 @@ public class ServiceIdentifier {
 
   @Override
   public String toString() {
-    return "ServiceIdentifier<" + uri.toString() + "," + serviceDefinition.toString() + ">";
+    return "ServiceIdentifier<" + name + "," + uri + ">";
   }
 
-  public ServiceDefinition getServiceDefinition() {
-    return serviceDefinition;
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((uri == null) ? 0 : uri.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    ServiceIdentifier other = (ServiceIdentifier) obj;
+    if (name == null) {
+      if (other.name != null)
+        return false;
+    } else if (!name.equals(other.name))
+      return false;
+    if (uri == null) {
+      if (other.uri != null)
+        return false;
+    } else if (!uri.equals(other.uri))
+      return false;
+    return true;
   }
 
 }

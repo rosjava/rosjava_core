@@ -41,7 +41,6 @@ import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-import org.ros.message.Service;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -125,8 +124,8 @@ public class Node {
   }
 
   public <ResponseMessageType> ServiceClient<ResponseMessageType> createServiceClient(
-      ServiceIdentifier serviceIdentifier, MessageDeserializer<ResponseMessageType> deserializer) {
-    return serviceFactory.createServiceClient(serviceIdentifier, deserializer);
+      ServiceDefinition serviceDefinition, MessageDeserializer<ResponseMessageType> deserializer) {
+    return serviceFactory.createServiceClient(serviceDefinition, deserializer);
   }
 
   void start() {
@@ -190,14 +189,12 @@ public class Node {
     return slaveServer.getAddress();
   }
 
-  public ServiceIdentifier lookupService(GraphName serviceName, Service<?, ?> serviceType)
+  public ServiceIdentifier lookupService(GraphName serviceName)
       throws RemoteException, XmlRpcTimeoutException {
     Response<URI> response =
         masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
     if (response.getStatusCode() == StatusCode.SUCCESS) {
-      ServiceDefinition serviceDefinition =
-          new ServiceDefinition(serviceName, serviceType.getDataType(), serviceType.getMD5Sum());
-      return new ServiceIdentifier(response.getResult(), serviceDefinition);
+      return new ServiceIdentifier(serviceName, response.getResult());
     } else {
       return null;
     }

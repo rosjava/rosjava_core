@@ -16,6 +16,8 @@
 
 package org.ros.internal.node;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.MessageDeserializer;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.MasterServer;
@@ -83,27 +85,28 @@ public class ServiceFactory {
    * created, it is connected to the {@link ServiceServer}.
    * 
    * @param <ResponseMessageType>
-   * @param serviceIdentifier the {@link ServiceIdentifier} of the server
+   * @param serviceDefinition the {@link ServiceIdentifier} of the server
    * @return a {@link ServiceClient} instance
    */
   @SuppressWarnings("unchecked")
   public <ResponseMessageType> ServiceClient<ResponseMessageType> createServiceClient(
-      ServiceIdentifier serviceIdentifier, MessageDeserializer<ResponseMessageType> deserializer) {
+      ServiceDefinition serviceDefinition, MessageDeserializer<ResponseMessageType> deserializer) {
+    Preconditions.checkNotNull(serviceDefinition.getUri());
     ServiceClient<ResponseMessageType> serviceClient;
-    String name = serviceIdentifier.getName().toString();
+    String name = serviceDefinition.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasServiceClient(name)) {
         serviceClient = (ServiceClient<ResponseMessageType>) serviceManager.getServiceClient(name);
       } else {
-        serviceClient = ServiceClient.create(nodeName, serviceIdentifier, deserializer);
+        serviceClient = ServiceClient.create(nodeName, serviceDefinition, deserializer);
         createdNewService = true;
       }
     }
 
     if (createdNewService) {
-      serviceClient.connect(serviceIdentifier.getUri());
+      serviceClient.connect(serviceDefinition.getUri());
     }
     return serviceClient;
   }

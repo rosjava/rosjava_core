@@ -204,9 +204,9 @@ public class Node {
   }
 
   public <ResponseMessageType extends Message> ServiceClient<ResponseMessageType>
-      createServiceClient(ServiceIdentifier serviceIdentifier,
+      createServiceClient(ServiceDefinition serviceDefinition,
           Class<ResponseMessageType> responseMessageClass) {
-    return node.createServiceClient(serviceIdentifier,
+    return node.createServiceClient(serviceDefinition,
         new MessageDeserializer<ResponseMessageType>(responseMessageClass));
   }
 
@@ -216,16 +216,13 @@ public class Node {
    * determined.
    * 
    * @param serviceName
-   * @param serviceType
    * @return {@link ServiceIdentifier} of current {@Service} provider
    *         or null if none present.
    */
-  public ServiceIdentifier lookupService(String serviceName, Service<?, ?> serviceType) {
-    // TODO(kwc) the need for the serviceType is an artifact of the
-    // ServiceIdentifier type. I would like to eliminate this need.
+  public ServiceIdentifier lookupService(String serviceName) {
     GraphName resolvedServiceName = new GraphName(resolveName(serviceName));
     try {
-      return node.lookupService(resolvedServiceName, serviceType);
+      return node.lookupService(resolvedServiceName);
     } catch (RemoteException e) {
       return null;
     } catch (XmlRpcTimeoutException e) {

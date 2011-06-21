@@ -17,7 +17,6 @@
 package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,21 +42,16 @@ public class ServiceServer {
   private final AdvertiseAddress advertiseAddress;
   private final ServiceResponseBuilder<?, ?> responseBuilder;
   private final ServiceDefinition definition;
-  private final Map<String, String> header;
 
   public ServiceServer(ServiceDefinition definition, ServiceResponseBuilder<?, ?> responseBuilder,
       AdvertiseAddress advertiseAddress) {
     this.definition = definition;
     this.responseBuilder = responseBuilder;
     this.advertiseAddress = advertiseAddress;
-    header =
-        ImmutableMap.<String, String>builder()
-            .put(ConnectionHeaderFields.SERVICE, definition.getName().toString())
-            .putAll(definition.toHeader())
-            .build();
   }
 
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
+    Map<String, String> header = getDefinition().toHeader();
     if (DEBUG) {
       log.info("Outgoing handshake header: " + header);
     }
@@ -78,6 +72,15 @@ public class ServiceServer {
 
   public GraphName getName() {
     return definition.getName();
+  }
+
+  /**
+   * @return a new {@link ServiceDefinition} with this {@link ServiceServer}'s
+   *         {@link URI}
+   */
+  public ServiceDefinition getDefinition() {
+    ServiceIdentifier identifier = new ServiceIdentifier(definition.getName(), getUri());
+    return new ServiceDefinition(identifier, definition.getType(), definition.getMd5Checksum());
   }
 
   public ChannelHandler createRequestHandler() {

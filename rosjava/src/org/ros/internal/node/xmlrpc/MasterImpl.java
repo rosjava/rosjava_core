@@ -23,7 +23,6 @@ import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
@@ -95,13 +94,10 @@ public class MasterImpl implements Master {
   @Override
   public List<Object> registerService(String callerId, String serviceName, String serviceApi,
       String callerApi) {
-    // TODO(damonkohler): Pull out factory methods to avoid passing in the null
-    // type and md5Checksum here.
     ServiceIdentifier serviceIdentifier;
     try {
       serviceIdentifier =
-          new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(new GraphName(
-              serviceName), null, null));
+          new ServiceIdentifier(new GraphName(serviceName), new URI(serviceApi));
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
@@ -111,17 +107,13 @@ public class MasterImpl implements Master {
 
   @Override
   public List<Object> unregisterService(String callerId, String serviceName, String serviceApi) {
-    // TODO(damonkohler): Pull out factory methods to avoid passing in the null
-    // type and md5Checksum here.
-    ServiceIdentifier description;
+    ServiceIdentifier serviceIdentifier;
     try {
-      description =
-          new ServiceIdentifier(new URI(serviceApi), new ServiceDefinition(new GraphName(
-              serviceName), null, null));
+      serviceIdentifier = new ServiceIdentifier(new GraphName(serviceName), new URI(serviceApi));
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
-    int result = master.unregisterService(description);
+    int result = master.unregisterService(serviceIdentifier);
     return Response.createSuccess("Success", result).toList();
   }
 

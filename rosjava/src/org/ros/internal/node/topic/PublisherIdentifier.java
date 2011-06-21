@@ -29,7 +29,8 @@ public class PublisherIdentifier {
   private final SlaveIdentifier slaveIdentifier;
   private final TopicIdentifier topicIdentifier;
 
-  public static PublisherIdentifier createFromStrings(String nodeName, String uri, String topicName) {
+  public static PublisherIdentifier
+      createFromStrings(String nodeName, String uri, String topicName) {
     return new PublisherIdentifier(SlaveIdentifier.createFromStrings(nodeName, uri),
         TopicIdentifier.createFromString(topicName));
   }
@@ -71,16 +72,23 @@ public class PublisherIdentifier {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
     PublisherIdentifier other = (PublisherIdentifier) obj;
     if (slaveIdentifier == null) {
-      if (other.slaveIdentifier != null) return false;
-    } else if (!slaveIdentifier.equals(other.slaveIdentifier)) return false;
+      if (other.slaveIdentifier != null)
+        return false;
+    } else if (!slaveIdentifier.equals(other.slaveIdentifier))
+      return false;
     if (topicIdentifier == null) {
-      if (other.topicIdentifier != null) return false;
-    } else if (!topicIdentifier.equals(other.topicIdentifier)) return false;
+      if (other.topicIdentifier != null)
+        return false;
+    } else if (!topicIdentifier.equals(other.topicIdentifier))
+      return false;
     return true;
   }
 
