@@ -30,7 +30,7 @@ public class PassthroughTestNode implements NodeMain {
 
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
-    node = new Node("test_node", nodeConfiguration);
+    node = new DefaultNode("test_node", nodeConfiguration);
 
     // The goal of the passthrough node is simply to retransmit the messages
     // sent to it. This allows us to external verify that the node is compatible

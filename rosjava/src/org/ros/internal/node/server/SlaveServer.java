@@ -16,12 +16,7 @@
 
 package org.ros.internal.node.server;
 
-import java.lang.management.ManagementFactory;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
@@ -43,7 +38,12 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
 
-import com.google.common.collect.Lists;
+import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

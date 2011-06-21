@@ -73,8 +73,8 @@ public class Time implements Comparable<Time> {
     return new Time(secs - d.secs, nsecs - d.nsecs);
   }
 
-  public Time subtract(Time t) {
-    return new Time(secs - t.secs, nsecs - t.nsecs);
+  public Duration subtract(Time t) {
+    return new Duration(secs - t.secs, nsecs - t.nsecs);
   }
 
   public static Time fromMillis(double timeInMillis) {
@@ -99,7 +99,7 @@ public class Time implements Comparable<Time> {
   }
 
   public boolean isZero() {
-    return (secs == 0) && (nsecs == 0);
+    return totalNsecs() == 0;
   }
 
   public void normalize() {

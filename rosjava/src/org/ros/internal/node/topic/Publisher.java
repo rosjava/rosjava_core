@@ -59,6 +59,30 @@ public class Publisher<MessageType> extends Topic {
   public PublisherDefinition toPublisherIdentifier(SlaveIdentifier description) {
     return PublisherDefinition.createPublisherDefinition(description, getTopicDefinition());
   }
+  
+  /**
+   * Does the publisher have any connected subscribers?
+   * 
+   * <p>This will be about subscribers registered. If the subscriber didn't shut down
+   * properly it will not be unregistered.
+   * 
+   * @return True if there are connected subscribers, false otherwise.
+   */
+  public boolean hasSubscribers() {
+	  return !subscribers.isEmpty();
+  }
+  
+  /**
+   * Get the number of subscribers currently connected to the publisher.
+   * 
+   * <p>This will be about subscribers registered. If the subscriber didn't shut down
+   * properly it will not be unregistered.
+   * 
+   * @return The number of subscribers currently connected to the publisher.
+   */
+  public int getNumberSubscribers() {
+	  return subscribers.size();
+  }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
   public void publish(MessageType message) {

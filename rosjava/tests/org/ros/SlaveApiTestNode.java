@@ -30,7 +30,7 @@ public class SlaveApiTestNode implements NodeMain {
 
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
-    node = new Node("test_node", nodeConfiguration);
+    node = new DefaultNode("test_node", nodeConfiguration);
 
     // Basic chatter in/out test.
     Publisher<org.ros.message.std_msgs.String> pub_string =

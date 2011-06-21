@@ -38,6 +38,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 
 /**
+ * The TCP server which is used for data communication between publishers and
+ * subscribers or between a service and a service client.
+ * 
+ * <p>This server is used after publishers, subscribers, services and service
+ * clients have been told about each other by the master.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TcpRosServer {

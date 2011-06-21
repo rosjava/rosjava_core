@@ -67,7 +67,10 @@ public class Node {
   private final ServiceFactory serviceFactory;
   private final PublisherFactory publisherFactory;
 
-  private boolean started;
+  /**
+   * True if the node is in a running state, false otherwise.
+   */
+  private boolean running;
 
   public static Node createPublic(GraphName nodeName, URI masterUri, String advertiseHostname,
       int xmlRpcBindPort, int tcpRosBindPort) {
@@ -92,7 +95,7 @@ public class Node {
   Node(GraphName nodeName, URI masterUri, BindAddress tcpRosBindAddress,
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
       AdvertiseAddress xmlRpcAdvertiseAddress) {
-    started = false;
+    running = false;
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
@@ -128,13 +131,28 @@ public class Node {
     return serviceFactory.createServiceClient(serviceDefinition, deserializer);
   }
 
+  /**
+   * Start the node running. This will initiate master registration.
+   */
   void start() {
-    if (started) {
-      throw new IllegalStateException("Already started.");
+    if (running) {
+      throw new IllegalStateException("Already running.");
     }
-    started = true;
+    running = true;
     slaveServer.start();
     masterRegistration.start(slaveServer.toSlaveIdentifier());
+  }
+  
+  /**
+   * Is the node running?
+   * 
+   * <p>A running node may not be fully initialized yet, it is either in the process
+   * of starting up or is running.
+   * 
+   * @return True if the node is running, false otherwise.
+   */
+  public boolean isRunning() {
+	  return running;
   }
 
   /**
@@ -145,6 +163,7 @@ public class Node {
     // NOTE(damonkohler): We don't want to raise potentially spurious
     // exceptions during shutdown that would interrupt the process. This is
     // simply best effort cleanup.
+	running = false;
     slaveServer.shutdown();
     masterRegistration.shutdown();
     for (Publisher<?> publisher : topicManager.getPublishers()) {

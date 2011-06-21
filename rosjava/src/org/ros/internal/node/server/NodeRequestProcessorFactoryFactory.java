@@ -18,6 +18,8 @@ package org.ros.internal.node.server;
 
 import org.apache.xmlrpc.XmlRpcRequest;
 import org.apache.xmlrpc.server.RequestProcessorFactoryFactory;
+import org.apache.xmlrpc.server.RequestProcessorFactoryFactory.RequestProcessorFactory;
+
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

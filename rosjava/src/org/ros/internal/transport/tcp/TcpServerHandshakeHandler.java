@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.MessageEvent;
@@ -36,6 +37,8 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import java.util.Map;
 
 /**
+ * A {@link ChannelHandler} which will process the TCP server handshake.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  * @author kwc@willowgarage.com (Ken Conley)
  */
@@ -84,6 +87,10 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
         throw new RuntimeException(future.getCause());
       }
       publisher.addChannel(channel);
+      
+      // Once the handshake is complete, there will be nothing incoming on the
+      // channel. Replace the handshake handler with a handler which will
+      // drop everything.
       pipeline.replace(this, "DiscardHandler", new SimpleChannelHandler());
     }
   }

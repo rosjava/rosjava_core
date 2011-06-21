@@ -17,6 +17,7 @@
 package org.ros.tutorials.pubsub;
 
 import org.apache.commons.logging.Log;
+import org.ros.DefaultNode;
 import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.NodeConfiguration;
@@ -36,7 +37,7 @@ public class Listener implements NodeMain {
   @Override
   public void main(NodeConfiguration configuration) {
     try {
-      node = new Node("listener", configuration);
+      node = new DefaultNode("listener", configuration);
       final Log log = node.getLog();
       node.createSubscriber("chatter", new MessageListener<org.ros.message.std_msgs.String>() {
         @Override

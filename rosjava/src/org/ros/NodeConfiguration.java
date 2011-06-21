@@ -35,6 +35,7 @@ import java.util.List;
 public class NodeConfiguration {
   
   public static final String DEFAULT_HOST = Address.LOCALHOST;
+
   public static final String DEFAULT_MASTER_URI = "http://" + DEFAULT_HOST + ":11311/";
 
   private NameResolver parentResolver;
@@ -149,5 +150,4 @@ public class NodeConfiguration {
   public void setNodeNameOverride(String nodeNameOverride) {
     this.nodeNameOverride = nodeNameOverride;
   }
-
 }
