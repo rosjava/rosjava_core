@@ -22,7 +22,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-
+import org.ros.DefaultNode;
 import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.NodeConfiguration;
@@ -70,7 +70,7 @@ public class RosImageView<T> extends ImageView implements NodeMain {
   public void main(NodeConfiguration nodeConfiguration) throws Exception {
     Preconditions.checkState(node == null);
     // TODO(damonkohler): This node name needs to be unique.
-    node = new Node("/android_image_view", nodeConfiguration);
+    node = new DefaultNode("/android_image_view", nodeConfiguration);
     node.createSubscriber(topicName, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {

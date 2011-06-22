@@ -20,7 +20,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-
+import org.ros.DefaultNode;
 import org.ros.Node;
 import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
@@ -87,7 +87,7 @@ public class OrientationPublisher implements NodeMain {
   @Override
   public void main(NodeConfiguration configuration) throws Exception {
     try {
-      node = new Node("orientation", configuration);
+      node = new DefaultNode("orientation", configuration);
       Publisher<org.ros.message.geometry_msgs.PoseStamped> publisher =
           node.createPublisher("android/orientation",
               org.ros.message.geometry_msgs.PoseStamped.class);

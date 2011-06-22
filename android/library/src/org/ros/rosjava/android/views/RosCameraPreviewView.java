@@ -23,7 +23,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.util.AttributeSet;
-
+import org.ros.DefaultNode;
 import org.ros.Node;
 import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
@@ -84,7 +84,7 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
   @Override
   public void main(NodeConfiguration nodeConfiguration) throws Exception {
     Preconditions.checkState(node == null);
-    node = new Node("/anonymous", nodeConfiguration);
+    node = new DefaultNode("/anonymous", nodeConfiguration);
     NameResolver resolver = node.getResolver().createResolver("camera");
     imagePublisher = node.createPublisher(resolver.resolveName("image_raw"), CompressedImage.class);
     cameraInfoPublisher =

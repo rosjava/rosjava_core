@@ -19,6 +19,5 @@
 	<classpathentry kind="lib" path="lib/netty-3.2.4.Final.jar"/>
 	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/dnsjava-2.1.1.jar"/>
-	<classpathentry kind="var" path="ABSOLUTE_LAYOUT"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

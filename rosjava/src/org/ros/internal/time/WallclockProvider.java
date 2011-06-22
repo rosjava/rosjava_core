@@ -29,4 +29,5 @@ public class WallclockProvider implements TimeProvider {
   public Time getCurrentTime() {
     return Time.fromMillis(System.currentTimeMillis());
   }
+
 }

@@ -21,7 +21,7 @@ import com.google.common.base.Preconditions;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
-
+import org.ros.DefaultNode;
 import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.NodeConfiguration;
@@ -67,7 +67,7 @@ public class RosTextView<T> extends TextView implements NodeMain {
   public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
     if (node == null) {
       Preconditions.checkNotNull(nodeConfiguration);
-      node = new Node("/anonymous", nodeConfiguration);
+      node = new DefaultNode("/anonymous", nodeConfiguration);
     }
     node.createSubscriber(topicName, new MessageListener<T>() {
       @Override

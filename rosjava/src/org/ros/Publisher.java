@@ -46,14 +46,14 @@ public class Publisher<MessageType> {
   }
 
   /**
-   * @param m
+   * @param message
    *          The {@link Message} to publish. This message will be available on
    *          the topic that this {@link Publisher} has been associated with.
    */
-  public void publish(MessageType m) {
+  public void publish(MessageType message) {
     // publisher is shared across multiple publisher instances, so lock access.
     synchronized (this) {
-      publisher.publish(m);
+      publisher.publish(message);
     }
   }
 
