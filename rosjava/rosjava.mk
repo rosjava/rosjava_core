@@ -16,6 +16,7 @@ msg-deps:
 	rosrun rosjava generate_msg_depends.py $(PACKAGE_NAME)
 
 clean:
+	-rm ros.properties
 	-ant clean
 
 wipe-msgs:

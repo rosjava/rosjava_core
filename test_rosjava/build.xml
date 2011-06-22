@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="." default="default">
+
+  <property file="ros.properties" />
+  <property name="build" location="build" />
+
+  <property name="dist" location="dist" />
+  <property name="build" location="build" />
+  <property name="src" location="src" />
+  
+  <property name="javac-source" value="1.6" />
+  <property name="javac-target" value="1.6" />
+  <property name="debuglevel" value="source,lines,vars" />
+
+  <path id="classpath">
+    <pathelement path="${ros.classpath}" />
+  </path>
+  
+  <echo message="${toString:classpath}" />
+
+  <target name="default" depends="init, compile, jar" />
+
+  <target name="init">
+    <mkdir dir="${build}" />
+    <mkdir dir="${dist}" />
+  </target>
+
+  <target name="compile" depends="init">
+
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build}" source="${javac-source}"
+         target="${javac-target}" includeantruntime="false">
+      <classpath refid="classpath" />
+      <src path="${src}" />
+    </javac>
+  </target>
+
+  <target name="jar" />
+
+  <target name="clean">
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
+  </target>
+
+</project>

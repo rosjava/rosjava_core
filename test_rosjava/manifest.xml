@@ -1,0 +1,20 @@
+<package>
+  <description brief="test_rosjava">
+
+     test_rosjava
+
+  </description>
+  <author>Ken Conley</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/test_rosjava</url>
+
+  <depend package="rosjava" />
+  <depend package="test_ros" />
+  <depend package="std_msgs" />
+  <depend package="rostest" />
+  <depend package="rosgraph_msgs" />
+
+</package>
+
+

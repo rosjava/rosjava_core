@@ -38,6 +38,8 @@ import roslib.rosenv
 import roslib.packages
 import roslib.stacks
 
+from generate_msg_depends import msg_jar_file_path, is_msg_pkg, is_srv_pkg
+
 def usage():
     print "generate_properties.py <package-name>"
     sys.exit(os.EX_USAGE)
@@ -52,14 +54,14 @@ def get_classpath(package):
     pathelements = []
     for pkg in depends:
         m = rospack.manifests[pkg]
+        pkg_dir = roslib.packages.get_pkg_dir(pkg)
         for e in [x for x in m.exports if x.tag == 'rosjava-pathelement']:
             try:
-                pathelements.append(e.attrs['location'])
+                pathelements.append(os.path.join(pkg_dir, e.attrs['location']))
             except KeyError:
                 print >> sys.stderr, "Invalid <rosjava-pathelement> tag in package %s"%(pkg)
-        # TODO: add in msg/srv jar deps
-        # if has_msgs(pkg) or has_srvs(pkg):
-        # pathelements.append(msggen_jar_path(pkg))
+        if is_msg_pkg(pkg) or is_srv_pkg(pkg):
+            pathelements.append(msg_jar_file_path(pkg))
     return os.pathsep.join(resolve_pathelements(pathelements))
 
 def generate_properties_main(argv=None):
