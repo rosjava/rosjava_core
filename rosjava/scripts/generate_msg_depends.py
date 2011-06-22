@@ -33,6 +33,7 @@
 
 import os
 import sys
+import shutil
 import subprocess
 
 import roslib.rosenv
@@ -58,16 +59,19 @@ def init():
     _srvgen = os.path.join(_rosjava_dir, 'scripts', 'java_srvs.py')
     
 def msggen_source_path(pkg):
-    return os.path.join(_ros_home, 'rosjava', 'msg_gen', pkg)
+    return os.path.join(_ros_home, 'rosjava', 'gen', 'msg', pkg)
 
 def srvgen_source_path(pkg):
-    return os.path.join(_ros_home, 'rosjava', 'srv_gen', pkg)
+    return os.path.join(_ros_home, 'rosjava', 'gen', 'srv', pkg)
 
 def msggen_jar_path():
     return os.path.join(_ros_home, 'rosjava', 'lib')
 
-def msggen_build_path():
-    return os.path.join(_ros_home, 'rosjava', 'build')
+def msggen_build_path(pkg):
+    return os.path.join(_ros_home, 'rosjava', 'build', 'msg', pkg)
+
+def srvgen_build_path(pkg):
+    return os.path.join(_ros_home, 'rosjava', 'build', 'srv', pkg)
 
 def get_msg_packages(rospack, package):
     depends = rospack.depends([package])[package]
@@ -99,7 +103,7 @@ def generate_srv_source(package):
     
 def build_msg(package):
     source_path = msggen_source_path(package)
-    build_path = msggen_build_path()
+    build_path = msggen_build_path(package)
     
     if not os.path.exists(build_path):
         os.makedirs(build_path)
@@ -113,7 +117,7 @@ def build_msg(package):
 
 def build_srv(package):
     source_path = msggen_source_path(package)
-    build_path = msggen_build_path()
+    build_path = srvgen_build_path(package)
     
     if not os.path.exists(build_path):
         os.makedirs(build_path)
@@ -125,41 +129,66 @@ def build_srv(package):
     command = ['javac', '-d', build_path, '-sourcepath', source_path, '-classpath', _rosjava_jar] + java_files
     subprocess.check_call(command)
 
-def build_jar(package):
+def jar_file_path(package):
     jar_path = msggen_jar_path()
     jar_name = '%s.jar'%(package) #TODO: versioning
-    jar_file = os.path.join(jar_path, jar_name)
-    build_path = msggen_build_path()
-    source_path = msggen_source_path(package)
+    return os.path.join(jar_path, jar_name)
     
-    if not os.path.exists(jar_path):
-        os.makedirs(jar_path)
+def build_jar(package):
+    jar_file = jar_file_path(package)
+    msg_build_path = msggen_build_path(package)
+    srv_build_path = srvgen_build_path(package)
+    
+    if not os.path.exists(os.path.dirname(jar_file)):
+        os.makedirs(os.path.dirname(jar_file))
 
     # determine .class files to package by examining .java files
-    java_files = []
-    for d, dirs, files in os.walk(source_path, topdown=True):
-        java_files.extend([os.path.join(d, f) for f in files if f.endswith('.java')])
-    print "source_path", source_path
-    print "JAVA_FILES", java_files
-        
     class_files = []
-    for f in java_files:
-        class_file = f[:-5] + '.class'
-        class_file = build_path + class_file[len(source_path):]
-        class_files.append(class_file)
+    for d, dirs, files in os.walk(msg_build_path, topdown=True):
+        class_files.extend([os.path.join(d, f) for f in files if f.endswith('.class')])
+    for d, dirs, files in os.walk(srv_build_path, topdown=True):
+        class_files.extend([os.path.join(d, f) for f in files if f.endswith('.class')])
         
     command = ['jar', 'cvf', jar_file] + class_files
-    print "JAR", command
+    print "generating jar file %s"%(jar_file)
     subprocess.check_call(command)
     
 def get_up_to_date():
     jar_path = msggen_jar_path()
     up_to_date = []
+    if not os.path.exists(jar_path):
+        return up_to_date
     for f in os.listdir(jar_path):
         if f.endswith('.jar'):
             up_to_date.append(f[:-4])
     return up_to_date
     
+def wipe_msg_depends(package):
+    init()
+    
+    rospack = roslib.packages.ROSPackages()
+    msg_packages = get_msg_packages(rospack, package)
+    srv_packages = get_srv_packages(rospack, package)
+
+    to_delete = []
+    
+    for pkg in msg_packages:
+        to_delete.append(msggen_source_path(pkg))
+        to_delete.append(msggen_build_path(pkg))
+    for pkg in srv_packages:
+        to_delete.append(srvgen_source_path(pkg))
+        to_delete.append(srvgen_build_path(pkg))
+    for pkg in set(msg_packages)  | set(srv_packages):
+        to_delete.append(jar_file_path(pkg))
+
+    to_delete = [x for x in to_delete if os.path.exists(x)]
+    for f in to_delete:
+        print "deleting", f
+        if os.path.isfile(f):
+            os.remove(f)
+        else:
+            shutil.rmtree(f)
+            
 def generate_msg_depends(package):
     init()
 
@@ -192,13 +221,22 @@ def generate_msg_depends(package):
     for pkg in set(msg_packages) | set(srv_packages):
         build_jar(pkg)
 
+from optparse import OptionParser
 def generate_msg_depends_main(argv=None):
+    parser = OptionParser(usage="usage: %prog [options] <package>", prog='generate_msg_depends.py')
+    parser.add_option('--wipe', default=False, action="store_true", dest="wipe")
     if argv is None:
-        argv = sys.argv
-    if len(argv) != 2:
-        usage()
+        argv = sys.argv[1:]
+        
+    options, args = parser.parse_args(argv)
+    if len(args) != 1:
+        parser.error("you may only specify one package argument")
 
-    generate_msg_depends()
+    package = args[0]
+    if options.wipe:
+        wipe_msg_depends(package)
+    else:
+        generate_msg_depends(package)        
     
 if __name__ == '__main__':
     generate_msg_depends_main()

@@ -3,7 +3,7 @@ CMAKE_FLAGS= -Wdev -DCMAKE_TOOLCHAIN_FILE=`rospack find rosbuild`/rostoolchain.c
 
 # The all target does the heavy lifting, creating the build directory and
 # invoking CMake
-all: ant-properties msg-deps srv-deps
+all: ant-properties msg-deps
 	ant
 
 PACKAGE_NAME=$(shell basename $(PWD))
@@ -11,14 +11,15 @@ PACKAGE_NAME=$(shell basename $(PWD))
 ant-properties:
 	rosrun rosjava generate_properties.py $(PACKAGE_NAME) > ros.properties
 
+# msg-deps builds both msgs and srvs
 msg-deps:
-	echo "TODO"
-
-srv-deps:
-	echo "TODO"
+	rosrun rosjava generate_msg_depends.py $(PACKAGE_NAME)
 
 clean:
 	-ant clean
+
+wipe-msgs:
+	rosrun rosjava generate_msg_depends.py --wipe $(PACKAGE_NAME)
 
 # All other targets are just passed through
 test: all
