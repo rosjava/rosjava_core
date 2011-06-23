@@ -54,7 +54,7 @@ public class MasterChooser extends Activity {
           if (uri.toString().length() == 0) {
             uri = new URI(NodeConfiguration.DEFAULT_MASTER_URI);
           }
-          intent.putExtra("ROS_MASTER_URI", uri);
+          intent.putExtra("ROS_MASTER_URI", uri.toString());
           setResult(RESULT_OK, intent);
           finish();
         } catch (URISyntaxException e) {
