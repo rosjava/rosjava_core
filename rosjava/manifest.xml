@@ -16,6 +16,10 @@
   <rosdep name="java"/>
 
   <export>
+    <rosjava-src location="src" />
+    <rosjava-src location="tests" />    
+    <rosjava-src location="tutorials" />
+    
     <rosjava-pathelement location="dist/rosjava.jar" />
     <rosjava-pathelement location="lib/dnsjava-2.1.1.jar" />
     <rosjava-pathelement location="lib/commons-codec-1.3.jar" />

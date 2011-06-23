@@ -3,13 +3,16 @@ CMAKE_FLAGS= -Wdev -DCMAKE_TOOLCHAIN_FILE=`rospack find rosbuild`/rostoolchain.c
 
 # The all target does the heavy lifting, creating the build directory and
 # invoking CMake
-all: ant-properties msg-deps
+all: ant-properties eclipse-project msg-deps
 	ant
 
 PACKAGE_NAME=$(shell basename $(PWD))
 
 ant-properties:
 	rosrun rosjava generate_properties.py $(PACKAGE_NAME) > ros.properties
+
+eclipse-project:
+	rosrun rosjava generate_properties.py --eclipse $(PACKAGE_NAME) > .project
 
 # msg-deps builds both msgs and srvs
 msg-deps:

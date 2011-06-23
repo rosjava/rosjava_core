@@ -52,26 +52,64 @@ def get_classpath(package):
     rospack = roslib.packages.ROSPackages()
     depends = rospack.depends([package])[package]
     pathelements = []
+    tag = 'rosjava-pathelement'
+        
     for pkg in depends:
         m = rospack.manifests[pkg]
         pkg_dir = roslib.packages.get_pkg_dir(pkg)
-        for e in [x for x in m.exports if x.tag == 'rosjava-pathelement']:
+        for e in [x for x in m.exports if x.tag == tag]:
             try:
                 pathelements.append(os.path.join(pkg_dir, e.attrs['location']))
             except KeyError:
-                print >> sys.stderr, "Invalid <rosjava-pathelement> tag in package %s"%(pkg)
+                print >> sys.stderr, "Invalid <%s> tag in package %s"%(tag, pkg)
         if is_msg_pkg(pkg) or is_srv_pkg(pkg):
             pathelements.append(msg_jar_file_path(pkg))
     return os.pathsep.join(resolve_pathelements(pathelements))
 
+def get_src_path(package, src=False):
+    rospack = roslib.packages.ROSPackages()
+    depends = rospack.depends([package])[package]
+    elements = []
+    tag = 'rosjava-src'
+        
+    m = rospack.manifests[package]
+    pkg_dir = roslib.packages.get_pkg_dir(package)
+    for e in [x for x in m.exports if x.tag == tag]:
+        try:
+            elements.append(os.path.join(pkg_dir, e.attrs['location']))
+        except KeyError:
+            print >> sys.stderr, "Invalid <%s> tag in package %s"%(tag, pkg)
+    return os.pathsep.join(resolve_pathelements(elements))
+
 def generate_properties_main(argv=None):
     if argv is None:
         argv = sys.argv
+    use_eclipse = False
+    if '--eclipse' in argv:
+        use_eclipse = True
+        argv = [a for a in argv if a != '--eclipse']
     if len(argv) != 2:
         usage()
     package = argv[1]
-    print 'ros.home=%s'%(roslib.rosenv.get_ros_home())
-    print 'ros.classpath=%s'%(get_classpath(package).replace(':', '\:'))
+    if not use_eclipse:
+        sys.stdout.write('ros.home=%s\n'%(roslib.rosenv.get_ros_home()))
+        sys.stdout.write('ros.classpath=%s\n'%(get_classpath(package).replace(':', '\:')))
+        sys.stdout.write('ros.test_results=%s\n'%(os.path.join(roslib.rosenv.get_test_results_dir(), package)))
+    else:
+        sys.stdout.write("""<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+""")
+        for p in get_classpath(package).split(':'):
+            if p:
+                sys.stdout.write('  <classpathentry kind="lib" path="%s"/>\n'%(p))
+        for p in get_src_path(package).split(':'):
+            if p:
+                sys.stdout.write('  <classpathentry kind="src" path="%s"/>\n'%(p))
+
+        sys.stdout.write("""
+  <classpath kind="output" path="build" />
+</classpath>
+""")
     
 if __name__ == '__main__':
     generate_properties_main()
