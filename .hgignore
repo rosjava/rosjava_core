@@ -10,6 +10,7 @@ syntax: glob
 *.ap_
 *.apk
 local.properties
+ros.properties
 .cproject
 .settings
 rosjava/lib/rosjava.jar

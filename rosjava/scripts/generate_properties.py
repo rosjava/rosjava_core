@@ -99,15 +99,16 @@ def generate_properties_main(argv=None):
         sys.stdout.write("""<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 """)
-        for p in get_classpath(package).split(':'):
-            if p:
-                sys.stdout.write('  <classpathentry kind="lib" path="%s"/>\n'%(p))
         for p in get_src_path(package).split(':'):
             if p:
-                sys.stdout.write('  <classpathentry kind="src" path="%s"/>\n'%(p))
-
-        sys.stdout.write("""
-  <classpath kind="output" path="build" />
+                sys.stdout.write('\t<classpathentry kind="src" path="%s"/>\n'%(p))
+        sys.stdout.write("""\t<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+""")
+        for p in get_classpath(package).split(':'):
+            if p:
+                sys.stdout.write('\t<classpathentry kind="lib" path="%s"/>\n'%(p))
+        sys.stdout.write("""\t<classpath kind="output" path="build"/>
 </classpath>
 """)
     
