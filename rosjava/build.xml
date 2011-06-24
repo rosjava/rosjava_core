@@ -2,6 +2,8 @@
 <project default="default" name="java">
   <import file="../build-common.xml" />
 
+  <property file="ros.properties" />
+  
   <property name="msg-gen" location="${gen}/msg_gen/java" />
   <property name="srv-gen" location="${gen}/srv_gen/java" />
 
@@ -86,30 +88,32 @@
   </target>
 
   <target name="init-test">
-    <mkdir dir="${test-output}" />
+    <mkdir dir="${ros.test_results}" />
   </target>
 
   <target name="test" depends="init-test">
     <!-- clear any previous results -->
     <delete>
-      <fileset dir="${test-output}">
+      <fileset dir="${ros.test_results}">
         <include name="*/**" />
       </fileset>
     </delete>
     <junit printsummary="yes">
       <classpath refid="classpath" />
       <formatter type="xml" />
-      <batchtest todir="${test-output}">
+      <batchtest todir="${ros.test_results}">
         <fileset dir="tests">
           <include name="**/*Test.java" />
         </fileset>
       </batchtest>
     </junit>
-    <junitreport todir="${test-output}">
-      <fileset dir="${test-output}">
+    <junitreport todir="${ros.test_results}">
+      <fileset dir="${ros.test_results}">
         <include name="TEST-*.xml" />
       </fileset>
-      <report format="frames" todir="${test-output}/html" />
+      <!--
+      <report format="frames" todir="${ros.test_results}/html" />
+      -->
     </junitreport>
   </target>
 
