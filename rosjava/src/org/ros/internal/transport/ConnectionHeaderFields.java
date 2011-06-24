@@ -17,6 +17,8 @@
 package org.ros.internal.transport;
 
 /**
+ * Fields found inside the header for node to node communication.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface ConnectionHeaderFields {

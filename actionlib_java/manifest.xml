@@ -1,0 +1,13 @@
+<package>
+  <description brief="Pure Java ROS aclinlib library.">
+    An implementation of actionlib in pure-Java ROS.
+  </description>
+  <author>Keith Hughes/khughes@google.com</author>
+  <license>Apache 2.0</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://rosjava.googlecode.com/</url>
+  <depend package="rosjava"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="actionlib_tutorials"/>
+</package>
+

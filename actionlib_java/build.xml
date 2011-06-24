@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="default" name="java">
+  <import file="../build-common.xml" />
+
+  <property name="lib" location="../rosjava/lib" />
+  <property name="msg-gen" location="${gen}/msg_gen/java" />
+  <property name="srv-gen" location="${gen}/srv_gen/java" />
+
+  <property name="jar.actionlib" location="${dist}/actionlib.jar" />
+
+  <path id="jar.classpath">
+    <pathelement location="${lib}/dnsjava-2.1.1.jar" />
+    <pathelement location="${lib}/commons-codec-1.3.jar" />
+    <pathelement location="${lib}/commons-httpclient-3.1.jar" />
+    <pathelement location="${lib}/commons-logging-1.1.1.jar" />
+    <pathelement location="${lib}/guava-r07.jar" />
+    <pathelement location="${lib}/mockito-all-1.8.5.jar" />
+    <pathelement location="${lib}/netty-3.2.4.Final.jar" />
+    <pathelement location="${lib}/junit-4.8.2.jar" />
+    <pathelement location="${lib}/rosjava.jar" />
+  </path>
+
+  <path id="classpath">
+    <pathelement location="${build}" />
+    <path refid="jar.classpath" />
+  </path>
+
+  <target name="check-msg-gen-skip">
+    <available file="${msg-gen}" type="dir" property="msg-gen.skip" />
+  </target>
+
+  <target name="msg-gen" depends="check-msg-gen-skip" unless="msg-gen.skip">
+    <echo message="Building commonly used ROS messages..." />
+
+    <exec executable="../rosjava/scripts/java_msgs.py">
+      <arg value="-o ${msg-gen}" />
+
+      <!-- list of packages to generate messages for -->
+      <arg value="actionlib_msgs" />
+      <arg value="actionlib_tutorials" />
+    </exec>
+  </target>
+
+  <target name="check-srv-gen-skip">
+    <available file="${srv-gen}" type="dir" property="srv-gen.skip" />
+  </target>
+
+  <target name="srv-gen" depends="check-srv-gen-skip" unless="srv-gen.skip">
+    <echo message="Building commonly used ROS services..." />
+
+    <exec executable="../rosjava/scripts/java_srvs.py">
+      <arg value="-o ${srv-gen}" />
+
+      <!-- list of packages to generate for -->
+    </exec>
+  </target>
+
+  <target name="compile" depends="msg-gen">
+    <!-- copy all assets -->
+    <copy todir="${build}">
+      <fileset dir="src">
+        <exclude name="**/*.java" />
+      </fileset>
+      <fileset dir="tutorials">
+        <exclude name="**/*.java" />
+      </fileset>
+      <fileset dir="tests">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build}" source="${javac-source}"
+        target="${javac-target}" includeantruntime="false">
+      <classpath refid="classpath" />
+      <src path="src" />
+      <src path="tutorials" />
+      <src path="tests" />
+      <src path="${msg-gen}" />
+      <!-- <src path="${srv-gen}" /> -->
+    </javac>
+  </target>
+
+  <target name="init-test">
+    <mkdir dir="${test-output}" />
+  </target>
+
+  <target name="test" depends="init-test">
+    <!-- clear any previous results -->
+    <delete>
+      <fileset dir="${test-output}">
+        <include name="*/**" />
+      </fileset>
+    </delete>
+    <junit printsummary="yes">
+      <classpath refid="classpath" />
+      <formatter type="xml" />
+      <batchtest todir="${test-output}">
+        <fileset dir="tests">
+          <include name="**/*Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+    <junitreport todir="${test-output}">
+      <fileset dir="${test-output}">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report format="frames" todir="${test-output}/html" />
+    </junitreport>
+  </target>
+
+  <target name="jar">
+    <manifestclasspath property="jar.actionlib.classpath" jarfile="${jar.actionlib}">
+      <classpath>
+        <path refid="jar.classpath"/>
+      </classpath>
+    </manifestclasspath>
+    <jar destfile="${jar.actionlib}">
+      <manifest>
+        <attribute name="Class-Path" value="${jar.actionlib.classpath}" />
+      </manifest>
+      <fileset dir="${build}">
+      	<exclude name="org/ros/message/actionlib_tutorials/**" />
+        <exclude name="org/ros/actionlib/example/**" />
+      </fileset>
+    </jar>
+    <copy file="${jar.actionlib}" todir="lib" />
+  </target>
+</project>

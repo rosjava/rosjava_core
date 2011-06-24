@@ -1,0 +1,62 @@
+package org.ros.actionlib.client;
+
+import org.ros.exception.RosException;
+import org.ros.message.Message;
+
+/**
+ * 
+ * An interface between an ActionClient and user code. Allows user code to react
+ * on callbacks due to received feedback messages and occurred transitions of
+ * the action client's state machine.<br>
+ * Implementations of this interface may be used as a parameter for the
+ * ActionClient's sendGoal()-method.
+ * 
+ * @author Alexander C. Perzylo, perzylo@cs.tum.edu
+ * 
+ * @param <T_ACTION_FEEDBACK>
+ *          action feedback message
+ * @param <T_ACTION_GOAL>
+ *          action goal message
+ * @param <T_ACTION_RESULT>
+ *          action result message
+ * @param <T_FEEDBACK>
+ *          feedback message
+ * @param <T_GOAL>
+ *          goal message
+ * @param <T_RESULT>
+ *          result message
+ * 
+ * @see ActionClient#sendGoal(Message, ActionClientCallbacks)
+ * 
+ */
+public interface ActionClientCallbacks<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extends Message, T_ACTION_RESULT extends Message, T_FEEDBACK extends Message, T_GOAL extends Message, T_RESULT extends Message> {
+
+  /**
+   * Gets called when a transition in the action client's state machine occurs.
+   * The implementation of this method should not contain any time-consuming
+   * operations and return immediately.
+   * 
+   * @param goalHandle
+   *          A goal handle of an active goal that caused the transition
+   */
+      void
+      transitionCallback(
+          ClientGoalHandle<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> goalHandle)
+          throws RosException;
+
+  /**
+   * Gets called when the action client receives a feedback message from the
+   * action server. The implementation of this method should not contain any
+   * time-consuming operations and return immediately.
+   * 
+   * @param goalHandle
+   *          A goal handle of an active goal that caused the feedback
+   * @param feedback
+   *          The received feedback message
+   */
+      void
+      feedbackCallback(
+          ClientGoalHandle<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> goalHandle,
+          T_FEEDBACK feedback) throws RosException;
+
+}

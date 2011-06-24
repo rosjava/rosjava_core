@@ -33,6 +33,13 @@ public class SubscriberDefinition {
   private final SubscriberIdentifier subscriberIdentifier;
   private final TopicDefinition topicDefinition;
 
+  /**
+   * Creates a subscriber definition from the headers in a connection header.
+   * 
+   * @param header The header data.
+   * 
+   * @return The subscriber definition from the header data.
+   */
   public static SubscriberDefinition createFromHeader(Map<String, String> header) {
     SlaveIdentifier slaveIdentifier =
         new SlaveIdentifier(new GraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
