@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="default" name="java">
+
+  <property file="ros.properties" />
+  
+  <property name="build" location="build" />
+  <property name="dist" location="dist" />
+  <property name="javac-source" value="1.6" />
+  <property name="javac-target" value="1.6" />
+  <property name="debuglevel" value="source,lines,vars" />
+
+  <property name="jar.actionlib_java" location="${dist}/actionlib_java.jar" />
+
+  <path id="classpath">
+    <pathelement location="${build}" />
+    <pathelement path="${ros.classpath}" />
+  </path>
+
+  <target name="default" depends="dist" />
+
+  <target name="init">
+    <mkdir dir="${build}" />
+    <mkdir dir="${dist}" />
+    <mkdir dir="${ros.test_results}" />
+  </target>
+
+  <target name="clean">
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
+    <delete dir="${ros.test_results}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <!-- copy all assets -->
+    <copy todir="${build}">
+      <fileset dir="src">
+        <exclude name="**/*.java" />
+      </fileset>
+      <fileset dir="tutorials">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build}" source="${javac-source}"
+        target="${javac-target}" includeantruntime="false">
+      <classpath refid="classpath" />
+      <src path="src" />
+      <src path="tutorials" />
+    </javac>
+  </target>
+
+  <target name="init-test">
+    <mkdir dir="${ros.test_results}" />
+  </target>
+
+  <target name="test" depends="init-test">
+    <!-- clear any previous results -->
+    <delete>
+      <fileset dir="${ros.test_results}">
+        <include name="*/**" />
+      </fileset>
+    </delete>
+    <junit printsummary="yes">
+      <classpath refid="classpath" />
+      <formatter type="xml" />
+      <batchtest todir="${ros.test_results}">
+        <fileset dir="tests">
+          <include name="**/*Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+    <junitreport todir="${ros.test_results}">
+      <fileset dir="${ros.test_results}">
+        <include name="TEST-*.xml" />
+      </fileset>
+    </junitreport>
+  </target>
+
+  <target name="dist" depends="jar" />
+
+  <target name="jar" depends="compile">
+    <!--
+    <manifestclasspath property="jar.actionlib_java.classpath" jarfile="${jar.actionlib_java}">
+      <classpath>
+        <path refid="classpath"/>
+      </classpath>
+    </manifestclasspath>
+    -->
+    <jar destfile="${jar.actionlib_java}">
+      <!--
+      <manifest>
+        <attribute name="Class-Path" value="${jar.actionlib_java.classpath}" />
+      </manifest>
+      -->
+      <fileset dir="${build}">
+      	<exclude name="org/ros/message/actionlib_tutorials/**" />
+        <exclude name="org/ros/actionlib/example/**" />
+      </fileset>
+    </jar>
+  </target>
+
+</project>
