@@ -47,8 +47,8 @@ def usage():
 _ros_home = roslib.rosenv.get_ros_home()
 _rosjava_dir = roslib.packages.get_pkg_dir('rosjava')
 _rosjava_jar = os.path.join(_rosjava_dir, 'dist', 'rosjava.jar')
-_msggen = os.path.join(_rosjava_dir, 'scripts', 'java_msgs.py')
-_srvgen = os.path.join(_rosjava_dir, 'scripts', 'java_srvs.py')
+_build_file = os.path.join(_rosjava_dir, 'scripts', 'build-msg.xml')
+_properties_dir = os.path.join(_ros_home, 'rosjava', 'properties')
     
 def msggen_source_path(pkg):
     return os.path.join(_ros_home, 'rosjava', 'gen', 'msg', pkg)
@@ -59,11 +59,8 @@ def srvgen_source_path(pkg):
 def msggen_jar_path():
     return os.path.join(_ros_home, 'rosjava', 'lib')
 
-def msggen_build_path(pkg):
-    return os.path.join(_ros_home, 'rosjava', 'build', 'msg', pkg)
-
-def srvgen_build_path(pkg):
-    return os.path.join(_ros_home, 'rosjava', 'build', 'srv', pkg)
+def msg_jar_file_path(package):
+    return os.path.join(_ros_home, 'rosjava', 'lib', '%s.jar'%package)
 
 def is_msg_pkg(pkg):
     d = roslib.packages.get_pkg_subdir(pkg, roslib.packages.MSG_DIR, False)
@@ -81,68 +78,6 @@ def get_srv_packages(rospack, package):
     depends = rospack.depends([package])[package]
     return [pkg for pkg in depends if is_srv_pkg(pkg)]
 
-def generate_msg_source(package):
-    source_path = msggen_source_path(package)
-    command = [_msggen, '-o', source_path, package]
-    subprocess.check_call(command)
-
-def generate_srv_source(package):
-    source_path = srvgen_source_path(package)
-    command = [_srvgen, '-o', source_path, package]
-    subprocess.check_call(command)
-    
-def build_msg(package):
-    source_path = msggen_source_path(package)
-    build_path = msggen_build_path(package)
-    
-    if not os.path.exists(build_path):
-        os.makedirs(build_path)
-
-    java_files = []
-    for d, dirs, files in os.walk(source_path, topdown=True):
-        java_files.extend([os.path.join(d, f) for f in files if f.endswith('.java')])
-    
-    command = ['javac', '-d', build_path, '-sourcepath', source_path, '-classpath', _rosjava_jar] + java_files
-    subprocess.check_call(command)
-
-def build_srv(package):
-    source_path = msggen_source_path(package)
-    build_path = srvgen_build_path(package)
-    
-    if not os.path.exists(build_path):
-        os.makedirs(build_path)
-
-    java_files = []
-    for d, dirs, files in os.walk(source_path, topdown=True):
-        java_files.extend([os.path.join(d, f) for f in files if f.endswith('.java')])
-    
-    command = ['javac', '-d', build_path, '-sourcepath', source_path, '-classpath', _rosjava_jar] + java_files
-    subprocess.check_call(command)
-
-def msg_jar_file_path(package):
-    jar_path = msggen_jar_path()
-    jar_name = '%s.jar'%(package) #TODO: versioning
-    return os.path.join(jar_path, jar_name)
-    
-def build_jar(package):
-    jar_file = msg_jar_file_path(package)
-    msg_build_path = msggen_build_path(package)
-    srv_build_path = srvgen_build_path(package)
-    
-    if not os.path.exists(os.path.dirname(jar_file)):
-        os.makedirs(os.path.dirname(jar_file))
-
-    # determine .class files to package by examining .java files
-    class_files = []
-    for d, dirs, files in os.walk(msg_build_path, topdown=True):
-        class_files.extend([os.path.join(d, f) for f in files if f.endswith('.class')])
-    for d, dirs, files in os.walk(srv_build_path, topdown=True):
-        class_files.extend([os.path.join(d, f) for f in files if f.endswith('.class')])
-        
-    command = ['jar', 'cvf', jar_file] + class_files
-    print "generating jar file %s"%(jar_file)
-    subprocess.check_call(command)
-    
 def get_up_to_date():
     jar_path = msggen_jar_path()
     up_to_date = []
@@ -153,30 +88,34 @@ def get_up_to_date():
             up_to_date.append(f[:-4])
     return up_to_date
     
-def wipe_msg_depends(package):
-    rospack = roslib.packages.ROSPackages()
-    msg_packages = get_msg_packages(rospack, package)
-    srv_packages = get_srv_packages(rospack, package)
+def _generate_msgs(rospack, package, up_to_date):
+    depends = get_msg_packages(rospack, package)
+    unbuilt = [d for d in depends if not d in up_to_date]
+    for u in unbuilt:
+        _generate_msgs(rospack, u, up_to_date)
+        
+    # generate classpath, safe-encode
+    classpath = get_msg_classpath(rospack, package)
+    classpath = classpath.replace(':', '\:')
+        
+    # generate properties for ant
+    properties_file = os.path.join(_properties_dir, 'build-%s.properties'%(package))
+    if not os.path.exists(os.path.dirname(properties_file)):
+        os.makedirs(os.path.dirname(properties_file))
+    with open(properties_file, 'w') as f:
+        f.write("""ros.package=%s
+ros.home=%s
+ros.rosjava.dir=%s
+ros.classpath=%s"""%(package, _ros_home, _rosjava_dir, classpath))
 
-    to_delete = []
+    # call ant to build everything
+    # - add to up_to_date regardless to prevent infinite loop
+    up_to_date.append(package)
+
+    command = ['ant', '-f', _build_file,
+               '-Dproperties=%s'%(properties_file)]
+    subprocess.check_call(command)
     
-    for pkg in msg_packages:
-        to_delete.append(msggen_source_path(pkg))
-        to_delete.append(msggen_build_path(pkg))
-    for pkg in srv_packages:
-        to_delete.append(srvgen_source_path(pkg))
-        to_delete.append(srvgen_build_path(pkg))
-    for pkg in set(msg_packages)  | set(srv_packages):
-        to_delete.append(msg_jar_file_path(pkg))
-
-    to_delete = [x for x in to_delete if os.path.exists(x)]
-    for f in to_delete:
-        print "deleting", f
-        if os.path.isfile(f):
-            os.remove(f)
-        else:
-            shutil.rmtree(f)
-            
 def generate_msg_depends(package):
     rospack = roslib.packages.ROSPackages()
 
@@ -189,24 +128,34 @@ def generate_msg_depends(package):
     msg_packages = [p for p in msg_packages if not p in up_to_date]
     srv_packages = [p for p in srv_packages if not p in up_to_date]
     
-    # generate .java
-    for pkg in msg_packages:
-        generate_msg_source(pkg)
+    # let ant do the rest
+    for p in set(msg_packages + srv_packages):
+        _generate_msgs(rospack, p, up_to_date)
+    
+def get_msg_classpath(rospack, package):
+    def resolve_pathelements(pathelements):
+        return [os.path.abspath(p) for p in pathelements]
 
-    for pkg in srv_packages:
-        generate_srv_source(pkg)
+    depends = rospack.depends([package])[package]
+    pathelements = [_rosjava_jar]
+    for pkg in depends:
+        if is_msg_pkg(pkg) or is_srv_pkg(pkg):
+            pathelements.append(msg_jar_file_path(pkg))
+    return os.pathsep.join(resolve_pathelements(pathelements))
 
-    # .java -> .class
-    for pkg in msg_packages:
-        build_msg(pkg)
+def wipe_msg_depends(package):
+    rospack = roslib.packages.ROSPackages()
+    
+    msg_packages = get_msg_packages(rospack, package)
+    srv_packages = get_srv_packages(rospack, package)
 
-    for pkg in srv_packages:
-        build_srv(pkg)
-
-    # .class -> .jar
-    for pkg in set(msg_packages) | set(srv_packages):
-        build_jar(pkg)
-
+    for p in set(msg_packages + srv_packages):
+        # call ant to delete build artifacts
+        command = ['ant', '-f', _build_file,
+                   '-Dproperties=%s'%(properties_file),
+                   'clean']
+        subprocess.check_call(command)
+    
 from optparse import OptionParser
 def generate_msg_depends_main(argv=None):
     parser = OptionParser(usage="usage: %prog [options] <package>", prog='generate_msg_depends.py')
