@@ -9,5 +9,13 @@
   <depend package="rosjava"/>
   <depend package="actionlib_msgs"/>
   <depend package="actionlib_tutorials"/>
+  
+  <export>
+    <rosjava-src location="src" />
+    <rosjava-src location="tutorials" />
+    
+    <rosjava-pathelement location="dist/actionlib_java.jar" />
+  </export>
+
 </package>
 
