@@ -37,8 +37,9 @@ import java.net.URI;
 /**
  * A node in the ROS graph.
  * 
- * <p>Nodes provide for communication with the ROS master. They are used for 
- * creation of 
+ * <p>
+ * Nodes provide for communication with the ROS master. They are used for
+ * creation of
  * 
  * <ul>
  * <li>{@link Publisher}</li>,
@@ -46,7 +47,8 @@ import java.net.URI;
  * <li>{@link ParameterClient}</li>
  * </ul>
  * 
- * <p>Lifetime of any objects created from a node are controlled by the creating
+ * <p>
+ * Lifetime of any objects created from a node are controlled by the creating
  * node.
  * 
  * @author Keith M. Hughes
@@ -79,11 +81,13 @@ public interface Node {
    * @return the {@link URI} of this {@link Node}
    */
   URI getUri();
-  
+
   /**
    * Is the node ok?
    * 
-   * <p>"ok" means that the node is in the running state and registered with the master.
+   * <p>
+   * "ok" means that the node is in the running state and registered with the
+   * master.
    * 
    * @return True if the node is OK, false otherwise.
    */
@@ -147,7 +151,7 @@ public interface Node {
    *           May throw if the system is not in a proper state.
    */
   <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
-      Class<MessageType> messageClass) throws RosInitException;
+      String messageType) throws RosInitException;
 
   /**
    * @param <MessageType>
@@ -169,17 +173,20 @@ public interface Node {
    *           initialized or other wackyness. TODO specify exceptions that
    *           might be thrown here.
    */
-  <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
-      final MessageListener<MessageType> callback, Class<MessageType> messageClass)
-      throws RosInitException;
-  
+  <MessageType> Subscriber<MessageType> createSubscriber(String topicName, String messageType,
+      final MessageListener<MessageType> callback) throws RosInitException;
+
   /**
    * Create a server to response to a particular service.
    * 
-   * @param <RequestType> Type for the request.
-   * @param <ResponseType> Type for the response.
-   * @param serviceDefinition Definition of the service.
-   * @param responseBuilder A builder for the response.
+   * @param <RequestType>
+   *          Type for the request.
+   * @param <ResponseType>
+   *          Type for the response.
+   * @param serviceDefinition
+   *          Definition of the service.
+   * @param responseBuilder
+   *          A builder for the response.
    * 
    * @return The service server which will handle the service requests.
    * 
@@ -192,14 +199,16 @@ public interface Node {
   /**
    * Create a service client.
    * 
-   * @param <ResponseType> The message type of the response.
-   * @param serviceDefinition Definition of the service.
-   * @param responseMessageClass The message class for the response.
+   * @param <ResponseType>
+   *          The message type of the response.
+   * @param serviceDefinition
+   *          Definition of the service.
+   * @param responseMessageClass
+   *          The message class for the response.
    * @return
    */
-  <ResponseType> ServiceClient<ResponseType>
-      createServiceClient(ServiceDefinition serviceDefinition,
-          Class<ResponseType> responseMessageClass);
+  <ResponseType> ServiceClient<ResponseType> createServiceClient(
+      ServiceDefinition serviceDefinition, Class<ResponseType> responseMessageClass);
 
   /**
    * Returns a {@link ServiceIdentifier} for communicating with the current

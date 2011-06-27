@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
     setContentView(R.layout.main);
     rosTextView = (RosTextView<org.ros.message.geometry_msgs.PoseStamped>) findViewById(R.id.text);
     rosTextView.setTopicName("/android/orientation");
-    rosTextView.setMessageClass(org.ros.message.geometry_msgs.PoseStamped.class);
+    rosTextView.setMessageType("geometry_msgs/PoseStamped");
     rosTextView
         .setMessageToStringCallable(new MessageCallable<String, org.ros.message.geometry_msgs.PoseStamped>() {
           @Override

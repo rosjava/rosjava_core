@@ -38,7 +38,7 @@ import org.ros.rosjava.android.MessageCallable;
 public class RosImageView<T> extends ImageView implements NodeMain {
 
   private String topicName;
-  private Class<T> messageClass;
+  private String messageType;
   private MessageCallable<Bitmap, T> callable;
   private Node node;
 
@@ -58,8 +58,8 @@ public class RosImageView<T> extends ImageView implements NodeMain {
     this.topicName = topicName;
   }
 
-  public void setMessageClass(Class<T> messageClass) {
-    this.messageClass = messageClass;
+  public void setMessageType(String messageType) {
+    this.messageType = messageType;
   }
   
   public void setMessageToBitmapCallable(MessageCallable<Bitmap, T> callable) {
@@ -71,7 +71,7 @@ public class RosImageView<T> extends ImageView implements NodeMain {
     Preconditions.checkState(node == null);
     // TODO(damonkohler): This node name needs to be unique.
     node = new DefaultNode("/android_image_view", nodeConfiguration);
-    node.createSubscriber(topicName, new MessageListener<T>() {
+    node.createSubscriber(topicName, messageType, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
         post(new Runnable() {
@@ -82,7 +82,7 @@ public class RosImageView<T> extends ImageView implements NodeMain {
         });
         postInvalidate();
       }
-    }, messageClass);
+    });
   }
 
   @Override

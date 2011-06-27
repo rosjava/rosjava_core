@@ -23,10 +23,21 @@ import java.nio.ByteBuffer;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageDeserializer<MessageType>
-    implements org.ros.MessageDeserializer<MessageType> {
+public class MessageDeserializer<MessageType> implements org.ros.MessageDeserializer<MessageType> {
 
   private final Class<MessageType> messageClass;
+
+  @SuppressWarnings("unchecked")
+  public static <T> MessageDeserializer<T> createFromString(String messageType) {
+    Preconditions.checkArgument(messageType.split("/").length == 2);
+    Class<T> messageClass;
+    try {
+      messageClass = (Class<T>) Class.forName("org.ros.message." + messageType.replace('/', '.'));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    return new MessageDeserializer<T>(messageClass);
+  }
 
   public MessageDeserializer(Class<MessageType> messageClass) {
     Preconditions.checkArgument(Message.class.isAssignableFrom(messageClass));

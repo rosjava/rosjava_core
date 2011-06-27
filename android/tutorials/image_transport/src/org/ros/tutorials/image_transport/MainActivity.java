@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
     setContentView(R.layout.main);
     image = (RosImageView<CompressedImage>) findViewById(R.id.image);
     image.setTopicName("/usb_cam/image_raw/compressed");
-    image.setMessageClass(org.ros.message.sensor_msgs.CompressedImage.class);
+    image.setMessageType("sensor_msgs/CompressedImage");
     image.setMessageToBitmapCallable(new BitmapFromCompressedImage());
     startActivityForResult(new Intent(this, MasterChooser.class), 0);
   }

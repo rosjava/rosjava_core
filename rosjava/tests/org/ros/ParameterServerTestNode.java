@@ -45,17 +45,14 @@ public class ParameterServerTestNode implements NodeMain {
       node = new DefaultNode("param_client", nodeConfiguration);
 
       Publisher<org.ros.message.std_msgs.String> pub_tilde =
-          node.createPublisher("tilde", org.ros.message.std_msgs.String.class);
+          node.createPublisher("tilde", "std_msgs/String");
       Publisher<org.ros.message.std_msgs.String> pub_string =
-          node.createPublisher("string", org.ros.message.std_msgs.String.class);
-      Publisher<Int64> pub_int = node.createPublisher("int", org.ros.message.std_msgs.Int64.class);
-      Publisher<Bool> pub_bool = node.createPublisher("bool", org.ros.message.std_msgs.Bool.class);
-      Publisher<Float64> pub_float =
-          node.createPublisher("float", org.ros.message.std_msgs.Float64.class);
-      Publisher<Composite> pub_composite =
-          node.createPublisher("composite", org.ros.message.test_ros.Composite.class);
-      Publisher<TestArrays> pub_list =
-          node.createPublisher("list", org.ros.message.test_ros.TestArrays.class);
+          node.createPublisher("string", "std_msgs/String");
+      Publisher<Int64> pub_int = node.createPublisher("int", "std_msgs/Int64");
+      Publisher<Bool> pub_bool = node.createPublisher("bool", "std_msgs/Bool");
+      Publisher<Float64> pub_float = node.createPublisher("float", "std_msgs/Float64");
+      Publisher<Composite> pub_composite = node.createPublisher("composite", "test_ros/Composite");
+      Publisher<TestArrays> pub_list = node.createPublisher("list", "test_ros/TestArrays");
 
       ParameterClient param = node.createParameterClient();
 
