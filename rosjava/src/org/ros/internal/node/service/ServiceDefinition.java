@@ -16,9 +16,9 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+import org.ros.internal.message.ServiceMessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
@@ -31,26 +31,22 @@ import java.util.Map;
 public class ServiceDefinition {
 
   private final ServiceIdentifier identifier;
-  private final String type;
-  private final String md5Checksum;
+  private final ServiceMessageDefinition definition;
 
-  public ServiceDefinition(ServiceIdentifier identifier, String type, String md5Checksum) {
+  public ServiceDefinition(ServiceIdentifier identifier, ServiceMessageDefinition definition) {
     this.identifier = identifier;
-    this.type = type;
-    this.md5Checksum = md5Checksum;
+    this.definition = definition;
   }
 
   public Map<String, String> toHeader() {
-    Preconditions.checkNotNull(md5Checksum);
     return new ImmutableMap.Builder<String, String>()
         .put(ConnectionHeaderFields.SERVICE, getName().toString())
-        .put(ConnectionHeaderFields.TYPE, type)
-        .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum)
+        .putAll(definition.toHeader())
         .build();
   }
 
   public String getType() {
-    return type;
+    return definition.getType();
   }
 
   public GraphName getName() {
@@ -59,11 +55,11 @@ public class ServiceDefinition {
 
   @Override
   public String toString() {
-    return "ServiceDefinition<" + getName().toString() + "," + type + "," + md5Checksum + ">";
+    return "ServiceDefinition<" + getName().toString() + "," + definition.toString() + ">";
   }
 
   public String getMd5Checksum() {
-    return md5Checksum;
+    return definition.getMd5Checksum();
   }
 
   public URI getUri() {
@@ -75,8 +71,7 @@ public class ServiceDefinition {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
-    result = prime * result + ((md5Checksum == null) ? 0 : md5Checksum.hashCode());
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
+    result = prime * result + ((definition == null) ? 0 : definition .hashCode());
     return result;
   }
 
@@ -94,15 +89,10 @@ public class ServiceDefinition {
         return false;
     } else if (!identifier.equals(other.identifier))
       return false;
-    if (md5Checksum == null) {
-      if (other.md5Checksum != null)
+    if (definition == null) {
+      if (other.definition != null)
         return false;
-    } else if (!md5Checksum.equals(other.md5Checksum))
-      return false;
-    if (type == null) {
-      if (other.type != null)
-        return false;
-    } else if (!type.equals(other.type))
+    } else if (!definition.equals(other.definition))
       return false;
     return true;
   }

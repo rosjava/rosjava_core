@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
+import org.ros.internal.message.ServiceMessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.topic.Publisher;
@@ -75,12 +76,13 @@ public class ServiceServer {
   }
 
   /**
-   * @return a new {@link ServiceDefinition} with this {@link ServiceServer}'s
-   *         {@link URI}
+   * @return a new {@link ServiceMessageDefinition} with this
+   *         {@link ServiceServer}'s {@link URI}
    */
   public ServiceDefinition getDefinition() {
     ServiceIdentifier identifier = new ServiceIdentifier(definition.getName(), getUri());
-    return new ServiceDefinition(identifier, definition.getType(), definition.getMd5Checksum());
+    return new ServiceDefinition(identifier, new ServiceMessageDefinition(definition.getType(),
+        definition.getMd5Checksum()));
   }
 
   public ChannelHandler createRequestHandler() {

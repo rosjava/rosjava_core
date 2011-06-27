@@ -18,14 +18,13 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.message.MessageDefinitionFactory;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.MessageDefinition;
+import org.ros.internal.message.ServiceMessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RosoutLogger;
 import org.ros.internal.node.address.InetAddressFactory;
@@ -41,8 +40,10 @@ import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.time.TimeProvider;
 import org.ros.internal.time.WallclockProvider;
 import org.ros.message.Message;
+import org.ros.message.MessageDefinitionFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
+import org.ros.message.ServiceMessageDefinitionFactory;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
@@ -198,17 +199,27 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public <RequestType, ResponseType> ServiceServer createServiceServer(
-      ServiceDefinition serviceDefinition,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
-    return node.createServiceServer(serviceDefinition, responseBuilder);
+  public <RequestType, ResponseType> ServiceServer createServiceServer(String serviceName,
+      String serviceType, ServiceResponseBuilder<RequestType, ResponseType> responseBuilder)
+      throws Exception {
+    // TODO(damonkohler): It's rather non-obvious that the URI will be created later on the fly.
+    ServiceIdentifier identifier = new ServiceIdentifier(new GraphName(serviceName), null);
+    ServiceMessageDefinition messageDefinition =
+        ServiceMessageDefinitionFactory.createFromString(serviceType);
+    ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
+    return node.createServiceServer(definition, responseBuilder);
   }
 
   @Override
-  public <ResponseType> ServiceClient<ResponseType> createServiceClient(
-      ServiceDefinition serviceDefinition, Class<ResponseType> responseMessageClass) {
-    return node.createServiceClient(serviceDefinition, new MessageDeserializer<ResponseType>(
-        responseMessageClass));
+  public <ResponseType> ServiceClient<ResponseType> createServiceClient(String serviceName,
+      String serviceType) {
+    ServiceIdentifier identifier = lookupService(serviceName);
+    ServiceMessageDefinition messageDefinition =
+        ServiceMessageDefinitionFactory.createFromString(serviceType);
+    ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
+    MessageDeserializer<ResponseType> messageDeserializer =
+        MessageDeserializer.<ResponseType>createFromString("srv." + serviceType + "$Response");
+    return node.createServiceClient(definition, messageDeserializer);
   }
 
   @Override

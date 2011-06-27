@@ -192,23 +192,23 @@ public interface Node {
    * 
    * @throws Exception
    */
-  public <RequestType, ResponseType> ServiceServer createServiceServer(
-      ServiceDefinition serviceDefinition,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception;
+  public <RequestType, ResponseType> ServiceServer createServiceServer(String serviceName,
+      String serviceType, ServiceResponseBuilder<RequestType, ResponseType> responseBuilder)
+      throws Exception;
 
   /**
    * Create a service client.
    * 
    * @param <ResponseType>
    *          The message type of the response.
-   * @param serviceDefinition
-   *          Definition of the service.
-   * @param responseMessageClass
-   *          The message class for the response.
+   * @param serviceName
+   *          the name of the service
+   * @param serviceType
+   *          the type of the service
    * @return
    */
-  <ResponseType> ServiceClient<ResponseType> createServiceClient(
-      ServiceDefinition serviceDefinition, Class<ResponseType> responseMessageClass);
+  <ResponseType> ServiceClient<ResponseType> createServiceClient(String serviceName,
+      String serviceType);
 
   /**
    * Returns a {@link ServiceIdentifier} for communicating with the current

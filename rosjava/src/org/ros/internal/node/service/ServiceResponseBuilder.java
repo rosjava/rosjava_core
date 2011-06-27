@@ -29,19 +29,19 @@ public abstract class ServiceResponseBuilder<RequestType, ResponseType> {
   private final MessageSerializer<ResponseType> serializer;
   private final MessageDeserializer<RequestType> deserializer;
 
-  ServiceResponseBuilder(MessageSerializer<ResponseType> serializer,
+  public ServiceResponseBuilder(MessageSerializer<ResponseType> serializer,
       MessageDeserializer<RequestType> deserializer) {
     this.serializer = serializer;
     this.deserializer = deserializer;
   }
 
-  ByteBuffer handleRequest(ByteBuffer buffer) throws ServiceException {
+  public ByteBuffer handleRequest(ByteBuffer buffer) throws ServiceException {
     RequestType request = deserializer.<RequestType>deserialize(buffer);
     ResponseType response;
     response = build(request);
     return serializer.serialize(response);
   }
 
-  abstract ResponseType build(RequestType requestMessage) throws ServiceException;
+  public abstract ResponseType build(RequestType requestMessage) throws ServiceException;
 
 }

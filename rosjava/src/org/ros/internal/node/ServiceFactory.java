@@ -19,6 +19,7 @@ package org.ros.internal.node;
 import com.google.common.base.Preconditions;
 
 import org.ros.MessageDeserializer;
+import org.ros.internal.message.ServiceMessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
@@ -49,7 +50,7 @@ public class ServiceFactory {
    * are cached and reused per service. When a new {@link ServiceServer} is
    * generated, it is registered with the {@link MasterServer}.
    * 
-   * @param serviceDefinition the {@link ServiceDefinition} that is being served
+   * @param serviceDefinition the {@link ServiceMessageDefinition} that is being served
    * @param responseBuilder the {@link ServiceResponseBuilder} that is used to
    *        build responses
    * @return a {@link ServiceServer} instance

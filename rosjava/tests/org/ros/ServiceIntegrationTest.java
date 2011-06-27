@@ -14,27 +14,23 @@
  * the License.
  */
 
-package org.ros.internal.node.service;
+package org.ros;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.ros.message.srv.beginner_tutorials.AddTwoInts;
-
-
-import org.ros.internal.message.ServiceMessageDefinition;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.ServiceResponseListener;
-import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.Node;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.service.ServiceClient;
+import org.ros.internal.node.service.ServiceException;
+import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
+import org.ros.message.srv.beginner_tutorials.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -44,40 +40,38 @@ import java.util.concurrent.TimeUnit;
  */
 public class ServiceIntegrationTest {
 
+  private static final String SERVICE_NAME = "/add_two_ints";
+  private static final String SERVICE_TYPE = "beginner_tutorials/AddTwoInts";
+
   private MasterServer masterServer;
-  private ServiceIdentifier serviceIdentifier;
-  private ServiceDefinition serviceDefinition;
+  private NodeConfiguration configuration;
 
   @Before
   public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    serviceIdentifier = new ServiceIdentifier(new GraphName("/add_two_ints"), null);
-    serviceDefinition =
-        new ServiceDefinition(serviceIdentifier, new ServiceMessageDefinition(
-            AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum()));
+    configuration = NodeConfiguration.createDefault();
+    configuration.setMasterUri(masterServer.getUri());
   }
 
   @Test
   public void PesistentServiceConnectionTest() throws Exception {
-    Node serverNode = Node.createPrivate(new GraphName("/server"), masterServer.getUri(), 0, 0);
-    ServiceServer server =
-        serverNode.createServiceServer(serviceDefinition,
-            new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>(
-                new MessageSerializer<AddTwoInts.Response>(),
-                new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class)) {
-              @Override
-              public AddTwoInts.Response build(AddTwoInts.Request request) {
-                AddTwoInts.Response response = new AddTwoInts.Response();
-                response.sum = request.a + request.b;
-                return response;
-              }
-            });
+    Node serverNode = new DefaultNode("/server", configuration);
+    serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
+        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>(
+            new MessageSerializer<AddTwoInts.Response>(),
+            new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class)) {
+          @Override
+          public AddTwoInts.Response build(AddTwoInts.Request request) {
+            AddTwoInts.Response response = new AddTwoInts.Response();
+            response.sum = request.a + request.b;
+            return response;
+          }
+        });
 
-    Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
+    Node clientNode = new DefaultNode("/client", configuration);
     ServiceClient<AddTwoInts.Response> client =
-        clientNode.createServiceClient(server.getDefinition(),
-            new MessageDeserializer<AddTwoInts.Response>(AddTwoInts.Response.class));
+        clientNode.createServiceClient(SERVICE_NAME, SERVICE_TYPE);
 
     // TODO(damonkohler): This is a hack that we should remove once it's
     // possible to block on a connection being established.
@@ -105,23 +99,20 @@ public class ServiceIntegrationTest {
   @Test
   public void RequestFailureTest() throws Exception {
     final String errorMessage = "Error!";
+    Node serverNode = new DefaultNode("/server", configuration);
+    serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
+        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>(
+            new MessageSerializer<AddTwoInts.Response>(),
+            new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class)) {
+          @Override
+          public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
+            throw new ServiceException(errorMessage);
+          }
+        });
 
-    Node serverNode = Node.createPrivate(new GraphName("/server"), masterServer.getUri(), 0, 0);
-    ServiceServer server =
-        serverNode.createServiceServer(serviceDefinition,
-            new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>(
-                new MessageSerializer<AddTwoInts.Response>(),
-                new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class)) {
-              @Override
-              public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
-                throw new ServiceException(errorMessage);
-              }
-            });
-
-    Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
+    Node clientNode = new DefaultNode("/client", configuration);
     ServiceClient<AddTwoInts.Response> client =
-        clientNode.createServiceClient(server.getDefinition(),
-            new MessageDeserializer<AddTwoInts.Response>(AddTwoInts.Response.class));
+        clientNode.createServiceClient(SERVICE_NAME, SERVICE_TYPE);
 
     // TODO(damonkohler): This is a hack that we should remove once it's
     // possible to block on a connection being established.
