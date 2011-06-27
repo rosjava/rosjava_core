@@ -58,20 +58,23 @@ public class ServiceFactory {
    * @return a {@link ServiceServer} instance
    * @throws Exception
    */
-  public <RequestType, ResponseType> ServiceServer createServiceServer(
-      ServiceDefinition serviceDefinition,
+  @SuppressWarnings("unchecked")
+  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServiceServer(
+      ServiceDefinition serviceDefinition, MessageDeserializer<RequestType> deserializer,
+      MessageSerializer<ResponseType> serializer,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
-    ServiceServer serviceServer;
+    ServiceServer<RequestType, ResponseType> serviceServer;
     String name = serviceDefinition.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasServiceServer(name)) {
-        serviceServer = serviceManager.getServiceServer(name);
+        serviceServer =
+            (ServiceServer<RequestType, ResponseType>) serviceManager.getServiceServer(name);
       } else {
         serviceServer =
-            new ServiceServer(serviceDefinition, responseBuilder,
-                slaveServer.getTcpRosAdvertiseAddress());
+            new ServiceServer<RequestType, ResponseType>(serviceDefinition, deserializer,
+                serializer, responseBuilder, slaveServer.getTcpRosAdvertiseAddress());
         createdNewService = true;
       }
     }

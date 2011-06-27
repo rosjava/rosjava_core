@@ -91,8 +91,10 @@ public class DefaultNode implements Node {
     nodeName = new GraphName(NameResolver.join(parentResolver.getNamespace(), baseName));
     resolver = NodeNameResolver.create(parentResolver, nodeName);
 
-    // TODO (kwc): implement simulated time.
+    // TODO(kwc): Implement simulated time.
+    // TODO(damonkohler): Move TimeProvider into NodeConfiguration.
     timeProvider = new WallclockProvider();
+
     // Log for /rosout.
     log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
 
@@ -192,17 +194,25 @@ public class DefaultNode implements Node {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <RequestType, ResponseType> ServiceServer createServiceServer(String serviceName,
-      String serviceType, ServiceResponseBuilder<RequestType, ResponseType> responseBuilder)
-      throws Exception {
+  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServiceServer(
+      String serviceName, String serviceType,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
     // TODO(damonkohler): It's rather non-obvious that the URI will be created
     // later on the fly.
     ServiceIdentifier identifier = new ServiceIdentifier(new GraphName(serviceName), null);
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
-    return node.createServiceServer(definition, responseBuilder);
+    MessageDeserializer<RequestType> requestDeserializer =
+        (MessageDeserializer<RequestType>) configuration.getMessageSerializationFactory()
+            .createServiceRequestDeserializer(serviceType);
+    MessageSerializer<ResponseType> responseSerializer =
+        (MessageSerializer<ResponseType>) configuration.getMessageSerializationFactory()
+            .createServiceResponseSerializer(serviceType);
+    return node.createServiceServer(definition, requestDeserializer, responseSerializer,
+        responseBuilder);
   }
 
   @SuppressWarnings("unchecked")
@@ -214,7 +224,7 @@ public class DefaultNode implements Node {
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
     MessageSerializer<RequestType> requestSerializer =
-        (MessageSerializer<RequestType>) configuration.getMessageSerializationFactory() 
+        (MessageSerializer<RequestType>) configuration.getMessageSerializationFactory()
             .createServiceRequestSerializer(serviceType);
     MessageDeserializer<ResponseType> responseDeserializer =
         (MessageDeserializer<ResponseType>) configuration.getMessageSerializationFactory()

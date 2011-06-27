@@ -190,9 +190,9 @@ public interface Node {
    * 
    * @throws Exception
    */
-  public <RequestType, ResponseType> ServiceServer createServiceServer(String serviceName,
-      String serviceType, ServiceResponseBuilder<RequestType, ResponseType> responseBuilder)
-      throws Exception;
+  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServiceServer(
+      String serviceName, String serviceType,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception;
 
   /**
    * Create a service client.

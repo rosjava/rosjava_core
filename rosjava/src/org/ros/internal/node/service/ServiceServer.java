@@ -18,6 +18,10 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.MessageDeserializer;
+
+import org.ros.MessageSerializer;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -35,18 +39,24 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceServer {
+public class ServiceServer<RequestType, ResponseType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
-  private final AdvertiseAddress advertiseAddress;
-  private final ServiceResponseBuilder<?, ?> responseBuilder;
   private final ServiceDefinition definition;
+  private final MessageDeserializer<RequestType> deserializer;
+  private final MessageSerializer<ResponseType> serializer;
+  private final AdvertiseAddress advertiseAddress;
+  private final ServiceResponseBuilder<RequestType, ResponseType> responseBuilder;
 
-  public ServiceServer(ServiceDefinition definition, ServiceResponseBuilder<?, ?> responseBuilder,
+  public ServiceServer(ServiceDefinition definition, MessageDeserializer<RequestType> deserializer,
+      MessageSerializer<ResponseType> serializer,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
       AdvertiseAddress advertiseAddress) {
     this.definition = definition;
+    this.deserializer = deserializer;
+    this.serializer = serializer;
     this.responseBuilder = responseBuilder;
     this.advertiseAddress = advertiseAddress;
   }
@@ -86,7 +96,8 @@ public class ServiceServer {
   }
 
   public ChannelHandler createRequestHandler() {
-    return new ServiceRequestHandler(responseBuilder);
+    return new ServiceRequestHandler<RequestType, ResponseType>(deserializer, serializer,
+        responseBuilder);
   }
 
 }

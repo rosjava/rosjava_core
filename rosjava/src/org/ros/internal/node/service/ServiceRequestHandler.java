@@ -21,16 +21,32 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.ros.MessageDeserializer;
+import org.ros.MessageSerializer;
+
+import java.nio.ByteBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class ServiceRequestHandler extends SimpleChannelHandler {
+class ServiceRequestHandler<RequestType, ResponseType> extends SimpleChannelHandler {
 
-  private final ServiceResponseBuilder<?, ?> responseBuilder;
+  private final MessageDeserializer<RequestType> deserializer;
+  private final MessageSerializer<ResponseType> serializer;
+  private final ServiceResponseBuilder<RequestType, ResponseType> responseBuilder;
 
-  ServiceRequestHandler(ServiceResponseBuilder<?, ?> responseBuilder) {
+  ServiceRequestHandler(MessageDeserializer<RequestType> deserializer,
+      MessageSerializer<ResponseType> serializer,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
+    this.deserializer = deserializer;
+    this.serializer = serializer;
     this.responseBuilder = responseBuilder;
+  }
+
+  private ByteBuffer handleRequest(ByteBuffer buffer) throws ServiceException {
+    RequestType request = (RequestType) deserializer.deserialize(buffer);
+    ResponseType response = responseBuilder.build(request);
+    return serializer.serialize(response);
   }
 
   @Override
@@ -40,7 +56,7 @@ class ServiceRequestHandler extends SimpleChannelHandler {
     ChannelBuffer responseBuffer;
     try {
       responseBuffer =
-          ChannelBuffers.wrappedBuffer(responseBuilder.handleRequest(requestBuffer.toByteBuffer()));
+          ChannelBuffers.wrappedBuffer(handleRequest(requestBuffer.toByteBuffer()));
     } catch (ServiceException ex) {
       response.setErrorCode(0);
       response.setMessageLength(ex.getMessage().length());

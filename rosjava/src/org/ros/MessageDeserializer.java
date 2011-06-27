@@ -23,6 +23,6 @@ import java.nio.ByteBuffer;
  */
 public interface MessageDeserializer<MessageType> {
   
-  <T extends MessageType> T deserialize(ByteBuffer buffer);
+  MessageType deserialize(ByteBuffer buffer);
 
 }

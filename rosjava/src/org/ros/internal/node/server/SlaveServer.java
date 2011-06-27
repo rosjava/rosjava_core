@@ -109,7 +109,7 @@ public class SlaveServer extends NodeServer {
    * @throws RemoteException
    * @throws XmlRpcTimeoutException
    */
-  public void addService(ServiceServer server) throws URISyntaxException, MalformedURLException,
+  public void addService(ServiceServer<?, ?> server) throws URISyntaxException, MalformedURLException,
       RemoteException, XmlRpcTimeoutException {
     // TODO(kwc): convert to MasterRegistration job. When we do, we can also get
     // rid of masterClient.

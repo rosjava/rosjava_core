@@ -21,7 +21,8 @@ import java.nio.ByteBuffer;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageDeserializer implements org.ros.MessageDeserializer<Message> {
+public class MessageDeserializer<MessageType extends Message> implements
+    org.ros.MessageDeserializer<Message> {
 
   private final MessageFactory factory;
   private final String messageName;
@@ -32,7 +33,7 @@ public class MessageDeserializer implements org.ros.MessageDeserializer<Message>
   }
 
   @Override
-  public <MessageType extends Message> MessageType deserialize(ByteBuffer buffer) {
+  public MessageType deserialize(ByteBuffer buffer) {
     return factory.<MessageType>deserializeMessage(messageName, buffer);
   }
 

@@ -52,7 +52,7 @@ class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
     ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
     ByteBuffer buffer = response.getMessage().toByteBuffer();
     if (response.getErrorCode() == 1) {
-      listener.onSuccess(deserializer.<ResponseType>deserialize(buffer));
+      listener.onSuccess(deserializer.deserialize(buffer));
     } else {
       String message = Charset.forName("US-ASCII").decode(buffer).toString();
       listener.onFailure(new RemoteException(StatusCode.ERROR, message));

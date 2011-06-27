@@ -65,7 +65,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @throws RemoteException
    * @throws XmlRpcTimeoutException
    */
-  public Response<Void> registerService(SlaveIdentifier slave, ServiceServer service)
+  public Response<Void> registerService(SlaveIdentifier slave, ServiceServer<?, ?> service)
       throws RemoteException, XmlRpcTimeoutException {
     try {
       return Response.fromListChecked(node.registerService(slave.getName().toString(), service
@@ -87,7 +87,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * @throws RemoteException
    * @throws XmlRpcTimeoutException
    */
-  public Response<Integer> unregisterService(SlaveIdentifier slave, ServiceServer service)
+  public Response<Integer> unregisterService(SlaveIdentifier slave, ServiceServer<?, ?> service)
       throws RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.unregisterService(slave.getName().toString(), service
         .getName().toString(), service.getUri().toString()), new IntegerResultFactory());

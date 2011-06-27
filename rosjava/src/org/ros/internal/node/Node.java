@@ -120,10 +120,12 @@ public class Node {
     return publisherFactory.create(topicDefinition, serializer);
   }
 
-  public <RequestType, ResponseType> ServiceServer createServiceServer(
-      ServiceDefinition serviceDefinition,
+  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServiceServer(
+      ServiceDefinition serviceDefinition, MessageDeserializer<RequestType> deserializer,
+      MessageSerializer<ResponseType> serializer,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
-    return serviceFactory.createServiceServer(serviceDefinition, responseBuilder);
+    return serviceFactory.createServiceServer(serviceDefinition, deserializer, serializer,
+        responseBuilder);
   }
 
   public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createServiceClient(
@@ -188,7 +190,7 @@ public class Node {
         log.error(e);
       }
     }
-    for (ServiceServer serviceServer : serviceManager.getServiceServers()) {
+    for (ServiceServer<?, ?> serviceServer : serviceManager.getServiceServers()) {
       try {
         masterClient.unregisterService(slaveServer.toSlaveIdentifier(), serviceServer);
       } catch (XmlRpcTimeoutException e) {

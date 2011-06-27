@@ -28,8 +28,6 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
-import org.ros.message.MessageDeserializer;
-import org.ros.message.MessageSerializer;
 import org.ros.message.srv.beginner_tutorials.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
@@ -58,9 +56,7 @@ public class ServiceIntegrationTest {
   public void PesistentServiceConnectionTest() throws Exception {
     Node serverNode = new DefaultNode("/server", configuration);
     serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
-        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>(
-            new MessageSerializer<AddTwoInts.Response>(),
-            new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class)) {
+        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
           @Override
           public AddTwoInts.Response build(AddTwoInts.Request request) {
             AddTwoInts.Response response = new AddTwoInts.Response();
@@ -101,9 +97,7 @@ public class ServiceIntegrationTest {
     final String errorMessage = "Error!";
     Node serverNode = new DefaultNode("/server", configuration);
     serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
-        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>(
-            new MessageSerializer<AddTwoInts.Response>(),
-            new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class)) {
+        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
           @Override
           public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
             throw new ServiceException(errorMessage);
