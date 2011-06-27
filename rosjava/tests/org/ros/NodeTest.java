@@ -47,95 +47,90 @@ import java.util.Map;
  */
 public class NodeTest {
 
-	private MasterServer master;
-	private URI masterUri;
-	private NodeConfiguration nodeConfiguration;
+  private MasterServer master;
+  private URI masterUri;
+  private NodeConfiguration nodeConfiguration;
 
-	@Before
-	public void setUp() throws RosInitException {
-		master = new MasterServer(BindAddress.createPublic(0),
-				AdvertiseAddress.createPublic());
-		master.start();
-		masterUri = master.getUri();
-		checkHostName(masterUri.getHost());
-		// Make sure that none of the publicly reported addresses are bind
-		// addresses.
-		Map<String, String> env = new HashMap<String, String>();
-		env.put("ROS_MASTER_URI", masterUri.toString());
-		CommandLineLoader loader = new CommandLineLoader(
-				Lists.<String> newArrayList("Foo"), env);
-		nodeConfiguration = loader.createConfiguration();
-	}
+  @Before
+  public void setUp() throws RosInitException {
+    master = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+    master.start();
+    masterUri = master.getUri();
+    checkHostName(masterUri.getHost());
+    // Make sure that none of the publicly reported addresses are bind
+    // addresses.
+    Map<String, String> env = new HashMap<String, String>();
+    env.put("ROS_MASTER_URI", masterUri.toString());
+    CommandLineLoader loader = new CommandLineLoader(Lists.<String>newArrayList("Foo"), env);
+    nodeConfiguration = loader.createConfiguration();
+  }
 
-	@Test
-	public void testResolveName() throws RosInitException {
-		nodeConfiguration.setParentResolver(new NameResolver("/ns1",
-				new HashMap<GraphName, GraphName>()));
-		Node node = new DefaultNode("test_resolver", nodeConfiguration);
+  @Test
+  public void testResolveName() throws RosInitException {
+    nodeConfiguration.setParentResolver(new NameResolver("/ns1",
+        new HashMap<GraphName, GraphName>()));
+    Node node = new DefaultNode("test_resolver", nodeConfiguration);
 
-		assertEquals("/foo", node.resolveName("/foo"));
-		assertEquals("/ns1/foo", node.resolveName("foo"));
-		assertEquals("/ns1/test_resolver/foo", node.resolveName("~foo"));
+    assertEquals("/foo", node.resolveName("/foo"));
+    assertEquals("/ns1/foo", node.resolveName("foo"));
+    assertEquals("/ns1/test_resolver/foo", node.resolveName("~foo"));
 
-		Publisher<Int64> pub = node.createPublisher("pub", "std_msgs/Int64");
-		assertEquals("/ns1/pub", pub.getTopicName());
-		pub = node.createPublisher("/pub", "std_msgs/Int64");
-		assertEquals("/pub", pub.getTopicName());
-		pub = node.createPublisher("~pub", "std_msgs/Int64");
-		assertEquals("/ns1/test_resolver/pub", pub.getTopicName());
+    Publisher<Int64> pub = node.createPublisher("pub", "std_msgs/Int64");
+    assertEquals("/ns1/pub", pub.getTopicName());
+    pub = node.createPublisher("/pub", "std_msgs/Int64");
+    assertEquals("/pub", pub.getTopicName());
+    pub = node.createPublisher("~pub", "std_msgs/Int64");
+    assertEquals("/ns1/test_resolver/pub", pub.getTopicName());
 
-		MessageListener<Int64> callback = new MessageListener<Int64>() {
-			@Override
-			public void onNewMessage(Int64 message) {
-			}
-		};
+    MessageListener<Int64> callback = new MessageListener<Int64>() {
+      @Override
+      public void onNewMessage(Int64 message) {
+      }
+    };
 
-		Subscriber<Int64> sub = node.createSubscriber("sub", "std_msgs/Int64", callback);
-		assertEquals("/ns1/sub", sub.getTopicName());
-		sub = node.createSubscriber("/sub", "std_msgs/Int64", callback);
-		assertEquals("/sub", sub.getTopicName());
-		sub = node.createSubscriber("~sub", "std_msgs/Int64", callback);
-		assertEquals("/ns1/test_resolver/sub", sub.getTopicName());
-	}
+    Subscriber<Int64> sub = node.createSubscriber("sub", "std_msgs/Int64", callback);
+    assertEquals("/ns1/sub", sub.getTopicName());
+    sub = node.createSubscriber("/sub", "std_msgs/Int64", callback);
+    assertEquals("/sub", sub.getTopicName());
+    sub = node.createSubscriber("~sub", "std_msgs/Int64", callback);
+    assertEquals("/ns1/test_resolver/sub", sub.getTopicName());
+  }
 
-	void checkHostName(String hostName) {
-		assertTrue(!hostName.equals("0.0.0.0"));
-		assertTrue(!hostName.equals("0:0:0:0:0:0:0:0"));
-	}
+  void checkHostName(String hostName) {
+    assertTrue(!hostName.equals("0.0.0.0"));
+    assertTrue(!hostName.equals("0:0:0:0:0:0:0:0"));
+  }
 
-	@Test
-	public void testPublicAddresses() throws RosInitException, RemoteException {
-		MasterServer master = new MasterServer(BindAddress.createPublic(0),
-				AdvertiseAddress.createPublic());
-		master.start();
-		URI masterUri = master.getUri();
-		checkHostName(masterUri.getHost());
+  @Test
+  public void testPublicAddresses() throws RosInitException, RemoteException {
+    MasterServer master =
+        new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+    master.start();
+    URI masterUri = master.getUri();
+    checkHostName(masterUri.getHost());
 
-		// Make sure that none of the publicly reported addresses are bind
-		// addresses.
-		Map<String, String> env = new HashMap<String, String>();
-		env.put("ROS_MASTER_URI", masterUri.toString());
-		CommandLineLoader loader = new CommandLineLoader(
-				Lists.<String> newArrayList("Foo"), env);
-		NodeConfiguration nodeConfiguration = loader.createConfiguration();
+    // Make sure that none of the publicly reported addresses are bind
+    // addresses.
+    Map<String, String> env = new HashMap<String, String>();
+    env.put("ROS_MASTER_URI", masterUri.toString());
+    CommandLineLoader loader = new CommandLineLoader(Lists.<String>newArrayList("Foo"), env);
+    NodeConfiguration nodeConfiguration = loader.createConfiguration();
 
-		Node node = new DefaultNode("test_addresses", nodeConfiguration);
-		node.createPublisher("test_addresses_pub", "std_msgs/Int64");
+    Node node = new DefaultNode("test_addresses", nodeConfiguration);
+    node.createPublisher("test_addresses_pub", "std_msgs/Int64");
 
-		URI uri = node.getUri();
-		int port = uri.getPort();
-		assertTrue(port > 0);
-		checkHostName(uri.getHost());
+    URI uri = node.getUri();
+    int port = uri.getPort();
+    assertTrue(port > 0);
+    checkHostName(uri.getHost());
 
-		// Check the TCPROS server address via the XML-RPC API.
-		SlaveClient slaveClient = new SlaveClient(new GraphName(
-				"test_addresses"), uri);
-		Response<ProtocolDescription> response = slaveClient.requestTopic(
-				"test_addresses_pub", Lists.newArrayList(ProtocolNames.TCPROS));
-		ProtocolDescription result = response.getResult();
-		InetSocketAddress tcpRosAddress = result.getAdverstiseAddress()
-				.toInetSocketAddress();
-		checkHostName(tcpRosAddress.getHostName());
-	}
+    // Check the TCPROS server address via the XML-RPC API.
+    SlaveClient slaveClient = new SlaveClient(new GraphName("test_addresses"), uri);
+    Response<ProtocolDescription> response =
+        slaveClient.requestTopic("test_addresses_pub", Lists.newArrayList(ProtocolNames.TCPROS));
+    ProtocolDescription result = response.getResult();
+    InetSocketAddress tcpRosAddress = result.getAdverstiseAddress().toInetSocketAddress();
+    checkHostName(tcpRosAddress.getHostName());
+  }
 
 }

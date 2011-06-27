@@ -126,9 +126,10 @@ public class Node {
     return serviceFactory.createServiceServer(serviceDefinition, responseBuilder);
   }
 
-  public <ResponseMessageType> ServiceClient<ResponseMessageType> createServiceClient(
-      ServiceDefinition serviceDefinition, MessageDeserializer<ResponseMessageType> deserializer) {
-    return serviceFactory.createServiceClient(serviceDefinition, deserializer);
+  public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createServiceClient(
+      ServiceDefinition serviceDefinition, MessageSerializer<RequestType> serializer,
+      MessageDeserializer<ResponseType> deserializer) {
+    return serviceFactory.createServiceClient(serviceDefinition, serializer, deserializer);
   }
 
   /**
@@ -142,17 +143,18 @@ public class Node {
     slaveServer.start();
     masterRegistration.start(slaveServer.toSlaveIdentifier());
   }
-  
+
   /**
    * Is the node running?
    * 
-   * <p>A running node may not be fully initialized yet, it is either in the process
-   * of starting up or is running.
+   * <p>
+   * A running node may not be fully initialized yet, it is either in the
+   * process of starting up or is running.
    * 
    * @return True if the node is running, false otherwise.
    */
   public boolean isRunning() {
-	  return running;
+    return running;
   }
 
   /**
@@ -163,7 +165,7 @@ public class Node {
     // NOTE(damonkohler): We don't want to raise potentially spurious
     // exceptions during shutdown that would interrupt the process. This is
     // simply best effort cleanup.
-	running = false;
+    running = false;
     slaveServer.shutdown();
     masterRegistration.shutdown();
     for (Publisher<?> publisher : topicManager.getPublishers()) {
@@ -208,8 +210,8 @@ public class Node {
     return slaveServer.getAddress();
   }
 
-  public ServiceIdentifier lookupService(GraphName serviceName)
-      throws RemoteException, XmlRpcTimeoutException {
+  public ServiceIdentifier lookupService(GraphName serviceName) throws RemoteException,
+      XmlRpcTimeoutException {
     Response<URI> response =
         masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
     if (response.getStatusCode() == StatusCode.SUCCESS) {

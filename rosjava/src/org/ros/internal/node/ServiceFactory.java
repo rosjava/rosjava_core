@@ -19,6 +19,7 @@ package org.ros.internal.node;
 import com.google.common.base.Preconditions;
 
 import org.ros.MessageDeserializer;
+import org.ros.MessageSerializer;
 import org.ros.internal.message.ServiceMessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.MasterServer;
@@ -50,9 +51,10 @@ public class ServiceFactory {
    * are cached and reused per service. When a new {@link ServiceServer} is
    * generated, it is registered with the {@link MasterServer}.
    * 
-   * @param serviceDefinition the {@link ServiceMessageDefinition} that is being served
-   * @param responseBuilder the {@link ServiceResponseBuilder} that is used to
-   *        build responses
+   * @param serviceDefinition
+   *          the {@link ServiceMessageDefinition} that is being served
+   * @param responseBuilder
+   *          the {@link ServiceResponseBuilder} that is used to build responses
    * @return a {@link ServiceServer} instance
    * @throws Exception
    */
@@ -85,23 +87,26 @@ public class ServiceFactory {
    * are cached and reused per service. When a new {@link ServiceClient} is
    * created, it is connected to the {@link ServiceServer}.
    * 
-   * @param <ResponseMessageType>
-   * @param serviceDefinition the {@link ServiceIdentifier} of the server
+   * @param <ResponseType>
+   * @param serviceDefinition
+   *          the {@link ServiceIdentifier} of the server
    * @return a {@link ServiceClient} instance
    */
   @SuppressWarnings("unchecked")
-  public <ResponseMessageType> ServiceClient<ResponseMessageType> createServiceClient(
-      ServiceDefinition serviceDefinition, MessageDeserializer<ResponseMessageType> deserializer) {
+  public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createServiceClient(
+      ServiceDefinition serviceDefinition, MessageSerializer<RequestType> serializer,
+      MessageDeserializer<ResponseType> deserializer) {
     Preconditions.checkNotNull(serviceDefinition.getUri());
-    ServiceClient<ResponseMessageType> serviceClient;
+    ServiceClient<RequestType, ResponseType> serviceClient;
     String name = serviceDefinition.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasServiceClient(name)) {
-        serviceClient = (ServiceClient<ResponseMessageType>) serviceManager.getServiceClient(name);
+        serviceClient =
+            (ServiceClient<RequestType, ResponseType>) serviceManager.getServiceClient(name);
       } else {
-        serviceClient = ServiceClient.create(nodeName, serviceDefinition, deserializer);
+        serviceClient = ServiceClient.create(nodeName, serviceDefinition, serializer, deserializer);
         createdNewService = true;
       }
     }

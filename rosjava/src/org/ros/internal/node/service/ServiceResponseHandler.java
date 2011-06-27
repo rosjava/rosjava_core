@@ -33,26 +33,26 @@ import java.util.Queue;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class ServiceResponseHandler<ResponseMessageType> extends SimpleChannelHandler {
+class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
 
-  private final Queue<ServiceResponseListener<ResponseMessageType>> responseListeners;
-  private final MessageDeserializer<ResponseMessageType> deserializer;
+  private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
+  private final MessageDeserializer<ResponseType> deserializer;
 
   ServiceResponseHandler(
-      Queue<ServiceResponseListener<ResponseMessageType>> messageListeners,
-      MessageDeserializer<ResponseMessageType> deserializer) {
+      Queue<ServiceResponseListener<ResponseType>> messageListeners,
+      MessageDeserializer<ResponseType> deserializer) {
     this.responseListeners = messageListeners;
     this.deserializer = deserializer;
   }
 
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-    ServiceResponseListener<ResponseMessageType> listener = responseListeners.poll();
+    ServiceResponseListener<ResponseType> listener = responseListeners.poll();
     Preconditions.checkNotNull(listener);
     ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
     ByteBuffer buffer = response.getMessage().toByteBuffer();
     if (response.getErrorCode() == 1) {
-      listener.onSuccess(deserializer.<ResponseMessageType>deserialize(buffer));
+      listener.onSuccess(deserializer.<ResponseType>deserialize(buffer));
     } else {
       String message = Charset.forName("US-ASCII").decode(buffer).toString();
       listener.onFailure(new RemoteException(StatusCode.ERROR, message));

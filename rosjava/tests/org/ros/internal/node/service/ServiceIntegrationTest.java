@@ -75,8 +75,9 @@ public class ServiceIntegrationTest {
             });
 
     Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
-    ServiceClient<AddTwoInts.Response> client =
+    ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.createServiceClient(server.getDefinition(),
+            new MessageSerializer<AddTwoInts.Request>(),
             new MessageDeserializer<AddTwoInts.Response>(AddTwoInts.Response.class));
 
     // TODO(damonkohler): This is a hack that we should remove once it's
@@ -119,8 +120,9 @@ public class ServiceIntegrationTest {
             });
 
     Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
-    ServiceClient<AddTwoInts.Response> client =
+    ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.createServiceClient(server.getDefinition(),
+            new MessageSerializer<AddTwoInts.Request>(),
             new MessageDeserializer<AddTwoInts.Response>(AddTwoInts.Response.class));
 
     // TODO(damonkohler): This is a hack that we should remove once it's

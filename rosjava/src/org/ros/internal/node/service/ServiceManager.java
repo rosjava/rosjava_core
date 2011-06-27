@@ -28,7 +28,7 @@ import java.util.Map;
 public class ServiceManager {
 
   private final Map<String, ServiceServer> serviceServers;
-  private final Map<String, ServiceClient<?>> serviceClients;
+  private final Map<String, ServiceClient<?, ?>> serviceClients;
 
   public ServiceManager() {
     serviceServers = Maps.newConcurrentMap();
@@ -51,11 +51,11 @@ public class ServiceManager {
     return serviceClients.containsKey(serviceName);
   }
 
-  public void putServiceClient(String serviceName, ServiceClient<?> serviceClient) {
+  public void putServiceClient(String serviceName, ServiceClient<?, ?> serviceClient) {
     serviceClients.put(serviceName, serviceClient);
   }
 
-  public ServiceClient<?> getServiceClient(String serviceName) {
+  public ServiceClient<?, ?> getServiceClient(String serviceName) {
     return serviceClients.get(serviceName);
   }
 

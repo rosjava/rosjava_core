@@ -20,11 +20,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+import org.jboss.netty.buffer.ChannelBuffers;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
@@ -37,12 +38,12 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.MessageDeserializer;
+import org.ros.MessageSerializer;
 import org.ros.ServiceResponseListener;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
-import org.ros.message.Message;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -54,13 +55,14 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceClient<ResponseMessageType> {
+public class ServiceClient<RequestType, ResponseType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
 
-  private final MessageDeserializer<ResponseMessageType> deserializer;
-  private final Queue<ServiceResponseListener<ResponseMessageType>> responseListeners;
+  private final MessageSerializer<RequestType> serializer;
+  private final MessageDeserializer<ResponseType> deserializer;
+  private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
   private final Map<String, String> header;
   private final ChannelFactory channelFactory;
   private final ClientBootstrap bootstrap;
@@ -77,26 +79,29 @@ public class ServiceClient<ResponseMessageType> {
       ChannelPipeline pipeline = e.getChannel().getPipeline();
       pipeline.remove(TcpClientPipelineFactory.LENGTH_FIELD_BASED_FRAME_DECODER);
       pipeline.remove(this);
-      pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<ResponseMessageType>());
-      pipeline.addLast("ResponseHandler", new ServiceResponseHandler<ResponseMessageType>(
+      pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<ResponseType>());
+      pipeline.addLast("ResponseHandler", new ServiceResponseHandler<ResponseType>(
           responseListeners, deserializer));
     }
   }
 
-  public static <T> ServiceClient<T> create(GraphName nodeName,
-      ServiceDefinition serviceDefinition, MessageDeserializer<T> deserializer) {
-    return new ServiceClient<T>(nodeName, serviceDefinition, deserializer);
+  public static <S, T> ServiceClient<S, T> create(GraphName nodeName,
+      ServiceDefinition serviceDefinition, MessageSerializer<S> serializer,
+      MessageDeserializer<T> deserializer) {
+    return new ServiceClient<S, T>(nodeName, serviceDefinition, serializer, deserializer);
   }
 
   private ServiceClient(GraphName nodeName, ServiceDefinition serviceDefinition,
-      MessageDeserializer<ResponseMessageType> deserializer) {
+      MessageSerializer<RequestType> serializer, MessageDeserializer<ResponseType> deserializer) {
+    this.serializer = serializer;
     this.deserializer = deserializer;
     responseListeners = Lists.newLinkedList();
     header =
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
             // TODO(damonkohler): Support non-persistent connections.
-            .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceDefinition.toHeader())
+            .put(ConnectionHeaderFields.PERSISTENT, "1")
+            .putAll(serviceDefinition.toHeader())
             .build();
     channelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
@@ -153,14 +158,12 @@ public class ServiceClient<ResponseMessageType> {
   }
 
   /**
-   * @param message
+   * @param request
    */
-  public void call(Message message, ServiceResponseListener<ResponseMessageType> listener) {
-    // TODO(damonkohler): Make use of sequence number.
-    ChannelBuffer buffer =
-        ChannelBuffers.wrappedBuffer(ByteOrder.LITTLE_ENDIAN, message.serialize(0));
+  public void call(RequestType request, ServiceResponseListener<ResponseType> listener) {
+    ChannelBuffer wrappedBuffer = ChannelBuffers.wrappedBuffer(serializer.serialize(request));
     responseListeners.add(listener);
-    channel.write(buffer);
+    channel.write(wrappedBuffer);
   }
 
 }

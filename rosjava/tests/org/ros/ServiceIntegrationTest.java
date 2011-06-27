@@ -70,7 +70,7 @@ public class ServiceIntegrationTest {
         });
 
     Node clientNode = new DefaultNode("/client", configuration);
-    ServiceClient<AddTwoInts.Response> client =
+    ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.createServiceClient(SERVICE_NAME, SERVICE_TYPE);
 
     // TODO(damonkohler): This is a hack that we should remove once it's
@@ -111,7 +111,7 @@ public class ServiceIntegrationTest {
         });
 
     Node clientNode = new DefaultNode("/client", configuration);
-    ServiceClient<AddTwoInts.Response> client =
+    ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.createServiceClient(SERVICE_NAME, SERVICE_TYPE);
 
     // TODO(damonkohler): This is a hack that we should remove once it's

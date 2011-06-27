@@ -33,7 +33,7 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class NodeConfiguration {
-  
+
   public static final String DEFAULT_HOST = Address.LOCALHOST;
   public static final String DEFAULT_MASTER_URI = "http://" + DEFAULT_HOST + ":11311/";
 
@@ -45,7 +45,8 @@ public class NodeConfiguration {
   private int tcpRosPort;
   private int xmlRpcPort;
   private String nodeNameOverride;
-  
+  private MessageSerializationFactory messageSerializationFactory;
+
   public static NodeConfiguration createDefault() {
     NodeConfiguration configuration = new NodeConfiguration();
     try {
@@ -57,6 +58,7 @@ public class NodeConfiguration {
     configuration.setHost(DEFAULT_HOST);
     configuration.setTcpRosPort(0); // OS determined free port.
     configuration.setXmlRpcPort(0); // OS determined free port.
+    configuration.setMessageSerializationFactory(new org.ros.message.MessageSerializationFactory());
     return configuration;
   }
 
@@ -148,6 +150,15 @@ public class NodeConfiguration {
 
   public void setNodeNameOverride(String nodeNameOverride) {
     this.nodeNameOverride = nodeNameOverride;
+  }
+
+  public MessageSerializationFactory getMessageSerializationFactory() {
+    return messageSerializationFactory;
+  }
+
+  public void
+      setMessageSerializationFactory(MessageSerializationFactory messageSerializationFactory) {
+    this.messageSerializationFactory = messageSerializationFactory;
   }
 
 }

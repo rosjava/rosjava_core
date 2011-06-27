@@ -39,6 +39,16 @@ public class MessageDeserializer<MessageType> implements org.ros.MessageDeserial
     return new MessageDeserializer<T>(messageClass);
   }
 
+  public static <T> MessageDeserializer<T> createServiceResponseFromString(String serviceType) {
+    Preconditions.checkArgument(serviceType.split("/").length == 2);
+    return createFromString("srv." + serviceType + "$Response");
+  }
+
+  public static <T> MessageDeserializer<T> createServiceRequestFromString(String serviceType) {
+    Preconditions.checkArgument(serviceType.split("/").length == 2);
+    return createFromString("srv." + serviceType + "$Request");
+  }
+
   public MessageDeserializer(Class<MessageType> messageClass) {
     Preconditions.checkArgument(Message.class.isAssignableFrom(messageClass));
     this.messageClass = messageClass;

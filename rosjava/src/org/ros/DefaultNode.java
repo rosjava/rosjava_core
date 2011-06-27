@@ -39,7 +39,6 @@ import org.ros.internal.node.xmlrpc.Master;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.time.TimeProvider;
 import org.ros.internal.time.WallclockProvider;
-import org.ros.message.Message;
 import org.ros.message.MessageDefinitionFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
@@ -69,15 +68,6 @@ public class DefaultNode implements Node {
   private final org.ros.internal.node.Node node;
   private final RosoutLogger log;
   private final TimeProvider timeProvider;
-  private final MessageSerializerFactory<Message> messageSerializerFactory;
-
-  private final class PregeneratedCodeMessageSerializerFactory implements
-      MessageSerializerFactory<Message> {
-    @Override
-    public <MessageType extends Message> org.ros.MessageSerializer<MessageType> create() {
-      return new MessageSerializer<MessageType>();
-    }
-  }
 
   /**
    * @param name
@@ -89,7 +79,6 @@ public class DefaultNode implements Node {
   public DefaultNode(String name, NodeConfiguration configuration) throws RosInitException {
     Preconditions.checkNotNull(configuration);
     Preconditions.checkNotNull(name);
-    messageSerializerFactory = new PregeneratedCodeMessageSerializerFactory();
     this.configuration = configuration;
     NameResolver parentResolver = configuration.getParentResolver();
     String baseName;
@@ -145,15 +134,17 @@ public class DefaultNode implements Node {
    *           May throw if the system is not in a proper state.
    */
   @Override
-  public <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
-      String messageType) throws RosInitException {
+  public <MessageType> Publisher<MessageType> createPublisher(String topicName, String messageType)
+      throws RosInitException {
     try {
       String resolvedTopicName = resolveName(topicName);
       MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
       TopicDefinition topicDefinition =
           TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
+      org.ros.MessageSerializer<MessageType> serializer =
+          configuration.getMessageSerializationFactory().createSerializer(messageType);
       org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
-          node.createPublisher(topicDefinition, messageSerializerFactory.<MessageType>create());
+          node.createPublisher(topicDefinition, serializer);
       return new Publisher<MessageType>(resolveName(topicName), publisherImpl);
     } catch (Exception e) {
       throw new RosInitException(e);
@@ -180,6 +171,7 @@ public class DefaultNode implements Node {
    *           initialized or other wackyness. TODO specify exceptions that
    *           might be thrown here.
    */
+  @SuppressWarnings("unchecked")
   @Override
   public <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
       String messageType, final MessageListener<MessageType> callback) throws RosInitException {
@@ -188,9 +180,11 @@ public class DefaultNode implements Node {
       MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
       TopicDefinition topicDefinition =
           TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
+      MessageDeserializer<MessageType> deserializer =
+          (MessageDeserializer<MessageType>) configuration.getMessageSerializationFactory()
+              .createDeserializer(messageType);
       org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
-          node.createSubscriber(topicDefinition,
-              MessageDeserializer.<MessageType>createFromString(messageType));
+          node.createSubscriber(topicDefinition, deserializer);
       subscriber.addMessageListener(callback);
       return new Subscriber<MessageType>(resolvedTopicName, callback, subscriber);
     } catch (Exception e) {
@@ -202,7 +196,8 @@ public class DefaultNode implements Node {
   public <RequestType, ResponseType> ServiceServer createServiceServer(String serviceName,
       String serviceType, ServiceResponseBuilder<RequestType, ResponseType> responseBuilder)
       throws Exception {
-    // TODO(damonkohler): It's rather non-obvious that the URI will be created later on the fly.
+    // TODO(damonkohler): It's rather non-obvious that the URI will be created
+    // later on the fly.
     ServiceIdentifier identifier = new ServiceIdentifier(new GraphName(serviceName), null);
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
@@ -210,16 +205,21 @@ public class DefaultNode implements Node {
     return node.createServiceServer(definition, responseBuilder);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public <ResponseType> ServiceClient<ResponseType> createServiceClient(String serviceName,
-      String serviceType) {
+  public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createServiceClient(
+      String serviceName, String serviceType) {
     ServiceIdentifier identifier = lookupService(serviceName);
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
-    MessageDeserializer<ResponseType> messageDeserializer =
-        MessageDeserializer.<ResponseType>createFromString("srv." + serviceType + "$Response");
-    return node.createServiceClient(definition, messageDeserializer);
+    MessageSerializer<RequestType> requestSerializer =
+        (MessageSerializer<RequestType>) configuration.getMessageSerializationFactory() 
+            .createServiceRequestSerializer(serviceType);
+    MessageDeserializer<ResponseType> responseDeserializer =
+        (MessageDeserializer<ResponseType>) configuration.getMessageSerializationFactory()
+            .createServiceResponseDeserializer(serviceType);
+    return node.createServiceClient(definition, requestSerializer, responseDeserializer);
   }
 
   @Override

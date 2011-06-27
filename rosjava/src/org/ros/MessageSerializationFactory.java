@@ -19,8 +19,20 @@ package org.ros;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface MessageSerializerFactory<BaseMessageType> {
+public interface MessageSerializationFactory {
 
-  <MessageType extends BaseMessageType> MessageSerializer<MessageType> create();
+  <MessageType> MessageSerializer<MessageType> createSerializer(String messageType);
+
+  <MessageType> MessageDeserializer<MessageType> createDeserializer(String messageType);
+
+  <MessageType> MessageSerializer<MessageType> createServiceRequestSerializer(String serviceType);
+
+  <MessageType> MessageDeserializer<MessageType>
+      createServiceRequestDeserializer(String serviceType);
+
+  <MessageType> MessageSerializer<MessageType> createServiceResponseSerializer(String serviceType);
+
+  <MessageType> MessageDeserializer<MessageType> createServiceResponseDeserializer(
+      String serviceType);
 
 }

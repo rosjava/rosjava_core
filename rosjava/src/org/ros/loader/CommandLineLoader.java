@@ -107,8 +107,7 @@ public class CommandLineLoader extends RosLoader {
   @Override
   public NodeConfiguration createConfiguration() throws RosInitException {
     parseRemappingArguments();
-    
-    NodeConfiguration nodeConfiguration = new NodeConfiguration();
+    NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
     nodeConfiguration.setParentResolver(buildParentResolver());
     nodeConfiguration.setRosRoot(getRosRoot());
     nodeConfiguration.setRosPackagePath(getRosPackagePath());

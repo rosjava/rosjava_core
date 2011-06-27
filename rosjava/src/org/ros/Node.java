@@ -25,7 +25,6 @@ import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.xmlrpc.Master;
-import org.ros.message.Message;
 import org.ros.message.Service;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
@@ -149,8 +148,8 @@ public interface Node {
    * @throws RosInitException
    *           May throw if the system is not in a proper state.
    */
-  <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
-      String messageType) throws RosInitException;
+  <MessageType> Publisher<MessageType> createPublisher(String topicName, String messageType)
+      throws RosInitException;
 
   /**
    * @param <MessageType>
@@ -206,8 +205,8 @@ public interface Node {
    *          the type of the service
    * @return
    */
-  <ResponseType> ServiceClient<ResponseType> createServiceClient(String serviceName,
-      String serviceType);
+  <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createServiceClient(
+      String serviceName, String serviceType);
 
   /**
    * Returns a {@link ServiceIdentifier} for communicating with the current
