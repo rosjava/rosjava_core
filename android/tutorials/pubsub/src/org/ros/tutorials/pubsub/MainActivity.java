@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
     setContentView(R.layout.main);
     rosTextView = (RosTextView<org.ros.message.std_msgs.String>) findViewById(R.id.text);
     rosTextView.setTopicName("/chatter");
-    rosTextView.setMessageClass(org.ros.message.std_msgs.String.class);
+    rosTextView.setMessageType("std_msgs/String");
     rosTextView
         .setMessageToStringCallable(new MessageCallable<String, org.ros.message.std_msgs.String>() {
           @Override

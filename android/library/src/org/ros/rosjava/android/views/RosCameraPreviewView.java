@@ -37,11 +37,11 @@ import org.ros.namespace.NameResolver;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class RosCameraPreviewView extends CameraPreviewView implements NodeMain {
-  
+
   private Node node;
   private Publisher<CompressedImage> imagePublisher;
   private Publisher<CameraInfo> cameraInfoPublisher;
-  
+
   private final class PublishingPreviewCallback implements PreviewCallback {
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
@@ -58,17 +58,17 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
       image.header.stamp = Time.fromMillis(System.currentTimeMillis());
       image.header.frame_id = frameId;
       imagePublisher.publish(image);
-      
+
       cameraInfo.header.stamp = image.header.stamp;
       cameraInfo.header.frame_id = frameId;
-      
+
       Size previewSize = camera.getParameters().getPreviewSize();
       cameraInfo.width = previewSize.width;
       cameraInfo.height = previewSize.height;
       cameraInfoPublisher.publish(cameraInfo);
     }
   }
-  
+
   public RosCameraPreviewView(Context context) {
     super(context);
   }
@@ -86,12 +86,13 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
     Preconditions.checkState(node == null);
     node = new DefaultNode("/anonymous", nodeConfiguration);
     NameResolver resolver = node.getResolver().createResolver("camera");
-    imagePublisher = node.createPublisher(resolver.resolveName("image_raw"), CompressedImage.class);
+    imagePublisher =
+        node.createPublisher(resolver.resolveName("image_raw"), "sensor_msgs/CompressedImage");
     cameraInfoPublisher =
-        node.createPublisher(resolver.resolveName("camera_info"), CameraInfo.class);
+        node.createPublisher(resolver.resolveName("camera_info"), "sensor_msgs/CameraInfo");
     setPreviewCallback(new PublishingPreviewCallback());
   }
-  
+
   @Override
   public void shutdown() {
     if (node != null) {

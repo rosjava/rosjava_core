@@ -35,7 +35,7 @@ import org.ros.rosjava.android.MessageCallable;
 public class RosTextView<T> extends TextView implements NodeMain {
 
   private String topicName;
-  private Class<T> messageClass;
+  private String messageType;
   private MessageCallable<String, T> callable;
   private Node node;
 
@@ -55,8 +55,8 @@ public class RosTextView<T> extends TextView implements NodeMain {
     this.topicName = topicName;
   }
 
-  public void setMessageClass(Class<T> messageClass) {
-    this.messageClass = messageClass;
+  public void setMessageType(String messageType) {
+    this.messageType = messageType;
   }
 
   public void setMessageToStringCallable(MessageCallable<String, T> callable) {
@@ -69,7 +69,7 @@ public class RosTextView<T> extends TextView implements NodeMain {
       Preconditions.checkNotNull(nodeConfiguration);
       node = new DefaultNode("/anonymous", nodeConfiguration);
     }
-    node.createSubscriber(topicName, new MessageListener<T>() {
+    node.createSubscriber(topicName, messageType, new MessageListener<T>() {
       @Override
       public void onNewMessage(final T message) {
         if (callable != null) {
@@ -89,7 +89,7 @@ public class RosTextView<T> extends TextView implements NodeMain {
         }
         postInvalidate();
       }
-    }, messageClass);
+    });
   }
 
   public void setNode(Node node) {

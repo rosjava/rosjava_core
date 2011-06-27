@@ -18,6 +18,8 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.message.MessageDefinitionFactory;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosInitException;
@@ -124,7 +126,7 @@ public class DefaultNode implements Node {
     // TODO(damonkohler): Move the creation and management of the RosoutLogger
     // into the internal.Node class.
     Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
-        createPublisher("/rosout", org.ros.message.rosgraph_msgs.Log.class);
+        createPublisher("/rosout", "rosgraph_msgs/Log");
     log.setRosoutPublisher(rosoutPublisher);
   }
 
@@ -141,14 +143,14 @@ public class DefaultNode implements Node {
    * @throws RosInitException
    *           May throw if the system is not in a proper state.
    */
+  @Override
   public <MessageType extends Message> Publisher<MessageType> createPublisher(String topicName,
-      Class<MessageType> messageClass) throws RosInitException {
+      String messageType) throws RosInitException {
     try {
       String resolvedTopicName = resolveName(topicName);
-      Message message = messageClass.newInstance();
+      MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
       TopicDefinition topicDefinition =
-          TopicDefinition.create(new GraphName(resolvedTopicName), MessageDefinition.create(
-              message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
+          TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
       org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
           node.createPublisher(topicDefinition, messageSerializerFactory.<MessageType>create());
       return new Publisher<MessageType>(resolveName(topicName), publisherImpl);
@@ -177,17 +179,17 @@ public class DefaultNode implements Node {
    *           initialized or other wackyness. TODO specify exceptions that
    *           might be thrown here.
    */
+  @Override
   public <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
-      final MessageListener<MessageType> callback, Class<MessageType> messageClass)
-      throws RosInitException {
+      String messageType, final MessageListener<MessageType> callback) throws RosInitException {
     try {
       String resolvedTopicName = resolveName(topicName);
-      Message message = (Message) messageClass.newInstance();
+      MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
       TopicDefinition topicDefinition =
-          TopicDefinition.create(new GraphName(resolvedTopicName), MessageDefinition.create(
-              message.getDataType(), message.getMessageDefinition(), message.getMD5Sum()));
+          TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
       org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
-          node.createSubscriber(topicDefinition, new MessageDeserializer<MessageType>(messageClass));
+          node.createSubscriber(topicDefinition,
+              MessageDeserializer.<MessageType>createFromString(messageType));
       subscriber.addMessageListener(callback);
       return new Subscriber<MessageType>(resolvedTopicName, callback, subscriber);
     } catch (Exception e) {
@@ -195,6 +197,7 @@ public class DefaultNode implements Node {
     }
   }
 
+  @Override
   public <RequestType, ResponseType> ServiceServer createServiceServer(
       ServiceDefinition serviceDefinition,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
@@ -228,6 +231,7 @@ public class DefaultNode implements Node {
    * 
    * @return the current time
    */
+  @Override
   public Time getCurrentTime() {
     return timeProvider.getCurrentTime();
   }
@@ -235,6 +239,7 @@ public class DefaultNode implements Node {
   /**
    * @return The fully resolved name of this namespace, e.g. "/foo/bar/boop".
    */
+  @Override
   public String getName() {
     return nodeName.toString();
   }
@@ -242,6 +247,7 @@ public class DefaultNode implements Node {
   /**
    * @return Logger for this node, which will also perform logging to /rosout.
    */
+  @Override
   public Log getLog() {
     return log;
   }
@@ -255,24 +261,29 @@ public class DefaultNode implements Node {
    * @return Fully resolved ros namespace name.
    * @throws RosNameException
    */
+  @Override
   public String resolveName(String name) {
     return resolver.resolveName(name);
   }
-  
+
   /**
    * Is the node ok?
    * 
-   * <p>"ok" means that the node is in the running state and registered with the master.
+   * <p>
+   * "ok" means that the node is in the running state and registered with the
+   * master.
    * 
    * @return True if the node is OK, false otherwise.
    */
+  @Override
   public boolean isOk() {
-	return node.isRunning() && node.isRegistered();
+    return node.isRunning() && node.isRegistered();
   }
 
   /**
    * Shut the node down.
    */
+  @Override
   public void shutdown() {
     node.shutdown();
   }
@@ -280,6 +291,7 @@ public class DefaultNode implements Node {
   /**
    * @return {@link URI} of {@link Master} that this node is attached to.
    */
+  @Override
   public URI getMasterUri() {
     return configuration.getMasterUri();
   }
@@ -287,6 +299,7 @@ public class DefaultNode implements Node {
   /**
    * @return {@link NameResolver} for this namespace.
    */
+  @Override
   public NodeNameResolver getResolver() {
     return resolver;
   }
@@ -298,6 +311,7 @@ public class DefaultNode implements Node {
    * @return {@link ParameterClient} with {@link NameResolver} in this
    *         namespace.
    */
+  @Override
   public ParameterClient createParameterClient() {
     try {
       return ParameterClient.create(getName(), getMasterUri(), resolver);
@@ -309,6 +323,7 @@ public class DefaultNode implements Node {
   /**
    * @return the {@link URI} of this {@link Node}
    */
+  @Override
   public URI getUri() {
     return node.getUri();
   }
@@ -321,6 +336,7 @@ public class DefaultNode implements Node {
    *         {@code isRegistered()} can go to false if new publisher or
    *         subscribers are created.
    */
+  @Override
   public boolean isRegistered() {
     return node.isRegistered();
   }
@@ -333,6 +349,7 @@ public class DefaultNode implements Node {
    * @return true if Node registrations are proceeding normally with
    *         {@link MasterServer}.
    */
+  @Override
   public boolean isRegistrationOk() {
     return node.isRegistrationOk();
   }

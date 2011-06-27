@@ -89,8 +89,7 @@ public class OrientationPublisher implements NodeMain {
     try {
       node = new DefaultNode("orientation", configuration);
       Publisher<org.ros.message.geometry_msgs.PoseStamped> publisher =
-          node.createPublisher("android/orientation",
-              org.ros.message.geometry_msgs.PoseStamped.class);
+          node.createPublisher("android/orientation", "geometry_msgs/PoseStamped");
       orientationListener = new OrientationListener(publisher);
       Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
       sensorManager.registerListener(orientationListener, sensor, 500000); // 10 Hz

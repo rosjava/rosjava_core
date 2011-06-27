@@ -50,7 +50,7 @@ public class MainActivity extends Activity {
     setContentView(R.layout.main);
     image = (RosImageView<CompressedImage>) findViewById(R.id.image);
     image.setTopicName("/slow_image");
-    image.setMessageClass(org.ros.message.sensor_msgs.CompressedImage.class);
+    image.setMessageType("sensor_msgs/CompressedImage");
     image.setMessageToBitmapCallable(new BitmapFromCompressedImage());
   }
 
