@@ -63,4 +63,8 @@ public class ServiceManager {
     return ImmutableList.copyOf(serviceServers.values());
   }
 
+  public List<ServiceClient<?, ?>> getServiceClients() {
+    return ImmutableList.copyOf(serviceClients.values());
+  }
+
 }
