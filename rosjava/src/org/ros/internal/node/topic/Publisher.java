@@ -37,7 +37,7 @@ import java.util.Map;
  * 
  * @param <MessageType>
  */
-public class Publisher<MessageType> extends Topic {
+public class Publisher<MessageType> extends Topic implements org.ros.Publisher<MessageType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
@@ -52,10 +52,12 @@ public class Publisher<MessageType> extends Topic {
     out.start();
   }
   
+  @Override
   public void setLatchMode(boolean enabled) {
     out.setLatchMode(enabled);
   }
 
+  @Override
   public void shutdown() {
     out.shutdown();
   }
@@ -64,31 +66,18 @@ public class Publisher<MessageType> extends Topic {
     return PublisherDefinition.createPublisherDefinition(description, getTopicDefinition());
   }
   
-  /**
-   * Does the publisher have any connected subscribers?
-   * 
-   * <p>This will be about subscribers registered. If the subscriber didn't shut down
-   * properly it will not be unregistered.
-   * 
-   * @return True if there are connected subscribers, false otherwise.
-   */
+  @Override
   public boolean hasSubscribers() {
 	  return !subscribers.isEmpty();
   }
   
-  /**
-   * Get the number of subscribers currently connected to the publisher.
-   * 
-   * <p>This will be about subscribers registered. If the subscriber didn't shut down
-   * properly it will not be unregistered.
-   * 
-   * @return The number of subscribers currently connected to the publisher.
-   */
-  public int getNumberSubscribers() {
+  @Override
+  public int getNumberOfSubscribers() {
 	  return subscribers.size();
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
+  @Override
   public void publish(MessageType message) {
     if (DEBUG) {
       log.info("Publishing message: " + message);

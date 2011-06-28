@@ -43,8 +43,12 @@ public class Topic {
   public List<String> getTopicDefinitionAsList() {
     return topicDefinition.toList();
   }
+  
+  public String getTopicName() {
+    return getTopicGraphName().toString();
+  }
 
-  public GraphName getTopicName() {
+  public GraphName getTopicGraphName() {
     return topicDefinition.getName();
   }
 

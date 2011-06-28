@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros;
 
 import java.util.concurrent.TimeUnit;
@@ -25,50 +26,23 @@ import java.util.concurrent.TimeUnit;
  *          The message type to template on. The publisher may only publish
  *          messages of this type.
  */
-public class Publisher<MessageType> {
-
-  private final org.ros.internal.node.topic.Publisher<MessageType> publisher;
-  
-  /**
-   * Fully qualified namespace topic name for the publisher.
-   */
-  private final String topicName;
-
-  /**
-   * Default package level constructor
-   * 
-   * @param topicName
-   * @param messageClass
-   */
-  Publisher(String topicName, org.ros.internal.node.topic.Publisher<MessageType> publisher) {
-    this.topicName = topicName;
-    this.publisher = publisher;
-  }
-  
-  public void setLatchMode(boolean enabled) {
-    publisher.setLatchMode(enabled);
-  }
+public interface Publisher<MessageType> {
+ 
+  void setLatchMode(boolean enabled);
 
   /**
    * @param message
    *          The {@link Message} to publish. This message will be available on
    *          the topic that this {@link Publisher} has been associated with.
    */
-  public void publish(MessageType message) {
-    // publisher is shared across multiple publisher instances, so lock access.
-    synchronized (this) {
-      publisher.publish(message);
-    }
-  }
+  void publish(MessageType message);
 
   /**
-   * Get the topic name for the publisher.
+   * Get the topic for the {@link Publisher}.
    * 
-   * @return The fully-namespaced name of the publisher.
+   * @return the fully-namespaced topic for the {@link Publisher}
    */
-  public String getTopicName() {
-    return topicName;
-  }
+  String getTopicName();
 
   /**
    * Wait for the publisher to register with the master.
@@ -78,9 +52,7 @@ public class Publisher<MessageType> {
    * 
    * @throws InterruptedException
    */
-  public void awaitRegistration() throws InterruptedException {
-    publisher.awaitRegistration();
-  }
+  void awaitRegistration() throws InterruptedException;
 
   /**
    * Wait for the publisher to register with the master.
@@ -93,9 +65,7 @@ public class Publisher<MessageType> {
    * 
    * @throws InterruptedException
    */
-  public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
-    return publisher.awaitRegistration(timeout, unit);
-  }
+  boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException;
   
   /**
    * Does the publisher have any connected subscribers?
@@ -105,9 +75,7 @@ public class Publisher<MessageType> {
    * 
    * @return True if there are connected subscribers, false otherwise.
    */
-  public boolean hasSubscribers() {
-	  return publisher.hasSubscribers();
-  }
+  boolean hasSubscribers();
   
   /**
    * Get the number of subscribers currently connected to the publisher.
@@ -117,15 +85,11 @@ public class Publisher<MessageType> {
    * 
    * @return The number of subscribers currently connected to the publisher.
    */
-  public int getNumberSubscribers() {
-	  return publisher.getNumberSubscribers();
-  }
+  int getNumberOfSubscribers();
 
   /**
    * Shut the publisher down.
    */
-  public void shutdown() {
-    publisher.shutdown();
-  }
+  void shutdown();
 
 }

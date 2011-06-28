@@ -63,14 +63,14 @@ public class TopicManager {
   }
 
   public void putPublisher(Publisher<?> publisher) {
-    publishers.put(publisher.getTopicName(), publisher);
+    publishers.put(publisher.getTopicGraphName(), publisher);
     if (listener != null) {
       listener.publisherAdded(publisher);
     }
   }
 
   public void putSubscriber(Subscriber<?> subscriber) {
-    subscribers.put(subscriber.getTopicName(), subscriber);
+    subscribers.put(subscriber.getTopicGraphName(), subscriber);
     if (listener != null) {
       listener.subscriberAdded(subscriber);
     }

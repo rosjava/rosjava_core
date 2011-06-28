@@ -112,7 +112,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
       throws RemoteException, XmlRpcTimeoutException {
     try {
       return Response.fromListChecked(node.registerSubscriber(slave.getName().toString(),
-          subscriber.getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri()
+          subscriber.getTopicGraphName().toString(), subscriber.getTopicMessageType(), slave.getUri()
               .toString()), new UriListResultFactory());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
@@ -132,7 +132,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
       throws RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.unregisterSubscriber(slave.getName().toString(),
-        subscriber.getTopicName().toString(), slave.getUri().toString()),
+        subscriber.getTopicGraphName().toString(), slave.getUri().toString()),
         new IntegerResultFactory());
   }
 
@@ -173,7 +173,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   public Response<Integer> unregisterPublisher(SlaveIdentifier slave, Publisher<?> publisher)
       throws RemoteException, XmlRpcTimeoutException {
     return Response.fromListChecked(node.unregisterPublisher(slave.getName().toString(), publisher
-        .getTopicName().toString(), slave.getUri().toString()), new IntegerResultFactory());
+        .getTopicGraphName().toString(), slave.getUri().toString()), new IntegerResultFactory());
   }
 
   /**

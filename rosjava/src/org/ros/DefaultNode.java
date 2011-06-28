@@ -146,9 +146,7 @@ public class DefaultNode implements Node {
         TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
     org.ros.MessageSerializer<MessageType> serializer =
         configuration.getMessageSerializationFactory().createSerializer(messageType);
-    org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
-        node.createPublisher(topicDefinition, serializer);
-    return new Publisher<MessageType>(resolveName(topicName), publisherImpl);
+    return node.createPublisher(topicDefinition, serializer);
   }
   
   /**
@@ -277,7 +275,6 @@ public class DefaultNode implements Node {
    * @param name
    *          The name to resolve.
    * @return Fully resolved ros namespace name.
-   * @throws RosNameException
    */
   @Override
   public String resolveName(String name) {
