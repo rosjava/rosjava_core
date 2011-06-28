@@ -32,7 +32,7 @@ public class MessageDefinitionFactory {
     Message message;
     try {
       messageClass =
-          (Class<Message>) Class.forName("org.ros.message." + messageType.replace('/', '.'));
+          (Class<Message>) MessageDefinitionFactory.class.getClassLoader().loadClass("org.ros.message." + messageType.replace('/', '.'));
       message = messageClass.newInstance();
     } catch (Exception e) {
       throw new RuntimeException(e);
