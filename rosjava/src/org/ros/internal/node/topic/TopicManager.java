@@ -34,6 +34,7 @@ public class TopicManager {
 
   private final Map<GraphName, Subscriber<?>> subscribers;
   private final Map<GraphName, Publisher<?>> publishers;
+  
   private TopicListener listener;
 
   public TopicManager() {
