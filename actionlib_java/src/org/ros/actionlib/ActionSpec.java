@@ -74,7 +74,14 @@ import java.lang.reflect.Field;
  * @param <T_RESULT>
  *          result message
  */
-public class ActionSpec<T_ACTION extends Message, T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extends Message, T_ACTION_RESULT extends Message, T_FEEDBACK extends Message, T_GOAL extends Message, T_RESULT extends Message> {
+public class ActionSpec<
+    T_ACTION extends Message, 
+    T_ACTION_FEEDBACK extends Message, 
+    T_ACTION_GOAL extends Message, 
+    T_ACTION_RESULT extends Message, 
+    T_FEEDBACK extends Message, 
+    T_GOAL extends Message, 
+    T_RESULT extends Message> {
   /**
    * Name of action
    */
@@ -114,6 +121,14 @@ public class ActionSpec<T_ACTION extends Message, T_ACTION_FEEDBACK extends Mess
    * Class of result message
    */
   public final Class<T_RESULT> clsResult;
+  
+  private String actionMessage;
+  private String actionFeedbackMessage;
+  private String actionGoalMessage; 
+  private String actionResultMessage;
+  private String feedbackMessage;
+  private String goalMessage;
+  private String resultMessage;
 
   /**
    * Constructor. Checks if all needed fields are present in the given action
@@ -126,8 +141,23 @@ public class ActionSpec<T_ACTION extends Message, T_ACTION_FEEDBACK extends Mess
    *          The class object of an action message
    */
   @SuppressWarnings("unchecked")
-  public ActionSpec(Class<T_ACTION> clsAction) throws RosException {
+  public ActionSpec(Class<T_ACTION> clsAction, 
+      String actionMessage, 
+      String actionFeedbackMessage, 
+      String actionGoalMessage, 
+      String actionResultMessage, 
+      String feedbackMessage, 
+      String goalMessage,
+      String resultMessage) throws RosException {
 
+    this.actionMessage = actionMessage;
+    this.actionFeedbackMessage = actionFeedbackMessage;
+    this.actionGoalMessage = actionGoalMessage; 
+    this.actionResultMessage = actionResultMessage;
+    this.feedbackMessage = feedbackMessage;
+    this.goalMessage = goalMessage;
+    this.resultMessage = resultMessage;
+    
     Class<T_ACTION> cA;
     Class<T_ACTION_FEEDBACK> cAF;
     Class<T_ACTION_GOAL> cAG;
@@ -182,6 +212,62 @@ public class ActionSpec<T_ACTION extends Message, T_ACTION_FEEDBACK extends Mess
     this.clsResult = cR;
     this.actionName = name;
 
+  }
+
+  /**
+   * @return the actionMessage
+   */
+  public String getActionMessage() {
+    return actionMessage;
+  }
+
+  /**
+   * @return the actionFeedbackMessage
+   */
+  public String getActionFeedbackMessage() {
+    return actionFeedbackMessage;
+  }
+
+  /**
+   * @return the actionGoalMessage
+   */
+  public String getActionGoalMessage() {
+    return actionGoalMessage;
+  }
+
+  /**
+   * @return the actionResultMessage
+   */
+  public String getActionResultMessage() {
+    return actionResultMessage;
+  }
+
+  /**
+   * @return the feedbackMessage
+   */
+  public String getFeedbackMessage() {
+    return feedbackMessage;
+  }
+
+  /**
+   * @return the goalMessage
+   */
+  public String getGoalMessage() {
+    return goalMessage;
+  }
+
+  /**
+   * @return the resultMessage
+   */
+  public String getResultMessage() {
+    return resultMessage;
+  }
+
+  /**
+   * @return the actionName
+   */
+  public String getActionName() {
+    return actionName;
   }
 
   /**
@@ -294,8 +380,7 @@ public class ActionSpec<T_ACTION extends Message, T_ACTION_FEEDBACK extends Mess
    *          server)
    * @return A SimpleActionClient object
    */
-  public
-      SimpleActionClient<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>
+  public SimpleActionClient<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>
       buildSimpleActionClient(Node node, String nameSpace) {
 
     SimpleActionClient<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> sac =
@@ -438,10 +523,6 @@ public class ActionSpec<T_ACTION extends Message, T_ACTION_FEEDBACK extends Mess
 
   }
 
-  public Class<T_ACTION_GOAL> getActionGoalMessageClass() {
-    return clsActionGoal;
-  }
-
   /**
    * Creates an action message.
    * 
@@ -472,15 +553,6 @@ public class ActionSpec<T_ACTION extends Message, T_ACTION_FEEDBACK extends Mess
     }
     return a;
 
-  }
-
-  /**
-   * Creates an action feedback message.
-   * 
-   * @return A new action feedback message object
-   */
-  public Class<T_ACTION_FEEDBACK> getActionFeedbackMessageClass() {
-    return clsActionFeedback;
   }
 
   /**
@@ -581,10 +653,6 @@ public class ActionSpec<T_ACTION extends Message, T_ACTION_FEEDBACK extends Mess
     }
     return a;
 
-  }
-
-  public Class<T_ACTION_RESULT> getActionResultMessageClass() {
-    return clsActionResult;
   }
 
   /**

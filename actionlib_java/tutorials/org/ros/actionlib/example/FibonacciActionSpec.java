@@ -31,7 +31,15 @@ public class FibonacciActionSpec
    * Constructor to create an action specification for the Fibonacci action.
    */
   public FibonacciActionSpec() throws RosException {
-    super(FibonacciAction.class);
+    super(FibonacciAction.class, 
+        "actionlib_tutorials/FibonacciAction",
+        "actionlib_tutorials/FibonacciActionFeedback",
+        "actionlib_tutorials/FibonacciActionGoal",
+        "actionlib_tutorials/FibonacciActionResult",
+        "actionlib_tutorials/FibonacciFeedback",
+        "actionlib_tutorials/FibonacciGoal",
+        "actionlib_tutorials/FibonacciResult"
+        );
   }
 
   @Override

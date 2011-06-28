@@ -99,9 +99,7 @@ public class RunFibonacciSimpleActionClient {
     try {
       int order = 4;
 
-      ActionSpec<FibonacciAction, FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> spec =
-          new ActionSpec<FibonacciAction, FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult>(
-              FibonacciAction.class);
+      FibonacciActionSpec spec = new FibonacciActionSpec();
 
       SimpleActionClient<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> sac =
           spec.buildSimpleActionClient("fibonacci");
