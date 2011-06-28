@@ -32,7 +32,6 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.NodeServer;
-import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
