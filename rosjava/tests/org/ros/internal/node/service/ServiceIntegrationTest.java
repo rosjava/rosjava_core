@@ -20,13 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.ros.message.srv.beginner_tutorials.AddTwoInts;
-
-import org.ros.internal.message.ServiceMessageDefinition;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.ServiceClient;
 import org.ros.ServiceResponseListener;
+import org.ros.internal.message.ServiceMessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.Node;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -34,6 +32,7 @@ import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
+import org.ros.message.srv.beginner_tutorials.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;

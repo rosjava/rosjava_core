@@ -16,12 +16,10 @@
 
 package org.ros;
 
-
 import org.apache.commons.logging.Log;
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.Master;

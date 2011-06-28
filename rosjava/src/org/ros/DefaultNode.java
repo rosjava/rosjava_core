@@ -18,12 +18,10 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
-
-import org.ros.exception.RosRuntimeException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosInitException;
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.message.ServiceMessageDefinition;
@@ -31,7 +29,6 @@ import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RosoutLogger;
 import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;

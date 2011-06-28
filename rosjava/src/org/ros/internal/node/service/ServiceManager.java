@@ -19,6 +19,8 @@ package org.ros.internal.node.service;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
+import org.ros.ServiceClient;
+
 import java.util.List;
 import java.util.Map;
 

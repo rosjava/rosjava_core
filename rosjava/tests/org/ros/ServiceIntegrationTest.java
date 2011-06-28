@@ -25,12 +25,9 @@ import org.junit.Test;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.message.srv.beginner_tutorials.AddTwoInts;
-import org.ros.message.srv.beginner_tutorials.AddTwoInts.Request;
-import org.ros.message.srv.beginner_tutorials.AddTwoInts.Response;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +54,7 @@ public class ServiceIntegrationTest {
   @Test
   public void PesistentServiceConnectionTest() throws Exception {
     Node serverNode = new DefaultNode("/server", configuration);
-    ServiceServer<Request, Response> server =
+    ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
               @Override
@@ -100,7 +97,7 @@ public class ServiceIntegrationTest {
   public void RequestFailureTest() throws Exception {
     final String errorMessage = "Error!";
     Node serverNode = new DefaultNode("/server", configuration);
-    ServiceServer<Request, Response> server = serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
+    ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server = serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
         new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
           @Override
           public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {

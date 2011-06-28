@@ -20,12 +20,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
@@ -55,7 +54,8 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceClient<RequestType, ResponseType> {
+public class ServiceClient<RequestType, ResponseType> implements
+    org.ros.ServiceClient<RequestType, ResponseType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);
@@ -120,6 +120,7 @@ public class ServiceClient<RequestType, ResponseType> {
     bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
   }
 
+  @Override
   public void connect(URI uri) {
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"));
     InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
@@ -138,6 +139,7 @@ public class ServiceClient<RequestType, ResponseType> {
     channel.write(encodedHeader).awaitUninterruptibly();
   }
 
+  @Override
   public void shutdown() {
     channelGroup.close().awaitUninterruptibly();
     channelFactory.releaseExternalResources();
@@ -157,9 +159,7 @@ public class ServiceClient<RequestType, ResponseType> {
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
   }
 
-  /**
-   * @param request
-   */
+  @Override
   public void call(RequestType request, ServiceResponseListener<ResponseType> listener) {
     ChannelBuffer wrappedBuffer = ChannelBuffers.wrappedBuffer(serializer.serialize(request));
     responseListeners.add(listener);
