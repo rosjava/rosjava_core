@@ -5,7 +5,7 @@ import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
-import org.ros.ParameterClient;
+import org.ros.ParameterTree;
 import org.ros.Publisher;
 import org.ros.Subscriber;
 import org.ros.actionlib.ActionSpec;
@@ -222,9 +222,9 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
     double pStatusFrequency;
     double pStatusListTimeout;
 
-    ParameterClient parameterClient = node.createParameterClient();
+    ParameterTree parameterClient = node.createParameterClient();
     try {
-      pStatusListTimeout = (Double) parameterClient.getParam("status_list_timeout", 5.0);
+      pStatusListTimeout = (Double) parameterClient.get("status_list_timeout", 5.0);
     } catch (Exception e) {
       e.printStackTrace();
       pStatusListTimeout = 5.0;
@@ -232,7 +232,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
     statusListTimeout = new Duration(pStatusListTimeout);
 
     try {
-      pStatusFrequency = (Double) parameterClient.getParam("status_frequency", 5.0);
+      pStatusFrequency = (Double) parameterClient.get("status_frequency", 5.0);
     } catch (Exception e) {
       e.printStackTrace();
       pStatusFrequency = 5.0;

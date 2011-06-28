@@ -64,9 +64,6 @@
       <fileset dir="tutorials">
         <exclude name="**/*.java" />
       </fileset>
-      <fileset dir="tests">
-        <exclude name="**/*.java" />
-      </fileset>
     </copy>
 
     <javac debug="true" debuglevel="${debuglevel}" destdir="${build}" source="${javac-source}"
@@ -74,7 +71,6 @@
       <classpath refid="classpath" />
       <src path="src" />
       <src path="tutorials" />
-      <src path="tests" />
       <src path="${msg-gen}" />
       <!-- <src path="${srv-gen}" /> -->
     </javac>
