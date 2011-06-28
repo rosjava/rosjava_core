@@ -29,41 +29,50 @@ public class ServiceManager {
 
   private final Map<String, ServiceServer<?, ?>> serviceServers;
   private final Map<String, ServiceClient<?, ?>> serviceClients;
+  
+  private ServiceListener listener;
 
   public ServiceManager() {
     serviceServers = Maps.newConcurrentMap();
     serviceClients = Maps.newConcurrentMap();
   }
+  
+  public void setListener(ServiceListener listener) {
+    this.listener = listener;
+  }
 
-  public boolean hasServiceServer(String serviceName) {
+  public boolean hasServer(String serviceName) {
     return serviceServers.containsKey(serviceName);
   }
 
-  public void putServiceServer(String serviceName, ServiceServer<?, ?> serviceServer) {
+  public void putServer(String serviceName, ServiceServer<?, ?> serviceServer) {
     serviceServers.put(serviceName, serviceServer);
+    if (listener != null) {
+      listener.serviceServerAdded(serviceServer);
+    }
   }
 
-  public ServiceServer<?, ?> getServiceServer(String serviceName) {
+  public ServiceServer<?, ?> getServer(String serviceName) {
     return serviceServers.get(serviceName);
   }
 
-  public boolean hasServiceClient(String serviceName) {
+  public boolean hasClient(String serviceName) {
     return serviceClients.containsKey(serviceName);
   }
 
-  public void putServiceClient(String serviceName, ServiceClient<?, ?> serviceClient) {
+  public void putClient(String serviceName, ServiceClient<?, ?> serviceClient) {
     serviceClients.put(serviceName, serviceClient);
   }
 
-  public ServiceClient<?, ?> getServiceClient(String serviceName) {
+  public ServiceClient<?, ?> getClient(String serviceName) {
     return serviceClients.get(serviceName);
   }
 
-  public List<ServiceServer<?, ?>> getServiceServers() {
+  public List<ServiceServer<?, ?>> getServers() {
     return ImmutableList.copyOf(serviceServers.values());
   }
 
-  public List<ServiceClient<?, ?>> getServiceClients() {
+  public List<ServiceClient<?, ?>> getClients() {
     return ImmutableList.copyOf(serviceClients.values());
   }
 

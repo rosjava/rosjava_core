@@ -44,12 +44,16 @@ public class Publisher<MessageType> extends Topic {
 
   private final List<SubscriberDefinition> subscribers;
   private final OutgoingMessageQueue<MessageType> out;
-
+  
   public Publisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer) {
     super(topicDefinition);
     subscribers = Lists.newArrayList();
     out = new OutgoingMessageQueue<MessageType>(serializer);
     out.start();
+  }
+  
+  public void setLatchMode(boolean enabled) {
+    out.setLatchMode(enabled);
   }
 
   public void shutdown() {

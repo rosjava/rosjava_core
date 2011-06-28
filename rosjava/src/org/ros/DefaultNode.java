@@ -18,6 +18,8 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.RosRuntimeException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosInitException;
@@ -137,23 +139,18 @@ public class DefaultNode implements Node {
    *           May throw if the system is not in a proper state.
    */
   @Override
-  public <MessageType> Publisher<MessageType> createPublisher(String topicName, String messageType)
-      throws RosInitException {
-    try {
-      String resolvedTopicName = resolveName(topicName);
-      MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
-      TopicDefinition topicDefinition =
-          TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
-      org.ros.MessageSerializer<MessageType> serializer =
-          configuration.getMessageSerializationFactory().createSerializer(messageType);
-      org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
-          node.createPublisher(topicDefinition, serializer);
-      return new Publisher<MessageType>(resolveName(topicName), publisherImpl);
-    } catch (Exception e) {
-      throw new RosInitException(e);
-    }
+  public <MessageType> Publisher<MessageType> createPublisher(String topicName, String messageType) {
+    String resolvedTopicName = resolveName(topicName);
+    MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
+    TopicDefinition topicDefinition =
+        TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
+    org.ros.MessageSerializer<MessageType> serializer =
+        configuration.getMessageSerializationFactory().createSerializer(messageType);
+    org.ros.internal.node.topic.Publisher<MessageType> publisherImpl =
+        node.createPublisher(topicDefinition, serializer);
+    return new Publisher<MessageType>(resolveName(topicName), publisherImpl);
   }
-
+  
   /**
    * @param <MessageType>
    *          The message type to create the Subscriber for.
@@ -177,29 +174,25 @@ public class DefaultNode implements Node {
   @SuppressWarnings("unchecked")
   @Override
   public <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
-      String messageType, final MessageListener<MessageType> callback) throws RosInitException {
-    try {
-      String resolvedTopicName = resolveName(topicName);
-      MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
-      TopicDefinition topicDefinition =
-          TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
-      MessageDeserializer<MessageType> deserializer =
-          (MessageDeserializer<MessageType>) configuration.getMessageSerializationFactory()
-              .createDeserializer(messageType);
-      org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
-          node.createSubscriber(topicDefinition, deserializer);
-      subscriber.addMessageListener(callback);
-      return new Subscriber<MessageType>(resolvedTopicName, callback, subscriber);
-    } catch (Exception e) {
-      throw new RosInitException(e);
-    }
+      String messageType, final MessageListener<MessageType> callback) {
+    String resolvedTopicName = resolveName(topicName);
+    MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
+    TopicDefinition topicDefinition =
+        TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
+    MessageDeserializer<MessageType> deserializer =
+        (MessageDeserializer<MessageType>) configuration.getMessageSerializationFactory()
+            .createDeserializer(messageType);
+    org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
+        node.createSubscriber(topicDefinition, deserializer);
+    subscriber.addMessageListener(callback);
+    return new Subscriber<MessageType>(resolvedTopicName, callback, subscriber);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServiceServer(
       String serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
     // TODO(damonkohler): It's rather non-obvious that the URI will be created
     // later on the fly.
     ServiceIdentifier identifier = new ServiceIdentifier(new GraphName(serviceName), null);
@@ -221,6 +214,9 @@ public class DefaultNode implements Node {
   public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createServiceClient(
       String serviceName, String serviceType) {
     ServiceIdentifier identifier = lookupService(serviceName);
+    if (identifier == null) {
+      throw new RosRuntimeException("No such service.");
+    }
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);

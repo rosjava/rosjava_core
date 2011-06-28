@@ -44,6 +44,10 @@ public class Publisher<MessageType> {
     this.topicName = topicName;
     this.publisher = publisher;
   }
+  
+  public void setLatchMode(boolean enabled) {
+    publisher.setLatchMode(enabled);
+  }
 
   /**
    * @param message

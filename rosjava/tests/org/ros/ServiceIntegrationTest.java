@@ -20,6 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.ros.internal.node.service.ServiceServer;
+import org.ros.message.srv.beginner_tutorials.AddTwoInts.Request;
+import org.ros.message.srv.beginner_tutorials.AddTwoInts.Response;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.node.address.AdvertiseAddress;
@@ -55,15 +59,17 @@ public class ServiceIntegrationTest {
   @Test
   public void PesistentServiceConnectionTest() throws Exception {
     Node serverNode = new DefaultNode("/server", configuration);
-    serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
-        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
-          @Override
-          public AddTwoInts.Response build(AddTwoInts.Request request) {
-            AddTwoInts.Response response = new AddTwoInts.Response();
-            response.sum = request.a + request.b;
-            return response;
-          }
-        });
+    ServiceServer<Request, Response> server =
+        serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
+            new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
+              @Override
+              public AddTwoInts.Response build(AddTwoInts.Request request) {
+                AddTwoInts.Response response = new AddTwoInts.Response();
+                response.sum = request.a + request.b;
+                return response;
+              }
+            });
+    assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
     Node clientNode = new DefaultNode("/client", configuration);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
@@ -96,13 +102,14 @@ public class ServiceIntegrationTest {
   public void RequestFailureTest() throws Exception {
     final String errorMessage = "Error!";
     Node serverNode = new DefaultNode("/server", configuration);
-    serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
+    ServiceServer<Request, Response> server = serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
         new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
           @Override
           public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
             throw new ServiceException(errorMessage);
           }
         });
+    assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
     Node clientNode = new DefaultNode("/client", configuration);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =

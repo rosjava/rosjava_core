@@ -121,6 +121,35 @@ public class MessageQueueIntegrationTest {
   }
 
   @Test
+  public void testSendAndReceiveLatchedMessage() throws InterruptedException {
+    // Setting latched mode and writing a message should cause any future
+    // IncomingMessageQueue to recieve that message.
+    out.setLatchMode(true);
+    org.ros.message.std_msgs.String hello = new org.ros.message.std_msgs.String();
+    hello.data = "Would you like to play a game?";
+    out.put(hello);
+
+    Channel serverChannel = buildServerChannel();
+
+    IncomingMessageQueue<org.ros.message.std_msgs.String> firstIncomingQueue =
+        new IncomingMessageQueue<org.ros.message.std_msgs.String>(
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
+
+    connectIncomingMessageQueue(firstIncomingQueue, serverChannel);
+
+    IncomingMessageQueue<org.ros.message.std_msgs.String> secondIncomingQueue =
+        new IncomingMessageQueue<org.ros.message.std_msgs.String>(
+            new MessageDeserializer<org.ros.message.std_msgs.String>(
+                org.ros.message.std_msgs.String.class));
+
+    connectIncomingMessageQueue(secondIncomingQueue, serverChannel);
+
+    assertEquals(firstIncomingQueue.take(), hello);
+    assertEquals(secondIncomingQueue.take(), hello);
+  }
+
+  @Test
   public void testSendAfterIncomingQueueShutdown() throws InterruptedException {
     Channel serverChannel = buildServerChannel();
     ChannelFuture future = connectIncomingMessageQueue(in, serverChannel);
@@ -160,14 +189,15 @@ public class MessageQueueIntegrationTest {
     clientBootstrap.setOption("bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     ChannelGroup clientChannelGroup = new DefaultChannelGroup();
-    TcpClientPipelineFactory clientPipelineFactory = new TcpClientPipelineFactory(clientChannelGroup) {
-      @Override
-      public ChannelPipeline getPipeline() {
-        ChannelPipeline pipeline = super.getPipeline();
-        pipeline.addLast("ClientHandler", in.createChannelHandler());
-        return pipeline;
-      }
-    };
+    TcpClientPipelineFactory clientPipelineFactory =
+        new TcpClientPipelineFactory(clientChannelGroup) {
+          @Override
+          public ChannelPipeline getPipeline() {
+            ChannelPipeline pipeline = super.getPipeline();
+            pipeline.addLast("ClientHandler", in.createChannelHandler());
+            return pipeline;
+          }
+        };
     clientBootstrap.setPipelineFactory(clientPipelineFactory);
     return clientBootstrap.connect(serverChannel.getLocalAddress()).await();
   }

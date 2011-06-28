@@ -66,7 +66,10 @@ public class MasterImpl implements Master {
   @Override
   public List<Object> lookupService(String callerId, String service) {
     ServiceIdentifier identifier = master.lookupService(callerId, service);
-    return Response.createSuccess("Success", identifier.getUri().toString()).toList();
+    if (identifier != null) {
+      return Response.createSuccess("Success", identifier.getUri().toString()).toList();
+    }
+    return Response.createError("No such service.", null).toList();
   }
 
   @Override

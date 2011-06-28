@@ -81,7 +81,7 @@ public class SlaveServer extends NodeServer {
     this.tcpRosServer =
         new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager);
   }
-  
+
   public AdvertiseAddress getTcpRosAdvertiseAddress() {
     return tcpRosServer.getAdvertiseAddress();
   }
@@ -109,12 +109,8 @@ public class SlaveServer extends NodeServer {
    * @throws RemoteException
    * @throws XmlRpcTimeoutException
    */
-  public void addService(ServiceServer<?, ?> server) throws URISyntaxException, MalformedURLException,
-      RemoteException, XmlRpcTimeoutException {
-    // TODO(kwc): convert to MasterRegistration job. When we do, we can also get
-    // rid of masterClient.
-    serviceManager.putServiceServer(server.getName().toString(), server);
-    masterClient.registerService(toSlaveIdentifier(), server);
+  public void addService(ServiceServer<?, ?> server) {
+    serviceManager.putServer(server.getName().toString(), server);
   }
 
   public List<Object> getBusStats(String callerId) {
@@ -151,11 +147,13 @@ public class SlaveServer extends NodeServer {
         }
       }
     } catch (NoClassDefFoundError unused) {
-      // Android does not support ManagementFactory. Try to get the PID on Android.
+      // Android does not support ManagementFactory. Try to get the PID on
+      // Android.
       try {
         return (Integer) Class.forName("android.os.Process").getMethod("myPid").invoke(null);
       } catch (Exception unused1) {
-        // Ignore this exception and fall through to the UnsupportedOperationException.
+        // Ignore this exception and fall through to the
+        // UnsupportedOperationException.
       }
     }
     throw new UnsupportedOperationException();

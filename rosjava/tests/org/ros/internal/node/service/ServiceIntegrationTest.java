@@ -78,6 +78,7 @@ public class ServiceIntegrationTest {
                 return response;
               }
             });
+    assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
     Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
@@ -120,6 +121,7 @@ public class ServiceIntegrationTest {
                 throw new ServiceException(errorMessage);
               }
             });
+    assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
     Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =

@@ -18,6 +18,9 @@ package org.ros.internal.node;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.exception.RemoteException;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
+
 import org.ros.MessageDeserializer;
 import org.ros.MessageSerializer;
 import org.ros.internal.message.ServiceMessageDefinition;
@@ -56,21 +59,22 @@ public class ServiceFactory {
    * @param responseBuilder
    *          the {@link ServiceResponseBuilder} that is used to build responses
    * @return a {@link ServiceServer} instance
-   * @throws Exception
+   * @throws RemoteException
+   * @throws XmlRpcTimeoutException
    */
   @SuppressWarnings("unchecked")
-  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServiceServer(
+  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServer(
       ServiceDefinition serviceDefinition, MessageDeserializer<RequestType> deserializer,
       MessageSerializer<ResponseType> serializer,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
     ServiceServer<RequestType, ResponseType> serviceServer;
     String name = serviceDefinition.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
-      if (serviceManager.hasServiceServer(name)) {
+      if (serviceManager.hasServer(name)) {
         serviceServer =
-            (ServiceServer<RequestType, ResponseType>) serviceManager.getServiceServer(name);
+            (ServiceServer<RequestType, ResponseType>) serviceManager.getServer(name);
       } else {
         serviceServer =
             new ServiceServer<RequestType, ResponseType>(serviceDefinition, deserializer,
@@ -96,7 +100,7 @@ public class ServiceFactory {
    * @return a {@link ServiceClient} instance
    */
   @SuppressWarnings("unchecked")
-  public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createServiceClient(
+  public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createClient(
       ServiceDefinition serviceDefinition, MessageSerializer<RequestType> serializer,
       MessageDeserializer<ResponseType> deserializer) {
     Preconditions.checkNotNull(serviceDefinition.getUri());
@@ -105,9 +109,9 @@ public class ServiceFactory {
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
-      if (serviceManager.hasServiceClient(name)) {
+      if (serviceManager.hasClient(name)) {
         serviceClient =
-            (ServiceClient<RequestType, ResponseType>) serviceManager.getServiceClient(name);
+            (ServiceClient<RequestType, ResponseType>) serviceManager.getClient(name);
       } else {
         serviceClient = ServiceClient.create(nodeName, serviceDefinition, serializer, deserializer);
         createdNewService = true;

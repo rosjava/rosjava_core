@@ -14,18 +14,15 @@
  * the License.
  */
 
-package org.ros.internal.node.topic;
+package org.ros.internal.node.service;
 
 /**
- * Listen to creation of new publisher and subscriber instances.
+ * Listen to creation of new {@link ServiceServer}s.
  * 
- * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface TopicListener {
+public interface ServiceListener {
+  
+  void serviceServerAdded(ServiceServer<?, ?> server);
 
-  void publisherAdded(Publisher<?> publisher);
-  
-  void subscriberAdded(Subscriber<?> subscriber);
-  
 }

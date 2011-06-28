@@ -19,6 +19,10 @@ package org.ros.internal.node;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
+import org.ros.internal.node.service.ServiceServer;
+
+import org.ros.internal.node.service.ServiceListener;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.client.MasterClient;
@@ -50,7 +54,7 @@ import java.util.concurrent.TimeUnit;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterRegistration implements TopicListener {
+public class MasterRegistration implements TopicListener, ServiceListener {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Node.class);
@@ -138,7 +142,7 @@ public class MasterRegistration implements TopicListener {
   public void publisherAdded(final Publisher<?> publisher) {
     submitCallable(new Callable<Response<?>>() {
       @Override
-      public Response<?> call() throws Exception {
+      public Response<List<URI>> call() throws Exception {
         Response<List<URI>> response =
             masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
         publisher.signalRegistrationDone();
@@ -151,13 +155,25 @@ public class MasterRegistration implements TopicListener {
   public void subscriberAdded(final Subscriber<?> subscriber) {
     submitCallable(new Callable<Response<?>>() {
       @Override
-      public Response<?> call() throws Exception {
+      public Response<List<URI>> call() throws Exception {
         Response<List<URI>> response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
         List<PublisherDefinition> publishers =
             SlaveServer.buildPublisherIdentifierList(response.getResult(),
                 subscriber.getTopicDefinition());
         subscriber.updatePublishers(publishers);
         subscriber.signalRegistrationDone();
+        return response;
+      }
+    });
+  }
+
+  @Override
+  public void serviceServerAdded(final ServiceServer<?, ?> serviceServer) {
+    submitCallable(new Callable<Response<?>>() {
+      @Override
+      public Response<Void> call() throws Exception {
+        Response<Void> response = masterClient.registerService(slaveIdentifier, serviceServer);
+        serviceServer.signalRegistrationDone();
         return response;
       }
     });

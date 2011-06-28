@@ -41,19 +41,16 @@ public class OutgoingMessageQueue<MessageType> {
   private final CircularBlockingQueue<MessageType> messages;
   private final MessageSendingThread thread;
   private final MessageSerializer<MessageType> serializer;
+  
+  private boolean latchMode;
+  private MessageType latchedMessage;
 
   private final class MessageSendingThread extends Thread {
     @Override
     public void run() {
       try {
         while (!Thread.currentThread().isInterrupted()) {
-          ChannelBuffer buffer =
-              ChannelBuffers.wrappedBuffer(serializer.serialize(messages.take()));
-          channelGroup.write(buffer);
-          if (DEBUG) {
-            // TODO(damonkohler): Add a utility method for a better ChannelBuffer.toString() method.
-            log.info("Wrote " + buffer.toString());
-          }
+          writeMessageToChannel(messages.take());
         }
       } catch (InterruptedException e) {
         // Cancelable
@@ -73,10 +70,26 @@ public class OutgoingMessageQueue<MessageType> {
     channelGroup = new DefaultChannelGroup();
     messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
     thread = new MessageSendingThread();
+    latchMode = false;
+  }
+  
+  public void setLatchMode(boolean enabled) {
+    latchMode = enabled;
+  }
+
+  private void writeMessageToChannel(MessageType message) {
+    ChannelBuffer buffer =
+        ChannelBuffers.wrappedBuffer(serializer.serialize(message));
+    channelGroup.write(buffer);
+    if (DEBUG) {
+      // TODO(damonkohler): Add a utility method for a better ChannelBuffer.toString() method.
+      log.info("Wrote " + buffer.toString());
+    }
   }
 
   public void put(MessageType message) {
     messages.put(message);
+    latchedMessage = message;
   }
 
   public void shutdown() {
@@ -95,6 +108,9 @@ public class OutgoingMessageQueue<MessageType> {
   public void addChannel(Channel channel) {
     Preconditions.checkState(thread.isAlive());
     channelGroup.add(channel);
+    if (latchMode && latchedMessage != null) {
+      writeMessageToChannel(latchedMessage);
+    }
   }
 
 }

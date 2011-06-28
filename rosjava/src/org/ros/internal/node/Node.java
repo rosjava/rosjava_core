@@ -105,6 +105,7 @@ public class Node {
             xmlRpcAdvertiseAddress, masterClient, topicManager, serviceManager, parameterManager);
     masterRegistration = new MasterRegistration(masterClient);
     topicManager.setListener(masterRegistration);
+    serviceManager.setListener(masterRegistration);
     publisherFactory = new PublisherFactory(topicManager);
     subscriberFactory = new SubscriberFactory(slaveServer, topicManager);
     serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager);
@@ -123,15 +124,15 @@ public class Node {
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServiceServer(
       ServiceDefinition serviceDefinition, MessageDeserializer<RequestType> deserializer,
       MessageSerializer<ResponseType> serializer,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception {
-    return serviceFactory.createServiceServer(serviceDefinition, deserializer, serializer,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
+    return serviceFactory.createServer(serviceDefinition, deserializer, serializer,
         responseBuilder);
   }
 
   public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createServiceClient(
       ServiceDefinition serviceDefinition, MessageSerializer<RequestType> serializer,
       MessageDeserializer<ResponseType> deserializer) {
-    return serviceFactory.createServiceClient(serviceDefinition, serializer, deserializer);
+    return serviceFactory.createClient(serviceDefinition, serializer, deserializer);
   }
 
   /**
@@ -190,7 +191,7 @@ public class Node {
         log.error(e);
       }
     }
-    for (ServiceServer<?, ?> serviceServer : serviceManager.getServiceServers()) {
+    for (ServiceServer<?, ?> serviceServer : serviceManager.getServers()) {
       try {
         masterClient.unregisterService(slaveServer.toSlaveIdentifier(), serviceServer);
       } catch (XmlRpcTimeoutException e) {
@@ -199,7 +200,7 @@ public class Node {
         log.error(e);
       }
     }
-    for (ServiceClient<?, ?> serviceClient : serviceManager.getServiceClients()) {
+    for (ServiceClient<?, ?> serviceClient : serviceManager.getClients()) {
       serviceClient.shutdown();
     }
   }
