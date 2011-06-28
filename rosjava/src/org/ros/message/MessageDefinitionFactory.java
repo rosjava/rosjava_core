@@ -20,6 +20,9 @@ import com.google.common.base.Preconditions;
 
 import org.ros.internal.message.MessageDefinition;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class MessageDefinitionFactory {
 
   @SuppressWarnings("unchecked")

@@ -115,7 +115,6 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
   public Object newInstance(ClassLoader pClassLoader, final Class<NodeType> pClass,
       final String pRemoteName, final int timeout) {
     return Proxy.newProxyInstance(pClassLoader, new Class[] {pClass}, new InvocationHandler() {
-      @SuppressWarnings({"rawtypes", "unchecked"})
       @Override
       public Object invoke(Object pProxy, Method pMethod, Object[] pArgs) throws Throwable {
         if (isObjectMethodLocal() && pMethod.getDeclaringClass().equals(Object.class)) {
@@ -146,9 +145,9 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
           if (linkedException instanceof RuntimeException) {
             throw linkedException;
           }
-          Class[] exceptionTypes = pMethod.getExceptionTypes();
+          Class<?>[] exceptionTypes = pMethod.getExceptionTypes();
           for (int i = 0; i < exceptionTypes.length; i++) {
-            Class c = exceptionTypes[i];
+            Class<?> c = exceptionTypes[i];
             if (c.isAssignableFrom(linkedException.getClass())) {
               throw linkedException;
             }

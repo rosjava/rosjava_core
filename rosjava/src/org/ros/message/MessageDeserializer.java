@@ -27,28 +27,6 @@ public class MessageDeserializer<MessageType> implements org.ros.MessageDeserial
 
   private final Class<MessageType> messageClass;
 
-  @SuppressWarnings("unchecked")
-  public static <T> MessageDeserializer<T> createFromString(String messageType) {
-    Preconditions.checkArgument(messageType.split("/").length == 2);
-    Class<T> messageClass;
-    try {
-      messageClass = (Class<T>) Class.forName("org.ros.message." + messageType.replace('/', '.'));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    return new MessageDeserializer<T>(messageClass);
-  }
-
-  public static <T> MessageDeserializer<T> createServiceResponseFromString(String serviceType) {
-    Preconditions.checkArgument(serviceType.split("/").length == 2);
-    return createFromString("srv." + serviceType + "$Response");
-  }
-
-  public static <T> MessageDeserializer<T> createServiceRequestFromString(String serviceType) {
-    Preconditions.checkArgument(serviceType.split("/").length == 2);
-    return createFromString("srv." + serviceType + "$Request");
-  }
-
   public MessageDeserializer(Class<MessageType> messageClass) {
     Preconditions.checkArgument(Message.class.isAssignableFrom(messageClass));
     this.messageClass = messageClass;

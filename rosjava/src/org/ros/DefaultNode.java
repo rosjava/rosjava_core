@@ -56,6 +56,7 @@ import java.net.URI;
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class DefaultNode implements Node {
 
