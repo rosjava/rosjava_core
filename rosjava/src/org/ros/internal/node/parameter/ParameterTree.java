@@ -17,9 +17,6 @@
 package org.ros.internal.node.parameter;
 
 import org.ros.ParameterListener;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.node.client.ParameterClient;
 import org.ros.internal.node.response.Response;
@@ -39,9 +36,6 @@ import java.util.List;
  */
 public class ParameterTree implements org.ros.ParameterTree {
 
-  private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(ParameterTree.class);
-
   private final ParameterClient parameterClient;
   private final NameResolver resolver;
   private final ParameterManager parameterManager;
@@ -50,22 +44,19 @@ public class ParameterTree implements org.ros.ParameterTree {
       NameResolver resolver, ParameterManager parameterManager) {
     ParameterClient client =
         new org.ros.internal.node.client.ParameterClient(slaveIdentifier, masterUri);
-    return new ParameterTree(client, resolver, parameterManager);
+    return new ParameterTree(client, parameterManager, resolver);
   }
 
-  private ParameterTree(ParameterClient parameterClient, NameResolver resolver,
-      ParameterManager parameterManager) {
+  private ParameterTree(ParameterClient parameterClient, ParameterManager parameterManager,
+      NameResolver resolver) {
     this.parameterClient = parameterClient;
-    this.resolver = resolver;
     this.parameterManager = parameterManager;
+    this.resolver = resolver;
   }
 
   @Override
   public Object get(String name) throws RemoteException {
     String resolvedName = resolver.resolveName(name);
-    if (DEBUG) {
-      log.info("getParam(" + name + " -> [resolved] " + resolvedName + ")");
-    }
     Response<Object> response = parameterClient.getParam(resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();
@@ -77,9 +68,6 @@ public class ParameterTree implements org.ros.ParameterTree {
   @Override
   public Object get(String name, Object defaultValue) throws RemoteException {
     String resolvedName = resolver.resolveName(name);
-    if (DEBUG) {
-      log.info("getParamDefault(" + name + " -> [resolved] " + resolvedName + ")");
-    }
     Response<Object> response = parameterClient.getParam(resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();
@@ -97,18 +85,12 @@ public class ParameterTree implements org.ros.ParameterTree {
   @Override
   public void delete(String name) throws RemoteException {
     String resolvedName = resolver.resolveName(name);
-    if (DEBUG) {
-      log.info("deleteParam(" + name + " -> [resolved] " + resolvedName + ")");
-    }
     parameterClient.deleteParam(resolvedName);
   }
 
   @Override
   public void set(String name, Object value) throws RemoteException {
     String resolvedName = resolver.resolveName(name);
-    if (DEBUG) {
-      log.info("setParam(" + name + " -> [resolved] " + resolvedName + ")");
-    }
     parameterClient.setParam(resolvedName, value);
   }
 
