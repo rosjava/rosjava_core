@@ -25,28 +25,12 @@ import java.util.concurrent.TimeUnit;
  * 
  * @param <MessageType>
  */
-public class Subscriber<MessageType> {
-
-  /**
-   * Fully namespace qualified name of the subscriber.
-   */
-  private final String topicName;
-  private final org.ros.internal.node.topic.Subscriber<MessageType> subscriber;
-  private final MessageListener<MessageType> messageListener;
-
-  protected Subscriber(String topicName, MessageListener<MessageType> messageListener,
-      org.ros.internal.node.topic.Subscriber<MessageType> subscriber) {
-    this.topicName = topicName;
-    this.messageListener = messageListener;
-    this.subscriber = subscriber;
-  }
+public interface Subscriber<MessageType> {
 
   /**
    * Cancels this subscription.
    */
-  public void cancel() {
-    subscriber.removeMessageListener(messageListener);
-  }
+  void shutdown();
 
   /**
    * Wait for the publisher to register with the master.
@@ -56,9 +40,7 @@ public class Subscriber<MessageType> {
    * 
    * @throws InterruptedException
    */
-  public void awaitRegistration() throws InterruptedException {
-    subscriber.awaitRegistration();
-  }
+  void awaitRegistration() throws InterruptedException;
 
   /**
    * Wait for the publisher to register with the master.
@@ -71,22 +53,15 @@ public class Subscriber<MessageType> {
    * 
    * @throws InterruptedException
    */
-  public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
-    return subscriber.awaitRegistration(timeout, unit);
-  }
+  boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException;
 
   /**
    * @return The name of the subscribed topic.
    */
-  public String getTopicName() {
-    return topicName;
-  }
+  String getTopicName();
 
-  /**
-   * @return The {@link MessageListener} for this {@link Subscriber}.
-   */
-  public MessageListener<MessageType> getMessageListener() {
-    return messageListener;
-  }
+  void addMessageListener(MessageListener<MessageType> listener);
+
+  void removeMessageListener(MessageListener<MessageType> listener);
 
 }

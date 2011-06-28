@@ -18,11 +18,10 @@ package org.ros.internal.node;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.exception.RemoteException;
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-
 import org.ros.MessageDeserializer;
 import org.ros.MessageSerializer;
+import org.ros.internal.node.service.ServiceServer;
+import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.ServiceMessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.MasterServer;
@@ -32,7 +31,7 @@ import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceResponseBuilder;
-import org.ros.internal.node.service.ServiceServer;
+import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

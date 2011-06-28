@@ -16,6 +16,7 @@
 
 package org.ros;
 
+
 import org.apache.commons.logging.Log;
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
@@ -23,7 +24,6 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
-import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.Service;
 import org.ros.message.Time;
@@ -148,8 +148,7 @@ public interface Node {
    * @throws RosInitException
    *           May throw if the system is not in a proper state.
    */
-  <MessageType> Publisher<MessageType> createPublisher(String topicName, String messageType)
-      throws RosInitException;
+  <MessageType> Publisher<MessageType> createPublisher(String topicName, String messageType);
 
   /**
    * @param <MessageType>
@@ -172,7 +171,7 @@ public interface Node {
    *           might be thrown here.
    */
   <MessageType> Subscriber<MessageType> createSubscriber(String topicName, String messageType,
-      final MessageListener<MessageType> callback) throws RosInitException;
+      MessageListener<MessageType> listener);
 
   /**
    * Create a server to response to a particular service.
@@ -192,7 +191,7 @@ public interface Node {
    */
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServiceServer(
       String serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) throws Exception;
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder);
 
   /**
    * Create a service client.

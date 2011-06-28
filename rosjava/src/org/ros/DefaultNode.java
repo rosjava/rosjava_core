@@ -18,12 +18,12 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
+
 import org.ros.exception.RosRuntimeException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosInitException;
-import org.ros.exception.RosNameException;
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.message.ServiceMessageDefinition;
@@ -35,7 +35,6 @@ import org.ros.internal.node.service.ServiceClient;
 import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
-import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
@@ -148,7 +147,7 @@ public class DefaultNode implements Node {
         configuration.getMessageSerializationFactory().createSerializer(messageType);
     return node.createPublisher(topicDefinition, serializer);
   }
-  
+
   /**
    * @param <MessageType>
    *          The message type to create the Subscriber for.
@@ -164,15 +163,11 @@ public class DefaultNode implements Node {
    *          topic.
    * @return A handle to a Subscriber that may be used to subscribe messages of
    *         type MessageType.
-   * @throws RosInitException
-   *           The subscriber may fail if the Ros system has not been
-   *           initialized or other wackyness. TODO specify exceptions that
-   *           might be thrown here.
    */
   @SuppressWarnings("unchecked")
   @Override
   public <MessageType> Subscriber<MessageType> createSubscriber(String topicName,
-      String messageType, final MessageListener<MessageType> callback) {
+      String messageType, final MessageListener<MessageType> listener) {
     String resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition =
@@ -180,10 +175,9 @@ public class DefaultNode implements Node {
     MessageDeserializer<MessageType> deserializer =
         (MessageDeserializer<MessageType>) configuration.getMessageSerializationFactory()
             .createDeserializer(messageType);
-    org.ros.internal.node.topic.Subscriber<MessageType> subscriber =
-        node.createSubscriber(topicDefinition, deserializer);
-    subscriber.addMessageListener(callback);
-    return new Subscriber<MessageType>(resolvedTopicName, callback, subscriber);
+    Subscriber<MessageType> subscriber = node.createSubscriber(topicDefinition, deserializer);
+    subscriber.addMessageListener(listener);
+    return subscriber;
   }
 
   @SuppressWarnings("unchecked")

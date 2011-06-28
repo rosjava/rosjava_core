@@ -52,7 +52,7 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Subscriber<MessageType> extends Topic {
+public class Subscriber<MessageType> extends Topic implements org.ros.Subscriber<MessageType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Subscriber.class);
@@ -127,10 +127,12 @@ public class Subscriber<MessageType> extends Topic {
     return ProtocolNames.SUPPORTED;
   }
 
+  @Override
   public void addMessageListener(MessageListener<MessageType> listener) {
     listeners.add(listener);
   }
 
+  @Override
   public void removeMessageListener(MessageListener<MessageType> listener) {
     listeners.remove(listener);
   }
@@ -192,6 +194,7 @@ public class Subscriber<MessageType> extends Topic {
     }
   }
 
+  @Override
   public void shutdown() {
     thread.cancel();
     channelGroup.close().awaitUninterruptibly();

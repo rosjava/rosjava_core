@@ -39,7 +39,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceServer<RequestType, ResponseType> {
+public class ServiceServer<RequestType, ResponseType> implements
+    org.ros.ServiceServer<RequestType, ResponseType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
@@ -106,17 +107,35 @@ public class ServiceServer<RequestType, ResponseType> {
     registrationLatch.countDown();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.internal.node.service.IServiceServer#isRegistered()
+   */
+  @Override
   public boolean isRegistered() {
     return registrationLatch.getCount() == 0;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.internal.node.service.IServiceServer#awaitRegistration()
+   */
+  @Override
   public void awaitRegistration() throws InterruptedException {
     registrationLatch.await();
   }
 
-  public boolean awaitRegistration(long timeout, TimeUnit unit)
-      throws InterruptedException {
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.ros.internal.node.service.IServiceServer#awaitRegistration(long,
+   * java.util.concurrent.TimeUnit)
+   */
+  @Override
+  public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
     return registrationLatch.await(timeout, unit);
   }
-  
+
 }
