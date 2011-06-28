@@ -199,6 +199,9 @@ public class Node {
         log.error(e);
       }
     }
+    for (ServiceClient<?, ?> serviceClient : serviceManager.getServiceClients()) {
+      serviceClient.shutdown();
+    }
   }
 
   /**
