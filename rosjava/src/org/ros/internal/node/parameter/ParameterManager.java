@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.internal.node.parameter;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;

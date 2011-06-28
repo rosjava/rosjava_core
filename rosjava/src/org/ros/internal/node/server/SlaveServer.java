@@ -18,9 +18,10 @@ package org.ros.internal.node.server;
 
 import com.google.common.collect.Lists;
 
+import org.ros.internal.node.parameter.ParameterManager;
+
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
-import org.ros.internal.node.ParameterManager;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;

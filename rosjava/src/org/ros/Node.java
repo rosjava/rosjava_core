@@ -16,9 +16,11 @@
 
 package org.ros;
 
+
 import org.apache.commons.logging.Log;
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
+import org.ros.internal.node.client.ParameterClient;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
@@ -224,5 +226,5 @@ public interface Node {
    * @return {@link ParameterClient} with {@link NameResolver} in this
    *         namespace.
    */
-  ParameterClient createParameterClient();
+  ParameterTree createParameterClient();
 }

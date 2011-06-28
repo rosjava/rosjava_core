@@ -41,6 +41,9 @@ import java.util.List;
 // which are ancillary.
 public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.ParameterServer> {
 
+  private final SlaveIdentifier slaveIdentifier;
+  private final String nodeName;
+
   /**
    * Create a new {@link ParameterClient} connected to the specified
    * {@link ParameterServer} URI.
@@ -49,61 +52,61 @@ public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.Par
    *          the {@link URI} of the {@link ParameterServer} to connect to
    * @throws MalformedURLException
    */
-  public ParameterClient(URI uri) throws MalformedURLException {
+  public ParameterClient(SlaveIdentifier slaveIdentifier, URI uri) {
     super(uri, org.ros.internal.node.xmlrpc.ParameterServer.class);
+    this.slaveIdentifier = slaveIdentifier;
+    nodeName = slaveIdentifier.getName().toString();
   }
 
-  public Response<Object> getParam(String callerId, String parameterName) throws RemoteException {
-    return Response.fromListCheckedFailure(node.getParam(callerId, parameterName),
+  public Response<Object> getParam(String parameterName) throws RemoteException {
+    return Response.fromListCheckedFailure(node.getParam(nodeName, parameterName),
         new ObjectResultFactory());
   }
 
-  public Response<Boolean> hasParam(String callerId, String parameterName) throws RemoteException {
-    return Response.fromListChecked(node.hasParam(callerId, parameterName),
+  public Response<Boolean> hasParam(String parameterName) throws RemoteException {
+    return Response.fromListChecked(node.hasParam(nodeName, parameterName),
         new BooleanResultFactory());
   }
 
-  public Response<Void> deleteParam(String callerId, String parameterName) throws RemoteException {
-    return Response.fromListChecked(node.deleteParam(callerId, parameterName),
+  public Response<Void> deleteParam(String parameterName) throws RemoteException {
+    return Response.fromListChecked(node.deleteParam(nodeName, parameterName),
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String callerId, String parameterName, Object parameterValue)
+  public Response<Void> setParam(String parameterName, Object parameterValue)
       throws RemoteException {
-    // Convert Longs to ints due to Apache XMLRPC restriction. An alternative
+    // Convert Longs to ints due to Apache XML-RPC restriction. An alternative
     // would be to change setParam to have type-specific overloads, though we
     // would still have issues with arrays and maps.
     if (parameterValue instanceof Long) {
       return Response.fromListChecked(
-          node.setParam(callerId, parameterName, ((Long) parameterValue).intValue()),
+          node.setParam(nodeName, parameterName, ((Long) parameterValue).intValue()),
           new VoidResultFactory());
     } else {
-      return Response.fromListChecked(node.setParam(callerId, parameterName, parameterValue),
+      return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
           new VoidResultFactory());
     }
   }
 
-  public Response<String> searchParam(String callerId, String parameterName) throws RemoteException {
-    return Response.fromListCheckedFailure(node.searchParam(callerId, parameterName),
+  public Response<String> searchParam(String parameterName) throws RemoteException {
+    return Response.fromListCheckedFailure(node.searchParam(nodeName, parameterName),
         new StringResultFactory());
   }
 
-  public Response<Object> subscribeParam(SlaveIdentifier slave, String parameterName)
-      throws RemoteException {
+  public Response<Object> subscribeParam(String parameterName) throws RemoteException {
     return Response.fromListChecked(
-        node.subscribeParam(slave.getName().toString(), slave.getUri().toString(), parameterName),
+        node.subscribeParam(nodeName, slaveIdentifier.getUri().toString(), parameterName),
         new ObjectResultFactory());
   }
 
-  public Response<Integer> unsubscribeParam(SlaveIdentifier slave, String parameterName)
-      throws RemoteException {
-    return Response
-        .fromListChecked(node.unsubscribeParam(slave.getName().toString(), slave.getUri()
-            .toString(), parameterName), new IntegerResultFactory());
+  public Response<Integer> unsubscribeParam(String parameterName) throws RemoteException {
+    return Response.fromListChecked(
+        node.unsubscribeParam(nodeName, slaveIdentifier.getUri().toString(), parameterName),
+        new IntegerResultFactory());
   }
 
-  public Response<List<String>> getParamNames(String callerId) throws RemoteException {
-    return Response.fromListChecked(node.getParamNames(callerId), new StringListResultFactory());
+  public Response<List<String>> getParamNames() throws RemoteException {
+    return Response.fromListChecked(node.getParamNames(nodeName), new StringListResultFactory());
   }
 
 }

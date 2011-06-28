@@ -20,16 +20,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.MessageDeserializer;
 import org.ros.MessageSerializer;
+import org.ros.ParameterTree;
 import org.ros.ServiceClient;
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.NodeServer;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
@@ -41,6 +44,7 @@ import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
+import org.ros.namespace.NodeNameResolver;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -125,14 +129,20 @@ public class Node {
       ServiceDefinition serviceDefinition, MessageDeserializer<RequestType> deserializer,
       MessageSerializer<ResponseType> serializer,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
-    return serviceFactory.createServer(serviceDefinition, deserializer, serializer,
-        responseBuilder);
+    return serviceFactory
+        .createServer(serviceDefinition, deserializer, serializer, responseBuilder);
   }
 
   public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createServiceClient(
       ServiceDefinition serviceDefinition, MessageSerializer<RequestType> serializer,
       MessageDeserializer<ResponseType> deserializer) {
     return serviceFactory.createClient(serviceDefinition, serializer, deserializer);
+  }
+
+  // TODO(damonkohler): Use a factory to allow consolidating instances later.
+  public ParameterTree createParameterTree(NodeNameResolver resolver) {
+    return org.ros.internal.node.parameter.ParameterTree.create(slaveServer.toSlaveIdentifier(),
+        masterClient.getRemoteUri(), resolver, parameterManager);
   }
 
   /**
@@ -215,7 +225,7 @@ public class Node {
   public InetSocketAddress getAddress() {
     return slaveServer.getAddress();
   }
-
+  
   public ServiceIdentifier lookupService(GraphName serviceName) throws RemoteException,
       XmlRpcTimeoutException {
     Response<URI> response =

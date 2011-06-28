@@ -4,6 +4,8 @@ package org.ros.internal.node;
 
 import static org.junit.Assert.assertTrue;
 
+import org.ros.internal.node.parameter.ParameterManager;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

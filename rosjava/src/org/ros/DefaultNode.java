@@ -28,6 +28,7 @@ import org.ros.internal.message.ServiceMessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.RosoutLogger;
 import org.ros.internal.node.address.InetAddressFactory;
+import org.ros.internal.node.client.ParameterClient;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceIdentifier;
@@ -46,7 +47,6 @@ import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
 
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.URI;
 
 /**
@@ -318,12 +318,8 @@ public class DefaultNode implements Node {
    *         namespace.
    */
   @Override
-  public ParameterClient createParameterClient() {
-    try {
-      return ParameterClient.create(getName(), getMasterUri(), resolver);
-    } catch (MalformedURLException e) {
-      throw new RuntimeException(e);
-    }
+  public ParameterTree createParameterClient() {
+    return node.createParameterTree(resolver);
   }
 
   /**
