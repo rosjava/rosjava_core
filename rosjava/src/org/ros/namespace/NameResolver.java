@@ -17,12 +17,12 @@
 package org.ros.namespace;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 import org.ros.exception.RosNameException;
 import org.ros.internal.namespace.GraphName;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -35,7 +35,7 @@ public class NameResolver {
   private final Map<GraphName, GraphName> remappings;
 
   public static NameResolver createDefault() {
-    return new NameResolver(Namespace.GLOBAL, Maps.<GraphName, GraphName>newHashMap());
+    return new NameResolver(Namespace.GLOBAL, new HashMap<GraphName, GraphName>());
   }
 
   public NameResolver(String namespace, Map<GraphName, GraphName> remappings) {

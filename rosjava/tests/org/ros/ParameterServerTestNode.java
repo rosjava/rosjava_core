@@ -27,6 +27,7 @@ import org.ros.message.test_ros.Composite;
 import org.ros.message.test_ros.TestArrays;
 import org.ros.namespace.NameResolver;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -60,31 +61,31 @@ public class ParameterServerTestNode implements NodeMain {
       Log log = node.getLog();
 
       org.ros.message.std_msgs.String tilde_m = new org.ros.message.std_msgs.String();
-      tilde_m.data = (String) param.get(node.resolveName("~tilde"));
+      tilde_m.data = param.getString(node.resolveName("~tilde"));
       log.info("tilde: " + tilde_m.data);
 
-      String paramNamespace = (String) param.get("parameter_namespace");
-      String targetNamespace = (String) param.get("target_namespace");
+      String paramNamespace = param.getString("parameter_namespace");
+      String targetNamespace = param.getString("target_namespace");
       log.info("parameter_namespace: " + paramNamespace);
       log.info("target_namespace: " + targetNamespace);
       NameResolver resolver = node.getResolver().createResolver(paramNamespace);
       NameResolver setResolver = node.getResolver().createResolver(targetNamespace);
 
       org.ros.message.std_msgs.String string_m = new org.ros.message.std_msgs.String();
-      string_m.data = (String) param.get(resolver.resolveName("string"));
+      string_m.data = param.getString(resolver.resolveName("string"));
       log.info("string: " + string_m.data);
       Int64 int_m = new org.ros.message.std_msgs.Int64();
-      int_m.data = (Integer) param.get(resolver.resolveName("int"));
+      int_m.data = param.getInteger(resolver.resolveName("int"));
       log.info("int: " + int_m.data);
       Bool bool_m = new org.ros.message.std_msgs.Bool();
-      bool_m.data = (Boolean) param.get(resolver.resolveName("bool"));
+      bool_m.data = param.getBoolean(resolver.resolveName("bool"));
       log.info("bool: " + bool_m.data);
       Float64 float_m = new org.ros.message.std_msgs.Float64();
-      float_m.data = (Double) param.get(resolver.resolveName("float"));
+      float_m.data = param.getDouble(resolver.resolveName("float"));
       log.info("float: " + float_m.data);
 
       Composite composite_m = new org.ros.message.test_ros.Composite();
-      Map composite_map = (Map) param.get(resolver.resolveName("composite"));
+      Map composite_map = param.getMap(resolver.resolveName("composite"));
       composite_m.a.w = (Double) ((Map) composite_map.get("a")).get("w");
       composite_m.a.x = (Double) ((Map) composite_map.get("a")).get("x");
       composite_m.a.y = (Double) ((Map) composite_map.get("a")).get("y");
@@ -95,7 +96,7 @@ public class ParameterServerTestNode implements NodeMain {
 
       TestArrays list_m = new org.ros.message.test_ros.TestArrays();
       // only using the integer part for easier (non-float) comparison
-      Object[] list = (Object[]) param.get(resolver.resolveName("list"));
+      Object[] list = param.getList(resolver.resolveName("list")).toArray();
       list_m.int32_array = new int[list.length];
       for (int i = 0; i < list.length; i++) {
         list_m.int32_array[i] = (Integer) list[i];
@@ -107,7 +108,7 @@ public class ParameterServerTestNode implements NodeMain {
       param.set(setResolver.resolveName("float"), float_m.data);
       param.set(setResolver.resolveName("bool"), bool_m.data);
       param.set(setResolver.resolveName("composite"), composite_map);
-      param.set(setResolver.resolveName("list"), list);
+      param.set(setResolver.resolveName("list"), Arrays.asList(list));
 
       try {
         while (true) {

@@ -18,6 +18,8 @@ package org.ros.internal.node.xmlrpc;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -54,7 +56,25 @@ public interface ParameterServer extends Node {
    *          Parameter value.
    * @return void
    */
-  public List<Object> setParam(String callerId, String key, Object value);
+  public List<Object> setParam(String callerId, String key, Boolean value);
+
+  public List<Object> setParam(String callerId, String key, Character value);
+
+  public List<Object> setParam(String callerId, String key, Byte value);
+
+  public List<Object> setParam(String callerId, String key, Short value);
+
+  public List<Object> setParam(String callerId, String key, Integer value);
+
+  public List<Object> setParam(String callerId, String key, Double value);
+
+  public List<Object> setParam(String callerId, String key, String value);
+
+  public List<Object> setParam(String callerId, String key, List<?> value);
+
+  public List<Object> setParam(String callerId, String key, Vector<?> value);
+
+  public List<Object> setParam(String callerId, String key, Map<?, ?> value);
 
   /**
    * Retrieve parameter value from server.

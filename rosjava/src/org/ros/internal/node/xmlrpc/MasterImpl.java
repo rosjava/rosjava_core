@@ -31,16 +31,20 @@ import org.ros.internal.node.topic.TopicIdentifier;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterImpl implements Master {
+public class MasterImpl implements Master, ParameterServer {
 
   private final MasterServer master;
+  private final org.ros.internal.node.server.ParameterServer parameterServer;
 
   public MasterImpl(MasterServer master) {
     this.master = master;
+    parameterServer = new org.ros.internal.node.server.ParameterServer();
   }
 
   @Override
@@ -139,6 +143,107 @@ public class MasterImpl implements Master {
         SubscriberIdentifier.createFromStrings(callerId, callerApi, topicName);
     return Response.createSuccess("Success", master.unregisterSubscriber(subscriberIdentifier))
         .toList();
+  }
+
+  @Override
+  public List<Object> deleteParam(String callerId, String key) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public List<Object> setParam(String callerId, String key, Boolean value) {
+    parameterServer.set(new GraphName(key), value);
+    return Response.createSuccess("Success", null).toList();
+  }
+
+  @Override
+  public List<Object> setParam(String callerId, String key, Integer value) {
+    parameterServer.set(new GraphName(key), value);
+    return Response.createSuccess("Success", null).toList();
+  }
+
+  @Override
+  public List<Object> setParam(String callerId, String key, Double value) {
+    parameterServer.set(new GraphName(key), value);
+    return Response.createSuccess("Success", null).toList();
+  }
+
+  @Override
+  public List<Object> setParam(String callerId, String key, String value) {
+    parameterServer.set(new GraphName(key), value);
+    return Response.createSuccess("Success", null).toList();
+  }
+
+  @Override
+  public List<Object> setParam(String callerId, String key, Character value) {
+    parameterServer.set(new GraphName(key), value);
+    return Response.createSuccess("Success", null).toList();
+  }
+
+  @Override
+  public List<Object> setParam(String callerId, String key, Byte value) {
+    parameterServer.set(new GraphName(key), value);
+    return Response.createSuccess("Success", null).toList();
+  }
+
+  @Override
+  public List<Object> setParam(String callerId, String key, Short value) {
+    parameterServer.set(new GraphName(key), value);
+    return Response.createSuccess("Success", null).toList();
+  }
+
+  @Override
+  public List<Object> setParam(String callerId, String key, List<?> value) {
+    parameterServer.set(new GraphName(key), value);
+    return Response.createSuccess("Success", null).toList();
+  }
+
+  @Override
+  public List<Object> setParam(String callerId, String key, Vector<?> value) {
+    parameterServer.set(new GraphName(key), value);
+    return Response.createSuccess("Success", null).toList();
+  }
+
+  @Override
+  public List<Object> setParam(String callerId, String key, Map<?, ?> value) {
+    parameterServer.set(new GraphName(key), value);
+    return Response.createSuccess("Success", null).toList();
+  }
+
+  @Override
+  public List<Object> getParam(String callerId, String key) {
+    Object value = parameterServer.get(new GraphName(key));
+    if (value == null) {
+      return Response.createError("Parameter \"" + key + "\" is not set.", null).toList();
+    }
+    return Response.createSuccess("Success", value).toList();
+  }
+
+  @Override
+  public List<Object> searchParam(String callerId, String key) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public List<Object> subscribeParam(String callerId, String callerApi, String key) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public List<Object> unsubscribeParam(String callerId, String callerApi, String key) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public List<Object> hasParam(String callerId, String key) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public List<Object> getParamNames(String callerId) {
+    throw new UnsupportedOperationException();
   }
 
 }

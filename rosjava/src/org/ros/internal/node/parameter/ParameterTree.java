@@ -27,6 +27,8 @@ import org.ros.namespace.NameResolver;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * Provides access to the ROS {@link ParameterServer}.
@@ -55,28 +57,6 @@ public class ParameterTree implements org.ros.ParameterTree {
   }
 
   @Override
-  public Object get(String name) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
-    Response<Object> response = parameterClient.getParam(resolvedName);
-    if (response.getStatusCode() == StatusCode.SUCCESS) {
-      return response.getResult();
-    } else {
-      return null;
-    }
-  }
-
-  @Override
-  public Object get(String name, Object defaultValue) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
-    Response<Object> response = parameterClient.getParam(resolvedName);
-    if (response.getStatusCode() == StatusCode.SUCCESS) {
-      return response.getResult();
-    } else {
-      return defaultValue;
-    }
-  }
-
-  @Override
   public boolean has(String name) throws RemoteException {
     String resolvedName = resolver.resolveName(name);
     return parameterClient.hasParam(resolvedName).getResult();
@@ -89,7 +69,73 @@ public class ParameterTree implements org.ros.ParameterTree {
   }
 
   @Override
-  public void set(String name, Object value) throws RemoteException {
+  public void set(String name, Boolean value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value);
+  }
+
+  @Override
+  public void set(String name, Integer value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value);
+  }
+
+  @Override
+  public void set(String name, Float value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value.doubleValue());
+  }
+
+  @Override
+  public void set(String name, Double value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value);
+  }
+
+  @Override
+  public void set(String name, String value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value);
+  }
+
+  @Override
+  public void set(String name, Character value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value);
+  }
+
+  @Override
+  public void set(String name, Byte value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value);
+  }
+
+  @Override
+  public void set(String name, Short value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value);
+  }
+
+  @Override
+  public void set(String name, Long value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value.intValue());
+  }
+
+  @Override
+  public void set(String name, List<?> value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value);
+  }
+
+  @Override
+  public void set(String name, Vector<?> value) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    parameterClient.setParam(resolvedName, value);
+  }
+
+  @Override
+  public void set(String name, Map<?, ?> value) throws RemoteException {
     String resolvedName = resolver.resolveName(name);
     parameterClient.setParam(resolvedName, value);
   }
@@ -118,6 +164,146 @@ public class ParameterTree implements org.ros.ParameterTree {
   @Override
   public void removeParameterListener(String name, ParameterListener listener) {
     parameterManager.removeListener(name, listener);
+  }
+
+  public Object get(String name) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    Response<Object> response = parameterClient.getParam(resolvedName);
+    if (response.getStatusCode() == StatusCode.SUCCESS) {
+      return response.getResult();
+    } else {
+      return null;
+    }
+  }
+
+  public Object get(String name, Object defaultValue) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    Response<Object> response = parameterClient.getParam(resolvedName);
+    if (response.getStatusCode() == StatusCode.SUCCESS) {
+      return response.getResult();
+    } else {
+      return defaultValue;
+    }
+  }
+
+  @Override
+  public boolean getBoolean(String name) throws RemoteException {
+    return (Boolean) get(name);
+  }
+
+  @Override
+  public boolean getBoolean(String name, boolean defaultValue) throws RemoteException {
+    return (Boolean) get(name, defaultValue);
+  }
+
+  @Override
+  public char getChar(String name) throws RemoteException {
+    return (Character) get(name);
+  }
+
+  @Override
+  public char getChar(String name, char defaultValue) throws RemoteException {
+    return (Character) get(name, defaultValue);
+  }
+
+  @Override
+  public byte getByte(String name) throws RemoteException {
+    return (Byte) get(name);
+  }
+
+  @Override
+  public byte getByte(String name, byte defaultValue) throws RemoteException {
+    return (Byte) get(name, defaultValue);
+  }
+
+  @Override
+  public short getShort(String name) throws RemoteException {
+    return (Short) get(name);
+  }
+
+  @Override
+  public short getShort(String name, short defaultValue) throws RemoteException {
+    return (Short) get(name, defaultValue);
+  }
+
+  @Override
+  public int getInteger(String name) throws RemoteException {
+    return (Integer) get(name);
+  }
+
+  @Override
+  public int getInteger(String name, int defaultValue) throws RemoteException {
+    return (Integer) get(name, defaultValue);
+  }
+
+  @Override
+  public long getLong(String name) throws RemoteException {
+    return ((Integer) get(name)).longValue();
+  }
+
+  @Override
+  public long getLong(String name, long defaultValue) throws RemoteException {
+    return ((Integer) get(name, defaultValue)).longValue();
+  }
+
+  @Override
+  public float getFloat(String name) throws RemoteException {
+    return ((Double) get(name)).floatValue();
+  }
+
+  @Override
+  public float getFloat(String name, float defaultValue) throws RemoteException {
+    return ((Double) get(name, defaultValue)).floatValue();
+  }
+
+  @Override
+  public double getDouble(String name) throws RemoteException {
+    return (Double) get(name);
+  }
+
+  @Override
+  public double getDouble(String name, double defaultValue) throws RemoteException {
+    return (Double) get(name, defaultValue);
+  }
+
+  @Override
+  public String getString(String name) throws RemoteException {
+    return (String) get(name);
+  }
+
+  @Override
+  public String getString(String name, String defaultValue) throws RemoteException {
+    return (String) get(name, defaultValue);
+  }
+
+  @Override
+  public List<?> getList(String name) throws RemoteException {
+    return (List<?>) get(name);
+  }
+
+  @Override
+  public List<?> getList(String name, List<?> defaultValue) throws RemoteException {
+    return (List<?>) get(name, defaultValue);
+  }
+
+  @Override
+  public Vector<?> getVector(String name) throws RemoteException {
+    return (Vector<?>) get(name);
+  }
+
+  @Override
+  public Vector<?> getVector(String name, Vector<?> defaultValue) throws RemoteException {
+    return (Vector<?>) get(name, defaultValue);
+  }
+
+  @Override
+  public Map<?, ?> getMap(String name) throws RemoteException {
+    return (Map<?, ?>) get(name);
+  }
+
+  @Override
+  public Map<?, ?> getMap(String name, Map<?, ?> defaultValue) throws RemoteException {
+    return (Map<?, ?>) get(name, defaultValue);
   }
 
 }

@@ -140,10 +140,7 @@ public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.N
         } catch (XmlRpcException e) {
           Throwable linkedException = e.linkedException;
           if (linkedException == null) {
-            throw new RuntimeException(linkedException);
-          }
-          if (linkedException instanceof RuntimeException) {
-            throw linkedException;
+            throw new RuntimeException(e);
           }
           Class<?>[] exceptionTypes = pMethod.getExceptionTypes();
           for (int i = 0; i < exceptionTypes.length; i++) {

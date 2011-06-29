@@ -80,4 +80,11 @@ public class ParameterServerTest {
     assertEquals("bloop", server.get(new GraphName("/foo")));
   }
 
+  @Test
+  public void testSetAndGetFloat() {
+    ParameterServer server = new ParameterServer();
+    server.set(new GraphName("/foo/bar"), 0.42f);
+    assertEquals(0.42f, server.get(new GraphName("/foo/bar")));
+  }
+
 }

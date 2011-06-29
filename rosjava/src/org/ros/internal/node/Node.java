@@ -43,7 +43,7 @@ import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-import org.ros.namespace.NodeNameResolver;
+import org.ros.namespace.NameResolver;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -139,7 +139,7 @@ public class Node {
   }
 
   // TODO(damonkohler): Use a factory to allow consolidating instances later.
-  public ParameterTree createParameterTree(NodeNameResolver resolver) {
+  public ParameterTree createParameterTree(NameResolver resolver) {
     return org.ros.internal.node.parameter.ParameterTree.create(slaveServer.toSlaveIdentifier(),
         masterClient.getRemoteUri(), resolver, parameterManager);
   }

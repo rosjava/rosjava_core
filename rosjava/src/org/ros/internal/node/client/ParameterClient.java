@@ -30,6 +30,7 @@ import org.ros.internal.node.xmlrpc.ParameterServer;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provide access to the XML-RPC API for a ROS {@link ParameterServer}.
@@ -73,19 +74,56 @@ public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.Par
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, Object parameterValue)
+  public Response<Void> setParam(String parameterName, Boolean parameterValue)
       throws RemoteException {
-    // Convert Longs to ints due to Apache XML-RPC restriction. An alternative
-    // would be to change setParam to have type-specific overloads, though we
-    // would still have issues with arrays and maps.
-    if (parameterValue instanceof Long) {
-      return Response.fromListChecked(
-          node.setParam(nodeName, parameterName, ((Long) parameterValue).intValue()),
-          new VoidResultFactory());
-    } else {
-      return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
-          new VoidResultFactory());
-    }
+    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(String parameterName, Integer parameterValue)
+      throws RemoteException {
+    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(String parameterName, Double parameterValue)
+      throws RemoteException {
+    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(String parameterName, String parameterValue)
+      throws RemoteException {
+    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(String parameterName, Character parameterValue)
+      throws RemoteException {
+    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(String parameterName, Byte parameterValue) throws RemoteException {
+    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(String parameterName, Short parameterValue) throws RemoteException {
+    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(String parameterName, List<?> parameterValue)
+      throws RemoteException {
+    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(String parameterName, Map<?, ?> parameterValue)
+      throws RemoteException {
+    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
+        new VoidResultFactory());
   }
 
   public Response<String> searchParam(String parameterName) throws RemoteException {
