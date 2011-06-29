@@ -84,8 +84,7 @@ public class MasterServer extends NodeServer {
   private void publisherUpdate(String topicName) throws XmlRpcTimeoutException, RemoteException {
     for (SlaveIdentifier slaveIdentifier : slaves.values()) {
       // TODO(damonkohler): Should the master server know its node name here?
-      SlaveClient client;
-      client = new SlaveClient(GraphName.createUnknown(), slaveIdentifier.getUri());
+      SlaveClient client = new SlaveClient(GraphName.createUnknown(), slaveIdentifier.getUri());
       List<URI> publisherUris = Lists.newArrayList();
       synchronized (publishers) {
         for (PublisherIdentifier publisherIdentifier : publishers.get(topicName)) {
