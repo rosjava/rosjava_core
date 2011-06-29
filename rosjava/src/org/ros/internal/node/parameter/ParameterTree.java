@@ -69,6 +69,32 @@ public class ParameterTree implements org.ros.ParameterTree {
   }
 
   @Override
+  public String search(String name) throws RemoteException {
+    String resolvedName = resolver.resolveName(name);
+    Response<String> response = parameterClient.searchParam(resolvedName);
+    if (response.getStatusCode() == StatusCode.SUCCESS) {
+      return response.getResult();
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  public List<String> getNames() throws RemoteException {
+    return parameterClient.getParamNames().getResult();
+  }
+
+  @Override
+  public void addParameterListener(String name, ParameterListener listener) {
+    parameterManager.addListener(name, listener);
+  }
+
+  @Override
+  public void removeParameterListener(String name, ParameterListener listener) {
+    parameterManager.removeListener(name, listener);
+  }
+
+  @Override
   public void set(String name, Boolean value) throws RemoteException {
     String resolvedName = resolver.resolveName(name);
     parameterClient.setParam(resolvedName, value);
@@ -138,32 +164,6 @@ public class ParameterTree implements org.ros.ParameterTree {
   public void set(String name, Map<?, ?> value) throws RemoteException {
     String resolvedName = resolver.resolveName(name);
     parameterClient.setParam(resolvedName, value);
-  }
-
-  @Override
-  public String search(String name) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
-    Response<String> response = parameterClient.searchParam(resolvedName);
-    if (response.getStatusCode() == StatusCode.SUCCESS) {
-      return response.getResult();
-    } else {
-      return null;
-    }
-  }
-
-  @Override
-  public List<String> getNames() throws RemoteException {
-    return parameterClient.getParamNames().getResult();
-  }
-
-  @Override
-  public void addParameterListener(String name, ParameterListener listener) {
-    parameterManager.addListener(name, listener);
-  }
-
-  @Override
-  public void removeParameterListener(String name, ParameterListener listener) {
-    parameterManager.removeListener(name, listener);
   }
 
   public Object get(String name) throws RemoteException {

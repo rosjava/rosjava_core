@@ -103,8 +103,7 @@ public class MasterImpl implements Master, ParameterServer {
       String callerApi) {
     ServiceIdentifier serviceIdentifier;
     try {
-      serviceIdentifier =
-          new ServiceIdentifier(new GraphName(serviceName), new URI(serviceApi));
+      serviceIdentifier = new ServiceIdentifier(new GraphName(serviceName), new URI(serviceApi));
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
@@ -143,11 +142,6 @@ public class MasterImpl implements Master, ParameterServer {
         SubscriberIdentifier.createFromStrings(callerId, callerApi, topicName);
     return Response.createSuccess("Success", master.unregisterSubscriber(subscriberIdentifier))
         .toList();
-  }
-
-  @Override
-  public List<Object> deleteParam(String callerId, String key) {
-    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -226,19 +220,23 @@ public class MasterImpl implements Master, ParameterServer {
 
   @Override
   public List<Object> subscribeParam(String callerId, String callerApi, String key) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public List<Object> unsubscribeParam(String callerId, String callerApi, String key) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public List<Object> deleteParam(String callerId, String key) {
+    parameterServer.delete(new GraphName(key));
+    return Response.createSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> hasParam(String callerId, String key) {
-    throw new UnsupportedOperationException();
+    return Response.createSuccess("Success", parameterServer.has(new GraphName(key))).toList();
   }
 
   @Override

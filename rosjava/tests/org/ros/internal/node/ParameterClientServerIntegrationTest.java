@@ -17,6 +17,8 @@
 package org.ros.internal.node;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Maps;
 
@@ -92,6 +94,17 @@ public class ParameterClientServerIntegrationTest {
     ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
     parameters.set("/foo/bar", 42l);
     assertEquals(42l, parameters.getLong("/foo/bar"));
+    node.shutdown();
+  }
+
+  @Test
+  public void testDeleteAndHas() throws RemoteException {
+    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
+    ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
+    parameters.set("/foo/bar", "baz");
+    assertTrue(parameters.has("/foo/bar"));
+    parameters.delete("/foo/bar");
+    assertFalse(parameters.has("/foo/bar"));
     node.shutdown();
   }
 

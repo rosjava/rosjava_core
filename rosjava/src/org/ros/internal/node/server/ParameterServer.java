@@ -69,7 +69,6 @@ public class ParameterServer {
       String part = parts.pop();
       if (parts.empty()) {
         subtree.put(part, value);
-        return;
       } else if (subtree.containsKey(part) && subtree.get(part) instanceof Map) {
         subtree = (Map<String, Object>) subtree.get(part);
       } else {
@@ -80,17 +79,37 @@ public class ParameterServer {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public void delete(GraphName name) {
-    throw new UnsupportedOperationException();
+    Preconditions.checkArgument(name.isGlobal());
+    Stack<String> parts = getGraphNameParts(name);
+    Map<String, Object> subtree = tree;
+    while (!parts.empty() && subtree.containsKey(parts.peek())) {
+      String part = parts.pop();
+      if (parts.empty()) {
+        subtree.remove(part);
+      } else {
+        subtree = (Map<String, Object>) subtree.get(part);
+      }
+    }
   }
 
   public Object search(GraphName name) {
     throw new UnsupportedOperationException();
   }
 
+  @SuppressWarnings("unchecked")
   public boolean has(GraphName name) {
     Preconditions.checkArgument(name.isGlobal());
-    throw new UnsupportedOperationException();
+    Stack<String> parts = getGraphNameParts(name);
+    Map<String, Object> subtree = tree;
+    while (!parts.empty() && subtree.containsKey(parts.peek())) {
+      String part = parts.pop();
+      if (!parts.empty()) {
+        subtree = (Map<String, Object>) subtree.get(part);
+      }
+    }
+    return parts.empty();
   }
 
   public Collection<GraphName> getNames() {

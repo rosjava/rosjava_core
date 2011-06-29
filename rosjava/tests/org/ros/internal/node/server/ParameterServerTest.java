@@ -17,6 +17,7 @@
 package org.ros.internal.node.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Maps;
 
@@ -83,8 +84,37 @@ public class ParameterServerTest {
   @Test
   public void testSetAndGetFloat() {
     ParameterServer server = new ParameterServer();
-    server.set(new GraphName("/foo/bar"), 0.42f);
-    assertEquals(0.42f, server.get(new GraphName("/foo/bar")));
+    GraphName name = new GraphName("/foo/bar");
+    server.set(name, 0.42f);
+    assertEquals(0.42f, server.get(name));
+  }
+
+  @Test
+  public void testDeleteShallow() {
+    ParameterServer server = new ParameterServer();
+    GraphName name = new GraphName("/foo");
+    server.set(name, "bloop");
+    server.delete(name);
+    assertEquals(null, server.get(name));
+  }
+
+  @Test
+  public void testDeleteDeep() {
+    ParameterServer server = new ParameterServer();
+    GraphName name = new GraphName("/foo/bar");
+    server.set(name, "bloop");
+    server.delete(name);
+    assertEquals(null, server.get(name));
+  }
+
+  @Test
+  public void testHas() {
+    ParameterServer server = new ParameterServer();
+    server.set(new GraphName("/foo/bar/baz"), "bloop");
+    assertTrue(server.has(new GraphName("/foo/bar/baz")));
+    assertTrue(server.has(new GraphName("/foo/bar")));
+    assertTrue(server.has(new GraphName("/foo")));
+    assertTrue(server.has(new GraphName("/")));
   }
 
 }

@@ -64,16 +64,6 @@ public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.Par
         new ObjectResultFactory());
   }
 
-  public Response<Boolean> hasParam(String parameterName) throws RemoteException {
-    return Response.fromListChecked(node.hasParam(nodeName, parameterName),
-        new BooleanResultFactory());
-  }
-
-  public Response<Void> deleteParam(String parameterName) throws RemoteException {
-    return Response.fromListChecked(node.deleteParam(nodeName, parameterName),
-        new VoidResultFactory());
-  }
-
   public Response<Void> setParam(String parameterName, Boolean parameterValue)
       throws RemoteException {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
@@ -141,6 +131,16 @@ public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.Par
     return Response.fromListChecked(
         node.unsubscribeParam(nodeName, slaveIdentifier.getUri().toString(), parameterName),
         new IntegerResultFactory());
+  }
+
+  public Response<Boolean> hasParam(String parameterName) throws RemoteException {
+    return Response.fromListChecked(node.hasParam(nodeName, parameterName),
+        new BooleanResultFactory());
+  }
+
+  public Response<Void> deleteParam(String parameterName) throws RemoteException {
+    return Response.fromListChecked(node.deleteParam(nodeName, parameterName),
+        new VoidResultFactory());
   }
 
   public Response<List<String>> getParamNames() throws RemoteException {
