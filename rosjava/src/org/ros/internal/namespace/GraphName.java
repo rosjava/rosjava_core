@@ -39,6 +39,10 @@ public class GraphName {
     return new GraphName(UNKNOWN_NAME);
   }
 
+  public static GraphName createRoot() {
+    return new GraphName(Namespace.GLOBAL);
+  }
+
   /**
    * @param name
    */
@@ -95,7 +99,11 @@ public class GraphName {
    * @return If this name is a global name then return true.
    */
   public boolean isGlobal() {
-    return name.startsWith("/");
+    return name.startsWith(Namespace.GLOBAL);
+  }
+  
+  public boolean isRoot() {
+    return name.equals(Namespace.GLOBAL);
   }
 
   /**
@@ -157,6 +165,17 @@ public class GraphName {
         return new GraphName("");
       }
     }
+  }
+
+  public GraphName getName() {
+    int slashIdx = name.lastIndexOf('/');
+    if (slashIdx > -1) {
+      if (slashIdx + 1 < name.length()) {
+        return new GraphName(name.substring(slashIdx + 1));
+      }
+      return new GraphName("");
+    }
+    return this;
   }
 
   @Override
