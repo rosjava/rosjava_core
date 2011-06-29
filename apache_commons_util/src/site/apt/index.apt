@@ -1,0 +1,10 @@
+           -----------------------------------
+           Apache Webservices Common Utilities
+           -----------------------------------
+
+About Apache WS Common Utilities
+
+  This is a small collection of utility classes, that allow high performance XML
+  processing based on SAX. Basically, it is assumed, that you are using an JAXP
+  1.1 compliant XML parser and nothing else. In particular, no dependency on the
+  javax.xml.transform package is introduced.

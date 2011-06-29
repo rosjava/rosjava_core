@@ -1,0 +1,155 @@
+~~
+~~
+~~  Licensed to the Apache Software Foundation (ASF) under one
+~~  or more contributor license agreements.  See the NOTICE file
+~~  distributed with this work for additional information
+~~  regarding copyright ownership.  The ASF licenses this file
+~~  to you under the Apache License, Version 2.0 (the
+~~  "License"); you may not use this file except in compliance
+~~  with the License.  You may obtain a copy of the License at
+~~
+~~    http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~  Unless required by applicable law or agreed to in writing,
+~~  software distributed under the License is distributed on an
+~~  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~  KIND, either express or implied.  See the License for the
+~~  specific language governing permissions and limitations
+~~  under the License.
+~~
+           --------------------------------
+           Apache XML-RPC Vendor Extensions
+           --------------------------------
+
+Introduction
+
+  The {{{http://www.xmlrpc.com/spec}XML-RPC specification}} has been
+  published in 1999. In the past 6 years, it was subject to some
+  minor corrections. Some things have been made clearer. However, it
+  hasn't really changed or evolved. Dave Winer, the XML-RPC specifications
+  author, has always rejected any suggestions in that direction. Of course,
+  he did so with a good reason: One of XML-RPC's major targets was
+  portability over arbitrary platforms and programming languages. Clearly,
+  this target has been met and any further development would mean putting
+  this at risk. 
+
+  On the other hand, this is most unfortunate: Obeying the specification
+  means accepting really serious limitations. For example, one cannot even
+  use all of Java's primitive data types, although nowadays they have
+  equivalents in almost any programming language. Possibly even more
+  important is the requirement to send a content-length header: HTTP/1.1
+  and its chunk encoding are the definite standard in 2005 for both HTTP
+  clients and servers. Consequently, the content-length header is, at
+  best, superfluos. Of course, having an additional header wouldn't be
+  too much of a problem. But calculating the header value enforces, that
+  request and response are written to byte arrays, before actually sending
+  them. This is both slow and memory consuming.
+
+  Version 3 of Apache XML-RPC is a compromise: By default it
+  still meets the specification. However, you <<may>> enable additional
+  features, called vendor extensions. Of course, these features only work,
+  if you have a streaming version of Apache XML-RPC on both sides. In
+  practice, it occurs very frequently, that both sides are controlled by
+  the same people. Besides, the vendor extensions are documented very
+  clearly here: Adding these features to an existing XML-RPC library
+  would mean almost no effort, so possibly someone does. You'r welcome.
+
+  But the purpose of this document is more than documentation: It is also
+  to receive feedback and discuss the extensions specification and
+  implementation. Nothing is fixed, and everything can be changed.
+
+Enabling extensions
+
+  Vendor extensions cannot be used, unless they are explicitly enabled.
+  In some cases, you have to enable specific features, for example
+  request compression. But in all cases, you need to enable the use
+  of vendor extensions at all, because that is the step, where you
+  knowingly say: "I know, I am now in violation of the original XML-RPC
+  specification."
+
+  For that reasons, both server and client have a property
+  <<<enabledForExtensions>>> in their respective configuration. Setting
+  this property to true enables the extensions. 
+
+Streaming Mode
+
+  Putting the client or the server into streaming mode means, that
+  data being sent to the other side is almost directly written to
+  the network connection. (Besides, of course, using a moderately
+  sized <<<BufferedOutputStream>>>, because one would not want to
+  have a network connection for any <<<write()>>> call.)
+
+  In particular, the request, or response, isn't written to a
+  <<<ByteArrayOutputStream>>> internally. Without streaming mode,
+  this is always the case. But there is more: For example, the
+  base64 encoder is also writing directly without internal buffering.
+  (There are few other base64 encoders around, which support streaming
+  mode.)
+
+  To enable streaming mode on the client, set the properties
+  <<<enabledForExtensions>>> and <<<contentLengthOptional>>>. This
+  will take care for the request, which is being sent to the server.
+
+  On the server, things are a little bit more complicated. Currently,
+  the server behaves as follows: If streaming mode is disabled, then
+  the server will always behave like a standard XML-RPC server.
+  Otherwise, the server will verify, whether the client sends a
+  content-length header. If so, then the server assumes that the
+  client is able to accept a missing content-length header in the
+  response as well. Otherwise, the server will still disable streaming
+  for this particular requests. In other words, traditional clients
+  will still receive a traditional response and one server can serve
+  both data types.
+
+Compression
+
+  HTTP Request compression is a standard HTTP feature and works by
+  using the HTTP headers <<<Accept-Encoding>>> and <<<Content-Encoding>>>.
+  In other words, it is quite likely, that request compression is
+  supported by your HTTP client or server library. For example, the
+  Apache httpd does so by using the <<<mod_deflate>>> module.
+
+  Of course, it's more convenient to have the XML-RPC library doing
+  this. If the client should compress the response, then you need
+  to set the properties <<<enabledForExtensions>>> and
+  <<<gzipCompressing>>>. The XML-RPC request will be compressed
+  (on-the-fly in streaming mode, of course) and the HTTP header
+  <<<Content-Encoding>>> will be set to <<<gzip>>>. Needless to say,
+  you may only do so, if the server is ready to accept such requests.
+
+  Compressing the request doesn't mean that the response is compressed
+  as well. First of all, the server will only send a compressed response,
+  if the server property <<<enabledForExtensions>>> is set. Additionally,
+  the server will read the HTTP header <<<Accept-Encoding>>>: If it
+  doesn't contain <<<gzip>>> encoding, then compression cannot take
+  place. In other words, the client must send this header. You need
+  to set the client properties <<<enabledForCompression>>> and
+  <<<gzipRequesting>>> to achieve that.
+
+Data Types
+
+  Enabling vendor extensions means also, that several additional
+  data types may be sent. (See {{{./types.html}Data Types}} for
+  details.) These different data types require an extension of the
+  XML-RPC network protocol.
+
+  All of these data types are using a special XML namespace. Using this
+  namespace is a clear indication, that these data types are in violation
+  to the XML-RPC specification.
+
+  For example, sending an integer value looks like the following:
+----------------------------------------------------------------------------
+  <i4>347</i4>
+----------------------------------------------------------------------------
+  32 bit integers are valid data types in XML-RPC. So we do not need
+  to use a separate namespace here. 64 bit integers aren't valid XML-RPC
+  data types. So we need to use our namespace when sending them:
+----------------------------------------------------------------------------
+  <i8 xmlns="http://ws.apache.org/xmlrpc/namespaces/extensions">78934</i8>
+----------------------------------------------------------------------------
+
+Exception Handling
+
+  If the server property "enabledForExceptions" is turned on, then the server
+  will convert exceptions into a byte array and send them to the client within
+  a "faultCause" message.

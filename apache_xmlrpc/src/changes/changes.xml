@@ -1,0 +1,447 @@
+<!--
+
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.    
+
+-->
+<document>
+  <properties>
+    <title>Changes in Apache XML-RPC</title>
+  </properties>
+  <body>
+    <release version="3.1.3" date="2010-Feb-06">
+      <action dev="jochen" type="fix">
+        The version number in the clients user agent string is now
+        updated automatically.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-168">
+        Fixed a deadlock in the ThreadPool.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-174" due-to="Livnat Peer" due-to-email="livnats@gmail.com">
+        The ClientFactory is now supporting an empty remote class.
+      </action>
+      <action dev="jochen" type="add" due-to="Gam" due-to-email="gamaliel@fastmail.fm">
+        Added support for configured timeouts to the XmlRpcSun15HttpTransport class.
+      </action>
+      <action dev="jochen" type="fix" due-to="Johan H&#244;gre" due-to-email="johan.hagre@home.se">
+        Fixed a potential security hole: The client has been able to include server side resources
+        into the request by using external entities.
+      </action>
+    </release>
+
+    <release version="3.1.2" date="2009-Apr-19">
+      <action dev="jochen" type="fix" due-to="Mark Gertsvolf" due-to-email="markg@nortel.com"
+          issue="XMLRPC-162">
+        Eliminated a possible race condition in the ThreadPool.
+      </action>
+      <action dev="jochen" type="fix" due-to="Mark Gertsvolf" due-to-email="markg@nortel.com"
+          issue="XMLRPC-161">
+        The ThreadPool could create more threads than configured.
+      </action>
+      <action dev="jochen" type="fix" due-to="James Baldassari" due-to-email="jbaldassari at gmail dot com"
+          issue="XMLRPC-160">
+        Weakened the access control in the WebServer class in order to make
+        subclassing easier.
+      </action>
+      <action dev="jochen" type="fix" due-to="Brandon DuRette" due-to-email="brandond@alum.mit.edu"
+          issue="XMLRPC-159">
+        Improved the handling of HTTP status codes that indicate an error.
+      </action>
+      <action dev="jochen" type="fix" due-to="Alan Burlison" due-to-email="Alan.Burlison@sun.com">
+        Fixed a possible NPE in case of a malformed HTTP request in the WebServer.
+      </action>
+      <action dev="jochen" type="fix" due-to="Alan Burlison" due-to-email="Alan.Burlison@sun.com"
+          issue="XMLRPC-166">
+        The webserver's connection timeout wasn't applied to the ServletWebServer.
+      </action>
+      <action dev="jochen" type="fix" due-to="Alan Burlison" due-to-email="Alan.Burlison@sun.com"
+          issue="XMLRPC-166">
+        A client could prevent other clients from connecting by not sending any data.
+      </action>
+      <action dev="jochen" type="fix" due-to="Greg Wurth" due-to-email="hackwurth@mac.com"
+          issue="XMLRPC-164">
+        The platforms default encoding has been used at some point when decoding HTTP headers.
+      </action>
+    </release>
+
+    <release version="3.1.1" date="2008-Aug-10">
+      <action dev="jochen" type="fix" due-to="P&#243;ka Bal&#225;zs" due-to-email="p.balazs@gmail.com">
+        The XmlRpcCommonsTransport is now always declaring its entities as repeatable.
+      </action>
+      <action dev="jochen" type="add" due-to="Andreas Sahlbach" due-to-email="andreas.sahlbach@gmail.com"
+          issue="XMLRPC-149">
+        It is now possible to set the clients user-agent header in the client configuration.
+      </action>
+      <action dev="jochen" type="fix" due-to="Andreas Sahlbach" due-to-email="andreas.sahlbach@gmail.com"
+          issue="XMLRPC-148">
+        Ensured that the server replies with a spec compliant request, if the client uses the
+        content-length header.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-150">
+        The XmlRpcSunHttpTransportFactory wasn't thread safe.
+      </action>
+      <action dev="jochen" type="add" issue="XMLRPC-101" due-to="Julio Francisco Veronelli" due-to-email="ckjfveronelli@fibertel.com.ar">
+        Added support for javax.net.ssl.SSLSocketFactory and javax.net.Proxy.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-151">
+        Added some clarification on the handling of Object[] and java.util.List to
+        the page on "XML-RPC Data Types".
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-157" due-to="Kay Tiong Khoo" due-to-email="kaytiong@gmail.com">
+        Minor grammar improvements.
+      </action>
+      <action dev="jochen" type="add" issue="XMLRPC-156">
+        Added the XmlRpcErrorHandler, which allows to customize the error logging.
+        This allows, for example, to minimize the logging for business exceptions.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-155">
+        Documented, that called methods are choosen based on their signature.
+        In particular, multiple methods with the same name are supported.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-158">
+        Fixed the FAQ entry on how to obtain the clients IP address.
+      </action>
+    </release>
+    <release version="3.1" date="2007-Aug-31">
+      <action dev="jochen" type="add">
+        Introduced the "enabledForExceptions" property.
+      </action>
+      <action dev="jochen" type="add">
+        Added support for void methods, if extensions are turned on.
+      </action>
+      <action dev="jochen" type="add" issue="XMLRPC-118" due-to="Perry Nguyen"
+          due-to-email="pfnguyen@hanhuy.com">
+        Added PropertyHandlerMapping.load(ClassLoader, Map).
+      </action>
+      <action dev="jochen" type="add" issue="XMLRPC-117" due-to="Jimisola Laursen"
+          due-to-email="jimisola@jimisola.com">
+        The authentication handler, type converter and requestprocessor factories
+        are now configurable as properties of the XmlRpcServlet.
+      </action>
+      <action dev="jochen" type="add" issue="XMLRPC-116" due-to="Jimisola Laursen"
+          due-to-email="jimisola@jimisola.com">
+        Atomic properties of XmlRpcServer are now configurable as init parameters
+        in the XmlRpcServlet.
+      </action>
+      <action dev="jochen" type="fix">
+        Reworked the WebServer/ThreadPool framework in order to ensure a clean
+        shutdown.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-124" due-to="Jimisola Laursen"
+          due-to-email="jimisola@jimisola.com">
+		The configuration framework, as introduced by XMLRPC-116, was applicable
+		to the configuration only, and not to the XmlRpcServlet, or the
+		XmlRpcServletServer.
+      </action>
+      <action dev="jochen" type="add">
+        Introduced the method AbstractReflectiveHandlerMapping.isHandlerMethod().
+        This should allow users to prevent remote invocation of certain methods,
+        for example initialization stuff.
+      </action>
+      <action dev="jochen" type="add" issue="XMLRPC-126"
+          due-to="Eugene Prokopiev" due-to-email="prokopiev@stc.donpac.ru">
+        The ClientFactory is now able to use a custom name for the remote
+        handler. So far, it was always using the interface name.
+      </action>
+      <action dev="jochen" type="add" issue="XMLRPC-127">
+        It is now possible to have other objects than strings as
+        map keys.
+      </action>
+      <action dev="jochen" type="add" issue="XMLRPC-131"
+          due-to="Steffen Pingel" due-to-email="steffenp@gmx.de">
+        Made extending the XmlRpcCommonsTransportFactory easier.
+      </action>
+      <action dev="jochen" type="add" issue="XMLRPC-132"
+          due-to="Andrew Norman" due-to-email="anorman@piczoinc.com">
+        Added support for redirects.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-136"
+          due-to="Mario Linke" due-to-email="linke.mario@web.de">
+        Fixed an invalid example in the "advanced" document.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-140">
+        An invalid dateTime value is now causing a more informative
+        error message.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-144"
+          due-to="Steve Cohen" due-to-email="sc1478@att.com">
+        The redirect handling (XMLRPC-132) wasn't actually working,
+        because it treated an URI as a charset name.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-145"
+          due-to="Gamaliel Amaudruz" due-to-email="gamaliel@fastmail.fm">
+        Address matching in the Webserver wasn't actually working,
+        because casting of integers to bytes was implemented wrong.
+      </action>
+      <action dev="jochen" type="fix">
+        Make the HttpClient creation in XmlRpcCommonsTransport and the
+        URLConnection creation in XmlRpcSunHttpTransport protected.
+        This is required for cookie support.
+      </action>
+      <action dev="jochen" type="fix">
+        The WebServer was producing invalid error responses, if contentLengthOptional
+        was set.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-113" due-to="Juha Syrjala"
+          due-to-email="Juha.Syrjala@hiq.fi">
+        If the server was throwing an XmlRpcException, then the fault code and fault
+        string weren't given to the client.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-114">
+        The WebServer replies with an HTTP error 401 now, if the
+        client uses chunked encoding.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-74">
+        The properties "Extension-Name", "Specification-Vendor", "Specification-Version",
+        "Specification-Title", "Implementation-Vendor-Id",
+        "Implementation-Vendor" and "Implementation-Version" are now
+		present in the MANIFEST files.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-115">
+        An NPE was thrown, if the clients request didn't contain a "params" element.
+      </action>
+      <action dev="jochen" type="fix" due-to="Jonathan Oexner"
+          due-to-email="jonathan.oexner@alum.wpi.edu">
+        The method TimingOutCallback.waitForResponse is now checking, whether
+        a response has already arrived before waiting.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-119">
+		Fixed a serious performance problem, if the XML parser was sending large
+		content in small pieces. This could happen, for example, if the content
+		contained a large number of character entities.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-120"
+          due-to="Juho Yli-Krekola" due-to-email="Juho.Yli-Krekola@iki.fi">
+        The configuration of the reply timeout in the commons transport was wrong.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-133"
+          due-to="Carsten Wolters" due-to-email="c.wolters@gmx.de">
+        The DateParser is now treating an empty string as null.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-134"
+          due-to="Sir Bode Rafael" due-to-email="sirboderafael@gmail.com">
+        Fixed a broken link referring to an "SSL with Jetty" HOW-TO.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-141"
+          due-to="Keith McNeill" due-to-email="mcneill@streambase.com">
+        The XmlRpcRequestParser and XmlRpcResponseParser didn't reset
+        their internal state within startDocument(). Consequently, they
+        haven't been reusable.
+      </action>
+    </release>
+    <release version="3.0" date="30-Aug-2006">
+      <action dev="jochen" type="fix" due-to="Matt Preston"
+          due-to-email="matt@knowledgeview.co.uk" issue="XMLRPC-100">
+        Fixed the spelling of CharSetXmlWriterFactory, which made
+        the class basically useless.
+      </action>
+      <action dev="jochen" type="fix" due-to="Stanislav Miklik"
+          due-to-email="stanislav.miklik@gmail.com">
+        Fixed that the WebServer didn't wait before retrying to
+        bind to the server socket.
+      </action>
+      <action dev="jochen" type="fix" due-to="Stanislav Miklik"
+          due-to-email="stanislav.miklik@gmail.com">
+        Fixed an endless loop, if the WebServer threw a BindException.
+      </action>
+      <action dev="jochen" type="fix" due-to="Landon Fuller"
+          due-to-email="landonf@threerings.net" issue="XMLRPC-104">
+        A NullPointerException was triggered, if the BasicEncoding was set to null.
+      </action>
+      <action dev="jochen" type="fix" due-to="Landon Fuller"
+          due-to-email="landonf@threerings.net" issue="XMLRPC-104">
+		Basic authentication didn't work, if the base64 encoded string with
+		user name and password contained more than 72 characters.
+      </action>
+      <action dev="jochen" type="fix">
+        Basic authentication didn't work with the commons http transport,
+        because the commons httpclient wasn't configured to send credentials
+        by default. (It was waiting for a challenge.)
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-105">
+        Basic authentication didn't work with the commons http transport,
+        if user name or password contained non-ASCII characters.
+      </action>
+      <action dev="jochen" type="fix" due-to="Randall Bryant"
+          due-to-email="randall@magpieti.com">
+        The releaseWorker() method wasn't called for the server.
+      </action>
+      <action dev="jochen" type="fix">
+        Fixed a bug in the web servers thread pool, which caused that
+        threads haven't been reused.
+      </action>
+      <action dev="jochen" type="fix" due-to="Jason McLaurin"
+          due-to-email="jmclaurin@petronworld.com">
+        Documentation improvements
+      </action>
+      <action dev="jochen" type="add">
+        Added documentation on custom data types.
+      </action>
+      <action dev="jochen" type="add" due-to="Catalin Hritcu"
+          due-to-email="Catalin.Hritcu@gmail.com" issue="XMLRPC-107">
+        The XmlRpcLiteHttpTransport is now creating a socket
+        in a protected methods. This allows to switch to
+        alternative socket implementations.
+      </action>
+      <action dev="jochen" type="fix" due-to="Catalin Hritcu"
+          due-to-email="Catalin.Hritcu@gmail.com" issue="XMLRPC-108">
+        More documentation fixes.
+      </action>
+      <action dev="jochen" type="fix" due-to="Catalin Hritcu"
+          due-to-email="Catalin.Hritcu@gmail.com" issue="XMLRPC-109">
+        Fixed an invalid FAQ example.
+      </action>
+    </release>
+    <release version="3.0rc1" date="27-Jul-2006">
+      <action dev="jochen" type="fix" due-to="Alan Burlison"
+          due-to-email="Alan.Burlison@sun.com">
+        Added a missing "synchronized" to the TimingOutCallback.
+      </action>
+      <action dev="jochen" type="fix" due-to="Chris Conrad"
+          due-to-email="rhavyn@gmail.com" issue="XMLRPC-94">
+        Fixed an invalid index, that caused the ReflectiveXmlRpcHandler to fail
+        detecting a method.
+      </action>
+      <action dev="jochen" type="add" issue="XMLRPC-93">
+        Added documentation for accessing an SSL server.
+      </action>
+      <action dev="jochen" type="add" due-to="Jimisola Laursen"
+          due-to-email="jimisola@jimisola.com" issue="XMLRPC-96">
+	    A null parameter list is now treated as an empty object array.
+      </action>
+      <action dev="jochen" type="fix" due-to="Jimisola Laursen"
+          due-to-email="jimisola@jimisola.com" issue="XMLRPC-97">
+	    The type long was missing in types.apt.      
+      </action>
+    </release>
+    <release version="3.0b1" date="24-Jun-2006">
+      <action dev="hgomez" type="add">
+        Add connectionTimeout and replyTimeout in RPC clients.
+        CommonsTransport support connection and reply timeout, liteHttpTransport only support reply timeout
+      </action>
+      <action dev="jochen" type="fix" due-to="Marek Ludha"
+          due-to-email="mludha@gmail.com">
+        The value created by HttpUtil.encodeBasicAuthentication(...)
+        was terminated with a line feed, which is invalid for
+        use in HTTP headers.
+      </action>
+      <action dev="hgomez" type="add">
+        add support for BigDecimal and BigInteger in extensions.
+      </action>
+      <action dev="jochen" type="fix" due-to="Walter Mundt"
+          due-to-email="Walter.Mundt@coleengineering.com">
+          Nested object arrays could not be parsed.
+      </action>
+      <action dev="jochen" type="fix" due-to="Walter Mundt"
+          due-to-email="Walter.Mundt@coleengineering.com">
+          The "string" tag could not be parsed.
+      </action>
+      <action dev="jochen" type="add" due-to="Walter Mundt"
+          due-to-email="Walter.Mundt@coleengineering.com"
+          issue="XMLRPC-76">
+		  Added the DynamicHandlerMapping.
+      </action>
+      <action dev="jochen" type="fix" due-to="Walter Mundt"
+          due-to-email="Walter.Mundt@coleengineering.com">
+          XmlRpcException.printStackTrace() was throwing
+          an NPE, if no linked exception was present.
+      </action>
+      <action dev="jochen" type="add">
+        The project is now splitted into three jar files:
+        common, client, and server.
+      </action>
+      <action dev="jochen" type="fix" due-to="Brad Karp"
+          due-to-email="bkarp@cs.ucl.ac.uk">
+        The Base64 encoder doesn't accept buffers of length 0. Such a buffer
+        was passed, if the byte array to encode has itself length 0.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-79">
+        HTTP/1.0 requires a content-length header. The Lite HTTP transport
+        doesn't support HTTP/1.1, so it refuses the "contentLengthOptional"
+        setting from now on.
+      </action>
+      <action dev="jochen" type="add" due-to="Mark Petrovic"
+          due-to-email="mspetrovic@gmail.com">
+        Added support for initializable handlers.
+      </action>
+      <action dev="jochen" type="add" due-to="Ken Weiner"
+          due-to-email="kweiner@gmail.com" issue="XMLRPC-56">
+        Added the TimingOutCallback, which allows to abort a request,
+        if the server doesn't reply within a given time.
+      </action>
+      <action dev="hgomez" type="fix">
+        Fixed that dateTime values must not include timezone values.
+      </action>
+      <action dev="jochen" type="add" due-to="Denis Carniel"
+          due-to-email="2nis@aktiv-design.com" issue="XMLRPC-84">
+        The XmlRpcServlet allows to configure its "enabledForExtensions"
+        value as an init parameter.
+      </action>
+      <action dev="jochen" type="add">
+        It is now possible to create and initialize handler objects per
+        request.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-89">
+        Added partial support for automatic conversion of object arrays
+        to lists, or vectors. Same for maps to hash tables, or properties.
+      </action>
+    </release>
+    <release version="3.0a1" date="17-Feb-2005">
+      <action dev="jochen" type="add">
+        Complete rewrite, adding vendor extensions:
+        Streaming mode, support for all primitive Java types,
+        nulls, DOM elements, and JAXB objects.
+      </action>
+    </release>
+    <release version="2.0.2" date="Not yet released">
+      <action dev="jochen" type="fix" issue="XMLRPC-67"
+             due-to="Mike Bailey" due-to-email="mike at blueoak.com">
+        A missing increment in LiteXmlRpcTransport.initConnection()
+        prevented, that the method could finally fail, resulting
+        in a never ending loop.
+      </action>
+    </release>
+    <release version="2.0.1" date="28-Dec-2005">
+      <action dev="jochen" type="fix" issue="XMLRPC-68"
+	      	 due-to="Johan Oskarson" due-to-email="johan at oskarsson.nu">
+	      The Webserver class was unable to handle basic authentication,
+	      because the BASE64 codec wasn't initialized.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-69"
+      		 due-to="Claude Zervas" due-to-email="claude at utlco.com">
+      	  The characters 0x20, 0xe000, and 0x10000 have been escaped
+      	  without reason.
+      </action>
+      <action dev="jochen" type="fix" issue="XMLRPC-73"
+      		due-to="Thomas Mohaupt" due-to-email="Thomas.Mohaupt at gmail.com">
+      	  The wrong version of commons-codec was downloaded by build.xml.
+      </action>
+      <action dev="jochen" type="add"
+      		due-to="Jimisola Laursen" due-to-email="jimisola@jimisola.com">
+      	  Added the CommonsXmlRpcTransportFactory.
+      </action>
+      <action dev="jochen" type="add"
+            due-to="Henry Story" due-to-email="henry.story@bblfish.net">
+          Added the possibility to specify a timezone for interpreting
+          incoming date values.
+      </action>
+      <action dev="jochen" type="add">
+          Upgrade to commons-httpclient 3.0.
+      </action>
+    </release>
+  </body>
+</document>

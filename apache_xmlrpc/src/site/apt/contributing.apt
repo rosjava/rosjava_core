@@ -1,0 +1,45 @@
+~~
+~~
+~~  Licensed to the Apache Software Foundation (ASF) under one
+~~  or more contributor license agreements.  See the NOTICE file
+~~  distributed with this work for additional information
+~~  regarding copyright ownership.  The ASF licenses this file
+~~  to you under the Apache License, Version 2.0 (the
+~~  "License"); you may not use this file except in compliance
+~~  with the License.  You may obtain a copy of the License at
+~~
+~~    http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~  Unless required by applicable law or agreed to in writing,
+~~  software distributed under the License is distributed on an
+~~  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~  KIND, either express or implied.  See the License for the
+~~  specific language governing permissions and limitations
+~~  under the License.
+~~
+                         ------------
+                         Contributing
+                         ------------
+
+Contributing
+
+  A great {{{http://jakarta.apache.org/site/contributing.html}description}}
+  of contributing to Apache XML-RPC is available from the Jakarta
+  project.
+
+Submitting Patches
+
+  The preferred patch format is unidiff. The best way to generate a patch
+  is by checking out the sources, applying your changes and running
+
+---------------------------------------------------------------------------------
+    svn diff
+---------------------------------------------------------------------------------
+
+  Emails containing patches should be sent to the mailing list
+  xmlrpc-dev@ws.apache.org, and prefix their subject lines with <<[PATCH]>>.
+  Patches are also accepted via the
+  {{{http://issues.apache.org/jira/browse/XMLRPC}issue tracker}}.
+  The Jakarta project provides a description of
+  {{{http://jakarta.apache.org/site/source.html}life with ASF source code}}
+  -- look for the <<Patches>> section.

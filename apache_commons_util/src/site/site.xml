@@ -1,0 +1,22 @@
+<project name="ws-commons-util">
+  <bannerLeft>
+    <name>Apache Webservices Common Utilities</name>
+    <src>http://ws.apache.org/images/project-logo.jpg</src>
+    <href>http://ws.apache.org/commons/util/</href>
+  </bannerLeft>
+  <body>
+    <links>
+      <item name="Apache" href="http://www.apache.org/"/>
+      <item name="Webservices" href="http://ws.apache.org/"/>
+      <item name="WS Commons" href="http://ws.apache.org/commons/"/>
+      <item name="Utilities" href="http://ws.apache.org/commons/util/"/>
+    </links>
+
+    <menu name="WS Common Utilities">
+      <item name="Overview"            href="/index.html"/>
+    </menu>
+
+    ${reports}
+
+  </body>
+</project>

@@ -1,0 +1,290 @@
+~~
+~~
+~~  Licensed to the Apache Software Foundation (ASF) under one
+~~  or more contributor license agreements.  See the NOTICE file
+~~  distributed with this work for additional information
+~~  regarding copyright ownership.  The ASF licenses this file
+~~  to you under the Apache License, Version 2.0 (the
+~~  "License"); you may not use this file except in compliance
+~~  with the License.  You may obtain a copy of the License at
+~~
+~~    http://www.apache.org/licenses/LICENSE-2.0
+~~
+~~  Unless required by applicable law or agreed to in writing,
+~~  software distributed under the License is distributed on an
+~~  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+~~  KIND, either express or implied.  See the License for the
+~~  specific language governing permissions and limitations
+~~  under the License.
+~~
+           ---------------------------
+           Advanced Programming Topics
+           ---------------------------
+
+  This page describes some advanced topics.
+
+Dynamic proxies
+
+  Dynamic proxies are an extremely comfortable way of Client programming.
+  Basically, the idea is as follows: All request processors on the server
+  side are splitted into interface and implementation. The interfaces are
+  shared between client and server, typically within some common jar file.
+  Now, rather than using the
+  {{{apidocs/org/apache/xmlrpc/client/XmlRpcClient.html}XmlRpcClient}}
+  directly,
+  the programmer creates an instance of
+  {{{apidocs/org/apache/xmlrpc/client/util/ClientFactory.html}ClientFactory}},
+  which is configured with an
+  {{{apidocs/org/apache/xmlrpc/client/XmlRpcClient.html}XmlRpcClient}}.
+
+  The {{{apidocs/org/apache/xmlrpc/client/util/ClientFactory.html}factory}}
+  can take an interface as input and returns an implementation,
+  which internally calls the server by using the
+  {{{apidocs/org/apache/xmlrpc/client/XmlRpcClient.html}XmlRpcClient}}.
+
+  Perhaps some code shows more than words. First of all, let's create
+  a request processor interface.
+
+-----------------------------------------------------------------------------------
+    package com.foo;
+
+    public interface Adder {
+      public int add(int pNum1, int pNum2);
+    }
+-----------------------------------------------------------------------------------
+
+  The server contains the request processors implementation:
+
+-----------------------------------------------------------------------------------
+    package com.foo;
+
+    public class AdderImpl implements Adder {
+      public int add(int pNum1, int pNum2) {
+        return pNum1 + pNum2;
+      }
+    }
+-----------------------------------------------------------------------------------
+
+  And here is how the client would use this:
+
+-----------------------------------------------------------------------------------
+    import com.foo.Adder;
+    import java.net.URL;
+    import org.apache.xmlrpc.client.XmlRpcClient;
+    import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+    import org.apache.xmlrpc.client.util.ClientFactory;
+
+    XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
+    config.setServerURL(new URL("http://127.0.0.1:8080/xmlrpc"));
+    XmlRpcClient client = new XmlRpcClient();
+    client.setConfig(config);
+    ClientFactory factory = new ClientFactory(client);
+    Adder adder = (Adder) factory.newInstance(Adder.class);
+    int sum = adder.add(2, 4);
+-----------------------------------------------------------------------------------
+
+* Exception handling
+
+  Currently, exceptions are a problem: If the server throws an exception
+  (for example an IOException), then the client receives an XmlRpcException.
+  Consequently, the generated implementation will attempt to throw the
+  XmlRpcException.
+
+  Unfortunately, the method signature will of course contain an IOException,
+  but rarely an XmlRpcException. As the XmlRpcException cannot be thrown,
+  it is converted into an UndeclaredThrowableException.
+
+  This is no problem, if you are prepared for runtime exceptions by enclosing
+  your code with proper exception handlers. (Of course, the exception handlers
+  may be in a calling method.) Only if you want to catch the exception (for
+  example, because you expect an error at a certain point), then you need
+  to consider, which exception is being trapped: If the method exposes
+  XmlRpcException, then you'll need to catch the XmlRpcException.
+  Otherwise, it's UndeclaredThrowableException.
+
+  It is recommended to use the property enabledForExceptions. If this property
+  is set, then the server will attempt to convert the exception into a byte
+  array, which is transmitted to the client. The client will be able to
+  convert the byte array back into an exception and throw that, as if it
+  came right out of the client. Note, that this approach may cause security
+  and privacy issues, because the serialized exception may, in theory, contain
+  arbitrary objects.
+
+* Cookie handling
+
+  Cookie has not yet been generalized. In other words, it depends on the
+  transport.
+
+  * The XmlRpcLiteHttpTransport doesn't have support for cookies.
+  * The XmlRpcSunHttpTransport requires hand written code for setting
+    and getting the cookies or using a cookie library. (The latter is
+    recommended, of course.) In either way, you've got to use a custom
+    transport and overwrite the methods newURLConnection(URL),
+    initHttpHeaders(XmlRpcRequest), and close():
+
+-----------------------------------------------------------------------------------
+    import java.net.URLConnection;
+    import org.apache.xmlrpc.client.XmlRpcClient;
+    import org.apache.xmlrpc.client.XmlRpcSunHttpTransport;
+    import org.apache.xmlrpc.client.XmlRpcTransport;
+    import org.apache.xmlrpc.client.XmlRpcTransportFactory;
+
+    final XmlRpcClient client = new XmlRpcClient();
+    XmlRpcTransportFactory factory = new XmlRpcTransportFactory(){
+        public XmlRpcTransport getTransport(){
+            private URLConnection conn;
+            protected URLConnection newURLConnection(URL pURL) throws IOException {
+                conn = super.newURLConnection(pURL);
+                return conn;
+            }
+            protected void initHttpHeaders(XmlRpcRequest pRequest) {
+                super.initHttpHeaders(pRequest);
+                setCookies(conn);
+            }
+            protected void close() throws XmlRpcClientException {
+                getCookies(conn);
+            }
+            private void setCookies(URLConnection pConn) {
+                // Implement me ...
+            }
+            private void getCookies(URLConnection pConn) {
+                // Implement me ...
+            }
+        }
+    };
+    client.setTransportFactory(factory);
+-----------------------------------------------------------------------------------    
+
+  * The XmlRpcCommonsHttpTransport requires that the HttpClient is being
+    reused. (By default, a new HttpClient is created for any connection.)
+    To reuse the HttpClient, set it on the transport factory:
+
+-----------------------------------------------------------------------------------
+    import org.apache.commons.httpclient.HttpClient;
+    import org.apache.commons.httpclient.HttpState;
+    import org.apache.xmlrpc.client.XmlRpcClient;
+    import org.apache.xmlrpc.client.XmlRpcCommonsTransport;
+    import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
+
+    final XmlRpcClient client = new XmlRpcClient();
+    final HttpClient httpClient = new HttpClient();
+    final XmlRpcCommonsTransportFactory factory = new XmlRpcCommonsTransportFactory(client);
+    factory.setHttpClient(httpClient);
+    client.setTransportFactory(factory);
+    final HttpState httpState = client.getState();
+-----------------------------------------------------------------------------------
+
+    Cookies may now be read or set on the httpState object.
+
+    Note, that this means losing the XmlRpcClients multithreading abilities!
+    The factory above is obviously bound to the HttpClient, which must be
+    bound to a thread. If you need to set cookies initially, overwrite the
+    transport method initHttpHeaders(XmlRpcRequest) as well.
+
+* Custom data types
+
+  Apache XML-RPC was built with extensibility in mind. In particular, it was
+  written to support custom data types.
+
+  The data type handling is completely left to the
+  {{{apidocs/org/apache/xmlrpc/common/TypeFactory.html}TypeFactory}}. In
+  other words, adding support for custom data types is as simple as
+  providing your own type factory. This is typically done by subclassing
+  {{{apidocs/org/apache/xmlrpc/common/TypeFactoryImpl.html}TypeFactoryImpl}}.
+
+  We'll illustrate the concept by creating a type factory, which uses a
+  non-standard date format for transmitting date values. First of all,
+  we've got to implement the subclass:
+
+-----------------------------------------------------------------------------------
+    import java.text.DateFormat;
+    import java.text.SimpleDateFormat;
+    import org.apache.xmlrpc.common.TypeFactoryImpl;
+    import org.apache.xmlrpc.common.XmlRpcController;
+    import org.apache.xmlrpc.parser.DateParser;
+    import org.apache.xmlrpc.parser.TypeParser;
+    import org.apache.xmlrpc.serializer.DateSerializer;
+    import org.apache.xmlrpc.serializer.TypeSerializer;
+    import org.apache.ws.commons.util.NamespaceContextImpl;
+
+    public class MyTypeFactory extends TypeFactoryImpl {
+        public MyTypeFactory(XmlRpcController pController) {
+            super(pController);
+        }
+
+        private DateFormat newFormat() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        }
+
+        public TypeParser getParser(XmlRpcStreamConfig pConfig, NamespaceContextImpl pContext, String pURI, String pLocalName) {
+            if (DateSerializer.DATE_TAG.equals(pLocalName)) {
+                return new DateParser(pFormat);
+            } else {
+                return super.getParser(pConfig, pContext, pURI, pLocalName);
+            }
+        }
+
+        public TypeSerializer getSerializer(XmlRpcStreamConfig pConfig, Object pObject) throws SAXException {
+            if (pObject instanceof Date) {
+                return new DateSerializer(newFormat());
+            } else {
+                return super.getSerializer(pConfig, pObject);
+            }
+        }
+    }
+-----------------------------------------------------------------------------------
+
+  On the client side, we've got to tell the 
+  {{{apidocs/org/apache/xmlrpc/client/XmlRpcClient.html}XmlRpcClient}} to use the
+  new factory. That's as simple as typing
+
+-----------------------------------------------------------------------------------
+    XmlRpcClient client = new XmlRpcClient();
+    client.setTypeFactory(new MyTypeFactory());
+-----------------------------------------------------------------------------------
+
+  Things are a little bit more difficult on the server side. Basically all we need
+  to do is setting the type factory on the
+  {{{apidocs/org/apache/xmlrpc/server/XmlRpcServer.html}XmlRpcServer}}. The question
+  is, how to obtain the server object. That depends on the environment. If you
+  are using the XmlRpcServlet, then you've got to derive a subclass:
+
+-----------------------------------------------------------------------------------
+    import org.apache.xmlrpc.webserver.XmlRpcServletServer;
+    import org.apache.xmlrpc.webserver.XmlRpcServlet;
+
+    public class MyXmlRpcServlet extends XmlRpcServlet {
+        protected XmlRpcServletServer newXmlRpcServer(ServletConfig pConfig) {
+            XmlRpcServletServer server = super.newXmlRpcServer(pConfig);
+            server.setTypeFactory(new MyTypeFactory(server));
+            return server;
+        }
+    }
+-----------------------------------------------------------------------------------
+
+  And, if you are using the
+  {{{apidocs/org/apache/xmlrpc/webserver/WebServer.html}WebServer}}, you've got
+  to override a similar method:
+
+-----------------------------------------------------------------------------------
+    import java.net.InetAddress;
+    import org.apache.xmlrpc.server.XmlRpcStreamServer;
+    import org.apache.xmlrpc.webserver.WebServer;
+    
+    public class MyWebServer extends WebServer {
+        public MyWebServer(int pPort) {
+            super(pPort);
+        }
+
+        public MyWebServer(int pPort, InetAddress pAddr) {
+            super(pPort, pAddr);
+        }
+
+  	    protected XmlRpcStreamServer newXmlRpcStreamServer() {
+  	        XmlRpcStreamServer server = new ConnectionServer();
+  	        server.setTypeFactory(new MyTypeFactory());
+  	        return server;
+	    }
+	}
+-----------------------------------------------------------------------------------
+  

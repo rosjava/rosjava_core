@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="jar" name="rosjava_bootstrap">
+  
+  <property name="build" location="build" />
+  <property name="dist" location="dist" />
+  <property name="jar" location="${dist}/rosjava-bootstrap.jar" />
+
+  <path id="classpath">
+    <pathelement location="${build}" />
+  </path>
+
+  <target name="init">
+    <mkdir dir="${build}" />
+    <mkdir dir="${dist}" />
+  </target>
+    
+  <target name="clean">
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <javac destdir="${build}">
+      <classpath refid="classpath" />
+      <src path="src" />
+    </javac>
+  </target>
+
+  <target name="jar" depends="init, compile">
+    <jar destfile="${jar}">
+      <fileset dir="${build}" />
+    </jar>
+  </target>
+</project>
