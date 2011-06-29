@@ -13,6 +13,8 @@ local.properties
 ros.properties
 .cproject
 .settings
+.classpath-generated
+.project-generated
 rosjava/lib/rosjava.jar
 syntax: regexp
 (bin|build|dist|msg_gen|srv_gen|gen|test_output)/.*
