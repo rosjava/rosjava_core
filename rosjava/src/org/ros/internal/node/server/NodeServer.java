@@ -58,7 +58,8 @@ public class NodeServer {
     startLatch = new CountDownLatch(1);
   }
 
-  public <T extends org.ros.internal.node.xmlrpc.Node> void start(Class<T> instanceClass, T instance) {
+  public <T extends org.ros.internal.node.xmlrpc.Node> void
+      start(Class<T> instanceClass, T instance) {
     XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
     PropertyHandlerMapping phm = new PropertyHandlerMapping();
     phm.setRequestProcessorFactoryFactory(new NodeRequestProcessorFactoryFactory<T>(instance));
@@ -89,19 +90,19 @@ public class NodeServer {
   public URI getUri() {
     return advertiseAddress.toUri("http");
   }
-  
+
   public InetSocketAddress getAddress() {
     return advertiseAddress.toInetSocketAddress();
   }
-  
+
   public AdvertiseAddress getAdvertiseAddress() {
     return advertiseAddress;
   }
-  
+
   public void awaitStart() throws InterruptedException {
     startLatch.await();
   }
-  
+
   public boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
     return startLatch.await(timeout, unit);
   }
