@@ -106,6 +106,10 @@ public class GraphName {
     return name.equals(Namespace.GLOBAL);
   }
 
+  public boolean isEmpty() {
+    return name.equals("");
+  }
+
   /**
    * Is this a ~private/name.
    * 
@@ -214,13 +218,30 @@ public class GraphName {
    * 
    * @return a string with the first
    */
-  public String toGlobal() {
+  public GraphName toGlobal() {
     if (isGlobal()) {
-      return name;
+      return this;
     } else if (isPrivate()) {
-      return "/" + name.substring(1);
+      return new GraphName(Namespace.GLOBAL + name.substring(1));
     } else {
-      return "/" + name;
+      return new GraphName(Namespace.GLOBAL + name);
+    }
+  }
+
+  /**
+   * Join two names together.
+   * 
+   * @param other
+   *          ROS name to join. If other is global, this will return other.
+   * @return A concatenation of the two names.
+   */
+  public GraphName join(GraphName other) {
+    if (other.isGlobal() || isEmpty()) {
+      return other;
+    } else if (isRoot()) {
+      return other.toGlobal();
+    } else {
+      return new GraphName(toString() + "/" + other.toString());
     }
   }
 

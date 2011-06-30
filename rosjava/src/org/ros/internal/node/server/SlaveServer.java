@@ -18,13 +18,12 @@ package org.ros.internal.node.server;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.node.parameter.ParameterManager;
-
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.Publisher;
@@ -190,7 +189,7 @@ public class SlaveServer extends NodeServer {
   public ProtocolDescription requestTopic(String topicName, Collection<String> protocols)
       throws ServerException {
     // Canonicalize topic name.
-    topicName = new GraphName(topicName).toGlobal();
+    topicName = new GraphName(topicName).toGlobal().toString();
     if (!topicManager.hasPublisher(topicName)) {
       throw new ServerException("No publishers for topic: " + topicName);
     }

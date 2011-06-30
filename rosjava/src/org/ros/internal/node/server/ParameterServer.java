@@ -18,11 +18,13 @@ package org.ros.internal.node.server;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import org.ros.internal.namespace.GraphName;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -112,8 +114,24 @@ public class ParameterServer {
     return parts.empty();
   }
 
+  @SuppressWarnings("unchecked")
+  private Set<GraphName> getSubtreeNames(GraphName parent, Map<String, Object> subtree,
+      Set<GraphName> names) {
+    for (String name : subtree.keySet()) {
+      Object possibleSubtree = subtree.get(name);
+      if (possibleSubtree instanceof Map) {
+        names.addAll(getSubtreeNames(parent.join(new GraphName(name)),
+            (Map<String, Object>) possibleSubtree, names));
+      } else {
+        names.add(parent.join(new GraphName(name)));
+      }
+    }
+    return names;
+  }
+
   public Collection<GraphName> getNames() {
-    throw new UnsupportedOperationException();
+    Set<GraphName> names = Sets.newHashSet();
+    return getSubtreeNames(GraphName.createRoot(), tree, names);
   }
 
 }

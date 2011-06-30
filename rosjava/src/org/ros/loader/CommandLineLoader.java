@@ -57,7 +57,8 @@ public class CommandLineLoader extends RosLoader {
    * Environment variables will be pulled from default {@link System}
    * environment variables.
    * 
-   * @param argv command-line arguments
+   * @param argv
+   *          command-line arguments
    */
   public CommandLineLoader(List<String> argv) {
     this(argv, System.getenv());
@@ -67,8 +68,10 @@ public class CommandLineLoader extends RosLoader {
    * Create new {@link CommandLineLoader} with specified command-line arguments
    * and environment variables.
    * 
-   * @param argv command-line arguments
-   * @param environment environment variables
+   * @param argv
+   *          command-line arguments
+   * @param environment
+   *          environment variables
    */
   public CommandLineLoader(List<String> argv, Map<String, String> environment) {
     Preconditions.checkArgument(argv.size() > 0);
@@ -145,9 +148,11 @@ public class CommandLineLoader extends RosLoader {
   private NameResolver buildParentResolver() {
     String namespace = Namespace.GLOBAL;
     if (specialRemappings.containsKey(CommandLine.ROS_NAMESPACE)) {
-      namespace = new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal();
+      namespace =
+          new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal().toString();
     } else if (environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
-      namespace = new GraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
+      namespace =
+          new GraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal().toString();
     }
     return new NameResolver(namespace, remappings);
   }

@@ -94,13 +94,7 @@ public class NameResolver {
    * @return A concatenation of the two names.
    */
   public static String join(GraphName name1, GraphName name2) {
-    if (name2.isGlobal() || name1.toString().equals("")) {
-      return name2.toString();
-    } else if (name1.equals(Namespace.GLOBAL)) {
-      return Namespace.GLOBAL + name2.toString();
-    } else {
-      return new GraphName(name1.toString() + "/" + name2.toString()).toString();
-    }
+    return name1.join(name2).toString();
   }
 
   /**
