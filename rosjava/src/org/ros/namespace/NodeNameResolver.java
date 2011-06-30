@@ -30,16 +30,16 @@ import java.util.Map;
  */
 public class NodeNameResolver extends NameResolver {
 
-  private final String privateNamespace;
+  private final GraphName privateNamespace;
 
   public static NodeNameResolver create(NameResolver defaultResolver, GraphName nodeName) {
-    return new NodeNameResolver(defaultResolver.getNamespace().toString(), nodeName.toString(),
+    return new NodeNameResolver(defaultResolver.getNamespace(), nodeName,
         defaultResolver.getRemappings());
   }
 
-  private NodeNameResolver(String defaultNamespace, String privateNamespace,
+  private NodeNameResolver(GraphName defaultNamespace, GraphName privateNamespace,
       Map<GraphName, GraphName> remappings) {
-    super(new GraphName(defaultNamespace), remappings);
+    super(defaultNamespace, remappings);
     this.privateNamespace = privateNamespace;
   }
 
@@ -49,12 +49,17 @@ public class NodeNameResolver extends NameResolver {
    * @return the name resolved relative to the default or private namespace
    */
   @Override
-  public String resolve(String name) {
-    GraphName graphName = lookUpRemapping(new GraphName(name));
+  public GraphName resolve(GraphName name) {
+    GraphName graphName = lookUpRemapping(name);
     if (graphName.isPrivate()) {
-      return resolve(privateNamespace, graphName.toRelative().toString());
+      return resolve(privateNamespace, graphName.toRelative());
     }
     return super.resolve(name);
+  }
+
+  @Override
+  public String resolve(String name) {
+    return resolve(new GraphName(name)).toString();
   }
 
 }

@@ -21,6 +21,7 @@ import org.ros.exception.RosNameException;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class GraphNameTest extends TestCase {
 
@@ -166,6 +167,15 @@ public class GraphNameTest extends TestCase {
     assertEquals("bar", name.getBasename().toString());
     name = new GraphName("foo/bar");
     assertEquals("bar", name.getBasename().toString());
+  }
+
+  @Test
+  public void testJoin() {
+    assertEquals(new GraphName("/bar"), new GraphName("/").join(new GraphName("bar")));
+    assertEquals(new GraphName("bar"), new GraphName("").join(new GraphName("bar")));
+    assertEquals(new GraphName("foo/bar"), new GraphName("foo").join(new GraphName("bar")));
+    assertEquals(new GraphName("/foo/bar"), new GraphName("/foo").join(new GraphName("bar")));
+    assertEquals(new GraphName("/bar"), new GraphName("/foo").join(new GraphName("/bar")));
   }
 
 }

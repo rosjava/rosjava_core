@@ -18,12 +18,13 @@ package org.ros.namespace;
 import org.ros.internal.namespace.GraphName;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class NodeNameResolverTest extends NameResolverTest {
 
   @Override
   public void testResolveNameOneArg() {
-    HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
+    Map<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     GraphName nodeName = new GraphName("/node");
     NodeNameResolver r = NodeNameResolver.create(NameResolver.createDefault(remappings), nodeName);
 

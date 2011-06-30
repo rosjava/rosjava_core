@@ -16,6 +16,7 @@
 
 package org.ros.namespace;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import org.ros.exception.RosNameException;
@@ -71,48 +72,35 @@ public class NameResolver {
    * @param name
    * @return the fully resolved name relative to the given namespace.
    */
-  public String resolve(String namespace, String name) {
-    GraphName ns = lookUpRemapping(new GraphName(namespace));
-    Preconditions.checkArgument(ns.isGlobal(), "namespace must be global: " + ns.toString());
-    GraphName n = lookUpRemapping(new GraphName(name));
-    if (n.isGlobal()) {
-      return n.toString();
+  @VisibleForTesting
+  GraphName resolve(GraphName namespace, GraphName name) {
+    GraphName remappedNamespace = lookUpRemapping(namespace);
+    Preconditions.checkArgument(remappedNamespace.isGlobal(),
+        "Namespace must be global. Tried to resolve: " + remappedNamespace);
+    GraphName remappedName = lookUpRemapping(name);
+    if (remappedName.isGlobal()) {
+      return remappedName;
     }
-    if (n.isRelative()) {
-      return join(ns, n);
-    } else if (n.isPrivate()) {
-      throw new RosNameException("cannot resolve ~private names in arbitrary namespaces");
-    } else {
-      throw new RosNameException("Bad name: " + name);
+    if (remappedName.isRelative()) {
+      return remappedNamespace.join(remappedName);
     }
+    if (remappedName.isPrivate()) {
+      throw new RosNameException("Cannot resolve ~private names in arbitrary namespaces.");
+    }
+    throw new RosNameException("Unable to resolve name: " + name);
   }
 
   /**
-   * Join two names together.
-   * 
-   * @param name1
-   *          ROS name to join to.
-   * @param name2
-   *          ROS name to join. Must be relative.
-   * @return A concatenation of the two names
-   * @throws IllegalArgumentException
-   *           If name2 is not a relative name
+   * @param name
+   *          name to resolve
+   * @return the name resolved relative to the default namespace
    */
-  public static String join(String name1, String name2) {
-    return join(new GraphName(name1), new GraphName(name2));
+  public GraphName resolve(GraphName name) {
+    return resolve(getNamespace(), name);
   }
 
-  /**
-   * Join two names together.
-   * 
-   * @param name1
-   *          ROS name to join to.
-   * @param name2
-   *          ROS name to join. If name2 is global, this will return name2.
-   * @return A concatenation of the two names.
-   */
-  public static String join(GraphName name1, GraphName name2) {
-    return name1.join(name2).toString();
+  public String resolve(String name) {
+    return resolve(getNamespace(), new GraphName(name)).toString();
   }
 
   /**
@@ -135,15 +123,6 @@ public class NameResolver {
   }
 
   /**
-   * @param name
-   *          name to resolve
-   * @return the name resolved relative to the default namespace
-   */
-  public String resolve(String name) {
-    return resolve(getNamespace().toString(), name);
-  }
-
-  /**
    * Construct a new {@link NameResolver} with the same remappings as this
    * resolver has. The namespace of the new resolver will be the value of the
    * name parameter resolved in this namespace.
@@ -151,8 +130,9 @@ public class NameResolver {
    * @param name
    * @return {@link NameResolver} relative to the current namespace.
    */
-  public NameResolver createResolver(String name) {
-    String resolverNamespace = resolve(name);
-    return new NameResolver(new GraphName(resolverNamespace), remappings);
+  public NameResolver createResolver(GraphName name) {
+    GraphName resolverNamespace = resolve(name);
+    return new NameResolver(resolverNamespace, remappings);
   }
+
 }
