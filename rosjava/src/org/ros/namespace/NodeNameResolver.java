@@ -33,13 +33,13 @@ public class NodeNameResolver extends NameResolver {
   private final String privateNamespace;
 
   public static NodeNameResolver create(NameResolver defaultResolver, GraphName nodeName) {
-    return new NodeNameResolver(defaultResolver.getNamespace(), nodeName.toString(),
+    return new NodeNameResolver(defaultResolver.getNamespace().toString(), nodeName.toString(),
         defaultResolver.getRemappings());
   }
 
   private NodeNameResolver(String defaultNamespace, String privateNamespace,
       Map<GraphName, GraphName> remappings) {
-    super(defaultNamespace, remappings);
+    super(new GraphName(defaultNamespace), remappings);
     this.privateNamespace = privateNamespace;
   }
 

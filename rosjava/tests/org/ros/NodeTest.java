@@ -67,8 +67,7 @@ public class NodeTest {
 
   @Test
   public void testResolveName() throws RosInitException {
-    nodeConfiguration.setParentResolver(new NameResolver("/ns1",
-        new HashMap<GraphName, GraphName>()));
+    nodeConfiguration.setParentResolver(NameResolver.createFromString("/ns1"));
     Node node = new DefaultNode("test_resolver", nodeConfiguration);
 
     assertEquals("/foo", node.resolveName("/foo"));

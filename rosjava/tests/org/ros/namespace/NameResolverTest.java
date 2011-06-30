@@ -16,7 +16,6 @@
 package org.ros.namespace;
 
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.ros.exception.RosNameException;
 import org.ros.internal.namespace.GraphName;
@@ -25,17 +24,9 @@ import java.util.HashMap;
 
 public class NameResolverTest extends TestCase {
 
-  public NameResolver createGlobalResolver() {
-    return createGlobalResolver(new HashMap<GraphName, GraphName>());
-  }
-
-  public NameResolver createGlobalResolver(HashMap<GraphName, GraphName> remappings) {
-    return new NameResolver(Namespace.GLOBAL, remappings);
-  }
-
   @Test
   public void testResolveNameOneArg() {
-    NameResolver r = createGlobalResolver();
+    NameResolver r = NameResolver.createDefault();
 
     assertEquals("/foo", r.resolve("foo"));
     assertEquals("/foo", r.resolve("/foo"));
@@ -47,7 +38,7 @@ public class NameResolverTest extends TestCase {
     } catch (RosNameException e) {
     }
 
-    r = new NameResolver("/ns1", new HashMap<GraphName, GraphName>());
+    r = NameResolver.createFromString("/ns1");
 
     assertEquals("/ns1/foo", r.resolve("foo"));
     assertEquals("/foo", r.resolve("/foo"));
@@ -56,9 +47,8 @@ public class NameResolverTest extends TestCase {
 
   @Test
   public void testResolveNameTwoArg() {
-    // these tests are based on test_roslib_names.py
-
-    NameResolver r = createGlobalResolver();
+    // These tests are based on test_roslib_names.py.
+    NameResolver r = NameResolver.createDefault();
     try {
       r.resolve("foo", "bar");
       fail("should have raised");
@@ -121,7 +111,7 @@ public class NameResolverTest extends TestCase {
     remappings.put(new GraphName("name"), new GraphName("/my/name"));
     remappings.put(new GraphName("foo"), new GraphName("/my/foo"));
 
-    NameResolver r = createGlobalResolver(remappings);
+    NameResolver r = NameResolver.createDefault(remappings);
 
     String n = r.resolve("name");
     assertTrue(n.equals("/my/name"));

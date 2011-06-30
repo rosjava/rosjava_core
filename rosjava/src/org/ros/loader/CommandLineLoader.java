@@ -25,7 +25,6 @@ import org.ros.RosLoader;
 import org.ros.exception.RosInitException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.namespace.NameResolver;
-import org.ros.namespace.Namespace;
 
 import java.io.File;
 import java.net.URI;
@@ -146,13 +145,11 @@ public class CommandLineLoader extends RosLoader {
    * </ol>
    */
   private NameResolver buildParentResolver() {
-    String namespace = Namespace.GLOBAL;
+    GraphName namespace = GraphName.createRoot();
     if (specialRemappings.containsKey(CommandLine.ROS_NAMESPACE)) {
-      namespace =
-          new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal().toString();
+      namespace = new GraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal();
     } else if (environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
-      namespace =
-          new GraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal().toString();
+      namespace = new GraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
     }
     return new NameResolver(namespace, remappings);
   }

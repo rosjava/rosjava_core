@@ -58,9 +58,6 @@ import java.net.URI;
  */
 public class DefaultNode implements Node {
 
-  /**
-   * Configuration this node was created with.
-   */
   private final NodeConfiguration configuration;
   private final NodeNameResolver resolver;
   private final GraphName nodeName;
@@ -72,11 +69,12 @@ public class DefaultNode implements Node {
    * @param name
    *          Node name. This identifies this node to the rest of the ROS graph.
    * @param configuration
-   *          Configuration parameters for the node.
+   *          configuration parameters for the node
    * @throws RosInitException
    */
-  public DefaultNode(String name, NodeConfiguration configuration) throws RosInitException {
+  public DefaultNode(String name, NodeConfiguration configuration) {
     Preconditions.checkNotNull(configuration);
+    Preconditions.checkNotNull(configuration.getHost());
     Preconditions.checkNotNull(name);
     this.configuration = configuration;
     NameResolver parentResolver = configuration.getParentResolver();
@@ -87,7 +85,7 @@ public class DefaultNode implements Node {
     } else {
       baseName = name;
     }
-    nodeName = new GraphName(NameResolver.join(parentResolver.getNamespace(), baseName));
+    nodeName = new GraphName(NameResolver.join(parentResolver.getNamespace().toString(), baseName));
     resolver = NodeNameResolver.create(parentResolver, nodeName);
 
     // TODO(kwc): Implement simulated time.
@@ -97,21 +95,16 @@ public class DefaultNode implements Node {
     // Log for /rosout.
     log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
 
-    try {
-      Preconditions.checkNotNull(configuration.getHost());
-      InetAddress host = InetAddressFactory.createFromHostString(configuration.getHost());
-      if (host.isLoopbackAddress()) {
-        node =
-            org.ros.internal.node.Node.createPrivate(nodeName, configuration.getMasterUri(),
-                configuration.getXmlRpcPort(), configuration.getTcpRosPort());
-      } else {
-        node =
-            org.ros.internal.node.Node.createPublic(nodeName, configuration.getMasterUri(),
-                configuration.getHost(), configuration.getXmlRpcPort(),
-                configuration.getTcpRosPort());
-      }
-    } catch (Exception e) {
-      throw new RosInitException(e);
+    InetAddress host = InetAddressFactory.createFromHostString(configuration.getHost());
+    if (host.isLoopbackAddress()) {
+      node =
+          org.ros.internal.node.Node.createPrivate(nodeName, configuration.getMasterUri(),
+              configuration.getXmlRpcPort(), configuration.getTcpRosPort());
+    } else {
+      node =
+          org.ros.internal.node.Node
+              .createPublic(nodeName, configuration.getMasterUri(), configuration.getHost(),
+                  configuration.getXmlRpcPort(), configuration.getTcpRosPort());
     }
 
     // TODO(damonkohler): Move the creation and management of the RosoutLogger

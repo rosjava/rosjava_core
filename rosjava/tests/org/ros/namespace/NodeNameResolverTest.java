@@ -25,8 +25,7 @@ public class NodeNameResolverTest extends NameResolverTest {
   public void testResolveNameOneArg() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     GraphName nodeName = new GraphName("/node");
-    NodeNameResolver r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL, remappings),
-        nodeName);
+    NodeNameResolver r = NodeNameResolver.create(NameResolver.createDefault(remappings), nodeName);
 
     assertEquals("/foo", r.resolve("foo"));
     assertEquals("/foo", r.resolve("/foo"));
@@ -38,14 +37,14 @@ public class NodeNameResolverTest extends NameResolverTest {
     assertEquals("/node/foo", r.resolve("~/foo"));
 
     nodeName = new GraphName("/ns1/node");
-    r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL, remappings), nodeName);
+    r = NodeNameResolver.create(NameResolver.createDefault(remappings), nodeName);
     assertEquals("/ns1/node/foo", r.resolve("~foo"));
     assertEquals("/ns1/node/foo", r.resolve("~/foo"));
     assertEquals("/ns1/node/foo/bar", r.resolve("~/foo/bar"));
 
     // Test case where private name is not is same namespace as default
     nodeName = new GraphName("/ns2/node");
-    r = NodeNameResolver.create(new NameResolver("/ns1", remappings), nodeName);
+    r = NodeNameResolver.create(NameResolver.createFromString("/ns1", remappings), nodeName);
 
     assertEquals("/ns1/foo", r.resolve("foo"));
     assertEquals("/foo", r.resolve("/foo"));
@@ -55,19 +54,6 @@ public class NodeNameResolverTest extends NameResolverTest {
     assertEquals("/ns2/node/foo/bar", r.resolve("~foo/bar"));
     // https://code.ros.org/trac/ros/ticket/3044
     assertEquals("/ns2/node/foo", r.resolve("~/foo"));
-  }
-
-  @Override
-  public NameResolver createGlobalResolver() {
-    return createGlobalResolver(new HashMap<GraphName, GraphName>());
-  }
-
-  @Override
-  public NameResolver createGlobalResolver(HashMap<GraphName, GraphName> remappings) {
-    GraphName nodeName = new GraphName("/node");
-    NodeNameResolver r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL, remappings),
-        nodeName);
-    return r;
   }
 
 }
