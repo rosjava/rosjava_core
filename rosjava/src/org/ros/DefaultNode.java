@@ -78,14 +78,14 @@ public class DefaultNode implements Node {
     Preconditions.checkNotNull(name);
     this.configuration = configuration;
     NameResolver parentResolver = configuration.getParentResolver();
-    String baseName;
+    String basename;
     String nodeNameOverride = configuration.getNodeNameOverride();
     if (nodeNameOverride != null) {
-      baseName = nodeNameOverride;
+      basename = nodeNameOverride;
     } else {
-      baseName = name;
+      basename = name;
     }
-    nodeName = new GraphName(NameResolver.join(parentResolver.getNamespace().toString(), baseName));
+    nodeName = parentResolver.getNamespace().join(new GraphName(basename));
     resolver = NodeNameResolver.create(parentResolver, nodeName);
 
     // TODO(kwc): Implement simulated time.

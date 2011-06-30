@@ -16,7 +16,6 @@
 package org.ros.internal.namespace;
 
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.ros.exception.RosNameException;
 
@@ -148,6 +147,25 @@ public class GraphNameTest extends TestCase {
     assertEquals("~foo", GraphName.canonicalize("~foo/"));
     assertEquals("~foo", GraphName.canonicalize("~foo//"));
     assertEquals("~foo", GraphName.canonicalize("~/foo"));
+  }
+
+  @Test
+  public void testGetName() {
+    GraphName name = new GraphName("");
+    assertEquals("", name.getBasename().toString());
+    name = new GraphName("/");
+    assertEquals("", name.getBasename().toString());
+    name = new GraphName("/foo");
+    assertEquals("foo", name.getBasename().toString());
+    name = new GraphName("foo");
+    assertEquals("foo", name.getBasename().toString());
+    name = new GraphName("foo/");
+    // The trailing slash is removed when creating a GraphName.
+    assertEquals("foo", name.getBasename().toString());
+    name = new GraphName("/foo/bar");
+    assertEquals("bar", name.getBasename().toString());
+    name = new GraphName("foo/bar");
+    assertEquals("bar", name.getBasename().toString());
   }
 
 }
