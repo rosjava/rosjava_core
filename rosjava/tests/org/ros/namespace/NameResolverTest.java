@@ -37,21 +37,21 @@ public class NameResolverTest extends TestCase {
   public void testResolveNameOneArg() {
     NameResolver r = createGlobalResolver();
 
-    assertEquals("/foo", r.resolveName("foo"));
-    assertEquals("/foo", r.resolveName("/foo"));
-    assertEquals("/foo/bar", r.resolveName("foo/bar"));
+    assertEquals("/foo", r.resolve("foo"));
+    assertEquals("/foo", r.resolve("/foo"));
+    assertEquals("/foo/bar", r.resolve("foo/bar"));
 
     try {
-      assertEquals("/node/foo", r.resolveName("~foo"));
+      assertEquals("/node/foo", r.resolve("~foo"));
       fail("should have thrown RosNameException");
     } catch (RosNameException e) {
     }
 
     r = new NameResolver("/ns1", new HashMap<GraphName, GraphName>());
 
-    assertEquals("/ns1/foo", r.resolveName("foo"));
-    assertEquals("/foo", r.resolveName("/foo"));
-    assertEquals("/ns1/foo/bar", r.resolveName("foo/bar"));
+    assertEquals("/ns1/foo", r.resolve("foo"));
+    assertEquals("/foo", r.resolve("/foo"));
+    assertEquals("/ns1/foo/bar", r.resolve("foo/bar"));
   }
 
   @Test
@@ -60,38 +60,38 @@ public class NameResolverTest extends TestCase {
 
     NameResolver r = createGlobalResolver();
     try {
-      r.resolveName("foo", "bar");
+      r.resolve("foo", "bar");
       fail("should have raised");
     } catch (IllegalArgumentException e) {
     }
 
-    assertEquals(Namespace.GLOBAL, r.resolveName(Namespace.GLOBAL, ""));
-    assertEquals(Namespace.GLOBAL, r.resolveName(Namespace.GLOBAL, Namespace.GLOBAL));
-    assertEquals(Namespace.GLOBAL, r.resolveName("/anything/bar", Namespace.GLOBAL));
+    assertEquals(Namespace.GLOBAL, r.resolve(Namespace.GLOBAL, ""));
+    assertEquals(Namespace.GLOBAL, r.resolve(Namespace.GLOBAL, Namespace.GLOBAL));
+    assertEquals(Namespace.GLOBAL, r.resolve("/anything/bar", Namespace.GLOBAL));
 
-    assertEquals("/ns1/node", r.resolveName("/ns1/node", ""));
-    assertEquals(Namespace.GLOBAL, r.resolveName(Namespace.GLOBAL, ""));
+    assertEquals("/ns1/node", r.resolve("/ns1/node", ""));
+    assertEquals(Namespace.GLOBAL, r.resolve(Namespace.GLOBAL, ""));
 
     // relative namespaces get resolved to default namespace
-    assertEquals("/foo", r.resolveName("/", "foo"));
-    assertEquals("/foo", r.resolveName("/", "foo/"));
-    assertEquals("/foo", r.resolveName("/", "/foo"));
-    assertEquals("/foo", r.resolveName("/", "/foo/"));
+    assertEquals("/foo", r.resolve("/", "foo"));
+    assertEquals("/foo", r.resolve("/", "foo/"));
+    assertEquals("/foo", r.resolve("/", "/foo"));
+    assertEquals("/foo", r.resolve("/", "/foo/"));
 
-    assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "foo"));
-    assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2", "foo/"));
-    assertEquals("/ns1/ns2/foo", r.resolveName("/ns1/ns2/", "foo"));
-    assertEquals("/foo", r.resolveName("/ns1/ns2", "/foo/"));
+    assertEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2", "foo"));
+    assertEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2", "foo/"));
+    assertEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2/", "foo"));
+    assertEquals("/foo", r.resolve("/ns1/ns2", "/foo/"));
 
-    assertEquals("/ns1/ns2/ns3/foo", r.resolveName("/ns1/ns2/ns3", "foo"));
-    assertEquals("/ns1/ns2/ns3/foo", r.resolveName("/ns1/ns2/ns3/", "foo"));
-    assertEquals("/foo", r.resolveName("/", "/foo/"));
+    assertEquals("/ns1/ns2/ns3/foo", r.resolve("/ns1/ns2/ns3", "foo"));
+    assertEquals("/ns1/ns2/ns3/foo", r.resolve("/ns1/ns2/ns3/", "foo"));
+    assertEquals("/foo", r.resolve("/", "/foo/"));
 
-    assertEquals("/ns1/ns2/foo/bar", r.resolveName("/ns1/ns2", "foo/bar"));
-    assertEquals("/ns1/ns2/ns3/foo/bar", r.resolveName("/ns1/ns2/ns3", "foo/bar"));
+    assertEquals("/ns1/ns2/foo/bar", r.resolve("/ns1/ns2", "foo/bar"));
+    assertEquals("/ns1/ns2/ns3/foo/bar", r.resolve("/ns1/ns2/ns3", "foo/bar"));
 
     try {
-      assertEquals("/foo", r.resolveName("/", "~foo"));
+      assertEquals("/foo", r.resolve("/", "~foo"));
       fail("resolveName() with two args should never allow private names");
     } catch (RosNameException e) {
     }
@@ -123,11 +123,11 @@ public class NameResolverTest extends TestCase {
 
     NameResolver r = createGlobalResolver(remappings);
 
-    String n = r.resolveName("name");
+    String n = r.resolve("name");
     assertTrue(n.equals("/my/name"));
-    assertTrue(r.resolveName("/name").equals("/name"));
-    assertTrue(r.resolveName("foo").equals("/my/foo"));
-    assertTrue(r.resolveName("/my/name").equals("/my/name"));
+    assertTrue(r.resolve("/name").equals("/name"));
+    assertTrue(r.resolve("foo").equals("/my/foo"));
+    assertTrue(r.resolve("/my/name").equals("/my/name"));
   }
 
 }

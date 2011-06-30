@@ -29,20 +29,20 @@ public class GraphNameTest {
   @Test
   public void testGetName() {
     GraphName name = new GraphName("");
-    assertEquals("", name.getName().toString());
+    assertEquals("", name.getBasename().toString());
     name = new GraphName("/");
-    assertEquals("", name.getName().toString());
+    assertEquals("", name.getBasename().toString());
     name = new GraphName("/foo");
-    assertEquals("foo", name.getName().toString());
+    assertEquals("foo", name.getBasename().toString());
     name = new GraphName("foo");
-    assertEquals("foo", name.getName().toString());
+    assertEquals("foo", name.getBasename().toString());
     name = new GraphName("foo/");
     // The trailing slash is removed when creating a GraphName.
-    assertEquals("foo", name.getName().toString());
+    assertEquals("foo", name.getBasename().toString());
     name = new GraphName("/foo/bar");
-    assertEquals("bar", name.getName().toString());
+    assertEquals("bar", name.getBasename().toString());
     name = new GraphName("foo/bar");
-    assertEquals("bar", name.getName().toString());
+    assertEquals("bar", name.getBasename().toString());
   }
 
 }

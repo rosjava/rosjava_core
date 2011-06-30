@@ -127,27 +127,27 @@ public class GraphNameTest extends TestCase {
 
   @Test
   public void testCanonicalizeName() {
-    assertEquals("", GraphName.canonicalizeName(""));
-    assertEquals("/", GraphName.canonicalizeName("/"));
-    assertEquals("/", GraphName.canonicalizeName("//"));
-    assertEquals("/", GraphName.canonicalizeName("///"));
+    assertEquals("", GraphName.canonicalize(""));
+    assertEquals("/", GraphName.canonicalize("/"));
+    assertEquals("/", GraphName.canonicalize("//"));
+    assertEquals("/", GraphName.canonicalize("///"));
 
-    assertEquals("foo", GraphName.canonicalizeName("foo"));
-    assertEquals("foo", GraphName.canonicalizeName("foo/"));
-    assertEquals("foo", GraphName.canonicalizeName("foo//"));
+    assertEquals("foo", GraphName.canonicalize("foo"));
+    assertEquals("foo", GraphName.canonicalize("foo/"));
+    assertEquals("foo", GraphName.canonicalize("foo//"));
 
-    assertEquals("/foo", GraphName.canonicalizeName("/foo"));
-    assertEquals("/foo", GraphName.canonicalizeName("/foo/"));
-    assertEquals("/foo", GraphName.canonicalizeName("/foo//"));
+    assertEquals("/foo", GraphName.canonicalize("/foo"));
+    assertEquals("/foo", GraphName.canonicalize("/foo/"));
+    assertEquals("/foo", GraphName.canonicalize("/foo//"));
 
-    assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar"));
-    assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar/"));
-    assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar//"));
+    assertEquals("/foo/bar", GraphName.canonicalize("/foo/bar"));
+    assertEquals("/foo/bar", GraphName.canonicalize("/foo/bar/"));
+    assertEquals("/foo/bar", GraphName.canonicalize("/foo/bar//"));
 
-    assertEquals("~foo", GraphName.canonicalizeName("~foo"));
-    assertEquals("~foo", GraphName.canonicalizeName("~foo/"));
-    assertEquals("~foo", GraphName.canonicalizeName("~foo//"));
-    assertEquals("~foo", GraphName.canonicalizeName("~/foo"));
+    assertEquals("~foo", GraphName.canonicalize("~foo"));
+    assertEquals("~foo", GraphName.canonicalize("~foo/"));
+    assertEquals("~foo", GraphName.canonicalize("~foo//"));
+    assertEquals("~foo", GraphName.canonicalize("~/foo"));
   }
 
 }

@@ -28,33 +28,33 @@ public class NodeNameResolverTest extends NameResolverTest {
     NodeNameResolver r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL, remappings),
         nodeName);
 
-    assertEquals("/foo", r.resolveName("foo"));
-    assertEquals("/foo", r.resolveName("/foo"));
-    assertEquals("/foo/bar", r.resolveName("foo/bar"));
+    assertEquals("/foo", r.resolve("foo"));
+    assertEquals("/foo", r.resolve("/foo"));
+    assertEquals("/foo/bar", r.resolve("foo/bar"));
 
-    assertEquals("/node/foo", r.resolveName("~foo"));
-    assertEquals("/node/foo/bar", r.resolveName("~foo/bar"));
+    assertEquals("/node/foo", r.resolve("~foo"));
+    assertEquals("/node/foo/bar", r.resolve("~foo/bar"));
     // https://code.ros.org/trac/ros/ticket/3044
-    assertEquals("/node/foo", r.resolveName("~/foo"));
+    assertEquals("/node/foo", r.resolve("~/foo"));
 
     nodeName = new GraphName("/ns1/node");
     r = NodeNameResolver.create(new NameResolver(Namespace.GLOBAL, remappings), nodeName);
-    assertEquals("/ns1/node/foo", r.resolveName("~foo"));
-    assertEquals("/ns1/node/foo", r.resolveName("~/foo"));
-    assertEquals("/ns1/node/foo/bar", r.resolveName("~/foo/bar"));
+    assertEquals("/ns1/node/foo", r.resolve("~foo"));
+    assertEquals("/ns1/node/foo", r.resolve("~/foo"));
+    assertEquals("/ns1/node/foo/bar", r.resolve("~/foo/bar"));
 
     // Test case where private name is not is same namespace as default
     nodeName = new GraphName("/ns2/node");
     r = NodeNameResolver.create(new NameResolver("/ns1", remappings), nodeName);
 
-    assertEquals("/ns1/foo", r.resolveName("foo"));
-    assertEquals("/foo", r.resolveName("/foo"));
-    assertEquals("/ns1/foo/bar", r.resolveName("foo/bar"));
+    assertEquals("/ns1/foo", r.resolve("foo"));
+    assertEquals("/foo", r.resolve("/foo"));
+    assertEquals("/ns1/foo/bar", r.resolve("foo/bar"));
 
-    assertEquals("/ns2/node/foo", r.resolveName("~foo"));
-    assertEquals("/ns2/node/foo/bar", r.resolveName("~foo/bar"));
+    assertEquals("/ns2/node/foo", r.resolve("~foo"));
+    assertEquals("/ns2/node/foo/bar", r.resolve("~foo/bar"));
     // https://code.ros.org/trac/ros/ticket/3044
-    assertEquals("/ns2/node/foo", r.resolveName("~/foo"));
+    assertEquals("/ns2/node/foo", r.resolve("~/foo"));
   }
 
   @Override

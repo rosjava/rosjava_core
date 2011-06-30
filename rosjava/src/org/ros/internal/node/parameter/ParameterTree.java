@@ -58,19 +58,19 @@ public class ParameterTree implements org.ros.ParameterTree {
 
   @Override
   public boolean has(String name) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     return parameterClient.hasParam(resolvedName).getResult();
   }
 
   @Override
   public void delete(String name) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.deleteParam(resolvedName);
   }
 
   @Override
   public String search(String name) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     Response<String> response = parameterClient.searchParam(resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();
@@ -96,78 +96,78 @@ public class ParameterTree implements org.ros.ParameterTree {
 
   @Override
   public void set(String name, Boolean value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, Integer value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, Float value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value.doubleValue());
   }
 
   @Override
   public void set(String name, Double value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, String value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, Character value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, Byte value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, Short value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, Long value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value.intValue());
   }
 
   @Override
   public void set(String name, List<?> value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, Vector<?> value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, Map<?, ?> value) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   public Object get(String name) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     Response<Object> response = parameterClient.getParam(resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();
@@ -177,7 +177,7 @@ public class ParameterTree implements org.ros.ParameterTree {
   }
 
   public Object get(String name, Object defaultValue) throws RemoteException {
-    String resolvedName = resolver.resolveName(name);
+    String resolvedName = resolver.resolve(name);
     Response<Object> response = parameterClient.getParam(resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();

@@ -243,11 +243,11 @@ public class CommandLineLoaderTest {
 
       // Test that our remappings loaded.
       NameResolver r = nodeConfiguration.getParentResolver();
-      String n = r.resolveName("name");
+      String n = r.resolve("name");
       assertTrue(n.equals("/my/name"));
-      assertTrue(r.resolveName("/name").equals("/name"));
-      assertTrue(r.resolveName("foo").equals("/my/foo"));
-      assertTrue(r.resolveName("/my/name").equals("/my/name"));
+      assertTrue(r.resolve("/name").equals("/name"));
+      assertTrue(r.resolve("foo").equals("/my/foo"));
+      assertTrue(r.resolve("/my/name").equals("/my/name"));
     }
   }
 }

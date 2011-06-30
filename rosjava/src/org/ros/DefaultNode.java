@@ -269,7 +269,7 @@ public class DefaultNode implements Node {
    */
   @Override
   public String resolveName(String name) {
-    return resolver.resolveName(name);
+    return resolver.resolve(name);
   }
 
   /**

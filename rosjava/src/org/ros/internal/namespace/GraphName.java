@@ -28,6 +28,10 @@ import org.ros.namespace.Namespace;
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
+/**
+ * @author damonkohler
+ * 
+ */
 public class GraphName {
 
   private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
@@ -45,14 +49,25 @@ public class GraphName {
 
   /**
    * @param name
+   *          the {@link String} representation of this {@link GraphName}
    */
   public GraphName(String name) {
     Preconditions.checkNotNull(name);
-    validateName(name);
-    this.name = canonicalizeName(name);
+    validate(name);
+    this.name = canonicalize(name);
   }
 
-  public static boolean validateName(String name) {
+  /**
+   * Returns {@code true} if the supplied {@link String} can be used to
+   * construct a {@link GraphName}.
+   * 
+   * @param name
+   *          the {@link String} representation of a {@link GraphName} to
+   *          validate
+   * @return {@code true} if the supplied name is can be used to construct a
+   *         {@link GraphName}
+   */
+  public static boolean validate(String name) {
     // Allow empty names.
     if (name.length() > 0) {
       if (!name.matches(VALID_ROS_NAME_PATTERN)) {
@@ -67,10 +82,10 @@ public class GraphName {
    * trailing slashes. Canonical names can be global, private, or relative.
    * 
    * @param name
-   * @return the canonical name for this graph node
+   * @return the canonical name for this {@link GraphName}
    */
-  public static String canonicalizeName(String name) {
-    validateName(name);
+  public static String canonicalize(String name) {
+    Preconditions.checkArgument(validate(name));
     // Trim trailing slashes for canonical representation.
     while (!name.equals(Namespace.GLOBAL) && name.endsWith("/")) {
       name = name.substring(0, name.length() - 1);
@@ -101,11 +116,18 @@ public class GraphName {
   public boolean isGlobal() {
     return name.startsWith(Namespace.GLOBAL);
   }
-  
+
+  /**
+   * Returns {@code true} if this {@link GraphName} represents the root
+   * namespace.
+   */
   public boolean isRoot() {
     return name.equals(Namespace.GLOBAL);
   }
 
+  /**
+   * Returns {@code true} if this {@link GraphName} is empty.
+   */
   public boolean isEmpty() {
     return name.equals("");
   }
@@ -171,7 +193,10 @@ public class GraphName {
     }
   }
 
-  public GraphName getName() {
+  /**
+   * Returns a {@link GraphName} without the leading parent namespace.
+   */
+  public GraphName getBasename() {
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > -1) {
       if (slashIdx + 1 < name.length()) {
@@ -202,13 +227,13 @@ public class GraphName {
    * namespace into account; it simply strips any preceding characters for
    * global or private name representation.
    * 
-   * @return a string with the first
+   * @return a relative {@link GraphName}
    */
-  public String toRelative() {
+  public GraphName toRelative() {
     if (isPrivate() || isGlobal()) {
-      return name.substring(1);
+      return new GraphName(name.substring(1));
     } else {
-      return name;
+      return this;
     }
   }
 
@@ -229,11 +254,13 @@ public class GraphName {
   }
 
   /**
-   * Join two names together.
+   * Join this {@link GraphName} with another.
    * 
    * @param other
-   *          ROS name to join. If other is global, this will return other.
-   * @return A concatenation of the two names.
+   *          the {@link GraphName} to join with, if other is global, this will
+   *          return other.
+   * @return a {@link GraphName} representing the concatenation of this
+   *         {@link GraphName} and {@code other}
    */
   public GraphName join(GraphName other) {
     if (other.isGlobal() || isEmpty()) {

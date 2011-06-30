@@ -40,7 +40,7 @@ public class NameResolver {
 
   public NameResolver(String namespace, Map<GraphName, GraphName> remappings) {
     this.remappings = Collections.unmodifiableMap(remappings);
-    this.namespace = GraphName.canonicalizeName(namespace);
+    this.namespace = GraphName.canonicalize(namespace);
   }
 
   public String getNamespace() {
@@ -58,7 +58,7 @@ public class NameResolver {
    * @param name
    * @return the fully resolved name relative to the given namespace.
    */
-  public String resolveName(String namespace, String name) {
+  public String resolve(String namespace, String name) {
     GraphName ns = lookUpRemapping(new GraphName(namespace));
     Preconditions.checkArgument(ns.isGlobal(), "namespace must be global: " + ns.toString());
     GraphName n = lookUpRemapping(new GraphName(name));
@@ -119,8 +119,8 @@ public class NameResolver {
    * @param name Name to resolve
    * @return The name resolved relative to the default namespace.
    */
-  public String resolveName(String name) {
-    return resolveName(getNamespace(), name);
+  public String resolve(String name) {
+    return resolve(getNamespace(), name);
   }
 
   /**
@@ -132,7 +132,7 @@ public class NameResolver {
    * @return {@link NameResolver} relative to the current namespace.
    */
   public NameResolver createResolver(String name) {
-    String resolverNamespace = resolveName(name);
+    String resolverNamespace = resolve(name);
     return new NameResolver(resolverNamespace, remappings);
   }
 }

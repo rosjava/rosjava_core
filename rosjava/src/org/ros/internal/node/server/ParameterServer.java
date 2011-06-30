@@ -42,7 +42,7 @@ public class ParameterServer {
     Stack<String> parts = new Stack<String>();
     GraphName tip = name;
     while (!tip.isRoot()) {
-      parts.add(tip.getName().toString());
+      parts.add(tip.getBasename().toString());
       tip = tip.getParent();
     }
     return parts;
