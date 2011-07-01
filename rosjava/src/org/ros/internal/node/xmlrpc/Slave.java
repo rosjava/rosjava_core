@@ -99,17 +99,17 @@ public interface Slave extends Node {
    *          New parameter value.
    * @return ignore
    */
-  public List<Object> paramUpdate(String callerId, String key, Boolean value);
+  public List<Object> paramUpdate(String callerId, String key, boolean value);
 
-  public List<Object> paramUpdate(String callerId, String key, Character value);
+  public List<Object> paramUpdate(String callerId, String key, char value);
 
-  public List<Object> paramUpdate(String callerId, String key, Byte value);
+  public List<Object> paramUpdate(String callerId, String key, byte value);
 
-  public List<Object> paramUpdate(String callerId, String key, Short value);
+  public List<Object> paramUpdate(String callerId, String key, short value);
 
-  public List<Object> paramUpdate(String callerId, String key, Integer value);
+  public List<Object> paramUpdate(String callerId, String key, int value);
 
-  public List<Object> paramUpdate(String callerId, String key, Double value);
+  public List<Object> paramUpdate(String callerId, String key, double value);
 
   public List<Object> paramUpdate(String callerId, String key, String value);
 

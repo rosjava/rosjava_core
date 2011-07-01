@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -170,31 +169,7 @@ public class MasterImpl implements Master, ParameterServer {
   }
 
   @Override
-  public List<Object> setParam(String callerId, String key, Character value) {
-    parameterServer.set(new GraphName(key), value);
-    return Response.createSuccess("Success", null).toList();
-  }
-
-  @Override
-  public List<Object> setParam(String callerId, String key, Byte value) {
-    parameterServer.set(new GraphName(key), value);
-    return Response.createSuccess("Success", null).toList();
-  }
-
-  @Override
-  public List<Object> setParam(String callerId, String key, Short value) {
-    parameterServer.set(new GraphName(key), value);
-    return Response.createSuccess("Success", null).toList();
-  }
-
-  @Override
   public List<Object> setParam(String callerId, String key, List<?> value) {
-    parameterServer.set(new GraphName(key), value);
-    return Response.createSuccess("Success", null).toList();
-  }
-
-  @Override
-  public List<Object> setParam(String callerId, String key, Vector<?> value) {
     parameterServer.set(new GraphName(key), value);
     return Response.createSuccess("Success", null).toList();
   }

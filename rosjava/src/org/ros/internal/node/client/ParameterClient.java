@@ -83,21 +83,6 @@ public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.Par
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, Character parameterValue) {
-    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<Void> setParam(String parameterName, Byte parameterValue) {
-    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<Void> setParam(String parameterName, Short parameterValue) {
-    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
-        new VoidResultFactory());
-  }
-
   public Response<Void> setParam(String parameterName, List<?> parameterValue) {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
         new VoidResultFactory());

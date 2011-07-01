@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -153,43 +152,7 @@ public class ParameterServer {
     });
   }
 
-  public void set(final GraphName name, final char value) {
-    update(name, value, new Updater() {
-      @Override
-      public void update(SlaveClient client) {
-        client.paramUpdate(name.toString(), value);
-      }
-    });
-  }
-
-  public void set(final GraphName name, final byte value) {
-    update(name, value, new Updater() {
-      @Override
-      public void update(SlaveClient client) {
-        client.paramUpdate(name.toString(), value);
-      }
-    });
-  }
-
-  public void set(final GraphName name, final short value) {
-    update(name, value, new Updater() {
-      @Override
-      public void update(SlaveClient client) {
-        client.paramUpdate(name.toString(), value);
-      }
-    });
-  }
-
   public void set(final GraphName name, final List<?> value) {
-    update(name, value, new Updater() {
-      @Override
-      public void update(SlaveClient client) {
-        client.paramUpdate(name.toString(), value);
-      }
-    });
-  }
-
-  public void set(final GraphName name, final Vector<?> value) {
     update(name, value, new Updater() {
       @Override
       public void update(SlaveClient client) {

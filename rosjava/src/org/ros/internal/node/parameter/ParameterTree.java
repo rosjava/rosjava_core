@@ -25,9 +25,9 @@ import org.ros.internal.node.xmlrpc.ParameterServer;
 import org.ros.namespace.NameResolver;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * Provides access to the ROS {@link ParameterServer}.
@@ -107,12 +107,6 @@ public class ParameterTree implements org.ros.ParameterTree {
   }
 
   @Override
-  public void set(String name, Float value) {
-    String resolvedName = resolver.resolve(name);
-    parameterClient.setParam(resolvedName, value.doubleValue());
-  }
-
-  @Override
   public void set(String name, Double value) {
     String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
@@ -125,37 +119,7 @@ public class ParameterTree implements org.ros.ParameterTree {
   }
 
   @Override
-  public void set(String name, Character value) {
-    String resolvedName = resolver.resolve(name);
-    parameterClient.setParam(resolvedName, value);
-  }
-
-  @Override
-  public void set(String name, Byte value) {
-    String resolvedName = resolver.resolve(name);
-    parameterClient.setParam(resolvedName, value);
-  }
-
-  @Override
-  public void set(String name, Short value) {
-    String resolvedName = resolver.resolve(name);
-    parameterClient.setParam(resolvedName, value);
-  }
-
-  @Override
-  public void set(String name, Long value) {
-    String resolvedName = resolver.resolve(name);
-    parameterClient.setParam(resolvedName, value.intValue());
-  }
-
-  @Override
   public void set(String name, List<?> value) {
-    String resolvedName = resolver.resolve(name);
-    parameterClient.setParam(resolvedName, value);
-  }
-
-  @Override
-  public void set(String name, Vector<?> value) {
     String resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
@@ -176,8 +140,7 @@ public class ParameterTree implements org.ros.ParameterTree {
     }
   }
 
-  // TODO(damonkohler): Create one of these per type.
-  public Object get(String name, Object defaultValue) {
+  private Object get(String name, Object defaultValue) {
     String resolvedName = resolver.resolve(name);
     Response<Object> response = parameterClient.getParam(resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
@@ -198,36 +161,6 @@ public class ParameterTree implements org.ros.ParameterTree {
   }
 
   @Override
-  public char getChar(String name) {
-    return (Character) get(name);
-  }
-
-  @Override
-  public char getChar(String name, char defaultValue) {
-    return (Character) get(name, defaultValue);
-  }
-
-  @Override
-  public byte getByte(String name) {
-    return (Byte) get(name);
-  }
-
-  @Override
-  public byte getByte(String name, byte defaultValue) {
-    return (Byte) get(name, defaultValue);
-  }
-
-  @Override
-  public short getShort(String name) {
-    return (Short) get(name);
-  }
-
-  @Override
-  public short getShort(String name, short defaultValue) {
-    return (Short) get(name, defaultValue);
-  }
-
-  @Override
   public int getInteger(String name) {
     return (Integer) get(name);
   }
@@ -235,26 +168,6 @@ public class ParameterTree implements org.ros.ParameterTree {
   @Override
   public int getInteger(String name, int defaultValue) {
     return (Integer) get(name, defaultValue);
-  }
-
-  @Override
-  public long getLong(String name) {
-    return ((Integer) get(name)).longValue();
-  }
-
-  @Override
-  public long getLong(String name, long defaultValue) {
-    return ((Integer) get(name, defaultValue)).longValue();
-  }
-
-  @Override
-  public float getFloat(String name) {
-    return ((Double) get(name)).floatValue();
-  }
-
-  @Override
-  public float getFloat(String name, float defaultValue) {
-    return ((Double) get(name, defaultValue)).floatValue();
   }
 
   @Override
@@ -279,22 +192,16 @@ public class ParameterTree implements org.ros.ParameterTree {
 
   @Override
   public List<?> getList(String name) {
-    return (List<?>) get(name);
+    return Arrays.asList((Object[]) get(name));
   }
 
   @Override
   public List<?> getList(String name, List<?> defaultValue) {
-    return (List<?>) get(name, defaultValue);
-  }
-
-  @Override
-  public Vector<?> getVector(String name) {
-    return (Vector<?>) get(name);
-  }
-
-  @Override
-  public Vector<?> getVector(String name, Vector<?> defaultValue) {
-    return (Vector<?>) get(name, defaultValue);
+    Object possibleList = get(name, defaultValue);
+    if (possibleList instanceof List<?>) {
+      return (List<?>) possibleList;
+    }
+    return Arrays.asList((Object[]) possibleList);
   }
 
   @Override

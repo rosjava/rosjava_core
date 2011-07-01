@@ -105,7 +105,7 @@ public class ParameterServerTestNode implements NodeMain {
 
       // Set parameters
       param.set(setResolver.resolve("string"), string_m.data);
-      param.set(setResolver.resolve("int"), int_m.data);
+      param.set(setResolver.resolve("int"), (int) int_m.data);
       param.set(setResolver.resolve("float"), float_m.data);
       param.set(setResolver.resolve("bool"), bool_m.data);
       param.set(setResolver.resolve("composite"), composite_map);

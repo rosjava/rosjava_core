@@ -18,7 +18,6 @@ package org.ros;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -29,29 +28,9 @@ public interface ParameterTree {
 
   boolean getBoolean(String name, boolean defaultValue);
 
-  char getChar(String name);
-
-  char getChar(String name, char defaultValue);
-
-  byte getByte(String name);
-
-  byte getByte(String name, byte defaultValue);
-
-  short getShort(String name);
-
-  short getShort(String name, short defaultValue);
-
   int getInteger(String name);
 
   int getInteger(String name, int defaultValue);
-
-  long getLong(String name);
-
-  long getLong(String name, long defaultValue);
-
-  float getFloat(String name);
-
-  float getFloat(String name, float defaultValue);
 
   double getDouble(String name);
 
@@ -65,35 +44,19 @@ public interface ParameterTree {
 
   List<?> getList(String name, List<?> defaultValue);
 
-  Vector<?> getVector(String name);
-
-  Vector<?> getVector(String name, Vector<?> defaultValue);
-
   Map<?, ?> getMap(String name);
 
   Map<?, ?> getMap(String name, Map<?, ?> defaultValue);
 
   void set(String name, Boolean value);
 
-  void set(String name, Character value);
-
-  void set(String name, Byte value);
-
-  void set(String name, Short value);
-
   void set(String name, Integer value);
-
-  void set(String name, Long value);
-
-  void set(String name, Float value);
 
   void set(String name, Double value);
 
   void set(String name, String value);
 
   void set(String name, List<?> value);
-
-  void set(String name, Vector<?> value);
 
   void set(String name, Map<?, ?> value);
 

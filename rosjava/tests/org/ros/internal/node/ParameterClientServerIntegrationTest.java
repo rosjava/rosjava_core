@@ -20,8 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.ParameterListener;
@@ -43,17 +45,24 @@ import java.util.concurrent.TimeUnit;
 public class ParameterClientServerIntegrationTest {
 
   private MasterServer masterServer;
+  private Node node;
+  private ParameterTree parameters;
 
   @Before
   public void setup() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
+    node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
+    parameters = node.createParameterTree(NodeNameResolver.createDefault());
+  }
+
+  @After
+  public void tearDown() {
+    node.shutdown();
   }
 
   @Test
   public void testSetAndGetStrings() {
-    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-    ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
     parameters.set("/foo/bar", "baz");
     assertEquals("baz", parameters.getString("/foo/bar"));
     parameters.set("/foo/bar", "baz");
@@ -61,67 +70,45 @@ public class ParameterClientServerIntegrationTest {
     Map<String, Object> expected = Maps.newHashMap();
     expected.put("bar", "baz");
     assertEquals(expected, parameters.getMap("/foo"));
-    node.shutdown();
   }
 
   @Test
-  public void testSetAndGetInts() {
-    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-    ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
-    parameters.set("/foo/bar", 42);
-    assertEquals(42, parameters.getInteger("/foo/bar"));
-    node.shutdown();
-  }
-
-  @Test
-  public void testSetAndGetFloats() {
-    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-    ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
-    parameters.set("/foo/bar", 0.42f);
-    assertEquals(0.42f, parameters.getFloat("/foo/bar"), 0.01);
-    node.shutdown();
-  }
-
-  @Test
-  public void testSetAndGetDoubles() {
-    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-    ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
-    parameters.set("/foo/bar", 0.42d);
-    assertEquals(0.42d, parameters.getDouble("/foo/bar"), 0.01);
-    node.shutdown();
-  }
-
-  @Test
-  public void testSetAndGetLongs() {
-    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-    ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
-    parameters.set("/foo/bar", 42l);
-    assertEquals(42l, parameters.getLong("/foo/bar"));
-    node.shutdown();
+  public void testSetAndGetAllTypes() {
+    String name = "/foo/bar";
+    parameters.set(name, true);
+    assertTrue(parameters.getBoolean(name));
+    parameters.set(name, 42);
+    assertEquals(42, parameters.getInteger(name));
+    parameters.set(name, 0.42d);
+    assertEquals(0.42d, parameters.getDouble(name), 0.01);
+    parameters.set(name, "foo");
+    assertEquals("foo", parameters.getString(name));
+    List<String> expectedList = Lists.newArrayList("foo", "bar", "baz");
+    parameters.set(name, expectedList);
+    assertEquals(expectedList, parameters.getList(name));
+    Map<String, String> expectedMap = Maps.newHashMap();
+    expectedMap.put("foo", "bar");
+    expectedMap.put("baz", "bloop");
+    parameters.set(name, expectedMap);
+    assertEquals(expectedMap, parameters.getMap(name));
   }
 
   @Test
   public void testDeleteAndHas() {
-    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-    ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
     parameters.set("/foo/bar", "baz");
     assertTrue(parameters.has("/foo/bar"));
     parameters.delete("/foo/bar");
     assertFalse(parameters.has("/foo/bar"));
-    node.shutdown();
   }
 
   @Test
   public void testGetNames() {
-    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-    ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
     parameters.set("/foo/bar", "baz");
     parameters.set("/bloop", "doh");
     List<String> names = parameters.getNames();
     assertEquals(2, names.size());
     assertTrue(names.contains("/foo/bar"));
     assertTrue(names.contains("/bloop"));
-    node.shutdown();
   }
 
   @Test

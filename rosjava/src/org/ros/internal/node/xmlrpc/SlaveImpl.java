@@ -116,32 +116,32 @@ public class SlaveImpl implements Slave {
   }
 
   @Override
-  public List<Object> paramUpdate(String callerId, String key, Boolean value) {
+  public List<Object> paramUpdate(String callerId, String key, boolean value) {
     return parameterUpdate(key, value);
   }
 
   @Override
-  public List<Object> paramUpdate(String callerId, String key, Character value) {
+  public List<Object> paramUpdate(String callerId, String key, char value) {
     return parameterUpdate(key, value);
   }
 
   @Override
-  public List<Object> paramUpdate(String callerId, String key, Byte value) {
+  public List<Object> paramUpdate(String callerId, String key, byte value) {
     return parameterUpdate(key, value);
   }
 
   @Override
-  public List<Object> paramUpdate(String callerId, String key, Short value) {
+  public List<Object> paramUpdate(String callerId, String key, short value) {
     return parameterUpdate(key, value);
   }
 
   @Override
-  public List<Object> paramUpdate(String callerId, String key, Integer value) {
+  public List<Object> paramUpdate(String callerId, String key, int value) {
     return parameterUpdate(key, value);
   }
 
   @Override
-  public List<Object> paramUpdate(String callerId, String key, Double value) {
+  public List<Object> paramUpdate(String callerId, String key, double value) {
     return parameterUpdate(key, value);
   }
 
