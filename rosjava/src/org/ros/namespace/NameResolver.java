@@ -16,7 +16,6 @@
 
 package org.ros.namespace;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import org.ros.exception.RosNameException;
@@ -72,8 +71,7 @@ public class NameResolver {
    * @param name
    * @return the fully resolved name relative to the given namespace.
    */
-  @VisibleForTesting
-  GraphName resolve(GraphName namespace, GraphName name) {
+  public GraphName resolve(GraphName namespace, GraphName name) {
     GraphName remappedNamespace = lookUpRemapping(namespace);
     Preconditions.checkArgument(remappedNamespace.isGlobal(),
         "Namespace must be global. Tried to resolve: " + remappedNamespace);
@@ -88,6 +86,10 @@ public class NameResolver {
       throw new RosNameException("Cannot resolve ~private names in arbitrary namespaces.");
     }
     throw new RosNameException("Unable to resolve name: " + name);
+  }
+
+  public String resolve(String namespace, String name) {
+    return resolve(new GraphName(namespace), new GraphName(name)).toString();
   }
 
   /**
