@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 
 import org.ros.MessageDeserializer;
 import org.ros.MessageSerializer;
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.ServiceMessageDefinition;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.server.MasterServer;
@@ -31,7 +30,6 @@ import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.service.ServiceServer;
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -58,8 +56,6 @@ public class ServiceFactory {
    * @param responseBuilder
    *          the {@link ServiceResponseBuilder} that is used to build responses
    * @return a {@link ServiceServer} instance
-   * @throws RemoteException
-   * @throws XmlRpcTimeoutException
    */
   @SuppressWarnings("unchecked")
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServer(

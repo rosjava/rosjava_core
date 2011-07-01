@@ -24,15 +24,18 @@ import com.google.common.collect.Maps;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.ParameterListener;
 import org.ros.ParameterTree;
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.namespace.NodeNameResolver;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -40,7 +43,7 @@ import java.util.Map;
 public class ParameterClientServerIntegrationTest {
 
   private MasterServer masterServer;
-  
+
   @Before
   public void setup() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
@@ -48,7 +51,7 @@ public class ParameterClientServerIntegrationTest {
   }
 
   @Test
-  public void testSetAndGetStrings() throws RemoteException {
+  public void testSetAndGetStrings() {
     Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
     ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
     parameters.set("/foo/bar", "baz");
@@ -62,7 +65,7 @@ public class ParameterClientServerIntegrationTest {
   }
 
   @Test
-  public void testSetAndGetInts() throws RemoteException {
+  public void testSetAndGetInts() {
     Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
     ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
     parameters.set("/foo/bar", 42);
@@ -71,7 +74,7 @@ public class ParameterClientServerIntegrationTest {
   }
 
   @Test
-  public void testSetAndGetFloats() throws RemoteException {
+  public void testSetAndGetFloats() {
     Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
     ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
     parameters.set("/foo/bar", 0.42f);
@@ -80,7 +83,7 @@ public class ParameterClientServerIntegrationTest {
   }
 
   @Test
-  public void testSetAndGetDoubles() throws RemoteException {
+  public void testSetAndGetDoubles() {
     Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
     ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
     parameters.set("/foo/bar", 0.42d);
@@ -89,7 +92,7 @@ public class ParameterClientServerIntegrationTest {
   }
 
   @Test
-  public void testSetAndGetLongs() throws RemoteException {
+  public void testSetAndGetLongs() {
     Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
     ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
     parameters.set("/foo/bar", 42l);
@@ -98,7 +101,7 @@ public class ParameterClientServerIntegrationTest {
   }
 
   @Test
-  public void testDeleteAndHas() throws RemoteException {
+  public void testDeleteAndHas() {
     Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
     ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
     parameters.set("/foo/bar", "baz");
@@ -106,6 +109,45 @@ public class ParameterClientServerIntegrationTest {
     parameters.delete("/foo/bar");
     assertFalse(parameters.has("/foo/bar"));
     node.shutdown();
+  }
+
+  @Test
+  public void testGetNames() {
+    Node node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
+    ParameterTree parameters = node.createParameterTree(NodeNameResolver.createDefault());
+    parameters.set("/foo/bar", "baz");
+    parameters.set("/bloop", "doh");
+    List<String> names = parameters.getNames();
+    assertEquals(2, names.size());
+    assertTrue(names.contains("/foo/bar"));
+    assertTrue(names.contains("/bloop"));
+    node.shutdown();
+  }
+
+  @Test
+  public void testParameterPubSub() throws InterruptedException {
+    Node subscriber = Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
+    Node publisher = Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0, 0);
+
+    ParameterTree subscriberParameters =
+        subscriber.createParameterTree(NodeNameResolver.createDefault());
+    final CountDownLatch latch = new CountDownLatch(1);
+    subscriberParameters.addParameterListener("/foo/bar", new ParameterListener() {
+      @Override
+      public void onNewValue(Object value) {
+        assertEquals(42, value);
+        latch.countDown();
+      }
+    });
+
+    ParameterTree publisherParameters =
+        publisher.createParameterTree(NodeNameResolver.createDefault());
+    publisherParameters.set("/foo/bar", 42);
+
+    assertTrue(latch.await(1, TimeUnit.SECONDS));
+
+    subscriber.shutdown();
+    publisher.shutdown();
   }
 
 }

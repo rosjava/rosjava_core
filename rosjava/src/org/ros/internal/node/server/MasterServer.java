@@ -24,7 +24,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
@@ -33,7 +32,6 @@ import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.xmlrpc.MasterImpl;
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
 import java.net.URI;
 import java.util.List;
@@ -48,6 +46,7 @@ public class MasterServer extends NodeServer {
   private final Map<String, ServiceIdentifier> services;
   private final Multimap<String, PublisherIdentifier> publishers;
   private final Multimap<String, SubscriberIdentifier> subscribers;
+  private final GraphName masterName;
 
   public MasterServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
     super(bindAddress, advertiseAddress);
@@ -56,6 +55,7 @@ public class MasterServer extends NodeServer {
     publishers = Multimaps.synchronizedMultimap(HashMultimap.<String, PublisherIdentifier>create());
     subscribers =
         Multimaps.synchronizedMultimap(HashMultimap.<String, SubscriberIdentifier>create());
+    masterName = new GraphName("/master");
   }
 
   public void start() {
@@ -81,16 +81,15 @@ public class MasterServer extends NodeServer {
     slaves.put(name, slaveIdentifier);
   }
 
-  private void publisherUpdate(String topicName) throws XmlRpcTimeoutException, RemoteException {
-    for (SlaveIdentifier slaveIdentifier : slaves.values()) {
-      // TODO(damonkohler): Should the master server know its node name here?
-      SlaveClient client = new SlaveClient(GraphName.createUnknown(), slaveIdentifier.getUri());
-      List<URI> publisherUris = Lists.newArrayList();
-      synchronized (publishers) {
-        for (PublisherIdentifier publisherIdentifier : publishers.get(topicName)) {
-          publisherUris.add(publisherIdentifier.getUri());
-        }
+  private void publisherUpdate(String topicName) {
+    List<URI> publisherUris = Lists.newArrayList();
+    synchronized (publishers) {
+      for (PublisherIdentifier publisherIdentifier : publishers.get(topicName)) {
+        publisherUris.add(publisherIdentifier.getUri());
       }
+    }
+    for (SlaveIdentifier slaveIdentifier : slaves.values()) {
+      SlaveClient client = new SlaveClient(masterName, slaveIdentifier.getUri());
       client.publisherUpdate(topicName, publisherUris);
     }
   }
@@ -125,11 +124,8 @@ public class MasterServer extends NodeServer {
    * Register the caller as a publisher the topic.
    * 
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
-   * @throws RemoteException
-   * @throws XmlRpcTimeoutException
    */
-  public List<SubscriberIdentifier> registerPublisher(PublisherIdentifier publisher)
-      throws XmlRpcTimeoutException, RemoteException {
+  public List<SubscriberIdentifier> registerPublisher(PublisherIdentifier publisher) {
     publishers.put(publisher.getTopicName().toString(), publisher);
     addSlave(publisher.getSlaveIdentifier());
     publisherUpdate(publisher.getTopicName().toString());

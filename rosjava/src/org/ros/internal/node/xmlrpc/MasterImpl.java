@@ -18,7 +18,6 @@ package org.ros.internal.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
@@ -30,6 +29,8 @@ import org.ros.internal.node.topic.TopicIdentifier;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -78,7 +79,7 @@ public class MasterImpl implements Master, ParameterServer {
 
   @Override
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) throws XmlRpcTimeoutException, RemoteException {
+      String callerApi) {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     PublisherIdentifier publisherIdentifier =
         new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(new GraphName(topic)));
@@ -220,7 +221,14 @@ public class MasterImpl implements Master, ParameterServer {
 
   @Override
   public List<Object> subscribeParam(String callerId, String callerApi, String key) {
-    throw new UnsupportedOperationException();
+    parameterServer.subscribe(new GraphName(key),
+        SlaveIdentifier.createFromStrings(callerId, callerApi));
+    Object value = parameterServer.get(new GraphName(key));
+    if (value == null) {
+      // Must return an empty map as the value of an unset parameter.
+      value = new HashMap<String, Object>();
+    }
+    return Response.createSuccess("Success", value).toList();
   }
 
   @Override
@@ -241,7 +249,12 @@ public class MasterImpl implements Master, ParameterServer {
 
   @Override
   public List<Object> getParamNames(String callerId) {
-    throw new UnsupportedOperationException();
+    Collection<GraphName> names = parameterServer.getNames();
+    List<String> stringNames = Lists.newArrayList();
+    for (GraphName name : names) {
+      stringNames.add(name.toString());
+    }
+    return Response.createSuccess("Success", stringNames).toList();
   }
 
 }

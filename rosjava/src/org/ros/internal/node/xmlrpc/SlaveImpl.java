@@ -33,7 +33,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -105,13 +107,62 @@ public class SlaveImpl implements Slave {
     return Response.createSuccess("Success", publications).toList();
   }
 
-  @Override
-  public List<Object> paramUpdate(String callerId, String parameterKey, Object parameterValue) {
+  private List<Object> parameterUpdate(String parameterKey, Object parameterValue) {
     if (slave.paramUpdate(parameterKey, parameterValue) > 0) {
       return Response.createSuccess("Success", null).toList();
     }
     return Response.createError("No subscribers for parameter key \"" + parameterKey + "\".", null)
         .toList();
+  }
+
+  @Override
+  public List<Object> paramUpdate(String callerId, String key, Boolean value) {
+    return parameterUpdate(key, value);
+  }
+
+  @Override
+  public List<Object> paramUpdate(String callerId, String key, Character value) {
+    return parameterUpdate(key, value);
+  }
+
+  @Override
+  public List<Object> paramUpdate(String callerId, String key, Byte value) {
+    return parameterUpdate(key, value);
+  }
+
+  @Override
+  public List<Object> paramUpdate(String callerId, String key, Short value) {
+    return parameterUpdate(key, value);
+  }
+
+  @Override
+  public List<Object> paramUpdate(String callerId, String key, Integer value) {
+    return parameterUpdate(key, value);
+  }
+
+  @Override
+  public List<Object> paramUpdate(String callerId, String key, Double value) {
+    return parameterUpdate(key, value);
+  }
+
+  @Override
+  public List<Object> paramUpdate(String callerId, String key, String value) {
+    return parameterUpdate(key, value);
+  }
+
+  @Override
+  public List<Object> paramUpdate(String callerId, String key, List<?> value) {
+    return parameterUpdate(key, value);
+  }
+
+  @Override
+  public List<Object> paramUpdate(String callerId, String key, Vector<?> value) {
+    return parameterUpdate(key, value);
+  }
+
+  @Override
+  public List<Object> paramUpdate(String callerId, String key, Map<?, ?> value) {
+    return parameterUpdate(key, value);
   }
 
   @Override

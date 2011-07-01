@@ -225,8 +225,7 @@ public class Node {
     return slaveServer.getAddress();
   }
   
-  public ServiceIdentifier lookupService(GraphName serviceName) throws RemoteException,
-      XmlRpcTimeoutException {
+  public ServiceIdentifier lookupService(GraphName serviceName) {
     Response<URI> response =
         masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
     if (response.getStatusCode() == StatusCode.SUCCESS) {

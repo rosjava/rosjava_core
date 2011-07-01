@@ -18,7 +18,6 @@ package org.ros.internal.node.client;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.ProtocolDescriptionResultFactory;
@@ -27,12 +26,13 @@ import org.ros.internal.node.response.TopicDefinitionListResultFactory;
 import org.ros.internal.node.response.UriResultFactory;
 import org.ros.internal.node.response.VoidResultFactory;
 import org.ros.internal.node.topic.TopicDefinition;
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.ProtocolDescription;
 
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -54,7 +54,7 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
     throw new UnsupportedOperationException();
   }
 
-  public Response<URI> getMasterUri() throws RemoteException, XmlRpcTimeoutException {
+  public Response<URI> getMasterUri() {
     return Response.fromListChecked(node.getMasterUri(nodeName.toString()), new UriResultFactory());
   }
 
@@ -62,28 +62,81 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
     throw new UnsupportedOperationException();
   }
 
-  public Response<Integer> getPid() throws RemoteException, XmlRpcTimeoutException {
+  public Response<Integer> getPid() {
     return Response.fromListChecked(node.getPid(nodeName.toString()), new IntegerResultFactory());
   }
 
-  public Response<List<TopicDefinition>> getSubscriptions() throws RemoteException,
-      XmlRpcTimeoutException {
+  public Response<List<TopicDefinition>> getSubscriptions() {
     return Response.fromListChecked(node.getSubscriptions(nodeName.toString()),
         new TopicDefinitionListResultFactory());
   }
 
-  public Response<List<TopicDefinition>> getPublications() throws RemoteException,
-      XmlRpcTimeoutException {
+  public Response<List<TopicDefinition>> getPublications() {
     return Response.fromListChecked(node.getPublications(nodeName.toString()),
         new TopicDefinitionListResultFactory());
   }
 
-  public List<Object> paramUpdate(String parameterKey, String parameterValue) {
-    throw new UnsupportedOperationException();
+  public Response<Void> paramUpdate(String parameterKey, Boolean parameterValue) {
+    return Response.fromListChecked(
+        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+        new VoidResultFactory());
   }
 
-  public Response<Void> publisherUpdate(String topic, Collection<URI> publisherUris)
-      throws XmlRpcTimeoutException, RemoteException {
+  public Response<Void> paramUpdate(String parameterKey, Character parameterValue) {
+    return Response.fromListChecked(
+        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> paramUpdate(String parameterKey, Byte parameterValue) {
+    return Response.fromListChecked(
+        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> paramUpdate(String parameterKey, Short parameterValue) {
+    return Response.fromListChecked(
+        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> paramUpdate(String parameterKey, Integer parameterValue) {
+    return Response.fromListChecked(
+        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> paramUpdate(String parameterKey, Double parameterValue) {
+    return Response.fromListChecked(
+        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> paramUpdate(String parameterKey, String parameterValue) {
+    return Response.fromListChecked(
+        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> paramUpdate(String parameterKey, List<?> parameterValue) {
+    return Response.fromListChecked(
+        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> paramUpdate(String parameterKey, Vector<?> parameterValue) {
+    return Response.fromListChecked(
+        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> paramUpdate(String parameterKey, Map<?, ?> parameterValue) {
+    return Response.fromListChecked(
+        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+        new VoidResultFactory());
+  }
+
+  public Response<Void> publisherUpdate(String topic, Collection<URI> publisherUris) {
     List<String> publishers = Lists.newArrayList();
     for (URI uri : publisherUris) {
       publishers.add(uri.toString());
@@ -94,9 +147,9 @@ public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> 
   }
 
   public Response<ProtocolDescription> requestTopic(String topic,
-      Collection<String> requestedProtocols) throws RemoteException, XmlRpcTimeoutException {
+      Collection<String> requestedProtocols) {
     return Response.fromListChecked(node.requestTopic(nodeName.toString(), topic,
-        new Object[][] {requestedProtocols.toArray()}), new ProtocolDescriptionResultFactory());
+        new Object[][] { requestedProtocols.toArray() }), new ProtocolDescriptionResultFactory());
   }
 
 }

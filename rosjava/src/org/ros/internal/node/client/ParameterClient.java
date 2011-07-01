@@ -16,7 +16,6 @@
 
 package org.ros.internal.node.client;
 
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.node.response.BooleanResultFactory;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.ObjectResultFactory;
@@ -59,91 +58,84 @@ public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.Par
     nodeName = slaveIdentifier.getName().toString();
   }
 
-  public Response<Object> getParam(String parameterName) throws RemoteException {
+  public Response<Object> getParam(String parameterName) {
     return Response.fromListCheckedFailure(node.getParam(nodeName, parameterName),
         new ObjectResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, Boolean parameterValue)
-      throws RemoteException {
+  public Response<Void> setParam(String parameterName, Boolean parameterValue) {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, Integer parameterValue)
-      throws RemoteException {
+  public Response<Void> setParam(String parameterName, Integer parameterValue) {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, Double parameterValue)
-      throws RemoteException {
+  public Response<Void> setParam(String parameterName, Double parameterValue) {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, String parameterValue)
-      throws RemoteException {
+  public Response<Void> setParam(String parameterName, String parameterValue) {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, Character parameterValue)
-      throws RemoteException {
+  public Response<Void> setParam(String parameterName, Character parameterValue) {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, Byte parameterValue) throws RemoteException {
+  public Response<Void> setParam(String parameterName, Byte parameterValue) {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, Short parameterValue) throws RemoteException {
+  public Response<Void> setParam(String parameterName, Short parameterValue) {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, List<?> parameterValue)
-      throws RemoteException {
+  public Response<Void> setParam(String parameterName, List<?> parameterValue) {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
         new VoidResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, Map<?, ?> parameterValue)
-      throws RemoteException {
+  public Response<Void> setParam(String parameterName, Map<?, ?> parameterValue) {
     return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
         new VoidResultFactory());
   }
 
-  public Response<String> searchParam(String parameterName) throws RemoteException {
+  public Response<String> searchParam(String parameterName) {
     return Response.fromListCheckedFailure(node.searchParam(nodeName, parameterName),
         new StringResultFactory());
   }
 
-  public Response<Object> subscribeParam(String parameterName) throws RemoteException {
+  public Response<Object> subscribeParam(String parameterName) {
     return Response.fromListChecked(
         node.subscribeParam(nodeName, slaveIdentifier.getUri().toString(), parameterName),
         new ObjectResultFactory());
   }
 
-  public Response<Integer> unsubscribeParam(String parameterName) throws RemoteException {
+  public Response<Integer> unsubscribeParam(String parameterName) {
     return Response.fromListChecked(
         node.unsubscribeParam(nodeName, slaveIdentifier.getUri().toString(), parameterName),
         new IntegerResultFactory());
   }
 
-  public Response<Boolean> hasParam(String parameterName) throws RemoteException {
+  public Response<Boolean> hasParam(String parameterName) {
     return Response.fromListChecked(node.hasParam(nodeName, parameterName),
         new BooleanResultFactory());
   }
 
-  public Response<Void> deleteParam(String parameterName) throws RemoteException {
+  public Response<Void> deleteParam(String parameterName) {
     return Response.fromListChecked(node.deleteParam(nodeName, parameterName),
         new VoidResultFactory());
   }
 
-  public Response<List<String>> getParamNames() throws RemoteException {
+  public Response<List<String>> getParamNames() {
     return Response.fromListChecked(node.getParamNames(nodeName), new StringListResultFactory());
   }
 

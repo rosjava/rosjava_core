@@ -88,7 +88,7 @@ public class ParameterServerTest {
   public void testSetAndGetFloat() {
     GraphName name = new GraphName("/foo/bar");
     server.set(name, 0.42f);
-    assertEquals(0.42f, server.get(name));
+    assertEquals(0.42, (Double) server.get(name), 0.1);
   }
 
   @Test

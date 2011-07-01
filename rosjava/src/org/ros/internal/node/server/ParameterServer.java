@@ -17,25 +17,43 @@
 package org.ros.internal.node.server;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ros.internal.namespace.GraphName;
+import org.ros.internal.node.client.SlaveClient;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ParameterServer {
 
+  private static final Log log = LogFactory.getLog(ParameterServer.class);
+
   private final Map<String, Object> tree;
+  private final Multimap<GraphName, SlaveIdentifier> subscribers;
+  private final GraphName masterName;
 
   public ParameterServer() {
-    tree = Maps.newHashMap();
+    tree = Maps.newConcurrentMap();
+    subscribers = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, SlaveIdentifier>create());
+    masterName = new GraphName("/master");
+  }
+
+  public void subscribe(GraphName name, SlaveIdentifier slaveIdentifier) {
+    subscribers.put(name, slaveIdentifier);
   }
 
   private Stack<String> getGraphNameParts(GraphName name) {
@@ -63,7 +81,7 @@ public class ParameterServer {
   }
 
   @SuppressWarnings("unchecked")
-  public void set(GraphName name, Object value) {
+  private void setValue(GraphName name, Object value) {
     Preconditions.checkArgument(name.isGlobal());
     Stack<String> parts = getGraphNameParts(name);
     Map<String, Object> subtree = tree;
@@ -79,6 +97,114 @@ public class ParameterServer {
         subtree = newSubtree;
       }
     }
+  }
+
+  private interface Updater {
+    void update(SlaveClient client);
+  }
+
+  private <T> void update(GraphName name, T value, Updater updater) {
+    setValue(name, value);
+    synchronized (subscribers) {
+      for (SlaveIdentifier slaveIdentifier : subscribers.get(name)) {
+        SlaveClient client = new SlaveClient(masterName, slaveIdentifier.getUri());
+        try {
+          updater.update(client);
+        } catch (Exception e) {
+          log.error(e);
+        }
+      }
+    }
+  }
+
+  public void set(final GraphName name, final boolean value) {
+    update(name, value, new Updater() {
+      @Override
+      public void update(SlaveClient client) {
+        client.paramUpdate(name.toString(), value);
+      }
+    });
+  }
+
+  public void set(final GraphName name, final int value) {
+    update(name, value, new Updater() {
+      @Override
+      public void update(SlaveClient client) {
+        client.paramUpdate(name.toString(), value);
+      }
+    });
+  }
+
+  public void set(final GraphName name, final double value) {
+    update(name, value, new Updater() {
+      @Override
+      public void update(SlaveClient client) {
+        client.paramUpdate(name.toString(), value);
+      }
+    });
+  }
+
+  public void set(final GraphName name, final String value) {
+    update(name, value, new Updater() {
+      @Override
+      public void update(SlaveClient client) {
+        client.paramUpdate(name.toString(), value);
+      }
+    });
+  }
+
+  public void set(final GraphName name, final char value) {
+    update(name, value, new Updater() {
+      @Override
+      public void update(SlaveClient client) {
+        client.paramUpdate(name.toString(), value);
+      }
+    });
+  }
+
+  public void set(final GraphName name, final byte value) {
+    update(name, value, new Updater() {
+      @Override
+      public void update(SlaveClient client) {
+        client.paramUpdate(name.toString(), value);
+      }
+    });
+  }
+
+  public void set(final GraphName name, final short value) {
+    update(name, value, new Updater() {
+      @Override
+      public void update(SlaveClient client) {
+        client.paramUpdate(name.toString(), value);
+      }
+    });
+  }
+
+  public void set(final GraphName name, final List<?> value) {
+    update(name, value, new Updater() {
+      @Override
+      public void update(SlaveClient client) {
+        client.paramUpdate(name.toString(), value);
+      }
+    });
+  }
+
+  public void set(final GraphName name, final Vector<?> value) {
+    update(name, value, new Updater() {
+      @Override
+      public void update(SlaveClient client) {
+        client.paramUpdate(name.toString(), value);
+      }
+    });
+  }
+
+  public void set(final GraphName name, final Map<?, ?> value) {
+    update(name, value, new Updater() {
+      @Override
+      public void update(SlaveClient client) {
+        client.paramUpdate(name.toString(), value);
+      }
+    });
   }
 
   @SuppressWarnings("unchecked")

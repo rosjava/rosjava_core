@@ -207,21 +207,6 @@ public class GraphName {
     return this;
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    return name.equals(obj.toString());
-  }
-
-  @Override
-  public int hashCode() {
-    return name.hashCode();
-  }
-
-  @Override
-  public String toString() {
-    return name;
-  }
-
   /**
    * Convert name to a relative name representation. This does not take any
    * namespace into account; it simply strips any preceding characters for
@@ -270,6 +255,21 @@ public class GraphName {
     } else {
       return new GraphName(toString() + "/" + other.toString());
     }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return name.equals(obj.toString());
+  }
+
+  @Override
+  public int hashCode() {
+    return name.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return name;
   }
 
 }
