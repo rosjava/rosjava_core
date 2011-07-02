@@ -3,6 +3,14 @@
 
   <echo message="Properties: ${properties}"/>
 
+  <fail message="properties file does not exist: ${properties}">
+     <condition>
+       <not>
+         <available file="${properties}" property="properties.present"/>
+       </not>
+     </condition>
+   </fail>
+
   <property file="${properties}"/>
 
   <property name="base" location="${ros.home}/rosjava" />
@@ -37,7 +45,8 @@
   </target>
 
   <target name="gen-msg" depends="check-gen-msg-skip" unless="gen-msg.skip">
-    <exec executable="${ros.rosjava.dir}/scripts/java_msgs.py">
+    <mkdir dir="${gen-msg}" />
+    <exec executable="${ros.bootstrap.scripts.dir}/java_msgs.py">
       <arg value="-o ${gen-msg}" />
       <arg value="${ros.package}" />
     </exec>
@@ -48,7 +57,8 @@
   </target>
 
   <target name="gen-srv" depends="check-gen-srv-skip" unless="gen-srv.skip">
-    <exec executable="${ros.rosjava.dir}/scripts/java_srvs.py">
+    <mkdir dir="${gen-srv}" />
+    <exec executable="${ros.bootstrap.scripts.dir}/java_srvs.py">
       <arg value="-o ${gen-srv}" />
       <arg value="${ros.package}" />
     </exec>

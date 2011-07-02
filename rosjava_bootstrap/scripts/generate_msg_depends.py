@@ -48,6 +48,7 @@ PKG = 'rosjava_bootstrap'
 
 _ros_home = roslib.rosenv.get_ros_home()
 _pkg_dir = roslib.packages.get_pkg_dir(PKG)
+_scripts_dir = os.path.join(_pkg_dir, 'scripts')
 _bootstrap_jar = os.path.join(_pkg_dir, 'dist', 'rosjava-bootstrap.jar')
 _build_file = os.path.join(_pkg_dir, 'scripts', 'build-msg.xml')
 _properties_dir = os.path.join(_ros_home, 'rosjava', 'properties')
@@ -107,7 +108,8 @@ def _generate_msgs(rospack, package, up_to_date):
     with open(properties_file, 'w') as f:
         f.write("""ros.package=%s
 ros.home=%s
-ros.classpath=%s"""%(package, _ros_home, classpath))
+ros.bootstrap.scripts.dir=%s
+ros.classpath=%s"""%(package, _ros_home, _scripts_dir, classpath))
 
     # call ant to build everything
     # - add to up_to_date regardless to prevent infinite loop

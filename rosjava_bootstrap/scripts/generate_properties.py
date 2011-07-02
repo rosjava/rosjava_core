@@ -93,7 +93,10 @@ def generate_properties_main(argv=None):
     package = argv[1]
     if not use_eclipse:
         sys.stdout.write('ros.home=%s\n'%(roslib.rosenv.get_ros_home()))
+        sys.stdout.write('ros.rosjava.dir=%s\n'%(roslib.packages.get_pkg_dir('rosjava')))
         sys.stdout.write('ros.classpath=%s\n'%(get_classpath(package).replace(':', '\:')))
+        # re-encode for ant <fileset includes="${ros.jarfileset}">
+        sys.stdout.write('ros.jarfileset=%s\n'%(get_classpath(package).replace(':', ',')))
         sys.stdout.write('ros.test_results=%s\n'%(os.path.join(roslib.rosenv.get_test_results_dir(), package)))
     else:
         sys.stdout.write("""<?xml version="1.0" encoding="UTF-8"?>
