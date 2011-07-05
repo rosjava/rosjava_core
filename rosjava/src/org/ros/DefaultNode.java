@@ -197,7 +197,7 @@ public class DefaultNode implements Node {
       String serviceName, String serviceType) {
     ServiceIdentifier identifier = lookupService(serviceName);
     if (identifier == null) {
-      throw new RosRuntimeException("No such service.");
+      throw new RosRuntimeException("No such service: " + serviceName + " of type " + serviceType);
     }
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);

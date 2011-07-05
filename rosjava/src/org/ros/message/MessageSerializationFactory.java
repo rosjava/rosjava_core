@@ -12,14 +12,18 @@ public class MessageSerializationFactory implements org.ros.MessageSerialization
     return new MessageSerializer<MessageType>();
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <MessageType> MessageDeserializer<MessageType> createDeserializer(String messageType) {
+    return createDeserializer(messageType, "org.ros.message.");
+  }
+
+  @SuppressWarnings("unchecked")
+  public <MessageType> MessageDeserializer<MessageType> createDeserializer(String messageType, String classpath) {
     Preconditions.checkArgument(messageType.split("/").length == 2);
     Class<MessageType> messageClass;
     try {
       messageClass =
-          (Class<MessageType>) Class.forName("org.ros.message." + messageType.replace('/', '.'));
+        (Class<MessageType>) Class.forName(classpath + messageType.replace('/', '.'));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -29,25 +33,25 @@ public class MessageSerializationFactory implements org.ros.MessageSerialization
   @Override
   public <MessageType> org.ros.MessageSerializer<MessageType> createServiceRequestSerializer(
       String serviceType) {
-    return createSerializer("srv." + serviceType + "$Request");
+    return createSerializer("org.ros.service." + serviceType + "$Request");
   }
 
   @Override
   public <MessageType> org.ros.MessageDeserializer<MessageType> createServiceRequestDeserializer(
       String serviceType) {
-    return createDeserializer("srv." + serviceType + "$Request");
+    return createDeserializer(serviceType + "$Request", "org.ros.service.");
   }
 
   @Override
   public <MessageType> org.ros.MessageSerializer<MessageType> createServiceResponseSerializer(
       String serviceType) {
-    return createSerializer("srv." + serviceType + "$Response");
+    return createSerializer("org.ros.service." + serviceType + "$Response");
   }
 
   @Override
   public <MessageType> org.ros.MessageDeserializer<MessageType> createServiceResponseDeserializer(
       String serviceType) {
-    return createDeserializer("srv." + serviceType + "$Response");
+    return createDeserializer(serviceType + "$Response", "org.ros.service.");
   }
 
 }

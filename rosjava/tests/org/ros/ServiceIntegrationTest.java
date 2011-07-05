@@ -27,7 +27,7 @@ import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
-import org.ros.message.srv.beginner_tutorials.AddTwoInts;
+import org.ros.service.test_ros.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class ServiceIntegrationTest {
 
   private static final String SERVICE_NAME = "/add_two_ints";
-  private static final String SERVICE_TYPE = "beginner_tutorials/AddTwoInts";
+  private static final String SERVICE_TYPE = "test_ros/AddTwoInts";
 
   private MasterServer masterServer;
   private NodeConfiguration configuration;
