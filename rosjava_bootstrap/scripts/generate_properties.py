@@ -48,11 +48,10 @@ def resolve_pathelements(pathelements):
     # TODO: potentially recognize keys like ROS_HOME
     return [os.path.abspath(p) for p in pathelements]
 
-def get_classpath(package, include_package=False):
+def get_classpath(rospack, package, include_package=False):
     """
     @param include_package: include library entries of self on path
     """
-    rospack = roslib.packages.ROSPackages()
     depends = rospack.depends([package])[package]
     if include_package:
         depends.append(package)
@@ -99,6 +98,40 @@ def get_eclipse_src_entries(package):
             print >> sys.stderr, "Invalid <%s> tag in package %s"%(tag, pkg)
     return elements
 
+_stack_version_cache = {}
+def get_stack_version_cached(s):
+    if s in _stack_version_cache:
+        return _stack_version_cache[s]
+    else:
+        _stack_version_cache[s] = val = roslib.stacks.get_stack_version(s)
+        return val
+
+def get_package_version(package):
+    # could optimize stack_of() calculation by maintaining a cache
+    s = roslib.stacks.stack_of(package)
+    return get_stack_version_cached(s)
+    
+def generate_ros_properties(package):
+    rospack = roslib.packages.ROSPackages()
+    depends = rospack.depends([package])[package]
+
+    props = {}
+    props['ros.home'] = roslib.rosenv.get_ros_home()
+
+    # add dir props for every package we depend on
+    for p in depends:
+        props['ros.pkg.%s.dir'%(p)] = roslib.packages.get_pkg_dir(p)
+        props['ros.pkg.%s.version'%(p)] = get_package_version(p)
+        
+    props['ros.classpath'] = get_classpath(rospack, package).replace(':', '\:')
+    # re-encode for ant <fileset includes="${ros.jarfileset}">
+    props['ros.jarfileset'] = get_classpath(rospack, package).replace(':', ',')
+
+    props['ros.test_results'] = os.path.join(roslib.rosenv.get_test_results_dir(), package)
+    keys = props.keys()
+    for k in sorted(keys):
+        sys.stdout.write('%s=%s\n'%(k, props[k]))
+
 def generate_properties_main(argv=None):
     if argv is None:
         argv = sys.argv
@@ -110,13 +143,9 @@ def generate_properties_main(argv=None):
         usage()
     package = argv[1]
     if not use_eclipse:
-        sys.stdout.write('ros.home=%s\n'%(roslib.rosenv.get_ros_home()))
-        sys.stdout.write('ros.rosjava.dir=%s\n'%(roslib.packages.get_pkg_dir('rosjava')))
-        sys.stdout.write('ros.classpath=%s\n'%(get_classpath(package).replace(':', '\:')))
-        # re-encode for ant <fileset includes="${ros.jarfileset}">
-        sys.stdout.write('ros.jarfileset=%s\n'%(get_classpath(package).replace(':', ',')))
-        sys.stdout.write('ros.test_results=%s\n'%(os.path.join(roslib.rosenv.get_test_results_dir(), package)))
+        generate_ros_properties(package)
     else:
+        rospack = roslib.packages.ROSPackages()
         sys.stdout.write("""<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 """)
@@ -126,7 +155,7 @@ def generate_properties_main(argv=None):
         sys.stdout.write("""\t<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 """)
-        for p in get_classpath(package, include_package=True).split(':'):
+        for p in get_classpath(rospack, package, include_package=True).split(':'):
             if p:
                 sys.stdout.write('\t<classpathentry kind="lib" path="%s"/>\n'%(p))
         sys.stdout.write("""\t<classpath kind="output" path="build"/>
