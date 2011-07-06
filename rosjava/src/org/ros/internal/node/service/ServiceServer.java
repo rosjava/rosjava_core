@@ -22,13 +22,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
-import org.ros.MessageDeserializer;
-import org.ros.MessageSerializer;
-import org.ros.internal.message.ServiceMessageDefinition;
+import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;

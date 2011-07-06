@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.namespace.DefaultGraphName;
+import org.ros.Ros;
 import org.ros.namespace.GraphName;
 
 /**
@@ -27,7 +27,7 @@ public class TopicIdentifier {
   private final GraphName name;
   
   public static TopicIdentifier createFromString(String topicName) {
-    return new TopicIdentifier(new DefaultGraphName(topicName));
+    return new TopicIdentifier(Ros.createGraphName(topicName));
   }
 
   public TopicIdentifier(GraphName name) {

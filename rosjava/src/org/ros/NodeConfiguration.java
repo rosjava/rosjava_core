@@ -17,10 +17,9 @@
 package org.ros;
 
 import org.ros.internal.namespace.DefaultNameResolver;
-
-import org.ros.namespace.NameResolver;
-
 import org.ros.internal.node.address.Address;
+import org.ros.message.MessageSerializationFactory;
+import org.ros.namespace.NameResolver;
 
 import java.io.File;
 import java.net.URI;
@@ -61,7 +60,7 @@ public class NodeConfiguration {
     configuration.setHost(DEFAULT_HOST);
     configuration.setTcpRosPort(0); // OS determined free port.
     configuration.setXmlRpcPort(0); // OS determined free port.
-    configuration.setMessageSerializationFactory(new org.ros.message.MessageSerializationFactory());
+    configuration.setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
     return configuration;
   }
 

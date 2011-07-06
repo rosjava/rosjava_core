@@ -17,6 +17,8 @@
 package org.ros;
 
 import org.ros.exception.RosInitException;
+import org.ros.internal.node.DefaultNode;
+import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
 
 /**

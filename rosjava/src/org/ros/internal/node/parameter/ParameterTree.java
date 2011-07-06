@@ -16,14 +16,13 @@
 
 package org.ros.internal.node.parameter;
 
-import org.ros.namespace.NameResolver;
-
 import org.ros.ParameterListener;
 import org.ros.internal.node.client.ParameterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.xmlrpc.ParameterServer;
+import org.ros.namespace.NameResolver;
 
 import java.net.URI;
 import java.util.Arrays;

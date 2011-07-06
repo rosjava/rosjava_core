@@ -21,10 +21,10 @@ import com.google.common.base.Preconditions;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
-import org.ros.MessageDeserializer;
 import org.ros.ServiceResponseListener;
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.node.response.StatusCode;
+import org.ros.message.MessageDeserializer;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;

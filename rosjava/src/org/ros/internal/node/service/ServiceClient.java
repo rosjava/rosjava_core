@@ -20,9 +20,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-import org.ros.namespace.GraphName;
-
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ClientBootstrap;
@@ -39,12 +36,13 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.ros.MessageDeserializer;
-import org.ros.MessageSerializer;
 import org.ros.ServiceResponseListener;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
+import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageSerializer;
+import org.ros.namespace.GraphName;
 
 import java.net.InetSocketAddress;
 import java.net.URI;

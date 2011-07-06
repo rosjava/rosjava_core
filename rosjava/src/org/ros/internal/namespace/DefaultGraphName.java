@@ -18,6 +18,7 @@ package org.ros.internal.namespace;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.Ros;
 import org.ros.exception.RosNameException;
 import org.ros.namespace.GraphName;
 
@@ -178,19 +179,19 @@ public class DefaultGraphName implements GraphName {
   @Override
   public GraphName getParent() {
     if (name.length() == 0) {
-      return new DefaultGraphName("");
+      return Ros.createGraphName("");
     }
     if (name.equals(GraphName.ROOT)) {
-      return new DefaultGraphName(GraphName.ROOT);
+      return Ros.createGraphName(GraphName.ROOT);
     }
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > 1) {
-      return new DefaultGraphName(name.substring(0, slashIdx));
+      return Ros.createGraphName(name.substring(0, slashIdx));
     } else {
       if (isGlobal()) {
-        return new DefaultGraphName(GraphName.ROOT);
+        return Ros.createGraphName(GraphName.ROOT);
       } else {
-        return new DefaultGraphName("");
+        return Ros.createGraphName("");
       }
     }
   }
@@ -203,9 +204,9 @@ public class DefaultGraphName implements GraphName {
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > -1) {
       if (slashIdx + 1 < name.length()) {
-        return new DefaultGraphName(name.substring(slashIdx + 1));
+        return Ros.createGraphName(name.substring(slashIdx + 1));
       }
-      return new DefaultGraphName("");
+      return Ros.createGraphName("");
     }
     return this;
   }
@@ -220,7 +221,7 @@ public class DefaultGraphName implements GraphName {
   @Override
   public GraphName toRelative() {
     if (isPrivate() || isGlobal()) {
-      return new DefaultGraphName(name.substring(1));
+      return Ros.createGraphName(name.substring(1));
     } else {
       return this;
     }
@@ -237,9 +238,9 @@ public class DefaultGraphName implements GraphName {
     if (isGlobal()) {
       return this;
     } else if (isPrivate()) {
-      return new DefaultGraphName(GraphName.ROOT + name.substring(1));
+      return Ros.createGraphName(GraphName.ROOT + name.substring(1));
     } else {
-      return new DefaultGraphName(GraphName.ROOT + name);
+      return Ros.createGraphName(GraphName.ROOT + name);
     }
   }
 
@@ -259,7 +260,7 @@ public class DefaultGraphName implements GraphName {
     } else if (isRoot()) {
       return other.toGlobal();
     } else {
-      return new DefaultGraphName(toString() + "/" + other.toString());
+      return Ros.createGraphName(toString() + "/" + other.toString());
     }
   }
 

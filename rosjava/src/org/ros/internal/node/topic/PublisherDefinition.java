@@ -18,10 +18,8 @@ package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.namespace.GraphName;
-
-
 import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.namespace.GraphName;
 
 import java.net.URI;
 

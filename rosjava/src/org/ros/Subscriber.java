@@ -16,6 +16,8 @@
 
 package org.ros;
 
+import org.ros.message.MessageListener;
+
 import java.util.concurrent.TimeUnit;
 
 /**

@@ -16,10 +16,10 @@
 
 package org.ros.internal.manifest;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public interface XmlSerializable {
   

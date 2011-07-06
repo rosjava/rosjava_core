@@ -19,10 +19,6 @@ package org.ros.internal.node;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
-import org.ros.internal.node.service.ServiceServer;
-
-import org.ros.internal.node.service.ServiceListener;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.client.MasterClient;
@@ -30,6 +26,8 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.service.ServiceListener;
+import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.Subscriber;

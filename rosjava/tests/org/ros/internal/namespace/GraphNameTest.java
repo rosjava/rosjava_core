@@ -17,6 +17,7 @@ package org.ros.internal.namespace;
 
 import junit.framework.TestCase;
 import org.junit.Test;
+import org.ros.Ros;
 import org.ros.exception.RosNameException;
 import org.ros.namespace.GraphName;
 
@@ -31,14 +32,14 @@ public class GraphNameTest extends TestCase {
     try {
       String[] canonical = {"abc", "ab7", "/abc", "/abc/bar", "/", "~garage", "~foo/bar"};
       for (String c : canonical) {
-        assertEquals(c, new DefaultGraphName(c).toString());
+        assertEquals(c, Ros.createGraphName(c).toString());
       }
       // test canonicalization
-      assertEquals("", new DefaultGraphName("").toString());
-      assertEquals("/", new DefaultGraphName("/").toString());
-      assertEquals("/foo", new DefaultGraphName("/foo/").toString());
-      assertEquals("foo", new DefaultGraphName("foo/").toString());
-      assertEquals("foo/bar", new DefaultGraphName("foo/bar/").toString());
+      assertEquals("", Ros.createGraphName("").toString());
+      assertEquals("/", Ros.createGraphName("/").toString());
+      assertEquals("/foo", Ros.createGraphName("/foo/").toString());
+      assertEquals("foo", Ros.createGraphName("foo/").toString());
+      assertEquals("foo/bar", Ros.createGraphName("foo/bar/").toString());
     } catch (IllegalArgumentException e) {
       fail("These names should be valid" + e.toString());
     }
@@ -50,7 +51,7 @@ public class GraphNameTest extends TestCase {
         {"", "abc", "ab7", "ab7_kdfJKSDJFGkd", "/abc", "/", "~private", "~private/something",
             "/global", "/global/", "/global/local"};
     for (String v : valid) {
-      new DefaultGraphName(v);
+      Ros.createGraphName(v);
     }
   }
 
@@ -59,7 +60,7 @@ public class GraphNameTest extends TestCase {
     final String[] illegalChars = {"=", "-", "(", ")", "*", "%", "^"};
     for (String i : illegalChars) {
       try {
-        new DefaultGraphName("good" + i);
+        Ros.createGraphName("good" + i);
         fail("bad name not caught: " + i);
       } catch (RosNameException e) {
       }
@@ -67,7 +68,7 @@ public class GraphNameTest extends TestCase {
     final String[] illegalNames = {"/~private", "5foo"};
     for (String i : illegalNames) {
       try {
-        new DefaultGraphName(i);
+        Ros.createGraphName(i);
         fail("bad name not caught" + i);
       } catch (RosNameException e) {
       }
@@ -78,11 +79,11 @@ public class GraphNameTest extends TestCase {
   public void testIsGlobal() {
     final String[] tests = {"/", "/global", "/global2"};
     for (String t : tests) {
-      assertTrue(new DefaultGraphName(t).isGlobal());
+      assertTrue(Ros.createGraphName(t).isGlobal());
     }
     final String[] fails = {"", "not_global", "not/global"};
     for (String t : fails) {
-      assertFalse(new DefaultGraphName(t).isGlobal());
+      assertFalse(Ros.createGraphName(t).isGlobal());
     }
   }
 
@@ -90,40 +91,40 @@ public class GraphNameTest extends TestCase {
   public void testIsPrivate() {
     String[] tests = {"~name", "~name/sub"};
     for (String t : tests) {
-      assertTrue(new DefaultGraphName(t).isPrivate());
+      assertTrue(Ros.createGraphName(t).isPrivate());
     }
     String[] fails = {"", "not_private", "not/private", "/"};
     for (String f : fails) {
-      assertFalse(new DefaultGraphName(f).isPrivate());
+      assertFalse(Ros.createGraphName(f).isPrivate());
     }
   }
 
   @Test
   public void testIsRelative() {
-    GraphName n = new DefaultGraphName("name");
+    GraphName n = Ros.createGraphName("name");
     assertTrue(n.isRelative());
-    n = new DefaultGraphName("/name");
+    n = Ros.createGraphName("/name");
     assertFalse(n.isRelative());
   }
 
   @Test
   public void testGetParent() {
-    GraphName global = new DefaultGraphName("/");
-    GraphName empty = new DefaultGraphName("");
+    GraphName global = Ros.createGraphName("/");
+    GraphName empty = Ros.createGraphName("");
     // parent of empty is empty, just like dirname
-    assertEquals(empty, new DefaultGraphName("").getParent());
+    assertEquals(empty, Ros.createGraphName("").getParent());
     // parent of global is global, just like dirname
-    assertEquals(global, new DefaultGraphName("/").getParent().toString());
+    assertEquals(global, Ros.createGraphName("/").getParent().toString());
 
     // test with global names
-    assertEquals(new DefaultGraphName("/wg"), new DefaultGraphName("/wg/name").getParent());
-    assertEquals(new DefaultGraphName("/wg"), new DefaultGraphName("/wg/name/").getParent());
-    assertEquals(global, new DefaultGraphName("/wg/").getParent());
-    assertEquals(global, new DefaultGraphName("/wg").getParent());
+    assertEquals(Ros.createGraphName("/wg"), Ros.createGraphName("/wg/name").getParent());
+    assertEquals(Ros.createGraphName("/wg"), Ros.createGraphName("/wg/name/").getParent());
+    assertEquals(global, Ros.createGraphName("/wg/").getParent());
+    assertEquals(global, Ros.createGraphName("/wg").getParent());
 
     // test with relative names
-    assertEquals(new DefaultGraphName("wg"), new DefaultGraphName("wg/name").getParent());
-    assertEquals(empty, new DefaultGraphName("wg/").getParent());
+    assertEquals(Ros.createGraphName("wg"), Ros.createGraphName("wg/name").getParent());
+    assertEquals(empty, Ros.createGraphName("wg/").getParent());
   }
 
   @Test
@@ -153,30 +154,30 @@ public class GraphNameTest extends TestCase {
 
   @Test
   public void testGetName() {
-    GraphName name = new DefaultGraphName("");
+    GraphName name = Ros.createGraphName("");
     assertEquals("", name.getBasename().toString());
-    name = new DefaultGraphName("/");
+    name = Ros.createGraphName("/");
     assertEquals("", name.getBasename().toString());
-    name = new DefaultGraphName("/foo");
+    name = Ros.createGraphName("/foo");
     assertEquals("foo", name.getBasename().toString());
-    name = new DefaultGraphName("foo");
+    name = Ros.createGraphName("foo");
     assertEquals("foo", name.getBasename().toString());
-    name = new DefaultGraphName("foo/");
+    name = Ros.createGraphName("foo/");
     // The trailing slash is removed when creating a GraphName.
     assertEquals("foo", name.getBasename().toString());
-    name = new DefaultGraphName("/foo/bar");
+    name = Ros.createGraphName("/foo/bar");
     assertEquals("bar", name.getBasename().toString());
-    name = new DefaultGraphName("foo/bar");
+    name = Ros.createGraphName("foo/bar");
     assertEquals("bar", name.getBasename().toString());
   }
 
   @Test
   public void testJoin() {
-    assertEquals(new DefaultGraphName("/bar"), new DefaultGraphName("/").join(new DefaultGraphName("bar")));
-    assertEquals(new DefaultGraphName("bar"), new DefaultGraphName("").join(new DefaultGraphName("bar")));
-    assertEquals(new DefaultGraphName("foo/bar"), new DefaultGraphName("foo").join(new DefaultGraphName("bar")));
-    assertEquals(new DefaultGraphName("/foo/bar"), new DefaultGraphName("/foo").join(new DefaultGraphName("bar")));
-    assertEquals(new DefaultGraphName("/bar"), new DefaultGraphName("/foo").join(new DefaultGraphName("/bar")));
+    assertEquals(Ros.createGraphName("/bar"), Ros.createGraphName("/").join(Ros.createGraphName("bar")));
+    assertEquals(Ros.createGraphName("bar"), Ros.createGraphName("").join(Ros.createGraphName("bar")));
+    assertEquals(Ros.createGraphName("foo/bar"), Ros.createGraphName("foo").join(Ros.createGraphName("bar")));
+    assertEquals(Ros.createGraphName("/foo/bar"), Ros.createGraphName("/foo").join(Ros.createGraphName("bar")));
+    assertEquals(Ros.createGraphName("/bar"), Ros.createGraphName("/foo").join(Ros.createGraphName("/bar")));
   }
 
 }

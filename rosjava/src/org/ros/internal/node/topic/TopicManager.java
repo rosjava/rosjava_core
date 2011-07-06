@@ -19,7 +19,7 @@ package org.ros.internal.node.topic;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-import org.ros.internal.namespace.DefaultGraphName;
+import org.ros.Ros;
 import org.ros.namespace.GraphName;
 
 import java.util.List;
@@ -48,19 +48,19 @@ public class TopicManager {
   }
 
   public boolean hasSubscriber(String topicName) {
-    return subscribers.containsKey(new DefaultGraphName(topicName));
+    return subscribers.containsKey(Ros.createGraphName(topicName));
   }
 
   public boolean hasPublisher(String topicName) {
-    return publishers.containsKey(new DefaultGraphName(topicName));
+    return publishers.containsKey(Ros.createGraphName(topicName));
   }
 
   public Publisher<?> getPublisher(String topicName) {
-    return publishers.get(new DefaultGraphName(topicName));
+    return publishers.get(Ros.createGraphName(topicName));
   }
 
   public Subscriber<?> getSubscriber(String topicName) {
-    return subscribers.get(new DefaultGraphName(topicName));
+    return subscribers.get(Ros.createGraphName(topicName));
   }
 
   public void putPublisher(Publisher<?> publisher) {

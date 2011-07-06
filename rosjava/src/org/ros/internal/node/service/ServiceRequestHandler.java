@@ -21,8 +21,8 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
-import org.ros.MessageDeserializer;
-import org.ros.MessageSerializer;
+import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageSerializer;
 
 import java.nio.ByteBuffer;
 

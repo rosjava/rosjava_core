@@ -15,12 +15,11 @@
  */
 package org.ros.namespace;
 
-import org.ros.internal.namespace.DefaultNameResolver;
-
 import junit.framework.TestCase;
 import org.junit.Test;
+import org.ros.Ros;
 import org.ros.exception.RosNameException;
-import org.ros.internal.namespace.DefaultGraphName;
+import org.ros.internal.namespace.DefaultNameResolver;
 
 import java.util.HashMap;
 
@@ -95,8 +94,8 @@ public class NameResolverTest extends TestCase {
   @Test
   public void testResolveNameRemapping() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
-    remappings.put(new DefaultGraphName("name"), new DefaultGraphName("/my/name"));
-    remappings.put(new DefaultGraphName("foo"), new DefaultGraphName("/my/foo"));
+    remappings.put(Ros.createGraphName("name"), Ros.createGraphName("/my/name"));
+    remappings.put(Ros.createGraphName("foo"), Ros.createGraphName("/my/foo"));
 
     NameResolver r = DefaultNameResolver.createDefault(remappings);
 

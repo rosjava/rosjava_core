@@ -17,6 +17,8 @@
 package org.ros;
 
 import org.ros.exception.RosInitException;
+import org.ros.internal.node.DefaultNode;
+import org.ros.message.MessageListener;
 
 /**
  * This node is used in rostest end-to-end integration tests with other client

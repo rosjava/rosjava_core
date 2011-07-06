@@ -17,18 +17,17 @@
 package org.ros;
 
 
-import org.ros.internal.namespace.NodeNameResolver;
-
-import org.ros.internal.namespace.DefaultNameResolver;
-
 import org.apache.commons.logging.Log;
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
+import org.ros.internal.namespace.DefaultNameResolver;
+import org.ros.internal.namespace.NodeNameResolver;
 import org.ros.internal.node.client.ParameterClient;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.Master;
+import org.ros.message.MessageListener;
 import org.ros.message.Service;
 import org.ros.message.Time;
 

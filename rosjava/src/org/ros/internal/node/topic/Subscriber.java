@@ -31,13 +31,13 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.ros.MessageDeserializer;
-import org.ros.MessageListener;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
+import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageListener;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;

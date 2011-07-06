@@ -35,13 +35,13 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.internal.message.old_style.MessageDeserializer;
+import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 import org.ros.message.Message;
-import org.ros.message.MessageDeserializer;
-import org.ros.message.MessageSerializer;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;

@@ -18,7 +18,7 @@ package org.ros.internal.node.server;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.namespace.DefaultGraphName;
+import org.ros.Ros;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
@@ -179,7 +179,7 @@ public class SlaveServer extends NodeServer {
   public ProtocolDescription requestTopic(String topicName, Collection<String> protocols)
       throws ServerException {
     // Canonicalize topic name.
-    topicName = new DefaultGraphName(topicName).toGlobal().toString();
+    topicName = Ros.createGraphName(topicName).toGlobal().toString();
     if (!topicManager.hasPublisher(topicName)) {
       throw new ServerException("No publishers for topic: " + topicName);
     }

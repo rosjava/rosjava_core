@@ -18,8 +18,6 @@ package org.ros.internal.node;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.MessageDeserializer;
-import org.ros.MessageSerializer;
 import org.ros.ParameterTree;
 import org.ros.ServiceClient;
 import org.ros.internal.exception.RemoteException;
@@ -42,6 +40,8 @@ import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
+import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 

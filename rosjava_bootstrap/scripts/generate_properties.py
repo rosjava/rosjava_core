@@ -134,7 +134,7 @@ def generate_properties_main(argv=None):
         for p in get_classpath(package, include_package=True).split(':'):
             if p:
                 sys.stdout.write('\t<classpathentry kind="lib" path="%s"/>\n'%(p))
-        sys.stdout.write("""\t<classpath kind="output" path="build"/>
+        sys.stdout.write("""\t<classpathentry kind="output" path="build"/>
 </classpath>
 """)
     else:

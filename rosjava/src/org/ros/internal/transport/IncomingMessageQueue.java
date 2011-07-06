@@ -21,7 +21,7 @@ import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
-import org.ros.MessageDeserializer;
+import org.ros.message.MessageDeserializer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

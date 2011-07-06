@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.internal.node.DefaultNode;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;

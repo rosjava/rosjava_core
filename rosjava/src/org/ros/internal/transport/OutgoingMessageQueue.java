@@ -25,7 +25,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.ros.MessageSerializer;
+import org.ros.message.MessageSerializer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

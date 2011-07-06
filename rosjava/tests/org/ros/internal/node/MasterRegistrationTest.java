@@ -7,8 +7,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.internal.message.MessageDefinition;
-import org.ros.internal.namespace.DefaultGraphName;
+import org.ros.Ros;
+import org.ros.internal.message.new_style.MessageDefinition;
+import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
@@ -19,7 +20,6 @@ import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
-import org.ros.message.MessageSerializer;
 
 import java.util.concurrent.TimeUnit;
 
@@ -42,7 +42,7 @@ public class MasterRegistrationTest {
 
   public MasterRegistrationTest() {
     topicDefinition =
-        TopicDefinition.create(new DefaultGraphName("/topic"), MessageDefinition.create(
+        TopicDefinition.create(Ros.createGraphName("/topic"), MessageDefinition.create(
             org.ros.message.std_msgs.String.__s_getDataType(),
             org.ros.message.std_msgs.String.__s_getMessageDefinition(),
             org.ros.message.std_msgs.String.__s_getMD5Sum()));
@@ -59,7 +59,7 @@ public class MasterRegistrationTest {
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
     slaveServer =
-        new SlaveServer(new DefaultGraphName("/node"), BindAddress.createPrivate(0),
+        new SlaveServer(Ros.createGraphName("/node"), BindAddress.createPrivate(0),
             AdvertiseAddress.createPrivate(), BindAddress.createPrivate(0),
             AdvertiseAddress.createPrivate(), masterClient, topicManager, serviceManager,
             parameterManager);

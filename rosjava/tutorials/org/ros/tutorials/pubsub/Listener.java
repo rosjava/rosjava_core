@@ -17,12 +17,12 @@
 package org.ros.tutorials.pubsub;
 
 import org.apache.commons.logging.Log;
-import org.ros.DefaultNode;
-import org.ros.MessageListener;
 import org.ros.Node;
 import org.ros.NodeConfiguration;
 import org.ros.NodeMain;
 import org.ros.Subscriber;
+import org.ros.internal.node.DefaultNode;
+import org.ros.message.MessageListener;
 
 /**
  * This is a simple rosjava {@link Subscriber} {@link Node}. It assumes an
