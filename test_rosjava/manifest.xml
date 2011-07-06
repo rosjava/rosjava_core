@@ -1,11 +1,11 @@
 <package>
   <description brief="test_rosjava">
 
-     test_rosjava
+     rostest-based integration test suite for rosjava library.
 
   </description>
   <author>Ken Conley</author>
-  <license>BSD</license>
+  <license>Apache License 2.0</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/test_rosjava</url>
 
