@@ -27,4 +27,6 @@
     </jar>
   </target>
 
+  <target name="test" />
+
 </project>

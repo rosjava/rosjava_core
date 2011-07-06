@@ -132,6 +132,11 @@ def generate_ros_properties(package):
     for k in sorted(keys):
         sys.stdout.write('%s=%s\n'%(k, props[k]))
 
+def is_android_package(package):
+    rospack = roslib.packages.ROSPackages()
+    m = rospack.manifests[package]
+    return 'android' in [x.tag for x in m.exports]
+    
 def generate_properties_main(argv=None):
     if argv is None:
         argv = sys.argv
@@ -142,13 +147,15 @@ def generate_properties_main(argv=None):
     if len(argv) != 2:
         usage()
     package = argv[1]
-    if not use_eclipse:
-        generate_ros_properties(package)
-    else:
+    if use_eclipse:
         rospack = roslib.packages.ROSPackages()
         sys.stdout.write("""<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 """)
+        # TODO(damonkohler): Move Eclipse .project file generation into this
+        # script as well so that we can alter it for use with Android.
+        if is_android_package(package):
+            sys.stdout.write('\t<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>\n')
         for p in get_eclipse_src_entries(package):
             if p:
                 sys.stdout.write('\t<classpathentry kind="src" path="%s"/>\n'%(p))
@@ -161,6 +168,8 @@ def generate_properties_main(argv=None):
         sys.stdout.write("""\t<classpath kind="output" path="build"/>
 </classpath>
 """)
+    else:
+        generate_ros_properties(package)
     
 if __name__ == '__main__':
     generate_properties_main()

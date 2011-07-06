@@ -31,4 +31,7 @@
       <fileset dir="${build}" />
     </jar>
   </target>
+
+  <target name="test" />
+
 </project>
