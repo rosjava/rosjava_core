@@ -5,7 +5,7 @@ java:
   macports: |
   gentoo: dev-java/sun-jdk
   freebsd: openjdk6
-java:
+ant:
   ubuntu: 
     '10.04': ant1.8
     '10.10': ant
