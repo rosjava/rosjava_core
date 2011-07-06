@@ -24,7 +24,7 @@
     <rosjava-src location="tests" />    
     <rosjava-src location="tutorials" />
     
-    <rosjava-pathelement location="dist/rosjava.jar" />
+    <rosjava-pathelement location="dist/rosjava.jar" built="true" />
     <rosjava-pathelement location="lib/dnsjava-2.1.1.jar" />
     <rosjava-pathelement location="lib/guava-r07.jar" />
     <rosjava-pathelement location="lib/mockito-all-1.8.5.jar" />

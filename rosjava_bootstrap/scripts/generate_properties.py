@@ -48,9 +48,14 @@ def resolve_pathelements(pathelements):
     # TODO: potentially recognize keys like ROS_HOME
     return [os.path.abspath(p) for p in pathelements]
 
-def get_classpath(package):
+def get_classpath(package, include_package=False):
+    """
+    @param include_package: include library entries of self on path
+    """
     rospack = roslib.packages.ROSPackages()
     depends = rospack.depends([package])[package]
+    if include_package:
+        depends.append(package)
     pathelements = []
     tag = 'rosjava-pathelement'
         
@@ -59,14 +64,25 @@ def get_classpath(package):
         pkg_dir = roslib.packages.get_pkg_dir(pkg)
         for e in [x for x in m.exports if x.tag == tag]:
             try:
-                pathelements.append(os.path.join(pkg_dir, e.attrs['location']))
+                # don't include this package's built resources
+                if include_package and pkg == package and \
+                       e.attrs.get('built', False):
+                    continue
+                else:
+                    pathelements.append(os.path.join(pkg_dir, e.attrs['location']))
             except KeyError:
                 print >> sys.stderr, "Invalid <%s> tag in package %s"%(tag, pkg)
         if is_msg_pkg(pkg) or is_srv_pkg(pkg):
             pathelements.append(msg_jar_file_path(pkg))
     return os.pathsep.join(resolve_pathelements(pathelements))
 
-def get_src_path(package, src=False):
+def get_eclipse_src_entries(package):
+    """
+    @return: list of source path locations.  Source paths will be
+    returned in the relative specification used in the ros
+    manifest.xml file.
+    @rtype: [str]
+    """
     rospack = roslib.packages.ROSPackages()
     depends = rospack.depends([package])[package]
     elements = []
@@ -76,10 +92,12 @@ def get_src_path(package, src=False):
     pkg_dir = roslib.packages.get_pkg_dir(package)
     for e in [x for x in m.exports if x.tag == tag]:
         try:
-            elements.append(os.path.join(pkg_dir, e.attrs['location']))
+            #elements.append(os.path.join(pkg_dir, e.attrs['location']))
+            # use relative location as Eclipse does not seem to like fully resolved
+            elements.append(e.attrs['location'])
         except KeyError:
             print >> sys.stderr, "Invalid <%s> tag in package %s"%(tag, pkg)
-    return os.pathsep.join(resolve_pathelements(elements))
+    return elements
 
 def generate_properties_main(argv=None):
     if argv is None:
@@ -102,13 +120,13 @@ def generate_properties_main(argv=None):
         sys.stdout.write("""<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 """)
-        for p in get_src_path(package).split(':'):
+        for p in get_eclipse_src_entries(package):
             if p:
                 sys.stdout.write('\t<classpathentry kind="src" path="%s"/>\n'%(p))
         sys.stdout.write("""\t<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 """)
-        for p in get_classpath(package).split(':'):
+        for p in get_classpath(package, include_package=True).split(':'):
             if p:
                 sys.stdout.write('\t<classpathentry kind="lib" path="%s"/>\n'%(p))
         sys.stdout.write("""\t<classpath kind="output" path="build"/>
