@@ -65,7 +65,7 @@
   </target>
 
   <target name="compile" depends="init, gen-msg, gen-srv">
-    <javac debug="true" debuglevel="${debuglevel}" destdir="${build}">
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build}" includeantruntime="false">
       <classpath refid="classpath" />
       <src path="${gen-msg}" />      
       <src path="${gen-srv}" />      

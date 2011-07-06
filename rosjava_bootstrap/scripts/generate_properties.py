@@ -133,8 +133,7 @@ def generate_ros_properties(package):
         sys.stdout.write('%s=%s\n'%(k, props[k]))
 
 def is_android_package(package):
-    rospack = roslib.packages.ROSPackages()
-    m = rospack.manifests[package]
+    m = roslib.manifest.load_manifest(package)
     return 'android' in [x.tag for x in m.exports]
     
 def generate_properties_main(argv=None):
