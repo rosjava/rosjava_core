@@ -31,19 +31,32 @@ import java.util.Map;
  */
 public class NameResolver {
 
-  private final String namespace;
+  private final GraphName namespace;
   private final Map<GraphName, GraphName> remappings;
 
+  public static NameResolver
+      createFromString(String namespace, Map<GraphName, GraphName> remappings) {
+    return new NameResolver(new GraphName(namespace), remappings);
+  }
+
+  public static NameResolver createFromString(String namespace) {
+    return NameResolver.createFromString(namespace, new HashMap<GraphName, GraphName>());
+  }
+
+  public static NameResolver createDefault(Map<GraphName, GraphName> remappings) {
+    return new NameResolver(GraphName.createRoot(), remappings);
+  }
+
   public static NameResolver createDefault() {
-    return new NameResolver(Namespace.GLOBAL, new HashMap<GraphName, GraphName>());
+    return NameResolver.createDefault(new HashMap<GraphName, GraphName>());
   }
 
-  public NameResolver(String namespace, Map<GraphName, GraphName> remappings) {
+  public NameResolver(GraphName namespace, Map<GraphName, GraphName> remappings) {
     this.remappings = Collections.unmodifiableMap(remappings);
-    this.namespace = GraphName.canonicalizeName(namespace);
+    this.namespace = namespace;
   }
 
-  public String getNamespace() {
+  public GraphName getNamespace() {
     return namespace;
   }
 
@@ -58,55 +71,45 @@ public class NameResolver {
    * @param name
    * @return the fully resolved name relative to the given namespace.
    */
-  public String resolveName(String namespace, String name) {
-    GraphName ns = lookUpRemapping(new GraphName(namespace));
-    Preconditions.checkArgument(ns.isGlobal(), "namespace must be global: " + ns.toString());
-    GraphName n = lookUpRemapping(new GraphName(name));
-    if (n.isGlobal()) {
-      return n.toString();
+  public GraphName resolve(GraphName namespace, GraphName name) {
+    GraphName remappedNamespace = lookUpRemapping(namespace);
+    Preconditions.checkArgument(remappedNamespace.isGlobal(),
+        "Namespace must be global. Tried to resolve: " + remappedNamespace);
+    GraphName remappedName = lookUpRemapping(name);
+    if (remappedName.isGlobal()) {
+      return remappedName;
     }
-    if (n.isRelative()) {
-      return join(ns, n);
-    } else if (n.isPrivate()) {
-      throw new RosNameException("cannot resolve ~private names in arbitrary namespaces");
-    } else {
-      throw new RosNameException("Bad name: " + name);
+    if (remappedName.isRelative()) {
+      return remappedNamespace.join(remappedName);
     }
+    if (remappedName.isPrivate()) {
+      throw new RosNameException("Cannot resolve ~private names in arbitrary namespaces.");
+    }
+    throw new RosNameException("Unable to resolve name: " + name);
+  }
+
+  public String resolve(String namespace, String name) {
+    return resolve(new GraphName(namespace), new GraphName(name)).toString();
   }
 
   /**
-   * Join two names together.
-   * 
-   * @param name1 ROS name to join to.
-   * @param name2 ROS name to join. Must be relative.
-   * @return A concatenation of the two names
-   * @throws IllegalArgumentException If name2 is not a relative name
+   * @param name
+   *          name to resolve
+   * @return the name resolved relative to the default namespace
    */
-  public static String join(String name1, String name2) {
-    return join(new GraphName(name1), new GraphName(name2));
+  public GraphName resolve(GraphName name) {
+    return resolve(getNamespace(), name);
   }
 
-  /**
-   * Join two names together.
-   * 
-   * @param name1 ROS name to join to.
-   * @param name2 ROS name to join. If name2 is global, this will return name2.
-   * @return A concatenation of the two names.
-   */
-  public static String join(GraphName name1, GraphName name2) {
-    if (name2.isGlobal() || name1.toString().equals("")) {
-      return name2.toString();
-    } else if (name1.equals(Namespace.GLOBAL)) {
-      return Namespace.GLOBAL + name2.toString();
-    } else {
-      return new GraphName(name1.toString() + "/" + name2.toString()).toString();
-    }
+  public String resolve(String name) {
+    return resolve(getNamespace(), new GraphName(name)).toString();
   }
 
   /**
    * Convenience function for looking up a remapping.
    * 
-   * @param name The name to lookup.
+   * @param name
+   *          The name to lookup.
    * @return The name if it is not remapped, otherwise the remapped name.
    */
   protected GraphName lookUpRemapping(GraphName name) {
@@ -122,14 +125,6 @@ public class NameResolver {
   }
 
   /**
-   * @param name Name to resolve
-   * @return The name resolved relative to the default namespace.
-   */
-  public String resolveName(String name) {
-    return resolveName(getNamespace(), name);
-  }
-
-  /**
    * Construct a new {@link NameResolver} with the same remappings as this
    * resolver has. The namespace of the new resolver will be the value of the
    * name parameter resolved in this namespace.
@@ -137,8 +132,9 @@ public class NameResolver {
    * @param name
    * @return {@link NameResolver} relative to the current namespace.
    */
-  public NameResolver createResolver(String name) {
-    String resolverNamespace = resolveName(name);
+  public NameResolver createResolver(GraphName name) {
+    GraphName resolverNamespace = resolve(name);
     return new NameResolver(resolverNamespace, remappings);
   }
+
 }

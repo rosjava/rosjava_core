@@ -18,13 +18,11 @@ package org.ros.internal.node.server;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.node.parameter.ParameterManager;
-
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceServer;
 import org.ros.internal.node.topic.Publisher;
@@ -33,16 +31,13 @@ import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.SlaveImpl;
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
 
 import java.lang.management.ManagementFactory;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 
@@ -103,13 +98,6 @@ public class SlaveServer extends NodeServer {
     tcpRosServer.shutdown();
   }
 
-  /**
-   * @param server
-   * @throws URISyntaxException
-   * @throws MalformedURLException
-   * @throws RemoteException
-   * @throws XmlRpcTimeoutException
-   */
   public void addService(ServiceServer<?, ?> server) {
     serviceManager.putServer(server.getName().toString(), server);
   }
@@ -190,7 +178,7 @@ public class SlaveServer extends NodeServer {
   public ProtocolDescription requestTopic(String topicName, Collection<String> protocols)
       throws ServerException {
     // Canonicalize topic name.
-    topicName = new GraphName(topicName).toGlobal();
+    topicName = new GraphName(topicName).toGlobal().toString();
     if (!topicManager.hasPublisher(topicName)) {
       throw new ServerException("No publishers for topic: " + topicName);
     }

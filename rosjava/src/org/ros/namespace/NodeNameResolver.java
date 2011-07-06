@@ -30,40 +30,36 @@ import java.util.Map;
  */
 public class NodeNameResolver extends NameResolver {
 
-  private final String privateNamespace;
+  private final GraphName privateNamespace;
 
-  /**
-   * @param remappings
-   */
-  private NodeNameResolver(String defaultNamespace, String privateNamespace,
+  public static NodeNameResolver create(NameResolver defaultResolver, GraphName nodeName) {
+    return new NodeNameResolver(defaultResolver.getNamespace(), nodeName,
+        defaultResolver.getRemappings());
+  }
+
+  private NodeNameResolver(GraphName defaultNamespace, GraphName privateNamespace,
       Map<GraphName, GraphName> remappings) {
     super(defaultNamespace, remappings);
     this.privateNamespace = privateNamespace;
   }
 
   /**
-   * @param name Name to resolve
-   * @return The name resolved relative to the default namespace.
+   * @param name
+   *          name to resolve
+   * @return the name resolved relative to the default or private namespace
    */
   @Override
-  public String resolveName(String name) {
-    GraphName n = lookUpRemapping(new GraphName(name));
-    if (n.isPrivate()) {
-      String s = n.toRelative();
-      // allow ~/foo
-      if (s.startsWith("/")) {
-        s = s.substring(1);
-      }
-      return resolveName(privateNamespace, s);
-    } else {
-      return resolveName(getNamespace(), name);
+  public GraphName resolve(GraphName name) {
+    GraphName graphName = lookUpRemapping(name);
+    if (graphName.isPrivate()) {
+      return resolve(privateNamespace, graphName.toRelative());
     }
-
+    return super.resolve(name);
   }
 
-  public static NodeNameResolver create(NameResolver defaultResolver, GraphName nodeName) {
-    return new NodeNameResolver(defaultResolver.getNamespace(), nodeName.toString(),
-        defaultResolver.getRemappings());
+  @Override
+  public String resolve(String name) {
+    return resolve(new GraphName(name)).toString();
   }
 
 }

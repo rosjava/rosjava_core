@@ -29,7 +29,6 @@ import org.ros.NodeConfiguration;
 import org.ros.exception.RosInitException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.namespace.NameResolver;
-import org.ros.namespace.Namespace;
 
 import java.io.File;
 import java.net.URI;
@@ -119,7 +118,7 @@ public class CommandLineLoaderTest {
     nodeConfiguration = loader.createConfiguration();
     assertEquals(defaultMasterUri, nodeConfiguration.getMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
-    assertEquals(Namespace.GLOBAL, nodeConfiguration.getParentResolver().getNamespace());
+    assertTrue(nodeConfiguration.getParentResolver().getNamespace().isRoot());
     // Default is the hostname + FQDN.
     assertEquals(NodeConfiguration.DEFAULT_HOST, nodeConfiguration.getHost());
 
@@ -134,11 +133,11 @@ public class CommandLineLoaderTest {
     assertEquals(defaultMasterUri, nodeConfiguration.getMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
     assertEquals("192.168.0.1", nodeConfiguration.getHost());
-    assertEquals("/foo/bar", nodeConfiguration.getParentResolver().getNamespace());
+    assertEquals(new GraphName("/foo/bar"), nodeConfiguration.getParentResolver().getNamespace());
     Assert.assertEquals(rosPackagePathList, nodeConfiguration.getRosPackagePath());
 
     // Test ROS namespace resolution and canonicalization
-    String canonical = new GraphName("/baz/bar").toString();
+    GraphName canonical = new GraphName("/baz/bar");
     env = getDefaultEnv();
     env.put(EnvironmentVariables.ROS_NAMESPACE, "baz/bar");
     loader = new CommandLineLoader(emptyArgv, env);
@@ -175,7 +174,7 @@ public class CommandLineLoaderTest {
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
 
     // Test ROS namespace resolution and canonicalization
-    String canonical = new GraphName("/baz/bar").toString();
+    GraphName canonical = new GraphName("/baz/bar");
     env = getDefaultEnv();
     args = Lists.newArrayList("Foo", CommandLine.ROS_NAMESPACE + ":=baz/bar");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
@@ -243,11 +242,11 @@ public class CommandLineLoaderTest {
 
       // Test that our remappings loaded.
       NameResolver r = nodeConfiguration.getParentResolver();
-      String n = r.resolveName("name");
+      String n = r.resolve("name");
       assertTrue(n.equals("/my/name"));
-      assertTrue(r.resolveName("/name").equals("/name"));
-      assertTrue(r.resolveName("foo").equals("/my/foo"));
-      assertTrue(r.resolveName("/my/name").equals("/my/name"));
+      assertTrue(r.resolve("/name").equals("/name"));
+      assertTrue(r.resolve("foo").equals("/my/foo"));
+      assertTrue(r.resolve("/my/name").equals("/my/name"));
     }
   }
 }

@@ -21,9 +21,11 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Maps;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.namespace.GraphName;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -31,30 +33,33 @@ import java.util.Map;
  */
 public class ParameterServerTest {
 
+  private ParameterServer server;
+
+  @Before
+  public void setup() {
+    server = new ParameterServer();
+  }
+
   @Test
   public void testGetNonExistent() {
-    ParameterServer server = new ParameterServer();
     assertEquals(null, server.get(new GraphName("/foo")));
     assertEquals(null, server.get(new GraphName("/foo/bar")));
   }
 
   @Test
   public void testSetAndGetShallow() {
-    ParameterServer server = new ParameterServer();
     server.set(new GraphName("/foo"), "bloop");
     assertEquals("bloop", server.get(new GraphName("/foo")));
   }
 
   @Test
   public void testSetAndGetDeep() {
-    ParameterServer server = new ParameterServer();
     server.set(new GraphName("/foo/bar"), "bloop");
     assertEquals("bloop", server.get(new GraphName("/foo/bar")));
   }
 
   @Test
   public void testSetAndGet() {
-    ParameterServer server = new ParameterServer();
     server.set(new GraphName("/foo"), "bloop");
     assertEquals("bloop", server.get(new GraphName("/foo")));
     server.set(new GraphName("/foo/bar"), "bloop");
@@ -65,7 +70,6 @@ public class ParameterServerTest {
 
   @Test
   public void testSetDeepAndGetShallow() {
-    ParameterServer server = new ParameterServer();
     server.set(new GraphName("/foo/bar"), "bloop");
     Map<String, Object> expected = Maps.newHashMap();
     expected.put("bar", "bloop");
@@ -74,7 +78,6 @@ public class ParameterServerTest {
 
   @Test
   public void testSetOverwritesMap() {
-    ParameterServer server = new ParameterServer();
     server.set(new GraphName("/foo/bar"), "bloop");
     assertEquals("bloop", server.get(new GraphName("/foo/bar")));
     server.set(new GraphName("/foo"), "bloop");
@@ -83,15 +86,13 @@ public class ParameterServerTest {
 
   @Test
   public void testSetAndGetFloat() {
-    ParameterServer server = new ParameterServer();
     GraphName name = new GraphName("/foo/bar");
     server.set(name, 0.42f);
-    assertEquals(0.42f, server.get(name));
+    assertEquals(0.42, (Double) server.get(name), 0.1);
   }
 
   @Test
   public void testDeleteShallow() {
-    ParameterServer server = new ParameterServer();
     GraphName name = new GraphName("/foo");
     server.set(name, "bloop");
     server.delete(name);
@@ -100,7 +101,6 @@ public class ParameterServerTest {
 
   @Test
   public void testDeleteDeep() {
-    ParameterServer server = new ParameterServer();
     GraphName name = new GraphName("/foo/bar");
     server.set(name, "bloop");
     server.delete(name);
@@ -109,12 +109,23 @@ public class ParameterServerTest {
 
   @Test
   public void testHas() {
-    ParameterServer server = new ParameterServer();
     server.set(new GraphName("/foo/bar/baz"), "bloop");
     assertTrue(server.has(new GraphName("/foo/bar/baz")));
     assertTrue(server.has(new GraphName("/foo/bar")));
     assertTrue(server.has(new GraphName("/foo")));
     assertTrue(server.has(new GraphName("/")));
+  }
+
+  @Test
+  public void testGetNames() {
+    GraphName name1 = new GraphName("/foo/bar/baz");
+    server.set(name1, "bloop");
+    GraphName name2 = new GraphName("/testing");
+    server.set(name2, "123");
+    Collection<GraphName> names = server.getNames();
+    assertEquals(2, names.size());
+    assertTrue(names.contains(name1));
+    assertTrue(names.contains(name2));
   }
 
 }

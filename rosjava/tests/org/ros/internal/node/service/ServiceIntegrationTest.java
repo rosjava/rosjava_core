@@ -32,7 +32,7 @@ import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
-import org.ros.message.srv.beginner_tutorials.AddTwoInts;
+import org.ros.service.test_ros.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;

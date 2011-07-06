@@ -87,9 +87,9 @@ public class RosCameraPreviewView extends CameraPreviewView implements NodeMain 
     node = new DefaultNode("/anonymous", nodeConfiguration);
     NameResolver resolver = node.getResolver().createResolver("camera");
     imagePublisher =
-        node.createPublisher(resolver.resolveName("image_raw"), "sensor_msgs/CompressedImage");
+        node.createPublisher(resolver.resolveor_msgs/CompressedImage");
     cameraInfoPublisher =
-        node.createPublisher(resolver.resolveName("camera_info"), "sensor_msgs/CameraInfo");
+        node.createPublisher(resolver.resoresoresoresoresoresolve");
     setPreviewCallback(new PublishingPreviewCallback());
   }
 

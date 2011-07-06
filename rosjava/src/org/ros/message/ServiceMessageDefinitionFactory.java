@@ -29,7 +29,7 @@ public class ServiceMessageDefinitionFactory {
     Service<?, ?> service;
     try {
       serviceClass =
-          (Class<Service<?, ?>>) Class.forName("org.ros.message.srv."
+          (Class<Service<?, ?>>) Class.forName("org.ros.service."
               + serviceType.replace('/', '.'));
       service = serviceClass.newInstance();
     } catch (Exception e) {

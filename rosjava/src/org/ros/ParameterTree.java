@@ -16,96 +16,57 @@
 
 package org.ros;
 
-import org.ros.internal.exception.RemoteException;
-
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface ParameterTree {
 
-  boolean getBoolean(String name) throws RemoteException;
+  boolean getBoolean(String name);
 
-  boolean getBoolean(String name, boolean defaultValue) throws RemoteException;
+  boolean getBoolean(String name, boolean defaultValue);
 
-  char getChar(String name) throws RemoteException;
+  int getInteger(String name);
 
-  char getChar(String name, char defaultValue) throws RemoteException;
+  int getInteger(String name, int defaultValue);
 
-  byte getByte(String name) throws RemoteException;
+  double getDouble(String name);
 
-  byte getByte(String name, byte defaultValue) throws RemoteException;
+  double getDouble(String name, double defaultValue);
 
-  short getShort(String name) throws RemoteException;
+  String getString(String name);
 
-  short getShort(String name, short defaultValue) throws RemoteException;
+  String getString(String name, String defaultValue);
 
-  int getInteger(String name) throws RemoteException;
+  List<?> getList(String name);
 
-  int getInteger(String name, int defaultValue) throws RemoteException;
+  List<?> getList(String name, List<?> defaultValue);
 
-  long getLong(String name) throws RemoteException;
+  Map<?, ?> getMap(String name);
 
-  long getLong(String name, long defaultValue) throws RemoteException;
+  Map<?, ?> getMap(String name, Map<?, ?> defaultValue);
 
-  float getFloat(String name) throws RemoteException;
+  void set(String name, Boolean value);
 
-  float getFloat(String name, float defaultValue) throws RemoteException;
+  void set(String name, Integer value);
 
-  double getDouble(String name) throws RemoteException;
+  void set(String name, Double value);
 
-  double getDouble(String name, double defaultValue) throws RemoteException;
+  void set(String name, String value);
 
-  String getString(String name) throws RemoteException;
+  void set(String name, List<?> value);
 
-  String getString(String name, String defaultValue) throws RemoteException;
+  void set(String name, Map<?, ?> value);
 
-  List<?> getList(String name) throws RemoteException;
+  boolean has(String name);
 
-  List<?> getList(String name, List<?> defaultValue) throws RemoteException;
+  void delete(String name);
 
-  Vector<?> getVector(String name) throws RemoteException;
+  String search(String name);
 
-  Vector<?> getVector(String name, Vector<?> defaultValue) throws RemoteException;
-
-  Map<?, ?> getMap(String name) throws RemoteException;
-
-  Map<?, ?> getMap(String name, Map<?, ?> defaultValue) throws RemoteException;
-
-  void set(String name, Boolean value) throws RemoteException;
-
-  void set(String name, Character value) throws RemoteException;
-
-  void set(String name, Byte value) throws RemoteException;
-
-  void set(String name, Short value) throws RemoteException;
-
-  void set(String name, Integer value) throws RemoteException;
-
-  void set(String name, Long value) throws RemoteException;
-
-  void set(String name, Float value) throws RemoteException;
-
-  void set(String name, Double value) throws RemoteException;
-
-  void set(String name, String value) throws RemoteException;
-
-  void set(String name, List<?> value) throws RemoteException;
-
-  void set(String name, Vector<?> value) throws RemoteException;
-
-  void set(String name, Map<?, ?> value) throws RemoteException;
-
-  boolean has(String name) throws RemoteException;
-
-  void delete(String name) throws RemoteException;
-
-  String search(String name) throws RemoteException;
-
-  List<String> getNames() throws RemoteException;
+  List<String> getNames();
 
   void addParameterListener(String name, ParameterListener listener);
 

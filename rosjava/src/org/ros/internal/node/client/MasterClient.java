@@ -16,7 +16,6 @@
 
 package org.ros.internal.node.client;
 
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.UriListResultFactory;
@@ -31,11 +30,8 @@ import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.topic.TopicDefinition;
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -49,7 +45,8 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * Create a new {@link MasterClient} connected to the specified
    * {@link MasterServer} URI.
    * 
-   * @param uri the {@link URI} of the {@link MasterServer} to connect to
+   * @param uri
+   *          the {@link URI} of the {@link MasterServer} to connect to
    */
   public MasterClient(URI uri) {
     super(uri, org.ros.internal.node.xmlrpc.Master.class);
@@ -58,37 +55,31 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   /**
    * Registers the given {@link ServiceServer}.
    * 
-   * @param slave the {@link SlaveIdentifier} where the {@link ServiceServer} is
-   *        running
-   * @param service the {@link ServiceServer} to register
+   * @param slave
+   *          the {@link SlaveIdentifier} where the {@link ServiceServer} is
+   *          running
+   * @param service
+   *          the {@link ServiceServer} to register
    * @return a {@link Response} with a void result
-   * @throws RemoteException
-   * @throws XmlRpcTimeoutException
    */
-  public Response<Void> registerService(SlaveIdentifier slave, ServiceServer<?, ?> service)
-      throws RemoteException, XmlRpcTimeoutException {
-    try {
-      return Response.fromListChecked(node.registerService(slave.getName().toString(), service
-          .getName().toString(), service.getUri().toString(), slave.getUri().toString()),
-          new VoidResultFactory());
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    }
+  public Response<Void> registerService(SlaveIdentifier slave, ServiceServer<?, ?> service) {
+    return Response.fromListChecked(node.registerService(slave.getName().toString(), service
+        .getName().toString(), service.getUri().toString(), slave.getUri().toString()),
+        new VoidResultFactory());
   }
 
   /**
    * Unregisters the specified {@link ServiceServer}.
    * 
-   * @param slave the {@link SlaveIdentifier} where the {@link ServiceServer} is
-   *        running
-   * @param service the {@link ServiceServer} to unregister
+   * @param slave
+   *          the {@link SlaveIdentifier} where the {@link ServiceServer} is
+   *          running
+   * @param service
+   *          the {@link ServiceServer} to unregister
    * @return a {@link Response} with the number of unregistered services as the
    *         result
-   * @throws RemoteException
-   * @throws XmlRpcTimeoutException
    */
-  public Response<Integer> unregisterService(SlaveIdentifier slave, ServiceServer<?, ?> service)
-      throws RemoteException, XmlRpcTimeoutException {
+  public Response<Integer> unregisterService(SlaveIdentifier slave, ServiceServer<?, ?> service) {
     return Response.fromListChecked(node.unregisterService(slave.getName().toString(), service
         .getName().toString(), service.getUri().toString()), new IntegerResultFactory());
   }
@@ -99,38 +90,32 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    * will also receive notifications of new {@link Publisher}s via the
    * publisherUpdate API.
    * 
-   * @param slave the {@link SlaveIdentifier} that the {@link Subscriber} is
-   *        running on
-   * @param subscriber the {@link Subscriber} to register
+   * @param slave
+   *          the {@link SlaveIdentifier} that the {@link Subscriber} is running
+   *          on
+   * @param subscriber
+   *          the {@link Subscriber} to register
    * @return a {@link Response} with a {@link List} or {@link SlaveServer}
    *         XML-RPC API URIs for nodes currently publishing the specified topic
    *         as the result
-   * @throws RemoteException
-   * @throws XmlRpcTimeoutException
    */
-  public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
-      throws RemoteException, XmlRpcTimeoutException {
-    try {
-      return Response.fromListChecked(node.registerSubscriber(slave.getName().toString(),
-          subscriber.getTopicGraphName().toString(), subscriber.getTopicMessageType(), slave.getUri()
-              .toString()), new UriListResultFactory());
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    }
+  public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber) {
+    return Response.fromListChecked(node.registerSubscriber(slave.getName().toString(), subscriber
+        .getTopicGraphName().toString(), subscriber.getTopicMessageType(), slave.getUri()
+        .toString()), new UriListResultFactory());
   }
 
   /**
    * Unregisters the specified {@link Subscriber}.
    * 
-   * @param slave the {@link SlaveIdentifier} where the subscriber is running
-   * @param subscriber the {@link Subscriber} to unregister
+   * @param slave
+   *          the {@link SlaveIdentifier} where the subscriber is running
+   * @param subscriber
+   *          the {@link Subscriber} to unregister
    * @return a {@link Response} with the number of unregistered subscribers as
    *         the result
-   * @throws RemoteException
-   * @throws XmlRpcTimeoutException
    */
-  public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber)
-      throws RemoteException, XmlRpcTimeoutException {
+  public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber) {
     return Response.fromListChecked(node.unregisterSubscriber(slave.getName().toString(),
         subscriber.getTopicGraphName().toString(), slave.getUri().toString()),
         new IntegerResultFactory());
@@ -139,39 +124,29 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   /**
    * Registers the specified {@link PublisherDefinition}.
    * 
-   * @param publisher the {@link PublisherDefinition} of the {@link Publisher}
-   *        to register
+   * @param publisher
+   *          the {@link PublisherDefinition} of the {@link Publisher} to
+   *          register
    * @return a {@link Response} with a {@link List} of the current
    *         {@link SlaveServer} URIs which have {@link Subscriber}s for the
    *         published {@link Topic}.
-   * @throws RemoteException
-   * @throws XmlRpcTimeoutException
    */
-  public Response<List<URI>> registerPublisher(PublisherDefinition publisher)
-      throws RemoteException, XmlRpcTimeoutException {
-    try {
-      return Response.fromListChecked(node.registerPublisher(publisher.getSlaveName().toString(),
-          publisher.getTopicName().toString(), publisher.getTopicMessageType(), publisher.getUri()
-              .toString()), new UriListResultFactory());
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    } catch (MalformedURLException e) {
-      throw new RuntimeException(e);
-    }
+  public Response<List<URI>> registerPublisher(PublisherDefinition publisher) {
+    return Response.fromListChecked(node.registerPublisher(publisher.getSlaveName().toString(),
+        publisher.getTopicName().toString(), publisher.getTopicMessageType(), publisher.getUri()
+            .toString()), new UriListResultFactory());
   }
 
   /**
    * Unregisters the specified {@link PublisherDefinition}.
    * 
-   * @param publisher the {@link PublisherDefinition} of the {@link Publisher}
-   *        to unregister
+   * @param publisher
+   *          the {@link PublisherDefinition} of the {@link Publisher} to
+   *          unregister
    * @return a {@link Response} with the number of unregistered
    *         {@link Publisher}s as the result
-   * @throws RemoteException
-   * @throws XmlRpcTimeoutException
    */
-  public Response<Integer> unregisterPublisher(SlaveIdentifier slave, Publisher<?> publisher)
-      throws RemoteException, XmlRpcTimeoutException {
+  public Response<Integer> unregisterPublisher(SlaveIdentifier slave, Publisher<?> publisher) {
     return Response.fromListChecked(node.unregisterPublisher(slave.getName().toString(), publisher
         .getTopicGraphName().toString(), slave.getUri().toString()), new IntegerResultFactory());
   }
@@ -179,15 +154,14 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   /**
    * Returns the {@link URI} of the {@link SlaveServer} with the given name.
    * 
-   * @param slave the {@link SlaveIdentifier} of the caller
-   * @param nodeName the name of the {@link SlaveServer} to lookup
+   * @param slave
+   *          the {@link SlaveIdentifier} of the caller
+   * @param nodeName
+   *          the name of the {@link SlaveServer} to lookup
    * @return a {@link Response} with the {@link URI} of the {@link SlaveServer}
    *         as a result
-   * @throws RemoteException
-   * @throws XmlRpcTimeoutException
    */
-  public Response<URI> lookupNode(SlaveIdentifier slave, String nodeName) throws RemoteException,
-      XmlRpcTimeoutException {
+  public Response<URI> lookupNode(SlaveIdentifier slave, String nodeName) {
     return Response.fromListChecked(node.lookupNode(slave.getName().toString(), nodeName),
         new UriResultFactory());
   }
@@ -195,13 +169,11 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   /**
    * Returns the {@link URI} of the {@link MasterServer}.
    * 
-   * @param slave the {@link SlaveIdentifier} of the caller
+   * @param slave
+   *          the {@link SlaveIdentifier} of the caller
    * @return the {@link URI} of the {@link MasterServer}
-   * @throws RemoteException If {@code StatusCode.FAILURE} or
-   *         {@code StatusCode.ERROR} is returned by {@link MasterServer}.
-   * @throws XmlRpcTimeoutException
    */
-  public Response<URI> getUri(SlaveIdentifier slave) throws RemoteException, XmlRpcTimeoutException {
+  public Response<URI> getUri(SlaveIdentifier slave) {
     return Response
         .fromListChecked(node.getUri(slave.getName().toString()), new UriResultFactory());
   }
@@ -209,16 +181,14 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
   /**
    * Returns the {@link URI} of the {@link ServiceServer} with the given name.
    * 
-   * @param slave the {@link SlaveIdentifier} of the caller
-   * @param serviceName the name of the {@link ServiceServer} to look up
+   * @param slave
+   *          the {@link SlaveIdentifier} of the caller
+   * @param serviceName
+   *          the name of the {@link ServiceServer} to look up
    * @return a {@link Response} with the {@link URI} of the
    *         {@link ServiceServer} as a result
-   * @throws RemoteException If {@code StatusCode.FAILURE} is returned by
-   *         {@link MasterServer}.
-   * @throws XmlRpcTimeoutException
    */
-  public Response<URI> lookupService(SlaveIdentifier slave, String serviceName)
-      throws RemoteException, XmlRpcTimeoutException {
+  public Response<URI> lookupService(SlaveIdentifier slave, String serviceName) {
     return Response.fromListCheckedFailure(
         node.lookupService(slave.getName().toString(), serviceName), new UriResultFactory());
   }

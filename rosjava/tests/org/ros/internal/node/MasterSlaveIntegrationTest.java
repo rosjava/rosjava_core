@@ -19,22 +19,19 @@ package org.ros.internal.node;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.ros.internal.node.parameter.ParameterManager;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.SlaveClient;
+import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
-import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 
 import java.net.URI;
 
@@ -66,13 +63,13 @@ public class MasterSlaveIntegrationTest {
   }
 
   @Test
-  public void testGetMasterUri() throws RemoteException, XmlRpcTimeoutException {
+  public void testGetMasterUri() {
     Response<URI> response = slaveClient.getMasterUri();
     assertEquals(masterServer.getUri(), response.getResult());
   }
 
   @Test
-  public void testGetPid() throws RemoteException, XmlRpcTimeoutException {
+  public void testGetPid() {
     Response<Integer> response = slaveClient.getPid();
     assertTrue(response.getResult() > 0);
   }

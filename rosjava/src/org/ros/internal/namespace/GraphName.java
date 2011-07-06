@@ -28,6 +28,10 @@ import org.ros.namespace.Namespace;
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
+/**
+ * @author damonkohler
+ * 
+ */
 public class GraphName {
 
   private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
@@ -45,14 +49,25 @@ public class GraphName {
 
   /**
    * @param name
+   *          the {@link String} representation of this {@link GraphName}
    */
   public GraphName(String name) {
     Preconditions.checkNotNull(name);
-    validateName(name);
-    this.name = canonicalizeName(name);
+    validate(name);
+    this.name = canonicalize(name);
   }
 
-  public static boolean validateName(String name) {
+  /**
+   * Returns {@code true} if the supplied {@link String} can be used to
+   * construct a {@link GraphName}.
+   * 
+   * @param name
+   *          the {@link String} representation of a {@link GraphName} to
+   *          validate
+   * @return {@code true} if the supplied name is can be used to construct a
+   *         {@link GraphName}
+   */
+  public static boolean validate(String name) {
     // Allow empty names.
     if (name.length() > 0) {
       if (!name.matches(VALID_ROS_NAME_PATTERN)) {
@@ -67,10 +82,10 @@ public class GraphName {
    * trailing slashes. Canonical names can be global, private, or relative.
    * 
    * @param name
-   * @return the canonical name for this graph node
+   * @return the canonical name for this {@link GraphName}
    */
-  public static String canonicalizeName(String name) {
-    validateName(name);
+  public static String canonicalize(String name) {
+    Preconditions.checkArgument(validate(name));
     // Trim trailing slashes for canonical representation.
     while (!name.equals(Namespace.GLOBAL) && name.endsWith("/")) {
       name = name.substring(0, name.length() - 1);
@@ -101,9 +116,20 @@ public class GraphName {
   public boolean isGlobal() {
     return name.startsWith(Namespace.GLOBAL);
   }
-  
+
+  /**
+   * Returns {@code true} if this {@link GraphName} represents the root
+   * namespace.
+   */
   public boolean isRoot() {
     return name.equals(Namespace.GLOBAL);
+  }
+
+  /**
+   * Returns {@code true} if this {@link GraphName} is empty.
+   */
+  public boolean isEmpty() {
+    return name.equals("");
   }
 
   /**
@@ -167,7 +193,10 @@ public class GraphName {
     }
   }
 
-  public GraphName getName() {
+  /**
+   * Returns a {@link GraphName} without the leading parent namespace.
+   */
+  public GraphName getBasename() {
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > -1) {
       if (slashIdx + 1 < name.length()) {
@@ -176,6 +205,56 @@ public class GraphName {
       return new GraphName("");
     }
     return this;
+  }
+
+  /**
+   * Convert name to a relative name representation. This does not take any
+   * namespace into account; it simply strips any preceding characters for
+   * global or private name representation.
+   * 
+   * @return a relative {@link GraphName}
+   */
+  public GraphName toRelative() {
+    if (isPrivate() || isGlobal()) {
+      return new GraphName(name.substring(1));
+    } else {
+      return this;
+    }
+  }
+
+  /**
+   * Convert name to a global name representation. This does not take any
+   * namespace into account; it simply adds in the global prefix "/" if missing.
+   * 
+   * @return a string with the first
+   */
+  public GraphName toGlobal() {
+    if (isGlobal()) {
+      return this;
+    } else if (isPrivate()) {
+      return new GraphName(Namespace.GLOBAL + name.substring(1));
+    } else {
+      return new GraphName(Namespace.GLOBAL + name);
+    }
+  }
+
+  /**
+   * Join this {@link GraphName} with another.
+   * 
+   * @param other
+   *          the {@link GraphName} to join with, if other is global, this will
+   *          return other.
+   * @return a {@link GraphName} representing the concatenation of this
+   *         {@link GraphName} and {@code other}
+   */
+  public GraphName join(GraphName other) {
+    if (other.isGlobal() || isEmpty()) {
+      return other;
+    } else if (isRoot()) {
+      return other.toGlobal();
+    } else {
+      return new GraphName(toString() + "/" + other.toString());
+    }
   }
 
   @Override
@@ -191,37 +270,6 @@ public class GraphName {
   @Override
   public String toString() {
     return name;
-  }
-
-  /**
-   * Convert name to a relative name representation. This does not take any
-   * namespace into account; it simply strips any preceding characters for
-   * global or private name representation.
-   * 
-   * @return a string with the first
-   */
-  public String toRelative() {
-    if (isPrivate() || isGlobal()) {
-      return name.substring(1);
-    } else {
-      return name;
-    }
-  }
-
-  /**
-   * Convert name to a global name representation. This does not take any
-   * namespace into account; it simply adds in the global prefix "/" if missing.
-   * 
-   * @return a string with the first
-   */
-  public String toGlobal() {
-    if (isGlobal()) {
-      return name;
-    } else if (isPrivate()) {
-      return "/" + name.substring(1);
-    } else {
-      return "/" + name;
-    }
   }
 
 }

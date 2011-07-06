@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.topic.PublisherIdentifier;
@@ -40,8 +39,7 @@ import java.util.List;
 public class MasterImplTest {
 
   @Test
-  public void testRegisterPublisherWithNoSubscribers() throws XmlRpcTimeoutException,
-      RemoteException {
+  public void testRegisterPublisherWithNoSubscribers() {
     MasterServer mockMaster = mock(MasterServer.class);
     when(mockMaster.registerPublisher(Matchers.<PublisherIdentifier>any())).thenReturn(
         Lists.<SubscriberIdentifier>newArrayList());
@@ -52,7 +50,7 @@ public class MasterImplTest {
   }
 
   @Test
-  public void testRegisterPublisher() throws XmlRpcTimeoutException, RemoteException {
+  public void testRegisterPublisher() {
     MasterServer mockMaster = mock(MasterServer.class);
     final SubscriberIdentifier subscriberIdentifier =
         SubscriberIdentifier.createFromStrings("/slave", "http://api", "/topic");

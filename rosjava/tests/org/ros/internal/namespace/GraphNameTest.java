@@ -16,12 +16,12 @@
 package org.ros.internal.namespace;
 
 import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.ros.exception.RosNameException;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class GraphNameTest extends TestCase {
 
@@ -127,27 +127,55 @@ public class GraphNameTest extends TestCase {
 
   @Test
   public void testCanonicalizeName() {
-    assertEquals("", GraphName.canonicalizeName(""));
-    assertEquals("/", GraphName.canonicalizeName("/"));
-    assertEquals("/", GraphName.canonicalizeName("//"));
-    assertEquals("/", GraphName.canonicalizeName("///"));
+    assertEquals("", GraphName.canonicalize(""));
+    assertEquals("/", GraphName.canonicalize("/"));
+    assertEquals("/", GraphName.canonicalize("//"));
+    assertEquals("/", GraphName.canonicalize("///"));
 
-    assertEquals("foo", GraphName.canonicalizeName("foo"));
-    assertEquals("foo", GraphName.canonicalizeName("foo/"));
-    assertEquals("foo", GraphName.canonicalizeName("foo//"));
+    assertEquals("foo", GraphName.canonicalize("foo"));
+    assertEquals("foo", GraphName.canonicalize("foo/"));
+    assertEquals("foo", GraphName.canonicalize("foo//"));
 
-    assertEquals("/foo", GraphName.canonicalizeName("/foo"));
-    assertEquals("/foo", GraphName.canonicalizeName("/foo/"));
-    assertEquals("/foo", GraphName.canonicalizeName("/foo//"));
+    assertEquals("/foo", GraphName.canonicalize("/foo"));
+    assertEquals("/foo", GraphName.canonicalize("/foo/"));
+    assertEquals("/foo", GraphName.canonicalize("/foo//"));
 
-    assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar"));
-    assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar/"));
-    assertEquals("/foo/bar", GraphName.canonicalizeName("/foo/bar//"));
+    assertEquals("/foo/bar", GraphName.canonicalize("/foo/bar"));
+    assertEquals("/foo/bar", GraphName.canonicalize("/foo/bar/"));
+    assertEquals("/foo/bar", GraphName.canonicalize("/foo/bar//"));
 
-    assertEquals("~foo", GraphName.canonicalizeName("~foo"));
-    assertEquals("~foo", GraphName.canonicalizeName("~foo/"));
-    assertEquals("~foo", GraphName.canonicalizeName("~foo//"));
-    assertEquals("~foo", GraphName.canonicalizeName("~/foo"));
+    assertEquals("~foo", GraphName.canonicalize("~foo"));
+    assertEquals("~foo", GraphName.canonicalize("~foo/"));
+    assertEquals("~foo", GraphName.canonicalize("~foo//"));
+    assertEquals("~foo", GraphName.canonicalize("~/foo"));
+  }
+
+  @Test
+  public void testGetName() {
+    GraphName name = new GraphName("");
+    assertEquals("", name.getBasename().toString());
+    name = new GraphName("/");
+    assertEquals("", name.getBasename().toString());
+    name = new GraphName("/foo");
+    assertEquals("foo", name.getBasename().toString());
+    name = new GraphName("foo");
+    assertEquals("foo", name.getBasename().toString());
+    name = new GraphName("foo/");
+    // The trailing slash is removed when creating a GraphName.
+    assertEquals("foo", name.getBasename().toString());
+    name = new GraphName("/foo/bar");
+    assertEquals("bar", name.getBasename().toString());
+    name = new GraphName("foo/bar");
+    assertEquals("bar", name.getBasename().toString());
+  }
+
+  @Test
+  public void testJoin() {
+    assertEquals(new GraphName("/bar"), new GraphName("/").join(new GraphName("bar")));
+    assertEquals(new GraphName("bar"), new GraphName("").join(new GraphName("bar")));
+    assertEquals(new GraphName("foo/bar"), new GraphName("foo").join(new GraphName("bar")));
+    assertEquals(new GraphName("/foo/bar"), new GraphName("/foo").join(new GraphName("bar")));
+    assertEquals(new GraphName("/bar"), new GraphName("/foo").join(new GraphName("/bar")));
   }
 
 }
