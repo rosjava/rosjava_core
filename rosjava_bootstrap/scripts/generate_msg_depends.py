@@ -75,6 +75,9 @@ def is_srv_pkg(pkg):
 
 def get_msg_packages(rospack, package):
     depends = rospack.depends([package])[package]
+    # temporary workaround until ROS 1.5.2 is released
+    if package == 'rosgraph_msgs' and not 'std_msgs' in depends:
+        depends.append('std_msgs')
     return [pkg for pkg in depends if is_msg_pkg(pkg)]
 
 def get_srv_packages(rospack, package):
@@ -152,6 +155,7 @@ def wipe_msg_depends(package):
     msg_packages = get_msg_packages(rospack, package)
     srv_packages = get_srv_packages(rospack, package)
 
+    properties_file = os.path.join(_properties_dir, 'build-%s.properties'%(package))
     for p in set(msg_packages + srv_packages):
         # call ant to delete build artifacts
         command = ['ant', '-f', _build_file,
