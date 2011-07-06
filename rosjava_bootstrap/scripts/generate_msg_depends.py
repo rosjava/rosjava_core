@@ -75,8 +75,8 @@ def is_srv_pkg(pkg):
 
 def get_msg_packages(rospack, package):
     depends = rospack.depends([package])[package]
-    # temporary workaround until ROS 1.5.2 is released
-    if package == 'rosgraph_msgs' and not 'std_msgs' in depends:
+    # temporary workaround until ROS 1.5.2 and common_msgs 1.6.0 is released
+    if package in ['rosgraph_msgs', 'actionlib_msgs'] and not 'std_msgs' in depends:
         depends.append('std_msgs')
     return [pkg for pkg in depends if is_msg_pkg(pkg)]
 
