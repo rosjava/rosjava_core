@@ -15,7 +15,7 @@ eclipse-classpath:
 	if [ ! -f .classpath ] ; then rosrun rosjava_bootstrap generate_properties.py --eclipse $(PACKAGE_NAME) > .classpath ; touch .classpath-generated; fi
 
 eclipse-project:
-	if [ ! -f .project ] ; then cp `rospack find rosjava_bootstrap`/eclipse/eclipse-project-template .project ; touch .project-generated; fi
+	if [ ! -f .project ] ; then sed s/PROJECT_NAME/$(PACKAGE_NAME)/ `rospack find rosjava_bootstrap`/eclipse/eclipse-project-template > .project ; touch .project-generated; fi
 
 # msg-deps builds both msgs and srvs
 msg-deps:
