@@ -3,6 +3,7 @@
   <import file="../build-common.xml" />
 
   <property file="ros.properties" />
+  <fail unless="ros.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/>
   
   <property name="jar.rosjava" location="${dist}/rosjava.jar" />
 
