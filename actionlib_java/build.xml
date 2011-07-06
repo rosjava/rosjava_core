@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="default" name="java">
 
+  <property file="ros.properties" />
+
   <property name="build" location="build" />
   <property name="dist" location="dist" />
   <property name="javac-source" value="1.6" />
@@ -13,6 +15,8 @@
     <pathelement location="${build}" />
     <pathelement path="${ros.classpath}" />
   </path>
+
+  <target name="default" depends="init, compile, jar" />
 
   <target name="init">
     <fail unless="ros.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/>
