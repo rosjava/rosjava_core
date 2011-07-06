@@ -99,6 +99,14 @@ def get_eclipse_src_entries(package):
             print >> sys.stderr, "Invalid <%s> tag in package %s"%(tag, pkg)
     return elements
 
+def is_android_package(package):
+    rospack = roslib.packages.ROSPackages()
+    depends = rospack.depends([package])[package]
+    elements = []
+    m = rospack.manifests[package]
+    pkg_dir = roslib.packages.get_pkg_dir(package)
+    return 'android' in [x.tag for x in m.exports]
+
 def generate_properties_main(argv=None):
     if argv is None:
         argv = sys.argv
@@ -109,17 +117,14 @@ def generate_properties_main(argv=None):
     if len(argv) != 2:
         usage()
     package = argv[1]
-    if not use_eclipse:
-        sys.stdout.write('ros.home=%s\n'%(roslib.rosenv.get_ros_home()))
-        sys.stdout.write('ros.rosjava.dir=%s\n'%(roslib.packages.get_pkg_dir('rosjava')))
-        sys.stdout.write('ros.classpath=%s\n'%(get_classpath(package).replace(':', '\:')))
-        # re-encode for ant <fileset includes="${ros.jarfileset}">
-        sys.stdout.write('ros.jarfileset=%s\n'%(get_classpath(package).replace(':', ',')))
-        sys.stdout.write('ros.test_results=%s\n'%(os.path.join(roslib.rosenv.get_test_results_dir(), package)))
-    else:
+    if use_eclipse:
         sys.stdout.write("""<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 """)
+        # TODO(damonkohler): Move Eclipse .project file generation into this
+        # script as well so that we can alter it for use with Android.
+        if is_android_package(package):
+            sys.stdout.write('\t<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>\n')
         for p in get_eclipse_src_entries(package):
             if p:
                 sys.stdout.write('\t<classpathentry kind="src" path="%s"/>\n'%(p))
@@ -132,6 +137,14 @@ def generate_properties_main(argv=None):
         sys.stdout.write("""\t<classpath kind="output" path="build"/>
 </classpath>
 """)
-    
+    else:
+        sys.stdout.write('ros.home=%s\n'%(roslib.rosenv.get_ros_home()))
+        sys.stdout.write('ros.rosjava.dir=%s\n'%(roslib.packages.get_pkg_dir('rosjava')))
+        sys.stdout.write('ros.classpath=%s\n'%(get_classpath(package).replace(':', '\:')))
+        # re-encode for ant <fileset includes="${ros.jarfileset}">
+        sys.stdout.write('ros.jarfileset=%s\n'%(get_classpath(package).replace(':', ',')))
+        sys.stdout.write('ros.test_results=%s\n'%(os.path.join(roslib.rosenv.get_test_results_dir(), package)))
+
+   
 if __name__ == '__main__':
     generate_properties_main()
