@@ -18,6 +18,10 @@ package org.ros;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.namespace.NodeNameResolver;
+
+import org.ros.internal.namespace.DefaultNameResolver;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosInitException;
@@ -25,7 +29,7 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.MessageDefinition;
 import org.ros.internal.message.ServiceMessageDefinition;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.RosoutLogger;
 import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.internal.node.client.ParameterClient;
@@ -43,8 +47,8 @@ import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.message.ServiceMessageDefinitionFactory;
 import org.ros.message.Time;
+import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
-import org.ros.namespace.NodeNameResolver;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -85,7 +89,7 @@ public class DefaultNode implements Node {
     } else {
       basename = name;
     }
-    nodeName = parentResolver.getNamespace().join(new GraphName(basename));
+    nodeName = parentResolver.getNamespace().join(new DefaultGraphName(basename));
     resolver = NodeNameResolver.create(parentResolver, nodeName);
 
     // TODO(kwc): Implement simulated time.
@@ -132,7 +136,7 @@ public class DefaultNode implements Node {
     String resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition =
-        TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
+        TopicDefinition.create(new DefaultGraphName(resolvedTopicName), messageDefinition);
     org.ros.MessageSerializer<MessageType> serializer =
         configuration.getMessageSerializationFactory().createSerializer(messageType);
     return node.createPublisher(topicDefinition, serializer);
@@ -161,7 +165,7 @@ public class DefaultNode implements Node {
     String resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition =
-        TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
+        TopicDefinition.create(new DefaultGraphName(resolvedTopicName), messageDefinition);
     MessageDeserializer<MessageType> deserializer =
         (MessageDeserializer<MessageType>) configuration.getMessageSerializationFactory()
             .createDeserializer(messageType);
@@ -177,7 +181,7 @@ public class DefaultNode implements Node {
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
     // TODO(damonkohler): It's rather non-obvious that the URI will be created
     // later on the fly.
-    ServiceIdentifier identifier = new ServiceIdentifier(new GraphName(serviceName), null);
+    ServiceIdentifier identifier = new ServiceIdentifier(new DefaultGraphName(serviceName), null);
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
@@ -213,7 +217,7 @@ public class DefaultNode implements Node {
 
   @Override
   public ServiceIdentifier lookupService(String serviceName) {
-    GraphName resolvedServiceName = new GraphName(resolveName(serviceName));
+    GraphName resolvedServiceName = new DefaultGraphName(resolveName(serviceName));
     try {
       return node.lookupService(resolvedServiceName);
     } catch (RemoteException e) {
@@ -296,7 +300,7 @@ public class DefaultNode implements Node {
   }
 
   /**
-   * @return {@link NameResolver} for this namespace.
+   * @return {@link DefaultNameResolver} for this namespace.
    */
   @Override
   public NodeNameResolver getResolver() {
@@ -307,7 +311,7 @@ public class DefaultNode implements Node {
    * Create a {@link ParameterClient} to query and set parameters on the ROS
    * parameter server.
    * 
-   * @return {@link ParameterClient} with {@link NameResolver} in this
+   * @return {@link ParameterClient} with {@link DefaultNameResolver} in this
    *         namespace.
    */
   @Override

@@ -44,7 +44,7 @@ class ServiceRequestHandler<RequestType, ResponseType> extends SimpleChannelHand
   }
 
   private ByteBuffer handleRequest(ByteBuffer buffer) throws ServiceException {
-    RequestType request = (RequestType) deserializer.deserialize(buffer);
+    RequestType request = deserializer.deserialize(buffer);
     ResponseType response = responseBuilder.build(request);
     return serializer.serialize(response);
   }

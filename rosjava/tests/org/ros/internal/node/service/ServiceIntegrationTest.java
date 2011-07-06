@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.ros.ServiceClient;
 import org.ros.ServiceResponseListener;
 import org.ros.internal.message.ServiceMessageDefinition;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.Node;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
@@ -54,7 +54,7 @@ public class ServiceIntegrationTest {
   public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    serviceIdentifier = new ServiceIdentifier(new GraphName("/add_two_ints"), null);
+    serviceIdentifier = new ServiceIdentifier(new DefaultGraphName("/add_two_ints"), null);
     serviceDefinition =
         new ServiceDefinition(serviceIdentifier, new ServiceMessageDefinition(
             AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum()));
@@ -66,7 +66,7 @@ public class ServiceIntegrationTest {
 
   @Test
   public void PesistentServiceConnectionTest() throws Exception {
-    Node serverNode = Node.createPrivate(new GraphName("/server"), masterServer.getUri(), 0, 0);
+    Node serverNode = Node.createPrivate(new DefaultGraphName("/server"), masterServer.getUri(), 0, 0);
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.createServiceServer(serviceDefinition, requestDeserializer, responseSerializer,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -79,7 +79,7 @@ public class ServiceIntegrationTest {
             });
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
-    Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
+    Node clientNode = Node.createPrivate(new DefaultGraphName("/client"), masterServer.getUri(), 0, 0);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.createServiceClient(server.getDefinition(), requestSerializer,
             responseDeserializer);
@@ -111,7 +111,7 @@ public class ServiceIntegrationTest {
   public void RequestFailureTest() throws Exception {
     final String errorMessage = "Error!";
 
-    Node serverNode = Node.createPrivate(new GraphName("/server"), masterServer.getUri(), 0, 0);
+    Node serverNode = Node.createPrivate(new DefaultGraphName("/server"), masterServer.getUri(), 0, 0);
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.createServiceServer(serviceDefinition, requestDeserializer, responseSerializer,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -122,7 +122,7 @@ public class ServiceIntegrationTest {
             });
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
-    Node clientNode = Node.createPrivate(new GraphName("/client"), masterServer.getUri(), 0, 0);
+    Node clientNode = Node.createPrivate(new DefaultGraphName("/client"), masterServer.getUri(), 0, 0);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.createServiceClient(server.getDefinition(), requestSerializer,
             responseDeserializer);

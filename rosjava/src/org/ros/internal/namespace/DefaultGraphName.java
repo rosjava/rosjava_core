@@ -19,7 +19,7 @@ package org.ros.internal.namespace;
 import com.google.common.base.Preconditions;
 
 import org.ros.exception.RosNameException;
-import org.ros.namespace.Namespace;
+import org.ros.namespace.GraphName;
 
 /**
  * ROS graph resource name.
@@ -28,30 +28,26 @@ import org.ros.namespace.Namespace;
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
-/**
- * @author damonkohler
- * 
- */
-public class GraphName {
+public class DefaultGraphName implements GraphName {
 
   private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
   private static final String UNKNOWN_NAME = "/unknown";
 
   private final String name;
 
-  public static GraphName createUnknown() {
-    return new GraphName(UNKNOWN_NAME);
+  public static DefaultGraphName createUnknown() {
+    return new DefaultGraphName(UNKNOWN_NAME);
   }
 
-  public static GraphName createRoot() {
-    return new GraphName(Namespace.GLOBAL);
+  public static DefaultGraphName createRoot() {
+    return new DefaultGraphName(GraphName.ROOT);
   }
 
   /**
    * @param name
-   *          the {@link String} representation of this {@link GraphName}
+   *          the {@link String} representation of this {@link DefaultGraphName}
    */
-  public GraphName(String name) {
+  public DefaultGraphName(String name) {
     Preconditions.checkNotNull(name);
     validate(name);
     this.name = canonicalize(name);
@@ -59,13 +55,13 @@ public class GraphName {
 
   /**
    * Returns {@code true} if the supplied {@link String} can be used to
-   * construct a {@link GraphName}.
+   * construct a {@link DefaultGraphName}.
    * 
    * @param name
-   *          the {@link String} representation of a {@link GraphName} to
+   *          the {@link String} representation of a {@link DefaultGraphName} to
    *          validate
    * @return {@code true} if the supplied name is can be used to construct a
-   *         {@link GraphName}
+   *         {@link DefaultGraphName}
    */
   public static boolean validate(String name) {
     // Allow empty names.
@@ -82,12 +78,12 @@ public class GraphName {
    * trailing slashes. Canonical names can be global, private, or relative.
    * 
    * @param name
-   * @return the canonical name for this {@link GraphName}
+   * @return the canonical name for this {@link DefaultGraphName}
    */
   public static String canonicalize(String name) {
     Preconditions.checkArgument(validate(name));
     // Trim trailing slashes for canonical representation.
-    while (!name.equals(Namespace.GLOBAL) && name.endsWith("/")) {
+    while (!name.equals(GraphName.ROOT) && name.endsWith("/")) {
       name = name.substring(0, name.length() - 1);
     }
     if (name.startsWith("~/")) {
@@ -113,21 +109,24 @@ public class GraphName {
    * 
    * @return If this name is a global name then return true.
    */
+  @Override
   public boolean isGlobal() {
-    return name.startsWith(Namespace.GLOBAL);
+    return name.startsWith(GraphName.ROOT);
   }
 
   /**
-   * Returns {@code true} if this {@link GraphName} represents the root
+   * Returns {@code true} if this {@link DefaultGraphName} represents the root
    * namespace.
    */
+  @Override
   public boolean isRoot() {
-    return name.equals(Namespace.GLOBAL);
+    return name.equals(GraphName.ROOT);
   }
 
   /**
-   * Returns {@code true} if this {@link GraphName} is empty.
+   * Returns {@code true} if this {@link DefaultGraphName} is empty.
    */
+  @Override
   public boolean isEmpty() {
     return name.equals("");
   }
@@ -148,6 +147,7 @@ public class GraphName {
    * 
    * @return true if the name is a private name.
    */
+  @Override
   public boolean isPrivate() {
     return name.startsWith("~");
   }
@@ -166,6 +166,7 @@ public class GraphName {
    * 
    * @return true if the name is a relative name.
    */
+  @Override
   public boolean isRelative() {
     return !isPrivate() && !isGlobal();
   }
@@ -174,35 +175,37 @@ public class GraphName {
    * @return Gets the parent of this name in canonical representation. This may
    *         return an empty name if there is no parent.
    */
+  @Override
   public GraphName getParent() {
     if (name.length() == 0) {
-      return new GraphName("");
+      return new DefaultGraphName("");
     }
-    if (name.equals(Namespace.GLOBAL)) {
-      return new GraphName(Namespace.GLOBAL);
+    if (name.equals(GraphName.ROOT)) {
+      return new DefaultGraphName(GraphName.ROOT);
     }
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > 1) {
-      return new GraphName(name.substring(0, slashIdx));
+      return new DefaultGraphName(name.substring(0, slashIdx));
     } else {
       if (isGlobal()) {
-        return new GraphName(Namespace.GLOBAL);
+        return new DefaultGraphName(GraphName.ROOT);
       } else {
-        return new GraphName("");
+        return new DefaultGraphName("");
       }
     }
   }
 
   /**
-   * Returns a {@link GraphName} without the leading parent namespace.
+   * Returns a {@link DefaultGraphName} without the leading parent namespace.
    */
+  @Override
   public GraphName getBasename() {
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > -1) {
       if (slashIdx + 1 < name.length()) {
-        return new GraphName(name.substring(slashIdx + 1));
+        return new DefaultGraphName(name.substring(slashIdx + 1));
       }
-      return new GraphName("");
+      return new DefaultGraphName("");
     }
     return this;
   }
@@ -212,11 +215,12 @@ public class GraphName {
    * namespace into account; it simply strips any preceding characters for
    * global or private name representation.
    * 
-   * @return a relative {@link GraphName}
+   * @return a relative {@link DefaultGraphName}
    */
+  @Override
   public GraphName toRelative() {
     if (isPrivate() || isGlobal()) {
-      return new GraphName(name.substring(1));
+      return new DefaultGraphName(name.substring(1));
     } else {
       return this;
     }
@@ -228,32 +232,34 @@ public class GraphName {
    * 
    * @return a string with the first
    */
+  @Override
   public GraphName toGlobal() {
     if (isGlobal()) {
       return this;
     } else if (isPrivate()) {
-      return new GraphName(Namespace.GLOBAL + name.substring(1));
+      return new DefaultGraphName(GraphName.ROOT + name.substring(1));
     } else {
-      return new GraphName(Namespace.GLOBAL + name);
+      return new DefaultGraphName(GraphName.ROOT + name);
     }
   }
 
   /**
-   * Join this {@link GraphName} with another.
+   * Join this {@link DefaultGraphName} with another.
    * 
    * @param other
-   *          the {@link GraphName} to join with, if other is global, this will
+   *          the {@link DefaultGraphName} to join with, if other is global, this will
    *          return other.
-   * @return a {@link GraphName} representing the concatenation of this
-   *         {@link GraphName} and {@code other}
+   * @return a {@link DefaultGraphName} representing the concatenation of this
+   *         {@link DefaultGraphName} and {@code other}
    */
+  @Override
   public GraphName join(GraphName other) {
     if (other.isGlobal() || isEmpty()) {
       return other;
     } else if (isRoot()) {
       return other.toGlobal();
     } else {
-      return new GraphName(toString() + "/" + other.toString());
+      return new DefaultGraphName(toString() + "/" + other.toString());
     }
   }
 

@@ -16,7 +16,8 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
+import org.ros.namespace.GraphName;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -26,7 +27,7 @@ public class TopicIdentifier {
   private final GraphName name;
   
   public static TopicIdentifier createFromString(String topicName) {
-    return new TopicIdentifier(new GraphName(topicName));
+    return new TopicIdentifier(new DefaultGraphName(topicName));
   }
 
   public TopicIdentifier(GraphName name) {

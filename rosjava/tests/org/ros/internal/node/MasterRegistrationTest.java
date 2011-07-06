@@ -4,16 +4,15 @@ package org.ros.internal.node;
 
 import static org.junit.Assert.assertTrue;
 
-import org.ros.internal.node.parameter.ParameterManager;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.message.MessageDefinition;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
@@ -43,7 +42,7 @@ public class MasterRegistrationTest {
 
   public MasterRegistrationTest() {
     topicDefinition =
-        TopicDefinition.create(new GraphName("/topic"), MessageDefinition.create(
+        TopicDefinition.create(new DefaultGraphName("/topic"), MessageDefinition.create(
             org.ros.message.std_msgs.String.__s_getDataType(),
             org.ros.message.std_msgs.String.__s_getMessageDefinition(),
             org.ros.message.std_msgs.String.__s_getMD5Sum()));
@@ -60,7 +59,7 @@ public class MasterRegistrationTest {
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
     slaveServer =
-        new SlaveServer(new GraphName("/node"), BindAddress.createPrivate(0),
+        new SlaveServer(new DefaultGraphName("/node"), BindAddress.createPrivate(0),
             AdvertiseAddress.createPrivate(), BindAddress.createPrivate(0),
             AdvertiseAddress.createPrivate(), masterClient, topicManager, serviceManager,
             parameterManager);

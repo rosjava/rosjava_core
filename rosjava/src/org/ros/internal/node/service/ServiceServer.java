@@ -25,11 +25,11 @@ import org.jboss.netty.channel.ChannelHandler;
 import org.ros.MessageDeserializer;
 import org.ros.MessageSerializer;
 import org.ros.internal.message.ServiceMessageDefinition;
-import org.ros.internal.namespace.GraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.namespace.GraphName;
 
 import java.net.URI;
 import java.util.Map;

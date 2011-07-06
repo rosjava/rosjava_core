@@ -20,12 +20,13 @@ package org.ros;
 import org.apache.commons.logging.Log;
 import org.ros.exception.RosInitException;
 import org.ros.internal.exception.RemoteException;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.message.std_msgs.Bool;
 import org.ros.message.std_msgs.Float64;
 import org.ros.message.std_msgs.Int64;
 import org.ros.message.test_ros.Composite;
 import org.ros.message.test_ros.TestArrays;
+import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 
 import java.util.Arrays;
@@ -65,8 +66,8 @@ public class ParameterServerTestNode implements NodeMain {
       tilde_m.data = param.getString(node.resolveName("~tilde"));
       log.info("tilde: " + tilde_m.data);
 
-      GraphName paramNamespace = new GraphName(param.getString("parameter_namespace"));
-      GraphName targetNamespace = new GraphName(param.getString("target_namespace"));
+      GraphName paramNamespace = new DefaultGraphName(param.getString("parameter_namespace"));
+      GraphName targetNamespace = new DefaultGraphName(param.getString("target_namespace"));
       log.info("parameter_namespace: " + paramNamespace);
       log.info("target_namespace: " + targetNamespace);
       NameResolver resolver = node.getResolver().createResolver(paramNamespace);

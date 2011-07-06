@@ -25,7 +25,7 @@ import com.google.common.collect.Sets;
 
 import org.junit.Test;
 import org.mockito.Matchers;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
@@ -56,7 +56,7 @@ public class SlaveImplTest {
     SlaveServer mockSlave = mock(SlaveServer.class);
     Publisher<?> mockPublisher = mock(Publisher.class);
     when(mockSlave.getPublications()).thenReturn(Lists.<Publisher<?>>newArrayList(mockPublisher));
-    when(mockPublisher.getTopicGraphName()).thenReturn(new GraphName("/bar"));
+    when(mockPublisher.getTopicGraphName()).thenReturn(new DefaultGraphName("/bar"));
     when(mockPublisher.getTopicMessageType()).thenReturn("/baz");
     when(mockPublisher.getTopicDefinitionAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));
     SlaveImpl slave = new SlaveImpl(mockSlave);

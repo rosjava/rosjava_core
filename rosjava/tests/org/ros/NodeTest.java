@@ -21,11 +21,13 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 
+import org.ros.internal.namespace.DefaultNameResolver;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.exception.RosInitException;
 import org.ros.internal.exception.RemoteException;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
@@ -35,7 +37,6 @@ import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.loader.CommandLineLoader;
 import org.ros.message.std_msgs.Int64;
-import org.ros.namespace.NameResolver;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -67,7 +68,7 @@ public class NodeTest {
 
   @Test
   public void testResolveName() throws RosInitException {
-    nodeConfiguration.setParentResolver(NameResolver.createFromString("/ns1"));
+    nodeConfiguration.setParentResolver(DefaultNameResolver.createFromString("/ns1"));
     Node node = new DefaultNode("test_resolver", nodeConfiguration);
 
     assertEquals("/foo", node.resolveName("/foo"));
@@ -124,7 +125,7 @@ public class NodeTest {
     checkHostName(uri.getHost());
 
     // Check the TCPROS server address via the XML-RPC API.
-    SlaveClient slaveClient = new SlaveClient(new GraphName("test_addresses"), uri);
+    SlaveClient slaveClient = new SlaveClient(new DefaultGraphName("test_addresses"), uri);
     Response<ProtocolDescription> response =
         slaveClient.requestTopic("test_addresses_pub", Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();

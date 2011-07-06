@@ -17,6 +17,10 @@
 package org.ros;
 
 
+import org.ros.internal.namespace.NodeNameResolver;
+
+import org.ros.internal.namespace.DefaultNameResolver;
+
 import org.apache.commons.logging.Log;
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
@@ -27,8 +31,6 @@ import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.Service;
 import org.ros.message.Time;
-import org.ros.namespace.NameResolver;
-import org.ros.namespace.NodeNameResolver;
 
 import java.net.URI;
 
@@ -71,7 +73,7 @@ public interface Node {
   String resolveName(String name);
 
   /**
-   * @return {@link NameResolver} for this namespace.
+   * @return {@link DefaultNameResolver} for this namespace.
    */
   NodeNameResolver getResolver();
 
@@ -223,7 +225,7 @@ public interface Node {
    * Create a {@link ParameterClient} to query and set parameters on the ROS
    * parameter server.
    * 
-   * @return {@link ParameterClient} with {@link NameResolver} in this
+   * @return {@link ParameterClient} with {@link DefaultNameResolver} in this
    *         namespace.
    */
   ParameterTree createParameterClient();

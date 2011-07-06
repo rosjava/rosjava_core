@@ -19,7 +19,7 @@ package org.ros.internal.node.response;
 import com.google.common.collect.Lists;
 
 import org.ros.internal.message.MessageDefinition;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.topic.TopicDefinition;
 
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public class TopicDefinitionListResultFactory implements ResultFactory<List<Topi
     for (Object topic : topics) {
       String name = (String) ((Object[]) topic)[0];
       String type = (String) ((Object[]) topic)[1];
-      descriptions.add(TopicDefinition.create(new GraphName(name), MessageDefinition
+      descriptions.add(TopicDefinition.create(new DefaultGraphName(name), MessageDefinition
           .createFromTypeName(type)));
     }
     return descriptions;

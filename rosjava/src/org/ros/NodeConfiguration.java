@@ -16,8 +16,11 @@
 
 package org.ros;
 
-import org.ros.internal.node.address.Address;
+import org.ros.internal.namespace.DefaultNameResolver;
+
 import org.ros.namespace.NameResolver;
+
+import org.ros.internal.node.address.Address;
 
 import java.io.File;
 import java.net.URI;
@@ -54,7 +57,7 @@ public class NodeConfiguration {
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
-    configuration.setParentResolver(NameResolver.createDefault());
+    configuration.setParentResolver(DefaultNameResolver.createDefault());
     configuration.setHost(DEFAULT_HOST);
     configuration.setTcpRosPort(0); // OS determined free port.
     configuration.setXmlRpcPort(0); // OS determined free port.
@@ -63,7 +66,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @return The {@link NameResolver} for a {@link Node}'s parent namespace.
+   * @return The {@link DefaultNameResolver} for a {@link Node}'s parent namespace.
    */
   public NameResolver getParentResolver() {
     return parentResolver;

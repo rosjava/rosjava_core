@@ -16,7 +16,8 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.namespace.GraphName;
+import org.ros.namespace.GraphName;
+
 import org.ros.internal.node.server.SlaveIdentifier;
 
 import java.net.URI;

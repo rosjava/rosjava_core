@@ -14,10 +14,12 @@
  * the License.
  */
 
-package org.ros.namespace;
+package org.ros.internal.namespace;
+
+import org.ros.namespace.GraphName;
+import org.ros.namespace.NameResolver;
 
 import org.ros.Node;
-import org.ros.internal.namespace.GraphName;
 
 import java.util.Map;
 
@@ -28,7 +30,7 @@ import java.util.Map;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class NodeNameResolver extends NameResolver {
+public class NodeNameResolver extends DefaultNameResolver {
 
   private final GraphName privateNamespace;
 
@@ -59,7 +61,7 @@ public class NodeNameResolver extends NameResolver {
 
   @Override
   public String resolve(String name) {
-    return resolve(new GraphName(name)).toString();
+    return resolve(new DefaultGraphName(name)).toString();
   }
 
 }

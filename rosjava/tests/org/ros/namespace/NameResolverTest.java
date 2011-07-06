@@ -15,10 +15,12 @@
  */
 package org.ros.namespace;
 
+import org.ros.internal.namespace.DefaultNameResolver;
+
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.ros.exception.RosNameException;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
 
 import java.util.HashMap;
 
@@ -26,7 +28,7 @@ public class NameResolverTest extends TestCase {
 
   @Test
   public void testResolveNameOneArg() {
-    NameResolver r = NameResolver.createDefault();
+    NameResolver r = DefaultNameResolver.createDefault();
 
     assertEquals("/foo", r.resolve("foo"));
     assertEquals("/foo", r.resolve("/foo"));
@@ -38,7 +40,7 @@ public class NameResolverTest extends TestCase {
     } catch (RosNameException e) {
     }
 
-    r = NameResolver.createFromString("/ns1");
+    r = DefaultNameResolver.createFromString("/ns1");
 
     assertEquals("/ns1/foo", r.resolve("foo"));
     assertEquals("/foo", r.resolve("/foo"));
@@ -48,19 +50,19 @@ public class NameResolverTest extends TestCase {
   @Test
   public void testResolveNameTwoArg() {
     // These tests are based on test_roslib_names.py.
-    NameResolver r = NameResolver.createDefault();
+    NameResolver r = DefaultNameResolver.createDefault();
     try {
       r.resolve("foo", "bar");
       fail("should have raised");
     } catch (IllegalArgumentException e) {
     }
 
-    assertEquals(Namespace.GLOBAL, r.resolve(Namespace.GLOBAL, ""));
-    assertEquals(Namespace.GLOBAL, r.resolve(Namespace.GLOBAL, Namespace.GLOBAL));
-    assertEquals(Namespace.GLOBAL, r.resolve("/anything/bar", Namespace.GLOBAL));
+    assertEquals(GraphName.ROOT, r.resolve(GraphName.ROOT, ""));
+    assertEquals(GraphName.ROOT, r.resolve(GraphName.ROOT, GraphName.ROOT));
+    assertEquals(GraphName.ROOT, r.resolve("/anything/bar", GraphName.ROOT));
 
     assertEquals("/ns1/node", r.resolve("/ns1/node", ""));
-    assertEquals(Namespace.GLOBAL, r.resolve(Namespace.GLOBAL, ""));
+    assertEquals(GraphName.ROOT, r.resolve(GraphName.ROOT, ""));
 
     // relative namespaces get resolved to default namespace
     assertEquals("/foo", r.resolve("/", "foo"));
@@ -93,10 +95,10 @@ public class NameResolverTest extends TestCase {
   @Test
   public void testResolveNameRemapping() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
-    remappings.put(new GraphName("name"), new GraphName("/my/name"));
-    remappings.put(new GraphName("foo"), new GraphName("/my/foo"));
+    remappings.put(new DefaultGraphName("name"), new DefaultGraphName("/my/name"));
+    remappings.put(new DefaultGraphName("foo"), new DefaultGraphName("/my/foo"));
 
-    NameResolver r = NameResolver.createDefault(remappings);
+    NameResolver r = DefaultNameResolver.createDefault(remappings);
 
     String n = r.resolve("name");
     assertTrue(n.equals("/my/name"));

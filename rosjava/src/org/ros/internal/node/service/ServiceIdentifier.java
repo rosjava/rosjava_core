@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.service;
 
-import org.ros.internal.namespace.GraphName;
+import org.ros.namespace.GraphName;
 
 import java.net.URI;
 

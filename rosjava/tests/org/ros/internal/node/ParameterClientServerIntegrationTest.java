@@ -23,16 +23,17 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.ros.internal.namespace.DefaultNameResolver;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.ParameterListener;
 import org.ros.ParameterTree;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.namespace.NodeNameResolver;
 
 import java.util.List;
 import java.util.Map;
@@ -52,8 +53,8 @@ public class ParameterClientServerIntegrationTest {
   public void setup() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    node = Node.createPrivate(new GraphName("/node_name"), masterServer.getUri(), 0, 0);
-    parameters = node.createParameterTree(NodeNameResolver.createDefault());
+    node = Node.createPrivate(new DefaultGraphName("/node_name"), masterServer.getUri(), 0, 0);
+    parameters = node.createParameterTree(DefaultNameResolver.createDefault());
   }
 
   @After
@@ -113,11 +114,11 @@ public class ParameterClientServerIntegrationTest {
 
   @Test
   public void testParameterPubSub() throws InterruptedException {
-    Node subscriber = Node.createPrivate(new GraphName("/subscriber"), masterServer.getUri(), 0, 0);
-    Node publisher = Node.createPrivate(new GraphName("/publisher"), masterServer.getUri(), 0, 0);
+    Node subscriber = Node.createPrivate(new DefaultGraphName("/subscriber"), masterServer.getUri(), 0, 0);
+    Node publisher = Node.createPrivate(new DefaultGraphName("/publisher"), masterServer.getUri(), 0, 0);
 
     ParameterTree subscriberParameters =
-        subscriber.createParameterTree(NodeNameResolver.createDefault());
+        subscriber.createParameterTree(DefaultNameResolver.createDefault());
     final CountDownLatch latch = new CountDownLatch(1);
     subscriberParameters.addParameterListener("/foo/bar", new ParameterListener() {
       @Override
@@ -128,7 +129,7 @@ public class ParameterClientServerIntegrationTest {
     });
 
     ParameterTree publisherParameters =
-        publisher.createParameterTree(NodeNameResolver.createDefault());
+        publisher.createParameterTree(DefaultNameResolver.createDefault());
     publisherParameters.set("/foo/bar", 42);
 
     assertTrue(latch.await(1, TimeUnit.SECONDS));

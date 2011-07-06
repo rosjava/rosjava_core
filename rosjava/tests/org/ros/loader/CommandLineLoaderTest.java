@@ -22,12 +22,15 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.ros.internal.namespace.DefaultNameResolver;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.NodeConfiguration;
 import org.ros.exception.RosInitException;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.namespace.DefaultGraphName;
+import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 
 import java.io.File;
@@ -89,7 +92,7 @@ public class CommandLineLoaderTest {
 
   /**
    * Test createConfiguration() with respect to reading of the environment
-   * configuration, including command-line overrides. {@link NameResolver} is
+   * configuration, including command-line overrides. {@link DefaultNameResolver} is
    * tested separately.
    * 
    * @throws RosInitException
@@ -133,11 +136,11 @@ public class CommandLineLoaderTest {
     assertEquals(defaultMasterUri, nodeConfiguration.getMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
     assertEquals("192.168.0.1", nodeConfiguration.getHost());
-    assertEquals(new GraphName("/foo/bar"), nodeConfiguration.getParentResolver().getNamespace());
+    assertEquals(new DefaultGraphName("/foo/bar"), nodeConfiguration.getParentResolver().getNamespace());
     Assert.assertEquals(rosPackagePathList, nodeConfiguration.getRosPackagePath());
 
     // Test ROS namespace resolution and canonicalization
-    GraphName canonical = new GraphName("/baz/bar");
+    GraphName canonical = new DefaultGraphName("/baz/bar");
     env = getDefaultEnv();
     env.put(EnvironmentVariables.ROS_NAMESPACE, "baz/bar");
     loader = new CommandLineLoader(emptyArgv, env);
@@ -174,7 +177,7 @@ public class CommandLineLoaderTest {
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
 
     // Test ROS namespace resolution and canonicalization
-    GraphName canonical = new GraphName("/baz/bar");
+    GraphName canonical = new DefaultGraphName("/baz/bar");
     env = getDefaultEnv();
     args = Lists.newArrayList("Foo", CommandLine.ROS_NAMESPACE + ":=baz/bar");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
@@ -208,7 +211,7 @@ public class CommandLineLoaderTest {
   }
 
   /**
-   * Test the {@link NameResolver} created by createConfiguration().
+   * Test the {@link DefaultNameResolver} created by createConfiguration().
    * 
    * @throws RosInitException
    * @throws URISyntaxException
