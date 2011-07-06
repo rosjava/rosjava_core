@@ -9,6 +9,9 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/rosjava_msg</url>
 
+  <rosdep name="ant" />
+  <rosdep name="java" />
+
   <export>
     <rosjava-src location="src" />
     <rosjava-pathelement location="dist/rosjava-bootstrap.jar" built="true" />
