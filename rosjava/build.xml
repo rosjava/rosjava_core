@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="default" name="java">
-  <import file="../build-common.xml" />
 
   <property file="ros.properties" />
-  <fail unless="ros.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/>
   
+  <property name="build" location="build" />
+  <property name="dist" location="dist" />
+  <property name="javac-source" value="1.6" />
+  <property name="javac-target" value="1.6" />
+  <property name="debuglevel" value="source,lines,vars" />
   <property name="jar.rosjava" location="${dist}/rosjava.jar" />
 
   <path id="jar.classpath">
@@ -20,6 +23,14 @@
     <path refid="jar.classpath" />
     <pathelement path="${ros.classpath}" />
   </path>
+
+  <target name="default" depends="init, compile, jar" />
+
+  <target name="init">
+    <fail unless="ros.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/>
+    <mkdir dir="${build}" />
+    <mkdir dir="${dist}" />
+  </target>
 
   <target name="compile" depends="init">
     <!-- copy all assets -->
@@ -44,12 +55,9 @@
     </javac>
   </target>
 
-  <target name="init-test">
-    <mkdir dir="${ros.test_results}" />
-  </target>
-
-  <target name="test" depends="init-test">
+  <target name="test" depends="compile">
     <!-- clear any previous results -->
+    <mkdir dir="${ros.test_results}" />
     <delete>
       <fileset dir="${ros.test_results}">
         <include name="*/**" />
@@ -89,4 +97,10 @@
       <fileset dir="${build}" />
     </jar>
   </target>
+
+  <target name="clean">
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
+  </target>
+
 </project>
