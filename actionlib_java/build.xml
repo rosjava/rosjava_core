@@ -1,28 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="default" name="java">
-  <import file="../build-common.xml" />
 
-  <property name="lib" location="../rosjava/lib" />
+  <property name="build" location="build" />
+  <property name="dist" location="dist" />
+  <property name="javac-source" value="1.6" />
+  <property name="javac-target" value="1.6" />
+  <property name="debuglevel" value="source,lines,vars" />
 
-  <property name="jar.actionlib" location="${dist}/actionlib.jar" />
-
-  <path id="jar.classpath">
-    <pathelement location="${lib}/dnsjava-2.1.1.jar" />
-    <pathelement location="${lib}/commons-codec-1.3.jar" />
-    <pathelement location="${lib}/commons-httpclient-3.1.jar" />
-    <pathelement location="${lib}/commons-logging-1.1.1.jar" />
-    <pathelement location="${lib}/guava-r07.jar" />
-    <pathelement location="${lib}/mockito-all-1.8.5.jar" />
-    <pathelement location="${lib}/netty-3.2.4.Final.jar" />
-    <pathelement location="${lib}/junit-4.8.2.jar" />
-    <pathelement location="${lib}/rosjava.jar" />
-  </path>
+  <property name="jar.actionlib_java" location="${dist}/actionlib_java.jar" />
 
   <path id="classpath">
     <pathelement location="${build}" />
-    <path refid="jar.classpath" />
     <pathelement path="${ros.classpath}" />
   </path>
+
+  <target name="init">
+    <fail unless="ros.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/>
+    <mkdir dir="${build}" />
+    <mkdir dir="${dist}" />
+  </target>
 
   <target name="compile" depends="init">
     <!-- copy all assets -->
@@ -43,49 +39,37 @@
     </javac>
   </target>
 
-  <target name="init-test">
-    <mkdir dir="${test-output}" />
-  </target>
-
-  <target name="test" depends="init-test">
+  <target name="test" depends="compile">
     <!-- clear any previous results -->
+    <mkdir dir="${ros.test_results}" />
     <delete>
-      <fileset dir="${test-output}">
+      <fileset dir="${ros.test_results}">
         <include name="*/**" />
       </fileset>
     </delete>
     <junit printsummary="yes">
       <classpath refid="classpath" />
       <formatter type="xml" />
-      <batchtest todir="${test-output}">
+      <batchtest todir="${ros.test_results}">
         <fileset dir="tests">
           <include name="**/*Test.java" />
         </fileset>
       </batchtest>
     </junit>
-    <junitreport todir="${test-output}">
-      <fileset dir="${test-output}">
+    <junitreport todir="${ros.test_results}">
+      <fileset dir="${ros.test_results}">
         <include name="TEST-*.xml" />
       </fileset>
-      <report format="frames" todir="${test-output}/html" />
+      <report format="frames" todir="${ros.test_results}/html" />
     </junitreport>
   </target>
 
   <target name="jar" depends="init, compile">
-    <manifestclasspath property="jar.actionlib.classpath" jarfile="${jar.actionlib}">
-      <classpath>
-        <path refid="jar.classpath"/>
-      </classpath>
-    </manifestclasspath>
-    <jar destfile="${jar.actionlib}">
-      <manifest>
-        <attribute name="Class-Path" value="${jar.actionlib.classpath}" />
-      </manifest>
+    <jar destfile="${jar.actionlib_java}">
       <fileset dir="${build}">
       	<exclude name="org/ros/message/actionlib_tutorials/**" />
         <exclude name="org/ros/actionlib/example/**" />
       </fileset>
     </jar>
-    <copy file="${jar.actionlib}" todir="lib" />
   </target>
 </project>
