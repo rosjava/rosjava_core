@@ -3,9 +3,9 @@
     An implementation of ROS in pure-Java with Android support.
   </description>
   <author>Damon Kohler/damonkohler@google.com</author>
-  <license>Apache 2.0</license>
+  <license>Apache License 2.0</license>
   <review status="unreviewed" notes=""/>
-  <url>http://rosjava.googlecode.com/</url>
+  <url>http://ros.org/wiki/rosjava</url>
   <depend package="roslib"/>
   <depend package="std_msgs"/>
   <depend package="rosgraph_msgs"/>

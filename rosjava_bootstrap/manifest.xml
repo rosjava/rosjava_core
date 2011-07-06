@@ -1,13 +1,14 @@
 <package>
   <description brief="rosjava_msg">
 
-     Classes for rosjava messages.
+     Provide ROS build system integration and bootstrap data
+     classes (Time and Message representation) for rosjava.
 
   </description>
   <author>Ken Conley</author>
-  <license>BSD</license>
+  <license>Apache Licence 2.0</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/rosjava_msg</url>
+  <url>http://ros.org/wiki/rosjava_bootstrap</url>
 
   <rosdep name="ant" />
   <rosdep name="java" />
