@@ -4,7 +4,6 @@
 
   <property name="build" location="build" />
   <property name="dist" location="dist" />
-  <property name="test-output" location="test_output" />
   <property name="javac-source" value="1.6" />
   <property name="javac-target" value="1.6" />
   <property name="debuglevel" value="source,lines,vars" />
@@ -18,7 +17,6 @@
   <target name="init">
     <mkdir dir="${build}" />
     <mkdir dir="${dist}" />
-    <mkdir dir="${test-output}" />
   </target>
 
   <target name="test">
@@ -32,6 +30,5 @@
   <target name="clean">
     <delete dir="${build}" />
     <delete dir="${dist}" />
-    <delete dir="${test-output}" />
   </target>
 </project>
