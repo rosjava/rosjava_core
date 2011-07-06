@@ -115,13 +115,16 @@ def generate_ros_properties(package):
     rospack = roslib.packages.ROSPackages()
     depends = rospack.depends([package])[package]
 
+    generate_version = hasattr(roslib.stacks, 'get_stack_version')
+    
     props = {}
     props['ros.home'] = roslib.rosenv.get_ros_home()
 
     # add dir props for every package we depend on
     for p in depends:
         props['ros.pkg.%s.dir'%(p)] = roslib.packages.get_pkg_dir(p)
-        props['ros.pkg.%s.version'%(p)] = get_package_version(p)
+        if generate_version:
+            props['ros.pkg.%s.version'%(p)] = get_package_version(p)
         
     props['ros.classpath'] = get_classpath(rospack, package).replace(':', '\:')
     # re-encode for ant <fileset includes="${ros.jarfileset}">
