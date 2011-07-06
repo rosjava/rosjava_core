@@ -101,6 +101,7 @@
   <target name="clean">
     <delete dir="${build}" />
     <delete dir="${dist}" />
+    <delete dir="${ros.test_results}" />
   </target>
 
 </project>
