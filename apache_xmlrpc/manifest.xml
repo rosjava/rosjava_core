@@ -18,7 +18,7 @@
     <rosjava-src location="server" />
     
     <rosjava-src location="tests" />    
-    <rosjava-pathelement location="dist/apache-xmlrpc-3.1.3rosjava.jar" />
+    <rosjava-pathelement location="dist/apache-xmlrpc-3.1.3rosjava.jar" built="true" />
     <rosjava-pathelement location="lib/commons-codec-1.3.jar" />
     <rosjava-pathelement location="lib/commons-httpclient-3.1.jar" />
     <rosjava-pathelement location="lib/commons-logging-1.1.1.jar" />

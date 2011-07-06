@@ -11,7 +11,7 @@
 
   <export>
     <rosjava-src location="src" />
-    <rosjava-pathelement location="dist/rosjava-bootstrap.jar" />
+    <rosjava-pathelement location="dist/rosjava-bootstrap.jar" built="true" />
   </export>
     
 </package>

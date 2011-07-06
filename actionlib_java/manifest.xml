@@ -14,7 +14,7 @@
     <rosjava-src location="src" />
     <rosjava-src location="tutorials" />
     
-    <rosjava-pathelement location="dist/actionlib_java.jar" />
+    <rosjava-pathelement location="dist/actionlib_java.jar" built="true" />
   </export>
 
 </package>
