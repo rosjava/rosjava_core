@@ -55,7 +55,7 @@
         <include name="*/**" />
       </fileset>
     </delete>
-    <junit printsummary="yes">
+    <junit printsummary="yes" failureproperty="tests.failed">
       <classpath refid="classpath" />
       <formatter type="xml" />
       <batchtest todir="${ros.test_results}">
@@ -72,6 +72,7 @@
       <report format="frames" todir="${ros.test_results}/html" />
       -->
     </junitreport>
+    <fail if="tests.failed" message="one or more tests failed" />
   </target>
 
   <target name="jar" depends="compile">
