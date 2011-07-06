@@ -3,7 +3,6 @@
   <import file="dependencies.xml" />
 
   <property name="build" location="build" />
-  <property name="gen" location="gen" />
   <property name="dist" location="dist" />
   <property name="test-output" location="test_output" />
   <property name="javac-source" value="1.6" />
@@ -18,7 +17,6 @@
 
   <target name="init">
     <mkdir dir="${build}" />
-    <mkdir dir="${gen}" />
     <mkdir dir="${dist}" />
     <mkdir dir="${test-output}" />
   </target>
@@ -33,7 +31,6 @@
 
   <target name="clean">
     <delete dir="${build}" />
-    <delete dir="${gen}" />
     <delete dir="${dist}" />
     <delete dir="${test-output}" />
   </target>
