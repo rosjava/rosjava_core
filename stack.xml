@@ -1,0 +1,11 @@
+<stack>
+  <description brief="rosjava core">Core rosjava libraries.</description>
+  <author>Maintained by Kenneth Conley</author>
+  <license>Apache License 2.0</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rosjava</url>
+  <depend stack="common_msgs" /> <!-- actionlib_msgs -->
+  <depend stack="ros" /> <!-- roslang, roslib -->
+  <depend stack="ros_comm" /> <!-- rosgraph_msgs, test_ros, rostest, std_msgs -->
+
+</stack>
