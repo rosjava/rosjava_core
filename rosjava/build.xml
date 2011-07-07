@@ -13,8 +13,12 @@
   <path id="jar.classpath">
     <pathelement location="lib/dnsjava-2.1.1.jar" />
     <pathelement location="lib/guava-r07.jar" />
-    <pathelement location="lib/mockito-all-1.8.5.jar" />
     <pathelement location="lib/netty-3.2.4.Final.jar" />
+  </path>
+
+  <!-- only use junit and mockito in tests -->
+  <path id="jar.test.classpath">
+    <pathelement location="lib/mockito-all-1.8.5.jar" />
     <pathelement location="lib/junit-4.8.2.jar" />
   </path>
 
@@ -22,6 +26,11 @@
     <pathelement location="${build}" />
     <path refid="jar.classpath" />
     <pathelement path="${ros.classpath}" />
+  </path>
+
+  <path id="test.classpath">
+    <path refid="classpath" />
+    <path refid="jar.test.classpath" />
   </path>
 
   <target name="default" depends="init, compile, jar" />
@@ -51,11 +60,18 @@
       <classpath refid="classpath" />
       <src path="src" />
       <src path="tutorials" />
+    </javac>
+  </target>
+
+  <target name="compile-test" depends="compile">
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build}" source="${javac-source}"
+        target="${javac-target}" includeantruntime="false">
+      <classpath refid="test.classpath" />
       <src path="tests" />
     </javac>
   </target>
 
-  <target name="test" depends="compile">
+  <target name="test" depends="compile-test">
     <!-- clear any previous results -->
     <mkdir dir="${ros.test_results}" />
     <delete>
@@ -64,7 +80,7 @@
       </fileset>
     </delete>
     <junit printsummary="yes" failureproperty="tests.failed">
-      <classpath refid="classpath" />
+      <classpath refid="test.classpath" />
       <formatter type="xml" />
       <batchtest todir="${ros.test_results}">
         <fileset dir="tests">
@@ -83,12 +99,8 @@
     <fail if="tests.failed" message="one or more tests failed" />
   </target>
 
+  <!-- TODO: this can end up including test artifacts -->
   <target name="jar" depends="compile">
-    <manifestclasspath property="jar.rosjava.classpath" jarfile="${jar.rosjava}">
-      <classpath>
-        <path refid="jar.classpath"/>
-      </classpath>
-    </manifestclasspath>
     <jar destfile="${jar.rosjava}">
       <manifest>
         <attribute name="Main-Class" value="org.ros.RosRun" />
