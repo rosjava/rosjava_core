@@ -13,7 +13,7 @@
 
   <path id="classpath">
     <pathelement location="${build}" />
-    <pathelement path="${ros.classpath}" />
+    <pathelement path="${ros.compile.classpath}" />
   </path>
 
   <target name="default" depends="init, compile, jar" />
@@ -22,6 +22,11 @@
     <fail unless="ros.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/>
     <mkdir dir="${build}" />
     <mkdir dir="${dist}" />
+  </target>
+
+  <target name="clean">
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
   </target>
 
   <target name="compile" depends="init">
