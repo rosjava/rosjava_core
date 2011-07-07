@@ -176,9 +176,9 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
   protected boolean initServer() {
 
     try {
-      pubFeedback = node.createPublisher("feedback", spec.getActionFeedbackMessage());
-      pubResult = node.createPublisher("result", spec.getActionResultMessage());
-      pubStatus = node.createPublisher("status", "actionlib_msgs/GoalStatusArray");
+      pubFeedback = node.newPublisher("feedback", spec.getActionFeedbackMessage());
+      pubResult = node.newPublisher("result", spec.getActionResultMessage());
+      pubStatus = node.newPublisher("status", "actionlib_msgs/GoalStatusArray");
 
       MessageListener<T_ACTION_GOAL> goalCallback = new MessageListener<T_ACTION_GOAL>() {
         @Override
@@ -186,7 +186,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
           doGoalCallback(actionGoal);
         }
       };
-      subGoal = node.createSubscriber("goal", spec.getActionGoalMessage(), goalCallback);
+      subGoal = node.newSubscriber("goal", spec.getActionGoalMessage(), goalCallback);
 
       MessageListener<GoalID> cancelCallback = new MessageListener<GoalID>() {
         @Override
@@ -194,7 +194,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
           doCancelCallback(goalID);
         }
       };
-      subCancelGoal = node.createSubscriber("cancel", "actionlib_msgs/GoalID", cancelCallback);
+      subCancelGoal = node.newSubscriber("cancel", "actionlib_msgs/GoalID", cancelCallback);
 
     } catch (Exception re) {
 
@@ -225,7 +225,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
     double pStatusFrequency;
     double pStatusListTimeout;
 
-    ParameterTree parameterClient = node.createParameterClient();
+    ParameterTree parameterClient = node.newParameterTree();
     try {
       pStatusListTimeout = parameterClient.getDouble("status_list_timeout", 5.0);
     } catch (Exception e) {

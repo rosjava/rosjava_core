@@ -200,7 +200,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
       }
     };
     subFeedback =
-        node.createSubscriber("feedback", spec.getActionFeedbackMessage(), feedbackCallback);
+        node.newSubscriber("feedback", spec.getActionFeedbackMessage(), feedbackCallback);
 
     MessageListener<T_ACTION_RESULT> resultCallback = new MessageListener<T_ACTION_RESULT>() {
       @Override
@@ -208,7 +208,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
         doResultCallback(actionResult);
       }
     };
-    subResult = node.createSubscriber("result", spec.getActionResultMessage(), resultCallback);
+    subResult = node.newSubscriber("result", spec.getActionResultMessage(), resultCallback);
 
     MessageListener<GoalStatusArray> statusCallback = new MessageListener<GoalStatusArray>() {
       @Override
@@ -216,10 +216,10 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
         doStatusCallback(statusArray);
       }
     };
-    subStatus = node.createSubscriber("status", "actionlib_msgs/GoalStatusArray", statusCallback);
+    subStatus = node.newSubscriber("status", "actionlib_msgs/GoalStatusArray", statusCallback);
 
-    pubGoal = node.createPublisher("goal", spec.getActionGoalMessage());
-    pubCancelGoal = node.createPublisher("cancel", "actionlib_msgs/GoalID");
+    pubGoal = node.newPublisher("goal", spec.getActionGoalMessage());
+    pubCancelGoal = node.newPublisher("cancel", "actionlib_msgs/GoalID");
 
     // Uses the node of the action client so must be done here.
     goalManager =

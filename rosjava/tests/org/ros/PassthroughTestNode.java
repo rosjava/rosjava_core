@@ -44,7 +44,7 @@ public class PassthroughTestNode implements NodeMain {
 
     // String pass through
     final Publisher<org.ros.message.std_msgs.String> pub_string =
-        node.createPublisher("string_out", "std_msgs/String");
+        node.newPublisher("string_out", "std_msgs/String");
     MessageListener<org.ros.message.std_msgs.String> string_cb =
         new MessageListener<org.ros.message.std_msgs.String>() {
           @Override
@@ -52,11 +52,11 @@ public class PassthroughTestNode implements NodeMain {
             pub_string.publish(m);
           }
         };
-    node.createSubscriber("string_in", "std_msgs/String", string_cb);
+    node.newSubscriber("string_in", "std_msgs/String", string_cb);
 
     // Int64 pass through
     final Publisher<org.ros.message.std_msgs.Int64> pub_int64 =
-        node.createPublisher("int64_out", "std_msgs/Int64");
+        node.newPublisher("int64_out", "std_msgs/Int64");
     MessageListener<org.ros.message.std_msgs.Int64> int64_cb =
         new MessageListener<org.ros.message.std_msgs.Int64>() {
           @Override
@@ -64,11 +64,11 @@ public class PassthroughTestNode implements NodeMain {
             pub_int64.publish(m);
           }
         };
-    node.createSubscriber("int64_in", "std_msgs/Int64", int64_cb);
+    node.newSubscriber("int64_in", "std_msgs/Int64", int64_cb);
 
     // TestHeader pass through
     final Publisher<org.ros.message.test_ros.TestHeader> pub_header =
-        node.createPublisher("test_header_out", "test_ros/TestHeader");
+        node.newPublisher("test_header_out", "test_ros/TestHeader");
     MessageListener<org.ros.message.test_ros.TestHeader> header_cb =
         new MessageListener<org.ros.message.test_ros.TestHeader>() {
           @Override
@@ -78,11 +78,11 @@ public class PassthroughTestNode implements NodeMain {
             pub_header.publish(m);
           }
         };
-    node.createSubscriber("test_header_in", "test_ros/TestHeader", header_cb);
+    node.newSubscriber("test_header_in", "test_ros/TestHeader", header_cb);
 
     // TestComposite pass through
     final Publisher<org.ros.message.test_ros.Composite> pub_composite =
-        node.createPublisher("composite_out", "test_ros/Composite");
+        node.newPublisher("composite_out", "test_ros/Composite");
     MessageListener<org.ros.message.test_ros.Composite> composite_cb =
         new MessageListener<org.ros.message.test_ros.Composite>() {
           @Override
@@ -90,7 +90,7 @@ public class PassthroughTestNode implements NodeMain {
             pub_composite.publish(m);
           }
         };
-    node.createSubscriber("composite_in", "test_ros/Composite", composite_cb);
+    node.newSubscriber("composite_in", "test_ros/Composite", composite_cb);
   }
 
   @Override

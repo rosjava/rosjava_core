@@ -61,7 +61,7 @@ public class ServiceIntegrationTest {
   public void PesistentServiceConnectionTest() throws Exception {
     Node serverNode = Ros.newNode("/server", configuration);
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
-        serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
+        serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
               @Override
               public AddTwoInts.Response build(AddTwoInts.Request request) {
@@ -74,7 +74,7 @@ public class ServiceIntegrationTest {
 
     Node clientNode = Ros.newNode("/client", configuration);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
-        clientNode.createServiceClient(SERVICE_NAME, SERVICE_TYPE);
+        clientNode.newServiceClient(SERVICE_NAME, SERVICE_TYPE);
 
     // TODO(damonkohler): This is a hack that we should remove once it's
     // possible to block on a connection being established.
@@ -103,7 +103,7 @@ public class ServiceIntegrationTest {
   public void RequestFailureTest() throws Exception {
     final String errorMessage = "Error!";
     Node serverNode = Ros.newNode("/server", configuration);
-    ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server = serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
+    ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server = serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
         new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
           @Override
           public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
@@ -114,7 +114,7 @@ public class ServiceIntegrationTest {
 
     Node clientNode = Ros.newNode("/client", configuration);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
-        clientNode.createServiceClient(SERVICE_NAME, SERVICE_TYPE);
+        clientNode.newServiceClient(SERVICE_NAME, SERVICE_TYPE);
 
     // TODO(damonkohler): This is a hack that we should remove once it's
     // possible to block on a connection being established.

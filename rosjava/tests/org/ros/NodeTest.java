@@ -79,11 +79,11 @@ public class NodeTest {
     assertEquals("/ns1/foo", node.resolveName("foo"));
     assertEquals("/ns1/test_resolver/foo", node.resolveName("~foo"));
 
-    Publisher<Int64> pub = node.createPublisher("pub", "std_msgs/Int64");
+    Publisher<Int64> pub = node.newPublisher("pub", "std_msgs/Int64");
     assertEquals("/ns1/pub", pub.getTopicName());
-    pub = node.createPublisher("/pub", "std_msgs/Int64");
+    pub = node.newPublisher("/pub", "std_msgs/Int64");
     assertEquals("/pub", pub.getTopicName());
-    pub = node.createPublisher("~pub", "std_msgs/Int64");
+    pub = node.newPublisher("~pub", "std_msgs/Int64");
     assertEquals("/ns1/test_resolver/pub", pub.getTopicName());
 
     MessageListener<Int64> callback = new MessageListener<Int64>() {
@@ -92,11 +92,11 @@ public class NodeTest {
       }
     };
 
-    Subscriber<Int64> sub = node.createSubscriber("sub", "std_msgs/Int64", callback);
+    Subscriber<Int64> sub = node.newSubscriber("sub", "std_msgs/Int64", callback);
     assertEquals("/ns1/sub", sub.getTopicName());
-    sub = node.createSubscriber("/sub", "std_msgs/Int64", callback);
+    sub = node.newSubscriber("/sub", "std_msgs/Int64", callback);
     assertEquals("/sub", sub.getTopicName());
-    sub = node.createSubscriber("~sub", "std_msgs/Int64", callback);
+    sub = node.newSubscriber("~sub", "std_msgs/Int64", callback);
     assertEquals("/ns1/test_resolver/sub", sub.getTopicName());
   }
 
@@ -121,7 +121,7 @@ public class NodeTest {
     NodeConfiguration nodeConfiguration = loader.createConfiguration();
 
     Node node = Ros.newNode("test_addresses", nodeConfiguration);
-    node.createPublisher("test_addresses_pub", "std_msgs/Int64");
+    node.newPublisher("test_addresses_pub", "std_msgs/Int64");
 
     URI uri = node.getUri();
     int port = uri.getPort();

@@ -54,16 +54,16 @@ public class ParameterServerTestNode implements NodeMain {
       node = Ros.newNode("param_client", nodeConfiguration);
 
       Publisher<org.ros.message.std_msgs.String> pub_tilde =
-          node.createPublisher("tilde", "std_msgs/String");
+          node.newPublisher("tilde", "std_msgs/String");
       Publisher<org.ros.message.std_msgs.String> pub_string =
-          node.createPublisher("string", "std_msgs/String");
-      Publisher<Int64> pub_int = node.createPublisher("int", "std_msgs/Int64");
-      Publisher<Bool> pub_bool = node.createPublisher("bool", "std_msgs/Bool");
-      Publisher<Float64> pub_float = node.createPublisher("float", "std_msgs/Float64");
-      Publisher<Composite> pub_composite = node.createPublisher("composite", "test_ros/Composite");
-      Publisher<TestArrays> pub_list = node.createPublisher("list", "test_ros/TestArrays");
+          node.newPublisher("string", "std_msgs/String");
+      Publisher<Int64> pub_int = node.newPublisher("int", "std_msgs/Int64");
+      Publisher<Bool> pub_bool = node.newPublisher("bool", "std_msgs/Bool");
+      Publisher<Float64> pub_float = node.newPublisher("float", "std_msgs/Float64");
+      Publisher<Composite> pub_composite = node.newPublisher("composite", "test_ros/Composite");
+      Publisher<TestArrays> pub_list = node.newPublisher("list", "test_ros/TestArrays");
 
-      ParameterTree param = node.createParameterClient();
+      ParameterTree param = node.newParameterTree();
 
       Log log = node.getLog();
 

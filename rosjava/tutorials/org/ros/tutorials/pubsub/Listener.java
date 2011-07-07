@@ -40,7 +40,7 @@ public class Listener implements NodeMain {
     try {
       node = Ros.newNode("listener", configuration);
       final Log log = node.getLog();
-      node.createSubscriber("chatter", "std_msgs/String",
+      node.newSubscriber("chatter", "std_msgs/String",
           new MessageListener<org.ros.message.std_msgs.String>() {
             @Override
             public void onNewMessage(org.ros.message.std_msgs.String message) {

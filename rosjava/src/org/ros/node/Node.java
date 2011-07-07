@@ -16,14 +16,11 @@
 
 package org.ros.node;
 
-
-
 import org.apache.commons.logging.Log;
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.namespace.NodeNameResolver;
-import org.ros.internal.node.client.ParameterClient;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
@@ -31,6 +28,7 @@ import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.MessageListener;
 import org.ros.message.Service;
 import org.ros.message.Time;
+import org.ros.namespace.NameResolver;
 
 import java.net.URI;
 
@@ -38,13 +36,15 @@ import java.net.URI;
  * A node in the ROS graph.
  * 
  * <p>
- * Nodes provide for communication with the ROS master. They are used for
- * creation of
+ * Nodes provide for communication with the ROS master. They also serve as
+ * factories for:
  * 
  * <ul>
  * <li>{@link Publisher}</li>,
  * <li>{@link Subscriber}</li>
- * <li>{@link ParameterClient}</li>
+ * <li>{@link ServiceServer}</li>
+ * <li>{@link ServiceClient}</li>
+ * <li>{@link ParameterTree}</li>
  * </ul>
  * 
  * <p>
@@ -57,7 +57,7 @@ import java.net.URI;
 public interface Node {
 
   /**
-   * @return The fully resolved name of this namespace, e.g. "/foo/bar/boop".
+   * @return The fully resolved name of this {@link Node}, e.g. "/foo/bar/boop".
    */
   String getName();
 
@@ -150,7 +150,7 @@ public interface Node {
    * @throws RosInitException
    *           May throw if the system is not in a proper state.
    */
-  <MessageType> Publisher<MessageType> createPublisher(String topicName, String messageType);
+  <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType);
 
   /**
    * @param <MessageType>
@@ -172,7 +172,7 @@ public interface Node {
    *           initialized or other wackyness. TODO specify exceptions that
    *           might be thrown here.
    */
-  <MessageType> Subscriber<MessageType> createSubscriber(String topicName, String messageType,
+  <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
       MessageListener<MessageType> listener);
 
   /**
@@ -191,7 +191,7 @@ public interface Node {
    * 
    * @throws Exception
    */
-  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServiceServer(
+  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
       String serviceName, String serviceType,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder);
 
@@ -206,7 +206,7 @@ public interface Node {
    *          the type of the service
    * @return
    */
-  <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createServiceClient(
+  <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
       String serviceName, String serviceType);
 
   /**
@@ -222,11 +222,10 @@ public interface Node {
   ServiceIdentifier lookupService(String serviceName);
 
   /**
-   * Create a {@link ParameterClient} to query and set parameters on the ROS
+   * Create a {@link ParameterTree} to query and set parameters on the ROS
    * parameter server.
    * 
-   * @return {@link ParameterClient} with {@link DefaultNameResolver} in this
-   *         namespace.
+   * @return {@link ParameterTree} with {@link NameResolver} in this namespace.
    */
-  ParameterTree createParameterClient();
+  ParameterTree newParameterTree();
 }
