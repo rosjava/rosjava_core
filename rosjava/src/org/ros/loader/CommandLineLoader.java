@@ -21,13 +21,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.ros.Ros;
-import org.ros.RosLoader;
 import org.ros.exception.RosInitException;
 import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
 
 import java.io.File;
 import java.net.URI;
@@ -37,13 +37,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Create {@link DefaultNodeConfiguration} instances using a ROS command-line and
- * environment specification.
+ * Create {@link DefaultNodeConfiguration} instances using a ROS command-line
+ * and environment specification.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class CommandLineLoader extends RosLoader {
+public class CommandLineLoader {
 
   private final List<String> argv;
   private final List<String> nodeArguments;
@@ -109,8 +109,7 @@ public class CommandLineLoader extends RosLoader {
    * Create NodeConfiguration according to ROS command-line and environment
    * specification.
    */
-  @Override
-  public NodeConfiguration createConfiguration() throws RosInitException {
+  public NodeConfiguration createConfiguration() {
     parseRemappingArguments();
     NodeConfiguration nodeConfiguration = Ros.newNodeConfiguration();
     nodeConfiguration.setParentResolver(buildParentResolver());
@@ -191,7 +190,7 @@ public class CommandLineLoader extends RosLoader {
    * 
    * @throws RosInitException
    */
-  private URI getMasterUri() throws RosInitException {
+  private URI getMasterUri() {
     String uri = DefaultNodeConfiguration.DEFAULT_MASTER_URI;
     if (specialRemappings.containsKey(CommandLine.ROS_MASTER_URI)) {
       uri = specialRemappings.get(CommandLine.ROS_MASTER_URI);
@@ -201,7 +200,7 @@ public class CommandLineLoader extends RosLoader {
     try {
       return new URI(uri);
     } catch (URISyntaxException e) {
-      throw new RosInitException("Master URI \"" + uri + "\" is not a valid.");
+      throw new RuntimeException("Master URI \"" + uri + "\" is not a valid.");
     }
   }
 
@@ -222,6 +221,20 @@ public class CommandLineLoader extends RosLoader {
     } else {
       return Lists.newArrayList();
     }
+  }
+
+  /**
+   * @param name
+   *          the name of the class
+   * @return an instance of {@link NodeMain}
+   * @throws ClassNotFoundException
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   */
+  public NodeMain loadClass(String name) throws ClassNotFoundException, InstantiationException,
+      IllegalAccessException {
+    Class<?> clazz = getClass().getClassLoader().loadClass(name);
+    return NodeMain.class.cast(clazz.newInstance());
   }
 
 }

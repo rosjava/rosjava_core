@@ -18,11 +18,10 @@ package org.ros;
 
 import com.google.common.collect.Lists;
 
-import org.ros.node.NodeConfiguration;
-
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
 import org.ros.loader.CommandLineLoader;
+import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 /**
@@ -52,13 +51,7 @@ public class RosRun {
     CommandLineLoader loader = new CommandLineLoader(Lists.newArrayList(argv));
     String nodeClassName = loader.getNodeClassName();
     System.out.println("Loading node class: " + loader.getNodeClassName());
-    NodeConfiguration nodeConfiguration = null;
-    try {
-      nodeConfiguration = loader.createConfiguration();
-    } catch (RosInitException e1) {
-      e1.printStackTrace();
-      System.exit(2);
-    }
+    NodeConfiguration nodeConfiguration = loader.createConfiguration();
 
     NodeMain nodeMain = null;
     try {
