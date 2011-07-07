@@ -27,9 +27,10 @@
     <rosjava-pathelement location="dist/rosjava.jar" built="true" />
     <rosjava-pathelement location="lib/dnsjava-2.1.1.jar" />
     <rosjava-pathelement location="lib/guava-r07.jar" />
-    <rosjava-pathelement location="lib/mockito-all-1.8.5.jar" />
     <rosjava-pathelement location="lib/netty-3.2.4.Final.jar" />
-    <rosjava-pathelement location="lib/junit-4.8.2.jar" />
+
+    <rosjava-pathelement location="lib/junit-4.8.2.jar" test="true" />
+    <rosjava-pathelement location="lib/mockito-all-1.8.5.jar" test="true" />
   </export>
 </package>
 
