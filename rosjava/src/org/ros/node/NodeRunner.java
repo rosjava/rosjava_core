@@ -16,10 +16,6 @@
 
 package org.ros.node;
 
-import org.ros.exception.RosInitException;
-import org.ros.loader.CommandLineLoader;
-
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -36,22 +32,6 @@ public class NodeRunner {
 
   public NodeRunner(Executor executor) {
     this.executor = executor;
-  }
-
-  // TODO(damonkohler): The CommandLineLoader is not appropriate here.
-  public void run(final NodeMain node, final List<String> argv) throws RosInitException {
-    final CommandLineLoader loader = new CommandLineLoader(argv);
-    final NodeConfiguration nodeConfiguration = loader.createConfiguration();
-    executor.execute(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          node.main(nodeConfiguration);
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      }
-    });
   }
 
   public void run(final NodeMain node, final NodeConfiguration nodeConfiguration) {
