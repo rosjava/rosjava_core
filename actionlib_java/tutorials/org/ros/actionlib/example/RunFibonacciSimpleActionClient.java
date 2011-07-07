@@ -1,6 +1,9 @@
 package org.ros.actionlib.example;
 
-import org.ros.internal.node.DefaultNodeConfiguration;
+import org.ros.Ros;
+
+import org.ros.node.NodeConfiguration;
+
 
 import org.ros.actionlib.client.SimpleActionClient;
 import org.ros.actionlib.client.SimpleActionClientCallbacks;
@@ -18,14 +21,14 @@ import org.ros.node.NodeRunner;
 public class RunFibonacciSimpleActionClient {
 
   public static void main(String[] args) {
-    DefaultNodeConfiguration configuration = DefaultNodeConfiguration.createDefault();
+    NodeConfiguration configuration = Ros.newNodeConfiguration();
     NodeRunner runner = NodeRunner.createDefault();
 
     run(runner, configuration);
 
   }
 
-  public static void run(NodeRunner runner, DefaultNodeConfiguration configuration) {
+  public static void run(NodeRunner runner, NodeConfiguration configuration) {
     try {
       int length = 10;
 
@@ -93,7 +96,7 @@ public class RunFibonacciSimpleActionClient {
     }
   }
 
-  public static void run2(NodeRunner runner, DefaultNodeConfiguration configuration) {
+  public static void run2(NodeRunner runner, NodeConfiguration configuration) {
 
     try {
       int order = 4;

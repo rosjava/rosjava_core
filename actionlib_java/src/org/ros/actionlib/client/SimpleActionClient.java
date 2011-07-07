@@ -1,6 +1,6 @@
 package org.ros.actionlib.client;
 
-import org.ros.internal.node.DefaultNodeConfiguration;
+import org.ros.node.NodeConfiguration;
 
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.state.CommState;
@@ -132,7 +132,7 @@ public class SimpleActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL
   }
 
   @Override
-  public void main(DefaultNodeConfiguration configuration) throws Exception {
+  public void main(NodeConfiguration configuration) throws Exception {
     actionClient.main(configuration);
   }
 

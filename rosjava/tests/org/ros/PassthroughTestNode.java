@@ -16,8 +16,9 @@
 
 package org.ros;
 
+import org.ros.node.NodeConfiguration;
+
 import org.ros.exception.RosInitException;
-import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.message.MessageListener;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -34,7 +35,7 @@ public class PassthroughTestNode implements NodeMain {
   private Node node;
 
   @Override
-  public void main(DefaultNodeConfiguration nodeConfiguration) throws RosInitException {
+  public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
     node = Ros.newNode("test_node", nodeConfiguration);
 
     // The goal of the passthrough node is simply to retransmit the messages

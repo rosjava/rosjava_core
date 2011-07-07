@@ -81,7 +81,7 @@ public class DefaultNode implements Node {
    *          configuration parameters for the node
    * @throws RosInitException
    */
-  public DefaultNode(GraphName name, DefaultNodeConfiguration configuration) {
+  public DefaultNode(GraphName name, NodeConfiguration configuration) {
     Preconditions.checkNotNull(configuration);
     Preconditions.checkNotNull(configuration.getHost());
     Preconditions.checkNotNull(name);

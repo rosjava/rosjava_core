@@ -1,6 +1,6 @@
 package org.ros.actionlib.client;
 
-import org.ros.internal.node.DefaultNodeConfiguration;
+import org.ros.node.NodeConfiguration;
 
 import org.ros.Ros;
 
@@ -174,7 +174,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
   }
 
   @Override
-  public void main(DefaultNodeConfiguration configuration) throws Exception {
+  public void main(NodeConfiguration configuration) throws Exception {
     if (parent != null)
       initClient(Ros.newNode(parent.resolveName(nodeName), configuration));
     else

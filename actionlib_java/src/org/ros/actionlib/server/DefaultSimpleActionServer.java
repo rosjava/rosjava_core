@@ -2,7 +2,8 @@ package org.ros.actionlib.server;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.node.DefaultNodeConfiguration;
+import org.ros.node.NodeConfiguration;
+
 
 import org.ros.actionlib.ActionSpec;
 import org.ros.exception.RosException;
@@ -219,7 +220,7 @@ public class DefaultSimpleActionServer<T_ACTION_FEEDBACK extends Message, T_ACTI
   }
 
   @Override
-  public void main(DefaultNodeConfiguration configuration) throws Exception {
+  public void main(NodeConfiguration configuration) throws Exception {
     actionServer.main(configuration);
   }
 

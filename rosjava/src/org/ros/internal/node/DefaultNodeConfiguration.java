@@ -16,6 +16,8 @@
 
 package org.ros.internal.node;
 
+import org.ros.Ros;
+
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.node.address.Address;
 import org.ros.message.MessageSerializationFactory;
@@ -51,23 +53,22 @@ public class DefaultNodeConfiguration implements NodeConfiguration {
   private String nodeNameOverride;
   private MessageSerializationFactory messageSerializationFactory;
 
-  public static DefaultNodeConfiguration createDefault() {
-    DefaultNodeConfiguration configuration = new DefaultNodeConfiguration();
+  public DefaultNodeConfiguration() {
     try {
-      configuration.setMasterUri(new URI(DEFAULT_MASTER_URI));
+      setMasterUri(new URI(DEFAULT_MASTER_URI));
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
-    configuration.setParentResolver(DefaultNameResolver.createDefault());
-    configuration.setHost(DEFAULT_HOST);
-    configuration.setTcpRosPort(0); // OS determined free port.
-    configuration.setXmlRpcPort(0); // OS determined free port.
-    configuration.setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
-    return configuration;
+    setParentResolver(Ros.newNameResolver());
+    setHost(DEFAULT_HOST);
+    setTcpRosPort(0); // OS determined free port.
+    setXmlRpcPort(0); // OS determined free port.
+    setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
   }
 
   /**
-   * @return The {@link DefaultNameResolver} for a {@link Node}'s parent namespace.
+   * @return The {@link DefaultNameResolver} for a {@link Node}'s parent
+   *         namespace.
    */
   @Override
   public NameResolver getParentResolver() {

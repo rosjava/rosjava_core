@@ -41,7 +41,7 @@ public class DefaultGraphName implements GraphName {
   }
 
   public static DefaultGraphName createRoot() {
-    return new DefaultGraphName(GraphName.ROOT);
+    return new DefaultGraphName(ROOT);
   }
 
   /**

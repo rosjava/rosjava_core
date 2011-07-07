@@ -20,9 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.ros.node.NodeConfiguration;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
@@ -46,13 +47,13 @@ public class ServiceIntegrationTest {
   private static final String SERVICE_TYPE = "test_ros/AddTwoInts";
 
   private MasterServer masterServer;
-  private DefaultNodeConfiguration configuration;
+  private NodeConfiguration configuration;
 
   @Before
   public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    configuration = DefaultNodeConfiguration.createDefault();
+    configuration = Ros.newNodeConfiguration();
     configuration.setMasterUri(masterServer.getUri());
   }
 

@@ -24,10 +24,10 @@ import org.ros.Ros;
 import org.ros.RosLoader;
 import org.ros.exception.RosInitException;
 import org.ros.internal.namespace.DefaultGraphName;
-import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
+import org.ros.node.NodeConfiguration;
 
 import java.io.File;
 import java.net.URI;
@@ -110,9 +110,9 @@ public class CommandLineLoader extends RosLoader {
    * specification.
    */
   @Override
-  public DefaultNodeConfiguration createConfiguration() throws RosInitException {
+  public NodeConfiguration createConfiguration() throws RosInitException {
     parseRemappingArguments();
-    DefaultNodeConfiguration nodeConfiguration = DefaultNodeConfiguration.createDefault();
+    NodeConfiguration nodeConfiguration = Ros.newNodeConfiguration();
     nodeConfiguration.setParentResolver(buildParentResolver());
     nodeConfiguration.setRosRoot(getRosRoot());
     nodeConfiguration.setRosPackagePath(getRosPackagePath());
@@ -154,7 +154,7 @@ public class CommandLineLoader extends RosLoader {
     } else if (environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
       namespace = Ros.newGraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
     }
-    return new DefaultNameResolver(namespace, remappings);
+    return Ros.newNameResolver(namespace, remappings);
   }
 
   /**

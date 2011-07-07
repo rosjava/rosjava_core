@@ -19,8 +19,6 @@ package org.ros;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.ros.internal.namespace.DefaultNameResolver;
-import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
 
@@ -28,16 +26,16 @@ public class NodeConfigurationTest {
 
   @Test
   public void testNodeContext() {
-    NodeConfiguration nodeConfiguration = new DefaultNodeConfiguration();
+    NodeConfiguration nodeConfiguration = Ros.newNodeConfiguration();
     assertEquals(null, nodeConfiguration.getParentResolver());
   }
 
   @Test
   public void testResolver() {
-    NodeConfiguration nodeConfiguration = new DefaultNodeConfiguration();
+    NodeConfiguration nodeConfiguration = Ros.newNodeConfiguration();
     assertEquals(null, nodeConfiguration.getParentResolver());
 
-    NameResolver resolver = DefaultNameResolver.createFromString("/test");
+    NameResolver resolver = Ros.newNameResolver("/test");
     nodeConfiguration.setParentResolver(resolver);
     assertEquals(resolver, nodeConfiguration.getParentResolver());
   }

@@ -1,6 +1,9 @@
 package org.ros.actionlib.example;
 
-import org.ros.internal.node.DefaultNodeConfiguration;
+import org.ros.Ros;
+
+import org.ros.node.NodeConfiguration;
+
 
 import org.ros.node.NodeRunner;
 
@@ -22,7 +25,7 @@ public class RunFibonacciSimpleActionServer {
       FibonacciSimpleActionServer sas =
           spec.buildSimpleActionServer("fibonacci_server", impl, true);
 
-      DefaultNodeConfiguration configuration = DefaultNodeConfiguration.createDefault();
+      NodeConfiguration configuration = Ros.newNodeConfiguration();
 
       NodeRunner runner = NodeRunner.createDefault();
 

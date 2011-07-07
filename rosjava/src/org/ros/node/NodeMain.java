@@ -32,7 +32,7 @@ public interface NodeMain {
    * @param nodeConfiguration the {@link DefaultNodeConfiguration} that will be passed to the
    *        {@link Node}
    */
-  void main(DefaultNodeConfiguration nodeConfiguration) throws Exception;
+  void main(NodeConfiguration nodeConfiguration) throws Exception;
   
   /**
    * {@link Node} shutdown routine.

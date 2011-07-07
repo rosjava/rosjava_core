@@ -27,7 +27,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.Ros;
-import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
@@ -53,7 +52,7 @@ public class ParameterClientServerIntegrationTest {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
     node = Node.createPrivate(Ros.newGraphName("/node_name"), masterServer.getUri(), 0, 0);
-    parameters = node.createParameterTree(DefaultNameResolver.createDefault());
+    parameters = node.createParameterTree(Ros.newNameResolver());
   }
 
   @After
@@ -117,7 +116,7 @@ public class ParameterClientServerIntegrationTest {
     Node publisher = Node.createPrivate(Ros.newGraphName("/publisher"), masterServer.getUri(), 0, 0);
 
     ParameterTree subscriberParameters =
-        subscriber.createParameterTree(DefaultNameResolver.createDefault());
+        subscriber.createParameterTree(Ros.newNameResolver());
     final CountDownLatch latch = new CountDownLatch(1);
     subscriberParameters.addParameterListener("/foo/bar", new ParameterListener() {
       @Override
@@ -128,7 +127,7 @@ public class ParameterClientServerIntegrationTest {
     });
 
     ParameterTree publisherParameters =
-        publisher.createParameterTree(DefaultNameResolver.createDefault());
+        publisher.createParameterTree(Ros.newNameResolver());
     publisherParameters.set("/foo/bar", 42);
 
     assertTrue(latch.await(1, TimeUnit.SECONDS));

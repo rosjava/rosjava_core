@@ -1,6 +1,6 @@
 package org.ros.actionlib.server;
 
-import org.ros.internal.node.DefaultNodeConfiguration;
+import org.ros.node.NodeConfiguration;
 
 import org.ros.Ros;
 
@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * A base implementation of an actionlib server.
  * 
  * <p>
- * This server should be started by calling {@link #main(DefaultNodeConfiguration)}.
+ * This server should be started by calling {@link #main(NodeConfiguration)}.
  */
 public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extends Message, T_ACTION_RESULT extends Message, T_FEEDBACK extends Message, T_GOAL extends Message, T_RESULT extends Message>
     implements NodeMain {
@@ -128,7 +128,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
   }
 
   @Override
-  public void main(DefaultNodeConfiguration configuration) throws Exception {
+  public void main(NodeConfiguration configuration) throws Exception {
     if (parent != null)
       node = Ros.newNode(parent.resolveName(name), configuration);
     else

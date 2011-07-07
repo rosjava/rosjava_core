@@ -17,10 +17,11 @@
 package org.ros;
 
 
+import org.ros.node.NodeConfiguration;
+
 import org.apache.commons.logging.Log;
 import org.ros.exception.RosInitException;
 import org.ros.internal.exception.RemoteException;
-import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.message.std_msgs.Bool;
 import org.ros.message.std_msgs.Float64;
 import org.ros.message.std_msgs.Int64;
@@ -48,7 +49,7 @@ public class ParameterServerTestNode implements NodeMain {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void main(DefaultNodeConfiguration nodeConfiguration) throws RosInitException {
+  public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
     try {
       node = Ros.newNode("param_client", nodeConfiguration);
 

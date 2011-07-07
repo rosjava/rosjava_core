@@ -24,7 +24,6 @@ import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -35,23 +34,6 @@ public class DefaultNameResolver implements NameResolver {
 
   private final GraphName namespace;
   private final Map<GraphName, GraphName> remappings;
-
-  public static NameResolver
-      createFromString(String namespace, Map<GraphName, GraphName> remappings) {
-    return new DefaultNameResolver(Ros.newGraphName(namespace), remappings);
-  }
-
-  public static NameResolver createFromString(String namespace) {
-    return DefaultNameResolver.createFromString(namespace, new HashMap<GraphName, GraphName>());
-  }
-
-  public static NameResolver createDefault(Map<GraphName, GraphName> remappings) {
-    return new DefaultNameResolver(DefaultGraphName.createRoot(), remappings);
-  }
-
-  public static NameResolver createDefault() {
-    return DefaultNameResolver.createDefault(new HashMap<GraphName, GraphName>());
-  }
 
   public DefaultNameResolver(GraphName namespace, Map<GraphName, GraphName> remappings) {
     this.remappings = Collections.unmodifiableMap(remappings);

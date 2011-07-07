@@ -21,12 +21,12 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 
+import org.ros.node.NodeConfiguration;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.exception.RosInitException;
 import org.ros.internal.exception.RemoteException;
-import org.ros.internal.namespace.DefaultNameResolver;
-import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
@@ -53,7 +53,7 @@ public class NodeTest {
 
   private MasterServer master;
   private URI masterUri;
-  private DefaultNodeConfiguration nodeConfiguration;
+  private NodeConfiguration nodeConfiguration;
 
   @Before
   public void setUp() throws RosInitException {
@@ -71,7 +71,7 @@ public class NodeTest {
 
   @Test
   public void testResolveName() throws RosInitException {
-    nodeConfiguration.setParentResolver(DefaultNameResolver.createFromString("/ns1"));
+    nodeConfiguration.setParentResolver(Ros.newNameResolver("/ns1"));
     Node node = Ros.newNode("test_resolver", nodeConfiguration);
 
     assertEquals("/foo", node.resolveName("/foo"));
@@ -117,7 +117,7 @@ public class NodeTest {
     Map<String, String> env = new HashMap<String, String>();
     env.put("ROS_MASTER_URI", masterUri.toString());
     CommandLineLoader loader = new CommandLineLoader(Lists.<String>newArrayList("Foo"), env);
-    DefaultNodeConfiguration nodeConfiguration = loader.createConfiguration();
+    NodeConfiguration nodeConfiguration = loader.createConfiguration();
 
     Node node = Ros.newNode("test_addresses", nodeConfiguration);
     node.createPublisher("test_addresses_pub", "std_msgs/Int64");

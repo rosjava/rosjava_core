@@ -18,8 +18,9 @@ package org.ros.tutorials.pubsub;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.node.NodeConfiguration;
+
 import org.ros.Ros;
-import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.Publisher;
@@ -36,7 +37,7 @@ public class Talker implements NodeMain {
   private Node node;
 
   @Override
-  public void main(DefaultNodeConfiguration configuration) {
+  public void main(NodeConfiguration configuration) {
     Preconditions.checkState(node == null);
     Preconditions.checkNotNull(configuration);
     try {

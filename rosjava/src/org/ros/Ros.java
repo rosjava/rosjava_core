@@ -17,10 +17,16 @@
 package org.ros;
 
 import org.ros.internal.namespace.DefaultGraphName;
+import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.node.DefaultNode;
 import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.namespace.GraphName;
+import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -31,12 +37,50 @@ public class Ros {
     // Utility class
   }
 
-  public static Node newNode(String name, DefaultNodeConfiguration configuration) {
-    return new DefaultNode(new DefaultGraphName(name), configuration);
+  public static NodeConfiguration newNodeConfiguration() {
+    return new DefaultNodeConfiguration();
+  }
+
+  public static Node newNode(GraphName name, NodeConfiguration configuration) {
+    return new DefaultNode(name, configuration);
+  }
+
+  public static Node newNode(String name, NodeConfiguration configuration) {
+    return newNode(new DefaultGraphName(name), configuration);
   }
 
   public static GraphName newGraphName(String name) {
     return new DefaultGraphName(name);
+  }
+
+  public static GraphName newRootGraphName() {
+    return DefaultGraphName.createRoot();
+  }
+
+  public static NameResolver newNameResolver(GraphName namespace,
+      Map<GraphName, GraphName> remappings) {
+    return new DefaultNameResolver(namespace, remappings);
+  }
+
+  public static NameResolver
+      newNameResolver(String namespace, Map<GraphName, GraphName> remappings) {
+    return newNameResolver(newGraphName(namespace), remappings);
+  }
+
+  public static NameResolver newNameResolver(GraphName namespace) {
+    return newNameResolver(namespace, new HashMap<GraphName, GraphName>());
+  }
+
+  public static NameResolver newNameResolver(String namespace) {
+    return newNameResolver(newGraphName(namespace));
+  }
+
+  public static NameResolver newNameResolver(Map<GraphName, GraphName> remappings) {
+    return newNameResolver(newRootGraphName(), remappings);
+  }
+
+  public static NameResolver newNameResolver() {
+    return newNameResolver(newRootGraphName());
   }
 
 }
