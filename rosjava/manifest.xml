@@ -29,8 +29,8 @@
     <rosjava-pathelement location="lib/guava-r07.jar" />
     <rosjava-pathelement location="lib/netty-3.2.4.Final.jar" />
 
-    <rosjava-pathelement location="lib/junit-4.8.2.jar" test="true" />
-    <rosjava-pathelement location="lib/mockito-all-1.8.5.jar" test="true" />
+    <rosjava-pathelement location="lib/junit-4.8.2.jar" scope="test" />
+    <rosjava-pathelement location="lib/mockito-all-1.8.5.jar" scope="test" />
   </export>
 </package>
 

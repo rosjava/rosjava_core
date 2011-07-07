@@ -40,6 +40,15 @@ import roslib.stacks
 
 from generate_msg_depends import msg_jar_file_path, is_msg_pkg, is_srv_pkg
 
+DEFAULT_SCOPE = 'compile'
+
+# See http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
+SCOPE_MAP = {
+    'compile': ['compile', 'runtime', 'test', 'all'],
+    'runtime': ['runtime', 'test', 'all'],
+    'test': ['test', 'all'],
+    }
+
 def usage():
     print "generate_properties.py <package-name>"
     sys.exit(os.EX_USAGE)
@@ -48,16 +57,24 @@ def resolve_pathelements(pathelements):
     # TODO: potentially recognize keys like ROS_HOME
     return [os.path.abspath(p) for p in pathelements]
 
-def get_classpath(rospack, package, include_package=False):
+def get_classpath(rospack, package, include_package=False, scope='all'):
     """
     @param include_package: include library entries of self on path
+    
+    @param classpath_type: (optional, default 'all').  'compile',
+    'runtime', 'test', or 'all'.  These classpath types are generated
+    based on the scope of an export.  Exports have a default scope of
+    'compile', which means they are part of all types of classpaths.
+    For an exact mapping, see SCOPE_MAP.  The behavior of these
+    scopes/classpath_types matches the Maven definition:
+    
+    http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
     """
     depends = rospack.depends([package])[package]
     if include_package:
         depends.append(package)
     pathelements = []
     tag = 'rosjava-pathelement'
-        
     for pkg in depends:
         m = rospack.manifests[pkg]
         pkg_dir = roslib.packages.get_pkg_dir(pkg)
@@ -68,8 +85,12 @@ def get_classpath(rospack, package, include_package=False):
                        e.attrs.get('built', False):
                     continue
                 else:
-                    pathelements.append(os.path.join(pkg_dir, e.attrs['location']))
-            except KeyError:
+                    location = os.path.join(pkg_dir, e.attrs['location'])
+                    entry_scope = e.attrs.get('scope', DEFAULT_SCOPE)
+                    if scope in SCOPE_MAP[entry_scope]:
+                        pathelements.append(location)
+            except KeyError as ke:
+                print >> sys.stderr, str(ke)
                 print >> sys.stderr, "Invalid <%s> tag in package %s"%(tag, pkg)
         if is_msg_pkg(pkg) or is_srv_pkg(pkg):
             pathelements.append(msg_jar_file_path(pkg))
@@ -126,10 +147,15 @@ def generate_ros_properties(package):
         if generate_version:
             props['ros.pkg.%s.version'%(p)] = get_package_version(p)
         
-    props['ros.classpath'] = get_classpath(rospack, package).replace(':', '\:')
-    # re-encode for ant <fileset includes="${ros.jarfileset}">
-    props['ros.jarfileset'] = get_classpath(rospack, package).replace(':', ',')
+    props['ros.classpath'] = get_classpath(rospack, package, scope='all').replace(':', '\:')
+    props['ros.compile.classpath'] = get_classpath(rospack, package, scope='compile').replace(':', '\:')
+    props['ros.runtime.classpath'] = get_classpath(rospack, package, scope='runtime').replace(':', '\:')
+    props['ros.test.classpath'] = get_classpath(rospack, package, scope='test').replace(':', '\:')
 
+    # re-encode for ant <fileset includes="${ros.jarfileset}">.  uses comma separator instead.
+    for prop in ['ros.classpath', 'ros.compile.classpath', 'ros.runtime.classpath', 'ros.test.classpath']:
+        props[prop.replace('classpath', 'jarfileset')] = props[prop].replace(':', ',')
+    
     props['ros.test_results'] = os.path.join(roslib.rosenv.get_test_results_dir(), package)
     keys = props.keys()
     for k in sorted(keys):
@@ -164,7 +190,7 @@ def generate_properties_main(argv=None):
         sys.stdout.write("""\t<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 """)
-        for p in get_classpath(rospack, package, include_package=True).split(':'):
+        for p in get_classpath(rospack, package, include_package=True, scope='all').split(':'):
             if p:
                 sys.stdout.write('\t<classpathentry kind="lib" path="%s"/>\n'%(p))
         sys.stdout.write("""\t<classpath kind="output" path="build"/>

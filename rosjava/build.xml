@@ -25,7 +25,7 @@
   <path id="classpath">
     <pathelement location="${build}" />
     <path refid="jar.classpath" />
-    <pathelement path="${ros.classpath}" />
+    <pathelement path="${ros.compile.classpath}" />
   </path>
 
   <path id="test.classpath">
@@ -36,7 +36,7 @@
   <target name="default" depends="init, compile, jar" />
 
   <target name="init">
-    <fail unless="ros.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/>
+    <fail unless="ros.compile.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/>
     <mkdir dir="${build}" />
     <mkdir dir="${dist}" />
   </target>
