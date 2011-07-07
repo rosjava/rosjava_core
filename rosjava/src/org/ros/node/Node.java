@@ -14,7 +14,8 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.node;
+
 
 
 import org.apache.commons.logging.Log;

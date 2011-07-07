@@ -16,6 +16,9 @@
 
 package org.ros;
 
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+
 import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.DefaultNode;
 import org.ros.namespace.GraphName;

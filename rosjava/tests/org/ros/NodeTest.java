@@ -21,6 +21,12 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 
+import org.ros.node.Publisher;
+import org.ros.node.Subscriber;
+
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.exception.RosInitException;

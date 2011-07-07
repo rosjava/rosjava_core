@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.node;
 
 import java.util.concurrent.TimeUnit;
 

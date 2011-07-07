@@ -22,10 +22,11 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.ros.node.NodeConfiguration;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.NodeConfiguration;
 import org.ros.Ros;
 import org.ros.exception.RosInitException;
 import org.ros.internal.namespace.DefaultNameResolver;

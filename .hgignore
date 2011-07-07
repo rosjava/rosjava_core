@@ -17,6 +17,8 @@ ros.properties
 .project-generated
 .classpath
 .project
-rosjava/lib/rosjava.jar
+apache_commons_util/bin
+apache_xmlrpc/bin
+
 syntax: regexp
 (build|dist|msg_gen|srv_gen|gen|test_output)/.*

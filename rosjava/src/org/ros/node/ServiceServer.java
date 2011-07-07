@@ -14,10 +14,22 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.node;
 
-public interface ParameterListener {
-  
-  void onNewValue(Object value);
+import java.util.concurrent.TimeUnit;
+
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ *
+ * @param <RequestType>
+ * @param <ResponseType>
+ */
+public interface ServiceServer<RequestType, ResponseType> {
+
+  boolean isRegistered();
+
+  void awaitRegistration() throws InterruptedException;
+
+  boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException;
 
 }

@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ServiceServer<RequestType, ResponseType> implements
-    org.ros.ServiceServer<RequestType, ResponseType> {
+    org.ros.node.ServiceServer<RequestType, ResponseType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);

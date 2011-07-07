@@ -18,16 +18,18 @@ package org.ros.internal.node;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.node.ParameterTree;
+import org.ros.node.Publisher;
+import org.ros.node.ServiceClient;
+import org.ros.node.ServiceServer;
+import org.ros.node.Subscriber;
+
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.Node;
-import org.ros.NodeConfiguration;
-import org.ros.ParameterTree;
-import org.ros.Publisher;
 import org.ros.Ros;
-import org.ros.ServiceClient;
-import org.ros.ServiceServer;
-import org.ros.Subscriber;
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.exception.RemoteException;

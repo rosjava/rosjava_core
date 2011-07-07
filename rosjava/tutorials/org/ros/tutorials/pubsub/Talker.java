@@ -18,10 +18,12 @@ package org.ros.tutorials.pubsub;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.Node;
-import org.ros.NodeConfiguration;
-import org.ros.NodeMain;
-import org.ros.Publisher;
+import org.ros.node.Publisher;
+
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
+
 import org.ros.internal.node.DefaultNode;
 
 /**

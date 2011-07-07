@@ -16,7 +16,8 @@
 
 package org.ros.internal.namespace;
 
-import org.ros.Node;
+import org.ros.node.Node;
+
 import org.ros.Ros;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;

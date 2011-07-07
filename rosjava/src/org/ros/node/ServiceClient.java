@@ -14,9 +14,9 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.node;
 
-import java.util.concurrent.TimeUnit;
+import java.net.URI;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -24,12 +24,12 @@ import java.util.concurrent.TimeUnit;
  * @param <RequestType>
  * @param <ResponseType>
  */
-public interface ServiceServer<RequestType, ResponseType> {
+public interface ServiceClient<RequestType, ResponseType> {
 
-  boolean isRegistered();
+  void connect(URI uri);
 
-  void awaitRegistration() throws InterruptedException;
+  void shutdown();
 
-  boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException;
+  void call(RequestType request, ServiceResponseListener<ResponseType> listener);
 
 }

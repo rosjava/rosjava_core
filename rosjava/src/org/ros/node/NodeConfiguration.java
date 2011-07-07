@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.node;
 
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.node.address.Address;

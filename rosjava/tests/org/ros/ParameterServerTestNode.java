@@ -17,6 +17,13 @@
 package org.ros;
 
 
+import org.ros.node.ParameterTree;
+import org.ros.node.Publisher;
+
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
+
 import org.apache.commons.logging.Log;
 import org.ros.exception.RosInitException;
 import org.ros.internal.exception.RemoteException;

@@ -14,22 +14,10 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.node;
 
-import java.net.URI;
-
-/**
- * @author damonkohler@google.com (Damon Kohler)
- *
- * @param <RequestType>
- * @param <ResponseType>
- */
-public interface ServiceClient<RequestType, ResponseType> {
-
-  void connect(URI uri);
-
-  void shutdown();
-
-  void call(RequestType request, ServiceResponseListener<ResponseType> listener);
+public interface ParameterListener {
+  
+  void onNewValue(Object value);
 
 }

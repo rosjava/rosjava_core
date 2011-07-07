@@ -20,6 +20,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+import org.ros.node.ServiceResponseListener;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ClientBootstrap;
@@ -36,7 +38,6 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.ros.ServiceResponseListener;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
@@ -55,7 +56,7 @@ import java.util.concurrent.Executors;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ServiceClient<RequestType, ResponseType> implements
-    org.ros.ServiceClient<RequestType, ResponseType> {
+    org.ros.node.ServiceClient<RequestType, ResponseType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);

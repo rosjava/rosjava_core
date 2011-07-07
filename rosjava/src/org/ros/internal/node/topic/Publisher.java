@@ -37,7 +37,7 @@ import java.util.Map;
  * 
  * @param <MessageType>
  */
-public class Publisher<MessageType> extends Topic implements org.ros.Publisher<MessageType> {
+public class Publisher<MessageType> extends Topic implements org.ros.node.Publisher<MessageType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);

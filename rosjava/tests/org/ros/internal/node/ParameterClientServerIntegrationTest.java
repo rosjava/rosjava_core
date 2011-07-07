@@ -23,11 +23,12 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.ros.node.ParameterListener;
+import org.ros.node.ParameterTree;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.ParameterListener;
-import org.ros.ParameterTree;
 import org.ros.Ros;
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.node.address.AdvertiseAddress;
