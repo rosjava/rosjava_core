@@ -1,6 +1,5 @@
 package org.ros.actionlib;
 
-import org.ros.Node;
 import org.ros.actionlib.client.ActionClient;
 import org.ros.actionlib.client.SimpleActionClient;
 import org.ros.actionlib.server.ActionServerCallbacks;
@@ -15,6 +14,7 @@ import org.ros.message.Time;
 import org.ros.message.actionlib_msgs.GoalID;
 import org.ros.message.actionlib_msgs.GoalStatus;
 import org.ros.message.std_msgs.Header;
+import org.ros.node.Node;
 
 import java.lang.reflect.Field;
 

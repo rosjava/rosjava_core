@@ -1,7 +1,7 @@
 package org.ros.actionlib.example;
 
-import org.ros.NodeConfiguration;
-import org.ros.NodeRunner;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeRunner;
 
 /**
  * A main for running the Fibonacci simple action server.

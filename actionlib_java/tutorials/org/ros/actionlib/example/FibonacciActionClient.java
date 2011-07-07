@@ -1,6 +1,5 @@
 package org.ros.actionlib.example;
 
-import org.ros.Node;
 import org.ros.actionlib.client.ActionClient;
 import org.ros.exception.RosException;
 import org.ros.message.actionlib_tutorials.FibonacciActionFeedback;
@@ -9,6 +8,7 @@ import org.ros.message.actionlib_tutorials.FibonacciActionResult;
 import org.ros.message.actionlib_tutorials.FibonacciFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciGoal;
 import org.ros.message.actionlib_tutorials.FibonacciResult;
+import org.ros.node.Node;
 
 /**
  * The FibonacciActionClient is a specialized ActionClient that is intended to

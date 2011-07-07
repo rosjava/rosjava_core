@@ -1,20 +1,18 @@
 package org.ros.actionlib.example;
 
-import org.ros.NodeConfiguration;
-import org.ros.NodeRunner;
-import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.client.SimpleActionClient;
 import org.ros.actionlib.client.SimpleActionClientCallbacks;
 import org.ros.actionlib.state.SimpleClientGoalState;
 import org.ros.exception.RosException;
 import org.ros.message.Duration;
-import org.ros.message.actionlib_tutorials.FibonacciAction;
 import org.ros.message.actionlib_tutorials.FibonacciActionFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciActionGoal;
 import org.ros.message.actionlib_tutorials.FibonacciActionResult;
 import org.ros.message.actionlib_tutorials.FibonacciFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciGoal;
 import org.ros.message.actionlib_tutorials.FibonacciResult;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeRunner;
 
 public class RunFibonacciSimpleActionClient {
 

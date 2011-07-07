@@ -1,6 +1,5 @@
 package org.ros.actionlib.example;
 
-import org.ros.Node;
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.server.ActionServerCallbacks;
 import org.ros.actionlib.server.DefaultActionServer;
@@ -11,6 +10,7 @@ import org.ros.message.actionlib_tutorials.FibonacciActionResult;
 import org.ros.message.actionlib_tutorials.FibonacciFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciGoal;
 import org.ros.message.actionlib_tutorials.FibonacciResult;
+import org.ros.node.Node;
 
 /**
  * The FibonacciActionServer is a specialized DefaultActionServer that offers

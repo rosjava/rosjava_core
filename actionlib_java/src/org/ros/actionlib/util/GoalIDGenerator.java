@@ -1,8 +1,8 @@
 package org.ros.actionlib.util;
 
-import org.ros.Node;
 import org.ros.message.Time;
 import org.ros.message.actionlib_msgs.GoalID;
+import org.ros.node.Node;
 
 import java.util.concurrent.atomic.AtomicLong;
 

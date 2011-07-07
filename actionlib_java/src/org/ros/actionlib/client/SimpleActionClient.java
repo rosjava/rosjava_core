@@ -1,8 +1,5 @@
 package org.ros.actionlib.client;
 
-import org.ros.Node;
-import org.ros.NodeConfiguration;
-import org.ros.NodeMain;
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.state.CommState;
 import org.ros.actionlib.state.SimpleClientGoalState;
@@ -12,6 +9,9 @@ import org.ros.exception.RosException;
 import org.ros.message.Duration;
 import org.ros.message.Message;
 import org.ros.message.Time;
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
 
 /**
  * A SimpleActionClient is a wrapper around a regular {@link ActionClient} that
