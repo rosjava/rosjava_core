@@ -43,30 +43,7 @@
     </javac>
   </target>
 
-  <target name="test" depends="compile">
-    <!-- clear any previous results -->
-    <mkdir dir="${ros.test_results}" />
-    <delete>
-      <fileset dir="${ros.test_results}">
-        <include name="*/**" />
-      </fileset>
-    </delete>
-    <junit printsummary="yes">
-      <classpath refid="classpath" />
-      <formatter type="xml" />
-      <batchtest todir="${ros.test_results}">
-        <fileset dir="tests">
-          <include name="**/*Test.java" />
-        </fileset>
-      </batchtest>
-    </junit>
-    <junitreport todir="${ros.test_results}">
-      <fileset dir="${ros.test_results}">
-        <include name="TEST-*.xml" />
-      </fileset>
-      <report format="frames" todir="${ros.test_results}/html" />
-    </junitreport>
-  </target>
+  <target name="test" depends="compile" />
 
   <target name="jar" depends="init, compile">
     <jar destfile="${jar.actionlib_java}">
