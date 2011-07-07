@@ -4,6 +4,10 @@
      Provide ROS build system integration and bootstrap data
      classes (Time and Message representation) for rosjava.
 
+     This package includes 
+     <a href="http://code.google.com/p/which/">which.py by Trent Mick</a>, 
+     which is provided separately under an MIT License. 
+
   </description>
   <author>Ken Conley</author>
   <license>Apache License 2.0</license>

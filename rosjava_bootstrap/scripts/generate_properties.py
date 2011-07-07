@@ -49,6 +49,8 @@ SCOPE_MAP = {
     'test': ['test', 'all'],
     }
 
+class UserError(Exception): pass
+
 def usage():
     print "generate_properties.py <package-name>"
     sys.exit(os.EX_USAGE)
@@ -116,7 +118,7 @@ def get_eclipse_src_entries(package):
             # use relative location as Eclipse does not seem to like fully resolved
             elements.append(e.attrs['location'])
         except KeyError:
-            print >> sys.stderr, "Invalid <%s> tag in package %s"%(tag, pkg)
+            sys.stderr.write("Invalid <%s> tag in package %s"%(tag, pkg))
     return elements
 
 _stack_version_cache = {}
@@ -157,9 +159,29 @@ def generate_ros_properties(package):
         props[prop.replace('classpath', 'jarfileset')] = props[prop].replace(':', ',')
     
     props['ros.test_results'] = os.path.join(roslib.rosenv.get_test_results_dir(), package)
+
+    if is_android_package(package):
+        props['android.sdk.dir'] = get_android_sdk_dir()
+        # TODO: should be attribute of android export
+        props['target']='android-9'
+        props['android.library']='true'
+    
     keys = props.keys()
     for k in sorted(keys):
         sys.stdout.write('%s=%s\n'%(k, props[k]))
+
+def get_android_sdk_dir():
+    """
+    @return: location of Android SDK
+    @raise UserError: if android is not installed
+    """
+    import which
+    location = which.which('android')
+    if not location:
+        raise UserError("android tool is not in your command path.  Install the android sdk and add the tools directory to your path.")
+    else:
+        # SDK dir is two levels up in the path
+        return os.path.dirname(os.path.dirname(location))
 
 def is_android_package(package):
     m = roslib.manifest.load_manifest(package)
@@ -200,4 +222,11 @@ def generate_properties_main(argv=None):
         generate_ros_properties(package)
     
 if __name__ == '__main__':
-    generate_properties_main()
+    try:
+        generate_properties_main()
+    except roslib.packages.InvalidROSPkgException as e:
+        sys.stderr.write('ERROR: '+str(e)+'\n')
+        sys.exit(1)
+    except UserError as ue:
+        sys.stderr.write(str(ue)+'\n')
+        sys.exit(1)
