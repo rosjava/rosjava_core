@@ -14,19 +14,13 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.node.service.ServiceClient;
-import org.ros.internal.node.service.ServiceDefinition;
-import org.ros.internal.node.service.ServiceIdentifier;
-import org.ros.internal.node.service.ServiceManager;
-import org.ros.internal.node.service.ServiceResponseBuilder;
-import org.ros.internal.node.service.ServiceServer;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;

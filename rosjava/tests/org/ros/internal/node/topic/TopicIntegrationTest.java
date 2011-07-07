@@ -53,19 +53,19 @@ public class TopicIntegrationTest {
   @Test
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
     TopicDefinition topicDefinition =
-        TopicDefinition.create(Ros.createGraphName("/foo"), MessageDefinition.create(
+        TopicDefinition.create(Ros.newGraphName("/foo"), MessageDefinition.create(
             org.ros.message.std_msgs.String.__s_getDataType(),
             org.ros.message.std_msgs.String.__s_getMessageDefinition(),
             org.ros.message.std_msgs.String.__s_getMD5Sum()));
 
     Node publisherNode =
-        Node.createPrivate(Ros.createGraphName("/publisher"), masterServer.getUri(), 0, 0);
+        Node.createPrivate(Ros.newGraphName("/publisher"), masterServer.getUri(), 0, 0);
     final Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.createPublisher(topicDefinition,
             new MessageSerializer<org.ros.message.std_msgs.String>());
 
     Node subscriberNode =
-        Node.createPrivate(Ros.createGraphName("/subscriber"), masterServer.getUri(), 0, 0);
+        Node.createPrivate(Ros.newGraphName("/subscriber"), masterServer.getUri(), 0, 0);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         subscriberNode.createSubscriber(topicDefinition, new MessageDeserializer<org.ros.message.std_msgs.String>(
             org.ros.message.std_msgs.String.class));
@@ -98,13 +98,13 @@ public class TopicIntegrationTest {
   @Test
   public void testAddDisconnectedPublisher() {
     TopicDefinition topicDefinition =
-        TopicDefinition.create(Ros.createGraphName("/foo"), MessageDefinition.create(
+        TopicDefinition.create(Ros.newGraphName("/foo"), MessageDefinition.create(
             org.ros.message.std_msgs.String.__s_getDataType(),
             org.ros.message.std_msgs.String.__s_getMessageDefinition(),
             org.ros.message.std_msgs.String.__s_getMD5Sum()));
 
     Node subscriberNode =
-        Node.createPrivate(Ros.createGraphName("/subscriber"), masterServer.getUri(), 0, 0);
+        Node.createPrivate(Ros.newGraphName("/subscriber"), masterServer.getUri(), 0, 0);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         subscriberNode.createSubscriber(topicDefinition, new MessageDeserializer<org.ros.message.std_msgs.String>(
             org.ros.message.std_msgs.String.class));

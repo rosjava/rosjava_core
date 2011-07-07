@@ -16,12 +16,11 @@
 
 package org.ros;
 
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMain;
-
+import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.node.NodeMain;
 
 import java.net.URI;
 
@@ -49,7 +48,7 @@ public class RosCore implements NodeMain {
   }
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) throws Exception {
+  public void main(DefaultNodeConfiguration nodeConfiguration) throws Exception {
     masterServer.start();
   }
 

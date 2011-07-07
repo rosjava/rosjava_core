@@ -16,10 +16,9 @@
 
 package org.ros;
 
+import org.ros.exception.RosInitException;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
-
-import org.ros.exception.RosInitException;
 
 /**
  * Class loader for finding {@link NodeMain}s given manifests, launch files,

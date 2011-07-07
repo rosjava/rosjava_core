@@ -21,18 +21,12 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 
-import org.ros.node.Publisher;
-import org.ros.node.Subscriber;
-
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.exception.RosInitException;
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.namespace.DefaultNameResolver;
-import org.ros.internal.node.DefaultNode;
+import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
@@ -43,6 +37,9 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.loader.CommandLineLoader;
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
+import org.ros.node.Node;
+import org.ros.node.Publisher;
+import org.ros.node.Subscriber;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -56,7 +53,7 @@ public class NodeTest {
 
   private MasterServer master;
   private URI masterUri;
-  private NodeConfiguration nodeConfiguration;
+  private DefaultNodeConfiguration nodeConfiguration;
 
   @Before
   public void setUp() throws RosInitException {
@@ -75,7 +72,7 @@ public class NodeTest {
   @Test
   public void testResolveName() throws RosInitException {
     nodeConfiguration.setParentResolver(DefaultNameResolver.createFromString("/ns1"));
-    Node node = new DefaultNode("test_resolver", nodeConfiguration);
+    Node node = Ros.newNode("test_resolver", nodeConfiguration);
 
     assertEquals("/foo", node.resolveName("/foo"));
     assertEquals("/ns1/foo", node.resolveName("foo"));
@@ -120,9 +117,9 @@ public class NodeTest {
     Map<String, String> env = new HashMap<String, String>();
     env.put("ROS_MASTER_URI", masterUri.toString());
     CommandLineLoader loader = new CommandLineLoader(Lists.<String>newArrayList("Foo"), env);
-    NodeConfiguration nodeConfiguration = loader.createConfiguration();
+    DefaultNodeConfiguration nodeConfiguration = loader.createConfiguration();
 
-    Node node = new DefaultNode("test_addresses", nodeConfiguration);
+    Node node = Ros.newNode("test_addresses", nodeConfiguration);
     node.createPublisher("test_addresses_pub", "std_msgs/Int64");
 
     URI uri = node.getUri();
@@ -131,7 +128,7 @@ public class NodeTest {
     checkHostName(uri.getHost());
 
     // Check the TCPROS server address via the XML-RPC API.
-    SlaveClient slaveClient = new SlaveClient(Ros.createGraphName("test_addresses"), uri);
+    SlaveClient slaveClient = new SlaveClient(Ros.newGraphName("test_addresses"), uri);
     Response<ProtocolDescription> response =
         slaveClient.requestTopic("test_addresses_pub", Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();

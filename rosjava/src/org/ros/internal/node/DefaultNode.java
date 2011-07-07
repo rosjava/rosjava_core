@@ -18,15 +18,6 @@ package org.ros.internal.node;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.node.ParameterTree;
-import org.ros.node.Publisher;
-import org.ros.node.ServiceClient;
-import org.ros.node.ServiceServer;
-import org.ros.node.Subscriber;
-
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.Ros;
@@ -50,12 +41,19 @@ import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-import org.ros.internal.time.TimeProvider;
 import org.ros.internal.time.WallclockProvider;
 import org.ros.message.MessageListener;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.ParameterTree;
+import org.ros.node.Publisher;
+import org.ros.node.ServiceClient;
+import org.ros.node.ServiceServer;
+import org.ros.node.Subscriber;
+import org.ros.time.TimeProvider;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -76,10 +74,6 @@ public class DefaultNode implements Node {
   private final RosoutLogger log;
   private final TimeProvider timeProvider;
 
-  public DefaultNode(String name, NodeConfiguration configuration) {
-    this(Ros.createGraphName(name), configuration);
-  }
-
   /**
    * @param name
    *          Node name. This identifies this node to the rest of the ROS graph.
@@ -87,7 +81,7 @@ public class DefaultNode implements Node {
    *          configuration parameters for the node
    * @throws RosInitException
    */
-  public DefaultNode(GraphName name, NodeConfiguration configuration) {
+  public DefaultNode(GraphName name, DefaultNodeConfiguration configuration) {
     Preconditions.checkNotNull(configuration);
     Preconditions.checkNotNull(configuration.getHost());
     Preconditions.checkNotNull(name);
@@ -96,7 +90,7 @@ public class DefaultNode implements Node {
     GraphName basename;
     String nodeNameOverride = configuration.getNodeNameOverride();
     if (nodeNameOverride != null) {
-      basename = Ros.createGraphName(nodeNameOverride);
+      basename = Ros.newGraphName(nodeNameOverride);
     } else {
       basename = name;
     }
@@ -147,7 +141,7 @@ public class DefaultNode implements Node {
     String resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition =
-        TopicDefinition.create(Ros.createGraphName(resolvedTopicName), messageDefinition);
+        TopicDefinition.create(Ros.newGraphName(resolvedTopicName), messageDefinition);
     org.ros.message.MessageSerializer<MessageType> serializer =
         configuration.getMessageSerializationFactory().createSerializer(messageType);
     return node.createPublisher(topicDefinition, serializer);
@@ -176,7 +170,7 @@ public class DefaultNode implements Node {
     String resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition =
-        TopicDefinition.create(Ros.createGraphName(resolvedTopicName), messageDefinition);
+        TopicDefinition.create(Ros.newGraphName(resolvedTopicName), messageDefinition);
     MessageDeserializer<MessageType> deserializer =
         (MessageDeserializer<MessageType>) configuration.getMessageSerializationFactory()
             .createDeserializer(messageType);
@@ -192,7 +186,7 @@ public class DefaultNode implements Node {
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
     // TODO(damonkohler): It's rather non-obvious that the URI will be created
     // later on the fly.
-    ServiceIdentifier identifier = new ServiceIdentifier(Ros.createGraphName(serviceName), null);
+    ServiceIdentifier identifier = new ServiceIdentifier(Ros.newGraphName(serviceName), null);
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
@@ -228,7 +222,7 @@ public class DefaultNode implements Node {
 
   @Override
   public ServiceIdentifier lookupService(String serviceName) {
-    GraphName resolvedServiceName = Ros.createGraphName(resolveName(serviceName));
+    GraphName resolvedServiceName = Ros.newGraphName(resolveName(serviceName));
     try {
       return node.lookupService(resolvedServiceName);
     } catch (RemoteException e) {

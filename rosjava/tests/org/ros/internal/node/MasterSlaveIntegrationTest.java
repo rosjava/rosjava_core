@@ -54,12 +54,12 @@ public class MasterSlaveIntegrationTest {
     ServiceManager serviceManager = new ServiceManager();
     ParameterManager parameterManager = new ParameterManager();
     slaveServer =
-        new SlaveServer(Ros.createGraphName("/foo"), BindAddress.createPublic(0),
+        new SlaveServer(Ros.newGraphName("/foo"), BindAddress.createPublic(0),
             AdvertiseAddress.createPublic(), BindAddress.createPublic(0),
             AdvertiseAddress.createPublic(), masterClient, topicManager, serviceManager,
             parameterManager);
     slaveServer.start();
-    slaveClient = new SlaveClient(Ros.createGraphName("/bar"), slaveServer.getUri());
+    slaveClient = new SlaveClient(Ros.newGraphName("/bar"), slaveServer.getUri());
   }
 
   @Test

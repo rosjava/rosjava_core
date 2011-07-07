@@ -43,7 +43,7 @@ public class SubscriberDefinition {
    */
   public static SubscriberDefinition createFromHeader(Map<String, String> header) {
     SlaveIdentifier slaveIdentifier =
-        new SlaveIdentifier(Ros.createGraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
+        new SlaveIdentifier(Ros.newGraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
     TopicDefinition topicDefinition = TopicDefinition.createFromHeader(header);
     return new SubscriberDefinition(new SubscriberIdentifier(slaveIdentifier,
         topicDefinition.toIdentifier()), topicDefinition);

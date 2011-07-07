@@ -38,7 +38,7 @@ public class TopicDefinition {
 
   public static TopicDefinition createFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));
-    GraphName name = Ros.createGraphName(header.get(ConnectionHeaderFields.TOPIC));
+    GraphName name = Ros.newGraphName(header.get(ConnectionHeaderFields.TOPIC));
     return new TopicDefinition(new TopicIdentifier(name),
         MessageDefinition.createFromHeader(header));
   }

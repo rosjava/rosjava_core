@@ -23,9 +23,6 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.ros.node.ParameterListener;
-import org.ros.node.ParameterTree;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +31,8 @@ import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.node.ParameterListener;
+import org.ros.node.ParameterTree;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +52,7 @@ public class ParameterClientServerIntegrationTest {
   public void setup() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    node = Node.createPrivate(Ros.createGraphName("/node_name"), masterServer.getUri(), 0, 0);
+    node = Node.createPrivate(Ros.newGraphName("/node_name"), masterServer.getUri(), 0, 0);
     parameters = node.createParameterTree(DefaultNameResolver.createDefault());
   }
 
@@ -114,8 +113,8 @@ public class ParameterClientServerIntegrationTest {
 
   @Test
   public void testParameterPubSub() throws InterruptedException {
-    Node subscriber = Node.createPrivate(Ros.createGraphName("/subscriber"), masterServer.getUri(), 0, 0);
-    Node publisher = Node.createPrivate(Ros.createGraphName("/publisher"), masterServer.getUri(), 0, 0);
+    Node subscriber = Node.createPrivate(Ros.newGraphName("/subscriber"), masterServer.getUri(), 0, 0);
+    Node publisher = Node.createPrivate(Ros.newGraphName("/publisher"), masterServer.getUri(), 0, 0);
 
     ParameterTree subscriberParameters =
         subscriber.createParameterTree(DefaultNameResolver.createDefault());

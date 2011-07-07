@@ -38,7 +38,7 @@ public class DefaultNameResolver implements NameResolver {
 
   public static NameResolver
       createFromString(String namespace, Map<GraphName, GraphName> remappings) {
-    return new DefaultNameResolver(Ros.createGraphName(namespace), remappings);
+    return new DefaultNameResolver(Ros.newGraphName(namespace), remappings);
   }
 
   public static NameResolver createFromString(String namespace) {
@@ -83,7 +83,7 @@ public class DefaultNameResolver implements NameResolver {
 
   @Override
   public String resolve(String namespace, String name) {
-    return resolve(Ros.createGraphName(namespace), Ros.createGraphName(name)).toString();
+    return resolve(Ros.newGraphName(namespace), Ros.newGraphName(name)).toString();
   }
 
   @Override
@@ -93,7 +93,7 @@ public class DefaultNameResolver implements NameResolver {
 
   @Override
   public String resolve(String name) {
-    return resolve(getNamespace(), Ros.createGraphName(name)).toString();
+    return resolve(getNamespace(), Ros.newGraphName(name)).toString();
   }
 
   protected GraphName lookUpRemapping(GraphName name) {

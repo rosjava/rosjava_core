@@ -20,13 +20,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.ros.node.NodeConfiguration;
-
 import org.ros.Ros;
 import org.ros.RosLoader;
 import org.ros.exception.RosInitException;
 import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.namespace.DefaultNameResolver;
+import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 
@@ -38,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Create {@link NodeConfiguration} instances using a ROS command-line and
+ * Create {@link DefaultNodeConfiguration} instances using a ROS command-line and
  * environment specification.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
@@ -111,9 +110,9 @@ public class CommandLineLoader extends RosLoader {
    * specification.
    */
   @Override
-  public NodeConfiguration createConfiguration() throws RosInitException {
+  public DefaultNodeConfiguration createConfiguration() throws RosInitException {
     parseRemappingArguments();
-    NodeConfiguration nodeConfiguration = NodeConfiguration.createDefault();
+    DefaultNodeConfiguration nodeConfiguration = DefaultNodeConfiguration.createDefault();
     nodeConfiguration.setParentResolver(buildParentResolver());
     nodeConfiguration.setRosRoot(getRosRoot());
     nodeConfiguration.setRosPackagePath(getRosPackagePath());
@@ -135,7 +134,7 @@ public class CommandLineLoader extends RosLoader {
       if (remapping.startsWith("__")) {
         specialRemappings.put(remap[0], remap[1]);
       } else {
-        remappings.put(Ros.createGraphName(remap[0]), Ros.createGraphName(remap[1]));
+        remappings.put(Ros.newGraphName(remap[0]), Ros.newGraphName(remap[1]));
       }
     }
   }
@@ -151,9 +150,9 @@ public class CommandLineLoader extends RosLoader {
   private NameResolver buildParentResolver() {
     GraphName namespace = DefaultGraphName.createRoot();
     if (specialRemappings.containsKey(CommandLine.ROS_NAMESPACE)) {
-      namespace = Ros.createGraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal();
+      namespace = Ros.newGraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal();
     } else if (environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
-      namespace = Ros.createGraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
+      namespace = Ros.newGraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
     }
     return new DefaultNameResolver(namespace, remappings);
   }
@@ -165,11 +164,11 @@ public class CommandLineLoader extends RosLoader {
    * <li>The __ip:= command line argument.</li>
    * <li>The ROS_IP environment variable.</li>
    * <li>The ROS_HOSTNAME environment variable.</li>
-   * <li>The default host as specified in {@link NodeConfiguration}.</li>
+   * <li>The default host as specified in {@link DefaultNodeConfiguration}.</li>
    * </ol>
    */
   private String getHost() {
-    String host = NodeConfiguration.DEFAULT_HOST;
+    String host = DefaultNodeConfiguration.DEFAULT_HOST;
     if (specialRemappings.containsKey(CommandLine.ROS_IP)) {
       host = specialRemappings.get(CommandLine.ROS_IP);
     } else if (environment.containsKey(EnvironmentVariables.ROS_IP)) {
@@ -187,13 +186,13 @@ public class CommandLineLoader extends RosLoader {
    * <li>The __master:= command line argument. This is not required but easy to
    * support.</li>
    * <li>The ROS_MASTER_URI environment variable.</li>
-   * <li>The default master URI as defined in {@link NodeConfiguration}.</li>
+   * <li>The default master URI as defined in {@link DefaultNodeConfiguration}.</li>
    * </ol>
    * 
    * @throws RosInitException
    */
   private URI getMasterUri() throws RosInitException {
-    String uri = NodeConfiguration.DEFAULT_MASTER_URI;
+    String uri = DefaultNodeConfiguration.DEFAULT_MASTER_URI;
     if (specialRemappings.containsKey(CommandLine.ROS_MASTER_URI)) {
       uri = specialRemappings.get(CommandLine.ROS_MASTER_URI);
     } else if (environment.containsKey(EnvironmentVariables.ROS_MASTER_URI)) {

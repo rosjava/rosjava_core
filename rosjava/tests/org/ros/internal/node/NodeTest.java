@@ -59,7 +59,7 @@ public class NodeTest {
   public void testFailIfStartedWhileRunning() throws UnknownHostException {
     String hostName = InetAddress.getLocalHost().getCanonicalHostName();
     Node node =
-        Node.createPublic(Ros.createGraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
+        Node.createPublic(Ros.newGraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
     try {
       node.start();
       fail();
@@ -72,7 +72,7 @@ public class NodeTest {
   public void testFailIfStoppedWhileNotRunning() throws UnknownHostException {
     String hostName = InetAddress.getLocalHost().getCanonicalHostName();
     Node node =
-        Node.createPublic(Ros.createGraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
+        Node.createPublic(Ros.newGraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
     node.shutdown();
     try {
       node.shutdown();
@@ -87,7 +87,7 @@ public class NodeTest {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     assertFalse(InetAddresses.isInetAddress(host));
     Node node =
-        Node.createPublic(Ros.createGraphName("/node_name"), masterServer.getUri(), host, 0, 0);
+        Node.createPublic(Ros.newGraphName("/node_name"), masterServer.getUri(), host, 0, 0);
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -98,7 +98,7 @@ public class NodeTest {
   public void testCreatePublicWithIpv4() throws Exception {
     String host = "1.2.3.4";
     Node node =
-        Node.createPublic(Ros.createGraphName("/node_name"), masterServer.getUri(), host, 0, 0);
+        Node.createPublic(Ros.newGraphName("/node_name"), masterServer.getUri(), host, 0, 0);
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -109,7 +109,7 @@ public class NodeTest {
   public void testCreatePublicWithIpv6() throws Exception {
     String host = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     Node node =
-        Node.createPublic(Ros.createGraphName("/node_name"), masterServer.getUri(), host, 0, 0);
+        Node.createPublic(Ros.newGraphName("/node_name"), masterServer.getUri(), host, 0, 0);
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -118,7 +118,7 @@ public class NodeTest {
 
   @Test
   public void testCreatePrivate() {
-    Node node = Node.createPrivate(Ros.createGraphName("/node_name"), masterServer.getUri(), 0, 0);
+    Node node = Node.createPrivate(Ros.newGraphName("/node_name"), masterServer.getUri(), 0, 0);
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertTrue(nodeAddress.getAddress().isLoopbackAddress());
@@ -127,9 +127,9 @@ public class NodeTest {
 
   @Test
   public void testPubSubRegistration() throws InterruptedException {
-    Node node = Node.createPrivate(Ros.createGraphName("/node_name"), masterServer.getUri(), 0, 0);
+    Node node = Node.createPrivate(Ros.newGraphName("/node_name"), masterServer.getUri(), 0, 0);
     TopicDefinition topicDefinition =
-        TopicDefinition.create(Ros.createGraphName("/foo"), MessageDefinition.create(
+        TopicDefinition.create(Ros.newGraphName("/foo"), MessageDefinition.create(
         org.ros.message.std_msgs.String.__s_getDataType(),
         org.ros.message.std_msgs.String.__s_getMessageDefinition(),
         org.ros.message.std_msgs.String.__s_getMD5Sum()));

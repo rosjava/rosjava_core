@@ -27,7 +27,7 @@ public class NodeNameResolverTest extends NameResolverTest {
   @Override
   public void testResolveNameOneArg() {
     Map<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
-    GraphName nodeName = Ros.createGraphName("/node");
+    GraphName nodeName = Ros.newGraphName("/node");
     NodeNameResolver r = NodeNameResolver.create(DefaultNameResolver.createDefault(remappings), nodeName);
 
     assertEquals("/foo", r.resolve("foo"));
@@ -39,14 +39,14 @@ public class NodeNameResolverTest extends NameResolverTest {
     // https://code.ros.org/trac/ros/ticket/3044
     assertEquals("/node/foo", r.resolve("~/foo"));
 
-    nodeName = Ros.createGraphName("/ns1/node");
+    nodeName = Ros.newGraphName("/ns1/node");
     r = NodeNameResolver.create(DefaultNameResolver.createDefault(remappings), nodeName);
     assertEquals("/ns1/node/foo", r.resolve("~foo"));
     assertEquals("/ns1/node/foo", r.resolve("~/foo"));
     assertEquals("/ns1/node/foo/bar", r.resolve("~/foo/bar"));
 
     // Test case where private name is not is same namespace as default
-    nodeName = Ros.createGraphName("/ns2/node");
+    nodeName = Ros.newGraphName("/ns2/node");
     r = NodeNameResolver.create(DefaultNameResolver.createFromString("/ns1", remappings), nodeName);
 
     assertEquals("/ns1/foo", r.resolve("foo"));

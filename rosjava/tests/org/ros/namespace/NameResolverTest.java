@@ -94,8 +94,8 @@ public class NameResolverTest extends TestCase {
   @Test
   public void testResolveNameRemapping() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
-    remappings.put(Ros.createGraphName("name"), Ros.createGraphName("/my/name"));
-    remappings.put(Ros.createGraphName("foo"), Ros.createGraphName("/my/foo"));
+    remappings.put(Ros.newGraphName("name"), Ros.newGraphName("/my/name"));
+    remappings.put(Ros.newGraphName("foo"), Ros.newGraphName("/my/foo"));
 
     NameResolver r = DefaultNameResolver.createDefault(remappings);
 

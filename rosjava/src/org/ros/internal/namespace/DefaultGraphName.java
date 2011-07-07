@@ -179,19 +179,19 @@ public class DefaultGraphName implements GraphName {
   @Override
   public GraphName getParent() {
     if (name.length() == 0) {
-      return Ros.createGraphName("");
+      return Ros.newGraphName("");
     }
     if (name.equals(GraphName.ROOT)) {
-      return Ros.createGraphName(GraphName.ROOT);
+      return Ros.newGraphName(GraphName.ROOT);
     }
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > 1) {
-      return Ros.createGraphName(name.substring(0, slashIdx));
+      return Ros.newGraphName(name.substring(0, slashIdx));
     } else {
       if (isGlobal()) {
-        return Ros.createGraphName(GraphName.ROOT);
+        return Ros.newGraphName(GraphName.ROOT);
       } else {
-        return Ros.createGraphName("");
+        return Ros.newGraphName("");
       }
     }
   }
@@ -204,9 +204,9 @@ public class DefaultGraphName implements GraphName {
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > -1) {
       if (slashIdx + 1 < name.length()) {
-        return Ros.createGraphName(name.substring(slashIdx + 1));
+        return Ros.newGraphName(name.substring(slashIdx + 1));
       }
-      return Ros.createGraphName("");
+      return Ros.newGraphName("");
     }
     return this;
   }
@@ -221,7 +221,7 @@ public class DefaultGraphName implements GraphName {
   @Override
   public GraphName toRelative() {
     if (isPrivate() || isGlobal()) {
-      return Ros.createGraphName(name.substring(1));
+      return Ros.newGraphName(name.substring(1));
     } else {
       return this;
     }
@@ -238,9 +238,9 @@ public class DefaultGraphName implements GraphName {
     if (isGlobal()) {
       return this;
     } else if (isPrivate()) {
-      return Ros.createGraphName(GraphName.ROOT + name.substring(1));
+      return Ros.newGraphName(GraphName.ROOT + name.substring(1));
     } else {
-      return Ros.createGraphName(GraphName.ROOT + name);
+      return Ros.newGraphName(GraphName.ROOT + name);
     }
   }
 
@@ -260,7 +260,7 @@ public class DefaultGraphName implements GraphName {
     } else if (isRoot()) {
       return other.toGlobal();
     } else {
-      return Ros.createGraphName(toString() + "/" + other.toString());
+      return Ros.newGraphName(toString() + "/" + other.toString());
     }
   }
 

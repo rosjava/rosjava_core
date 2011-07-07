@@ -179,7 +179,7 @@ public class SlaveServer extends NodeServer {
   public ProtocolDescription requestTopic(String topicName, Collection<String> protocols)
       throws ServerException {
     // Canonicalize topic name.
-    topicName = Ros.createGraphName(topicName).toGlobal().toString();
+    topicName = Ros.newGraphName(topicName).toGlobal().toString();
     if (!topicManager.hasPublisher(topicName)) {
       throw new ServerException("No publishers for topic: " + topicName);
     }

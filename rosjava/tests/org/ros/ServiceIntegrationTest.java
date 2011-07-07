@@ -20,21 +20,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.ros.node.ServiceClient;
-import org.ros.node.ServiceResponseListener;
-import org.ros.node.ServiceServer;
-
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.internal.node.DefaultNode;
+import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
+import org.ros.node.Node;
+import org.ros.node.ServiceClient;
+import org.ros.node.ServiceResponseListener;
+import org.ros.node.ServiceServer;
 import org.ros.service.test_ros.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
@@ -49,19 +46,19 @@ public class ServiceIntegrationTest {
   private static final String SERVICE_TYPE = "test_ros/AddTwoInts";
 
   private MasterServer masterServer;
-  private NodeConfiguration configuration;
+  private DefaultNodeConfiguration configuration;
 
   @Before
   public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    configuration = NodeConfiguration.createDefault();
+    configuration = DefaultNodeConfiguration.createDefault();
     configuration.setMasterUri(masterServer.getUri());
   }
 
   @Test
   public void PesistentServiceConnectionTest() throws Exception {
-    Node serverNode = new DefaultNode("/server", configuration);
+    Node serverNode = Ros.newNode("/server", configuration);
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -74,7 +71,7 @@ public class ServiceIntegrationTest {
             });
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
-    Node clientNode = new DefaultNode("/client", configuration);
+    Node clientNode = Ros.newNode("/client", configuration);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.createServiceClient(SERVICE_NAME, SERVICE_TYPE);
 
@@ -104,7 +101,7 @@ public class ServiceIntegrationTest {
   @Test
   public void RequestFailureTest() throws Exception {
     final String errorMessage = "Error!";
-    Node serverNode = new DefaultNode("/server", configuration);
+    Node serverNode = Ros.newNode("/server", configuration);
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server = serverNode.createServiceServer(SERVICE_NAME, SERVICE_TYPE,
         new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
           @Override
@@ -114,7 +111,7 @@ public class ServiceIntegrationTest {
         });
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
-    Node clientNode = new DefaultNode("/client", configuration);
+    Node clientNode = Ros.newNode("/client", configuration);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.createServiceClient(SERVICE_NAME, SERVICE_TYPE);
 

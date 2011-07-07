@@ -17,150 +17,78 @@
 package org.ros.node;
 
 import org.ros.internal.namespace.DefaultNameResolver;
-import org.ros.internal.node.address.Address;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.NameResolver;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 /**
- * Stores contextual information about a ROS node, including common ROS
- * configuration like the master URI.
- * 
- * @author ethan.rublee@gmail.com (Ethan Rublee)
- * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class NodeConfiguration {
-
-  public static final String DEFAULT_HOST = Address.LOCALHOST;
-  public static final String DEFAULT_MASTER_URI = "http://" + DEFAULT_HOST + ":11311/";
-
-  private NameResolver parentResolver;
-  private URI masterUri;
-  private String host;
-  private File rosRoot;
-  private List<String> rosPackagePath;
-  private int tcpRosPort;
-  private int xmlRpcPort;
-  private String nodeNameOverride;
-  private MessageSerializationFactory messageSerializationFactory;
-
-  public static NodeConfiguration createDefault() {
-    NodeConfiguration configuration = new NodeConfiguration();
-    try {
-      configuration.setMasterUri(new URI(DEFAULT_MASTER_URI));
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
-    }
-    configuration.setParentResolver(DefaultNameResolver.createDefault());
-    configuration.setHost(DEFAULT_HOST);
-    configuration.setTcpRosPort(0); // OS determined free port.
-    configuration.setXmlRpcPort(0); // OS determined free port.
-    configuration.setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
-    return configuration;
-  }
+public interface NodeConfiguration {
 
   /**
    * @return The {@link DefaultNameResolver} for a {@link Node}'s parent namespace.
    */
-  public NameResolver getParentResolver() {
-    return parentResolver;
-  }
+  NameResolver getParentResolver();
 
-  public void setParentResolver(NameResolver resolver) {
-    this.parentResolver = resolver;
-  }
+  void setParentResolver(NameResolver resolver);
 
-  public URI getMasterUri() {
-    return masterUri;
-  }
+  URI getMasterUri();
 
-  public void setMasterUri(URI masterUri) {
-    this.masterUri = masterUri;
-  }
+  void setMasterUri(URI masterUri);
 
-  public File getRosRoot() {
-    return rosRoot;
-  }
+  File getRosRoot();
 
-  public void setRosRoot(File rosRoot) {
-    this.rosRoot = rosRoot;
-  }
+  void setRosRoot(File rosRoot);
 
-  public List<String> getRosPackagePath() {
-    return rosPackagePath;
-  }
+  List<String> getRosPackagePath();
 
-  public void setRosPackagePath(List<String> rosPackagePath) {
-    this.rosPackagePath = rosPackagePath;
-  }
+  void setRosPackagePath(List<String> rosPackagePath);
 
   /**
    * @return host name/address to use when advertising this node via URLs.
    */
-  public String getHost() {
-    return host;
-  }
+  String getHost();
 
   /**
    * Set host name/address to use when advertising this node via URLs.
    * 
    * @param host
    */
-  public void setHost(String host) {
-    this.host = host;
-  }
+  void setHost(String host);
 
   /**
    * @return Port to bind TCPROS server to, or 0 to bind to any open port.
    */
-  public int getTcpRosPort() {
-    return tcpRosPort;
-  }
+  int getTcpRosPort();
 
   /**
    * Set port to bind TCPROS server to. 0 binds to any open port.
    */
-  public void setTcpRosPort(int tcpRosPort) {
-    this.tcpRosPort = tcpRosPort;
-  }
+  void setTcpRosPort(int tcpRosPort);
 
   /**
    * @return Port to bind XMLRPC server to, or 0 to bind to any open port.
    */
-  public int getXmlRpcPort() {
-    return xmlRpcPort;
-  }
+  int getXmlRpcPort();
 
   /**
    * Set port to bind XMLRPC server to. 0 binds to any open port.
    */
-  public void setXmlRpcPort(int xmlRpcPort) {
-    this.xmlRpcPort = xmlRpcPort;
-  }
+  void setXmlRpcPort(int xmlRpcPort);
 
   /**
    * @return Override for Node name or null if no override.
    */
-  public String getNodeNameOverride() {
-    return nodeNameOverride;
-  }
+  String getNodeNameOverride();
 
-  public void setNodeNameOverride(String nodeNameOverride) {
-    this.nodeNameOverride = nodeNameOverride;
-  }
+  void setNodeNameOverride(String nodeNameOverride);
 
-  public MessageSerializationFactory getMessageSerializationFactory() {
-    return messageSerializationFactory;
-  }
+  MessageSerializationFactory getMessageSerializationFactory();
 
-  public void
-      setMessageSerializationFactory(MessageSerializationFactory messageSerializationFactory) {
-    this.messageSerializationFactory = messageSerializationFactory;
-  }
+  void setMessageSerializationFactory(MessageSerializationFactory messageSerializationFactory);
 
 }

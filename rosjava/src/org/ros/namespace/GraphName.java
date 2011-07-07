@@ -16,7 +16,6 @@
 
 package org.ros.namespace;
 
-
 /**
  * ROS graph resource name.
  * 

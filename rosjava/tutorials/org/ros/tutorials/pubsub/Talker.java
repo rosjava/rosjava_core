@@ -18,13 +18,11 @@ package org.ros.tutorials.pubsub;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.node.Publisher;
-
+import org.ros.Ros;
+import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
-
-import org.ros.internal.node.DefaultNode;
+import org.ros.node.Publisher;
 
 /**
  * This is a simple rosjava {@link Publisher} {@link Node}. It assumes an
@@ -38,11 +36,11 @@ public class Talker implements NodeMain {
   private Node node;
 
   @Override
-  public void main(NodeConfiguration configuration) {
+  public void main(DefaultNodeConfiguration configuration) {
     Preconditions.checkState(node == null);
     Preconditions.checkNotNull(configuration);
     try {
-      node = new DefaultNode("talker", configuration);
+      node = Ros.newNode("talker", configuration);
       Publisher<org.ros.message.std_msgs.String> publisher =
           node.createPublisher("chatter", "std_msgs/String");
       int seq = 0;

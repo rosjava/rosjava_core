@@ -16,12 +16,11 @@
 
 package org.ros;
 
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-
 import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.DefaultNode;
+import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.namespace.GraphName;
+import org.ros.node.Node;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -32,11 +31,11 @@ public class Ros {
     // Utility class
   }
 
-  public static Node createNode(String name, NodeConfiguration configuration) {
+  public static Node newNode(String name, DefaultNodeConfiguration configuration) {
     return new DefaultNode(new DefaultGraphName(name), configuration);
   }
 
-  public static GraphName createGraphName(String name) {
+  public static GraphName newGraphName(String name) {
     return new DefaultGraphName(name);
   }
 

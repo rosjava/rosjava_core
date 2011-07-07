@@ -56,7 +56,7 @@ public class MasterServer extends NodeServer {
     publishers = Multimaps.synchronizedMultimap(HashMultimap.<String, PublisherIdentifier>create());
     subscribers =
         Multimaps.synchronizedMultimap(HashMultimap.<String, SubscriberIdentifier>create());
-    masterName = Ros.createGraphName("/master");
+    masterName = Ros.newGraphName("/master");
   }
 
   public void start() {

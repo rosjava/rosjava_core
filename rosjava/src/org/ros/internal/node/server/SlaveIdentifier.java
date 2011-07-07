@@ -38,7 +38,7 @@ public class SlaveIdentifier {
 
   public static SlaveIdentifier createFromStrings(String nodeName, String uri) {
     try {
-      return new SlaveIdentifier(Ros.createGraphName(nodeName), new URI(uri));
+      return new SlaveIdentifier(Ros.newGraphName(nodeName), new URI(uri));
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }

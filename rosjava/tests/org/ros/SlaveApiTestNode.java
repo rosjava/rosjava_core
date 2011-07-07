@@ -16,16 +16,13 @@
 
 package org.ros;
 
-import org.ros.node.Publisher;
-
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMain;
-
 import org.ros.exception.RosInitException;
-import org.ros.internal.node.DefaultNode;
+import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
+import org.ros.node.Node;
+import org.ros.node.NodeMain;
+import org.ros.node.Publisher;
 
 /**
  * This node is used to test the slave API externally using rostest.
@@ -37,8 +34,8 @@ public class SlaveApiTestNode implements NodeMain {
   private Node node;
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
-    node = new DefaultNode("test_node", nodeConfiguration);
+  public void main(DefaultNodeConfiguration nodeConfiguration) throws RosInitException {
+    node = Ros.newNode("test_node", nodeConfiguration);
 
     // Basic chatter in/out test.
     Publisher<org.ros.message.std_msgs.String> pub_string =

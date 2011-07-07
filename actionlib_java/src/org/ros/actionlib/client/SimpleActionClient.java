@@ -1,5 +1,7 @@
 package org.ros.actionlib.client;
 
+import org.ros.internal.node.DefaultNodeConfiguration;
+
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.state.CommState;
 import org.ros.actionlib.state.SimpleClientGoalState;
@@ -10,7 +12,6 @@ import org.ros.message.Duration;
 import org.ros.message.Message;
 import org.ros.message.Time;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 /**
@@ -131,7 +132,7 @@ public class SimpleActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL
   }
 
   @Override
-  public void main(NodeConfiguration configuration) throws Exception {
+  public void main(DefaultNodeConfiguration configuration) throws Exception {
     actionClient.main(configuration);
   }
 

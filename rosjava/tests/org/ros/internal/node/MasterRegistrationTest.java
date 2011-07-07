@@ -42,7 +42,7 @@ public class MasterRegistrationTest {
 
   public MasterRegistrationTest() {
     topicDefinition =
-        TopicDefinition.create(Ros.createGraphName("/topic"), MessageDefinition.create(
+        TopicDefinition.create(Ros.newGraphName("/topic"), MessageDefinition.create(
             org.ros.message.std_msgs.String.__s_getDataType(),
             org.ros.message.std_msgs.String.__s_getMessageDefinition(),
             org.ros.message.std_msgs.String.__s_getMD5Sum()));
@@ -59,7 +59,7 @@ public class MasterRegistrationTest {
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
     slaveServer =
-        new SlaveServer(Ros.createGraphName("/node"), BindAddress.createPrivate(0),
+        new SlaveServer(Ros.newGraphName("/node"), BindAddress.createPrivate(0),
             AdvertiseAddress.createPrivate(), BindAddress.createPrivate(0),
             AdvertiseAddress.createPrivate(), masterClient, topicManager, serviceManager,
             parameterManager);

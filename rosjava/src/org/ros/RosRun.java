@@ -18,12 +18,11 @@ package org.ros;
 
 import com.google.common.collect.Lists;
 
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMain;
-
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
+import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.loader.CommandLineLoader;
+import org.ros.node.NodeMain;
 
 /**
  * This is a rosrun-compatible loader for rosjava-based nodes.
@@ -52,7 +51,7 @@ public class RosRun {
     CommandLineLoader loader = new CommandLineLoader(Lists.newArrayList(argv));
     String nodeClassName = loader.getNodeClassName();
     System.out.println("Loading node class: " + loader.getNodeClassName());
-    NodeConfiguration nodeConfiguration = null;
+    DefaultNodeConfiguration nodeConfiguration = null;
     try {
       nodeConfiguration = loader.createConfiguration();
     } catch (RosInitException e1) {

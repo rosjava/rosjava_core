@@ -14,13 +14,9 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.internal.node.topic;
 
 import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.topic.Publisher;
-import org.ros.internal.node.topic.Subscriber;
-import org.ros.internal.node.topic.TopicDefinition;
-import org.ros.internal.node.topic.TopicManager;
 import org.ros.message.MessageSerializer;
 
 /**

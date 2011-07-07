@@ -16,6 +16,8 @@
 
 package org.ros.node;
 
+import org.ros.internal.node.DefaultNodeConfiguration;
+
 /**
  * Defines a {@link Node} entry point and shutdown routine.
  * 
@@ -27,10 +29,10 @@ public interface NodeMain {
   /**
    * {@link Node} entry point.
    * 
-   * @param nodeConfiguration the {@link NodeConfiguration} that will be passed to the
+   * @param nodeConfiguration the {@link DefaultNodeConfiguration} that will be passed to the
    *        {@link Node}
    */
-  void main(NodeConfiguration nodeConfiguration) throws Exception;
+  void main(DefaultNodeConfiguration nodeConfiguration) throws Exception;
   
   /**
    * {@link Node} shutdown routine.

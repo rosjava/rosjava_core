@@ -17,17 +17,10 @@
 package org.ros;
 
 
-import org.ros.node.ParameterTree;
-import org.ros.node.Publisher;
-
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMain;
-
 import org.apache.commons.logging.Log;
 import org.ros.exception.RosInitException;
 import org.ros.internal.exception.RemoteException;
-import org.ros.internal.node.DefaultNode;
+import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.message.std_msgs.Bool;
 import org.ros.message.std_msgs.Float64;
 import org.ros.message.std_msgs.Int64;
@@ -35,6 +28,10 @@ import org.ros.message.test_ros.Composite;
 import org.ros.message.test_ros.TestArrays;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
+import org.ros.node.Node;
+import org.ros.node.NodeMain;
+import org.ros.node.ParameterTree;
+import org.ros.node.Publisher;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -51,9 +48,9 @@ public class ParameterServerTestNode implements NodeMain {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
+  public void main(DefaultNodeConfiguration nodeConfiguration) throws RosInitException {
     try {
-      node = new DefaultNode("param_client", nodeConfiguration);
+      node = Ros.newNode("param_client", nodeConfiguration);
 
       Publisher<org.ros.message.std_msgs.String> pub_tilde =
           node.createPublisher("tilde", "std_msgs/String");
@@ -73,8 +70,8 @@ public class ParameterServerTestNode implements NodeMain {
       tilde_m.data = param.getString(node.resolveName("~tilde"));
       log.info("tilde: " + tilde_m.data);
 
-      GraphName paramNamespace = Ros.createGraphName(param.getString("parameter_namespace"));
-      GraphName targetNamespace = Ros.createGraphName(param.getString("target_namespace"));
+      GraphName paramNamespace = Ros.newGraphName(param.getString("parameter_namespace"));
+      GraphName targetNamespace = Ros.newGraphName(param.getString("target_namespace"));
       log.info("parameter_namespace: " + paramNamespace);
       log.info("target_namespace: " + targetNamespace);
       NameResolver resolver = node.getResolver().createResolver(paramNamespace);

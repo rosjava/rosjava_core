@@ -1,5 +1,9 @@
 package org.ros.actionlib.client;
 
+import org.ros.internal.node.DefaultNodeConfiguration;
+
+import org.ros.Ros;
+
 import org.ros.actionlib.ActionSpec;
 import org.ros.exception.RosException;
 import org.ros.internal.node.DefaultNode;
@@ -10,7 +14,6 @@ import org.ros.message.Time;
 import org.ros.message.actionlib_msgs.GoalID;
 import org.ros.message.actionlib_msgs.GoalStatusArray;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.Publisher;
 import org.ros.node.Subscriber;
@@ -171,11 +174,11 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
   }
 
   @Override
-  public void main(NodeConfiguration configuration) throws Exception {
+  public void main(DefaultNodeConfiguration configuration) throws Exception {
     if (parent != null)
-      initClient(new DefaultNode(parent.resolveName(nodeName), configuration));
+      initClient(Ros.newNode(parent.resolveName(nodeName), configuration));
     else
-      initClient(new DefaultNode(nodeName, configuration));
+      initClient(Ros.newNode(nodeName, configuration));
   }
 
   /**

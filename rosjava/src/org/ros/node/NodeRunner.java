@@ -17,6 +17,7 @@
 package org.ros.node;
 
 import org.ros.exception.RosInitException;
+import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.loader.CommandLineLoader;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public class NodeRunner {
   // TODO(damonkohler): The CommandLineLoader is not appropriate here.
   public void run(final NodeMain node, final List<String> argv) throws RosInitException {
     final CommandLineLoader loader = new CommandLineLoader(argv);
-    final NodeConfiguration nodeConfiguration = loader.createConfiguration();
+    final DefaultNodeConfiguration nodeConfiguration = loader.createConfiguration();
     executor.execute(new Runnable() {
       @Override
       public void run() {
@@ -54,7 +55,7 @@ public class NodeRunner {
     });
   }
 
-  public void run(final NodeMain node, final NodeConfiguration nodeConfiguration) {
+  public void run(final NodeMain node, final DefaultNodeConfiguration nodeConfiguration) {
     executor.execute(new Runnable() {
       @Override
       public void run() {

@@ -27,7 +27,7 @@ public class TopicIdentifier {
   private final GraphName name;
   
   public static TopicIdentifier createFromString(String topicName) {
-    return new TopicIdentifier(Ros.createGraphName(topicName));
+    return new TopicIdentifier(Ros.newGraphName(topicName));
   }
 
   public TopicIdentifier(GraphName name) {

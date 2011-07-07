@@ -48,19 +48,19 @@ public class TopicManager {
   }
 
   public boolean hasSubscriber(String topicName) {
-    return subscribers.containsKey(Ros.createGraphName(topicName));
+    return subscribers.containsKey(Ros.newGraphName(topicName));
   }
 
   public boolean hasPublisher(String topicName) {
-    return publishers.containsKey(Ros.createGraphName(topicName));
+    return publishers.containsKey(Ros.newGraphName(topicName));
   }
 
   public Publisher<?> getPublisher(String topicName) {
-    return publishers.get(Ros.createGraphName(topicName));
+    return publishers.get(Ros.newGraphName(topicName));
   }
 
   public Subscriber<?> getSubscriber(String topicName) {
-    return subscribers.get(Ros.createGraphName(topicName));
+    return subscribers.get(Ros.newGraphName(topicName));
   }
 
   public void putPublisher(Publisher<?> publisher) {
