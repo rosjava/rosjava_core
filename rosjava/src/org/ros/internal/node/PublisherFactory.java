@@ -16,12 +16,12 @@
 
 package org.ros.internal.node;
 
-import org.ros.MessageSerializer;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
+import org.ros.message.MessageSerializer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

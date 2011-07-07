@@ -18,7 +18,7 @@ package org.ros.internal.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.namespace.GraphName;
+import org.ros.Ros;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -26,6 +26,7 @@ import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicIdentifier;
+import org.ros.namespace.GraphName;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -81,7 +82,7 @@ public class MasterImpl implements Master, ParameterServer {
       String callerApi) {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
     PublisherIdentifier publisherIdentifier =
-        new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(new GraphName(topic)));
+        new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(Ros.createGraphName(topic)));
     List<SubscriberIdentifier> subscribers = master.registerPublisher(publisherIdentifier);
     List<String> urls = Lists.newArrayList();
     for (SubscriberIdentifier subscriberIdentifier : subscribers) {
@@ -103,7 +104,7 @@ public class MasterImpl implements Master, ParameterServer {
       String callerApi) {
     ServiceIdentifier serviceIdentifier;
     try {
-      serviceIdentifier = new ServiceIdentifier(new GraphName(serviceName), new URI(serviceApi));
+      serviceIdentifier = new ServiceIdentifier(Ros.createGraphName(serviceName), new URI(serviceApi));
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
@@ -115,7 +116,7 @@ public class MasterImpl implements Master, ParameterServer {
   public List<Object> unregisterService(String callerId, String serviceName, String serviceApi) {
     ServiceIdentifier serviceIdentifier;
     try {
-      serviceIdentifier = new ServiceIdentifier(new GraphName(serviceName), new URI(serviceApi));
+      serviceIdentifier = new ServiceIdentifier(Ros.createGraphName(serviceName), new URI(serviceApi));
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
@@ -146,43 +147,43 @@ public class MasterImpl implements Master, ParameterServer {
 
   @Override
   public List<Object> setParam(String callerId, String key, Boolean value) {
-    parameterServer.set(new GraphName(key), value);
+    parameterServer.set(Ros.createGraphName(key), value);
     return Response.createSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, Integer value) {
-    parameterServer.set(new GraphName(key), value);
+    parameterServer.set(Ros.createGraphName(key), value);
     return Response.createSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, Double value) {
-    parameterServer.set(new GraphName(key), value);
+    parameterServer.set(Ros.createGraphName(key), value);
     return Response.createSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, String value) {
-    parameterServer.set(new GraphName(key), value);
+    parameterServer.set(Ros.createGraphName(key), value);
     return Response.createSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, List<?> value) {
-    parameterServer.set(new GraphName(key), value);
+    parameterServer.set(Ros.createGraphName(key), value);
     return Response.createSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, Map<?, ?> value) {
-    parameterServer.set(new GraphName(key), value);
+    parameterServer.set(Ros.createGraphName(key), value);
     return Response.createSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> getParam(String callerId, String key) {
-    Object value = parameterServer.get(new GraphName(key));
+    Object value = parameterServer.get(Ros.createGraphName(key));
     if (value == null) {
       return Response.createError("Parameter \"" + key + "\" is not set.", null).toList();
     }
@@ -196,9 +197,9 @@ public class MasterImpl implements Master, ParameterServer {
 
   @Override
   public List<Object> subscribeParam(String callerId, String callerApi, String key) {
-    parameterServer.subscribe(new GraphName(key),
+    parameterServer.subscribe(Ros.createGraphName(key),
         SlaveIdentifier.createFromStrings(callerId, callerApi));
-    Object value = parameterServer.get(new GraphName(key));
+    Object value = parameterServer.get(Ros.createGraphName(key));
     if (value == null) {
       // Must return an empty map as the value of an unset parameter.
       value = new HashMap<String, Object>();
@@ -213,13 +214,13 @@ public class MasterImpl implements Master, ParameterServer {
 
   @Override
   public List<Object> deleteParam(String callerId, String key) {
-    parameterServer.delete(new GraphName(key));
+    parameterServer.delete(Ros.createGraphName(key));
     return Response.createSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> hasParam(String callerId, String key) {
-    return Response.createSuccess("Success", parameterServer.has(new GraphName(key))).toList();
+    return Response.createSuccess("Success", parameterServer.has(Ros.createGraphName(key))).toList();
   }
 
   @Override

@@ -19,9 +19,9 @@ package org.ros.internal.node.service;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-import org.ros.internal.message.ServiceMessageDefinition;
-import org.ros.internal.namespace.GraphName;
+import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.namespace.GraphName;
 
 import java.net.URI;
 import java.util.Map;

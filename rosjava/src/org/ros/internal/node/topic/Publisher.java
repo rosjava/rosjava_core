@@ -23,11 +23,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
-import org.ros.MessageSerializer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.OutgoingMessageQueue;
+import org.ros.message.MessageSerializer;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,7 @@ import java.util.Map;
  * 
  * @param <MessageType>
  */
-public class Publisher<MessageType> extends Topic implements org.ros.Publisher<MessageType> {
+public class Publisher<MessageType> extends Topic implements org.ros.node.Publisher<MessageType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);

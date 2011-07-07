@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.namespace.GraphName;
+import org.ros.namespace.GraphName;
 
 import java.util.List;
 import java.util.Map;

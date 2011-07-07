@@ -17,18 +17,12 @@
 package org.ros.message;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageSerializer<MessageType> implements org.ros.MessageSerializer<MessageType> {
-
-  @Override
-  public ByteBuffer serialize(MessageType message) {
-    ByteBuffer buffer = ByteBuffer.wrap(((Message) message).serialize(0));
-    buffer.order(ByteOrder.LITTLE_ENDIAN);
-    return buffer;
-  }
+public interface MessageSerializer<MessageType> {
+  
+  ByteBuffer serialize(MessageType message);
 
 }

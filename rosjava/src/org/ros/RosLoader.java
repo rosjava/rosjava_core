@@ -16,6 +16,9 @@
 
 package org.ros;
 
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
+
 import org.ros.exception.RosInitException;
 
 /**

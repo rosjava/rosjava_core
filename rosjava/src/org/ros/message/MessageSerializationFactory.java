@@ -1,57 +1,38 @@
-package org.ros.message;
+/*
+ * Copyright (C) 2011 Google Inc.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
-import com.google.common.base.Preconditions;
+package org.ros.message;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageSerializationFactory implements org.ros.MessageSerializationFactory {
+public interface MessageSerializationFactory {
 
-  @Override
-  public <MessageType> MessageSerializer<MessageType> createSerializer(String messageType) {
-    return new MessageSerializer<MessageType>();
-  }
+  <MessageType> MessageSerializer<MessageType> createSerializer(String messageType);
 
-  @Override
-  public <MessageType> MessageDeserializer<MessageType> createDeserializer(String messageType) {
-    return createDeserializer(messageType, "org.ros.message.");
-  }
+  <MessageType> MessageDeserializer<MessageType> createDeserializer(String messageType);
 
-  @SuppressWarnings("unchecked")
-  public <MessageType> MessageDeserializer<MessageType> createDeserializer(String messageType, String classpath) {
-    Preconditions.checkArgument(messageType.split("/").length == 2);
-    Class<MessageType> messageClass;
-    try {
-      messageClass =
-        (Class<MessageType>) Class.forName(classpath + messageType.replace('/', '.'));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    return new MessageDeserializer<MessageType>(messageClass);
-  }
+  <MessageType> MessageSerializer<MessageType> createServiceRequestSerializer(String serviceType);
 
-  @Override
-  public <MessageType> org.ros.MessageSerializer<MessageType> createServiceRequestSerializer(
-      String serviceType) {
-    return createSerializer("org.ros.service." + serviceType + "$Request");
-  }
+  <MessageType> MessageDeserializer<MessageType>
+      createServiceRequestDeserializer(String serviceType);
 
-  @Override
-  public <MessageType> org.ros.MessageDeserializer<MessageType> createServiceRequestDeserializer(
-      String serviceType) {
-    return createDeserializer(serviceType + "$Request", "org.ros.service.");
-  }
+  <MessageType> MessageSerializer<MessageType> createServiceResponseSerializer(String serviceType);
 
-  @Override
-  public <MessageType> org.ros.MessageSerializer<MessageType> createServiceResponseSerializer(
-      String serviceType) {
-    return createSerializer("org.ros.service." + serviceType + "$Response");
-  }
-
-  @Override
-  public <MessageType> org.ros.MessageDeserializer<MessageType> createServiceResponseDeserializer(
-      String serviceType) {
-    return createDeserializer(serviceType + "$Response", "org.ros.service.");
-  }
+  <MessageType> MessageDeserializer<MessageType> createServiceResponseDeserializer(
+      String serviceType);
 
 }

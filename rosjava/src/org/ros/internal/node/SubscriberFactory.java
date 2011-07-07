@@ -16,12 +16,12 @@
 
 package org.ros.internal.node;
 
-import org.ros.MessageDeserializer;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
+import org.ros.message.MessageDeserializer;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;

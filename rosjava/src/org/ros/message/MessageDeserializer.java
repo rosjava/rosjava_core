@@ -16,32 +16,13 @@
 
 package org.ros.message;
 
-import com.google.common.base.Preconditions;
-
 import java.nio.ByteBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageDeserializer<MessageType> implements org.ros.MessageDeserializer<MessageType> {
-
-  private final Class<MessageType> messageClass;
-
-  public MessageDeserializer(Class<MessageType> messageClass) {
-    Preconditions.checkArgument(Message.class.isAssignableFrom(messageClass));
-    this.messageClass = messageClass;
-  }
-
-  @Override
-  public MessageType deserialize(ByteBuffer buffer) {
-    MessageType message;
-    try {
-      message = messageClass.newInstance();
-    } catch (Exception e) {
-      throw new RuntimeException();
-    }
-    ((Message) message).deserialize(buffer);
-    return message;
-  }
+public interface MessageDeserializer<MessageType> {
+  
+  MessageType deserialize(ByteBuffer buffer);
 
 }

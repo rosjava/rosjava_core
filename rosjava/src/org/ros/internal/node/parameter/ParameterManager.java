@@ -20,9 +20,10 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
-import java.util.Collection;
+import org.ros.node.ParameterListener;
 
-import org.ros.ParameterListener;
+
+import java.util.Collection;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

@@ -16,7 +16,7 @@
 
 package org.ros.exception;
 
-import org.ros.internal.namespace.GraphName;
+import org.ros.namespace.GraphName;
 
 /**
  * Thrown in the case where a {@link GraphName} is invalid.

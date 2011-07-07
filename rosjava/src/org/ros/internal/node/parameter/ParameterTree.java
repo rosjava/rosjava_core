@@ -16,7 +16,8 @@
 
 package org.ros.internal.node.parameter;
 
-import org.ros.ParameterListener;
+import org.ros.node.ParameterListener;
+
 import org.ros.internal.node.client.ParameterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
@@ -35,7 +36,7 @@ import java.util.Map;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ParameterTree implements org.ros.ParameterTree {
+public class ParameterTree implements org.ros.node.ParameterTree {
 
   private final ParameterClient parameterClient;
   private final NameResolver resolver;

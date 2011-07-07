@@ -16,6 +16,9 @@
 
 package org.ros.internal.node.address;
 
+import com.google.common.collect.Lists;
+import com.google.common.net.InetAddresses;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -24,9 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import com.google.common.collect.Lists;
-import com.google.common.net.InetAddresses;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

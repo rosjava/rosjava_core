@@ -23,7 +23,8 @@ import com.google.common.collect.Maps;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.internal.namespace.GraphName;
+import org.ros.Ros;
+import org.ros.namespace.GraphName;
 
 import java.util.Collection;
 import java.util.Map;
@@ -42,58 +43,58 @@ public class ParameterServerTest {
 
   @Test
   public void testGetNonExistent() {
-    assertEquals(null, server.get(new GraphName("/foo")));
-    assertEquals(null, server.get(new GraphName("/foo/bar")));
+    assertEquals(null, server.get(Ros.createGraphName("/foo")));
+    assertEquals(null, server.get(Ros.createGraphName("/foo/bar")));
   }
 
   @Test
   public void testSetAndGetShallow() {
-    server.set(new GraphName("/foo"), "bloop");
-    assertEquals("bloop", server.get(new GraphName("/foo")));
+    server.set(Ros.createGraphName("/foo"), "bloop");
+    assertEquals("bloop", server.get(Ros.createGraphName("/foo")));
   }
 
   @Test
   public void testSetAndGetDeep() {
-    server.set(new GraphName("/foo/bar"), "bloop");
-    assertEquals("bloop", server.get(new GraphName("/foo/bar")));
+    server.set(Ros.createGraphName("/foo/bar"), "bloop");
+    assertEquals("bloop", server.get(Ros.createGraphName("/foo/bar")));
   }
 
   @Test
   public void testSetAndGet() {
-    server.set(new GraphName("/foo"), "bloop");
-    assertEquals("bloop", server.get(new GraphName("/foo")));
-    server.set(new GraphName("/foo/bar"), "bloop");
-    assertEquals("bloop", server.get(new GraphName("/foo/bar")));
-    server.set(new GraphName("/foo/bar/baz"), "bloop");
-    assertEquals("bloop", server.get(new GraphName("/foo/bar/baz")));
+    server.set(Ros.createGraphName("/foo"), "bloop");
+    assertEquals("bloop", server.get(Ros.createGraphName("/foo")));
+    server.set(Ros.createGraphName("/foo/bar"), "bloop");
+    assertEquals("bloop", server.get(Ros.createGraphName("/foo/bar")));
+    server.set(Ros.createGraphName("/foo/bar/baz"), "bloop");
+    assertEquals("bloop", server.get(Ros.createGraphName("/foo/bar/baz")));
   }
 
   @Test
   public void testSetDeepAndGetShallow() {
-    server.set(new GraphName("/foo/bar"), "bloop");
+    server.set(Ros.createGraphName("/foo/bar"), "bloop");
     Map<String, Object> expected = Maps.newHashMap();
     expected.put("bar", "bloop");
-    assertEquals(expected, server.get(new GraphName("/foo")));
+    assertEquals(expected, server.get(Ros.createGraphName("/foo")));
   }
 
   @Test
   public void testSetOverwritesMap() {
-    server.set(new GraphName("/foo/bar"), "bloop");
-    assertEquals("bloop", server.get(new GraphName("/foo/bar")));
-    server.set(new GraphName("/foo"), "bloop");
-    assertEquals("bloop", server.get(new GraphName("/foo")));
+    server.set(Ros.createGraphName("/foo/bar"), "bloop");
+    assertEquals("bloop", server.get(Ros.createGraphName("/foo/bar")));
+    server.set(Ros.createGraphName("/foo"), "bloop");
+    assertEquals("bloop", server.get(Ros.createGraphName("/foo")));
   }
 
   @Test
   public void testSetAndGetFloat() {
-    GraphName name = new GraphName("/foo/bar");
+    GraphName name = Ros.createGraphName("/foo/bar");
     server.set(name, 0.42f);
     assertEquals(0.42, (Double) server.get(name), 0.1);
   }
 
   @Test
   public void testDeleteShallow() {
-    GraphName name = new GraphName("/foo");
+    GraphName name = Ros.createGraphName("/foo");
     server.set(name, "bloop");
     server.delete(name);
     assertEquals(null, server.get(name));
@@ -101,7 +102,7 @@ public class ParameterServerTest {
 
   @Test
   public void testDeleteDeep() {
-    GraphName name = new GraphName("/foo/bar");
+    GraphName name = Ros.createGraphName("/foo/bar");
     server.set(name, "bloop");
     server.delete(name);
     assertEquals(null, server.get(name));
@@ -109,18 +110,18 @@ public class ParameterServerTest {
 
   @Test
   public void testHas() {
-    server.set(new GraphName("/foo/bar/baz"), "bloop");
-    assertTrue(server.has(new GraphName("/foo/bar/baz")));
-    assertTrue(server.has(new GraphName("/foo/bar")));
-    assertTrue(server.has(new GraphName("/foo")));
-    assertTrue(server.has(new GraphName("/")));
+    server.set(Ros.createGraphName("/foo/bar/baz"), "bloop");
+    assertTrue(server.has(Ros.createGraphName("/foo/bar/baz")));
+    assertTrue(server.has(Ros.createGraphName("/foo/bar")));
+    assertTrue(server.has(Ros.createGraphName("/foo")));
+    assertTrue(server.has(Ros.createGraphName("/")));
   }
 
   @Test
   public void testGetNames() {
-    GraphName name1 = new GraphName("/foo/bar/baz");
+    GraphName name1 = Ros.createGraphName("/foo/bar/baz");
     server.set(name1, "bloop");
-    GraphName name2 = new GraphName("/testing");
+    GraphName name2 = Ros.createGraphName("/testing");
     server.set(name2, "123");
     Collection<GraphName> names = server.getNames();
     assertEquals(2, names.size());

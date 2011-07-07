@@ -24,7 +24,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
-import org.ros.internal.namespace.GraphName;
+import org.ros.Ros;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
@@ -32,6 +32,7 @@ import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.xmlrpc.MasterImpl;
+import org.ros.namespace.GraphName;
 
 import java.net.URI;
 import java.util.List;
@@ -55,7 +56,7 @@ public class MasterServer extends NodeServer {
     publishers = Multimaps.synchronizedMultimap(HashMultimap.<String, PublisherIdentifier>create());
     subscribers =
         Multimaps.synchronizedMultimap(HashMultimap.<String, SubscriberIdentifier>create());
-    masterName = new GraphName("/master");
+    masterName = Ros.createGraphName("/master");
   }
 
   public void start() {

@@ -21,8 +21,8 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
-import org.ros.MessageDeserializer;
-import org.ros.MessageSerializer;
+import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageSerializer;
 
 import java.nio.ByteBuffer;
 
@@ -44,7 +44,7 @@ class ServiceRequestHandler<RequestType, ResponseType> extends SimpleChannelHand
   }
 
   private ByteBuffer handleRequest(ByteBuffer buffer) throws ServiceException {
-    RequestType request = (RequestType) deserializer.deserialize(buffer);
+    RequestType request = deserializer.deserialize(buffer);
     ResponseType response = responseBuilder.build(request);
     return serializer.serialize(response);
   }
