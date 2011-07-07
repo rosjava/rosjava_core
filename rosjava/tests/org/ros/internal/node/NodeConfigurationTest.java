@@ -14,9 +14,11 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.internal.node;
 
 import static org.junit.Assert.assertEquals;
+
+import org.ros.Ros;
 
 import org.junit.Test;
 import org.ros.namespace.NameResolver;

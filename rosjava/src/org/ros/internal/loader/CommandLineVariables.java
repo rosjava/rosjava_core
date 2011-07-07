@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.loader;
+package org.ros.internal.loader;
 
 /**
  * Remapping keys used to override ROS environment and other configuration

@@ -14,13 +14,17 @@
  * the License.
  */
 
-package org.ros.loader;
+package org.ros.internal.loader;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import org.ros.internal.loader.CommandLineLoader;
+import org.ros.internal.loader.CommandLineVariables;
+import org.ros.internal.loader.EnvironmentVariables;
 
 import org.junit.Assert;
 import org.junit.Before;

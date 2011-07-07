@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.loader;
+package org.ros.internal.loader;
 
 /**
  * ROS environment variables.

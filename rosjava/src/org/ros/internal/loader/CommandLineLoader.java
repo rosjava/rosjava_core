@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.loader;
+package org.ros.internal.loader;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
