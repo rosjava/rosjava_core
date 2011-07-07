@@ -117,8 +117,8 @@ public class CommandLineLoader {
     nodeConfiguration.setRosPackagePath(getRosPackagePath());
     nodeConfiguration.setMasterUri(getMasterUri());
     nodeConfiguration.setHost(getHost());
-    if (specialRemappings.containsKey(CommandLine.NODE_NAME)) {
-      nodeConfiguration.setNodeNameOverride(specialRemappings.get(CommandLine.NODE_NAME));
+    if (specialRemappings.containsKey(CommandLineVariables.NODE_NAME)) {
+      nodeConfiguration.setNodeNameOverride(specialRemappings.get(CommandLineVariables.NODE_NAME));
     }
     return nodeConfiguration;
   }
@@ -148,8 +148,8 @@ public class CommandLineLoader {
    */
   private NameResolver buildParentResolver() {
     GraphName namespace = DefaultGraphName.createRoot();
-    if (specialRemappings.containsKey(CommandLine.ROS_NAMESPACE)) {
-      namespace = Ros.newGraphName(specialRemappings.get(CommandLine.ROS_NAMESPACE)).toGlobal();
+    if (specialRemappings.containsKey(CommandLineVariables.ROS_NAMESPACE)) {
+      namespace = Ros.newGraphName(specialRemappings.get(CommandLineVariables.ROS_NAMESPACE)).toGlobal();
     } else if (environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
       namespace = Ros.newGraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
     }
@@ -168,8 +168,8 @@ public class CommandLineLoader {
    */
   private String getHost() {
     String host = DefaultNodeConfiguration.DEFAULT_HOST;
-    if (specialRemappings.containsKey(CommandLine.ROS_IP)) {
-      host = specialRemappings.get(CommandLine.ROS_IP);
+    if (specialRemappings.containsKey(CommandLineVariables.ROS_IP)) {
+      host = specialRemappings.get(CommandLineVariables.ROS_IP);
     } else if (environment.containsKey(EnvironmentVariables.ROS_IP)) {
       host = environment.get(EnvironmentVariables.ROS_IP);
     } else if (environment.containsKey(EnvironmentVariables.ROS_HOSTNAME)) {
@@ -192,8 +192,8 @@ public class CommandLineLoader {
    */
   private URI getMasterUri() {
     String uri = DefaultNodeConfiguration.DEFAULT_MASTER_URI;
-    if (specialRemappings.containsKey(CommandLine.ROS_MASTER_URI)) {
-      uri = specialRemappings.get(CommandLine.ROS_MASTER_URI);
+    if (specialRemappings.containsKey(CommandLineVariables.ROS_MASTER_URI)) {
+      uri = specialRemappings.get(CommandLineVariables.ROS_MASTER_URI);
     } else if (environment.containsKey(EnvironmentVariables.ROS_MASTER_URI)) {
       uri = environment.get(EnvironmentVariables.ROS_MASTER_URI);
     }

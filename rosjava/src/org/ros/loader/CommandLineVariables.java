@@ -24,7 +24,7 @@ package org.ros.loader;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public interface CommandLine {
+public interface CommandLineVariables {
 
   public static String ROS_NAMESPACE = "__ns";
   public static String ROS_IP = "__ip";

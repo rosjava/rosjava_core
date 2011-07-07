@@ -166,7 +166,7 @@ public class CommandLineLoaderTest {
     assertEquals("newname", nodeConfiguration.getNodeNameOverride());
 
     // Test ROS_MASTER_URI from command-line
-    args = Lists.newArrayList("Foo", CommandLine.ROS_MASTER_URI + ":=http://override:22622");
+    args = Lists.newArrayList("Foo", CommandLineVariables.ROS_MASTER_URI + ":=http://override:22622");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
 
@@ -179,11 +179,11 @@ public class CommandLineLoaderTest {
     // Test ROS namespace resolution and canonicalization
     GraphName canonical = Ros.newGraphName("/baz/bar");
     env = getDefaultEnv();
-    args = Lists.newArrayList("Foo", CommandLine.ROS_NAMESPACE + ":=baz/bar");
+    args = Lists.newArrayList("Foo", CommandLineVariables.ROS_NAMESPACE + ":=baz/bar");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
 
-    args = Lists.newArrayList("Foo", CommandLine.ROS_NAMESPACE + ":=baz/bar/");
+    args = Lists.newArrayList("Foo", CommandLineVariables.ROS_NAMESPACE + ":=baz/bar/");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
 
@@ -194,15 +194,15 @@ public class CommandLineLoaderTest {
 
     // Verify address override.
     env = getDefaultEnv();
-    args = Lists.newArrayList("Foo", CommandLine.ROS_IP + ":=192.168.0.2");
+    args = Lists.newArrayList("Foo", CommandLineVariables.ROS_IP + ":=192.168.0.2");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
     assertEquals("192.168.0.2", nodeConfiguration.getHost());
 
     // Verify multiple options work together.
     env = getDefaultEnv();
     args =
-        Lists.newArrayList("Foo", CommandLine.ROS_NAMESPACE + ":=baz/bar/", "ignore",
-            CommandLine.ROS_MASTER_URI + ":=http://override:22622", "--bad", CommandLine.ROS_IP
+        Lists.newArrayList("Foo", CommandLineVariables.ROS_NAMESPACE + ":=baz/bar/", "ignore",
+            CommandLineVariables.ROS_MASTER_URI + ":=http://override:22622", "--bad", CommandLineVariables.ROS_IP
                 + ":=192.168.0.2");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
