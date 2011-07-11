@@ -20,9 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.ros.address.Address;
-import org.ros.address.InetAddressFactory;
-
 import org.junit.Test;
 
 import java.net.InetAddress;
@@ -47,14 +44,13 @@ public class AddressTest {
     assertTrue(loopback.isLoopbackAddress());
   }
 
-  @Test
+  // TODO(damonkohler): This test fails if the host isn't registered with DNS.
+  // These tests need to be changed to inject behavior into the
+  // getAllInetAddressesByName() method.
   public void testPublicHost() throws UnknownHostException {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     InetAddress publicHost = InetAddressFactory.createFromHostString(host);
     assertEquals(host, publicHost.getHostName());
-    // TODO(damonkohler): This test fails if the host isn't registered with DNS.
-    // These tests need to be changed to inject behavior into the
-    // getAllInetAddressesByName() method.
     assertFalse(publicHost.isLoopbackAddress());
   }
 

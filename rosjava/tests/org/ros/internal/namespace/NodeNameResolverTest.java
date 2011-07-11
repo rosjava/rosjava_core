@@ -13,7 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.namespace;
+package org.ros.internal.namespace;
+
+import org.ros.namespace.GraphName;
 
 import org.ros.Ros;
 import org.ros.internal.namespace.NodeNameResolver;
