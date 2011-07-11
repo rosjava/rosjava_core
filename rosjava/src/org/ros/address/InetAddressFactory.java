@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node.address;
+package org.ros.address;
 
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;

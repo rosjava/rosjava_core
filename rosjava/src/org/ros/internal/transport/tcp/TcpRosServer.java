@@ -18,6 +18,9 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.address.AdvertiseAddress;
+import org.ros.address.BindAddress;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -27,8 +30,6 @@ import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.ros.internal.node.address.AdvertiseAddress;
-import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 

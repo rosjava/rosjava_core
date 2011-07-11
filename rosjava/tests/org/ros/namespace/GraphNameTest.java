@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.ros.internal.namespace;
+package org.ros.namespace;
 
 import junit.framework.TestCase;
 import org.junit.Test;

@@ -16,6 +16,9 @@
 
 package org.ros.internal.node.server;
 
+import org.ros.address.AdvertiseAddress;
+import org.ros.address.BindAddress;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
@@ -23,8 +26,6 @@ import org.apache.xmlrpc.server.PropertyHandlerMapping;
 import org.apache.xmlrpc.server.XmlRpcServer;
 import org.apache.xmlrpc.server.XmlRpcServerConfigImpl;
 import org.apache.xmlrpc.webserver.WebServer;
-import org.ros.internal.node.address.AdvertiseAddress;
-import org.ros.internal.node.address.BindAddress;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

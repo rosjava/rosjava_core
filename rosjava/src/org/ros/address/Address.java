@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node.address;
+package org.ros.address;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

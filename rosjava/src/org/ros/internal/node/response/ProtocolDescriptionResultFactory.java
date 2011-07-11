@@ -18,7 +18,8 @@ package org.ros.internal.node.response;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.address.AdvertiseAddress;
+
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;

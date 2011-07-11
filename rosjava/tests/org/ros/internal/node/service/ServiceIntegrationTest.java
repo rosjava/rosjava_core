@@ -20,13 +20,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.ros.address.AdvertiseAddress;
+import org.ros.address.BindAddress;
+
 import org.ros.node.NodeConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.Ros;
-import org.ros.internal.node.address.AdvertiseAddress;
-import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.node.Node;
 import org.ros.node.ServiceClient;

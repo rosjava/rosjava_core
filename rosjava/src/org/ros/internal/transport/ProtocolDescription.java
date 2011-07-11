@@ -18,7 +18,8 @@ package org.ros.internal.transport;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.address.AdvertiseAddress;
+
 
 import java.net.InetSocketAddress;
 import java.util.List;

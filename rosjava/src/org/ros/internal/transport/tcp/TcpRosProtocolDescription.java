@@ -16,7 +16,8 @@
 
 package org.ros.internal.transport.tcp;
 
-import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.address.AdvertiseAddress;
+
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 

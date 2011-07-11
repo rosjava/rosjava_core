@@ -4,13 +4,14 @@ package org.ros.internal.node;
 
 import static org.junit.Assert.assertTrue;
 
+import org.ros.address.AdvertiseAddress;
+import org.ros.address.BindAddress;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.message.new_style.MessageDefinition;
 import org.ros.internal.message.old_style.MessageSerializer;
-import org.ros.internal.node.address.AdvertiseAddress;
-import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.server.MasterServer;

@@ -14,15 +14,16 @@
  * the License.
  */
 
-package org.ros.internal.address;
+package org.ros.address;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.ros.address.Address;
+import org.ros.address.InetAddressFactory;
+
 import org.junit.Test;
-import org.ros.internal.node.address.Address;
-import org.ros.internal.node.address.InetAddressFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

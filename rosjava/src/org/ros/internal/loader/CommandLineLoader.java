@@ -20,9 +20,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.ros.address.InetAddressFactory;
+
 import org.ros.Ros;
 import org.ros.exception.RosInitException;
-import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;

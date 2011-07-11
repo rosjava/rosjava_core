@@ -20,10 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.ros.address.Address;
+import org.ros.address.AdvertiseAddress;
+import org.ros.address.BindAddress;
+
 import org.junit.Test;
-import org.ros.internal.node.address.Address;
-import org.ros.internal.node.address.AdvertiseAddress;
-import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.xmlrpc.Node;
 
 import java.net.URI;
