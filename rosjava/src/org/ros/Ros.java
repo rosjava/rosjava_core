@@ -18,14 +18,11 @@ package org.ros;
 
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.node.DefaultNode;
-import org.ros.internal.node.DefaultNodeConfiguration;
-import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,60 +33,6 @@ public class Ros {
 
   private Ros() {
     // Utility class
-  }
-
-  public static NodeConfiguration newPublicNodeConfiguration(String host,
-      MessageSerializationFactory messageSerializationFactory) {
-    // OS picks an available port.
-    NodeConfiguration configuration = DefaultNodeConfiguration.newPublic(host, 0, 0);
-    configuration.setMessageSerializationFactory(messageSerializationFactory);
-    return configuration;
-  }
-
-  public static NodeConfiguration newPublicNodeConfiguration(URI masterUri, String host,
-      MessageSerializationFactory messageSerializationFactory) {
-    NodeConfiguration configuration = newPublicNodeConfiguration(host, messageSerializationFactory);
-    configuration.setMasterUri(masterUri);
-    return configuration;
-  }
-
-  public static NodeConfiguration newPublicNodeConfiguration(String host, URI masterUri) {
-    NodeConfiguration configuration =
-        newPublicNodeConfiguration(host,
-            new org.ros.internal.message.old_style.MessageSerializationFactory());
-    configuration.setMasterUri(masterUri);
-    return configuration;
-  }
-
-  public static NodeConfiguration newPublicNodeConfiguration(String host) {
-    return newPublicNodeConfiguration(host,
-        new org.ros.internal.message.old_style.MessageSerializationFactory());
-  }
-
-  public static NodeConfiguration newPrivateNodeConfiguration(
-      MessageSerializationFactory messageSerializationFactory) {
-    // OS picks an available port.
-    NodeConfiguration configuration = DefaultNodeConfiguration.newPrivate(0, 0);
-    configuration.setMessageSerializationFactory(messageSerializationFactory);
-    return configuration;
-  }
-
-  public static NodeConfiguration newPrivateNodeConfiguration(URI masterUri,
-      MessageSerializationFactory messageSerializationFactory) {
-    NodeConfiguration configuration = newPrivateNodeConfiguration(messageSerializationFactory);
-    configuration.setMasterUri(masterUri);
-    return configuration;
-  }
-
-  public static NodeConfiguration newPrivateNodeConfiguration(URI masterUri) {
-    NodeConfiguration configuration =
-        newPrivateNodeConfiguration(new org.ros.internal.message.old_style.MessageSerializationFactory());
-    configuration.setMasterUri(masterUri);
-    return configuration;
-  }
-
-  public static NodeConfiguration newPrivateNodeConfiguration() {
-    return newPrivateNodeConfiguration(new org.ros.internal.message.old_style.MessageSerializationFactory());
   }
 
   public static Node newNode(GraphName name, NodeConfiguration configuration) {

@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.ros.node.NodeConfiguration;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.Ros;
@@ -51,7 +53,7 @@ public class ServiceIntegrationTest {
   @Test
   public void PesistentServiceConnectionTest() throws Exception {
     Node serverNode =
-        Ros.newNode("/server", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
+        Ros.newNode("/server", NodeConfiguration.newPrivate(masterServer.getUri()));
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.newServiceServer("/service", "test_ros/AddTwoInts",
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -65,7 +67,7 @@ public class ServiceIntegrationTest {
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
     Node clientNode =
-        Ros.newNode("/client", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
+        Ros.newNode("/client", NodeConfiguration.newPrivate(masterServer.getUri()));
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.newServiceClient("/service", "test_ros/AddTwoInts");
 
@@ -97,7 +99,7 @@ public class ServiceIntegrationTest {
     final String errorMessage = "Error!";
 
     Node serverNode =
-        Ros.newNode("/server", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
+        Ros.newNode("/server", NodeConfiguration.newPrivate(masterServer.getUri()));
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.newServiceServer("/service", "test_ros/AddTwoInts",
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -109,7 +111,7 @@ public class ServiceIntegrationTest {
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
     Node clientNode =
-        Ros.newNode("/client", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
+        Ros.newNode("/client", NodeConfiguration.newPrivate(masterServer.getUri()));
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.newServiceClient("/service", "test_ros/AddTwoInts");
 

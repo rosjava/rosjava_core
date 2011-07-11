@@ -16,6 +16,7 @@
 
 package org.ros.node;
 
+import org.ros.Ros;
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
@@ -24,59 +25,161 @@ import org.ros.namespace.NameResolver;
 
 import java.io.File;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
+ * Stores contextual information about a ROS node, including common ROS
+ * configuration like the master URI.
+ * 
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
+ * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface NodeConfiguration {
+public class NodeConfiguration {
 
-  public static final String DEFAULT_MASTER_URI = "http://localhost:11311/";
+  public static final URI DEFAULT_MASTER_URI;
+
+  static {
+    try {
+      DEFAULT_MASTER_URI = new URI("http://localhost:11311/");
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private NameResolver parentResolver;
+  private URI masterUri;
+  private File rosRoot;
+  private List<String> rosPackagePath;
+  private String nodeNameOverride;
+  private MessageSerializationFactory messageSerializationFactory;
+  private BindAddress tcpRosBindAddress;
+  private AdvertiseAddress tcpRosAdvertiseAddress;
+  private BindAddress xmlRpcBindAddress;
+  private AdvertiseAddress xmlRpcAdvertiseAddress;
+
+  public static NodeConfiguration newPublic(String advertiseHostname, URI masterUri) {
+    NodeConfiguration configuration = new NodeConfiguration();
+    // OS picks an available port.
+    configuration.setXmlRpcBindAddress(BindAddress.createPublic(0));
+    configuration.setXmlRpcAdvertiseAddress(new AdvertiseAddress(advertiseHostname));
+    configuration.setTcpRosBindAddress(BindAddress.createPublic(0));
+    configuration.setTcpRosAdvertiseAddress(new AdvertiseAddress(advertiseHostname));
+    configuration.setMasterUri(masterUri);
+    return configuration;
+  }
+
+  public static NodeConfiguration newPublic(String advertiseHostname) {
+    return newPublic(advertiseHostname, DEFAULT_MASTER_URI);
+  }
+
+  public static NodeConfiguration newPrivate(URI masterUri) {
+    NodeConfiguration configuration = new NodeConfiguration();
+    // OS picks an available port.
+    configuration.setXmlRpcBindAddress(BindAddress.createPrivate(0));
+    configuration.setXmlRpcAdvertiseAddress(AdvertiseAddress.createPrivate());
+    configuration.setTcpRosBindAddress(BindAddress.createPrivate(0));
+    configuration.setTcpRosAdvertiseAddress(AdvertiseAddress.createPrivate());
+    configuration.setMasterUri(masterUri);
+    return configuration;
+  }
+
+  public static NodeConfiguration newPrivate() {
+    return newPrivate(DEFAULT_MASTER_URI);
+  }
+
+  private NodeConfiguration() {
+    setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
+    setParentResolver(Ros.newNameResolver());
+  }
 
   /**
-   * @return The {@link DefaultNameResolver} for a {@link Node}'s parent namespace.
+   * @return The {@link DefaultNameResolver} for a {@link Node}'s parent
+   *         namespace.
    */
-  NameResolver getParentResolver();
+  public NameResolver getParentResolver() {
+    return parentResolver;
+  }
 
-  void setParentResolver(NameResolver resolver);
+  public void setParentResolver(NameResolver resolver) {
+    this.parentResolver = resolver;
+  }
 
-  URI getMasterUri();
+  public URI getMasterUri() {
+    return masterUri;
+  }
 
-  void setMasterUri(URI masterUri);
+  public void setMasterUri(URI masterUri) {
+    this.masterUri = masterUri;
+  }
 
-  File getRosRoot();
+  public File getRosRoot() {
+    return rosRoot;
+  }
 
-  void setRosRoot(File rosRoot);
+  public void setRosRoot(File rosRoot) {
+    this.rosRoot = rosRoot;
+  }
 
-  List<String> getRosPackagePath();
+  public List<String> getRosPackagePath() {
+    return rosPackagePath;
+  }
 
-  void setRosPackagePath(List<String> rosPackagePath);
+  public void setRosPackagePath(List<String> rosPackagePath) {
+    this.rosPackagePath = rosPackagePath;
+  }
 
   /**
    * @return Override for Node name or null if no override.
    */
-  String getNodeNameOverride();
+  public String getNodeNameOverride() {
+    return nodeNameOverride;
+  }
 
-  void setNodeNameOverride(String nodeNameOverride);
+  public void setNodeNameOverride(String nodeNameOverride) {
+    this.nodeNameOverride = nodeNameOverride;
+  }
 
-  MessageSerializationFactory getMessageSerializationFactory();
+  public MessageSerializationFactory getMessageSerializationFactory() {
+    return messageSerializationFactory;
+  }
 
-  void setMessageSerializationFactory(MessageSerializationFactory messageSerializationFactory);
+  public void
+      setMessageSerializationFactory(MessageSerializationFactory messageSerializationFactory) {
+    this.messageSerializationFactory = messageSerializationFactory;
+  }
 
-  BindAddress getTcpRosBindAddress();
+  public BindAddress getTcpRosBindAddress() {
+    return tcpRosBindAddress;
+  }
 
-  void setTcpRosBindAddress(BindAddress tcpRosBindAddress);
+  public void setTcpRosBindAddress(BindAddress tcpRosBindAddress) {
+    this.tcpRosBindAddress = tcpRosBindAddress;
+  }
 
-  AdvertiseAddress getTcpRosAdvertiseAddress();
+  public AdvertiseAddress getTcpRosAdvertiseAddress() {
+    return tcpRosAdvertiseAddress;
+  }
 
-  void setTcpRosAdvertiseAddress(AdvertiseAddress tcpRosAdvertiseAddress);
+  public void setTcpRosAdvertiseAddress(AdvertiseAddress tcpRosAdvertiseAddress) {
+    this.tcpRosAdvertiseAddress = tcpRosAdvertiseAddress;
+  }
 
-  BindAddress getXmlRpcBindAddress();
+  public BindAddress getXmlRpcBindAddress() {
+    return xmlRpcBindAddress;
+  }
 
-  void setXmlRpcBindAddress(BindAddress xmlRpcBindAddress);
+  public void setXmlRpcBindAddress(BindAddress xmlRpcBindAddress) {
+    this.xmlRpcBindAddress = xmlRpcBindAddress;
+  }
 
-  AdvertiseAddress getXmlRpcAdvertiseAddress();
+  public AdvertiseAddress getXmlRpcAdvertiseAddress() {
+    return xmlRpcAdvertiseAddress;
+  }
 
-  void setXmlRpcAdvertiseAddress(AdvertiseAddress xmlRpcAdvertiseAddress);
+  public void setXmlRpcAdvertiseAddress(AdvertiseAddress xmlRpcAdvertiseAddress) {
+    this.xmlRpcAdvertiseAddress = xmlRpcAdvertiseAddress;
+  }
 
 }

@@ -25,7 +25,7 @@ public class RunFibonacciSimpleActionServer {
       FibonacciSimpleActionServer sas =
           spec.buildSimpleActionServer("fibonacci_server", impl, true);
 
-      NodeConfiguration configuration = Ros.newPrivateNodeConfiguration();
+      NodeConfiguration configuration = NodeConfiguration.newPrivate();
 
       NodeRunner runner = NodeRunner.createDefault();
 

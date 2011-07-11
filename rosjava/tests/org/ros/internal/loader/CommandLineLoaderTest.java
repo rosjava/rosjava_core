@@ -90,16 +90,15 @@ public class CommandLineLoaderTest {
 
   /**
    * Test createConfiguration() with respect to reading of the environment
-   * configuration, including command-line overrides. {@link DefaultNameResolver} is
-   * tested separately.
+   * configuration, including command-line overrides.
+   * {@link DefaultNameResolver} is tested separately.
    * 
    * @throws RosInitException
    * @throws URISyntaxException
    * @throws UnknownHostException
    */
   @Test
-  public void testcreateConfigurationEnvironment() throws RosInitException, URISyntaxException,
-      UnknownHostException {
+  public void testcreateConfigurationEnvironment() {
     // Construct artificial environment. Test failure without required settings.
     // Failure: ROS_ROOT not set.
     String tmpDir = System.getProperty("java.io.tmpdir");
@@ -111,7 +110,7 @@ public class CommandLineLoaderTest {
     env.put(EnvironmentVariables.ROS_ROOT, defaultRosRoot.getAbsolutePath());
     loader = new CommandLineLoader(emptyArgv, env);
     NodeConfiguration nodeConfiguration = loader.createConfiguration();
-    assertEquals(new URI(NodeConfiguration.DEFAULT_MASTER_URI), nodeConfiguration.getMasterUri());
+    assertEquals(NodeConfiguration.DEFAULT_MASTER_URI, nodeConfiguration.getMasterUri());
 
     // Construct artificial environment. Set required environment variables.
     env = getDefaultEnv();
@@ -154,7 +153,7 @@ public class CommandLineLoaderTest {
   }
 
   @Test
-  public void testCreateConfigurationCommandLine() throws RosInitException, URISyntaxException {
+  public void testCreateConfigurationCommandLine() throws URISyntaxException {
     Map<String, String> env = getDefaultEnv();
 
     // Test __name override
@@ -166,7 +165,8 @@ public class CommandLineLoaderTest {
     assertEquals("newname", nodeConfiguration.getNodeNameOverride());
 
     // Test ROS_MASTER_URI from command-line
-    args = Lists.newArrayList("Foo", CommandLineVariables.ROS_MASTER_URI + ":=http://override:22622");
+    args =
+        Lists.newArrayList("Foo", CommandLineVariables.ROS_MASTER_URI + ":=http://override:22622");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
 
@@ -203,8 +203,8 @@ public class CommandLineLoaderTest {
     env = getDefaultEnv();
     args =
         Lists.newArrayList("Foo", CommandLineVariables.ROS_NAMESPACE + ":=baz/bar/", "ignore",
-            CommandLineVariables.ROS_MASTER_URI + ":=http://override:22622", "--bad", CommandLineVariables.ROS_IP
-                + ":=192.168.0.2");
+            CommandLineVariables.ROS_MASTER_URI + ":=http://override:22622", "--bad",
+            CommandLineVariables.ROS_IP + ":=192.168.0.2");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
     assertEquals("192.168.0.2", nodeConfiguration.getTcpRosAdvertiseAddress().getHost());
@@ -219,7 +219,7 @@ public class CommandLineLoaderTest {
    * @throws URISyntaxException
    */
   @Test
-  public void testcreateConfigurationResolver() throws RosInitException, URISyntaxException {
+  public void testcreateConfigurationResolver() {
     // Construct artificial environment. Set required environment variables.
     HashMap<String, String> env = getDefaultEnv();
 

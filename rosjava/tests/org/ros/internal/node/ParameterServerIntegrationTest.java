@@ -23,6 +23,8 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.ros.node.NodeConfiguration;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +54,7 @@ public class ParameterServerIntegrationTest {
   public void setup() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    node = Ros.newNode("/node_name", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
+    node = Ros.newNode("/node_name", NodeConfiguration.newPrivate(masterServer.getUri()));
     parameters = node.newParameterTree();
   }
 
@@ -114,9 +116,9 @@ public class ParameterServerIntegrationTest {
   @Test
   public void testParameterPubSub() throws InterruptedException {
     Node subscriberNode =
-        Ros.newNode("/subscriber", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
+        Ros.newNode("/subscriber", NodeConfiguration.newPrivate(masterServer.getUri()));
     Node publisherNode =
-        Ros.newNode("/publisher", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
+        Ros.newNode("/publisher", NodeConfiguration.newPrivate(masterServer.getUri()));
 
     ParameterTree subscriberParameters = subscriberNode.newParameterTree();
     final CountDownLatch latch = new CountDownLatch(1);

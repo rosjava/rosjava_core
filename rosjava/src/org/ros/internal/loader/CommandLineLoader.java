@@ -22,8 +22,6 @@ import com.google.common.collect.Maps;
 
 import org.ros.Ros;
 import org.ros.exception.RosInitException;
-import org.ros.internal.node.DefaultNodeConfiguration;
-import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
@@ -38,8 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Create {@link DefaultNodeConfiguration} instances using a ROS command-line
- * and environment specification.
+ * Create {@link NodeConfiguration} instances using a ROS command-line and
+ * environment specification.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
@@ -112,13 +110,12 @@ public class CommandLineLoader {
    */
   public NodeConfiguration createConfiguration() {
     parseRemappingArguments();
-    NodeConfiguration nodeConfiguration = Ros.newPrivateNodeConfiguration();
+    // TODO(damonkohler): Add support for starting up a private node.
+    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(getHost());
     nodeConfiguration.setParentResolver(buildParentResolver());
     nodeConfiguration.setRosRoot(getRosRoot());
     nodeConfiguration.setRosPackagePath(getRosPackagePath());
     nodeConfiguration.setMasterUri(getMasterUri());
-    nodeConfiguration.setTcpRosAdvertiseAddress(new AdvertiseAddress(getHost()));
-    nodeConfiguration.setXmlRpcAdvertiseAddress(new AdvertiseAddress(getHost()));
     if (specialRemappings.containsKey(CommandLineVariables.NODE_NAME)) {
       nodeConfiguration.setNodeNameOverride(specialRemappings.get(CommandLineVariables.NODE_NAME));
     }
@@ -166,7 +163,7 @@ public class CommandLineLoader {
    * <li>The __ip:= command line argument.</li>
    * <li>The ROS_IP environment variable.</li>
    * <li>The ROS_HOSTNAME environment variable.</li>
-   * <li>The default host as specified in {@link DefaultNodeConfiguration}.</li>
+   * <li>The default host as specified in {@link NodeConfiguration}.</li>
    * </ol>
    */
   private String getHost() {
@@ -188,20 +185,20 @@ public class CommandLineLoader {
    * <li>The __master:= command line argument. This is not required but easy to
    * support.</li>
    * <li>The ROS_MASTER_URI environment variable.</li>
-   * <li>The default master URI as defined in {@link DefaultNodeConfiguration}.</li>
+   * <li>The default master URI as defined in {@link NodeConfiguration}.</li>
    * </ol>
    * 
    * @throws RosInitException
    */
   private URI getMasterUri() {
-    String uri = NodeConfiguration.DEFAULT_MASTER_URI;
-    if (specialRemappings.containsKey(CommandLineVariables.ROS_MASTER_URI)) {
-      uri = specialRemappings.get(CommandLineVariables.ROS_MASTER_URI);
-    } else if (environment.containsKey(EnvironmentVariables.ROS_MASTER_URI)) {
-      uri = environment.get(EnvironmentVariables.ROS_MASTER_URI);
-    }
+    URI uri = NodeConfiguration.DEFAULT_MASTER_URI;
     try {
-      return new URI(uri);
+      if (specialRemappings.containsKey(CommandLineVariables.ROS_MASTER_URI)) {
+        uri = new URI(specialRemappings.get(CommandLineVariables.ROS_MASTER_URI));
+      } else if (environment.containsKey(EnvironmentVariables.ROS_MASTER_URI)) {
+        uri = new URI(environment.get(EnvironmentVariables.ROS_MASTER_URI));
+      }
+      return uri;
     } catch (URISyntaxException e) {
       throw new RuntimeException("Master URI \"" + uri + "\" is not a valid.");
     }

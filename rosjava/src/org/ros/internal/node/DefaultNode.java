@@ -16,6 +16,7 @@
 
 package org.ros.internal.node;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
@@ -107,7 +108,6 @@ public class DefaultNode implements Node {
 
     messageSerializationFactory = configuration.getMessageSerializationFactory();
 
-    NameResolver parentResolver = configuration.getParentResolver();
     GraphName basename;
     String nodeNameOverride = configuration.getNodeNameOverride();
     if (nodeNameOverride != null) {
@@ -115,6 +115,8 @@ public class DefaultNode implements Node {
     } else {
       basename = name;
     }
+
+    NameResolver parentResolver = configuration.getParentResolver();
     nodeName = parentResolver.getNamespace().join(basename);
     resolver = NodeNameResolver.create(parentResolver, nodeName);
     slaveServer =
@@ -142,7 +144,8 @@ public class DefaultNode implements Node {
   /**
    * Start the node running. This will initiate master registration.
    */
-  private void start() {
+  @VisibleForTesting
+  void start() {
     Preconditions.checkState(!running);
     running = true;
     slaveServer.start();
