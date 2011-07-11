@@ -14,18 +14,27 @@
  * the License.
  */
 
-package org.ros.internal.exception;
+package org.ros.exception;
+
+import org.ros.internal.node.response.StatusCode;
 
 /**
- * {@link RuntimeException} indicating that an invalid response was received to
- * a remote call.
- * 
- * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public class InvalidResponseException extends RuntimeException {
+public class RemoteException extends RuntimeException {
 
-  public InvalidResponseException(String message) {
+  private final StatusCode statusCode;
+
+  public RemoteException(StatusCode statusCode, String message) {
     super(message);
+    this.statusCode = statusCode;
+  }
+
+  /**
+   * @return the status code
+   */
+  public StatusCode getStatusCode() {
+    return statusCode;
   }
 
 }

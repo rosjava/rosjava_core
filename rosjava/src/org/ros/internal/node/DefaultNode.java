@@ -19,10 +19,11 @@ package org.ros.internal.node;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.RemoteException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.ServiceNotFoundException;
-import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.new_style.MessageDefinition;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.internal.message.old_style.MessageDefinitionFactory;

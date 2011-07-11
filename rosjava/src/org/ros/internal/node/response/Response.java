@@ -18,8 +18,8 @@ package org.ros.internal.node.response;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.exception.InvalidResponseException;
-import org.ros.internal.exception.RemoteException;
+import org.ros.exception.RemoteException;
+
 
 import java.util.List;
 
@@ -52,14 +52,16 @@ public class Response<ResultType> {
    * {@link StatusCode} is StatusCode.FAILURE.
    * 
    * @param <ResultType>
-   * @param response the {@link List} of {@link Object}s returned from the
-   *        XML-RPC call
-   * @param resultFactory a {@link ResultFactory} that creates a result from the
-   *        third {@link Object} in the {@link Response}
+   * @param response
+   *          the {@link List} of {@link Object}s returned from the XML-RPC call
+   * @param resultFactory
+   *          a {@link ResultFactory} that creates a result from the third
+   *          {@link Object} in the {@link Response}
    * @return a {@link Response} using the specified {@link ResultFactory} to
    *         generate the result
-   * @throws RemoteException if the {@link Response}'s {@link StatusCode}
-   *         indicates StatusCode.FAILURE.
+   * @throws RemoteException
+   *           if the {@link Response}'s {@link StatusCode} indicates
+   *           StatusCode.FAILURE.
    */
   public static <ResultType> Response<ResultType> fromListCheckedFailure(List<Object> response,
       ResultFactory<ResultType> resultFactory) throws RemoteException {
@@ -73,13 +75,13 @@ public class Response<ResultType> {
       }
 
     } catch (ClassCastException e) {
-      throw new InvalidResponseException(
-          "remote side did not return correct type (status code/message)");
+      throw new RuntimeException("Remote side did not return correct type (status code/message).",
+          e);
     }
     try {
       return new Response<ResultType>(statusCode, message, resultFactory.create(response.get(2)));
     } catch (ClassCastException e) {
-      throw new InvalidResponseException("remote side did not return correct value type");
+      throw new RuntimeException("Remote side did not return correct value type.", e);
     }
   }
 
@@ -89,14 +91,16 @@ public class Response<ResultType> {
    * {@link StatusCode} is not a success.
    * 
    * @param <ResultType>
-   * @param response the {@link List} of {@link Object}s returned from the
-   *        XML-RPC call
-   * @param resultFactory a {@link ResultFactory} that creates a result from the
-   *        third {@link Object} in the {@link Response}
+   * @param response
+   *          the {@link List} of {@link Object}s returned from the XML-RPC call
+   * @param resultFactory
+   *          a {@link ResultFactory} that creates a result from the third
+   *          {@link Object} in the {@link Response}
    * @return a {@link Response} using the specified {@link ResultFactory} to
    *         generate the result
-   * @throws RemoteException if the {@link Response}'s {@link StatusCode} does
-   *         not indicate success
+   * @throws RemoteException
+   *           if the {@link Response}'s {@link StatusCode} does not indicate
+   *           success
    */
   public static <ResultType> Response<ResultType> fromListChecked(List<Object> response,
       ResultFactory<ResultType> resultFactory) throws RemoteException {
@@ -108,15 +112,14 @@ public class Response<ResultType> {
       if (statusCode != StatusCode.SUCCESS) {
         throw new RemoteException(statusCode, message);
       }
-
     } catch (ClassCastException e) {
-      throw new InvalidResponseException(
-          "remote side did not return correct type (status code/message)");
+      throw new RuntimeException("Remote side did not return correct type (status code/message).",
+          e);
     }
     try {
       return new Response<ResultType>(statusCode, message, resultFactory.create(response.get(2)));
     } catch (ClassCastException e) {
-      throw new InvalidResponseException("remote side did not return correct value type");
+      throw new RuntimeException("Remote side did not return correct value type.", e);
     }
   }
 
@@ -150,7 +153,7 @@ public class Response<ResultType> {
   public String toString() {
     return "Response<" + statusCode + ", " + statusMessage + ", " + result.toString() + ">";
   }
-  
+
   public boolean isSuccess() {
     return result == StatusCode.SUCCESS;
   }
