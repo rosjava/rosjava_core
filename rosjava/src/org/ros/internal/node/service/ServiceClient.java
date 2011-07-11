@@ -20,6 +20,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+import org.ros.node.service.ServiceResponseListener;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ClientBootstrap;
@@ -42,7 +44,6 @@ import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
-import org.ros.node.ServiceResponseListener;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -55,7 +56,7 @@ import java.util.concurrent.Executors;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ServiceClient<RequestType, ResponseType> implements
-    org.ros.node.ServiceClient<RequestType, ResponseType> {
+    org.ros.node.service.ServiceClient<RequestType, ResponseType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClient.class);

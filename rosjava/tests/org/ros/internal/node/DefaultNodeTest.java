@@ -24,6 +24,9 @@ import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.Ros;
@@ -40,8 +43,6 @@ import org.ros.message.std_msgs.Int64;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.Publisher;
-import org.ros.node.Subscriber;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

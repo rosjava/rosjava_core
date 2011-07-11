@@ -16,6 +16,10 @@
 
 package org.ros;
 
+import org.ros.node.parameter.ParameterTree;
+
+import org.ros.node.topic.Publisher;
+
 import org.ros.exception.RemoteException;
 
 import org.apache.commons.logging.Log;
@@ -29,8 +33,6 @@ import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
-import org.ros.node.ParameterTree;
-import org.ros.node.Publisher;
 
 import java.util.Arrays;
 import java.util.Map;

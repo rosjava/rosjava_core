@@ -16,11 +16,12 @@
 
 package org.ros;
 
+import org.ros.node.topic.Publisher;
+
 import org.ros.message.MessageListener;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
-import org.ros.node.Publisher;
 
 /**
  * This node is used in rostest end-to-end integration tests with other client

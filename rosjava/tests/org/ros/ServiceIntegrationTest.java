@@ -20,6 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceResponseListener;
+import org.ros.node.service.ServiceServer;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -29,9 +33,6 @@ import org.ros.internal.node.service.ServiceException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.ServiceClient;
-import org.ros.node.ServiceResponseListener;
-import org.ros.node.ServiceServer;
 import org.ros.service.test_ros.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;

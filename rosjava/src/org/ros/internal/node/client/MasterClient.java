@@ -16,6 +16,11 @@
 
 package org.ros.internal.node.client;
 
+import org.ros.node.service.ServiceServer;
+
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
+
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.UriListResultFactory;
@@ -27,9 +32,6 @@ import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.topic.TopicDefinition;
-import org.ros.node.Publisher;
-import org.ros.node.ServiceServer;
-import org.ros.node.Subscriber;
 
 import java.net.URI;
 import java.util.List;

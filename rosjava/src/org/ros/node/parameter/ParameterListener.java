@@ -14,29 +14,10 @@
  * the License.
  */
 
-package org.ros.node;
+package org.ros.node.parameter;
 
-import org.ros.namespace.GraphName;
-
-import java.net.URI;
-import java.util.concurrent.TimeUnit;
-
-/**
- * @author damonkohler@google.com (Damon Kohler)
- *
- * @param <RequestType>
- * @param <ResponseType>
- */
-public interface ServiceServer<RequestType, ResponseType> {
-
-  boolean isRegistered();
-
-  void awaitRegistration() throws InterruptedException;
-
-  boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException;
-
-  GraphName getName();
-
-  URI getUri();
+public interface ParameterListener {
+  
+  void onNewValue(Object value);
 
 }

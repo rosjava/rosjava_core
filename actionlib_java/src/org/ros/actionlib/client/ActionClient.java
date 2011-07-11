@@ -1,5 +1,8 @@
 package org.ros.actionlib.client;
 
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
+
 import org.ros.node.NodeConfiguration;
 
 import org.ros.Ros;
@@ -15,8 +18,6 @@ import org.ros.message.actionlib_msgs.GoalID;
 import org.ros.message.actionlib_msgs.GoalStatusArray;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
-import org.ros.node.Publisher;
-import org.ros.node.Subscriber;
 
 /**
  * An ActionClient is the client interface of the actionlib package. It provides

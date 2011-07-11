@@ -16,12 +16,13 @@
 
 package org.ros;
 
+import org.ros.node.topic.Publisher;
+
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
-import org.ros.node.Publisher;
 
 /**
  * This node is used to test the slave API externally using rostest.

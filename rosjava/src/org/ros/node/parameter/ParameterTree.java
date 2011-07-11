@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.node;
+package org.ros.node.parameter;
 
 import java.util.List;
 import java.util.Map;

@@ -23,6 +23,9 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.ros.node.parameter.ParameterListener;
+import org.ros.node.parameter.ParameterTree;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,8 +35,6 @@ import org.ros.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.ParameterListener;
-import org.ros.node.ParameterTree;
 
 import java.util.List;
 import java.util.Map;

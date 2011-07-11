@@ -18,9 +18,10 @@ package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.node.topic.Publisher;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.node.Publisher;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

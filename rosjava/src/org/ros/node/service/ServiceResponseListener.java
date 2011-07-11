@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.node;
+package org.ros.node.service;
 
 import org.ros.message.Message;
 
