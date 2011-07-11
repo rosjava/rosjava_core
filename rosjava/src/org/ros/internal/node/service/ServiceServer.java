@@ -80,10 +80,12 @@ public class ServiceServer<RequestType, ResponseType> implements
     }
   }
 
+  @Override
   public URI getUri() {
     return advertiseAddress.toUri("rosrpc");
   }
 
+  @Override
   public GraphName getName() {
     return definition.getName();
   }
@@ -107,32 +109,16 @@ public class ServiceServer<RequestType, ResponseType> implements
     registrationLatch.countDown();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.internal.node.service.IServiceServer#isRegistered()
-   */
   @Override
   public boolean isRegistered() {
     return registrationLatch.getCount() == 0;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.internal.node.service.IServiceServer#awaitRegistration()
-   */
   @Override
   public void awaitRegistration() throws InterruptedException {
     registrationLatch.await();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.ros.internal.node.service.IServiceServer#awaitRegistration(long,
-   * java.util.concurrent.TimeUnit)
-   */
   @Override
   public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
     return registrationLatch.await(timeout, unit);

@@ -28,13 +28,13 @@ public class NodeConfigurationTest {
 
   @Test
   public void testNodeContext() {
-    NodeConfiguration nodeConfiguration = Ros.newNodeConfiguration();
+    NodeConfiguration nodeConfiguration = Ros.newPrivateNodeConfiguration();
     assertEquals(null, nodeConfiguration.getParentResolver());
   }
 
   @Test
   public void testResolver() {
-    NodeConfiguration nodeConfiguration = Ros.newNodeConfiguration();
+    NodeConfiguration nodeConfiguration = Ros.newPrivateNodeConfiguration();
     assertEquals(null, nodeConfiguration.getParentResolver());
 
     NameResolver resolver = Ros.newNameResolver("/test");

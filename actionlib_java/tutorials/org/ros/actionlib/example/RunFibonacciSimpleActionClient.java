@@ -21,7 +21,7 @@ import org.ros.node.NodeRunner;
 public class RunFibonacciSimpleActionClient {
 
   public static void main(String[] args) {
-    NodeConfiguration configuration = Ros.newNodeConfiguration();
+    NodeConfiguration configuration = Ros.newPrivateNodeConfiguration();
     NodeRunner runner = NodeRunner.createDefault();
 
     run(runner, configuration);

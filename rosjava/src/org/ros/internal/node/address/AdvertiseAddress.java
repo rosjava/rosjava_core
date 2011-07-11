@@ -90,10 +90,14 @@ public class AdvertiseAddress {
     this.portCallable = portCallable;
   }
 
+  public InetAddress toInetAddress() {
+    return InetAddressFactory.createFromHostString(host);
+  }
+
   public InetSocketAddress toInetSocketAddress() {
     Preconditions.checkNotNull(portCallable);
     try {
-      InetAddress address = InetAddressFactory.createFromHostString(host);
+      InetAddress address = toInetAddress();
       return new InetSocketAddress(address, portCallable.call());
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -107,6 +111,10 @@ public class AdvertiseAddress {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public boolean isLoopbackAddress() {
+    return toInetAddress().isLoopbackAddress();
   }
 
   @Override
@@ -136,15 +144,21 @@ public class AdvertiseAddress {
   @Override
   public boolean equals(Object obj) {
     Preconditions.checkNotNull(portCallable);
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
     AdvertiseAddress other = (AdvertiseAddress) obj;
     if (host == null) {
-      if (other.host != null) return false;
-    } else if (!host.equals(other.host)) return false;
+      if (other.host != null)
+        return false;
+    } else if (!host.equals(other.host))
+      return false;
     try {
-      if (portCallable.call() != other.portCallable.call()) return false;
+      if (portCallable.call() != other.portCallable.call())
+        return false;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

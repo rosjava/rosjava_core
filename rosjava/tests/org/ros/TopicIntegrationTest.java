@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node.topic;
+package org.ros;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -22,18 +22,21 @@ import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.Ros;
 import org.ros.internal.message.new_style.MessageDefinition;
-import org.ros.internal.message.old_style.MessageDeserializer;
-import org.ros.internal.message.old_style.MessageSerializer;
-import org.ros.internal.node.Node;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.topic.PublisherDefinition;
+import org.ros.internal.node.topic.RepeatingPublisher;
+import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.message.MessageListener;
+import org.ros.node.Node;
+import org.ros.node.Publisher;
+import org.ros.node.Subscriber;
 
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -43,37 +46,36 @@ import java.util.concurrent.TimeUnit;
 public class TopicIntegrationTest {
 
   private MasterServer masterServer;
+  private URI masterUri;
 
   @Before
   public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
+    masterUri = masterServer.getUri();
   }
 
   @Test
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
-    TopicDefinition topicDefinition =
-        TopicDefinition.create(Ros.newGraphName("/foo"), MessageDefinition.create(
-            org.ros.message.std_msgs.String.__s_getDataType(),
-            org.ros.message.std_msgs.String.__s_getMessageDefinition(),
-            org.ros.message.std_msgs.String.__s_getMD5Sum()));
-
-    Node publisherNode =
-        Node.createPrivate(Ros.newGraphName("/publisher"), masterServer.getUri(), 0, 0);
-    final Publisher<org.ros.message.std_msgs.String> publisher =
-        publisherNode.createPublisher(topicDefinition,
-            new MessageSerializer<org.ros.message.std_msgs.String>());
-
-    Node subscriberNode =
-        Node.createPrivate(Ros.newGraphName("/subscriber"), masterServer.getUri(), 0, 0);
-    Subscriber<org.ros.message.std_msgs.String> subscriber =
-        subscriberNode.createSubscriber(topicDefinition, new MessageDeserializer<org.ros.message.std_msgs.String>(
-            org.ros.message.std_msgs.String.class));
+    Node publisherNode = Ros.newNode("/publisher", Ros.newPrivateNodeConfiguration(masterUri));
+    Publisher<org.ros.message.std_msgs.String> publisher =
+        publisherNode.newPublisher("/foo", "std_msgs/String");
 
     final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
     helloMessage.data = "Hello, ROS!";
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
+    Node subscriberNode = Ros.newNode("/subscriber", Ros.newPrivateNodeConfiguration(masterUri));
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        subscriberNode.newSubscriber("/foo", "std_msgs/String",
+            new MessageListener<org.ros.message.std_msgs.String>() {
+              @Override
+              public void onNewMessage(org.ros.message.std_msgs.String message) {
+                assertEquals(helloMessage, message);
+                messageReceived.countDown();
+              }
+            });
+
     subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
       @Override
       public void onNewMessage(org.ros.message.std_msgs.String message) {
@@ -97,19 +99,15 @@ public class TopicIntegrationTest {
 
   @Test
   public void testAddDisconnectedPublisher() {
-    TopicDefinition topicDefinition =
-        TopicDefinition.create(Ros.newGraphName("/foo"), MessageDefinition.create(
-            org.ros.message.std_msgs.String.__s_getDataType(),
-            org.ros.message.std_msgs.String.__s_getMessageDefinition(),
-            org.ros.message.std_msgs.String.__s_getMD5Sum()));
-
-    Node subscriberNode =
-        Node.createPrivate(Ros.newGraphName("/subscriber"), masterServer.getUri(), 0, 0);
-    Subscriber<org.ros.message.std_msgs.String> subscriber =
-        subscriberNode.createSubscriber(topicDefinition, new MessageDeserializer<org.ros.message.std_msgs.String>(
-            org.ros.message.std_msgs.String.class));
+    Node subscriberNode = Ros.newNode("/subscriber", Ros.newPrivateNodeConfiguration(masterUri));
+    org.ros.internal.node.topic.Subscriber<org.ros.message.std_msgs.String> subscriber =
+        (org.ros.internal.node.topic.Subscriber<org.ros.message.std_msgs.String>) subscriberNode
+            .<org.ros.message.std_msgs.String>newSubscriber("/foo", "std_msgs/String", null);
 
     try {
+      TopicDefinition topicDefinition =
+          TopicDefinition.create(Ros.newGraphName("/foo"),
+              MessageDefinition.createFromTypeName("std_msgs/String"));
       subscriber.addPublisher(
           PublisherDefinition.createPublisherDefinition(
               SlaveIdentifier.createFromStrings("foo", "http://foo"), topicDefinition),

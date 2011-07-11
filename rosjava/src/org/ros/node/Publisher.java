@@ -16,6 +16,8 @@
 
 package org.ros.node;
 
+import org.ros.namespace.GraphName;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -32,8 +34,8 @@ public interface Publisher<MessageType> {
 
   /**
    * @param message
-   *          The {@link Message} to publish. This message will be available on
-   *          the topic that this {@link Publisher} has been associated with.
+   *          The message to publish. This message will be available on the
+   *          topic that this {@link Publisher} has been associated with.
    */
   void publish(MessageType message);
 
@@ -43,6 +45,8 @@ public interface Publisher<MessageType> {
    * @return the fully-namespaced topic for the {@link Publisher}
    */
   String getTopicName();
+
+  GraphName getTopicGraphName();
 
   /**
    * Wait for the publisher to register with the master.

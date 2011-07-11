@@ -17,6 +17,7 @@
 package org.ros.node;
 
 import org.ros.message.MessageListener;
+import org.ros.namespace.GraphName;
 
 import java.util.concurrent.TimeUnit;
 
@@ -61,6 +62,10 @@ public interface Subscriber<MessageType> {
    * @return The name of the subscribed topic.
    */
   String getTopicName();
+
+  GraphName getTopicGraphName();
+
+  String getTopicMessageType();
 
   void addMessageListener(MessageListener<MessageType> listener);
 

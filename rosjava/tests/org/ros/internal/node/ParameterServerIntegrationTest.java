@@ -30,6 +30,7 @@ import org.ros.Ros;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.node.Node;
 import org.ros.node.ParameterListener;
 import org.ros.node.ParameterTree;
 
@@ -41,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ParameterClientServerIntegrationTest {
+public class ParameterServerIntegrationTest {
 
   private MasterServer masterServer;
   private Node node;
@@ -51,8 +52,8 @@ public class ParameterClientServerIntegrationTest {
   public void setup() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    node = Node.createPrivate(Ros.newGraphName("/node_name"), masterServer.getUri(), 0, 0);
-    parameters = node.createParameterTree(Ros.newNameResolver());
+    node = Ros.newNode("/node_name", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
+    parameters = node.newParameterTree();
   }
 
   @After
@@ -112,11 +113,12 @@ public class ParameterClientServerIntegrationTest {
 
   @Test
   public void testParameterPubSub() throws InterruptedException {
-    Node subscriber = Node.createPrivate(Ros.newGraphName("/subscriber"), masterServer.getUri(), 0, 0);
-    Node publisher = Node.createPrivate(Ros.newGraphName("/publisher"), masterServer.getUri(), 0, 0);
+    Node subscriberNode =
+        Ros.newNode("/subscriber", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
+    Node publisherNode =
+        Ros.newNode("/publisher", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
 
-    ParameterTree subscriberParameters =
-        subscriber.createParameterTree(Ros.newNameResolver());
+    ParameterTree subscriberParameters = subscriberNode.newParameterTree();
     final CountDownLatch latch = new CountDownLatch(1);
     subscriberParameters.addParameterListener("/foo/bar", new ParameterListener() {
       @Override
@@ -126,14 +128,13 @@ public class ParameterClientServerIntegrationTest {
       }
     });
 
-    ParameterTree publisherParameters =
-        publisher.createParameterTree(Ros.newNameResolver());
+    ParameterTree publisherParameters = publisherNode.newParameterTree();
     publisherParameters.set("/foo/bar", 42);
 
     assertTrue(latch.await(1, TimeUnit.SECONDS));
 
-    subscriber.shutdown();
-    publisher.shutdown();
+    subscriberNode.shutdown();
+    publisherNode.shutdown();
   }
 
 }

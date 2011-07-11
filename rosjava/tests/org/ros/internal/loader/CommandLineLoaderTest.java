@@ -22,10 +22,6 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.ros.internal.loader.CommandLineLoader;
-import org.ros.internal.loader.CommandLineVariables;
-import org.ros.internal.loader.EnvironmentVariables;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -126,8 +122,9 @@ public class CommandLineLoaderTest {
     assertEquals(defaultMasterUri, nodeConfiguration.getMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
     assertTrue(nodeConfiguration.getParentResolver().getNamespace().isRoot());
-    // Default is the hostname + FQDN.
-    assertEquals(DefaultNodeConfiguration.DEFAULT_HOST, nodeConfiguration.getHost());
+    // Default is loopback.
+    assertTrue(nodeConfiguration.getTcpRosAdvertiseAddress().isLoopbackAddress());
+    assertTrue(nodeConfiguration.getXmlRpcAdvertiseAddress().isLoopbackAddress());
 
     // Construct artificial environment. Set optional environment variables.
     env = getDefaultEnv();
@@ -139,7 +136,8 @@ public class CommandLineLoaderTest {
 
     assertEquals(defaultMasterUri, nodeConfiguration.getMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
-    assertEquals("192.168.0.1", nodeConfiguration.getHost());
+    assertEquals("192.168.0.1", nodeConfiguration.getTcpRosAdvertiseAddress().getHost());
+    assertEquals("192.168.0.1", nodeConfiguration.getXmlRpcAdvertiseAddress().getHost());
     assertEquals(Ros.newGraphName("/foo/bar"), nodeConfiguration.getParentResolver().getNamespace());
     Assert.assertEquals(rosPackagePathList, nodeConfiguration.getRosPackagePath());
 
@@ -200,7 +198,8 @@ public class CommandLineLoaderTest {
     env = getDefaultEnv();
     args = Lists.newArrayList("Foo", CommandLineVariables.ROS_IP + ":=192.168.0.2");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
-    assertEquals("192.168.0.2", nodeConfiguration.getHost());
+    assertEquals("192.168.0.2", nodeConfiguration.getTcpRosAdvertiseAddress().getHost());
+    assertEquals("192.168.0.2", nodeConfiguration.getXmlRpcAdvertiseAddress().getHost());
 
     // Verify multiple options work together.
     env = getDefaultEnv();
@@ -210,7 +209,8 @@ public class CommandLineLoaderTest {
                 + ":=192.168.0.2");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
-    assertEquals("192.168.0.2", nodeConfiguration.getHost());
+    assertEquals("192.168.0.2", nodeConfiguration.getTcpRosAdvertiseAddress().getHost());
+    assertEquals("192.168.0.2", nodeConfiguration.getXmlRpcAdvertiseAddress().getHost());
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
   }
 

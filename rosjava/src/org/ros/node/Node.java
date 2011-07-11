@@ -30,6 +30,7 @@ import org.ros.message.Service;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 
 /**
@@ -228,4 +229,7 @@ public interface Node {
    * @return {@link ParameterTree} with {@link NameResolver} in this namespace.
    */
   ParameterTree newParameterTree();
+
+  InetSocketAddress getAddress();
+
 }

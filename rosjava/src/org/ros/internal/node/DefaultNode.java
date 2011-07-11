@@ -30,14 +30,24 @@ import org.ros.internal.message.old_style.MessageDeserializer;
 import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.message.old_style.ServiceMessageDefinitionFactory;
 import org.ros.internal.namespace.NodeNameResolver;
-import org.ros.internal.node.address.InetAddressFactory;
+import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.parameter.ParameterManager;
+import org.ros.internal.node.response.Response;
+import org.ros.internal.node.response.StatusCode;
+import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceDefinition;
+import org.ros.internal.node.service.ServiceFactory;
 import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceResponseBuilder;
+import org.ros.internal.node.topic.PublisherFactory;
+import org.ros.internal.node.topic.SubscriberFactory;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.time.WallclockProvider;
 import org.ros.message.MessageListener;
+import org.ros.message.MessageSerializationFactory;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
@@ -50,7 +60,7 @@ import org.ros.node.ServiceServer;
 import org.ros.node.Subscriber;
 import org.ros.time.TimeProvider;
 
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URI;
 
 /**
@@ -62,18 +72,42 @@ import java.net.URI;
  */
 public class DefaultNode implements Node {
 
-  private final NodeConfiguration configuration;
   private final NodeNameResolver resolver;
   private final GraphName nodeName;
-  private final org.ros.internal.node.Node node;
   private final RosoutLogger log;
   private final TimeProvider timeProvider;
+  private final MasterClient masterClient;
+  private final SlaveServer slaveServer;
+  private final TopicManager topicManager;
+  private final ServiceManager serviceManager;
+  private final ParameterManager parameterManager;
+  private final MasterRegistration masterRegistration;
+  private final SubscriberFactory subscriberFactory;
+  private final ServiceFactory serviceFactory;
+  private final PublisherFactory publisherFactory;
+  private final MessageSerializationFactory messageSerializationFactory;
+  private final URI masterUri;
+
+  /**
+   * True if the node is in a running state, false otherwise.
+   */
+  private boolean running;
 
   public DefaultNode(GraphName name, NodeConfiguration configuration) {
-    Preconditions.checkNotNull(configuration);
-    Preconditions.checkNotNull(configuration.getHost());
     Preconditions.checkNotNull(name);
-    this.configuration = configuration;
+    Preconditions.checkNotNull(configuration);
+    running = false;
+    masterClient = new MasterClient(configuration.getMasterUri());
+    topicManager = new TopicManager();
+    serviceManager = new ServiceManager();
+    parameterManager = new ParameterManager();
+    masterRegistration = new MasterRegistration(masterClient);
+    topicManager.setListener(masterRegistration);
+    serviceManager.setListener(masterRegistration);
+    publisherFactory = new PublisherFactory(topicManager);
+
+    messageSerializationFactory = configuration.getMessageSerializationFactory();
+
     NameResolver parentResolver = configuration.getParentResolver();
     GraphName basename;
     String nodeNameOverride = configuration.getNodeNameOverride();
@@ -84,6 +118,13 @@ public class DefaultNode implements Node {
     }
     nodeName = parentResolver.getNamespace().join(basename);
     resolver = NodeNameResolver.create(parentResolver, nodeName);
+    slaveServer =
+        new SlaveServer(nodeName, configuration.getTcpRosBindAddress(),
+            configuration.getTcpRosAdvertiseAddress(), configuration.getXmlRpcBindAddress(),
+            configuration.getXmlRpcAdvertiseAddress(), masterClient, topicManager, serviceManager,
+            parameterManager);
+    subscriberFactory = new SubscriberFactory(slaveServer, topicManager);
+    serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager);
 
     // TODO(kwc): Implement simulated time.
     // TODO(damonkohler): Move TimeProvider into NodeConfiguration.
@@ -91,24 +132,22 @@ public class DefaultNode implements Node {
 
     // Log for /rosout.
     log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
-
-    InetAddress host = InetAddressFactory.createFromHostString(configuration.getHost());
-    if (host.isLoopbackAddress()) {
-      node =
-          org.ros.internal.node.Node.createPrivate(nodeName, configuration.getMasterUri(),
-              configuration.getXmlRpcPort(), configuration.getTcpRosPort());
-    } else {
-      node =
-          org.ros.internal.node.Node
-              .createPublic(nodeName, configuration.getMasterUri(), configuration.getHost(),
-                  configuration.getXmlRpcPort(), configuration.getTcpRosPort());
-    }
-
-    // TODO(damonkohler): Move the creation and management of the RosoutLogger
-    // into the internal.Node class.
     Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
         newPublisher("/rosout", "rosgraph_msgs/Log");
     log.setRosoutPublisher(rosoutPublisher);
+
+    masterUri = configuration.getMasterUri();
+    start();
+  }
+
+  /**
+   * Start the node running. This will initiate master registration.
+   */
+  private void start() {
+    Preconditions.checkState(!running);
+    running = true;
+    slaveServer.start();
+    masterRegistration.start(slaveServer.toSlaveIdentifier());
   }
 
   @Override
@@ -118,8 +157,8 @@ public class DefaultNode implements Node {
     TopicDefinition topicDefinition =
         TopicDefinition.create(Ros.newGraphName(resolvedTopicName), messageDefinition);
     org.ros.message.MessageSerializer<MessageType> serializer =
-        configuration.getMessageSerializationFactory().createSerializer(messageType);
-    return node.createPublisher(topicDefinition, serializer);
+        messageSerializationFactory.createSerializer(messageType);
+    return publisherFactory.create(topicDefinition, serializer);
   }
 
   @SuppressWarnings("unchecked")
@@ -131,9 +170,9 @@ public class DefaultNode implements Node {
     TopicDefinition topicDefinition =
         TopicDefinition.create(Ros.newGraphName(resolvedTopicName), messageDefinition);
     MessageDeserializer<MessageType> deserializer =
-        (MessageDeserializer<MessageType>) configuration.getMessageSerializationFactory()
+        (MessageDeserializer<MessageType>) messageSerializationFactory
             .createDeserializer(messageType);
-    Subscriber<MessageType> subscriber = node.createSubscriber(topicDefinition, deserializer);
+    Subscriber<MessageType> subscriber = subscriberFactory.create(topicDefinition, deserializer);
     subscriber.addMessageListener(listener);
     return subscriber;
   }
@@ -150,12 +189,12 @@ public class DefaultNode implements Node {
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
     MessageDeserializer<RequestType> requestDeserializer =
-        (MessageDeserializer<RequestType>) configuration.getMessageSerializationFactory()
+        (MessageDeserializer<RequestType>) messageSerializationFactory
             .createServiceRequestDeserializer(serviceType);
     MessageSerializer<ResponseType> responseSerializer =
-        (MessageSerializer<ResponseType>) configuration.getMessageSerializationFactory()
+        (MessageSerializer<ResponseType>) messageSerializationFactory
             .createServiceResponseSerializer(serviceType);
-    return node.createServiceServer(definition, requestDeserializer, responseSerializer,
+    return serviceFactory.createServer(definition, requestDeserializer, responseSerializer,
         responseBuilder);
   }
 
@@ -171,23 +210,22 @@ public class DefaultNode implements Node {
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
     MessageSerializer<RequestType> requestSerializer =
-        (MessageSerializer<RequestType>) configuration.getMessageSerializationFactory()
+        (MessageSerializer<RequestType>) messageSerializationFactory
             .createServiceRequestSerializer(serviceType);
     MessageDeserializer<ResponseType> responseDeserializer =
-        (MessageDeserializer<ResponseType>) configuration.getMessageSerializationFactory()
+        (MessageDeserializer<ResponseType>) messageSerializationFactory
             .createServiceResponseDeserializer(serviceType);
-    return node.createServiceClient(definition, requestSerializer, responseDeserializer);
+    return serviceFactory.createClient(definition, requestSerializer, responseDeserializer);
   }
 
   @Override
   public ServiceIdentifier lookupService(String serviceName) {
     GraphName resolvedServiceName = Ros.newGraphName(resolveName(serviceName));
-    try {
-      return node.lookupService(resolvedServiceName);
-    } catch (RemoteException e) {
-      return null;
-    } catch (XmlRpcTimeoutException e) {
-      // TODO(kwc): change timeout policies
+    Response<URI> response =
+        masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
+    if (response.getStatusCode() == StatusCode.SUCCESS) {
+      return new ServiceIdentifier(resolvedServiceName, response.getResult());
+    } else {
       return null;
     }
   }
@@ -212,19 +250,69 @@ public class DefaultNode implements Node {
     return resolver.resolve(name);
   }
 
+  /**
+   * Is the node running?
+   * 
+   * <p>
+   * A running node may not be fully initialized yet, it is either in the
+   * process of starting up or is running.
+   * 
+   * @return True if the node is running, false otherwise.
+   */
+  public boolean isRunning() {
+    return running;
+  }
+
   @Override
   public boolean isOk() {
-    return node.isRunning() && node.isRegistered();
+    return isRunning() && isRegistered();
   }
 
   @Override
   public void shutdown() {
-    node.shutdown();
+    // NOTE(damonkohler): We don't want to raise potentially spurious
+    // exceptions during shutdown that would interrupt the process. This is
+    // simply best effort cleanup.
+    running = false;
+    slaveServer.shutdown();
+    masterRegistration.shutdown();
+    for (Publisher<?> publisher : topicManager.getPublishers()) {
+      publisher.shutdown();
+      try {
+        masterClient.unregisterPublisher(slaveServer.toSlaveIdentifier(), publisher);
+      } catch (XmlRpcTimeoutException e) {
+        log.error(e);
+      } catch (RemoteException e) {
+        log.error(e);
+      }
+    }
+    for (Subscriber<?> subscriber : topicManager.getSubscribers()) {
+      subscriber.shutdown();
+      try {
+        masterClient.unregisterSubscriber(slaveServer.toSlaveIdentifier(), subscriber);
+      } catch (XmlRpcTimeoutException e) {
+        log.error(e);
+      } catch (RemoteException e) {
+        log.error(e);
+      }
+    }
+    for (ServiceServer<?, ?> serviceServer : serviceManager.getServers()) {
+      try {
+        masterClient.unregisterService(slaveServer.toSlaveIdentifier(), serviceServer);
+      } catch (XmlRpcTimeoutException e) {
+        log.error(e);
+      } catch (RemoteException e) {
+        log.error(e);
+      }
+    }
+    for (ServiceClient<?, ?> serviceClient : serviceManager.getClients()) {
+      serviceClient.shutdown();
+    }
   }
 
   @Override
   public URI getMasterUri() {
-    return configuration.getMasterUri();
+    return masterUri;
   }
 
   @Override
@@ -234,21 +322,28 @@ public class DefaultNode implements Node {
 
   @Override
   public ParameterTree newParameterTree() {
-    return node.createParameterTree(resolver);
+    return org.ros.internal.node.parameter.ParameterTree.create(slaveServer.toSlaveIdentifier(),
+        masterClient.getRemoteUri(), resolver, parameterManager);
   }
 
   @Override
   public URI getUri() {
-    return node.getUri();
+    return slaveServer.getUri();
+  }
+
+  @Override
+  public InetSocketAddress getAddress() {
+    return slaveServer.getAddress();
   }
 
   @Override
   public boolean isRegistered() {
-    return node.isRegistered();
+    return masterRegistration.getPendingSize() == 0;
   }
 
   @Override
   public boolean isRegistrationOk() {
-    return node.isRegistrationOk();
+    return masterRegistration.isMasterRegistrationOk();
   }
+
 }

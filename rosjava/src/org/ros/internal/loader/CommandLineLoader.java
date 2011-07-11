@@ -24,6 +24,8 @@ import org.ros.Ros;
 import org.ros.exception.RosInitException;
 import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.DefaultNodeConfiguration;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.InetAddressFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
@@ -111,12 +113,13 @@ public class CommandLineLoader {
    */
   public NodeConfiguration createConfiguration() {
     parseRemappingArguments();
-    NodeConfiguration nodeConfiguration = Ros.newNodeConfiguration();
+    NodeConfiguration nodeConfiguration = Ros.newPrivateNodeConfiguration();
     nodeConfiguration.setParentResolver(buildParentResolver());
     nodeConfiguration.setRosRoot(getRosRoot());
     nodeConfiguration.setRosPackagePath(getRosPackagePath());
     nodeConfiguration.setMasterUri(getMasterUri());
-    nodeConfiguration.setHost(getHost());
+    nodeConfiguration.setTcpRosAdvertiseAddress(new AdvertiseAddress(getHost()));
+    nodeConfiguration.setXmlRpcAdvertiseAddress(new AdvertiseAddress(getHost()));
     if (specialRemappings.containsKey(CommandLineVariables.NODE_NAME)) {
       nodeConfiguration.setNodeNameOverride(specialRemappings.get(CommandLineVariables.NODE_NAME));
     }
@@ -149,7 +152,8 @@ public class CommandLineLoader {
   private NameResolver buildParentResolver() {
     GraphName namespace = DefaultGraphName.createRoot();
     if (specialRemappings.containsKey(CommandLineVariables.ROS_NAMESPACE)) {
-      namespace = Ros.newGraphName(specialRemappings.get(CommandLineVariables.ROS_NAMESPACE)).toGlobal();
+      namespace =
+          Ros.newGraphName(specialRemappings.get(CommandLineVariables.ROS_NAMESPACE)).toGlobal();
     } else if (environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
       namespace = Ros.newGraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
     }
@@ -167,7 +171,7 @@ public class CommandLineLoader {
    * </ol>
    */
   private String getHost() {
-    String host = DefaultNodeConfiguration.DEFAULT_HOST;
+    String host = InetAddressFactory.createLoopback().getHostName();
     if (specialRemappings.containsKey(CommandLineVariables.ROS_IP)) {
       host = specialRemappings.get(CommandLineVariables.ROS_IP);
     } else if (environment.containsKey(EnvironmentVariables.ROS_IP)) {

@@ -23,15 +23,13 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.Ros;
-import org.ros.internal.message.new_style.ServiceMessageDefinition;
-import org.ros.internal.message.old_style.MessageDeserializer;
-import org.ros.internal.message.old_style.MessageSerializer;
-import org.ros.internal.node.Node;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.node.Node;
 import org.ros.node.ServiceClient;
 import org.ros.node.ServiceResponseListener;
+import org.ros.node.ServiceServer;
 import org.ros.service.test_ros.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
@@ -43,32 +41,19 @@ import java.util.concurrent.TimeUnit;
 public class ServiceIntegrationTest {
 
   private MasterServer masterServer;
-  private ServiceIdentifier serviceIdentifier;
-  private ServiceDefinition serviceDefinition;
-  private MessageSerializer<AddTwoInts.Request> requestSerializer;
-  private MessageSerializer<AddTwoInts.Response> responseSerializer;
-  private MessageDeserializer<AddTwoInts.Request> requestDeserializer;
-  private MessageDeserializer<AddTwoInts.Response> responseDeserializer;
 
   @Before
   public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    serviceIdentifier = new ServiceIdentifier(Ros.newGraphName("/add_two_ints"), null);
-    serviceDefinition =
-        new ServiceDefinition(serviceIdentifier, new ServiceMessageDefinition(
-            AddTwoInts.__s_getDataType(), AddTwoInts.__s_getMD5Sum()));
-    requestSerializer = new MessageSerializer<AddTwoInts.Request>();
-    responseSerializer = new MessageSerializer<AddTwoInts.Response>();
-    requestDeserializer = new MessageDeserializer<AddTwoInts.Request>(AddTwoInts.Request.class);
-    responseDeserializer = new MessageDeserializer<AddTwoInts.Response>(AddTwoInts.Response.class);
   }
 
   @Test
   public void PesistentServiceConnectionTest() throws Exception {
-    Node serverNode = Node.createPrivate(Ros.newGraphName("/server"), masterServer.getUri(), 0, 0);
+    Node serverNode =
+        Ros.newNode("/server", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
-        serverNode.createServiceServer(serviceDefinition, requestDeserializer, responseSerializer,
+        serverNode.newServiceServer("/service", "test_ros/AddTwoInts",
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
               @Override
               public AddTwoInts.Response build(AddTwoInts.Request request) {
@@ -79,10 +64,10 @@ public class ServiceIntegrationTest {
             });
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
-    Node clientNode = Node.createPrivate(Ros.newGraphName("/client"), masterServer.getUri(), 0, 0);
+    Node clientNode =
+        Ros.newNode("/client", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
-        clientNode.createServiceClient(server.getDefinition(), requestSerializer,
-            responseDeserializer);
+        clientNode.newServiceClient("/service", "test_ros/AddTwoInts");
 
     // TODO(damonkohler): This is a hack that we should remove once it's
     // possible to block on a connection being established.
@@ -111,9 +96,10 @@ public class ServiceIntegrationTest {
   public void RequestFailureTest() throws Exception {
     final String errorMessage = "Error!";
 
-    Node serverNode = Node.createPrivate(Ros.newGraphName("/server"), masterServer.getUri(), 0, 0);
+    Node serverNode =
+        Ros.newNode("/server", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
-        serverNode.createServiceServer(serviceDefinition, requestDeserializer, responseSerializer,
+        serverNode.newServiceServer("/service", "test_ros/AddTwoInts",
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
               @Override
               public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
@@ -122,10 +108,10 @@ public class ServiceIntegrationTest {
             });
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
-    Node clientNode = Node.createPrivate(Ros.newGraphName("/client"), masterServer.getUri(), 0, 0);
+    Node clientNode =
+        Ros.newNode("/client", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
-        clientNode.createServiceClient(server.getDefinition(), requestSerializer,
-            responseDeserializer);
+        clientNode.newServiceClient("/service", "test_ros/AddTwoInts");
 
     // TODO(damonkohler): This is a hack that we should remove once it's
     // possible to block on a connection being established.

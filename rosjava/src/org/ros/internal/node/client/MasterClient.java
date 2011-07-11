@@ -24,12 +24,12 @@ import org.ros.internal.node.response.VoidResultFactory;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.node.service.ServiceServer;
-import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.node.topic.PublisherDefinition;
-import org.ros.internal.node.topic.Subscriber;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.node.Publisher;
+import org.ros.node.ServiceServer;
+import org.ros.node.Subscriber;
 
 import java.net.URI;
 import java.util.List;

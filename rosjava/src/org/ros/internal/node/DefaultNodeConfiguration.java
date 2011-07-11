@@ -17,9 +17,9 @@
 package org.ros.internal.node;
 
 import org.ros.Ros;
-
 import org.ros.internal.namespace.DefaultNameResolver;
-import org.ros.internal.node.address.Address;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
@@ -40,30 +40,43 @@ import java.util.List;
  */
 public class DefaultNodeConfiguration implements NodeConfiguration {
 
-  public static final String DEFAULT_HOST = Address.LOCALHOST;
-  public static final String DEFAULT_MASTER_URI = "http://" + DEFAULT_HOST + ":11311/";
-
   private NameResolver parentResolver;
   private URI masterUri;
-  private String host;
   private File rosRoot;
   private List<String> rosPackagePath;
-  private int tcpRosPort;
-  private int xmlRpcPort;
   private String nodeNameOverride;
   private MessageSerializationFactory messageSerializationFactory;
+  private BindAddress tcpRosBindAddress;
+  private AdvertiseAddress tcpRosAdvertiseAddress;
+  private BindAddress xmlRpcBindAddress;
+  private AdvertiseAddress xmlRpcAdvertiseAddress;
 
-  public DefaultNodeConfiguration() {
+  public static NodeConfiguration newPublic(String advertiseHostname,
+      int xmlRpcBindPort, int tcpRosBindPort) {
+    NodeConfiguration configuration = new DefaultNodeConfiguration();
+    configuration.setXmlRpcBindAddress(BindAddress.createPublic(xmlRpcBindPort));
+    configuration.setXmlRpcAdvertiseAddress(new AdvertiseAddress(advertiseHostname));
+    configuration.setTcpRosBindAddress(BindAddress.createPublic(tcpRosBindPort));
+    configuration.setTcpRosAdvertiseAddress(new AdvertiseAddress(advertiseHostname));
+    return configuration;
+  }
+
+  public static NodeConfiguration newPrivate(int xmlRpcBindPort, int tcpRosBindPort) {
+    NodeConfiguration configuration = new DefaultNodeConfiguration();
+    configuration.setXmlRpcBindAddress(BindAddress.createPrivate(xmlRpcBindPort));
+    configuration.setXmlRpcAdvertiseAddress(AdvertiseAddress.createPrivate());
+    configuration.setTcpRosBindAddress(BindAddress.createPrivate(tcpRosBindPort));
+    configuration.setTcpRosAdvertiseAddress(AdvertiseAddress.createPrivate());
+    return configuration;
+  }
+
+  private DefaultNodeConfiguration() {
     try {
-      setMasterUri(new URI(DEFAULT_MASTER_URI));
+      setMasterUri(new URI(NodeConfiguration.DEFAULT_MASTER_URI));
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
     setParentResolver(Ros.newNameResolver());
-    setHost(DEFAULT_HOST);
-    setTcpRosPort(0); // OS determined free port.
-    setXmlRpcPort(0); // OS determined free port.
-    setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
   }
 
   /**
@@ -111,56 +124,6 @@ public class DefaultNodeConfiguration implements NodeConfiguration {
   }
 
   /**
-   * @return host name/address to use when advertising this node via URLs.
-   */
-  @Override
-  public String getHost() {
-    return host;
-  }
-
-  /**
-   * Set host name/address to use when advertising this node via URLs.
-   * 
-   * @param host
-   */
-  @Override
-  public void setHost(String host) {
-    this.host = host;
-  }
-
-  /**
-   * @return Port to bind TCPROS server to, or 0 to bind to any open port.
-   */
-  @Override
-  public int getTcpRosPort() {
-    return tcpRosPort;
-  }
-
-  /**
-   * Set port to bind TCPROS server to. 0 binds to any open port.
-   */
-  @Override
-  public void setTcpRosPort(int tcpRosPort) {
-    this.tcpRosPort = tcpRosPort;
-  }
-
-  /**
-   * @return Port to bind XMLRPC server to, or 0 to bind to any open port.
-   */
-  @Override
-  public int getXmlRpcPort() {
-    return xmlRpcPort;
-  }
-
-  /**
-   * Set port to bind XMLRPC server to. 0 binds to any open port.
-   */
-  @Override
-  public void setXmlRpcPort(int xmlRpcPort) {
-    this.xmlRpcPort = xmlRpcPort;
-  }
-
-  /**
    * @return Override for Node name or null if no override.
    */
   @Override
@@ -182,6 +145,46 @@ public class DefaultNodeConfiguration implements NodeConfiguration {
   public void
       setMessageSerializationFactory(MessageSerializationFactory messageSerializationFactory) {
     this.messageSerializationFactory = messageSerializationFactory;
+  }
+
+  @Override
+  public BindAddress getTcpRosBindAddress() {
+    return tcpRosBindAddress;
+  }
+
+  @Override
+  public void setTcpRosBindAddress(BindAddress tcpRosBindAddress) {
+    this.tcpRosBindAddress = tcpRosBindAddress;
+  }
+
+  @Override
+  public AdvertiseAddress getTcpRosAdvertiseAddress() {
+    return tcpRosAdvertiseAddress;
+  }
+
+  @Override
+  public void setTcpRosAdvertiseAddress(AdvertiseAddress tcpRosAdvertiseAddress) {
+    this.tcpRosAdvertiseAddress = tcpRosAdvertiseAddress;
+  }
+
+  @Override
+  public BindAddress getXmlRpcBindAddress() {
+    return xmlRpcBindAddress;
+  }
+
+  @Override
+  public void setXmlRpcBindAddress(BindAddress xmlRpcBindAddress) {
+    this.xmlRpcBindAddress = xmlRpcBindAddress;
+  }
+
+  @Override
+  public AdvertiseAddress getXmlRpcAdvertiseAddress() {
+    return xmlRpcAdvertiseAddress;
+  }
+
+  @Override
+  public void setXmlRpcAdvertiseAddress(AdvertiseAddress xmlRpcAdvertiseAddress) {
+    this.xmlRpcAdvertiseAddress = xmlRpcAdvertiseAddress;
   }
 
 }

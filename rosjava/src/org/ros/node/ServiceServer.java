@@ -16,6 +16,9 @@
 
 package org.ros.node;
 
+import org.ros.namespace.GraphName;
+
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -31,5 +34,9 @@ public interface ServiceServer<RequestType, ResponseType> {
   void awaitRegistration() throws InterruptedException;
 
   boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException;
+
+  GraphName getName();
+
+  URI getUri();
 
 }

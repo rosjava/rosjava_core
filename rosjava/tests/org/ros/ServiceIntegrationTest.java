@@ -53,7 +53,7 @@ public class ServiceIntegrationTest {
   public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
-    configuration = Ros.newNodeConfiguration();
+    configuration = Ros.newPrivateNodeConfiguration();
     configuration.setMasterUri(masterServer.getUri());
   }
 

@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 public class MasterRegistration implements TopicListener, ServiceListener {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(Node.class);
+  private static final Log log = LogFactory.getLog(MasterRegistration.class);
 
   private static final long DEFAULT_RETRY_DELAY = 5;
   private static final TimeUnit DEFAULT_RETRY_TIME_UNIT = TimeUnit.SECONDS;

@@ -17,6 +17,8 @@
 package org.ros.node;
 
 import org.ros.internal.namespace.DefaultNameResolver;
+import org.ros.internal.node.address.AdvertiseAddress;
+import org.ros.internal.node.address.BindAddress;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.NameResolver;
 
@@ -28,6 +30,8 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface NodeConfiguration {
+
+  public static final String DEFAULT_MASTER_URI = "http://localhost:11311/";
 
   /**
    * @return The {@link DefaultNameResolver} for a {@link Node}'s parent namespace.
@@ -49,38 +53,6 @@ public interface NodeConfiguration {
   void setRosPackagePath(List<String> rosPackagePath);
 
   /**
-   * @return host name/address to use when advertising this node via URLs.
-   */
-  String getHost();
-
-  /**
-   * Set host name/address to use when advertising this node via URLs.
-   * 
-   * @param host
-   */
-  void setHost(String host);
-
-  /**
-   * @return Port to bind TCPROS server to, or 0 to bind to any open port.
-   */
-  int getTcpRosPort();
-
-  /**
-   * Set port to bind TCPROS server to. 0 binds to any open port.
-   */
-  void setTcpRosPort(int tcpRosPort);
-
-  /**
-   * @return Port to bind XMLRPC server to, or 0 to bind to any open port.
-   */
-  int getXmlRpcPort();
-
-  /**
-   * Set port to bind XMLRPC server to. 0 binds to any open port.
-   */
-  void setXmlRpcPort(int xmlRpcPort);
-
-  /**
    * @return Override for Node name or null if no override.
    */
   String getNodeNameOverride();
@@ -90,5 +62,21 @@ public interface NodeConfiguration {
   MessageSerializationFactory getMessageSerializationFactory();
 
   void setMessageSerializationFactory(MessageSerializationFactory messageSerializationFactory);
+
+  BindAddress getTcpRosBindAddress();
+
+  void setTcpRosBindAddress(BindAddress tcpRosBindAddress);
+
+  AdvertiseAddress getTcpRosAdvertiseAddress();
+
+  void setTcpRosAdvertiseAddress(AdvertiseAddress tcpRosAdvertiseAddress);
+
+  BindAddress getXmlRpcBindAddress();
+
+  void setXmlRpcBindAddress(BindAddress xmlRpcBindAddress);
+
+  AdvertiseAddress getXmlRpcAdvertiseAddress();
+
+  void setXmlRpcAdvertiseAddress(AdvertiseAddress xmlRpcAdvertiseAddress);
 
 }

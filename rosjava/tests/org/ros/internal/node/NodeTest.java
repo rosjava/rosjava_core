@@ -26,15 +26,12 @@ import com.google.common.net.InetAddresses;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.Ros;
-import org.ros.internal.message.new_style.MessageDefinition;
-import org.ros.internal.message.old_style.MessageDeserializer;
-import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.topic.Publisher;
-import org.ros.internal.node.topic.Subscriber;
-import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.node.Node;
+import org.ros.node.Publisher;
+import org.ros.node.Subscriber;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -57,11 +54,9 @@ public class NodeTest {
 
   @Test
   public void testFailIfStartedWhileRunning() throws UnknownHostException {
-    String hostName = InetAddress.getLocalHost().getCanonicalHostName();
-    Node node =
-        Node.createPublic(Ros.newGraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
+    String host = InetAddress.getLocalHost().getCanonicalHostName();
     try {
-      node.start();
+      Ros.newNode("/node_name", Ros.newPublicNodeConfiguration(host, masterServer.getUri()));
       fail();
     } catch (RuntimeException e) {
       // Calling start() while the node is running must fail.
@@ -70,12 +65,9 @@ public class NodeTest {
 
   @Test
   public void testFailIfStoppedWhileNotRunning() throws UnknownHostException {
-    String hostName = InetAddress.getLocalHost().getCanonicalHostName();
-    Node node =
-        Node.createPublic(Ros.newGraphName("/node_name"), masterServer.getUri(), hostName, 0, 0);
-    node.shutdown();
+    String host = InetAddress.getLocalHost().getCanonicalHostName();
     try {
-      node.shutdown();
+      Ros.newNode("/node_name", Ros.newPublicNodeConfiguration(host, masterServer.getUri()));
       fail();
     } catch (RuntimeException e) {
       // Calling stop() while the node is not running must fail.
@@ -87,7 +79,7 @@ public class NodeTest {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     assertFalse(InetAddresses.isInetAddress(host));
     Node node =
-        Node.createPublic(Ros.newGraphName("/node_name"), masterServer.getUri(), host, 0, 0);
+        Ros.newNode("/node_name", Ros.newPublicNodeConfiguration(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -98,7 +90,7 @@ public class NodeTest {
   public void testCreatePublicWithIpv4() throws Exception {
     String host = "1.2.3.4";
     Node node =
-        Node.createPublic(Ros.newGraphName("/node_name"), masterServer.getUri(), host, 0, 0);
+        Ros.newNode("/node_name", Ros.newPublicNodeConfiguration(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -109,7 +101,7 @@ public class NodeTest {
   public void testCreatePublicWithIpv6() throws Exception {
     String host = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     Node node =
-        Node.createPublic(Ros.newGraphName("/node_name"), masterServer.getUri(), host, 0, 0);
+        Ros.newNode("/node_name", Ros.newPublicNodeConfiguration(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -118,7 +110,7 @@ public class NodeTest {
 
   @Test
   public void testCreatePrivate() {
-    Node node = Node.createPrivate(Ros.newGraphName("/node_name"), masterServer.getUri(), 0, 0);
+    Node node = Ros.newNode("/node_name", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertTrue(nodeAddress.getAddress().isLoopbackAddress());
@@ -127,21 +119,14 @@ public class NodeTest {
 
   @Test
   public void testPubSubRegistration() throws InterruptedException {
-    Node node = Node.createPrivate(Ros.newGraphName("/node_name"), masterServer.getUri(), 0, 0);
-    TopicDefinition topicDefinition =
-        TopicDefinition.create(Ros.newGraphName("/foo"), MessageDefinition.create(
-        org.ros.message.std_msgs.String.__s_getDataType(),
-        org.ros.message.std_msgs.String.__s_getMessageDefinition(),
-        org.ros.message.std_msgs.String.__s_getMD5Sum()));
+    Node node = Ros.newNode("/node_name", Ros.newPrivateNodeConfiguration(masterServer.getUri()));
 
     Publisher<org.ros.message.std_msgs.String> publisher =
-        node.createPublisher(topicDefinition,
-            new MessageSerializer<org.ros.message.std_msgs.String>());
+        node.newPublisher("/foo", "std_msgs/String");
     assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
 
     Subscriber<org.ros.message.std_msgs.String> subscriber =
-        node.createSubscriber(topicDefinition, new MessageDeserializer<org.ros.message.std_msgs.String>(
-            org.ros.message.std_msgs.String.class));
+        node.newSubscriber("/foo", "std_msgs/String", null);
     assertTrue(subscriber.awaitRegistration(1, TimeUnit.SECONDS));
 
     assertEquals(1, masterServer.getRegisteredPublishers().size());

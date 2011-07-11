@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.node.Publisher;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -58,7 +59,8 @@ public class RepeatingPublisher<MessageType> {
   /**
    * @param publisher
    * @param message
-   * @param frequency the frequency of publication in Hz
+   * @param frequency
+   *          the frequency of publication in Hz
    */
   public RepeatingPublisher(Publisher<MessageType> publisher, MessageType message, int frequency) {
     this.publisher = publisher;
