@@ -1,14 +1,9 @@
 package org.ros.actionlib.server;
 
-import org.ros.node.NodeConfiguration;
-
 import org.ros.Ros;
-
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.util.GoalIDGenerator;
 import org.ros.exception.RosException;
-import org.ros.exception.RosInitException;
-import org.ros.internal.node.DefaultNode;
 import org.ros.message.Duration;
 import org.ros.message.Message;
 import org.ros.message.MessageListener;
@@ -17,6 +12,7 @@ import org.ros.message.actionlib_msgs.GoalID;
 import org.ros.message.actionlib_msgs.GoalStatus;
 import org.ros.message.actionlib_msgs.GoalStatusArray;
 import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.ParameterTree;
 import org.ros.node.Publisher;
@@ -109,8 +105,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
   public DefaultActionServer(
       String name,
       ActionSpec<?, T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> spec,
-      ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks)
-      throws RosInitException {
+      ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks) {
 
     this(null, name, spec, callbacks);
   }
@@ -119,8 +114,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
       Node parent,
       String name,
       ActionSpec<?, T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> spec,
-      ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks)
-      throws RosInitException {
+      ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks) {
     this.parent = parent;
     this.name = name;
     this.callbacks = callbacks;

@@ -20,7 +20,6 @@ import com.google.common.collect.Lists;
 
 import org.ros.address.AdvertiseAddress;
 
-
 import java.net.InetSocketAddress;
 import java.util.List;
 

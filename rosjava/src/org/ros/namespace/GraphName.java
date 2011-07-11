@@ -18,8 +18,6 @@ package org.ros.namespace;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.exception.RosNameException;
-
 /**
  * ROS graph resource name.
  * 
@@ -29,9 +27,10 @@ import org.ros.exception.RosNameException;
  */
 public class GraphName {
 
+  private static final String ROOT = "/";
+  private static final String SEPARATOR = "/";
   private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
   private static final String UNKNOWN_NAME = "/unknown";
-  private static final String ROOT = "/";
 
   private final String name;
 
@@ -49,7 +48,7 @@ public class GraphName {
    */
   public GraphName(String name) {
     Preconditions.checkNotNull(name);
-    validate(name);
+    Preconditions.checkArgument(validate(name), "Invalid graph name: " + name);
     this.name = canonicalize(name);
   }
 
@@ -67,7 +66,7 @@ public class GraphName {
     // Allow empty names.
     if (name.length() > 0) {
       if (!name.matches(VALID_ROS_NAME_PATTERN)) {
-        throw new RosNameException("Invalid unix name, may not contain special characters.");
+        return false;
       }
     }
     return true;
@@ -83,7 +82,7 @@ public class GraphName {
   public static String canonicalize(String name) {
     Preconditions.checkArgument(validate(name));
     // Trim trailing slashes for canonical representation.
-    while (!name.equals(GraphName.ROOT) && name.endsWith("/")) {
+    while (!name.equals(GraphName.ROOT) && name.endsWith(SEPARATOR)) {
       name = name.substring(0, name.length() - 1);
     }
     if (name.startsWith("~/")) {
@@ -249,7 +248,7 @@ public class GraphName {
     } else if (isRoot()) {
       return other.toGlobal();
     } else {
-      return new GraphName(toString() + "/" + other.toString());
+      return new GraphName(toString() + SEPARATOR + other.toString());
     }
   }
 

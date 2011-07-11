@@ -24,14 +24,11 @@ import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 
-import org.ros.address.AdvertiseAddress;
-import org.ros.address.BindAddress;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.Ros;
-import org.ros.exception.RosInitException;
-import org.ros.internal.exception.RemoteException;
+import org.ros.address.AdvertiseAddress;
+import org.ros.address.BindAddress;
 import org.ros.internal.loader.CommandLineLoader;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
@@ -64,7 +61,7 @@ public class DefaultNodeTest {
   private NodeConfiguration nodeConfiguration;
 
   @Before
-  public void setUp() throws RosInitException {
+  public void setUp() {
     masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     masterServer.start();
     masterUri = masterServer.getUri();
@@ -163,7 +160,7 @@ public class DefaultNodeTest {
   }
 
   @Test
-  public void testResolveName() throws RosInitException {
+  public void testResolveName() {
     nodeConfiguration.setParentResolver(Ros.newNameResolver("/ns1"));
     Node node = Ros.newNode("test_resolver", nodeConfiguration);
 
@@ -198,7 +195,7 @@ public class DefaultNodeTest {
   }
 
   @Test
-  public void testPublicAddresses() throws RosInitException, RemoteException {
+  public void testPublicAddresses() {
     MasterServer master =
         new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
     master.start();

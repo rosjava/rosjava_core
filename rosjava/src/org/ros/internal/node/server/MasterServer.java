@@ -26,7 +26,6 @@ import com.google.common.collect.Multimaps;
 
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
-
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;

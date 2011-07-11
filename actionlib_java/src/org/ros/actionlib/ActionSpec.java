@@ -8,7 +8,6 @@ import org.ros.actionlib.server.DefaultSimpleActionServer;
 import org.ros.actionlib.server.SimpleActionServer;
 import org.ros.actionlib.server.SimpleActionServerCallbacks;
 import org.ros.exception.RosException;
-import org.ros.exception.RosInitException;
 import org.ros.message.Message;
 import org.ros.message.Time;
 import org.ros.message.actionlib_msgs.GoalID;
@@ -414,8 +413,7 @@ public class ActionSpec<
       DefaultActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>
       buildActionServer(
           String nameSpace,
-          ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks)
-          throws RosInitException {
+          ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks) {
 
     return new DefaultActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
         nameSpace, this, callbacks);
@@ -444,8 +442,7 @@ public class ActionSpec<
       buildActionServer(
           Node node,
           String name,
-          ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks)
-          throws RosInitException {
+          ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks) {
 
     return new DefaultActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
         node, name, this, callbacks);
@@ -478,7 +475,7 @@ public class ActionSpec<
       buildSimpleActionServer(
           String nameSpace,
           SimpleActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks,
-          boolean useBlockingGoalCallback) throws RosInitException {
+          boolean useBlockingGoalCallback) {
 
     return new DefaultSimpleActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
         nameSpace, this, callbacks, useBlockingGoalCallback);
@@ -516,7 +513,7 @@ public class ActionSpec<
           Node node,
           String nameSpace,
           SimpleActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks,
-          boolean useBlockingGoalCallback) throws RosInitException {
+          boolean useBlockingGoalCallback) {
 
     return new DefaultSimpleActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
         node, nameSpace, this, callbacks, useBlockingGoalCallback);

@@ -3,7 +3,6 @@ package org.ros.actionlib.example;
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.server.ActionServerCallbacks;
 import org.ros.actionlib.server.DefaultActionServer;
-import org.ros.exception.RosInitException;
 import org.ros.message.actionlib_tutorials.FibonacciActionFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciActionGoal;
 import org.ros.message.actionlib_tutorials.FibonacciActionResult;
@@ -29,8 +28,7 @@ public class FibonacciActionServer
   public FibonacciActionServer(
       String nameSpace,
       ActionSpec<?, FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> spec,
-      ActionServerCallbacks<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> callbacks)
-      throws RosInitException {
+      ActionServerCallbacks<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> callbacks) {
 
     super(nameSpace, spec, callbacks);
 
@@ -40,8 +38,7 @@ public class FibonacciActionServer
       Node parent,
       String nameSpace,
       ActionSpec<?, FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> spec,
-      ActionServerCallbacks<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> callbacks)
-      throws RosInitException {
+      ActionServerCallbacks<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> callbacks) {
     super(parent, nameSpace, spec, callbacks);
   }
 }

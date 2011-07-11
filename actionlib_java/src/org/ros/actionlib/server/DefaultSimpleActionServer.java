@@ -2,15 +2,12 @@ package org.ros.actionlib.server;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.node.NodeConfiguration;
-
-
 import org.ros.actionlib.ActionSpec;
 import org.ros.exception.RosException;
-import org.ros.exception.RosInitException;
 import org.ros.message.Message;
 import org.ros.message.actionlib_msgs.GoalStatus;
 import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 import java.util.concurrent.locks.Condition;
@@ -68,7 +65,7 @@ public class DefaultSimpleActionServer<T_ACTION_FEEDBACK extends Message, T_ACTI
       String nameSpace,
       ActionSpec<?, T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> spec,
       SimpleActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks,
-      boolean useBlockingGoalCallback) throws RosInitException {
+      boolean useBlockingGoalCallback) {
     Preconditions.checkNotNull(callbacks);
     this.callbacks = callbacks;
     this.actionServer =
@@ -86,7 +83,7 @@ public class DefaultSimpleActionServer<T_ACTION_FEEDBACK extends Message, T_ACTI
       String nameSpace,
       ActionSpec<?, T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> spec,
       SimpleActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks,
-      boolean useBlockingGoalCallback) throws RosInitException {
+      boolean useBlockingGoalCallback) {
 
     this.callbacks = callbacks;
     this.actionServer =

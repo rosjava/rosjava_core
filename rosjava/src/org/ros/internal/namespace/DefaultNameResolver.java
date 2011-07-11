@@ -18,7 +18,6 @@ package org.ros.internal.namespace;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.exception.RosNameException;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 
@@ -57,9 +56,9 @@ public class DefaultNameResolver implements NameResolver {
       return remappedNamespace.join(remappedName);
     }
     if (remappedName.isPrivate()) {
-      throw new RosNameException("Cannot resolve ~private names in arbitrary namespaces.");
+      throw new RuntimeException("Cannot resolve ~private names in arbitrary namespaces.");
     }
-    throw new RosNameException("Unable to resolve name: " + name);
+    throw new RuntimeException("Unable to resolve graph name: " + name);
   }
 
   @Override

@@ -20,7 +20,6 @@ import com.google.common.collect.Lists;
 
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
-
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.service.ServiceManager;

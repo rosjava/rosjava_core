@@ -20,13 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.ros.address.AdvertiseAddress;
-import org.ros.address.BindAddress;
-
-import org.ros.node.NodeConfiguration;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.address.AdvertiseAddress;
+import org.ros.address.BindAddress;
 import org.ros.internal.message.new_style.MessageDefinition;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -36,6 +33,7 @@ import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
 import org.ros.node.Publisher;
 import org.ros.node.Subscriber;
 

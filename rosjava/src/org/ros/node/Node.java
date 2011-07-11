@@ -17,8 +17,7 @@
 package org.ros.node;
 
 import org.apache.commons.logging.Log;
-import org.ros.exception.RosInitException;
-import org.ros.exception.RosNameException;
+import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.namespace.NodeNameResolver;
 import org.ros.internal.node.server.MasterServer;
@@ -69,7 +68,6 @@ public interface Node {
    * @param name
    *          The name to resolve.
    * @return Fully resolved ros namespace name.
-   * @throws RosNameException
    */
   String resolveName(String name);
 
@@ -148,8 +146,6 @@ public interface Node {
    *          The Class object of the topic message type.
    * @return A handle to a publisher that may be used to publish messages of
    *         type MessageType
-   * @throws RosInitException
-   *           May throw if the system is not in a proper state.
    */
   <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType);
 
@@ -168,10 +164,6 @@ public interface Node {
    *          topic.
    * @return A handle to a Subscriber that may be used to subscribe messages of
    *         type MessageType.
-   * @throws RosInitException
-   *           The subscriber may fail if the Ros system has not been
-   *           initialized or other wackyness. TODO specify exceptions that
-   *           might be thrown here.
    */
   <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
       MessageListener<MessageType> listener);
@@ -208,7 +200,7 @@ public interface Node {
    * @return
    */
   <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
-      String serviceName, String serviceType);
+      String serviceName, String serviceType) throws ServiceNotFoundException;
 
   /**
    * Returns a {@link ServiceIdentifier} for communicating with the current

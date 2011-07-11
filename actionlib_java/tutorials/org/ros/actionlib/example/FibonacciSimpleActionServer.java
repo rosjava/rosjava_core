@@ -3,7 +3,6 @@ package org.ros.actionlib.example;
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.server.DefaultSimpleActionServer;
 import org.ros.actionlib.server.SimpleActionServerCallbacks;
-import org.ros.exception.RosInitException;
 import org.ros.message.actionlib_tutorials.FibonacciActionFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciActionGoal;
 import org.ros.message.actionlib_tutorials.FibonacciActionResult;
@@ -30,7 +29,7 @@ public class FibonacciSimpleActionServer
       String nameSpace,
       ActionSpec<?, FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> spec,
       SimpleActionServerCallbacks<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> callbacks,
-      boolean useBlockingGoalCallback) throws RosInitException {
+      boolean useBlockingGoalCallback) {
     super(nameSpace, spec, callbacks, useBlockingGoalCallback);
   }
 
@@ -39,7 +38,7 @@ public class FibonacciSimpleActionServer
       String nameSpace,
       ActionSpec<?, FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> spec,
       SimpleActionServerCallbacks<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> callbacks,
-      boolean useBlockingGoalCallback) throws RosInitException {
+      boolean useBlockingGoalCallback) {
     super(parent, nameSpace, spec, callbacks, useBlockingGoalCallback);
   }
 }

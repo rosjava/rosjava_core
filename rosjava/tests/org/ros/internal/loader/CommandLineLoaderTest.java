@@ -25,7 +25,6 @@ import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.exception.RosInitException;
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
@@ -214,9 +213,6 @@ public class CommandLineLoaderTest {
 
   /**
    * Test the {@link DefaultNameResolver} created by createConfiguration().
-   * 
-   * @throws RosInitException
-   * @throws URISyntaxException
    */
   @Test
   public void testcreateConfigurationResolver() {

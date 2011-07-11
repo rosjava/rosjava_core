@@ -21,7 +21,7 @@ import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.exception.RosRuntimeException;
+import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.new_style.MessageDefinition;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
@@ -203,10 +203,11 @@ public class DefaultNode implements Node {
   @SuppressWarnings("unchecked")
   @Override
   public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
-      String serviceName, String serviceType) {
+      String serviceName, String serviceType) throws ServiceNotFoundException {
     ServiceIdentifier identifier = lookupService(serviceName);
     if (identifier == null) {
-      throw new RosRuntimeException("No such service: " + serviceName + " of type " + serviceType);
+      throw new ServiceNotFoundException("No such service " + serviceName + " of type "
+          + serviceType);
     }
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);

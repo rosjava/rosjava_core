@@ -17,19 +17,11 @@
 package org.ros.exception;
 
 /**
- * @author ethan.rublee@gmail.com (Ethan Rublee) 
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosRuntimeException extends RuntimeException {
+public class ServiceNotFoundException extends Exception {
 
-  public RosRuntimeException(final Exception exception) {
-    super(exception);
-  }
-
-  public RosRuntimeException(final String message, final Throwable throwable) {
-    super(message, throwable);
-  }
-
-  public RosRuntimeException(final String message) {
+  public ServiceNotFoundException(String message) {
     super(message);
   }
 

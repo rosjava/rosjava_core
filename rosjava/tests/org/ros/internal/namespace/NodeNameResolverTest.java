@@ -15,10 +15,8 @@
  */
 package org.ros.internal.namespace;
 
-import org.ros.namespace.GraphName;
-
 import org.ros.Ros;
-import org.ros.internal.namespace.NodeNameResolver;
+import org.ros.namespace.GraphName;
 
 import java.util.HashMap;
 import java.util.Map;

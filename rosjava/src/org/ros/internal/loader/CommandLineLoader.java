@@ -20,10 +20,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.ros.address.InetAddressFactory;
-
 import org.ros.Ros;
-import org.ros.exception.RosInitException;
+import org.ros.address.InetAddressFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
@@ -188,8 +186,6 @@ public class CommandLineLoader {
    * <li>The ROS_MASTER_URI environment variable.</li>
    * <li>The default master URI as defined in {@link NodeConfiguration}.</li>
    * </ol>
-   * 
-   * @throws RosInitException
    */
   private URI getMasterUri() {
     URI uri = NodeConfiguration.DEFAULT_MASTER_URI;
@@ -201,7 +197,7 @@ public class CommandLineLoader {
       }
       return uri;
     } catch (URISyntaxException e) {
-      throw new RuntimeException("Master URI \"" + uri + "\" is not a valid.");
+      throw new RuntimeException("Invalid master URI: " + uri);
     }
   }
 

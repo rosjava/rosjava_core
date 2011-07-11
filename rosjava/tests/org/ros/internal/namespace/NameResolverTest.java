@@ -15,13 +15,11 @@
  */
 package org.ros.internal.namespace;
 
-import org.ros.namespace.GraphName;
-import org.ros.namespace.NameResolver;
-
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.ros.Ros;
-import org.ros.exception.RosNameException;
+import org.ros.namespace.GraphName;
+import org.ros.namespace.NameResolver;
 
 import java.util.HashMap;
 
@@ -37,8 +35,8 @@ public class NameResolverTest extends TestCase {
 
     try {
       assertEquals("/node/foo", r.resolve("~foo"));
-      fail("should have thrown RosNameException");
-    } catch (RosNameException e) {
+      fail("should have thrown RuntimeException");
+    } catch (RuntimeException e) {
     }
 
     r = Ros.newNameResolver("/ns1");
@@ -85,7 +83,7 @@ public class NameResolverTest extends TestCase {
     try {
       assertEquals("/foo", r.resolve(root, "~foo"));
       fail("resolveName() with two args should never allow private names");
-    } catch (RosNameException e) {
+    } catch (RuntimeException e) {
     }
   }
 

@@ -16,7 +16,6 @@
 
 package org.ros;
 
-import org.ros.exception.RosInitException;
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
 import org.ros.node.Node;
@@ -34,7 +33,7 @@ public class SlaveApiTestNode implements NodeMain {
   private Node node;
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) throws RosInitException {
+  public void main(NodeConfiguration nodeConfiguration) {
     node = Ros.newNode("test_node", nodeConfiguration);
 
     // Basic chatter in/out test.

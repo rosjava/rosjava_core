@@ -18,12 +18,11 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.address.AdvertiseAddress;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
+import org.ros.address.AdvertiseAddress;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.internal.node.topic.Publisher;
 import org.ros.internal.transport.ConnectionHeader;

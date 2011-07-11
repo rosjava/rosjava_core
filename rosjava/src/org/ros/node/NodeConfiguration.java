@@ -16,10 +16,9 @@
 
 package org.ros.node;
 
+import org.ros.Ros;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
-
-import org.ros.Ros;
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.NameResolver;

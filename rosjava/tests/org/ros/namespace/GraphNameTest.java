@@ -17,8 +17,6 @@ package org.ros.namespace;
 
 import junit.framework.TestCase;
 import org.junit.Test;
-import org.ros.exception.RosNameException;
-import org.ros.namespace.GraphName;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
@@ -61,7 +59,7 @@ public class GraphNameTest extends TestCase {
       try {
         new GraphName("good" + i);
         fail("bad name not caught: " + i);
-      } catch (RosNameException e) {
+      } catch (RuntimeException e) {
       }
     }
     final String[] illegalNames = {"/~private", "5foo"};
@@ -69,7 +67,7 @@ public class GraphNameTest extends TestCase {
       try {
         new GraphName(i);
         fail("bad name not caught" + i);
-      } catch (RosNameException e) {
+      } catch (RuntimeException e) {
       }
     }
   }

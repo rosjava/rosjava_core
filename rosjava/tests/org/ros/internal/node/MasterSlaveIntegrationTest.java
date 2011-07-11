@@ -19,11 +19,10 @@ package org.ros.internal.node;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.ros.address.AdvertiseAddress;
-import org.ros.address.BindAddress;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.address.AdvertiseAddress;
+import org.ros.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.parameter.ParameterManager;
