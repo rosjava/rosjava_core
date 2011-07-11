@@ -16,12 +16,11 @@
 
 package org.ros.tutorials.pubsub;
 
-import org.ros.node.NodeConfiguration;
-
 import org.apache.commons.logging.Log;
 import org.ros.Ros;
 import org.ros.message.MessageListener;
 import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.Subscriber;
 

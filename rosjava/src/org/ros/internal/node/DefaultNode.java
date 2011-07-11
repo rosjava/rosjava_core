@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.Ros;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.exception.RemoteException;
 import org.ros.internal.message.new_style.MessageDefinition;
@@ -112,7 +111,7 @@ public class DefaultNode implements Node {
     GraphName basename;
     String nodeNameOverride = configuration.getNodeNameOverride();
     if (nodeNameOverride != null) {
-      basename = Ros.newGraphName(nodeNameOverride);
+      basename = new GraphName(nodeNameOverride);
     } else {
       basename = name;
     }
@@ -155,7 +154,7 @@ public class DefaultNode implements Node {
     String resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition =
-        TopicDefinition.create(Ros.newGraphName(resolvedTopicName), messageDefinition);
+        TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
     org.ros.message.MessageSerializer<MessageType> serializer =
         messageSerializationFactory.createSerializer(messageType);
     return publisherFactory.create(topicDefinition, serializer);
@@ -168,7 +167,7 @@ public class DefaultNode implements Node {
     String resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition =
-        TopicDefinition.create(Ros.newGraphName(resolvedTopicName), messageDefinition);
+        TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
     MessageDeserializer<MessageType> deserializer =
         (MessageDeserializer<MessageType>) messageSerializationFactory
             .createDeserializer(messageType);
@@ -184,7 +183,7 @@ public class DefaultNode implements Node {
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
     // TODO(damonkohler): It's rather non-obvious that the URI will be created
     // later on the fly.
-    ServiceIdentifier identifier = new ServiceIdentifier(Ros.newGraphName(serviceName), null);
+    ServiceIdentifier identifier = new ServiceIdentifier(new GraphName(serviceName), null);
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
@@ -220,7 +219,7 @@ public class DefaultNode implements Node {
 
   @Override
   public ServiceIdentifier lookupService(String serviceName) {
-    GraphName resolvedServiceName = Ros.newGraphName(resolveName(serviceName));
+    GraphName resolvedServiceName = new GraphName(resolveName(serviceName));
     Response<URI> response =
         masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
     if (response.getStatusCode() == StatusCode.SUCCESS) {

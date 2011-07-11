@@ -55,18 +55,17 @@ public class NameResolverTest extends TestCase {
     } catch (IllegalArgumentException e) {
     }
 
-    assertEquals(GraphName.ROOT, r.resolve(GraphName.ROOT, ""));
-    assertEquals(GraphName.ROOT, r.resolve(GraphName.ROOT, GraphName.ROOT));
-    assertEquals(GraphName.ROOT, r.resolve("/anything/bar", GraphName.ROOT));
-
+    String root = GraphName.newRoot().toString();
+    assertEquals(root, r.resolve(root, ""));
+    assertEquals(root, r.resolve(root, root));
+    assertEquals(root, r.resolve("/anything/bar", root));
     assertEquals("/ns1/node", r.resolve("/ns1/node", ""));
-    assertEquals(GraphName.ROOT, r.resolve(GraphName.ROOT, ""));
 
     // relative namespaces get resolved to default namespace
-    assertEquals("/foo", r.resolve("/", "foo"));
-    assertEquals("/foo", r.resolve("/", "foo/"));
-    assertEquals("/foo", r.resolve("/", "/foo"));
-    assertEquals("/foo", r.resolve("/", "/foo/"));
+    assertEquals("/foo", r.resolve(root, "foo"));
+    assertEquals("/foo", r.resolve(root, "foo/"));
+    assertEquals("/foo", r.resolve(root, "/foo"));
+    assertEquals("/foo", r.resolve(root, "/foo/"));
 
     assertEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2", "foo"));
     assertEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2", "foo/"));
@@ -75,13 +74,13 @@ public class NameResolverTest extends TestCase {
 
     assertEquals("/ns1/ns2/ns3/foo", r.resolve("/ns1/ns2/ns3", "foo"));
     assertEquals("/ns1/ns2/ns3/foo", r.resolve("/ns1/ns2/ns3/", "foo"));
-    assertEquals("/foo", r.resolve("/", "/foo/"));
+    assertEquals("/foo", r.resolve(root, "/foo/"));
 
     assertEquals("/ns1/ns2/foo/bar", r.resolve("/ns1/ns2", "foo/bar"));
     assertEquals("/ns1/ns2/ns3/foo/bar", r.resolve("/ns1/ns2/ns3", "foo/bar"));
 
     try {
-      assertEquals("/foo", r.resolve("/", "~foo"));
+      assertEquals("/foo", r.resolve(root, "~foo"));
       fail("resolveName() with two args should never allow private names");
     } catch (RosNameException e) {
     }
@@ -93,8 +92,8 @@ public class NameResolverTest extends TestCase {
   @Test
   public void testResolveNameRemapping() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
-    remappings.put(Ros.newGraphName("name"), Ros.newGraphName("/my/name"));
-    remappings.put(Ros.newGraphName("foo"), Ros.newGraphName("/my/foo"));
+    remappings.put(new GraphName("name"), new GraphName("/my/name"));
+    remappings.put(new GraphName("foo"), new GraphName("/my/foo"));
 
     NameResolver r = Ros.newNameResolver(remappings);
 

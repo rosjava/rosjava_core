@@ -18,9 +18,8 @@ package org.ros.internal.node;
 
 import static org.junit.Assert.assertEquals;
 
-import org.ros.Ros;
-
 import org.junit.Test;
+import org.ros.Ros;
 import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
 

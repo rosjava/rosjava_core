@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-import org.ros.Ros;
 import org.ros.internal.message.new_style.MessageDefinition;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
@@ -38,7 +37,7 @@ public class TopicDefinition {
 
   public static TopicDefinition createFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));
-    GraphName name = Ros.newGraphName(header.get(ConnectionHeaderFields.TOPIC));
+    GraphName name = new GraphName(header.get(ConnectionHeaderFields.TOPIC));
     return new TopicDefinition(new TopicIdentifier(name),
         MessageDefinition.createFromHeader(header));
   }

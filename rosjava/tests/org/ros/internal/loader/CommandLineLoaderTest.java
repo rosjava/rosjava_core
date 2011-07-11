@@ -25,10 +25,8 @@ import com.google.common.collect.Maps;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.Ros;
 import org.ros.exception.RosInitException;
 import org.ros.internal.namespace.DefaultNameResolver;
-import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
@@ -113,7 +111,7 @@ public class CommandLineLoaderTest {
     env.put(EnvironmentVariables.ROS_ROOT, defaultRosRoot.getAbsolutePath());
     loader = new CommandLineLoader(emptyArgv, env);
     NodeConfiguration nodeConfiguration = loader.createConfiguration();
-    assertEquals(new URI(DefaultNodeConfiguration.DEFAULT_MASTER_URI), nodeConfiguration.getMasterUri());
+    assertEquals(new URI(NodeConfiguration.DEFAULT_MASTER_URI), nodeConfiguration.getMasterUri());
 
     // Construct artificial environment. Set required environment variables.
     env = getDefaultEnv();
@@ -138,11 +136,11 @@ public class CommandLineLoaderTest {
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
     assertEquals("192.168.0.1", nodeConfiguration.getTcpRosAdvertiseAddress().getHost());
     assertEquals("192.168.0.1", nodeConfiguration.getXmlRpcAdvertiseAddress().getHost());
-    assertEquals(Ros.newGraphName("/foo/bar"), nodeConfiguration.getParentResolver().getNamespace());
+    assertEquals(new GraphName("/foo/bar"), nodeConfiguration.getParentResolver().getNamespace());
     Assert.assertEquals(rosPackagePathList, nodeConfiguration.getRosPackagePath());
 
     // Test ROS namespace resolution and canonicalization
-    GraphName canonical = Ros.newGraphName("/baz/bar");
+    GraphName canonical = new GraphName("/baz/bar");
     env = getDefaultEnv();
     env.put(EnvironmentVariables.ROS_NAMESPACE, "baz/bar");
     loader = new CommandLineLoader(emptyArgv, env);
@@ -179,7 +177,7 @@ public class CommandLineLoaderTest {
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
 
     // Test ROS namespace resolution and canonicalization
-    GraphName canonical = Ros.newGraphName("/baz/bar");
+    GraphName canonical = new GraphName("/baz/bar");
     env = getDefaultEnv();
     args = Lists.newArrayList("Foo", CommandLineVariables.ROS_NAMESPACE + ":=baz/bar");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();

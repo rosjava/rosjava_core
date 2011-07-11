@@ -25,8 +25,6 @@ import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.Ros;
-import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.namespace.GraphName;
 
@@ -50,7 +48,7 @@ public class ParameterServer {
   public ParameterServer() {
     tree = Maps.newConcurrentMap();
     subscribers = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, SlaveIdentifier>create());
-    masterName = Ros.newGraphName("/master");
+    masterName = new GraphName("/master");
   }
 
   public void subscribe(GraphName name, SlaveIdentifier slaveIdentifier) {
@@ -211,10 +209,10 @@ public class ParameterServer {
     for (String name : subtree.keySet()) {
       Object possibleSubtree = subtree.get(name);
       if (possibleSubtree instanceof Map) {
-        names.addAll(getSubtreeNames(parent.join(Ros.newGraphName(name)),
+        names.addAll(getSubtreeNames(parent.join(new GraphName(name)),
             (Map<String, Object>) possibleSubtree, names));
       } else {
-        names.add(parent.join(Ros.newGraphName(name)));
+        names.add(parent.join(new GraphName(name)));
       }
     }
     return names;
@@ -222,7 +220,7 @@ public class ParameterServer {
 
   public Collection<GraphName> getNames() {
     Set<GraphName> names = Sets.newHashSet();
-    return getSubtreeNames(DefaultGraphName.createRoot(), tree, names);
+    return getSubtreeNames(GraphName.newRoot(), tree, names);
   }
 
 }

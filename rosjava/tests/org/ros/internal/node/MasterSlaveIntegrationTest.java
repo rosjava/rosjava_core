@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.Ros;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
@@ -32,6 +31,7 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
+import org.ros.namespace.GraphName;
 
 import java.net.URI;
 
@@ -54,12 +54,12 @@ public class MasterSlaveIntegrationTest {
     ServiceManager serviceManager = new ServiceManager();
     ParameterManager parameterManager = new ParameterManager();
     slaveServer =
-        new SlaveServer(Ros.newGraphName("/foo"), BindAddress.createPublic(0),
+        new SlaveServer(new GraphName("/foo"), BindAddress.createPublic(0),
             AdvertiseAddress.createPublic(), BindAddress.createPublic(0),
             AdvertiseAddress.createPublic(), masterClient, topicManager, serviceManager,
             parameterManager);
     slaveServer.start();
-    slaveClient = new SlaveClient(Ros.newGraphName("/bar"), slaveServer.getUri());
+    slaveClient = new SlaveClient(new GraphName("/bar"), slaveServer.getUri());
   }
 
   @Test

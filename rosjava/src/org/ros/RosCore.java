@@ -16,11 +16,10 @@
 
 package org.ros;
 
-import org.ros.node.NodeConfiguration;
-
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 import java.net.URI;

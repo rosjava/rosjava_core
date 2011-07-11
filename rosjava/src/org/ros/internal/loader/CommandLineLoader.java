@@ -22,7 +22,6 @@ import com.google.common.collect.Maps;
 
 import org.ros.Ros;
 import org.ros.exception.RosInitException;
-import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.node.DefaultNodeConfiguration;
 import org.ros.internal.node.address.AdvertiseAddress;
 import org.ros.internal.node.address.InetAddressFactory;
@@ -136,7 +135,7 @@ public class CommandLineLoader {
       if (remapping.startsWith("__")) {
         specialRemappings.put(remap[0], remap[1]);
       } else {
-        remappings.put(Ros.newGraphName(remap[0]), Ros.newGraphName(remap[1]));
+        remappings.put(new GraphName(remap[0]), new GraphName(remap[1]));
       }
     }
   }
@@ -150,12 +149,12 @@ public class CommandLineLoader {
    * </ol>
    */
   private NameResolver buildParentResolver() {
-    GraphName namespace = DefaultGraphName.createRoot();
+    GraphName namespace = GraphName.newRoot();
     if (specialRemappings.containsKey(CommandLineVariables.ROS_NAMESPACE)) {
       namespace =
-          Ros.newGraphName(specialRemappings.get(CommandLineVariables.ROS_NAMESPACE)).toGlobal();
+          new GraphName(specialRemappings.get(CommandLineVariables.ROS_NAMESPACE)).toGlobal();
     } else if (environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
-      namespace = Ros.newGraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
+      namespace = new GraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
     }
     return Ros.newNameResolver(namespace, remappings);
   }
@@ -195,7 +194,7 @@ public class CommandLineLoader {
    * @throws RosInitException
    */
   private URI getMasterUri() {
-    String uri = DefaultNodeConfiguration.DEFAULT_MASTER_URI;
+    String uri = NodeConfiguration.DEFAULT_MASTER_URI;
     if (specialRemappings.containsKey(CommandLineVariables.ROS_MASTER_URI)) {
       uri = specialRemappings.get(CommandLineVariables.ROS_MASTER_URI);
     } else if (environment.containsKey(EnvironmentVariables.ROS_MASTER_URI)) {

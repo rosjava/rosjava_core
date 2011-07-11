@@ -16,16 +16,81 @@
 
 package org.ros.namespace;
 
+import com.google.common.base.Preconditions;
+
+import org.ros.exception.RosNameException;
+
 /**
  * ROS graph resource name.
  * 
  * @see "http://www.ros.org/wiki/Names"
  * 
- * @author damonkohler@google.com (Damon Kohler)
+ * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
-public interface GraphName {
+public class GraphName {
 
-  public final static String ROOT = "/";
+  private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
+  private static final String UNKNOWN_NAME = "/unknown";
+  private static final String ROOT = "/";
+
+  private final String name;
+
+  public static GraphName newUnknown() {
+    return new GraphName(UNKNOWN_NAME);
+  }
+
+  public static GraphName newRoot() {
+    return new GraphName(ROOT);
+  }
+
+  /**
+   * @param name
+   *          the {@link String} representation of this {@link GraphName}
+   */
+  public GraphName(String name) {
+    Preconditions.checkNotNull(name);
+    validate(name);
+    this.name = canonicalize(name);
+  }
+
+  /**
+   * Returns {@code true} if the supplied {@link String} can be used to
+   * construct a {@link GraphName}.
+   * 
+   * @param name
+   *          the {@link String} representation of a {@link GraphName} to
+   *          validate
+   * @return {@code true} if the supplied name is can be used to construct a
+   *         {@link GraphName}
+   */
+  public static boolean validate(String name) {
+    // Allow empty names.
+    if (name.length() > 0) {
+      if (!name.matches(VALID_ROS_NAME_PATTERN)) {
+        throw new RosNameException("Invalid unix name, may not contain special characters.");
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Convert name into canonical representation. Canonical representation has no
+   * trailing slashes. Canonical names can be global, private, or relative.
+   * 
+   * @param name
+   * @return the canonical name for this {@link GraphName}
+   */
+  public static String canonicalize(String name) {
+    Preconditions.checkArgument(validate(name));
+    // Trim trailing slashes for canonical representation.
+    while (!name.equals(GraphName.ROOT) && name.endsWith("/")) {
+      name = name.substring(0, name.length() - 1);
+    }
+    if (name.startsWith("~/")) {
+      name = "~" + name.substring(2);
+    }
+    return name;
+  }
 
   /**
    * This is a /global/name.
@@ -44,18 +109,24 @@ public interface GraphName {
    * 
    * @return If this name is a global name then return true.
    */
-  boolean isGlobal();
+  public boolean isGlobal() {
+    return name.startsWith(GraphName.ROOT);
+  }
 
   /**
    * Returns {@code true} if this {@link GraphName} represents the root
    * namespace.
    */
-  boolean isRoot();
+  public boolean isRoot() {
+    return name.equals(GraphName.ROOT);
+  }
 
   /**
    * Returns {@code true} if this {@link GraphName} is empty.
    */
-  boolean isEmpty();
+  public boolean isEmpty() {
+    return name.equals("");
+  }
 
   /**
    * Is this a ~private/name.
@@ -73,7 +144,9 @@ public interface GraphName {
    * 
    * @return true if the name is a private name.
    */
-  boolean isPrivate();
+  public boolean isPrivate() {
+    return name.startsWith("~");
+  }
 
   /**
    * Is this a relative/name.
@@ -89,18 +162,46 @@ public interface GraphName {
    * 
    * @return true if the name is a relative name.
    */
-  boolean isRelative();
+  public boolean isRelative() {
+    return !isPrivate() && !isGlobal();
+  }
 
   /**
    * @return Gets the parent of this name in canonical representation. This may
    *         return an empty name if there is no parent.
    */
-  GraphName getParent();
+  public GraphName getParent() {
+    if (name.length() == 0) {
+      return new GraphName("");
+    }
+    if (name.equals(GraphName.ROOT)) {
+      return new GraphName(GraphName.ROOT);
+    }
+    int slashIdx = name.lastIndexOf('/');
+    if (slashIdx > 1) {
+      return new GraphName(name.substring(0, slashIdx));
+    } else {
+      if (isGlobal()) {
+        return new GraphName(GraphName.ROOT);
+      } else {
+        return new GraphName("");
+      }
+    }
+  }
 
   /**
    * Returns a {@link GraphName} without the leading parent namespace.
    */
-  GraphName getBasename();
+  public GraphName getBasename() {
+    int slashIdx = name.lastIndexOf('/');
+    if (slashIdx > -1) {
+      if (slashIdx + 1 < name.length()) {
+        return new GraphName(name.substring(slashIdx + 1));
+      }
+      return new GraphName("");
+    }
+    return this;
+  }
 
   /**
    * Convert name to a relative name representation. This does not take any
@@ -109,7 +210,13 @@ public interface GraphName {
    * 
    * @return a relative {@link GraphName}
    */
-  GraphName toRelative();
+  public GraphName toRelative() {
+    if (isPrivate() || isGlobal()) {
+      return new GraphName(name.substring(1));
+    } else {
+      return this;
+    }
+  }
 
   /**
    * Convert name to a global name representation. This does not take any
@@ -117,7 +224,15 @@ public interface GraphName {
    * 
    * @return a string with the first
    */
-  GraphName toGlobal();
+  public GraphName toGlobal() {
+    if (isGlobal()) {
+      return this;
+    } else if (isPrivate()) {
+      return new GraphName(GraphName.ROOT + name.substring(1));
+    } else {
+      return new GraphName(GraphName.ROOT + name);
+    }
+  }
 
   /**
    * Join this {@link GraphName} with another.
@@ -128,6 +243,29 @@ public interface GraphName {
    * @return a {@link GraphName} representing the concatenation of this
    *         {@link GraphName} and {@code other}
    */
-  GraphName join(GraphName other);
+  public GraphName join(GraphName other) {
+    if (other.isGlobal() || isEmpty()) {
+      return other;
+    } else if (isRoot()) {
+      return other.toGlobal();
+    } else {
+      return new GraphName(toString() + "/" + other.toString());
+    }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return name.equals(obj.toString());
+  }
+
+  @Override
+  public int hashCode() {
+    return name.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return name;
+  }
 
 }

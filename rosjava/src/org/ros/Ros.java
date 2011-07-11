@@ -16,7 +16,6 @@
 
 package org.ros;
 
-import org.ros.internal.namespace.DefaultGraphName;
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.internal.node.DefaultNode;
 import org.ros.internal.node.DefaultNodeConfiguration;
@@ -98,15 +97,7 @@ public class Ros {
   }
 
   public static Node newNode(String name, NodeConfiguration configuration) {
-    return newNode(new DefaultGraphName(name), configuration);
-  }
-
-  public static GraphName newGraphName(String name) {
-    return new DefaultGraphName(name);
-  }
-
-  public static GraphName newRootGraphName() {
-    return DefaultGraphName.createRoot();
+    return newNode(new GraphName(name), configuration);
   }
 
   public static NameResolver newNameResolver(GraphName namespace,
@@ -116,7 +107,7 @@ public class Ros {
 
   public static NameResolver
       newNameResolver(String namespace, Map<GraphName, GraphName> remappings) {
-    return newNameResolver(newGraphName(namespace), remappings);
+    return newNameResolver(new GraphName(namespace), remappings);
   }
 
   public static NameResolver newNameResolver(GraphName namespace) {
@@ -124,15 +115,15 @@ public class Ros {
   }
 
   public static NameResolver newNameResolver(String namespace) {
-    return newNameResolver(newGraphName(namespace));
+    return newNameResolver(new GraphName(namespace));
   }
 
   public static NameResolver newNameResolver(Map<GraphName, GraphName> remappings) {
-    return newNameResolver(newRootGraphName(), remappings);
+    return newNameResolver(GraphName.newRoot(), remappings);
   }
 
   public static NameResolver newNameResolver() {
-    return newNameResolver(newRootGraphName());
+    return newNameResolver(GraphName.newRoot());
   }
 
 }

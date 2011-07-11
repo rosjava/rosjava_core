@@ -31,6 +31,7 @@ import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.RepeatingPublisher;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.message.MessageListener;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.Publisher;
 import org.ros.node.Subscriber;
@@ -106,7 +107,7 @@ public class TopicIntegrationTest {
 
     try {
       TopicDefinition topicDefinition =
-          TopicDefinition.create(Ros.newGraphName("/foo"),
+          TopicDefinition.create(new GraphName("/foo"),
               MessageDefinition.createFromTypeName("std_msgs/String"));
       subscriber.addPublisher(
           PublisherDefinition.createPublisherDefinition(

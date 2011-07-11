@@ -18,9 +18,9 @@ package org.ros.internal.node.response;
 
 import com.google.common.collect.Lists;
 
-import org.ros.Ros;
 import org.ros.internal.message.new_style.MessageDefinition;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.namespace.GraphName;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +37,7 @@ public class TopicDefinitionListResultFactory implements ResultFactory<List<Topi
     for (Object topic : topics) {
       String name = (String) ((Object[]) topic)[0];
       String type = (String) ((Object[]) topic)[1];
-      descriptions.add(TopicDefinition.create(Ros.newGraphName(name), MessageDefinition
+      descriptions.add(TopicDefinition.create(new GraphName(name), MessageDefinition
           .createFromTypeName(type)));
     }
     return descriptions;

@@ -18,10 +18,9 @@ package org.ros;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.loader.CommandLineLoader;
-
 import org.ros.exception.RosInitException;
 import org.ros.exception.RosNameException;
+import org.ros.internal.loader.CommandLineLoader;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 

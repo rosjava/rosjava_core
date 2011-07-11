@@ -18,7 +18,6 @@ package org.ros.internal.namespace;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.Ros;
 import org.ros.exception.RosNameException;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
@@ -65,7 +64,7 @@ public class DefaultNameResolver implements NameResolver {
 
   @Override
   public String resolve(String namespace, String name) {
-    return resolve(Ros.newGraphName(namespace), Ros.newGraphName(name)).toString();
+    return resolve(new GraphName(namespace), new GraphName(name)).toString();
   }
 
   @Override
@@ -75,7 +74,7 @@ public class DefaultNameResolver implements NameResolver {
 
   @Override
   public String resolve(String name) {
-    return resolve(getNamespace(), Ros.newGraphName(name)).toString();
+    return resolve(getNamespace(), new GraphName(name)).toString();
   }
 
   protected GraphName lookUpRemapping(GraphName name) {

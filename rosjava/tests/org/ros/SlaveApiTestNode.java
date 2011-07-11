@@ -16,12 +16,11 @@
 
 package org.ros;
 
-import org.ros.node.NodeConfiguration;
-
 import org.ros.exception.RosInitException;
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
 import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.Publisher;
 

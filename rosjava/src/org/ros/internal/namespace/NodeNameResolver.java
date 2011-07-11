@@ -16,7 +16,6 @@
 
 package org.ros.internal.namespace;
 
-import org.ros.Ros;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
@@ -61,7 +60,7 @@ public class NodeNameResolver extends DefaultNameResolver {
 
   @Override
   public String resolve(String name) {
-    return resolve(Ros.newGraphName(name)).toString();
+    return resolve(new GraphName(name)).toString();
   }
 
 }
