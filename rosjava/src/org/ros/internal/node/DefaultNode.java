@@ -44,6 +44,7 @@ import org.ros.internal.node.topic.SubscriberFactory;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
+import org.ros.internal.time.TimeProvider;
 import org.ros.internal.time.WallclockProvider;
 import org.ros.message.MessageListener;
 import org.ros.message.MessageSerializationFactory;
@@ -58,7 +59,6 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
-import org.ros.time.TimeProvider;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -105,7 +105,6 @@ public class DefaultNode implements Node {
     topicManager.setListener(masterRegistration);
     serviceManager.setListener(masterRegistration);
     publisherFactory = new PublisherFactory(topicManager);
-
     messageSerializationFactory = configuration.getMessageSerializationFactory();
 
     GraphName basename;
@@ -128,7 +127,6 @@ public class DefaultNode implements Node {
     serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager);
 
     // TODO(kwc): Implement simulated time.
-    // TODO(damonkohler): Move TimeProvider into NodeConfiguration.
     timeProvider = new WallclockProvider();
 
     // Log for /rosout.

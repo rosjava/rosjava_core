@@ -17,7 +17,6 @@
 package org.ros.internal.time;
 
 import org.ros.message.Time;
-import org.ros.time.TimeProvider;
 
 /**
  * Provides wallclock (actual) time.
