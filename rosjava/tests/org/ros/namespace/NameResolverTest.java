@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.namespace;
+package org.ros.namespace;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

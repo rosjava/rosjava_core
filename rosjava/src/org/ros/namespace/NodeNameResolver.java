@@ -14,10 +14,8 @@
  * the License.
  */
 
-package org.ros.internal.namespace;
+package org.ros.namespace;
 
-import org.ros.namespace.GraphName;
-import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
 
 /**
@@ -27,7 +25,7 @@ import org.ros.node.Node;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class NodeNameResolver extends DefaultNameResolver {
+public class NodeNameResolver extends NameResolver {
 
   private final GraphName privateNamespace;
 
