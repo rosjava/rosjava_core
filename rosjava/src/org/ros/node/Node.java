@@ -16,14 +16,6 @@
 
 package org.ros.node;
 
-import org.ros.node.service.ServiceClient;
-import org.ros.node.service.ServiceServer;
-
-import org.ros.node.parameter.ParameterTree;
-
-import org.ros.node.topic.Publisher;
-import org.ros.node.topic.Subscriber;
-
 import org.apache.commons.logging.Log;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.namespace.DefaultNameResolver;
@@ -36,6 +28,11 @@ import org.ros.message.MessageListener;
 import org.ros.message.Service;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
+import org.ros.node.parameter.ParameterTree;
+import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceServer;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 import java.net.InetSocketAddress;
 import java.net.URI;

@@ -13,21 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.internal.namespace;
 
-import org.ros.Ros;
+import org.ros.namespace.DefaultNameResolverFactory;
 import org.ros.namespace.GraphName;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author kwc@willowgarage.com (Ken Conley)
+ */
 public class NodeNameResolverTest extends NameResolverTest {
 
   @Override
   public void testResolveNameOneArg() {
     Map<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     GraphName nodeName = new GraphName("/node");
-    NodeNameResolver r = NodeNameResolver.create(Ros.newNameResolver(remappings), nodeName);
+    DefaultNameResolverFactory nameResolverFactory = new DefaultNameResolverFactory();
+    NodeNameResolver r =
+        new NodeNameResolver(nodeName, nameResolverFactory.newNameResolver(remappings));
 
     assertEquals("/foo", r.resolve("foo"));
     assertEquals("/foo", r.resolve("/foo"));
@@ -39,14 +45,14 @@ public class NodeNameResolverTest extends NameResolverTest {
     assertEquals("/node/foo", r.resolve("~/foo"));
 
     nodeName = new GraphName("/ns1/node");
-    r = NodeNameResolver.create(Ros.newNameResolver(remappings), nodeName);
+    r = new NodeNameResolver(nodeName, nameResolverFactory.newNameResolver(remappings));
     assertEquals("/ns1/node/foo", r.resolve("~foo"));
     assertEquals("/ns1/node/foo", r.resolve("~/foo"));
     assertEquals("/ns1/node/foo/bar", r.resolve("~/foo/bar"));
 
     // Test case where private name is not is same namespace as default
     nodeName = new GraphName("/ns2/node");
-    r = NodeNameResolver.create(Ros.newNameResolver("/ns1", remappings), nodeName);
+    r = new NodeNameResolver(nodeName, nameResolverFactory.newNameResolver("/ns1", remappings));
 
     assertEquals("/ns1/foo", r.resolve("foo"));
     assertEquals("/foo", r.resolve("/foo"));

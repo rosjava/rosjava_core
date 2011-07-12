@@ -20,8 +20,6 @@ import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
 
-import java.util.Map;
-
 /**
  * Resolver for {@link Node} names. Node namespace must handle the ~name syntax
  * for private names.
@@ -33,15 +31,9 @@ public class NodeNameResolver extends DefaultNameResolver {
 
   private final GraphName privateNamespace;
 
-  public static NodeNameResolver create(NameResolver defaultResolver, GraphName nodeName) {
-    return new NodeNameResolver(defaultResolver.getNamespace(), nodeName,
-        defaultResolver.getRemappings());
-  }
-
-  private NodeNameResolver(GraphName defaultNamespace, GraphName privateNamespace,
-      Map<GraphName, GraphName> remappings) {
-    super(defaultNamespace, remappings);
-    this.privateNamespace = privateNamespace;
+  public NodeNameResolver(GraphName nodeName, NameResolver defaultResolver) {
+    super(defaultResolver.getNamespace(), defaultResolver.getRemappings());
+    this.privateNamespace = nodeName;
   }
 
   /**

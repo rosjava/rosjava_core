@@ -16,18 +16,27 @@
 package org.ros.internal.namespace;
 
 import junit.framework.TestCase;
+import org.junit.Before;
 import org.junit.Test;
-import org.ros.Ros;
+import org.ros.namespace.DefaultNameResolverFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
+import org.ros.namespace.NameResolverFactory;
 
 import java.util.HashMap;
 
 public class NameResolverTest extends TestCase {
 
+  private NameResolverFactory nameResolverFactory;
+
+  @Before
+  public void setup() {
+    nameResolverFactory = new DefaultNameResolverFactory();
+  }
+
   @Test
   public void testResolveNameOneArg() {
-    NameResolver r = Ros.newNameResolver();
+    NameResolver r = nameResolverFactory.newNameResolver();
 
     assertEquals("/foo", r.resolve("foo"));
     assertEquals("/foo", r.resolve("/foo"));
@@ -39,7 +48,7 @@ public class NameResolverTest extends TestCase {
     } catch (RuntimeException e) {
     }
 
-    r = Ros.newNameResolver("/ns1");
+    r = nameResolverFactory.newNameResolver("/ns1");
 
     assertEquals("/ns1/foo", r.resolve("foo"));
     assertEquals("/foo", r.resolve("/foo"));
@@ -49,7 +58,7 @@ public class NameResolverTest extends TestCase {
   @Test
   public void testResolveNameTwoArg() {
     // These tests are based on test_roslib_names.py.
-    NameResolver r = Ros.newNameResolver();
+    NameResolver r = nameResolverFactory.newNameResolver();
     try {
       r.resolve("foo", "bar");
       fail("should have raised");
@@ -96,7 +105,7 @@ public class NameResolverTest extends TestCase {
     remappings.put(new GraphName("name"), new GraphName("/my/name"));
     remappings.put(new GraphName("foo"), new GraphName("/my/foo"));
 
-    NameResolver r = Ros.newNameResolver(remappings);
+    NameResolver r = nameResolverFactory.newNameResolver(remappings);
 
     String n = r.resolve("name");
     assertTrue(n.equals("/my/name"));

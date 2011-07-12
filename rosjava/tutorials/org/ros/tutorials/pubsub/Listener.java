@@ -16,17 +16,13 @@
 
 package org.ros.tutorials.pubsub;
 
-import org.ros.namespace.GraphName;
-import org.ros.node.DefaultNodeFactory;
-
-import org.ros.node.topic.Subscriber;
-
 import org.apache.commons.logging.Log;
-import org.ros.Ros;
 import org.ros.message.MessageListener;
+import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
+import org.ros.node.topic.Subscriber;
 
 /**
  * This is a simple rosjava {@link Subscriber} {@link Node}. It assumes an

@@ -19,18 +19,9 @@ package org.ros.internal.node;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
-import org.ros.node.service.ServiceClient;
-import org.ros.node.service.ServiceServer;
-
-import org.ros.node.parameter.ParameterTree;
-
-import org.ros.node.topic.Publisher;
-import org.ros.node.topic.Subscriber;
-
-import org.ros.exception.RemoteException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.new_style.MessageDefinition;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
@@ -62,6 +53,11 @@ import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.parameter.ParameterTree;
+import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceServer;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 import org.ros.time.TimeProvider;
 
 import java.net.InetSocketAddress;
@@ -122,7 +118,7 @@ public class DefaultNode implements Node {
 
     NameResolver parentResolver = configuration.getParentResolver();
     nodeName = parentResolver.getNamespace().join(basename);
-    resolver = NodeNameResolver.create(parentResolver, nodeName);
+    resolver = new NodeNameResolver(nodeName, parentResolver);
     slaveServer =
         new SlaveServer(nodeName, configuration.getTcpRosBindAddress(),
             configuration.getTcpRosAdvertiseAddress(), configuration.getXmlRpcBindAddress(),

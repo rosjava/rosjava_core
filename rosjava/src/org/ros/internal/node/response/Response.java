@@ -20,7 +20,6 @@ import com.google.common.collect.Lists;
 
 import org.ros.exception.RemoteException;
 
-
 import java.util.List;
 
 /**

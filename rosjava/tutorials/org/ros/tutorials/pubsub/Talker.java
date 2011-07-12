@@ -18,15 +18,11 @@ package org.ros.tutorials.pubsub;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.namespace.GraphName;
 import org.ros.node.DefaultNodeFactory;
-
-import org.ros.node.topic.Publisher;
-
-import org.ros.Ros;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
+import org.ros.node.topic.Publisher;
 
 /**
  * This is a simple rosjava {@link Publisher} {@link Node}. It assumes an

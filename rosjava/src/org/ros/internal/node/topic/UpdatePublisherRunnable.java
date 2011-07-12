@@ -16,10 +16,9 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.exception.RemoteException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.exception.RemoteException;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.SlaveIdentifier;

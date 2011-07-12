@@ -1,10 +1,6 @@
 package org.ros.actionlib.example;
 
-import org.ros.Ros;
-
 import org.ros.node.NodeConfiguration;
-
-
 import org.ros.node.NodeRunner;
 
 /**

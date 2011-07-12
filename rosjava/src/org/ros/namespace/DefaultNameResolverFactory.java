@@ -14,11 +14,9 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.namespace;
 
 import org.ros.internal.namespace.DefaultNameResolver;
-import org.ros.namespace.GraphName;
-import org.ros.namespace.NameResolver;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,35 +24,35 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Ros {
+public class DefaultNameResolverFactory implements NameResolverFactory {
 
-  private Ros() {
-    // Utility class
-  }
-
-  public static NameResolver newNameResolver(GraphName namespace,
-      Map<GraphName, GraphName> remappings) {
+  @Override
+  public NameResolver newNameResolver(GraphName namespace, Map<GraphName, GraphName> remappings) {
     return new DefaultNameResolver(namespace, remappings);
   }
 
-  public static NameResolver
-      newNameResolver(String namespace, Map<GraphName, GraphName> remappings) {
+  @Override
+  public NameResolver newNameResolver(String namespace, Map<GraphName, GraphName> remappings) {
     return newNameResolver(new GraphName(namespace), remappings);
   }
 
-  public static NameResolver newNameResolver(GraphName namespace) {
+  @Override
+  public NameResolver newNameResolver(GraphName namespace) {
     return newNameResolver(namespace, new HashMap<GraphName, GraphName>());
   }
 
-  public static NameResolver newNameResolver(String namespace) {
+  @Override
+  public NameResolver newNameResolver(String namespace) {
     return newNameResolver(new GraphName(namespace));
   }
 
-  public static NameResolver newNameResolver(Map<GraphName, GraphName> remappings) {
+  @Override
+  public NameResolver newNameResolver(Map<GraphName, GraphName> remappings) {
     return newNameResolver(GraphName.newRoot(), remappings);
   }
 
-  public static NameResolver newNameResolver() {
+  @Override
+  public NameResolver newNameResolver() {
     return newNameResolver(GraphName.newRoot());
   }
 
