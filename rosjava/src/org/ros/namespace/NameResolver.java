@@ -16,8 +16,6 @@
 
 package org.ros.namespace;
 
-import org.ros.internal.namespace.DefaultNameResolver;
-
 import java.util.Map;
 
 /**
@@ -54,12 +52,12 @@ public interface NameResolver {
   Map<GraphName, GraphName> getRemappings();
 
   /**
-   * Construct a new {@link DefaultNameResolver} with the same remappings as this
+   * Construct a new {@link NameResolver} with the same remappings as this
    * resolver has. The namespace of the new resolver will be the value of the
    * name parameter resolved in this namespace.
    * 
    * @param name
-   * @return {@link DefaultNameResolver} relative to the current namespace.
+   * @return {@link NameResolver} relative to the current namespace.
    */
   NameResolver createResolver(GraphName name);
 
