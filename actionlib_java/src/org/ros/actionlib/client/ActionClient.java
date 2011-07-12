@@ -1,23 +1,20 @@
 package org.ros.actionlib.client;
 
-import org.ros.node.topic.Publisher;
-import org.ros.node.topic.Subscriber;
-
-import org.ros.node.NodeConfiguration;
-
-import org.ros.Ros;
-
 import org.ros.actionlib.ActionSpec;
 import org.ros.exception.RosException;
-import org.ros.internal.node.DefaultNode;
 import org.ros.message.Duration;
 import org.ros.message.Message;
 import org.ros.message.MessageListener;
 import org.ros.message.Time;
 import org.ros.message.actionlib_msgs.GoalID;
 import org.ros.message.actionlib_msgs.GoalStatusArray;
+import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeFactory;
 import org.ros.node.NodeMain;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 /**
  * An ActionClient is the client interface of the actionlib package. It provides
@@ -176,10 +173,11 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
 
   @Override
   public void main(NodeConfiguration configuration) throws Exception {
+    NodeFactory nodeFactory = new DefaultNodeFactory();
     if (parent != null)
-      initClient(Ros.newNode(parent.resolveName(nodeName), configuration));
+      initClient(nodeFactory.newNode(parent.resolveName(nodeName), configuration));
     else
-      initClient(Ros.newNode(nodeName, configuration));
+      initClient(nodeFactory.newNode(nodeName, configuration));
   }
 
   /**

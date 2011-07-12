@@ -24,15 +24,11 @@ import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 
-import org.ros.node.topic.Publisher;
-import org.ros.node.topic.Subscriber;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.Ros;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
-import org.ros.internal.loader.CommandLineLoader;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
@@ -41,15 +37,17 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
 import org.ros.namespace.GraphName;
+import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeFactory;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -58,26 +56,26 @@ import java.util.concurrent.TimeUnit;
 public class DefaultNodeTest {
 
   private MasterServer masterServer;
-  private URI masterUri;
-  private NodeConfiguration nodeConfiguration;
+  private NodeConfiguration privateNodeConfiguration;
+  private NodeFactory nodeFactory;
+
+  void checkHostName(String hostName) {
+    assertTrue(!hostName.equals("0.0.0.0"));
+    assertTrue(!hostName.equals("0:0:0:0:0:0:0:0"));
+  }
 
   @Before
   public void setUp() {
-    masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+    masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
-    masterUri = masterServer.getUri();
+    URI masterUri = masterServer.getUri();
     checkHostName(masterUri.getHost());
-    // Make sure that none of the publicly reported addresses are bind
-    // addresses.
-    Map<String, String> env = new HashMap<String, String>();
-    env.put("ROS_MASTER_URI", masterUri.toString());
-    CommandLineLoader loader = new CommandLineLoader(Lists.<String>newArrayList("Foo"), env);
-    nodeConfiguration = loader.createConfiguration();
+    privateNodeConfiguration = NodeConfiguration.newPrivate(masterUri);
+    nodeFactory = new DefaultNodeFactory();
   }
 
   public void testFailIfStartedWhileRunning() throws UnknownHostException {
-    String host = InetAddress.getLocalHost().getCanonicalHostName();
-    Node node = Ros.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+    Node node = nodeFactory.newNode("/node_name", privateNodeConfiguration);
     try {
       ((DefaultNode) node).start();
       fail();
@@ -88,8 +86,7 @@ public class DefaultNodeTest {
 
   @Test
   public void testFailIfStoppedWhileNotRunning() throws UnknownHostException {
-    String host = InetAddress.getLocalHost().getCanonicalHostName();
-    Node node = Ros.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+    Node node = nodeFactory.newNode("/node_name", privateNodeConfiguration);
     node.shutdown();
     try {
       node.shutdown();
@@ -103,7 +100,8 @@ public class DefaultNodeTest {
   public void testCreatePublic() throws Exception {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     assertFalse(InetAddresses.isInetAddress(host));
-    Node node = Ros.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+    Node node =
+        nodeFactory.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -113,7 +111,8 @@ public class DefaultNodeTest {
   @Test
   public void testCreatePublicWithIpv4() throws Exception {
     String host = "1.2.3.4";
-    Node node = Ros.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+    Node node =
+        nodeFactory.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -123,7 +122,8 @@ public class DefaultNodeTest {
   @Test
   public void testCreatePublicWithIpv6() throws Exception {
     String host = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
-    Node node = Ros.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+    Node node =
+        nodeFactory.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -132,7 +132,8 @@ public class DefaultNodeTest {
 
   @Test
   public void testCreatePrivate() {
-    Node node = Ros.newNode("/node_name", NodeConfiguration.newPrivate(masterServer.getUri()));
+    Node node =
+        nodeFactory.newNode("/node_name", NodeConfiguration.newPrivate(masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertTrue(nodeAddress.getAddress().isLoopbackAddress());
@@ -141,7 +142,7 @@ public class DefaultNodeTest {
 
   @Test
   public void testPubSubRegistration() throws InterruptedException {
-    Node node = Ros.newNode("/node_name", NodeConfiguration.newPrivate(masterServer.getUri()));
+    Node node = nodeFactory.newNode("/node_name", privateNodeConfiguration);
 
     Publisher<org.ros.message.std_msgs.String> publisher =
         node.newPublisher("/foo", "std_msgs/String");
@@ -162,8 +163,8 @@ public class DefaultNodeTest {
 
   @Test
   public void testResolveName() {
-    nodeConfiguration.setParentResolver(Ros.newNameResolver("/ns1"));
-    Node node = Ros.newNode("test_resolver", nodeConfiguration);
+    privateNodeConfiguration.setParentResolver(Ros.newNameResolver("/ns1"));
+    Node node = nodeFactory.newNode("test_resolver", privateNodeConfiguration);
 
     assertEquals("/foo", node.resolveName("/foo"));
     assertEquals("/ns1/foo", node.resolveName("foo"));
@@ -190,36 +191,28 @@ public class DefaultNodeTest {
     assertEquals("/ns1/test_resolver/sub", sub.getTopicName());
   }
 
-  void checkHostName(String hostName) {
-    assertTrue(!hostName.equals("0.0.0.0"));
-    assertTrue(!hostName.equals("0:0:0:0:0:0:0:0"));
-  }
-
   @Test
-  public void testPublicAddresses() {
+  public void testPublicAddresses() throws InterruptedException {
     MasterServer master =
-        new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+        new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     master.start();
     URI masterUri = master.getUri();
     checkHostName(masterUri.getHost());
 
-    // Make sure that none of the publicly reported addresses are bind
-    // addresses.
-    Map<String, String> env = new HashMap<String, String>();
-    env.put("ROS_MASTER_URI", masterUri.toString());
-    CommandLineLoader loader = new CommandLineLoader(Lists.<String>newArrayList("Foo"), env);
-    NodeConfiguration nodeConfiguration = loader.createConfiguration();
+    NodeConfiguration nodeConfiguration =
+        NodeConfiguration.newPublic(masterUri.getHost(), masterUri);
+    Node node = nodeFactory.newNode("test_addresses", nodeConfiguration);
 
-    Node node = Ros.newNode("test_addresses", nodeConfiguration);
-    node.newPublisher("test_addresses_pub", "std_msgs/Int64");
+    URI nodeUri = node.getUri();
+    assertTrue(nodeUri.getPort() > 0);
+    checkHostName(nodeUri.getHost());
 
-    URI uri = node.getUri();
-    int port = uri.getPort();
-    assertTrue(port > 0);
-    checkHostName(uri.getHost());
+    Publisher<org.ros.message.std_msgs.Int64> publisher =
+        node.newPublisher("test_addresses_pub", "std_msgs/Int64");
+    assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
 
     // Check the TCPROS server address via the XML-RPC API.
-    SlaveClient slaveClient = new SlaveClient(new GraphName("test_addresses"), uri);
+    SlaveClient slaveClient = new SlaveClient(new GraphName("test_addresses"), nodeUri);
     Response<ProtocolDescription> response =
         slaveClient.requestTopic("test_addresses_pub", Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();

@@ -1,11 +1,5 @@
 package org.ros.actionlib.server;
 
-import org.ros.node.parameter.ParameterTree;
-
-import org.ros.node.topic.Publisher;
-import org.ros.node.topic.Subscriber;
-
-import org.ros.Ros;
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.util.GoalIDGenerator;
 import org.ros.exception.RosException;
@@ -16,9 +10,14 @@ import org.ros.message.Time;
 import org.ros.message.actionlib_msgs.GoalID;
 import org.ros.message.actionlib_msgs.GoalStatus;
 import org.ros.message.actionlib_msgs.GoalStatusArray;
+import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeFactory;
 import org.ros.node.NodeMain;
+import org.ros.node.parameter.ParameterTree;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,10 +124,12 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
 
   @Override
   public void main(NodeConfiguration configuration) throws Exception {
-    if (parent != null)
-      node = Ros.newNode(parent.resolveName(name), configuration);
-    else
-      node = Ros.newNode(name, configuration);
+    NodeFactory nodeFactory = new DefaultNodeFactory();
+    if (parent != null) {
+      node = nodeFactory.newNode(parent.resolveName(name), configuration);
+    } else {
+      node = nodeFactory.newNode(name, configuration);
+    }
 
     idGenerator = new GoalIDGenerator(node);
 

@@ -55,7 +55,7 @@ public class InetAddressFactory {
     return inetAddresses;
   }
 
-  public static InetAddress createNonLoopback() {
+  public static InetAddress newNonLoopback() {
     for (InetAddress address : getAllInetAddresses()) {
       // IPv4 only for now.
       if (!address.isLoopbackAddress() && isIpv4(address)) {
@@ -97,7 +97,7 @@ public class InetAddressFactory {
    * @return an {@link InetAddress} with both an IP and a host set (no further
    *         resolving will take place)
    */
-  public static InetAddress createFromHostString(String host) {
+  public static InetAddress newFromHostString(String host) {
     try {
       if (InetAddresses.isInetAddress(host)) {
         return InetAddress.getByAddress(host, InetAddresses.forString(host).getAddress());
@@ -125,8 +125,8 @@ public class InetAddressFactory {
     throw new RuntimeException();
   }
 
-  public static InetAddress createLoopback() {
-    return createFromHostString(Address.LOOPBACK);
+  public static InetAddress newLoopback() {
+    return newFromHostString(Address.LOOPBACK);
   }
 
 }

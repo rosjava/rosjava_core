@@ -52,7 +52,8 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Subscriber<MessageType> extends Topic implements org.ros.node.topic.Subscriber<MessageType> {
+public class Subscriber<MessageType> extends Topic implements
+    org.ros.node.topic.Subscriber<MessageType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Subscriber.class);
@@ -67,7 +68,7 @@ public class Subscriber<MessageType> extends Topic implements org.ros.node.topic
   private final SlaveIdentifier slaveIdentifier;
   private final ChannelGroup channelGroup;
   private final Collection<ClientBootstrap> bootstraps;
-  
+
   private final class MessageReadingThread extends Thread {
     @Override
     public void run() {
@@ -177,8 +178,8 @@ public class Subscriber<MessageType> extends Topic implements org.ros.node.topic
    * Updates the list of {@link Publisher}s for the topic that this
    * {@link Subscriber} is interested in.
    * 
-   * @param publishers {@link List} of {@link Publisher}s for the subscribed
-   *        topic
+   * @param publishers
+   *          {@link List} of {@link Publisher}s for the subscribed topic
    */
   public synchronized void updatePublishers(Collection<PublisherDefinition> publishers) {
     // Find new connections.
@@ -210,6 +211,11 @@ public class Subscriber<MessageType> extends Topic implements org.ros.node.topic
    */
   public ImmutableMap<String, String> getHeader() {
     return header;
+  }
+
+  @Override
+  public String toString() {
+    return "Subscriber<" + getTopicDefinition() + ">";
   }
 
 }

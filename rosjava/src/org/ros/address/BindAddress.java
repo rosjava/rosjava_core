@@ -38,8 +38,12 @@ public class BindAddress {
    * @return a {@link BindAddress} instance with specified port that will bind
    *         to all network interfaces on the host
    */
-  public static BindAddress createPublic(int port) {
+  public static BindAddress newPublic(int port) {
     return new BindAddress(new InetSocketAddress(port));
+  }
+
+  public static BindAddress newPublic() {
+    return newPublic(0);
   }
 
   /**
@@ -47,8 +51,12 @@ public class BindAddress {
    * @return a {@link BindAddress} instance with specified port that will bind
    *         to the loopback interface on the host
    */
-  public static BindAddress createPrivate(int port) {
-    return new BindAddress(new InetSocketAddress(InetAddressFactory.createLoopback(), port));
+  public static BindAddress newPrivate(int port) {
+    return new BindAddress(new InetSocketAddress(InetAddressFactory.newLoopback(), port));
+  }
+
+  public static BindAddress newPrivate() {
+    return newPrivate(0);
   }
 
   @Override

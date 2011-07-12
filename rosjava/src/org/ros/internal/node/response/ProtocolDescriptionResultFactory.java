@@ -25,7 +25,6 @@ import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -38,13 +37,7 @@ public class ProtocolDescriptionResultFactory implements ResultFactory<ProtocolD
     Preconditions.checkState(protocolParameters.size() == 3);
     Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
     AdvertiseAddress address = new AdvertiseAddress((String) protocolParameters.get(1));
-    final int port = (Integer) protocolParameters.get(2);
-    address.setPortCallable(new Callable<Integer>() {
-      @Override
-      public Integer call() throws Exception {
-        return port;
-      }
-    });
+    address.setStaticPort((Integer) protocolParameters.get(2));
     return new TcpRosProtocolDescription(address);
   }
 

@@ -47,16 +47,16 @@ public class MasterSlaveIntegrationTest {
 
   @Before
   public void setUp() {
-    masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+    masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
     TopicManager topicManager = new TopicManager();
     ServiceManager serviceManager = new ServiceManager();
     ParameterManager parameterManager = new ParameterManager();
     slaveServer =
-        new SlaveServer(new GraphName("/foo"), BindAddress.createPublic(0),
-            AdvertiseAddress.createPublic(), BindAddress.createPublic(0),
-            AdvertiseAddress.createPublic(), masterClient, topicManager, serviceManager,
+        new SlaveServer(new GraphName("/foo"), BindAddress.newPublic(),
+            AdvertiseAddress.newPublic(), BindAddress.newPublic(),
+            AdvertiseAddress.newPublic(), masterClient, topicManager, serviceManager,
             parameterManager);
     slaveServer.start();
     slaveClient = new SlaveClient(new GraphName("/bar"), slaveServer.getUri());

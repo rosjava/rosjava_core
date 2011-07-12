@@ -63,7 +63,8 @@ public class TopicManager {
   }
 
   public void putPublisher(Publisher<?> publisher) {
-    publishers.put(publisher.getTopicGraphName(), publisher);
+    GraphName topicGraphName = publisher.getTopicGraphName();
+    publishers.put(topicGraphName, publisher);
     if (listener != null) {
       listener.publisherAdded(publisher);
     }

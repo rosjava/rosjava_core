@@ -20,10 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.ros.node.service.ServiceClient;
-import org.ros.node.service.ServiceResponseListener;
-import org.ros.node.service.ServiceServer;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -31,8 +27,13 @@ import org.ros.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
+import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeFactory;
+import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceResponseListener;
+import org.ros.node.service.ServiceServer;
 import org.ros.service.test_ros.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
@@ -47,19 +48,20 @@ public class ServiceIntegrationTest {
   private static final String SERVICE_TYPE = "test_ros/AddTwoInts";
 
   private MasterServer masterServer;
-  private NodeConfiguration configuration;
+  private NodeConfiguration nodeConfiguration;
+  private NodeFactory nodeFactory;
 
   @Before
   public void setUp() {
-    masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+    masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
-    configuration = NodeConfiguration.newPrivate();
-    configuration.setMasterUri(masterServer.getUri());
+    nodeConfiguration = NodeConfiguration.newPrivate(masterServer.getUri());
+    nodeFactory = new DefaultNodeFactory();
   }
 
   @Test
   public void PesistentServiceConnectionTest() throws Exception {
-    Node serverNode = Ros.newNode("/server", configuration);
+    Node serverNode = nodeFactory.newNode("/server", nodeConfiguration);
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -72,7 +74,7 @@ public class ServiceIntegrationTest {
             });
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
-    Node clientNode = Ros.newNode("/client", configuration);
+    Node clientNode = nodeFactory.newNode("/client", nodeConfiguration);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.newServiceClient(SERVICE_NAME, SERVICE_TYPE);
 
@@ -102,17 +104,18 @@ public class ServiceIntegrationTest {
   @Test
   public void RequestFailureTest() throws Exception {
     final String errorMessage = "Error!";
-    Node serverNode = Ros.newNode("/server", configuration);
-    ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server = serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
-        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
-          @Override
-          public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
-            throw new ServiceException(errorMessage);
-          }
-        });
+    Node serverNode = nodeFactory.newNode("/server", nodeConfiguration);
+    ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
+        serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
+            new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
+              @Override
+              public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
+                throw new ServiceException(errorMessage);
+              }
+            });
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
-    Node clientNode = Ros.newNode("/client", configuration);
+    Node clientNode = nodeFactory.newNode("/client", nodeConfiguration);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.newServiceClient(SERVICE_NAME, SERVICE_TYPE);
 

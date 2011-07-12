@@ -51,7 +51,7 @@ public class MasterRegistrationTest {
 
   @Before
   public void setup() {
-    masterServer = new MasterServer(BindAddress.createPrivate(0), AdvertiseAddress.createPrivate());
+    masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
     masterRegistration = new MasterRegistration(masterClient);
@@ -59,9 +59,9 @@ public class MasterRegistrationTest {
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
     slaveServer =
-        new SlaveServer(new GraphName("/node"), BindAddress.createPrivate(0),
-            AdvertiseAddress.createPrivate(), BindAddress.createPrivate(0),
-            AdvertiseAddress.createPrivate(), masterClient, topicManager, serviceManager,
+        new SlaveServer(new GraphName("/node"), BindAddress.newPrivate(),
+            AdvertiseAddress.newPrivate(), BindAddress.newPrivate(),
+            AdvertiseAddress.newPrivate(), masterClient, topicManager, serviceManager,
             parameterManager);
     slaveServer.start();
     masterRegistration.start(slaveServer.toSlaveIdentifier());
@@ -87,8 +87,8 @@ public class MasterRegistrationTest {
     masterRegistration.publisherAdded(publisher);
     // Restart the MasterServer on the same port (hopefully still available).
     masterServer =
-        new MasterServer(BindAddress.createPrivate(masterServer.getAdvertiseAddress().getPort()),
-            AdvertiseAddress.createPrivate());
+        new MasterServer(BindAddress.newPrivate(masterServer.getAdvertiseAddress().getPort()),
+            AdvertiseAddress.newPrivate());
     masterServer.start();
     assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
   }

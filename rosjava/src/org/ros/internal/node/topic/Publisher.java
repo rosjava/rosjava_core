@@ -37,21 +37,22 @@ import java.util.Map;
  * 
  * @param <MessageType>
  */
-public class Publisher<MessageType> extends Topic implements org.ros.node.topic.Publisher<MessageType> {
+public class Publisher<MessageType> extends Topic implements
+    org.ros.node.topic.Publisher<MessageType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Publisher.class);
 
   private final List<SubscriberDefinition> subscribers;
   private final OutgoingMessageQueue<MessageType> out;
-  
+
   public Publisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer) {
     super(topicDefinition);
     subscribers = Lists.newArrayList();
     out = new OutgoingMessageQueue<MessageType>(serializer);
     out.start();
   }
-  
+
   @Override
   public void setLatchMode(boolean enabled) {
     out.setLatchMode(enabled);
@@ -65,15 +66,15 @@ public class Publisher<MessageType> extends Topic implements org.ros.node.topic.
   public PublisherDefinition toPublisherIdentifier(SlaveIdentifier description) {
     return PublisherDefinition.createPublisherDefinition(description, getTopicDefinition());
   }
-  
+
   @Override
   public boolean hasSubscribers() {
-	  return !subscribers.isEmpty();
+    return !subscribers.isEmpty();
   }
-  
+
   @Override
   public int getNumberOfSubscribers() {
-	  return subscribers.size();
+    return subscribers.size();
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
@@ -114,7 +115,7 @@ public class Publisher<MessageType> extends Topic implements org.ros.node.topic.
     }
     out.addChannel(channel);
   }
-  
+
   @Override
   public String toString() {
     return "Publisher<" + getTopicDefinition() + ">";

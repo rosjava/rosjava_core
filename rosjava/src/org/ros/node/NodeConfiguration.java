@@ -18,7 +18,10 @@ package org.ros.node;
 
 import org.ros.Ros;
 import org.ros.address.AdvertiseAddress;
+import org.ros.address.AdvertiseAddressFactory;
 import org.ros.address.BindAddress;
+import org.ros.address.PrivateAdvertiseAddressFactory;
+import org.ros.address.PublicAdvertiseAddressFactory;
 import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.NameResolver;
@@ -55,17 +58,18 @@ public class NodeConfiguration {
   private String nodeNameOverride;
   private MessageSerializationFactory messageSerializationFactory;
   private BindAddress tcpRosBindAddress;
-  private AdvertiseAddress tcpRosAdvertiseAddress;
+  private AdvertiseAddressFactory tcpRosAdvertiseAddressFactory;
   private BindAddress xmlRpcBindAddress;
-  private AdvertiseAddress xmlRpcAdvertiseAddress;
+  private AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory;
 
   public static NodeConfiguration newPublic(String advertiseHostname, URI masterUri) {
     NodeConfiguration configuration = new NodeConfiguration();
-    // OS picks an available port.
-    configuration.setXmlRpcBindAddress(BindAddress.createPublic(0));
-    configuration.setXmlRpcAdvertiseAddress(new AdvertiseAddress(advertiseHostname));
-    configuration.setTcpRosBindAddress(BindAddress.createPublic(0));
-    configuration.setTcpRosAdvertiseAddress(new AdvertiseAddress(advertiseHostname));
+    configuration.setXmlRpcBindAddress(BindAddress.newPublic());
+    configuration.setXmlRpcAdvertiseAddressFactory(new PublicAdvertiseAddressFactory(
+        advertiseHostname));
+    configuration.setTcpRosBindAddress(BindAddress.newPublic());
+    configuration.setTcpRosAdvertiseAddressFactory(new PublicAdvertiseAddressFactory(
+        advertiseHostname));
     configuration.setMasterUri(masterUri);
     return configuration;
   }
@@ -76,11 +80,10 @@ public class NodeConfiguration {
 
   public static NodeConfiguration newPrivate(URI masterUri) {
     NodeConfiguration configuration = new NodeConfiguration();
-    // OS picks an available port.
-    configuration.setXmlRpcBindAddress(BindAddress.createPrivate(0));
-    configuration.setXmlRpcAdvertiseAddress(AdvertiseAddress.createPrivate());
-    configuration.setTcpRosBindAddress(BindAddress.createPrivate(0));
-    configuration.setTcpRosAdvertiseAddress(AdvertiseAddress.createPrivate());
+    configuration.setXmlRpcBindAddress(BindAddress.newPrivate());
+    configuration.setXmlRpcAdvertiseAddressFactory(new PrivateAdvertiseAddressFactory());
+    configuration.setTcpRosBindAddress(BindAddress.newPrivate());
+    configuration.setTcpRosAdvertiseAddressFactory(new PrivateAdvertiseAddressFactory());
     configuration.setMasterUri(masterUri);
     return configuration;
   }
@@ -158,12 +161,17 @@ public class NodeConfiguration {
     this.tcpRosBindAddress = tcpRosBindAddress;
   }
 
-  public AdvertiseAddress getTcpRosAdvertiseAddress() {
-    return tcpRosAdvertiseAddress;
+  public AdvertiseAddressFactory getTcpRosAdvertiseAddressFactory() {
+    return tcpRosAdvertiseAddressFactory;
   }
 
-  public void setTcpRosAdvertiseAddress(AdvertiseAddress tcpRosAdvertiseAddress) {
-    this.tcpRosAdvertiseAddress = tcpRosAdvertiseAddress;
+  public void
+      setTcpRosAdvertiseAddressFactory(AdvertiseAddressFactory tcpRosAdvertiseAddressFactory) {
+    this.tcpRosAdvertiseAddressFactory = tcpRosAdvertiseAddressFactory;
+  }
+
+  public AdvertiseAddress getTcpRosAdvertiseAddress() {
+    return tcpRosAdvertiseAddressFactory.create();
   }
 
   public BindAddress getXmlRpcBindAddress() {
@@ -175,11 +183,16 @@ public class NodeConfiguration {
   }
 
   public AdvertiseAddress getXmlRpcAdvertiseAddress() {
-    return xmlRpcAdvertiseAddress;
+    return xmlRpcAdvertiseAddressFactory.create();
   }
 
-  public void setXmlRpcAdvertiseAddress(AdvertiseAddress xmlRpcAdvertiseAddress) {
-    this.xmlRpcAdvertiseAddress = xmlRpcAdvertiseAddress;
+  public AdvertiseAddressFactory getXmlRpcAdvertiseAddressFactory() {
+    return xmlRpcAdvertiseAddressFactory;
+  }
+
+  public void
+      setXmlRpcAdvertiseAddressFactory(AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory) {
+    this.xmlRpcAdvertiseAddressFactory = xmlRpcAdvertiseAddressFactory;
   }
 
 }

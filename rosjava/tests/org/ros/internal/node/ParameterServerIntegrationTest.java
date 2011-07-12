@@ -23,18 +23,18 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.ros.node.parameter.ParameterListener;
-import org.ros.node.parameter.ParameterTree;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.Ros;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeFactory;
+import org.ros.node.parameter.ParameterListener;
+import org.ros.node.parameter.ParameterTree;
 
 import java.util.List;
 import java.util.Map;
@@ -49,12 +49,16 @@ public class ParameterServerIntegrationTest {
   private MasterServer masterServer;
   private Node node;
   private ParameterTree parameters;
+  private NodeFactory nodeFactory;
+  private NodeConfiguration nodeConfiguration;
 
   @Before
   public void setup() {
-    masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+    masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
-    node = Ros.newNode("/node_name", NodeConfiguration.newPrivate(masterServer.getUri()));
+    nodeFactory = new DefaultNodeFactory();
+    nodeConfiguration = NodeConfiguration.newPrivate(masterServer.getUri());
+    node = nodeFactory.newNode("/node_name", nodeConfiguration);
     parameters = node.newParameterTree();
   }
 
@@ -115,10 +119,8 @@ public class ParameterServerIntegrationTest {
 
   @Test
   public void testParameterPubSub() throws InterruptedException {
-    Node subscriberNode =
-        Ros.newNode("/subscriber", NodeConfiguration.newPrivate(masterServer.getUri()));
-    Node publisherNode =
-        Ros.newNode("/publisher", NodeConfiguration.newPrivate(masterServer.getUri()));
+    Node subscriberNode = nodeFactory.newNode("/subscriber", nodeConfiguration);
+    Node publisherNode = nodeFactory.newNode("/publisher", nodeConfiguration);
 
     ParameterTree subscriberParameters = subscriberNode.newParameterTree();
     final CountDownLatch latch = new CountDownLatch(1);

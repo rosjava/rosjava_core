@@ -20,9 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.ros.node.topic.Publisher;
-import org.ros.node.topic.Subscriber;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -35,11 +32,14 @@ import org.ros.internal.node.topic.RepeatingPublisher;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
+import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeFactory;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -49,18 +49,20 @@ import java.util.concurrent.TimeUnit;
 public class TopicIntegrationTest {
 
   private MasterServer masterServer;
-  private URI masterUri;
+  private NodeFactory nodeFactory;
+  private NodeConfiguration nodeConfiguration;
 
   @Before
   public void setUp() {
-    masterServer = new MasterServer(BindAddress.createPublic(0), AdvertiseAddress.createPublic());
+    masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
-    masterUri = masterServer.getUri();
+    nodeConfiguration = NodeConfiguration.newPrivate(masterServer.getUri());
+    nodeFactory = new DefaultNodeFactory();
   }
 
   @Test
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
-    Node publisherNode = Ros.newNode("/publisher", NodeConfiguration.newPrivate(masterUri));
+    Node publisherNode = nodeFactory.newNode("/publisher", nodeConfiguration);
     Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.newPublisher("/foo", "std_msgs/String");
 
@@ -68,7 +70,7 @@ public class TopicIntegrationTest {
     helloMessage.data = "Hello, ROS!";
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
-    Node subscriberNode = Ros.newNode("/subscriber", NodeConfiguration.newPrivate(masterUri));
+    Node subscriberNode = nodeFactory.newNode("/subscriber", nodeConfiguration);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         subscriberNode.newSubscriber("/foo", "std_msgs/String",
             new MessageListener<org.ros.message.std_msgs.String>() {
@@ -78,14 +80,6 @@ public class TopicIntegrationTest {
                 messageReceived.countDown();
               }
             });
-
-    subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
-      @Override
-      public void onNewMessage(org.ros.message.std_msgs.String message) {
-        assertEquals(helloMessage, message);
-        messageReceived.countDown();
-      }
-    });
 
     assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
     assertTrue(subscriber.awaitRegistration(1, TimeUnit.SECONDS));
@@ -102,7 +96,7 @@ public class TopicIntegrationTest {
 
   @Test
   public void testAddDisconnectedPublisher() {
-    Node subscriberNode = Ros.newNode("/subscriber", NodeConfiguration.newPrivate(masterUri));
+    Node subscriberNode = nodeFactory.newNode("/subscriber", nodeConfiguration);
     org.ros.internal.node.topic.Subscriber<org.ros.message.std_msgs.String> subscriber =
         (org.ros.internal.node.topic.Subscriber<org.ros.message.std_msgs.String>) subscriberNode
             .<org.ros.message.std_msgs.String>newSubscriber("/foo", "std_msgs/String", null);

@@ -32,14 +32,14 @@ public class AddressTest {
 
   @Test
   public void testLocalhost() {
-    InetAddress localhost = InetAddressFactory.createFromHostString(Address.LOCALHOST);
+    InetAddress localhost = InetAddressFactory.newFromHostString(Address.LOCALHOST);
     assertEquals(Address.LOCALHOST, localhost.getHostName());
     assertTrue(localhost.isLoopbackAddress());
   }
 
   @Test
   public void testLoopback() {
-    InetAddress loopback = InetAddressFactory.createFromHostString(Address.LOOPBACK);
+    InetAddress loopback = InetAddressFactory.newFromHostString(Address.LOOPBACK);
     assertEquals(Address.LOOPBACK, loopback.getHostName());
     assertTrue(loopback.isLoopbackAddress());
   }
@@ -49,7 +49,7 @@ public class AddressTest {
   // getAllInetAddressesByName() method.
   public void testPublicHost() throws UnknownHostException {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
-    InetAddress publicHost = InetAddressFactory.createFromHostString(host);
+    InetAddress publicHost = InetAddressFactory.newFromHostString(host);
     assertEquals(host, publicHost.getHostName());
     assertFalse(publicHost.isLoopbackAddress());
   }
@@ -57,7 +57,7 @@ public class AddressTest {
   @Test
   public void testPublicIpv4() {
     String host = "1.2.3.4";
-    InetAddress publicHost = InetAddressFactory.createFromHostString(host);
+    InetAddress publicHost = InetAddressFactory.newFromHostString(host);
     assertEquals(host, publicHost.getHostName());
     assertFalse(publicHost.isLoopbackAddress());
   }

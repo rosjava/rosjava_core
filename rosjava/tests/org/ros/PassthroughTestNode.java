@@ -16,12 +16,12 @@
 
 package org.ros;
 
-import org.ros.node.topic.Publisher;
-
 import org.ros.message.MessageListener;
+import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
+import org.ros.node.topic.Publisher;
 
 /**
  * This node is used in rostest end-to-end integration tests with other client
@@ -35,7 +35,7 @@ public class PassthroughTestNode implements NodeMain {
 
   @Override
   public void main(NodeConfiguration nodeConfiguration) {
-    node = Ros.newNode("test_node", nodeConfiguration);
+    node = new DefaultNodeFactory().newNode("test_node", nodeConfiguration);
 
     // The goal of the passthrough node is simply to retransmit the messages
     // sent to it. This allows us to external verify that the node is compatible

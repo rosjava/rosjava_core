@@ -166,7 +166,7 @@ public class CommandLineLoader {
    * </ol>
    */
   private String getHost() {
-    String host = InetAddressFactory.createLoopback().getHostName();
+    String host = InetAddressFactory.newLoopback().getHostName();
     if (specialRemappings.containsKey(CommandLineVariables.ROS_IP)) {
       host = specialRemappings.get(CommandLineVariables.ROS_IP);
     } else if (environment.containsKey(EnvironmentVariables.ROS_IP)) {

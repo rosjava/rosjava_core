@@ -70,7 +70,7 @@ public class SlaveImplTest {
   @Test
   public void testRequestTopic() throws ServerException {
     SlaveServer mockSlave = mock(SlaveServer.class);
-    AdvertiseAddress address = AdvertiseAddress.createPrivate();
+    AdvertiseAddress address = AdvertiseAddress.newPrivate();
     address.setStaticPort(1234);
     TcpRosProtocolDescription protocol = new TcpRosProtocolDescription(address);
     when(
@@ -87,7 +87,7 @@ public class SlaveImplTest {
   @Test
   public void testGetPid() {
     SlaveServer mockSlave = mock(SlaveServer.class);
-    AdvertiseAddress address = AdvertiseAddress.createPrivate();
+    AdvertiseAddress address = AdvertiseAddress.newPrivate();
     address.setStaticPort(1234);
     when(mockSlave.getPid()).thenReturn(1234);
     SlaveImpl slave = new SlaveImpl(mockSlave);
@@ -99,7 +99,7 @@ public class SlaveImplTest {
   @Test
   public void testGetPidNotSupported() {
     SlaveServer mockSlave = mock(SlaveServer.class);
-    AdvertiseAddress address = AdvertiseAddress.createPrivate();
+    AdvertiseAddress address = AdvertiseAddress.newPrivate();
     address.setStaticPort(1234);
     when(mockSlave.getPid()).thenThrow(new UnsupportedOperationException());
     SlaveImpl slave = new SlaveImpl(mockSlave);

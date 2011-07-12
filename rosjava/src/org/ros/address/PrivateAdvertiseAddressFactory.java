@@ -14,17 +14,16 @@
  * the License.
  */
 
-package org.ros.node;
-
-import org.ros.namespace.GraphName;
+package org.ros.address;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface NodeFactory {
+public class PrivateAdvertiseAddressFactory implements AdvertiseAddressFactory {
 
-  Node newNode(String name, NodeConfiguration configuration);
-
-  Node newNode(GraphName name, NodeConfiguration configuration);
+  @Override
+  public AdvertiseAddress create() {
+    return new AdvertiseAddress(Address.LOOPBACK);
+  }
 
 }

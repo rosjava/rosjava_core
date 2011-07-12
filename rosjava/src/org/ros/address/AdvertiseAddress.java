@@ -21,7 +21,6 @@ import com.google.common.base.Preconditions;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.concurrent.Callable;
 
 /**
@@ -41,8 +40,8 @@ public class AdvertiseAddress {
 
   private Callable<Integer> portCallable;
 
-  public static AdvertiseAddress createPrivate() {
-    return new AdvertiseAddress(Address.LOOPBACK);
+  public static AdvertiseAddress newPrivate() {
+    return new PrivateAdvertiseAddressFactory().create();
   }
 
   /**
@@ -52,12 +51,8 @@ public class AdvertiseAddress {
    * @return a suitable {@link AdvertiseAddress} for a publicly accessible
    *         {@link BindAddress}
    */
-  public static AdvertiseAddress createPublic() {
-    try {
-      return new AdvertiseAddress(InetAddress.getLocalHost().getCanonicalHostName());
-    } catch (UnknownHostException e) {
-      throw new RuntimeException(e);
-    }
+  public static AdvertiseAddress newPublic() {
+    return new PublicAdvertiseAddressFactory().create();
   }
 
   public AdvertiseAddress(String host) {
@@ -91,7 +86,7 @@ public class AdvertiseAddress {
   }
 
   public InetAddress toInetAddress() {
-    return InetAddressFactory.createFromHostString(host);
+    return InetAddressFactory.newFromHostString(host);
   }
 
   public InetSocketAddress toInetSocketAddress() {

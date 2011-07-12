@@ -17,12 +17,8 @@
 package org.ros;
 
 import org.ros.internal.namespace.DefaultNameResolver;
-import org.ros.internal.node.DefaultNode;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,37 +28,8 @@ import java.util.Map;
  */
 public class Ros {
 
-  private static NodeFactory nodeFactory;
-
-  private static final class DefaultNodeFactory implements NodeFactory {
-    @Override
-    public Node newNode(GraphName name, NodeConfiguration configuration) {
-      return new DefaultNode(name, configuration);
-    }
-  }
-
-  static {
-    setNodeFactory(new DefaultNodeFactory());
-  }
-
   private Ros() {
     // Utility class
-  }
-
-  public static NodeFactory getNodeFactory() {
-    return nodeFactory;
-  }
-
-  public static void setNodeFactory(NodeFactory nodeFactory) {
-    Ros.nodeFactory = nodeFactory;
-  }
-
-  public static Node newNode(GraphName name, NodeConfiguration configuration) {
-    return nodeFactory.newNode(name, configuration);
-  }
-
-  public static Node newNode(String name, NodeConfiguration configuration) {
-    return nodeFactory.newNode(new GraphName(name), configuration);
   }
 
   public static NameResolver newNameResolver(GraphName namespace,

@@ -16,15 +16,22 @@
 
 package org.ros.node;
 
+import org.ros.internal.node.DefaultNode;
 import org.ros.namespace.GraphName;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface NodeFactory {
+public class DefaultNodeFactory implements NodeFactory {
 
-  Node newNode(String name, NodeConfiguration configuration);
+  @Override
+  public Node newNode(GraphName name, NodeConfiguration configuration) {
+    return new DefaultNode(name, configuration);
+  }
 
-  Node newNode(GraphName name, NodeConfiguration configuration);
+  @Override
+  public Node newNode(String name, NodeConfiguration configuration) {
+    return newNode(new GraphName(name), configuration);
+  }
 
 }

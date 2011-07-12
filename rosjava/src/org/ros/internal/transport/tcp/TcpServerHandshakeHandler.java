@@ -43,7 +43,7 @@ import java.util.Map;
  * @author kwc@willowgarage.com (Ken Conley)
  */
 public class TcpServerHandshakeHandler extends SimpleChannelHandler {
-  
+
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
 
@@ -76,9 +76,11 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
         pipeline.replace(this, "ServiceRequestHandler", serviceServer.createRequestHandler());
       }
     } else {
-      Preconditions.checkState(incomingHeader.containsKey(ConnectionHeaderFields.TOPIC));
+      Preconditions.checkState(incomingHeader.containsKey(ConnectionHeaderFields.TOPIC),
+          "Handshake header missing field: " + ConnectionHeaderFields.TOPIC);
       String topicName = incomingHeader.get(ConnectionHeaderFields.TOPIC);
-      Preconditions.checkState(topicManager.hasPublisher(topicName));
+      Preconditions.checkState(topicManager.hasPublisher(topicName), "No publisher for topic: "
+          + topicName);
       Publisher<?> publisher = topicManager.getPublisher(topicName);
       ChannelBuffer outgoingBuffer = publisher.finishHandshake(incomingHeader);
       Channel channel = ctx.getChannel();
@@ -87,12 +89,12 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
         throw new RuntimeException(future.getCause());
       }
       publisher.addChannel(channel);
-      
+
       // Once the handshake is complete, there will be nothing incoming on the
       // channel. Replace the handshake handler with a handler which will
       // drop everything.
       pipeline.replace(this, "DiscardHandler", new SimpleChannelHandler());
     }
   }
-  
+
 }

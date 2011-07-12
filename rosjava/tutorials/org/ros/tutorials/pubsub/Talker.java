@@ -18,6 +18,9 @@ package org.ros.tutorials.pubsub;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.namespace.GraphName;
+import org.ros.node.DefaultNodeFactory;
+
 import org.ros.node.topic.Publisher;
 
 import org.ros.Ros;
@@ -41,7 +44,7 @@ public class Talker implements NodeMain {
     Preconditions.checkState(node == null);
     Preconditions.checkNotNull(configuration);
     try {
-      node = Ros.newNode("talker", configuration);
+      node = new DefaultNodeFactory().newNode("talker", configuration);
       Publisher<org.ros.message.std_msgs.String> publisher =
           node.newPublisher("chatter", "std_msgs/String");
       int seq = 0;
