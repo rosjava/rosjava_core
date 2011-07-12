@@ -21,9 +21,7 @@ import org.ros.address.AdvertiseAddressFactory;
 import org.ros.address.BindAddress;
 import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.address.PublicAdvertiseAddressFactory;
-import org.ros.internal.namespace.DefaultNameResolver;
 import org.ros.message.MessageSerializationFactory;
-import org.ros.namespace.DefaultNameResolverFactory;
 import org.ros.namespace.NameResolver;
 
 import java.io.File;
@@ -94,7 +92,7 @@ public class NodeConfiguration {
 
   private NodeConfiguration() {
     setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
-    setParentResolver(new DefaultNameResolverFactory().newNameResolver());
+    setParentResolver(NameResolver.create());
   }
 
   /**

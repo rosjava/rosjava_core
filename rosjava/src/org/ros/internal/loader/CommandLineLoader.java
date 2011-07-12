@@ -21,7 +21,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.ros.address.InetAddressFactory;
-import org.ros.namespace.DefaultNameResolverFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
@@ -152,7 +151,7 @@ public class CommandLineLoader {
     } else if (environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
       namespace = new GraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
     }
-    return new DefaultNameResolverFactory().newNameResolver(namespace, remappings);
+    return new NameResolver(namespace, remappings);
   }
 
   /**

@@ -18,8 +18,6 @@ package org.ros.node;
 
 import org.apache.commons.logging.Log;
 import org.ros.exception.ServiceNotFoundException;
-import org.ros.internal.namespace.DefaultNameResolver;
-import org.ros.internal.namespace.NodeNameResolver;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
@@ -28,6 +26,7 @@ import org.ros.message.MessageListener;
 import org.ros.message.Service;
 import org.ros.message.Time;
 import org.ros.namespace.NameResolver;
+import org.ros.namespace.NodeNameResolver;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;

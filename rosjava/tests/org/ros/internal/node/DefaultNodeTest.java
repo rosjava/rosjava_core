@@ -35,8 +35,8 @@ import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
-import org.ros.namespace.DefaultNameResolverFactory;
 import org.ros.namespace.GraphName;
+import org.ros.namespace.NameResolver;
 import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
@@ -163,7 +163,7 @@ public class DefaultNodeTest {
 
   @Test
   public void testResolveName() {
-    privateNodeConfiguration.setParentResolver(new DefaultNameResolverFactory().newNameResolver("/ns1"));
+    privateNodeConfiguration.setParentResolver(NameResolver.create("/ns1"));
     Node node = nodeFactory.newNode("test_resolver", privateNodeConfiguration);
 
     assertEquals("/foo", node.resolveName("/foo"));

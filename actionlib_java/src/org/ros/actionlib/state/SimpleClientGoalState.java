@@ -131,7 +131,7 @@ public class SimpleClientGoalState {
       if (o instanceof SimpleClientGoalState)
         return this.state.equals(((SimpleClientGoalState) o).getState());
       if (o instanceof StateEnum) {
-        return this.state.equals((StateEnum) o);
+        return this.state.equals(o);
       }
     }
     return false;

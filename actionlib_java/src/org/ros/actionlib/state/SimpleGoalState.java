@@ -67,7 +67,7 @@ public class SimpleGoalState {
       if (o instanceof SimpleGoalState)
         return this.state.equals(((SimpleGoalState) o).getState());
       if (o instanceof StateEnum) {
-        return this.state.equals((StateEnum) o);
+        return this.state.equals(o);
       }
     }
     return false;
