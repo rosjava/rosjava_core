@@ -16,6 +16,9 @@
 
 package org.ros.internal.namespace;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 import org.ros.namespace.DefaultNameResolverFactory;
 import org.ros.namespace.GraphName;
 
@@ -25,9 +28,9 @@ import java.util.Map;
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class NodeNameResolverTest extends NameResolverTest {
+public class NodeNameResolverTest {
 
-  @Override
+  @Test
   public void testResolveNameOneArg() {
     Map<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
     GraphName nodeName = new GraphName("/node");

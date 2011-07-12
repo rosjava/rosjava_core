@@ -13,9 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.ros.internal.namespace;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.namespace.DefaultNameResolverFactory;
@@ -25,7 +29,10 @@ import org.ros.namespace.NameResolverFactory;
 
 import java.util.HashMap;
 
-public class NameResolverTest extends TestCase {
+/**
+ * @author kwc@willowgarage.com (Ken Conley)
+ */
+public class NameResolverTest {
 
   private NameResolverFactory nameResolverFactory;
 
