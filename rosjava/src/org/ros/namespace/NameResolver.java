@@ -18,6 +18,8 @@ package org.ros.namespace;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.RosRuntimeException;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,9 +85,9 @@ public class NameResolver {
       return remappedNamespace.join(remappedName);
     }
     if (remappedName.isPrivate()) {
-      throw new RuntimeException("Cannot resolve ~private names in arbitrary namespaces.");
+      throw new RosRuntimeException("Cannot resolve ~private names in arbitrary namespaces.");
     }
-    throw new RuntimeException("Unable to resolve graph name: " + name);
+    throw new RosRuntimeException("Unable to resolve graph name: " + name);
   }
 
   public String resolve(String namespace, String name) {

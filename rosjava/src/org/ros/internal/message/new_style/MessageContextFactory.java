@@ -18,6 +18,8 @@ package org.ros.internal.message.new_style;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.RosRuntimeException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -47,7 +49,7 @@ public class MessageContextFactory {
         line = reader.readLine();
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     return context;
   }
@@ -73,7 +75,7 @@ public class MessageContextFactory {
     }
     if (value != null) {
       if (array) {
-        throw new RuntimeException();
+        throw new UnsupportedOperationException();
       } else {
         Preconditions.checkState(fieldType instanceof PrimitiveFieldType);
         context.addConstantField(name, fieldType, fieldType.parseFromString(value));

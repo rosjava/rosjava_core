@@ -18,6 +18,7 @@ package org.ros.internal.node.xmlrpc;
 
 import com.google.common.collect.Lists;
 
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -105,7 +106,7 @@ public class MasterImpl implements Master, ParameterServer {
     try {
       serviceIdentifier = new ServiceIdentifier(new GraphName(serviceName), new URI(serviceApi));
     } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     master.registerService(serviceIdentifier);
     return Response.createSuccess("Success", 0).toList();
@@ -117,7 +118,7 @@ public class MasterImpl implements Master, ParameterServer {
     try {
       serviceIdentifier = new ServiceIdentifier(new GraphName(serviceName), new URI(serviceApi));
     } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     int result = master.unregisterService(serviceIdentifier);
     return Response.createSuccess("Success", result).toList();

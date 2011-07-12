@@ -18,6 +18,7 @@ package org.ros.internal.message.old_style;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.new_style.MessageDefinition;
 import org.ros.message.Message;
 
@@ -38,7 +39,7 @@ public class MessageDefinitionFactory {
               "org.ros.message." + messageType.replace('/', '.'));
       message = messageClass.newInstance();
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     return MessageDefinition.create(message.getDataType(), message.getMessageDefinition(),
         message.getMD5Sum());

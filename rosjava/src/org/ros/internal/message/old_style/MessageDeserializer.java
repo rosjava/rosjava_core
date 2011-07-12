@@ -18,6 +18,7 @@ package org.ros.internal.message.old_style;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.RosRuntimeException;
 import org.ros.message.Message;
 
 import java.nio.ByteBuffer;
@@ -40,7 +41,7 @@ public class MessageDeserializer<MessageType> implements org.ros.message.Message
     try {
       message = messageClass.newInstance();
     } catch (Exception e) {
-      throw new RuntimeException();
+      throw new RosRuntimeException(e);
     }
     ((Message) message).deserialize(buffer);
     return message;

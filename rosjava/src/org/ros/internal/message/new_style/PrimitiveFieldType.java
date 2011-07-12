@@ -347,7 +347,7 @@ enum PrimitiveFieldType implements FieldType {
   STRING {
     @Override
     public int getSerializedSize() {
-      throw new RuntimeException();
+      throw new UnsupportedOperationException();
     }
 
     @Override

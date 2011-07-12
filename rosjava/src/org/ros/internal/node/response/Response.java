@@ -19,6 +19,7 @@ package org.ros.internal.node.response;
 import com.google.common.collect.Lists;
 
 import org.ros.exception.RemoteException;
+import org.ros.exception.RosRuntimeException;
 
 import java.util.List;
 
@@ -74,13 +75,13 @@ public class Response<ResultType> {
       }
 
     } catch (ClassCastException e) {
-      throw new RuntimeException("Remote side did not return correct type (status code/message).",
-          e);
+      throw new RosRuntimeException(
+          "Remote side did not return correct type (status code/message).", e);
     }
     try {
       return new Response<ResultType>(statusCode, message, resultFactory.create(response.get(2)));
     } catch (ClassCastException e) {
-      throw new RuntimeException("Remote side did not return correct value type.", e);
+      throw new RosRuntimeException("Remote side did not return correct value type.", e);
     }
   }
 
@@ -112,13 +113,13 @@ public class Response<ResultType> {
         throw new RemoteException(statusCode, message);
       }
     } catch (ClassCastException e) {
-      throw new RuntimeException("Remote side did not return correct type (status code/message).",
-          e);
+      throw new RosRuntimeException(
+          "Remote side did not return correct type (status code/message).", e);
     }
     try {
       return new Response<ResultType>(statusCode, message, resultFactory.create(response.get(2)));
     } catch (ClassCastException e) {
-      throw new RuntimeException("Remote side did not return correct value type.", e);
+      throw new RosRuntimeException("Remote side did not return correct value type.", e);
     }
   }
 

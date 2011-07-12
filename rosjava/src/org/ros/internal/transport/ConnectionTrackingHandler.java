@@ -23,6 +23,7 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
+import org.ros.exception.RosRuntimeException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -59,7 +60,7 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
       log.info("Channel exception: " + e.getChannel().toString());
     }
     e.getChannel().close();
-    throw new RuntimeException(e.getCause());
+    throw new RosRuntimeException(e.getCause());
   }
   
 }

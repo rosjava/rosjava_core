@@ -19,6 +19,8 @@ package org.ros.internal.message.new_style;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
+import org.ros.exception.RosRuntimeException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -78,7 +80,7 @@ public class ServiceFactory {
         line = reader.readLine();
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     requestDefinitions.put(serviceName, request.toString());
     responseDefinitions.put(serviceName, response.toString());

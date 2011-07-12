@@ -18,6 +18,8 @@ package org.ros.address;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.RosRuntimeException;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -77,7 +79,7 @@ public class AdvertiseAddress {
     try {
       return portCallable.call();
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
   }
 
@@ -95,7 +97,7 @@ public class AdvertiseAddress {
       InetAddress address = toInetAddress();
       return new InetSocketAddress(address, portCallable.call());
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
   }
 
@@ -104,7 +106,7 @@ public class AdvertiseAddress {
     try {
       return new URI(scheme, null, host, portCallable.call(), null, null, null);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
   }
 
@@ -118,7 +120,7 @@ public class AdvertiseAddress {
     try {
       return "AdvertiseAddress<" + host + ", " + portCallable.call() + ">";
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
   }
 
@@ -131,7 +133,7 @@ public class AdvertiseAddress {
     try {
       result = prime * result + portCallable.call();
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     return result;
   }
@@ -155,7 +157,7 @@ public class AdvertiseAddress {
       if (portCallable.call() != other.portCallable.call())
         return false;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     return true;
   }

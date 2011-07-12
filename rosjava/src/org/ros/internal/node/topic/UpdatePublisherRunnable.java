@@ -55,8 +55,9 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
     SlaveClient slaveClient;
     try {
       slaveClient = new SlaveClient(slaveIdentifier.getName(), publisherDefinition.getUri());
-      Response<ProtocolDescription> response = slaveClient.requestTopic(this.subscriber
-          .getTopicGraphName().toString(), ProtocolNames.SUPPORTED);
+      Response<ProtocolDescription> response =
+          slaveClient.requestTopic(this.subscriber.getTopicGraphName().toString(),
+              ProtocolNames.SUPPORTED);
       // TODO(kwc): all of this logic really belongs in a protocol handler
       // registry.
       ProtocolDescription selected = response.getResult();
@@ -69,7 +70,7 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
       // TODO(damonkohler): Retry logic is needed at the XML-RPC layer.
       log.error(e);
     } catch (XmlRpcTimeoutException e) {
-      // TODO see above note re: retry
+      // TODO(damonkohler): see above note re: retry
       log.error(e);
     } catch (RuntimeException e) {
       // TODO(kwc):

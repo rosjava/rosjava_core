@@ -19,6 +19,8 @@ package org.ros.address;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 
+import org.ros.exception.RosRuntimeException;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -46,7 +48,7 @@ public class InetAddressFactory {
     try {
       networkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
     } catch (SocketException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     List<InetAddress> inetAddresses = Lists.newArrayList();
     for (NetworkInterface networkInterface : networkInterfaces) {
@@ -62,7 +64,7 @@ public class InetAddressFactory {
         return address;
       }
     }
-    throw new RuntimeException("No non-loopback interface found.");
+    throw new RosRuntimeException("No non-loopback interface found.");
   }
 
   private static Collection<InetAddress> getAllInetAddressByName(String host) {
@@ -73,7 +75,7 @@ public class InetAddressFactory {
       try {
         allAddressesByName = InetAddress.getAllByName(host);
       } catch (UnknownHostException e) {
-        throw new RuntimeException(e);
+        throw new RosRuntimeException(e);
       }
     }
     return Arrays.asList(allAddressesByName);
@@ -107,7 +109,7 @@ public class InetAddressFactory {
             .forString(Address.LOOPBACK).getAddress());
       }
     } catch (UnknownHostException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     Collection<InetAddress> allAddressesByName = getAllInetAddressByName(host);
     // First, try to find a non-loopback IPv4 address.
@@ -122,7 +124,7 @@ public class InetAddressFactory {
         return address;
       }
     }
-    throw new RuntimeException();
+    throw new RosRuntimeException("Unable to construct InetAddress for host: " + host);
   }
 
   public static InetAddress newLoopback() {

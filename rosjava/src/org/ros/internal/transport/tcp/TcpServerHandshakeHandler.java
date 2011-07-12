@@ -26,6 +26,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceResponseEncoder;
 import org.ros.internal.node.service.ServiceServer;
@@ -86,7 +87,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
       Channel channel = ctx.getChannel();
       ChannelFuture future = channel.write(outgoingBuffer).await();
       if (!future.isSuccess()) {
-        throw new RuntimeException(future.getCause());
+        throw new RosRuntimeException(future.getCause());
       }
       publisher.addChannel(channel);
 

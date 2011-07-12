@@ -21,8 +21,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import org.ros.namespace.GraphName;
-import org.ros.namespace.NameResolver;
 
 import java.util.HashMap;
 
@@ -41,7 +39,7 @@ public class NameResolverTest {
 
     try {
       assertEquals("/node/foo", r.resolve("~foo"));
-      fail("should have thrown RuntimeException");
+      fail();
     } catch (RuntimeException e) {
     }
 

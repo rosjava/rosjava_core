@@ -14,25 +14,23 @@
  * the License.
  */
 
-package org.ros.internal.node.response;
-
-import org.ros.exception.RosRuntimeException;
-
-import java.net.URI;
-import java.net.URISyntaxException;
+package org.ros.exception;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class UriResultFactory implements ResultFactory<URI> {
+public class RosRuntimeException extends RuntimeException {
 
-  @Override
-  public URI create(Object value) {
-    try {
-      return new URI((String) value);
-    } catch (URISyntaxException e) {
-      throw new RosRuntimeException(e);
-    }
+  public RosRuntimeException(final Throwable throwable) {
+    super(throwable);
+  }
+
+  public RosRuntimeException(final String message, final Throwable throwable) {
+    super(message, throwable);
+  }
+
+  public RosRuntimeException(final String message) {
+    super(message);
   }
 
 }

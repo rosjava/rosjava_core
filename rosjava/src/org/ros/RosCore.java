@@ -18,6 +18,7 @@ package org.ros;
 
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
@@ -68,7 +69,7 @@ public class RosCore implements NodeMain {
     try {
       masterServer.awaitStart();
     } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
   }
 

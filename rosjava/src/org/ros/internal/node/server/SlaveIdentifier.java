@@ -19,6 +19,7 @@ package org.ros.internal.node.server;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
@@ -38,7 +39,7 @@ public class SlaveIdentifier {
     try {
       return new SlaveIdentifier(new GraphName(nodeName), new URI(uri));
     } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
   }
 

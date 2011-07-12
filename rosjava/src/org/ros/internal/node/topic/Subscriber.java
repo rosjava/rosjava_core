@@ -31,6 +31,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.IncomingMessageQueue;
@@ -153,12 +154,12 @@ public class Subscriber<MessageType> extends Topic implements
     // TODO(damonkohler): Add timeouts.
     ChannelFuture future = bootstrap.connect(address).awaitUninterruptibly();
     if (!future.isSuccess()) {
-      throw new RuntimeException(future.getCause());
+      throw new RosRuntimeException(future.getCause());
     }
     Channel channel = future.getChannel();
     future = channel.write(ConnectionHeader.encode(header)).awaitUninterruptibly();
     if (!future.isSuccess()) {
-      throw new RuntimeException(future.getCause());
+      throw new RosRuntimeException(future.getCause());
     }
     if (DEBUG) {
       log.info("Connected to: " + channel.getRemoteAddress());

@@ -16,6 +16,8 @@
 
 package org.ros.node;
 
+import org.ros.exception.RosRuntimeException;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -41,7 +43,7 @@ public class NodeRunner {
         try {
           node.main(nodeConfiguration);
         } catch (Exception e) {
-          throw new RuntimeException(e);
+          throw new RosRuntimeException(e);
         }
       }
     });

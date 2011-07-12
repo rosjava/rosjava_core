@@ -21,7 +21,7 @@ import org.ros.internal.node.response.StatusCode;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RemoteException extends RuntimeException {
+public class RemoteException extends RosRuntimeException {
 
   private final StatusCode statusCode;
 

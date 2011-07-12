@@ -58,7 +58,7 @@ public class GraphNameTest extends TestCase {
     for (String i : illegalChars) {
       try {
         new GraphName("good" + i);
-        fail("bad name not caught: " + i);
+        fail("Bad name not caught: " + i);
       } catch (RuntimeException e) {
       }
     }
@@ -66,7 +66,7 @@ public class GraphNameTest extends TestCase {
     for (String i : illegalNames) {
       try {
         new GraphName(i);
-        fail("bad name not caught" + i);
+        fail("Bad name not caught" + i);
       } catch (RuntimeException e) {
       }
     }

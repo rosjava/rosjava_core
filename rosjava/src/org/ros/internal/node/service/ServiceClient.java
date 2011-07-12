@@ -36,6 +36,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
@@ -132,8 +133,7 @@ public class ServiceClient<RequestType, ResponseType> implements
         log.info("Connected to: " + channel.getRemoteAddress());
       }
     } else {
-      throw new RuntimeException("ServiceClient.connect() failed to connect to host "
-          + uri.getHost() + " on port " + uri.getPort(), future.getCause());
+      throw new RosRuntimeException("Failed to connect to host: " + uri, future.getCause());
     }
     ChannelBuffer encodedHeader = ConnectionHeader.encode(header);
     channel.write(encodedHeader).awaitUninterruptibly();

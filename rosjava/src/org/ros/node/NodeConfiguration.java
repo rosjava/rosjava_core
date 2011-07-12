@@ -21,6 +21,7 @@ import org.ros.address.AdvertiseAddressFactory;
 import org.ros.address.BindAddress;
 import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.address.PublicAdvertiseAddressFactory;
+import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.NameResolver;
 
@@ -45,7 +46,7 @@ public class NodeConfiguration {
     try {
       DEFAULT_MASTER_URI = new URI("http://localhost:11311/");
     } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
   }
 

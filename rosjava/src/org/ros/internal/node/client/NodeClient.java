@@ -19,6 +19,7 @@ package org.ros.internal.node.client;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.NodeServer;
 import org.ros.internal.node.xmlrpc.XmlRpcClientFactory;
 
@@ -46,7 +47,7 @@ public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
     try {
       config.setServerURL(uri.toURL());
     } catch (MalformedURLException e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     config.setConnectionTimeout(CONNECTION_TIMEOUT);
     config.setReplyTimeout(REPLY_TIMEOUT);

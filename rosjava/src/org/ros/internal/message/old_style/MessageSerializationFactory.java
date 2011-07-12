@@ -2,6 +2,8 @@ package org.ros.internal.message.old_style;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.RosRuntimeException;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -25,7 +27,7 @@ public class MessageSerializationFactory implements org.ros.message.MessageSeria
       messageClass =
         (Class<MessageType>) Class.forName(classpath + messageType.replace('/', '.'));
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     return new MessageDeserializer<MessageType>(messageClass);
   }

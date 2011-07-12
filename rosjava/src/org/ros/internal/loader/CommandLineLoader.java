@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.ros.address.InetAddressFactory;
+import org.ros.exception.RosRuntimeException;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
@@ -196,7 +197,7 @@ public class CommandLineLoader {
       }
       return uri;
     } catch (URISyntaxException e) {
-      throw new RuntimeException("Invalid master URI: " + uri);
+      throw new RosRuntimeException("Invalid master URI: " + uri);
     }
   }
 

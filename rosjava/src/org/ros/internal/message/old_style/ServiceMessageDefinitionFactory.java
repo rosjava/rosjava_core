@@ -18,6 +18,7 @@ package org.ros.internal.message.old_style;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.message.Service;
 
@@ -35,7 +36,7 @@ public class ServiceMessageDefinitionFactory {
               + serviceType.replace('/', '.'));
       service = serviceClass.newInstance();
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RosRuntimeException(e);
     }
     return new ServiceMessageDefinition(service.getDataType(), service.getMD5Sum());
   }

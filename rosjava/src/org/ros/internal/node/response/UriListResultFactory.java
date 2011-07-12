@@ -18,6 +18,8 @@ package org.ros.internal.node.response;
 
 import com.google.common.collect.Lists;
 
+import org.ros.exception.RosRuntimeException;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -36,7 +38,7 @@ public class UriListResultFactory implements ResultFactory<List<URI>> {
       try {
         uris.add(new URI((String) uri));
       } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
+        throw new RosRuntimeException(e);
       }
     }
     return uris;

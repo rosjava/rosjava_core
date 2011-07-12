@@ -16,6 +16,7 @@
 
 package org.ros.internal.message.new_style;
 
+import org.ros.exception.RosRuntimeException;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 import org.ros.message.std_msgs.Char;
@@ -39,14 +40,15 @@ public class MessageImpl implements Message, GetInstance {
     if (context.hasField(name, type)) {
       return context.getField(name).<T>getValue();
     }
-    throw new RuntimeException("Unknown field: " + type + " " + name);
+    throw new RosRuntimeException("Unknown field: " + type + " " + name);
   }
 
   private <T> void setFieldValue(String name, FieldType type, T value) {
     if (context.hasField(name, type)) {
       context.getField(name).setValue(value);
     } else {
-      throw new RuntimeException("Unable to set field value: " + type + " " + name + " = " + value);
+      throw new RosRuntimeException("Unable to set field value: " + type + " " + name + " = "
+          + value);
     }
   }
 
@@ -145,7 +147,7 @@ public class MessageImpl implements Message, GetInstance {
     if (context.getField(name).getType() instanceof MessageFieldType) {
       return context.getField(name).<MessageType>getValue();
     }
-    throw new RuntimeException();
+    throw new RosRuntimeException("Failed to access message field: " + name);
   }
 
   @Override
@@ -153,7 +155,7 @@ public class MessageImpl implements Message, GetInstance {
     if (context.getField(name).getType() instanceof MessageFieldType) {
       return context.getField(name).<List<MessageType>>getValue();
     }
-    throw new RuntimeException();
+    throw new RosRuntimeException("Failed to access list field: " + name);
   }
 
   @Override

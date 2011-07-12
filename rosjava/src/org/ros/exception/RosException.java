@@ -21,8 +21,8 @@ package org.ros.exception;
  */
 public class RosException extends Exception {
 
-  public RosException(final Exception exception) {
-    super(exception);
+  public RosException(final Throwable throwable) {
+    super(throwable);
   }
   
   public RosException(final String message, final Throwable throwable) {
