@@ -19,8 +19,6 @@ package org.ros.internal.node;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.node.client.Registrar;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RemoteException;
@@ -32,6 +30,7 @@ import org.ros.internal.message.old_style.MessageDeserializer;
 import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.message.old_style.ServiceMessageDefinitionFactory;
 import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.client.Registrar;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
@@ -192,10 +191,9 @@ public class DefaultNode implements Node {
 
   @Override
   public <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType) {
-    String resolvedTopicName = resolveName(topicName);
+    GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
-    TopicDefinition topicDefinition =
-        TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
+    TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
     org.ros.message.MessageSerializer<MessageType> serializer = newMessageSerializer(messageType);
     return publisherFactory.create(topicDefinition, serializer);
   }
@@ -203,10 +201,9 @@ public class DefaultNode implements Node {
   @Override
   public <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
       final MessageListener<MessageType> listener) {
-    String resolvedTopicName = resolveName(topicName);
+    GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
-    TopicDefinition topicDefinition =
-        TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
+    TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
     MessageDeserializer<MessageType> deserializer = newMessageDeserializer(messageType);
     Subscriber<MessageType> subscriber = subscriberFactory.create(topicDefinition, deserializer);
     subscriber.addMessageListener(listener);
@@ -240,7 +237,7 @@ public class DefaultNode implements Node {
     }
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
-    GraphName resolvedServiceName = new GraphName(resolveName(serviceName));
+    GraphName resolvedServiceName = resolveName(serviceName);
     ServiceIdentifier serviceIdentifier = new ServiceIdentifier(resolvedServiceName, uri);
     ServiceDefinition definition = new ServiceDefinition(serviceIdentifier, messageDefinition);
     MessageSerializer<RequestType> requestSerializer = newServiceRequestSerializer(serviceType);
@@ -252,7 +249,8 @@ public class DefaultNode implements Node {
   @Override
   public URI lookupService(String serviceName) {
     Response<URI> response =
-        masterClient.lookupService(slaveServer.toSlaveIdentifier(), resolveName(serviceName));
+        masterClient.lookupService(slaveServer.toSlaveIdentifier(), resolveName(serviceName)
+            .toString());
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();
     } else {
@@ -266,8 +264,8 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public String getName() {
-    return nodeName.toString();
+  public GraphName getName() {
+    return nodeName;
   }
 
   @Override
@@ -276,8 +274,13 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public String resolveName(String name) {
+  public GraphName resolveName(GraphName name) {
     return resolver.resolve(name);
+  }
+
+  @Override
+  public GraphName resolveName(String name) {
+    return resolver.resolve(new GraphName(name));
   }
 
   @Override
@@ -344,8 +347,8 @@ public class DefaultNode implements Node {
 
   @Override
   public ParameterTree newParameterTree() {
-    return org.ros.internal.node.parameter.DefaultParameterTree.create(slaveServer.toSlaveIdentifier(),
-        masterClient.getRemoteUri(), resolver, parameterManager);
+    return org.ros.internal.node.parameter.DefaultParameterTree.create(
+        slaveServer.toSlaveIdentifier(), masterClient.getRemoteUri(), resolver, parameterManager);
   }
 
   @Override

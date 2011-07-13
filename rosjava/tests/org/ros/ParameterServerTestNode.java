@@ -64,7 +64,7 @@ public class ParameterServerTestNode implements NodeMain {
     Log log = node.getLog();
 
     org.ros.message.std_msgs.String tilde_m = new org.ros.message.std_msgs.String();
-    tilde_m.data = param.getString(node.resolveName("~tilde"));
+    tilde_m.data = param.getString(node.resolveName("~tilde").toString());
     log.info("tilde: " + tilde_m.data);
 
     GraphName paramNamespace = new GraphName(param.getString("parameter_namespace"));

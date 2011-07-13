@@ -173,9 +173,9 @@ public class DefaultNodeTest {
             NodeConfiguration.newPrivate(masterUri).setParentResolver(
                 NameResolver.create("/ns1")));
 
-    assertEquals("/foo", node.resolveName("/foo"));
-    assertEquals("/ns1/foo", node.resolveName("foo"));
-    assertEquals("/ns1/test_resolver/foo", node.resolveName("~foo"));
+    assertEquals("/foo", node.resolveName("/foo").toString());
+    assertEquals("/ns1/foo", node.resolveName("foo").toString());
+    assertEquals("/ns1/test_resolver/foo", node.resolveName("~foo").toString());
 
     Publisher<Int64> pub = node.newPublisher("pub", "std_msgs/Int64");
     assertEquals("/ns1/pub", pub.getTopicName().toString());

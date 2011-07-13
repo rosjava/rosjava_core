@@ -24,6 +24,7 @@ import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.MessageListener;
 import org.ros.message.Service;
 import org.ros.message.Time;
+import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
 import org.ros.node.parameter.ParameterTree;
@@ -61,17 +62,27 @@ public interface Node {
   /**
    * @return the fully resolved name of this {@link Node}, e.g. "/foo/bar/boop"
    */
-  String getName();
+  GraphName getName();
 
   /**
    * Resolve the given name, using ROS conventions, into a full ROS namespace
    * name. Will be relative to the current namespace unless the name is global.
    * 
    * @param name
-   *          The name to resolve.
-   * @return Fully resolved ros namespace name.
+   *          the name to resolve
+   * @return fully resolved ros namespace name
    */
-  String resolveName(String name);
+  GraphName resolveName(GraphName name);
+
+  /**
+   * Resolve the given name, using ROS conventions, into a full ROS namespace
+   * name. Will be relative to the current namespace unless the name is global.
+   * 
+   * @param name
+   *          the name to resolve
+   * @return fully resolved ros namespace name
+   */
+  GraphName resolveName(String name);
 
   /**
    * @return {@link DefaultNameResolver} for this namespace.

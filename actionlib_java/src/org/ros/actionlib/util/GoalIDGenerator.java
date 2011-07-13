@@ -49,7 +49,7 @@ public class GoalIDGenerator {
     Time t = node.getCurrentTime();
     GoalID id = new GoalID();
 
-    StringBuilder sb = new StringBuilder(node.getName());
+    StringBuilder sb = new StringBuilder(node.getName().toString());
     sb.append("-").append(goalCount.incrementAndGet()).append("-").append(t.secs).append(".")
         .append(t.nsecs);
 

@@ -73,7 +73,7 @@ public class PassthroughTestNode implements NodeMain {
           @Override
           public void onNewMessage(org.ros.message.test_ros.TestHeader m) {
             m.orig_caller_id = m.caller_id;
-            m.caller_id = node.getName();
+            m.caller_id = node.getName().toString();
             pub_header.publish(m);
           }
         };
