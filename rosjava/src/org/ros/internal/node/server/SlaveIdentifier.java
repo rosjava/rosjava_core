@@ -35,7 +35,7 @@ public class SlaveIdentifier {
   private final GraphName name;
   private final URI uri;
 
-  public static SlaveIdentifier createFromStrings(String nodeName, String uri) {
+  public static SlaveIdentifier newFromStrings(String nodeName, String uri) {
     try {
       return new SlaveIdentifier(new GraphName(nodeName), new URI(uri));
     } catch (URISyntaxException e) {
@@ -51,11 +51,12 @@ public class SlaveIdentifier {
   }
 
   /**
-   * @param uri the {@link URI} of the {@link SlaveServer}
-   * @return a {@link SlaveIdentifier} with a {@link URI} but no name
+   * @param uri
+   *          the {@link URI} of the {@link SlaveServer}
+   * @return an anonymous {@link SlaveIdentifier} with the specified {@link URI}
    */
-  public static SlaveIdentifier createAnonymous(URI uri) {
-    return new SlaveIdentifier(GraphName.newUnknown(), uri);
+  static SlaveIdentifier newAnonymous(URI uri) {
+    return new SlaveIdentifier(GraphName.newAnonymous(), uri);
   }
 
   @Override

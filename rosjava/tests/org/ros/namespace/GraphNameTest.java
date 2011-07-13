@@ -18,6 +18,14 @@ package org.ros.namespace;
 import junit.framework.TestCase;
 import org.junit.Test;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
@@ -27,7 +35,7 @@ public class GraphNameTest extends TestCase {
   @Test
   public void testToString() {
     try {
-      String[] canonical = {"abc", "ab7", "/abc", "/abc/bar", "/", "~garage", "~foo/bar"};
+      String[] canonical = { "abc", "ab7", "/abc", "/abc/bar", "/", "~garage", "~foo/bar" };
       for (String c : canonical) {
         assertEquals(c, new GraphName(c).toString());
       }
@@ -45,8 +53,8 @@ public class GraphNameTest extends TestCase {
   @Test
   public void testValidNames() {
     String[] valid =
-        {"", "abc", "ab7", "ab7_kdfJKSDJFGkd", "/abc", "/", "~private", "~private/something",
-            "/global", "/global/", "/global/local"};
+        { "", "abc", "ab7", "ab7_kdfJKSDJFGkd", "/abc", "/", "~private", "~private/something",
+            "/global", "/global/", "/global/local" };
     for (String v : valid) {
       new GraphName(v);
     }
@@ -54,7 +62,7 @@ public class GraphNameTest extends TestCase {
 
   @Test
   public void testInvalidNames() {
-    final String[] illegalChars = {"=", "-", "(", ")", "*", "%", "^"};
+    final String[] illegalChars = { "=", "-", "(", ")", "*", "%", "^" };
     for (String i : illegalChars) {
       try {
         new GraphName("good" + i);
@@ -62,7 +70,7 @@ public class GraphNameTest extends TestCase {
       } catch (RuntimeException e) {
       }
     }
-    final String[] illegalNames = {"/~private", "5foo"};
+    final String[] illegalNames = { "/~private", "5foo" };
     for (String i : illegalNames) {
       try {
         new GraphName(i);
@@ -74,11 +82,11 @@ public class GraphNameTest extends TestCase {
 
   @Test
   public void testIsGlobal() {
-    final String[] tests = {"/", "/global", "/global2"};
+    final String[] tests = { "/", "/global", "/global2" };
     for (String t : tests) {
       assertTrue(new GraphName(t).isGlobal());
     }
-    final String[] fails = {"", "not_global", "not/global"};
+    final String[] fails = { "", "not_global", "not/global" };
     for (String t : fails) {
       assertFalse(new GraphName(t).isGlobal());
     }
@@ -86,11 +94,11 @@ public class GraphNameTest extends TestCase {
 
   @Test
   public void testIsPrivate() {
-    String[] tests = {"~name", "~name/sub"};
+    String[] tests = { "~name", "~name/sub" };
     for (String t : tests) {
       assertTrue(new GraphName(t).isPrivate());
     }
-    String[] fails = {"", "not_private", "not/private", "/"};
+    String[] fails = { "", "not_private", "not/private", "/" };
     for (String f : fails) {
       assertFalse(new GraphName(f).isPrivate());
     }
@@ -175,6 +183,28 @@ public class GraphNameTest extends TestCase {
     assertEquals(new GraphName("foo/bar"), new GraphName("foo").join(new GraphName("bar")));
     assertEquals(new GraphName("/foo/bar"), new GraphName("/foo").join(new GraphName("bar")));
     assertEquals(new GraphName("/bar"), new GraphName("/foo").join(new GraphName("/bar")));
+  }
+
+  @Test
+  public void testNewAnonymous() throws InterruptedException {
+    Executor executor = Executors.newFixedThreadPool(10);
+    int sampleSize = 10000;
+    final CountDownLatch latch = new CountDownLatch(sampleSize);
+    final Set<GraphName> anonymousGraphNames =
+        Collections.synchronizedSet(new HashSet<GraphName>());
+    for (int i = 0; i < sampleSize; i++) {
+      executor.execute(new Runnable() {
+        @Override
+        public void run() {
+          GraphName name = GraphName.newAnonymous();
+          assertTrue(name.toString().startsWith(GraphName.ANONYMOUS_PREFIX));
+          anonymousGraphNames.add(name);
+          latch.countDown();
+        }
+      });
+    }
+    assertTrue(latch.await(1, TimeUnit.SECONDS));
+    assertEquals(sampleSize, anonymousGraphNames.size());
   }
 
 }

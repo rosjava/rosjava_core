@@ -105,7 +105,7 @@ public class TopicIntegrationTest {
               MessageDefinition.createFromTypeName("std_msgs/String"));
       subscriber.addPublisher(
           PublisherDefinition.createPublisherDefinition(
-              SlaveIdentifier.createFromStrings("foo", "http://foo"), topicDefinition),
+              SlaveIdentifier.newFromStrings("foo", "http://foo"), topicDefinition),
           new InetSocketAddress(1234));
       fail();
     } catch (RuntimeException e) {

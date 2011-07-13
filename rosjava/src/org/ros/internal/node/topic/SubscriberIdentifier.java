@@ -30,7 +30,7 @@ public class SubscriberIdentifier {
   private final TopicIdentifier topicIdentifier;
 
   public static SubscriberIdentifier createFromStrings(String nodeName, String uri, String topicName) {
-    return new SubscriberIdentifier(SlaveIdentifier.createFromStrings(nodeName, uri),
+    return new SubscriberIdentifier(SlaveIdentifier.newFromStrings(nodeName, uri),
         TopicIdentifier.createFromString(topicName));
   }
 

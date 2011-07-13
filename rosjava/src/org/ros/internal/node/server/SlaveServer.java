@@ -57,7 +57,7 @@ public class SlaveServer extends NodeServer {
       Collection<URI> publisherUriList, TopicDefinition topicDefinition) {
     List<PublisherDefinition> publishers = Lists.newArrayList();
     for (URI uri : publisherUriList) {
-      SlaveIdentifier slaveIdentifier = SlaveIdentifier.createAnonymous(uri);
+      SlaveIdentifier slaveIdentifier = SlaveIdentifier.newAnonymous(uri);
       publishers.add(PublisherDefinition
           .createPublisherDefinition(slaveIdentifier, topicDefinition));
     }

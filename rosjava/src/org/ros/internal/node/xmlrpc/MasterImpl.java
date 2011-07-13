@@ -80,7 +80,7 @@ public class MasterImpl implements Master, ParameterServer {
   @Override
   public List<Object> registerPublisher(String callerId, String topic, String topicType,
       String callerApi) {
-    SlaveIdentifier slaveIdentifier = SlaveIdentifier.createFromStrings(callerId, callerApi);
+    SlaveIdentifier slaveIdentifier = SlaveIdentifier.newFromStrings(callerId, callerApi);
     PublisherIdentifier publisherIdentifier =
         new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(new GraphName(topic)));
     List<SubscriberIdentifier> subscribers = master.registerPublisher(publisherIdentifier);
@@ -198,7 +198,7 @@ public class MasterImpl implements Master, ParameterServer {
   @Override
   public List<Object> subscribeParam(String callerId, String callerApi, String key) {
     parameterServer.subscribe(new GraphName(key),
-        SlaveIdentifier.createFromStrings(callerId, callerApi));
+        SlaveIdentifier.newFromStrings(callerId, callerApi));
     Object value = parameterServer.get(new GraphName(key));
     if (value == null) {
       // Must return an empty map as the value of an unset parameter.

@@ -16,35 +16,56 @@
 
 package org.ros.namespace;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * ROS graph resource name.
  * 
- * @see "http://www.ros.org/wiki/Names"
+ * @see http://www.ros.org/wiki/Names
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */
 public class GraphName {
 
+  @VisibleForTesting
+  static final String ANONYMOUS_PREFIX = "anonymous_";
+
   private static final String ROOT = "/";
   private static final String SEPARATOR = "/";
   private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
-  private static final String UNKNOWN_NAME = "/unknown";
+
+  private static AtomicInteger anonymousCounter;
+
+  static {
+    anonymousCounter = new AtomicInteger();
+  }
 
   private final String name;
 
-  public static GraphName newUnknown() {
-    return new GraphName(UNKNOWN_NAME);
+  /**
+   * Creates an anonymous {@link GraphName}.
+   * 
+   * @return a new {@link GraphName} suitable for creating an anonymous node
+   */
+  public static GraphName newAnonymous() {
+    return new GraphName(ANONYMOUS_PREFIX + anonymousCounter.incrementAndGet());
   }
 
+  /**
+   * @return a new {@link GraphName} representing the root namespace
+   */
   public static GraphName newRoot() {
     return new GraphName(ROOT);
   }
 
   /**
+   * Constructs a new canonical {@link GraphName}.
+   * 
    * @param name
-   *          the {@link String} representation of this {@link GraphName}
+   *          the name of this resource
    */
   public GraphName(String name) {
     Preconditions.checkNotNull(name);
@@ -92,7 +113,7 @@ public class GraphName {
   }
 
   /**
-   * This is a /global/name.
+   * Is this a /global/name?
    * 
    * <ul>
    * <li>
@@ -106,29 +127,30 @@ public class GraphName {
    * will resolve to the name /foo/bar.</li>
    * </ul>
    * 
-   * @return If this name is a global name then return true.
+   * @return {@code true} if this name is a global name, {@code false} otherwise
    */
   public boolean isGlobal() {
     return name.startsWith(GraphName.ROOT);
   }
 
   /**
-   * Returns {@code true} if this {@link GraphName} represents the root
-   * namespace.
+   * @return {@code true} if this {@link GraphName} represents the root
+   *         namespace, {@code false} otherwise
    */
   public boolean isRoot() {
     return name.equals(GraphName.ROOT);
   }
 
   /**
-   * Returns {@code true} if this {@link GraphName} is empty.
+   * @return {@code true} if this {@link GraphName} is empty, {@code false}
+   *         otherwise
    */
   public boolean isEmpty() {
     return name.equals("");
   }
 
   /**
-   * Is this a ~private/name.
+   * Is this a ~private/name?
    * 
    * <ul>
    * <li>
@@ -141,14 +163,14 @@ public class GraphName {
    * that will resolve to the name /wg/node3/foo/bar.
    * </ul>
    * 
-   * @return true if the name is a private name.
+   * @return {@code true} if the name is a private name, {@code false} otherwise
    */
   public boolean isPrivate() {
     return name.startsWith("~");
   }
 
   /**
-   * Is this a relative/name.
+   * Is this a relative/name?
    * 
    * <ul>
    * <li>If node node1 in the global / namespace accesses the resource ~bar,
@@ -189,7 +211,7 @@ public class GraphName {
   }
 
   /**
-   * Returns a {@link GraphName} without the leading parent namespace.
+   * @return a {@link GraphName} without the leading parent namespace
    */
   public GraphName getBasename() {
     int slashIdx = name.lastIndexOf('/');
@@ -221,7 +243,7 @@ public class GraphName {
    * Convert name to a global name representation. This does not take any
    * namespace into account; it simply adds in the global prefix "/" if missing.
    * 
-   * @return a string with the first
+   * @return a global {@link GraphName}
    */
   public GraphName toGlobal() {
     if (isGlobal()) {
