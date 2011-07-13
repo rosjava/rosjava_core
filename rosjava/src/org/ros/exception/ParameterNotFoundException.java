@@ -14,19 +14,25 @@
  * the License.
  */
 
-package org.ros.node.parameter;
+package org.ros.exception;
 
 /**
- * Called when a subscribed parameter value changes.
+ * Thrown when a requested parameter is not found.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ParameterListener {
-  
-  /**
-   * @param value
-   *          the new parameter value
-   */
-  void onNewValue(Object value);
+public class ParameterNotFoundException extends RosRuntimeException {
+
+  public ParameterNotFoundException(String message) {
+    super(message);
+  }
+
+  public ParameterNotFoundException(String message, Throwable throwable) {
+    super(message, throwable);
+  }
+
+  public ParameterNotFoundException(Throwable throwable) {
+    super(throwable);
+  }
 
 }

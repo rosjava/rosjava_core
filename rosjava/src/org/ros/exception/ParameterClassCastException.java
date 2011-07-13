@@ -14,19 +14,26 @@
  * the License.
  */
 
-package org.ros.node.parameter;
+package org.ros.exception;
 
 /**
- * Called when a subscribed parameter value changes.
+ * Thrown when a requested parameter does not match the requested parameter
+ * type.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ParameterListener {
-  
-  /**
-   * @param value
-   *          the new parameter value
-   */
-  void onNewValue(Object value);
+public class ParameterClassCastException extends RosRuntimeException {
+
+  public ParameterClassCastException(String message) {
+    super(message);
+  }
+
+  public ParameterClassCastException(String message, Throwable throwable) {
+    super(message, throwable);
+  }
+
+  public ParameterClassCastException(Throwable throwable) {
+    super(throwable);
+  }
 
 }

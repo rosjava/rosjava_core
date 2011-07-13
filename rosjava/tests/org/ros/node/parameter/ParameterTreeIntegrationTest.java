@@ -19,6 +19,7 @@ package org.ros.node.parameter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -28,14 +29,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
+import org.ros.exception.ParameterClassCastException;
+import org.ros.exception.ParameterNotFoundException;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeFactory;
-import org.ros.node.parameter.ParameterListener;
-import org.ros.node.parameter.ParameterTree;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -58,13 +60,54 @@ public class ParameterTreeIntegrationTest {
     masterServer.start();
     nodeFactory = new DefaultNodeFactory();
     nodeConfiguration = NodeConfiguration.newPrivate(masterServer.getUri());
-    node = nodeFactory.newNode("/node_name", nodeConfiguration);
+    node = nodeFactory.newNode("node_name", nodeConfiguration);
     parameters = node.newParameterTree();
   }
 
   @After
   public void tearDown() {
     node.shutdown();
+  }
+
+  @Test
+  public void testGetNonExistentParameter() {
+    try {
+      parameters.getBoolean("bloop");
+      fail();
+    } catch (ParameterNotFoundException e) {
+      // Thrown when a parameter does not exist.
+    }
+  }
+
+  @Test
+  public void testGetParameterOfWrongType() {
+    parameters.set("bloop", "foo");
+    try {
+      parameters.getBoolean("bloop");
+      fail();
+    } catch (ParameterClassCastException e) {
+      // Thrown when a parameter is of the wrong type.
+    }
+  }
+
+  @Test
+  public void testGetParameterWithDefault() {
+    assertTrue(parameters.getBoolean("bloop", true));
+    List<String> expectedList = Lists.newArrayList("foo", "bar", "baz");
+    assertEquals(expectedList, parameters.getList("bloop", expectedList));
+    parameters.set("bloop", expectedList);
+    assertEquals(expectedList, parameters.getList("bloop", Lists.newArrayList()));
+  }
+
+  @Test
+  public void testGetParameterWithDefaultOfWrongType() {
+    parameters.set("bloop", "foo");
+    try {
+      parameters.getBoolean("bloop", true);
+      fail();
+    } catch (ParameterClassCastException e) {
+      // Thrown when a parameter is of the wrong type.
+    }
   }
 
   @Test
@@ -111,7 +154,7 @@ public class ParameterTreeIntegrationTest {
   public void testGetNames() {
     parameters.set("/foo/bar", "baz");
     parameters.set("/bloop", "doh");
-    List<String> names = parameters.getNames();
+    Collection<String> names = parameters.getNames();
     assertEquals(2, names.size());
     assertTrue(names.contains("/foo/bar"));
     assertTrue(names.contains("/bloop"));
@@ -119,8 +162,8 @@ public class ParameterTreeIntegrationTest {
 
   @Test
   public void testParameterPubSub() throws InterruptedException {
-    Node subscriberNode = nodeFactory.newNode("/subscriber", nodeConfiguration);
-    Node publisherNode = nodeFactory.newNode("/publisher", nodeConfiguration);
+    Node subscriberNode = nodeFactory.newNode("subscriber", nodeConfiguration);
+    Node publisherNode = nodeFactory.newNode("publisher", nodeConfiguration);
 
     ParameterTree subscriberParameters = subscriberNode.newParameterTree();
     final CountDownLatch latch = new CountDownLatch(1);

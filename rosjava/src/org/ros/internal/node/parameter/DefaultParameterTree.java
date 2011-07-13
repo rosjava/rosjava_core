@@ -16,6 +16,10 @@
 
 package org.ros.internal.node.parameter;
 
+import com.google.common.base.Preconditions;
+
+import org.ros.exception.ParameterClassCastException;
+import org.ros.exception.ParameterNotFoundException;
 import org.ros.internal.node.client.ParameterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
@@ -131,21 +135,31 @@ public class DefaultParameterTree implements ParameterTree {
     parameterClient.setParam(resolvedName, value);
   }
 
-  private Object get(String name) {
+  private <T> T get(String name, Class<T> type) {
     String resolvedName = resolver.resolve(name);
     Response<Object> response = parameterClient.getParam(resolvedName);
-    if (response.getStatusCode() == StatusCode.SUCCESS) {
-      return response.getResult();
-    } else {
-      return null;
+    try {
+      if (response.getStatusCode() == StatusCode.SUCCESS) {
+        return type.cast(response.getResult());
+      }
+    } catch (ClassCastException e) {
+      throw new ParameterClassCastException("Cannot cast parameter to: " + type.getName(), e);
     }
+    throw new ParameterNotFoundException("Parameter does not exist: " + name);
   }
 
-  private Object get(String name, Object defaultValue) {
+  @SuppressWarnings("unchecked")
+  private <T> T get(String name, T defaultValue) {
+    Preconditions.checkNotNull(defaultValue);
     String resolvedName = resolver.resolve(name);
     Response<Object> response = parameterClient.getParam(resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
-      return response.getResult();
+      try {
+        return (T) defaultValue.getClass().cast(response.getResult());
+      } catch (ClassCastException e) {
+        throw new ParameterClassCastException("Cannot cast parameter to: "
+            + defaultValue.getClass().getName(), e);
+      }
     } else {
       return defaultValue;
     }
@@ -153,66 +167,62 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public boolean getBoolean(String name) {
-    return (Boolean) get(name);
+    return get(name, Boolean.class);
   }
 
   @Override
   public boolean getBoolean(String name, boolean defaultValue) {
-    return (Boolean) get(name, defaultValue);
+    return get(name, defaultValue);
   }
 
   @Override
   public int getInteger(String name) {
-    return (Integer) get(name);
+    return get(name, Integer.class);
   }
 
   @Override
   public int getInteger(String name, int defaultValue) {
-    return (Integer) get(name, defaultValue);
+    return get(name, defaultValue);
   }
 
   @Override
   public double getDouble(String name) {
-    return (Double) get(name);
+    return get(name, Double.class);
   }
 
   @Override
   public double getDouble(String name, double defaultValue) {
-    return (Double) get(name, defaultValue);
+    return get(name, defaultValue);
   }
 
   @Override
   public String getString(String name) {
-    return (String) get(name);
+    return get(name, String.class);
   }
 
   @Override
   public String getString(String name, String defaultValue) {
-    return (String) get(name, defaultValue);
+    return get(name, defaultValue);
   }
 
   @Override
   public List<?> getList(String name) {
-    return Arrays.asList((Object[]) get(name));
+    return Arrays.asList(get(name, Object[].class));
   }
 
   @Override
   public List<?> getList(String name, List<?> defaultValue) {
-    Object possibleList = get(name, defaultValue);
-    if (possibleList instanceof List<?>) {
-      return (List<?>) possibleList;
-    }
-    return Arrays.asList((Object[]) possibleList);
+    return Arrays.asList(get(name, defaultValue.toArray()));
   }
 
   @Override
   public Map<?, ?> getMap(String name) {
-    return (Map<?, ?>) get(name);
+    return get(name, Map.class);
   }
 
   @Override
   public Map<?, ?> getMap(String name, Map<?, ?> defaultValue) {
-    return (Map<?, ?>) get(name, defaultValue);
+    return get(name, defaultValue);
   }
 
 }
