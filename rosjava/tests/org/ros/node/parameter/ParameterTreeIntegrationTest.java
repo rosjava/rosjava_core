@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.node.parameter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ParameterServerIntegrationTest {
+public class ParameterTreeIntegrationTest {
 
   private MasterServer masterServer;
   private Node node;
