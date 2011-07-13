@@ -32,6 +32,7 @@ import org.ros.address.BindAddress;
 import org.ros.exception.ParameterClassCastException;
 import org.ros.exception.ParameterNotFoundException;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.namespace.GraphName;
 import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
@@ -154,10 +155,10 @@ public class ParameterTreeIntegrationTest {
   public void testGetNames() {
     parameters.set("/foo/bar", "baz");
     parameters.set("/bloop", "doh");
-    Collection<String> names = parameters.getNames();
+    Collection<GraphName> names = parameters.getNames();
     assertEquals(2, names.size());
-    assertTrue(names.contains("/foo/bar"));
-    assertTrue(names.contains("/bloop"));
+    assertTrue(names.contains(new GraphName("/foo/bar")));
+    assertTrue(names.contains(new GraphName("/bloop")));
   }
 
   @Test

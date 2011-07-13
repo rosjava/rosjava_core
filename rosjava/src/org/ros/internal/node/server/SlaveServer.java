@@ -22,11 +22,11 @@ import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.parameter.ParameterManager;
-import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.DefaultServiceServer;
+import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
-import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.DefaultSubscriber;
+import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.SlaveImpl;
@@ -157,12 +157,12 @@ public class SlaveServer extends NodeServer {
   }
 
   /**
-   * @param parameterKey
+   * @param parameterName
    * @param parameterValue
    * @return the number of parameter subscribers that received the update
    */
-  public int paramUpdate(String parameterKey, Object parameterValue) {
-    return parameterManager.updateParameter(parameterKey, parameterValue);
+  public int paramUpdate(GraphName parameterName, Object parameterValue) {
+    return parameterManager.updateParameter(parameterName, parameterValue);
   }
 
   public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {

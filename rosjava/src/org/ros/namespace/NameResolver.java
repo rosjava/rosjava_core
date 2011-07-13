@@ -90,8 +90,25 @@ public class NameResolver {
     throw new RosRuntimeException("Unable to resolve graph name: " + name);
   }
 
-  public String resolve(String namespace, String name) {
-    return resolve(new GraphName(namespace), new GraphName(name)).toString();
+  /**
+   * @see #resolve(GraphName, GraphName)
+   */
+  public GraphName resolve(String namespace, String name) {
+    return resolve(new GraphName(namespace), new GraphName(name));
+  }
+
+  /**
+   * @see #resolve(GraphName, GraphName)
+   */
+  public GraphName resolve(GraphName namespace, String name) {
+    return resolve(namespace, new GraphName(name));
+  }
+
+  /**
+   * @see #resolve(GraphName, GraphName)
+   */
+  public GraphName resolve(String namespace, GraphName name) {
+    return resolve(new GraphName(namespace), name);
   }
 
   /**

@@ -75,12 +75,7 @@ public interface Node {
   GraphName resolveName(GraphName name);
 
   /**
-   * Resolve the given name, using ROS conventions, into a full ROS namespace
-   * name. Will be relative to the current namespace unless the name is global.
-   * 
-   * @param name
-   *          the name to resolve
-   * @return fully resolved ros namespace name
+   * @see #resolveName(GraphName)
    */
   GraphName resolveName(String name);
 
@@ -162,14 +157,7 @@ public interface Node {
   <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType);
 
   /**
-   * @param <MessageType>
-   *          the message type to create the publisher for
-   * @param topicName
-   *          the topic name, will be pushed down under this namespace unless
-   *          '/' is prepended.
-   * @param messageType
-   *          the message data type (e.g. "std_msgs/String")
-   * @return a {@link Publisher} for the specified topic
+   * @see #newPublisher(GraphName, String)
    */
   <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType);
 
@@ -190,17 +178,7 @@ public interface Node {
       MessageListener<MessageType> listener);
 
   /**
-   * @param <MessageType>
-   *          the message type to create the {@link Subscriber} for
-   * @param topicName
-   *          the topic name to be subscribed to, this will be auto resolved
-   * @param messageType
-   *          the message data type (e.g. "std_msgs/String")
-   * @param listener
-   *          the {@link MessageListener} to be added to this {@link Subscriber}
-   *          , will be called asynchronously any time that a message is
-   *          published on the specified topic
-   * @return a {@link Subscriber} for the specified topic
+   * @see #newSubscriber(GraphName, String, MessageListener)
    */
   <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
       MessageListener<MessageType> listener);
@@ -225,19 +203,7 @@ public interface Node {
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder);
 
   /**
-   * Create a {@link ServiceServer}.
-   * 
-   * @param <RequestType>
-   *          type for the request
-   * @param <ResponseType>
-   *          type for the response
-   * @param serviceName
-   *          the name of the service
-   * @param serviceType
-   *          the type of the service (e.g. "test_ros/AddTwoInts")
-   * @param responseBuilder
-   *          called for every request to build a response
-   * @return a {@link ServiceServer}
+   * @see #newServiceServer(GraphName, String, ServiceResponseBuilder)
    */
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
       String serviceName, String serviceType,
@@ -262,19 +228,7 @@ public interface Node {
       GraphName serviceName, String serviceType) throws ServiceNotFoundException;
 
   /**
-   * Create a {@link ServiceClient}.
-   * 
-   * @param <RequestType>
-   *          type for the request
-   * @param <ResponseType>
-   *          type for the response
-   * @param serviceName
-   *          the name of the service
-   * @param serviceType
-   *          the type of the service (e.g. "test_ros/AddTwoInts")
-   * @return a {@link ServiceClient}
-   * @throws ServiceNotFoundException
-   *           thrown if no matching service could be found
+   * @see #newServiceClient(GraphName, String)
    */
   <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
       String serviceName, String serviceType) throws ServiceNotFoundException;
@@ -288,10 +242,7 @@ public interface Node {
   URI lookupService(GraphName serviceName);
 
   /**
-   * @param serviceName
-   *          the name of the service to lookup
-   * @return {@link URI} of the {@Service} provider or null if the
-   *         {@link Service} does not exist
+   * @see #lookupService(GraphName)
    */
   URI lookupService(String serviceName);
 

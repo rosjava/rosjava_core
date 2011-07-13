@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.client;
 
+import com.google.common.collect.Lists;
+
 import org.ros.internal.node.response.BooleanResultFactory;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.ObjectResultFactory;
@@ -25,6 +27,7 @@ import org.ros.internal.node.response.StringResultFactory;
 import org.ros.internal.node.response.VoidResultFactory;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.xmlrpc.ParameterServer;
+import org.ros.namespace.GraphName;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -35,6 +38,7 @@ import java.util.Map;
  * Provide access to the XML-RPC API for a ROS {@link ParameterServer}.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 // TODO(kwc): it's a bit odd that both Master and ParameterServer are "Nodes".
 // The only API methods that require a ROS Node is the subscribe/unsubscribe,
@@ -58,70 +62,79 @@ public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.Par
     nodeName = slaveIdentifier.getName().toString();
   }
 
-  public Response<Object> getParam(String parameterName) {
-    return Response.fromListCheckedFailure(node.getParam(nodeName, parameterName),
+  public Response<Object> getParam(GraphName parameterName) {
+    return Response.fromListCheckedFailure(node.getParam(nodeName, parameterName.toString()),
         new ObjectResultFactory());
   }
 
-  public Response<Void> setParam(String parameterName, Boolean parameterValue) {
-    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<Void> setParam(String parameterName, Integer parameterValue) {
-    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<Void> setParam(String parameterName, Double parameterValue) {
-    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<Void> setParam(String parameterName, String parameterValue) {
-    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<Void> setParam(String parameterName, List<?> parameterValue) {
-    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<Void> setParam(String parameterName, Map<?, ?> parameterValue) {
-    return Response.fromListChecked(node.setParam(nodeName, parameterName, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<String> searchParam(String parameterName) {
-    return Response.fromListCheckedFailure(node.searchParam(nodeName, parameterName),
-        new StringResultFactory());
-  }
-
-  public Response<Object> subscribeParam(String parameterName) {
+  public Response<Void> setParam(GraphName parameterName, Boolean parameterValue) {
     return Response.fromListChecked(
-        node.subscribeParam(nodeName, slaveIdentifier.getUri().toString(), parameterName),
-        new ObjectResultFactory());
+        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
   }
 
-  public Response<Integer> unsubscribeParam(String parameterName) {
+  public Response<Void> setParam(GraphName parameterName, Integer parameterValue) {
     return Response.fromListChecked(
-        node.unsubscribeParam(nodeName, slaveIdentifier.getUri().toString(), parameterName),
-        new IntegerResultFactory());
+        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
   }
 
-  public Response<Boolean> hasParam(String parameterName) {
-    return Response.fromListChecked(node.hasParam(nodeName, parameterName),
+  public Response<Void> setParam(GraphName parameterName, Double parameterValue) {
+    return Response.fromListChecked(
+        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(GraphName parameterName, String parameterValue) {
+    return Response.fromListChecked(
+        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(GraphName parameterName, List<?> parameterValue) {
+    return Response.fromListChecked(
+        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
+  }
+
+  public Response<Void> setParam(GraphName parameterName, Map<?, ?> parameterValue) {
+    return Response.fromListChecked(
+        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
+  }
+
+  public Response<GraphName> searchParam(GraphName parameterName) {
+    Response<String> response =
+        Response.fromListCheckedFailure(node.searchParam(nodeName, parameterName.toString()),
+            new StringResultFactory());
+    return new Response<GraphName>(response.getStatusCode(), response.getStatusMessage(),
+        new GraphName(response.getResult()));
+  }
+
+  public Response<Object> subscribeParam(GraphName parameterName) {
+    return Response.fromListChecked(node.subscribeParam(nodeName, slaveIdentifier.getUri()
+        .toString(), parameterName.toString()), new ObjectResultFactory());
+  }
+
+  public Response<Integer> unsubscribeParam(GraphName parameterName) {
+    return Response.fromListChecked(
+        node.unsubscribeParam(nodeName, slaveIdentifier.getUri().toString(),
+            parameterName.toString()), new IntegerResultFactory());
+  }
+
+  public Response<Boolean> hasParam(GraphName parameterName) {
+    return Response.fromListChecked(node.hasParam(nodeName, parameterName.toString()),
         new BooleanResultFactory());
   }
 
-  public Response<Void> deleteParam(String parameterName) {
-    return Response.fromListChecked(node.deleteParam(nodeName, parameterName),
+  public Response<Void> deleteParam(GraphName parameterName) {
+    return Response.fromListChecked(node.deleteParam(nodeName, parameterName.toString()),
         new VoidResultFactory());
   }
 
-  public Response<List<String>> getParamNames() {
-    return Response.fromListChecked(node.getParamNames(nodeName), new StringListResultFactory());
+  public Response<List<GraphName>> getParamNames() {
+    Response<List<String>> response =
+        Response.fromListChecked(node.getParamNames(nodeName), new StringListResultFactory());
+    List<GraphName> graphNames = Lists.newArrayList();
+    for (String name : response.getResult()) {
+      graphNames.add(new GraphName(name));
+    }
+    return new Response<List<GraphName>>(response.getStatusCode(), response.getStatusMessage(),
+        graphNames);
   }
 
 }

@@ -17,8 +17,8 @@
 package org.ros.namespace;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.ros.Assert.assertGraphNameEquals;
 
 import org.junit.Test;
 
@@ -33,21 +33,22 @@ public class NameResolverTest {
   public void testResolveNameOneArg() {
     NameResolver r = NameResolver.create();
 
-    assertEquals("/foo", r.resolve("foo"));
-    assertEquals("/foo", r.resolve("/foo"));
-    assertEquals("/foo/bar", r.resolve("foo/bar"));
+    assertGraphNameEquals("/foo", r.resolve("foo"));
+    assertGraphNameEquals("/foo", r.resolve("/foo"));
+    assertGraphNameEquals("/foo/bar", r.resolve("foo/bar"));
 
     try {
-      assertEquals("/node/foo", r.resolve("~foo"));
+      r.resolve("~foo");
       fail();
     } catch (RuntimeException e) {
+      // Should throw if trying to resolve private name.
     }
 
     r = NameResolver.create("/ns1");
 
-    assertEquals("/ns1/foo", r.resolve("foo"));
-    assertEquals("/foo", r.resolve("/foo"));
-    assertEquals("/ns1/foo/bar", r.resolve("foo/bar"));
+    assertGraphNameEquals("/ns1/foo", r.resolve("foo"));
+    assertGraphNameEquals("/foo", r.resolve("/foo"));
+    assertGraphNameEquals("/ns1/foo/bar", r.resolve("foo/bar"));
   }
 
   @Test
@@ -60,34 +61,35 @@ public class NameResolverTest {
     } catch (IllegalArgumentException e) {
     }
 
-    String root = GraphName.newRoot().toString();
+    GraphName root = GraphName.newRoot();
     assertEquals(root, r.resolve(root, ""));
     assertEquals(root, r.resolve(root, root));
     assertEquals(root, r.resolve("/anything/bar", root));
-    assertEquals("/ns1/node", r.resolve("/ns1/node", ""));
+    assertGraphNameEquals("/ns1/node", r.resolve("/ns1/node", ""));
 
     // relative namespaces get resolved to default namespace
-    assertEquals("/foo", r.resolve(root, "foo"));
-    assertEquals("/foo", r.resolve(root, "foo/"));
-    assertEquals("/foo", r.resolve(root, "/foo"));
-    assertEquals("/foo", r.resolve(root, "/foo/"));
+    assertGraphNameEquals("/foo", r.resolve(root, "foo"));
+    assertGraphNameEquals("/foo", r.resolve(root, "foo/"));
+    assertGraphNameEquals("/foo", r.resolve(root, "/foo"));
+    assertGraphNameEquals("/foo", r.resolve(root, "/foo/"));
 
-    assertEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2", "foo"));
-    assertEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2", "foo/"));
-    assertEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2/", "foo"));
-    assertEquals("/foo", r.resolve("/ns1/ns2", "/foo/"));
+    assertGraphNameEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2", "foo"));
+    assertGraphNameEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2", "foo/"));
+    assertGraphNameEquals("/ns1/ns2/foo", r.resolve("/ns1/ns2/", "foo"));
+    assertGraphNameEquals("/foo", r.resolve("/ns1/ns2", "/foo/"));
 
-    assertEquals("/ns1/ns2/ns3/foo", r.resolve("/ns1/ns2/ns3", "foo"));
-    assertEquals("/ns1/ns2/ns3/foo", r.resolve("/ns1/ns2/ns3/", "foo"));
-    assertEquals("/foo", r.resolve(root, "/foo/"));
+    assertGraphNameEquals("/ns1/ns2/ns3/foo", r.resolve("/ns1/ns2/ns3", "foo"));
+    assertGraphNameEquals("/ns1/ns2/ns3/foo", r.resolve("/ns1/ns2/ns3/", "foo"));
+    assertGraphNameEquals("/foo", r.resolve(root, "/foo/"));
 
-    assertEquals("/ns1/ns2/foo/bar", r.resolve("/ns1/ns2", "foo/bar"));
-    assertEquals("/ns1/ns2/ns3/foo/bar", r.resolve("/ns1/ns2/ns3", "foo/bar"));
+    assertGraphNameEquals("/ns1/ns2/foo/bar", r.resolve("/ns1/ns2", "foo/bar"));
+    assertGraphNameEquals("/ns1/ns2/ns3/foo/bar", r.resolve("/ns1/ns2/ns3", "foo/bar"));
 
     try {
-      assertEquals("/foo", r.resolve(root, "~foo"));
-      fail("resolveName() with two args should never allow private names");
+      r.resolve(root, "~foo");
+      fail();
     } catch (RuntimeException e) {
+      // resolveName() with two args should never allow private names
     }
   }
 
@@ -102,11 +104,11 @@ public class NameResolverTest {
 
     NameResolver r = NameResolver.create(remappings);
 
-    String n = r.resolve("name");
-    assertTrue(n.equals("/my/name"));
-    assertTrue(r.resolve("/name").equals("/name"));
-    assertTrue(r.resolve("foo").equals("/my/foo"));
-    assertTrue(r.resolve("/my/name").equals("/my/name"));
+    GraphName n = r.resolve("name");
+    assertGraphNameEquals("/my/name", n);
+    assertGraphNameEquals("/name", r.resolve("/name"));
+    assertGraphNameEquals("/my/foo", r.resolve("foo"));
+    assertGraphNameEquals("/my/name", r.resolve("/my/name"));
   }
 
 }

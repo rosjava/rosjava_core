@@ -28,6 +28,7 @@ import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.transport.ProtocolDescription;
+import org.ros.namespace.GraphName;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -107,12 +108,12 @@ public class SlaveImpl implements Slave {
     return Response.createSuccess("Success", publications).toList();
   }
 
-  private List<Object> parameterUpdate(String parameterKey, Object parameterValue) {
-    if (slave.paramUpdate(parameterKey, parameterValue) > 0) {
+  private List<Object> parameterUpdate(String parameterName, Object parameterValue) {
+    if (slave.paramUpdate(new GraphName(parameterName), parameterValue) > 0) {
       return Response.createSuccess("Success", null).toList();
     }
-    return Response.createError("No subscribers for parameter key \"" + parameterKey + "\".", null)
-        .toList();
+    return Response
+        .createError("No subscribers for parameter key \"" + parameterName + "\".", null).toList();
   }
 
   @Override

@@ -20,6 +20,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
+import org.ros.namespace.GraphName;
 import org.ros.node.parameter.ParameterListener;
 
 import java.util.Collection;
@@ -29,17 +30,17 @@ import java.util.Collection;
  */
 public class ParameterManager {
 
-  private final Multimap<String, ParameterListener> listeners;
+  private final Multimap<GraphName, ParameterListener> listeners;
   
   public ParameterManager() {
-    listeners = Multimaps.synchronizedMultimap(HashMultimap.<String, ParameterListener>create());
+    listeners = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, ParameterListener>create());
   }
   
-  public void addListener(String key, ParameterListener listener) {
+  public void addListener(GraphName key, ParameterListener listener) {
     listeners.put(key, listener);
   }
   
-  public void removeListener(String key, ParameterListener listener) {
+  public void removeListener(GraphName key, ParameterListener listener) {
     listeners.remove(key, listener);
   }
   
@@ -48,7 +49,7 @@ public class ParameterManager {
    * @param value
    * @return the number of listeners called with the new value
    */
-  public int updateParameter(String key, Object value) {
+  public int updateParameter(GraphName key, Object value) {
     int numberOfListeners = 0;
     synchronized(listeners) {
       Collection<ParameterListener> listenersForKey = listeners.get(key);

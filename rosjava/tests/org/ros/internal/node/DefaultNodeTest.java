@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.ros.Assert.assertGraphNameEquals;
 
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
@@ -173,16 +174,16 @@ public class DefaultNodeTest {
             NodeConfiguration.newPrivate(masterUri).setParentResolver(
                 NameResolver.create("/ns1")));
 
-    assertEquals("/foo", node.resolveName("/foo").toString());
-    assertEquals("/ns1/foo", node.resolveName("foo").toString());
-    assertEquals("/ns1/test_resolver/foo", node.resolveName("~foo").toString());
+    assertGraphNameEquals("/foo", node.resolveName("/foo"));
+    assertGraphNameEquals("/ns1/foo", node.resolveName("foo"));
+    assertGraphNameEquals("/ns1/test_resolver/foo", node.resolveName("~foo"));
 
     Publisher<Int64> pub = node.newPublisher("pub", "std_msgs/Int64");
-    assertEquals("/ns1/pub", pub.getTopicName().toString());
+    assertGraphNameEquals("/ns1/pub", pub.getTopicName());
     pub = node.newPublisher("/pub", "std_msgs/Int64");
-    assertEquals("/pub", pub.getTopicName().toString());
+    assertGraphNameEquals("/pub", pub.getTopicName());
     pub = node.newPublisher("~pub", "std_msgs/Int64");
-    assertEquals("/ns1/test_resolver/pub", pub.getTopicName().toString());
+    assertGraphNameEquals("/ns1/test_resolver/pub", pub.getTopicName());
 
     MessageListener<Int64> callback = new MessageListener<Int64>() {
       @Override
@@ -191,11 +192,11 @@ public class DefaultNodeTest {
     };
 
     Subscriber<Int64> sub = node.newSubscriber("sub", "std_msgs/Int64", callback);
-    assertEquals("/ns1/sub", sub.getTopicName().toString());
+    assertGraphNameEquals("/ns1/sub", sub.getTopicName());
     sub = node.newSubscriber("/sub", "std_msgs/Int64", callback);
-    assertEquals("/sub", sub.getTopicName().toString());
+    assertGraphNameEquals("/sub", sub.getTopicName());
     sub = node.newSubscriber("~sub", "std_msgs/Int64", callback);
-    assertEquals("/ns1/test_resolver/sub", sub.getTopicName().toString());
+    assertGraphNameEquals("/ns1/test_resolver/sub", sub.getTopicName());
   }
 
   @Test

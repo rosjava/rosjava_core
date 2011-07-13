@@ -18,6 +18,7 @@ package org.ros.internal.loader;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.ros.Assert.assertGraphNameEquals;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -242,11 +243,11 @@ public class CommandLineLoaderTest {
 
       // Test that our remappings loaded.
       NameResolver r = nodeConfiguration.getParentResolver();
-      String n = r.resolve("name");
-      assertTrue(n.equals("/my/name"));
-      assertTrue(r.resolve("/name").equals("/name"));
-      assertTrue(r.resolve("foo").equals("/my/foo"));
-      assertTrue(r.resolve("/my/name").equals("/my/name"));
+      GraphName n = r.resolve("name");
+      assertGraphNameEquals("/my/name", n);
+      assertGraphNameEquals("/name", r.resolve("/name"));
+      assertGraphNameEquals("/my/foo", r.resolve("foo"));
+      assertGraphNameEquals("/my/name", r.resolve("/my/name"));
     }
   }
 }

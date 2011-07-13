@@ -25,6 +25,7 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.xmlrpc.ParameterServer;
+import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
@@ -48,8 +49,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   public static DefaultParameterTree create(SlaveIdentifier slaveIdentifier, URI masterUri,
       NameResolver resolver, ParameterManager parameterManager) {
-    ParameterClient client =
-        new org.ros.internal.node.client.ParameterClient(slaveIdentifier, masterUri);
+    ParameterClient client = new ParameterClient(slaveIdentifier, masterUri);
     return new DefaultParameterTree(client, parameterManager, resolver);
   }
 
@@ -61,21 +61,31 @@ public class DefaultParameterTree implements ParameterTree {
   }
 
   @Override
-  public boolean has(String name) {
-    String resolvedName = resolver.resolve(name);
+  public boolean has(GraphName name) {
+    GraphName resolvedName = resolver.resolve(name);
     return parameterClient.hasParam(resolvedName).getResult();
   }
 
   @Override
-  public void delete(String name) {
-    String resolvedName = resolver.resolve(name);
+  public boolean has(String name) {
+    return has(new GraphName(name));
+  }
+
+  @Override
+  public void delete(GraphName name) {
+    GraphName resolvedName = resolver.resolve(name);
     parameterClient.deleteParam(resolvedName);
   }
 
   @Override
-  public String search(String name) {
-    String resolvedName = resolver.resolve(name);
-    Response<String> response = parameterClient.searchParam(resolvedName);
+  public void delete(String name) {
+    delete(new GraphName(name));
+  }
+
+  @Override
+  public GraphName search(GraphName name) {
+    GraphName resolvedName = resolver.resolve(name);
+    Response<GraphName> response = parameterClient.searchParam(resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();
     } else {
@@ -84,59 +94,104 @@ public class DefaultParameterTree implements ParameterTree {
   }
 
   @Override
-  public List<String> getNames() {
+  public GraphName search(String name) {
+    return search(new GraphName(name));
+  }
+
+  @Override
+  public List<GraphName> getNames() {
     return parameterClient.getParamNames().getResult();
   }
 
   @Override
-  public void addParameterListener(String name, ParameterListener listener) {
+  public void addParameterListener(GraphName name, ParameterListener listener) {
     parameterManager.addListener(name, listener);
     parameterClient.subscribeParam(name);
   }
 
   @Override
-  public void removeParameterListener(String name, ParameterListener listener) {
+  public void addParameterListener(String name, ParameterListener listener) {
+    addParameterListener(new GraphName(name), listener);
+  }
+
+  @Override
+  public void removeParameterListener(GraphName name, ParameterListener listener) {
     parameterManager.removeListener(name, listener);
   }
 
   @Override
-  public void set(String name, Boolean value) {
-    String resolvedName = resolver.resolve(name);
+  public void removeParameterListener(String name, ParameterListener listener) {
+    removeParameterListener(new GraphName(name), listener);
+  }
+
+  @Override
+  public void set(GraphName name, boolean value) {
+    GraphName resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
-  public void set(String name, Integer value) {
-    String resolvedName = resolver.resolve(name);
+  public void set(String name, boolean value) {
+    set(new GraphName(name), value);
+  }
+
+  @Override
+  public void set(GraphName name, int value) {
+    GraphName resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
-  public void set(String name, Double value) {
-    String resolvedName = resolver.resolve(name);
+  public void set(String name, int value) {
+    set(new GraphName(name), value);
+  }
+
+  @Override
+  public void set(GraphName name, double value) {
+    GraphName resolvedName = resolver.resolve(name);
+    parameterClient.setParam(resolvedName, value);
+  }
+
+  @Override
+  public void set(String name, double value) {
+    set(new GraphName(name), value);
+  }
+
+  @Override
+  public void set(GraphName name, String value) {
+    GraphName resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, String value) {
-    String resolvedName = resolver.resolve(name);
+    set(new GraphName(name), value);
+  }
+
+  @Override
+  public void set(GraphName name, List<?> value) {
+    GraphName resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, List<?> value) {
-    String resolvedName = resolver.resolve(name);
+    set(new GraphName(name), value);
+  }
+
+  @Override
+  public void set(GraphName name, Map<?, ?> value) {
+    GraphName resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);
   }
 
   @Override
   public void set(String name, Map<?, ?> value) {
-    String resolvedName = resolver.resolve(name);
-    parameterClient.setParam(resolvedName, value);
+    set(new GraphName(name), value);
   }
 
-  private <T> T get(String name, Class<T> type) {
-    String resolvedName = resolver.resolve(name);
+  private <T> T get(GraphName name, Class<T> type) {
+    GraphName resolvedName = resolver.resolve(name);
     Response<Object> response = parameterClient.getParam(resolvedName);
     try {
       if (response.getStatusCode() == StatusCode.SUCCESS) {
@@ -149,9 +204,9 @@ public class DefaultParameterTree implements ParameterTree {
   }
 
   @SuppressWarnings("unchecked")
-  private <T> T get(String name, T defaultValue) {
+  private <T> T get(GraphName name, T defaultValue) {
     Preconditions.checkNotNull(defaultValue);
-    String resolvedName = resolver.resolve(name);
+    GraphName resolvedName = resolver.resolve(name);
     Response<Object> response = parameterClient.getParam(resolvedName);
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       try {
@@ -166,63 +221,123 @@ public class DefaultParameterTree implements ParameterTree {
   }
 
   @Override
-  public boolean getBoolean(String name) {
+  public boolean getBoolean(GraphName name) {
     return get(name, Boolean.class);
   }
 
   @Override
-  public boolean getBoolean(String name, boolean defaultValue) {
+  public boolean getBoolean(String name) {
+    return getBoolean(new GraphName(name));
+  }
+
+  @Override
+  public boolean getBoolean(GraphName name, boolean defaultValue) {
     return get(name, defaultValue);
   }
 
   @Override
-  public int getInteger(String name) {
+  public boolean getBoolean(String name, boolean defaultValue) {
+    return getBoolean(new GraphName(name), defaultValue);
+  }
+
+  @Override
+  public int getInteger(GraphName name) {
     return get(name, Integer.class);
   }
 
   @Override
-  public int getInteger(String name, int defaultValue) {
+  public int getInteger(String name) {
+    return getInteger(new GraphName(name));
+  }
+
+  @Override
+  public int getInteger(GraphName name, int defaultValue) {
     return get(name, defaultValue);
   }
 
   @Override
-  public double getDouble(String name) {
+  public int getInteger(String name, int defaultValue) {
+    return getInteger(new GraphName(name), defaultValue);
+  }
+
+  @Override
+  public double getDouble(GraphName name) {
     return get(name, Double.class);
   }
 
   @Override
-  public double getDouble(String name, double defaultValue) {
+  public double getDouble(String name) {
+    return getDouble(new GraphName(name));
+  }
+
+  @Override
+  public double getDouble(GraphName name, double defaultValue) {
     return get(name, defaultValue);
   }
 
   @Override
-  public String getString(String name) {
+  public double getDouble(String name, double defaultValue) {
+    return getDouble(new GraphName(name), defaultValue);
+  }
+
+  @Override
+  public String getString(GraphName name) {
     return get(name, String.class);
   }
 
   @Override
-  public String getString(String name, String defaultValue) {
+  public String getString(String name) {
+    return get(new GraphName(name), String.class);
+  }
+
+  @Override
+  public String getString(GraphName name, String defaultValue) {
     return get(name, defaultValue);
   }
 
   @Override
-  public List<?> getList(String name) {
+  public String getString(String name, String defaultValue) {
+    return getString(new GraphName(name), defaultValue);
+  }
+
+  @Override
+  public List<?> getList(GraphName name) {
     return Arrays.asList(get(name, Object[].class));
   }
 
   @Override
-  public List<?> getList(String name, List<?> defaultValue) {
+  public List<?> getList(String name) {
+    return getList(new GraphName(name));
+  }
+
+  @Override
+  public List<?> getList(GraphName name, List<?> defaultValue) {
     return Arrays.asList(get(name, defaultValue.toArray()));
   }
 
   @Override
-  public Map<?, ?> getMap(String name) {
+  public List<?> getList(String name, List<?> defaultValue) {
+    return getList(new GraphName(name), defaultValue);
+  }
+
+  @Override
+  public Map<?, ?> getMap(GraphName name) {
     return get(name, Map.class);
   }
 
   @Override
-  public Map<?, ?> getMap(String name, Map<?, ?> defaultValue) {
+  public Map<?, ?> getMap(String name) {
+    return getMap(new GraphName(name));
+  }
+
+  @Override
+  public Map<?, ?> getMap(GraphName name, Map<?, ?> defaultValue) {
     return get(name, defaultValue);
+  }
+
+  @Override
+  public Map<?, ?> getMap(String name, Map<?, ?> defaultValue) {
+    return getMap(new GraphName(name), defaultValue);
   }
 
 }

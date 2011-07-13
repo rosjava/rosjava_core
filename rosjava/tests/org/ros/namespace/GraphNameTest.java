@@ -15,7 +15,12 @@
  */
 package org.ros.namespace;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.ros.Assert.assertGraphNameEquals;
+
 import org.junit.Test;
 
 import java.util.Collections;
@@ -30,21 +35,21 @@ import java.util.concurrent.TimeUnit;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class GraphNameTest extends TestCase {
+public class GraphNameTest {
 
   @Test
   public void testToString() {
     try {
       String[] canonical = { "abc", "ab7", "/abc", "/abc/bar", "/", "~garage", "~foo/bar" };
       for (String c : canonical) {
-        assertEquals(c, new GraphName(c).toString());
+        assertGraphNameEquals(c, new GraphName(c));
       }
       // test canonicalization
-      assertEquals("", new GraphName("").toString());
-      assertEquals("/", new GraphName("/").toString());
-      assertEquals("/foo", new GraphName("/foo/").toString());
-      assertEquals("foo", new GraphName("foo/").toString());
-      assertEquals("foo/bar", new GraphName("foo/bar/").toString());
+      assertGraphNameEquals("", new GraphName(""));
+      assertGraphNameEquals("/", new GraphName("/"));
+      assertGraphNameEquals("/foo", new GraphName("/foo/"));
+      assertGraphNameEquals("foo", new GraphName("foo/"));
+      assertGraphNameEquals("foo/bar", new GraphName("foo/bar/"));
     } catch (IllegalArgumentException e) {
       fail("These names should be valid" + e.toString());
     }
@@ -119,7 +124,7 @@ public class GraphNameTest extends TestCase {
     // parent of empty is empty, just like dirname
     assertEquals(empty, new GraphName("").getParent());
     // parent of global is global, just like dirname
-    assertEquals(global, new GraphName("/").getParent().toString());
+    assertEquals(global, new GraphName("/").getParent());
 
     // test with global names
     assertEquals(new GraphName("/wg"), new GraphName("/wg/name").getParent());
@@ -159,21 +164,14 @@ public class GraphNameTest extends TestCase {
 
   @Test
   public void testGetName() {
-    GraphName name = new GraphName("");
-    assertEquals("", name.getBasename().toString());
-    name = new GraphName("/");
-    assertEquals("", name.getBasename().toString());
-    name = new GraphName("/foo");
-    assertEquals("foo", name.getBasename().toString());
-    name = new GraphName("foo");
-    assertEquals("foo", name.getBasename().toString());
-    name = new GraphName("foo/");
+    assertGraphNameEquals("", new GraphName("").getBasename());
+    assertGraphNameEquals("", new GraphName("").getBasename());
+    assertGraphNameEquals("foo", new GraphName("/foo").getBasename());
+    assertGraphNameEquals("foo", new GraphName("foo").getBasename());
     // The trailing slash is removed when creating a GraphName.
-    assertEquals("foo", name.getBasename().toString());
-    name = new GraphName("/foo/bar");
-    assertEquals("bar", name.getBasename().toString());
-    name = new GraphName("foo/bar");
-    assertEquals("bar", name.getBasename().toString());
+    assertGraphNameEquals("foo", new GraphName("foo/").getBasename());
+    assertGraphNameEquals("bar", new GraphName("/foo/bar").getBasename());
+    assertGraphNameEquals("bar", new GraphName("foo/bar").getBasename());
   }
 
   @Test
