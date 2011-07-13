@@ -19,7 +19,6 @@ package org.ros.node;
 import org.apache.commons.logging.Log;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.MessageListener;
@@ -207,16 +206,12 @@ public interface Node {
       String serviceName, String serviceType) throws ServiceNotFoundException;
 
   /**
-   * Returns a {@link ServiceIdentifier} for communicating with the current
-   * provider of a {@link Service}. Return value is null if no provider can be
-   * determined.
-   * 
    * @param serviceName
-   * @param serviceType
-   * @return {@link ServiceIdentifier} of current {@Service} provider
-   *         or null if none present.
+   *          the name of the service to lookup
+   * @return {@link URI} of the {@Service} provider or null if the
+   *         {@link Service} does not exist
    */
-  ServiceIdentifier lookupService(String serviceName);
+  URI lookupService(String serviceName);
 
   /**
    * Create a {@link ParameterTree} to query and set parameters on the ROS

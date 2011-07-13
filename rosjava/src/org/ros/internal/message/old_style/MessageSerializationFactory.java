@@ -10,12 +10,12 @@ import org.ros.exception.RosRuntimeException;
 public class MessageSerializationFactory implements org.ros.message.MessageSerializationFactory {
 
   @Override
-  public <MessageType> MessageSerializer<MessageType> createSerializer(String messageType) {
+  public <MessageType> MessageSerializer<MessageType> newMessageSerializer(String messageType) {
     return new MessageSerializer<MessageType>();
   }
 
   @Override
-  public <MessageType> MessageDeserializer<MessageType> createDeserializer(String messageType) {
+  public <MessageType> MessageDeserializer<MessageType> newMessageDeserializer(String messageType) {
     return createDeserializer(messageType, "org.ros.message.");
   }
 
@@ -33,25 +33,25 @@ public class MessageSerializationFactory implements org.ros.message.MessageSeria
   }
 
   @Override
-  public <MessageType> org.ros.message.MessageSerializer<MessageType> createServiceRequestSerializer(
+  public <MessageType> org.ros.message.MessageSerializer<MessageType> newServiceRequestSerializer(
       String serviceType) {
-    return createSerializer("org.ros.service." + serviceType + "$Request");
+    return newMessageSerializer("org.ros.service." + serviceType + "$Request");
   }
 
   @Override
-  public <MessageType> org.ros.message.MessageDeserializer<MessageType> createServiceRequestDeserializer(
+  public <MessageType> org.ros.message.MessageDeserializer<MessageType> newServiceRequestDeserializer(
       String serviceType) {
     return createDeserializer(serviceType + "$Request", "org.ros.service.");
   }
 
   @Override
-  public <MessageType> org.ros.message.MessageSerializer<MessageType> createServiceResponseSerializer(
+  public <MessageType> org.ros.message.MessageSerializer<MessageType> newServiceResponseSerializer(
       String serviceType) {
-    return createSerializer("org.ros.service." + serviceType + "$Response");
+    return newMessageSerializer("org.ros.service." + serviceType + "$Response");
   }
 
   @Override
-  public <MessageType> org.ros.message.MessageDeserializer<MessageType> createServiceResponseDeserializer(
+  public <MessageType> org.ros.message.MessageDeserializer<MessageType> newServiceResponseDeserializer(
       String serviceType) {
     return createDeserializer(serviceType + "$Response", "org.ros.service.");
   }

@@ -52,6 +52,26 @@ public class NodeConfiguration {
     }
   }
 
+  /**
+   * @param nodeConfiguration
+   *          the {@link NodeConfiguration} to copy
+   * @return a copy of the supplied {@link NodeConfiguration}
+   */
+  public static NodeConfiguration copyOf(NodeConfiguration nodeConfiguration) {
+    NodeConfiguration copy = new NodeConfiguration();
+    copy.parentResolver = nodeConfiguration.parentResolver;
+    copy.masterUri = nodeConfiguration.masterUri;
+    copy.rosRoot = nodeConfiguration.rosRoot;
+    copy.rosPackagePath = nodeConfiguration.rosPackagePath;
+    copy.nodeNameOverride = nodeConfiguration.nodeNameOverride;
+    copy.messageSerializationFactory = nodeConfiguration.messageSerializationFactory;
+    copy.tcpRosBindAddress = nodeConfiguration.tcpRosBindAddress;
+    copy.tcpRosAdvertiseAddressFactory = nodeConfiguration.tcpRosAdvertiseAddressFactory;
+    copy.xmlRpcBindAddress = nodeConfiguration.xmlRpcBindAddress;
+    copy.xmlRpcAdvertiseAddressFactory = nodeConfiguration.xmlRpcAdvertiseAddressFactory;
+    return copy;
+  }
+
   private NameResolver parentResolver;
   private URI masterUri;
   private File rosRoot;

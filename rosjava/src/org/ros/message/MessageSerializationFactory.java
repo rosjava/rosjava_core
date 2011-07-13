@@ -21,18 +21,18 @@ package org.ros.message;
  */
 public interface MessageSerializationFactory {
 
-  <MessageType> MessageSerializer<MessageType> createSerializer(String messageType);
+  <MessageType> MessageSerializer<MessageType> newMessageSerializer(String messageType);
 
-  <MessageType> MessageDeserializer<MessageType> createDeserializer(String messageType);
+  <MessageType> MessageDeserializer<MessageType> newMessageDeserializer(String messageType);
 
-  <MessageType> MessageSerializer<MessageType> createServiceRequestSerializer(String serviceType);
+  <MessageType> MessageSerializer<MessageType> newServiceRequestSerializer(String serviceType);
 
   <MessageType> MessageDeserializer<MessageType>
-      createServiceRequestDeserializer(String serviceType);
+      newServiceRequestDeserializer(String serviceType);
 
-  <MessageType> MessageSerializer<MessageType> createServiceResponseSerializer(String serviceType);
+  <MessageType> MessageSerializer<MessageType> newServiceResponseSerializer(String serviceType);
 
-  <MessageType> MessageDeserializer<MessageType> createServiceResponseDeserializer(
+  <MessageType> MessageDeserializer<MessageType> newServiceResponseDeserializer(
       String serviceType);
 
 }

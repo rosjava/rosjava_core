@@ -72,8 +72,9 @@ import java.net.URI;
  */
 public class DefaultNode implements Node {
 
-  private final NodeNameResolver resolver;
   private final GraphName nodeName;
+  private final NodeConfiguration nodeConfiguration;
+  private final NodeNameResolver resolver;
   private final RosoutLogger log;
   private final TimeProvider timeProvider;
   private final MasterClient masterClient;
@@ -93,11 +94,12 @@ public class DefaultNode implements Node {
    */
   private boolean running;
 
-  public DefaultNode(GraphName name, NodeConfiguration configuration) {
+  public DefaultNode(GraphName name, NodeConfiguration nodeConfiguration) {
     Preconditions.checkNotNull(name);
-    Preconditions.checkNotNull(configuration);
+    Preconditions.checkNotNull(nodeConfiguration);
+    this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
     running = false;
-    masterClient = new MasterClient(configuration.getMasterUri());
+    masterClient = new MasterClient(nodeConfiguration.getMasterUri());
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
@@ -105,24 +107,25 @@ public class DefaultNode implements Node {
     topicManager.setListener(masterRegistration);
     serviceManager.setListener(masterRegistration);
     publisherFactory = new PublisherFactory(topicManager);
-    messageSerializationFactory = configuration.getMessageSerializationFactory();
+    messageSerializationFactory = nodeConfiguration.getMessageSerializationFactory();
 
     GraphName basename;
-    String nodeNameOverride = configuration.getNodeNameOverride();
+    String nodeNameOverride = nodeConfiguration.getNodeNameOverride();
     if (nodeNameOverride != null) {
       basename = new GraphName(nodeNameOverride);
     } else {
       basename = name;
     }
 
-    NameResolver parentResolver = configuration.getParentResolver();
+    NameResolver parentResolver = nodeConfiguration.getParentResolver();
     nodeName = parentResolver.getNamespace().join(basename);
     resolver = new NodeNameResolver(nodeName, parentResolver);
     slaveServer =
-        new SlaveServer(nodeName, configuration.getTcpRosBindAddress(),
-            configuration.getTcpRosAdvertiseAddress(), configuration.getXmlRpcBindAddress(),
-            configuration.getXmlRpcAdvertiseAddress(), masterClient, topicManager, serviceManager,
-            parameterManager);
+        new SlaveServer(nodeName, nodeConfiguration.getTcpRosBindAddress(),
+            nodeConfiguration.getTcpRosAdvertiseAddress(),
+            nodeConfiguration.getXmlRpcBindAddress(),
+            nodeConfiguration.getXmlRpcAdvertiseAddress(), masterClient, topicManager,
+            serviceManager, parameterManager);
     subscriberFactory = new SubscriberFactory(slaveServer, topicManager);
     serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager);
 
@@ -135,7 +138,7 @@ public class DefaultNode implements Node {
         newPublisher("/rosout", "rosgraph_msgs/Log");
     log.setRosoutPublisher(rosoutPublisher);
 
-    masterUri = configuration.getMasterUri();
+    masterUri = nodeConfiguration.getMasterUri();
     start();
   }
 
@@ -150,18 +153,55 @@ public class DefaultNode implements Node {
     masterRegistration.start(slaveServer.toSlaveIdentifier());
   }
 
+  private <MessageType> org.ros.message.MessageSerializer<MessageType> newMessageSerializer(
+      String messageType) {
+    return nodeConfiguration.getMessageSerializationFactory().newMessageSerializer(messageType);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <MessageType> MessageDeserializer<MessageType> newMessageDeserializer(String messageType) {
+    return (MessageDeserializer<MessageType>) messageSerializationFactory
+        .newMessageDeserializer(messageType);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <ResponseType> MessageSerializer<ResponseType> newServiceResponseSerializer(
+      String serviceType) {
+    return (MessageSerializer<ResponseType>) messageSerializationFactory
+        .newServiceResponseSerializer(serviceType);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <ResponseType> MessageDeserializer<ResponseType> newServiceResponseDeserializer(
+      String serviceType) {
+    return (MessageDeserializer<ResponseType>) messageSerializationFactory
+        .newServiceResponseDeserializer(serviceType);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <RequestType> MessageSerializer<RequestType> newServiceRequestSerializer(
+      String serviceType) {
+    return (MessageSerializer<RequestType>) messageSerializationFactory
+        .newServiceRequestSerializer(serviceType);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <RequestType> MessageDeserializer<RequestType> newServiceRequestDeserializer(
+      String serviceType) {
+    return (MessageDeserializer<RequestType>) messageSerializationFactory
+        .newServiceRequestDeserializer(serviceType);
+  }
+
   @Override
   public <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType) {
     String resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition =
         TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
-    org.ros.message.MessageSerializer<MessageType> serializer =
-        messageSerializationFactory.createSerializer(messageType);
+    org.ros.message.MessageSerializer<MessageType> serializer = newMessageSerializer(messageType);
     return publisherFactory.create(topicDefinition, serializer);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
       final MessageListener<MessageType> listener) {
@@ -169,15 +209,12 @@ public class DefaultNode implements Node {
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition =
         TopicDefinition.create(new GraphName(resolvedTopicName), messageDefinition);
-    MessageDeserializer<MessageType> deserializer =
-        (MessageDeserializer<MessageType>) messageSerializationFactory
-            .createDeserializer(messageType);
+    MessageDeserializer<MessageType> deserializer = newMessageDeserializer(messageType);
     Subscriber<MessageType> subscriber = subscriberFactory.create(topicDefinition, deserializer);
     subscriber.addMessageListener(listener);
     return subscriber;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
       String serviceName, String serviceType,
@@ -189,43 +226,37 @@ public class DefaultNode implements Node {
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
     MessageDeserializer<RequestType> requestDeserializer =
-        (MessageDeserializer<RequestType>) messageSerializationFactory
-            .createServiceRequestDeserializer(serviceType);
-    MessageSerializer<ResponseType> responseSerializer =
-        (MessageSerializer<ResponseType>) messageSerializationFactory
-            .createServiceResponseSerializer(serviceType);
+        newServiceRequestDeserializer(serviceType);
+    MessageSerializer<ResponseType> responseSerializer = newServiceResponseSerializer(serviceType);
     return serviceFactory.createServer(definition, requestDeserializer, responseSerializer,
         responseBuilder);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
       String serviceName, String serviceType) throws ServiceNotFoundException {
-    ServiceIdentifier identifier = lookupService(serviceName);
-    if (identifier == null) {
+    URI uri = lookupService(serviceName);
+    if (uri == null) {
       throw new ServiceNotFoundException("No such service " + serviceName + " of type "
           + serviceType);
     }
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
-    ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
-    MessageSerializer<RequestType> requestSerializer =
-        (MessageSerializer<RequestType>) messageSerializationFactory
-            .createServiceRequestSerializer(serviceType);
+    GraphName resolvedServiceName = new GraphName(resolveName(serviceName));
+    ServiceIdentifier serviceIdentifier = new ServiceIdentifier(resolvedServiceName, uri);
+    ServiceDefinition definition = new ServiceDefinition(serviceIdentifier, messageDefinition);
+    MessageSerializer<RequestType> requestSerializer = newServiceRequestSerializer(serviceType);
     MessageDeserializer<ResponseType> responseDeserializer =
-        (MessageDeserializer<ResponseType>) messageSerializationFactory
-            .createServiceResponseDeserializer(serviceType);
+        newServiceResponseDeserializer(serviceType);
     return serviceFactory.createClient(definition, requestSerializer, responseDeserializer);
   }
 
   @Override
-  public ServiceIdentifier lookupService(String serviceName) {
-    GraphName resolvedServiceName = new GraphName(resolveName(serviceName));
+  public URI lookupService(String serviceName) {
     Response<URI> response =
-        masterClient.lookupService(slaveServer.toSlaveIdentifier(), serviceName.toString());
+        masterClient.lookupService(slaveServer.toSlaveIdentifier(), resolveName(serviceName));
     if (response.getStatusCode() == StatusCode.SUCCESS) {
-      return new ServiceIdentifier(resolvedServiceName, response.getResult());
+      return response.getResult();
     } else {
       return null;
     }
