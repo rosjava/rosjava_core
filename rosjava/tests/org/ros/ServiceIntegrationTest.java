@@ -60,7 +60,7 @@ public class ServiceIntegrationTest {
   }
 
   @Test
-  public void PesistentServiceConnectionTest() throws Exception {
+  public void pesistentServiceConnectionTest() throws Exception {
     Node serverNode = nodeFactory.newNode("/server", nodeConfiguration);
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
@@ -102,7 +102,7 @@ public class ServiceIntegrationTest {
   }
 
   @Test
-  public void RequestFailureTest() throws Exception {
+  public void requestFailureTest() throws Exception {
     final String errorMessage = "Error!";
     Node serverNode = nodeFactory.newNode("/server", nodeConfiguration);
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
