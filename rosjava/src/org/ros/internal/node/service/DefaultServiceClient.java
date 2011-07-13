@@ -43,6 +43,7 @@ import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
+import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
 
 import java.net.InetSocketAddress;
@@ -55,11 +56,11 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceClient<RequestType, ResponseType> implements
-    org.ros.node.service.ServiceClient<RequestType, ResponseType> {
+public class DefaultServiceClient<RequestType, ResponseType> implements
+    ServiceClient<RequestType, ResponseType> {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(ServiceClient.class);
+  private static final Log log = LogFactory.getLog(DefaultServiceClient.class);
 
   private final MessageSerializer<RequestType> serializer;
   private final MessageDeserializer<ResponseType> deserializer;
@@ -86,13 +87,13 @@ public class ServiceClient<RequestType, ResponseType> implements
     }
   }
 
-  public static <S, T> ServiceClient<S, T> create(GraphName nodeName,
+  public static <S, T> DefaultServiceClient<S, T> create(GraphName nodeName,
       ServiceDefinition serviceDefinition, MessageSerializer<S> serializer,
       MessageDeserializer<T> deserializer) {
-    return new ServiceClient<S, T>(nodeName, serviceDefinition, serializer, deserializer);
+    return new DefaultServiceClient<S, T>(nodeName, serviceDefinition, serializer, deserializer);
   }
 
-  private ServiceClient(GraphName nodeName, ServiceDefinition serviceDefinition,
+  private DefaultServiceClient(GraphName nodeName, ServiceDefinition serviceDefinition,
       MessageSerializer<RequestType> serializer, MessageDeserializer<ResponseType> deserializer) {
     this.serializer = serializer;
     this.deserializer = deserializer;
@@ -101,8 +102,7 @@ public class ServiceClient<RequestType, ResponseType> implements
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
             // TODO(damonkohler): Support non-persistent connections.
-            .put(ConnectionHeaderFields.PERSISTENT, "1")
-            .putAll(serviceDefinition.toHeader())
+            .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceDefinition.toHeader())
             .build();
     channelFactory =
         new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),

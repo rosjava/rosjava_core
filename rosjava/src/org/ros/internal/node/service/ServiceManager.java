@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class ServiceManager {
 
-  private final Map<String, ServiceServer<?, ?>> serviceServers;
+  private final Map<String, DefaultServiceServer<?, ?>> serviceServers;
   private final Map<String, ServiceClient<?, ?>> serviceClients;
   
   private ServiceListener listener;
@@ -47,14 +47,14 @@ public class ServiceManager {
     return serviceServers.containsKey(serviceName);
   }
 
-  public void putServer(String serviceName, ServiceServer<?, ?> serviceServer) {
+  public void putServer(String serviceName, DefaultServiceServer<?, ?> serviceServer) {
     serviceServers.put(serviceName, serviceServer);
     if (listener != null) {
       listener.serviceServerAdded(serviceServer);
     }
   }
 
-  public ServiceServer<?, ?> getServer(String serviceName) {
+  public DefaultServiceServer<?, ?> getServer(String serviceName) {
     return serviceServers.get(serviceName);
   }
 
@@ -70,7 +70,7 @@ public class ServiceManager {
     return serviceClients.get(serviceName);
   }
 
-  public List<ServiceServer<?, ?>> getServers() {
+  public List<DefaultServiceServer<?, ?>> getServers() {
     return ImmutableList.copyOf(serviceServers.values());
   }
 

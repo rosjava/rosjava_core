@@ -29,7 +29,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceResponseEncoder;
-import org.ros.internal.node.service.ServiceServer;
+import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.ConnectionHeader;
@@ -65,7 +65,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
     if (incomingHeader.containsKey(ConnectionHeaderFields.SERVICE)) {
       String serviceName = incomingHeader.get(ConnectionHeaderFields.SERVICE);
       Preconditions.checkState(serviceManager.hasServer(serviceName));
-      ServiceServer<?, ?> serviceServer = serviceManager.getServer(serviceName);
+      DefaultServiceServer<?, ?> serviceServer = serviceManager.getServer(serviceName);
       ChannelBuffer outgoingBuffer = serviceServer.finishHandshake(incomingHeader);
       if (outgoingBuffer == null) {
         // This is just a probe.

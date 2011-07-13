@@ -30,9 +30,7 @@ import org.ros.internal.node.topic.Topic;
 public interface Publisher<MessageType> extends Topic {
 
   /**
-   * @see http
-   *      ://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#
-   *      Publisher_Options
+   * @see http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options
    * @param enabled
    *          if {@code true}, all messages published to this topic from the
    *          {@link Publisher}'s {@link Node} will be latched
@@ -40,7 +38,7 @@ public interface Publisher<MessageType> extends Topic {
   void setLatchMode(boolean enabled);
 
   /**
-   * Publish a message. This message will be available on the topic that this
+   * Publishes a message. This message will be available on the topic that this
    * {@link Publisher} has been associated with.
    * 
    * @param message

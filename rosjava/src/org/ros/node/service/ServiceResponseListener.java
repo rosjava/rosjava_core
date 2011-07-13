@@ -16,19 +16,32 @@
 
 package org.ros.node.service;
 
-import org.ros.message.Message;
+import org.ros.exception.RemoteException;
 
 /**
  * A listener for service responses.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <MessageType> {@link Message} type
+ * @param <MessageType>
+ *          handles messages of this type
  */
 public interface ServiceResponseListener<MessageType> {
 
-  void onSuccess(MessageType message);
+  /**
+   * Called when a service method returns successfully.
+   * 
+   * @param response
+   *          the response message
+   */
+  void onSuccess(MessageType response);
 
-  void onFailure(Exception e);
+  /**
+   * Called when a service method fails to return successfully.
+   * 
+   * @param e
+   *          the {@link RemoteException} received from the service
+   */
+  void onFailure(RemoteException e);
 
 }

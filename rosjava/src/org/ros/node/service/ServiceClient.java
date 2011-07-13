@@ -19,17 +19,39 @@ package org.ros.node.service;
 import java.net.URI;
 
 /**
+ * Provides a connection to a ROS service.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
- *
+ * 
  * @param <RequestType>
+ *          the {@link ServiceServer} responds to requests of this type
  * @param <ResponseType>
+ *          the {@link ServiceServer} returns responses of this type
  */
 public interface ServiceClient<RequestType, ResponseType> {
 
+  /**
+   * Connects to a {@link ServiceServer}.
+   * 
+   * @param uri
+   *          the {@link URI} of the {@link ServiceServer} to connect to
+   */
   void connect(URI uri);
 
-  void shutdown();
-
+  /**
+   * Calls a method on the {@link ServiceServer}.
+   * 
+   * @param request
+   *          the request message
+   * @param listener
+   *          the {@link ServiceResponseListener} that will handle the response
+   *          to this request
+   */
   void call(RequestType request, ServiceResponseListener<ResponseType> listener);
+
+  /**
+   * Stops the client (e.g. disconnect a persistent service connection).
+   */
+  void shutdown();
 
 }

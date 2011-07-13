@@ -41,32 +41,32 @@ public class ServiceFactory {
   }
 
   /**
-   * Gets or creates a {@link ServiceServer} instance. {@link ServiceServer}s
-   * are cached and reused per service. When a new {@link ServiceServer} is
+   * Gets or creates a {@link DefaultServiceServer} instance. {@link DefaultServiceServer}s
+   * are cached and reused per service. When a new {@link DefaultServiceServer} is
    * generated, it is registered with the {@link MasterServer}.
    * 
    * @param serviceDefinition
    *          the {@link ServiceMessageDefinition} that is being served
    * @param responseBuilder
    *          the {@link ServiceResponseBuilder} that is used to build responses
-   * @return a {@link ServiceServer} instance
+   * @return a {@link DefaultServiceServer} instance
    */
   @SuppressWarnings("unchecked")
-  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> createServer(
+  public <RequestType, ResponseType> DefaultServiceServer<RequestType, ResponseType> createServer(
       ServiceDefinition serviceDefinition, MessageDeserializer<RequestType> deserializer,
       MessageSerializer<ResponseType> serializer,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
-    ServiceServer<RequestType, ResponseType> serviceServer;
+    DefaultServiceServer<RequestType, ResponseType> serviceServer;
     String name = serviceDefinition.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasServer(name)) {
         serviceServer =
-            (ServiceServer<RequestType, ResponseType>) serviceManager.getServer(name);
+            (DefaultServiceServer<RequestType, ResponseType>) serviceManager.getServer(name);
       } else {
         serviceServer =
-            new ServiceServer<RequestType, ResponseType>(serviceDefinition, deserializer,
+            new DefaultServiceServer<RequestType, ResponseType>(serviceDefinition, deserializer,
                 serializer, responseBuilder, slaveServer.getTcpRosAdvertiseAddress());
         createdNewService = true;
       }
@@ -79,30 +79,30 @@ public class ServiceFactory {
   }
 
   /**
-   * Gets or creates a {@link ServiceClient} instance. {@link ServiceClient}s
-   * are cached and reused per service. When a new {@link ServiceClient} is
-   * created, it is connected to the {@link ServiceServer}.
+   * Gets or creates a {@link DefaultServiceClient} instance. {@link DefaultServiceClient}s
+   * are cached and reused per service. When a new {@link DefaultServiceClient} is
+   * created, it is connected to the {@link DefaultServiceServer}.
    * 
    * @param <ResponseType>
    * @param serviceDefinition
    *          the {@link ServiceIdentifier} of the server
-   * @return a {@link ServiceClient} instance
+   * @return a {@link DefaultServiceClient} instance
    */
   @SuppressWarnings("unchecked")
-  public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> createClient(
+  public <RequestType, ResponseType> DefaultServiceClient<RequestType, ResponseType> createClient(
       ServiceDefinition serviceDefinition, MessageSerializer<RequestType> serializer,
       MessageDeserializer<ResponseType> deserializer) {
     Preconditions.checkNotNull(serviceDefinition.getUri());
-    ServiceClient<RequestType, ResponseType> serviceClient;
+    DefaultServiceClient<RequestType, ResponseType> serviceClient;
     String name = serviceDefinition.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasClient(name)) {
         serviceClient =
-            (ServiceClient<RequestType, ResponseType>) serviceManager.getClient(name);
+            (DefaultServiceClient<RequestType, ResponseType>) serviceManager.getClient(name);
       } else {
-        serviceClient = ServiceClient.create(nodeName, serviceDefinition, serializer, deserializer);
+        serviceClient = DefaultServiceClient.create(nodeName, serviceDefinition, serializer, deserializer);
         createdNewService = true;
       }
     }

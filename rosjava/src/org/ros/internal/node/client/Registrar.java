@@ -26,7 +26,7 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceListener;
-import org.ros.internal.node.service.ServiceServer;
+import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.DefaultSubscriber;
@@ -165,7 +165,7 @@ public class Registrar implements TopicListener, ServiceListener {
   }
 
   @Override
-  public void serviceServerAdded(final ServiceServer<?, ?> serviceServer) {
+  public void serviceServerAdded(final DefaultServiceServer<?, ?> serviceServer) {
     submitCallable(new Callable<Response<?>>() {
       @Override
       public Response<Void> call() throws Exception {

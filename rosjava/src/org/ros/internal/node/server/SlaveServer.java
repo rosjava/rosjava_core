@@ -23,7 +23,7 @@ import org.ros.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.service.ServiceManager;
-import org.ros.internal.node.service.ServiceServer;
+import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.DefaultSubscriber;
@@ -98,7 +98,7 @@ public class SlaveServer extends NodeServer {
     tcpRosServer.shutdown();
   }
 
-  public void addService(ServiceServer<?, ?> server) {
+  public void addService(DefaultServiceServer<?, ?> server) {
     serviceManager.putServer(server.getName().toString(), server);
   }
 

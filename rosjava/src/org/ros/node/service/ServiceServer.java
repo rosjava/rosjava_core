@@ -17,7 +17,6 @@
 package org.ros.node.service;
 
 import org.ros.internal.node.client.Registrant;
-
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
@@ -36,8 +35,19 @@ import java.net.URI;
  */
 public interface ServiceServer<RequestType, ResponseType> extends Registrant {
 
+  /**
+   * @return the name of the {@link ServiceServer}
+   */
   GraphName getName();
 
+  /**
+   * @return the {@link URI} for this {@link ServiceServer}
+   */
   URI getUri();
+
+  /**
+   * Stops the service and unregisters it.
+   */
+  void shutdown();
 
 }

@@ -30,6 +30,7 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
+import org.ros.node.service.ServiceServer;
 
 import java.net.URI;
 import java.util.Map;
@@ -39,8 +40,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceServer<RequestType, ResponseType> implements
-    org.ros.node.service.ServiceServer<RequestType, ResponseType> {
+public class DefaultServiceServer<RequestType, ResponseType> implements
+    ServiceServer<RequestType, ResponseType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
@@ -52,8 +53,8 @@ public class ServiceServer<RequestType, ResponseType> implements
   private final ServiceResponseBuilder<RequestType, ResponseType> responseBuilder;
   private final CountDownLatch registrationLatch;
 
-  public ServiceServer(ServiceDefinition definition, MessageDeserializer<RequestType> deserializer,
-      MessageSerializer<ResponseType> serializer,
+  public DefaultServiceServer(ServiceDefinition definition,
+      MessageDeserializer<RequestType> deserializer, MessageSerializer<ResponseType> serializer,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
       AdvertiseAddress advertiseAddress) {
     this.definition = definition;
@@ -92,9 +93,9 @@ public class ServiceServer<RequestType, ResponseType> implements
 
   /**
    * @return a new {@link ServiceMessageDefinition} with this
-   *         {@link ServiceServer}'s {@link URI}
+   *         {@link DefaultServiceServer}'s {@link URI}
    */
-  public ServiceDefinition getDefinition() {
+  ServiceDefinition getDefinition() {
     ServiceIdentifier identifier = new ServiceIdentifier(definition.getName(), getUri());
     return new ServiceDefinition(identifier, new ServiceMessageDefinition(definition.getType(),
         definition.getMd5Checksum()));
@@ -122,6 +123,11 @@ public class ServiceServer<RequestType, ResponseType> implements
   @Override
   public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
     return registrationLatch.await(timeout, unit);
+  }
+
+  @Override
+  public void shutdown() {
+    throw new UnsupportedOperationException();
   }
 
 }

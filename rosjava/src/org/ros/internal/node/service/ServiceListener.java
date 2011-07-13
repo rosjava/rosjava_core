@@ -17,12 +17,12 @@
 package org.ros.internal.node.service;
 
 /**
- * Listen to creation of new {@link ServiceServer}s.
+ * Listen to creation of new {@link DefaultServiceServer}s.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface ServiceListener {
   
-  void serviceServerAdded(ServiceServer<?, ?> server);
+  void serviceServerAdded(DefaultServiceServer<?, ?> server);
 
 }
