@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
+import org.ros.exception.RemoteException;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
@@ -31,9 +32,6 @@ import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeFactory;
-import org.ros.node.service.ServiceClient;
-import org.ros.node.service.ServiceResponseListener;
-import org.ros.node.service.ServiceServer;
 import org.ros.service.test_ros.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
@@ -94,7 +92,7 @@ public class ServiceIntegrationTest {
       }
 
       @Override
-      public void onFailure(Exception e) {
+      public void onFailure(RemoteException e) {
         throw new RuntimeException(e);
       }
     });
@@ -132,7 +130,7 @@ public class ServiceIntegrationTest {
       }
 
       @Override
-      public void onFailure(Exception e) {
+      public void onFailure(RemoteException e) {
         assertEquals(e.getMessage(), errorMessage);
         latch.countDown();
       }
