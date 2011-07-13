@@ -23,6 +23,7 @@ import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.address.PublicAdvertiseAddressFactory;
 import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageSerializationFactory;
+import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 
 import java.io.File;
@@ -63,7 +64,7 @@ public class NodeConfiguration {
     copy.masterUri = nodeConfiguration.masterUri;
     copy.rosRoot = nodeConfiguration.rosRoot;
     copy.rosPackagePath = nodeConfiguration.rosPackagePath;
-    copy.nodeNameOverride = nodeConfiguration.nodeNameOverride;
+    copy.nodeName = nodeConfiguration.nodeName;
     copy.messageSerializationFactory = nodeConfiguration.messageSerializationFactory;
     copy.tcpRosBindAddress = nodeConfiguration.tcpRosBindAddress;
     copy.tcpRosAdvertiseAddressFactory = nodeConfiguration.tcpRosAdvertiseAddressFactory;
@@ -76,7 +77,7 @@ public class NodeConfiguration {
   private URI masterUri;
   private File rosRoot;
   private List<File> rosPackagePath;
-  private String nodeNameOverride;
+  private GraphName nodeName;
   private MessageSerializationFactory messageSerializationFactory;
   private BindAddress tcpRosBindAddress;
   private AdvertiseAddressFactory tcpRosAdvertiseAddressFactory;
@@ -162,9 +163,11 @@ public class NodeConfiguration {
   /**
    * @param resolver
    *          the {@link NameResolver} for the {@link Node}'s parent namespace
+   * @return this {@link NodeConfiguration}
    */
-  public void setParentResolver(NameResolver resolver) {
+  public NodeConfiguration setParentResolver(NameResolver resolver) {
     this.parentResolver = resolver;
+    return this;
   }
 
   /**
@@ -181,9 +184,11 @@ public class NodeConfiguration {
    * @param masterUri
    *          the {@link URI} of the master that the {@link Node} will register
    *          with
+   * @return this {@link NodeConfiguration}
    */
-  public void setMasterUri(URI masterUri) {
+  public NodeConfiguration setMasterUri(URI masterUri) {
     this.masterUri = masterUri;
+    return this;
   }
 
   /**
@@ -198,9 +203,11 @@ public class NodeConfiguration {
    * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_ROOT
    * @param rosRoot
    *          the location where the ROS core packages are installed
+   * @return this {@link NodeConfiguration}
    */
-  public void setRosRoot(File rosRoot) {
+  public NodeConfiguration setRosRoot(File rosRoot) {
     this.rosRoot = rosRoot;
+    return this;
   }
 
   /**
@@ -225,50 +232,91 @@ public class NodeConfiguration {
    * @param rosPackagePath
    *          the {@link List} of paths where the system will look for ROS
    *          packages
+   * @return this {@link NodeConfiguration}
    */
-  public void setRosPackagePath(List<File> rosPackagePath) {
+  public NodeConfiguration setRosPackagePath(List<File> rosPackagePath) {
     this.rosPackagePath = rosPackagePath;
+    return this;
   }
 
   /**
-   * @return the override for the name of the {@link Node}
+   * @return the name of the {@link Node}
    */
-  public String getNodeNameOverride() {
-    return nodeNameOverride;
+  public GraphName getNodeName() {
+    return nodeName;
   }
 
   /**
-   * @param nodeNameOverride
-   *          the override for the name of the {@link Node}
+   * @param nodeName
+   *          the name of the {@link Node}
+   * @return this {@link NodeConfiguration}
    */
-  public void setNodeNameOverride(String nodeNameOverride) {
-    this.nodeNameOverride = nodeNameOverride;
+  public NodeConfiguration setNodeName(GraphName nodeName) {
+    this.nodeName = nodeName;
+    return this;
+  }
+
+  /**
+   * @param nodeName
+   *          the name of the {@link Node}
+   * @return this {@link NodeConfiguration}
+   */
+  public NodeConfiguration setNodeName(String nodeName) {
+    return setNodeName(new GraphName(nodeName));
+  }
+
+  /**
+   * Sets the name of the {@link Node} if the name has not already been set.
+   * 
+   * @param nodeName
+   *          the name of the {@link Node}
+   * @return this {@link NodeConfiguration}
+   */
+  public NodeConfiguration setDefaultNodeName(GraphName nodeName) {
+    if (this.nodeName == null) {
+      setNodeName(nodeName);
+    }
+    return this;
+  }
+
+  /**
+   * Sets the name of the {@link Node} if the name has not already been set.
+   * 
+   * @param nodeName
+   *          the name of the {@link Node}
+   * @return this {@link NodeConfiguration}
+   */
+  public NodeConfiguration setDefaultNodeName(String nodeName) {
+    return setDefaultNodeName(new GraphName(nodeName));
   }
 
   public MessageSerializationFactory getMessageSerializationFactory() {
     return messageSerializationFactory;
   }
 
-  public void
-      setMessageSerializationFactory(MessageSerializationFactory messageSerializationFactory) {
+  public NodeConfiguration setMessageSerializationFactory(
+      MessageSerializationFactory messageSerializationFactory) {
     this.messageSerializationFactory = messageSerializationFactory;
+    return this;
   }
 
   public BindAddress getTcpRosBindAddress() {
     return tcpRosBindAddress;
   }
 
-  public void setTcpRosBindAddress(BindAddress tcpRosBindAddress) {
+  public NodeConfiguration setTcpRosBindAddress(BindAddress tcpRosBindAddress) {
     this.tcpRosBindAddress = tcpRosBindAddress;
+    return this;
   }
 
   public AdvertiseAddressFactory getTcpRosAdvertiseAddressFactory() {
     return tcpRosAdvertiseAddressFactory;
   }
 
-  public void
-      setTcpRosAdvertiseAddressFactory(AdvertiseAddressFactory tcpRosAdvertiseAddressFactory) {
+  public NodeConfiguration setTcpRosAdvertiseAddressFactory(
+      AdvertiseAddressFactory tcpRosAdvertiseAddressFactory) {
     this.tcpRosAdvertiseAddressFactory = tcpRosAdvertiseAddressFactory;
+    return this;
   }
 
   public AdvertiseAddress getTcpRosAdvertiseAddress() {
@@ -279,8 +327,9 @@ public class NodeConfiguration {
     return xmlRpcBindAddress;
   }
 
-  public void setXmlRpcBindAddress(BindAddress xmlRpcBindAddress) {
+  public NodeConfiguration setXmlRpcBindAddress(BindAddress xmlRpcBindAddress) {
     this.xmlRpcBindAddress = xmlRpcBindAddress;
+    return this;
   }
 
   public AdvertiseAddress getXmlRpcAdvertiseAddress() {
@@ -291,9 +340,10 @@ public class NodeConfiguration {
     return xmlRpcAdvertiseAddressFactory;
   }
 
-  public void
-      setXmlRpcAdvertiseAddressFactory(AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory) {
+  public NodeConfiguration setXmlRpcAdvertiseAddressFactory(
+      AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory) {
     this.xmlRpcAdvertiseAddressFactory = xmlRpcAdvertiseAddressFactory;
+    return this;
   }
 
 }

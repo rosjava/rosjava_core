@@ -63,7 +63,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 
 /**
- * A default implementation of a {@link Node}.
+ * The default implementation of a {@link Node}.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
@@ -92,9 +92,7 @@ public class DefaultNode implements Node {
    */
   private boolean running;
 
-  public DefaultNode(GraphName name, NodeConfiguration nodeConfiguration) {
-    Preconditions.checkNotNull(name);
-    Preconditions.checkNotNull(nodeConfiguration);
+  public DefaultNode(NodeConfiguration nodeConfiguration) {
     this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
     running = false;
     masterClient = new MasterClient(nodeConfiguration.getMasterUri());
@@ -106,14 +104,7 @@ public class DefaultNode implements Node {
     serviceManager.setListener(masterRegistration);
     publisherFactory = new PublisherFactory(topicManager);
 
-    GraphName basename;
-    String nodeNameOverride = nodeConfiguration.getNodeNameOverride();
-    if (nodeNameOverride != null) {
-      basename = new GraphName(nodeNameOverride);
-    } else {
-      basename = name;
-    }
-
+    GraphName basename = nodeConfiguration.getNodeName();
     NameResolver parentResolver = nodeConfiguration.getParentResolver();
     nodeName = parentResolver.getNamespace().join(basename);
     resolver = new NodeNameResolver(nodeName, parentResolver);
@@ -140,7 +131,7 @@ public class DefaultNode implements Node {
   }
 
   /**
-   * Start the node running. This will initiate master registration.
+   * Start the node and initiate master registration.
    */
   @VisibleForTesting
   void start() {

@@ -26,27 +26,29 @@ import org.ros.namespace.GraphName;
 public interface NodeFactory {
 
   /**
-   * Build a new {@link Node} with the given name and {@link NodeConfiguration}.
+   * Build a new {@link Node} with the given and {@link NodeConfiguration} and
+   * default name.
    * 
-   * @param name
-   *          the name of the new {@link Node}
+   * @param defaultNodeName
+   *          the name of the {@link Node} if the name is not already specified
+   *          in the {@link NodeConfiguration}
    * @param configuration
    *          the {@link NodeConfiguration} for the new {@link Node}
-   * @return a new {@link Node} with the given name and
-   *         {@link NodeConfiguration}
+   * @return a new {@link Node}
    */
-  Node newNode(GraphName name, NodeConfiguration configuration);
+  Node newNode(GraphName defaultNodeName, NodeConfiguration configuration);
 
   /**
-   * Build a new {@link Node} with the given name and {@link NodeConfiguration}.
+   * Build a new {@link Node} with the given and {@link NodeConfiguration} and
+   * default name.
    * 
-   * @param name
-   *          the name of the new {@link Node}
+   * @param defaultNodeName
+   *          the name of the {@link Node} if the name is not already specified
+   *          in the {@link NodeConfiguration}
    * @param configuration
    *          the {@link NodeConfiguration} for the new {@link Node}
-   * @return a new {@link Node} with the given name and
-   *         {@link NodeConfiguration}
+   * @return a new {@link Node}
    */
-  Node newNode(String name, NodeConfiguration configuration);
+  Node newNode(String defaultNodeName, NodeConfiguration configuration);
 
 }

@@ -36,8 +36,6 @@ import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeFactory;
-import org.ros.node.topic.Publisher;
-import org.ros.node.topic.Subscriber;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
@@ -62,17 +60,17 @@ public class TopicIntegrationTest {
 
   @Test
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
-    Node publisherNode = nodeFactory.newNode("/publisher", nodeConfiguration);
+    Node publisherNode = nodeFactory.newNode("publisher", nodeConfiguration);
     Publisher<org.ros.message.std_msgs.String> publisher =
-        publisherNode.newPublisher("/foo", "std_msgs/String");
+        publisherNode.newPublisher("foo", "std_msgs/String");
 
     final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
     helloMessage.data = "Hello, ROS!";
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
-    Node subscriberNode = nodeFactory.newNode("/subscriber", nodeConfiguration);
+    Node subscriberNode = nodeFactory.newNode("subscriber", nodeConfiguration);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
-        subscriberNode.newSubscriber("/foo", "std_msgs/String",
+        subscriberNode.newSubscriber("foo", "std_msgs/String",
             new MessageListener<org.ros.message.std_msgs.String>() {
               @Override
               public void onNewMessage(org.ros.message.std_msgs.String message) {
@@ -96,14 +94,14 @@ public class TopicIntegrationTest {
 
   @Test
   public void testAddDisconnectedPublisher() {
-    Node subscriberNode = nodeFactory.newNode("/subscriber", nodeConfiguration);
+    Node subscriberNode = nodeFactory.newNode("subscriber", nodeConfiguration);
     org.ros.internal.node.topic.Subscriber<org.ros.message.std_msgs.String> subscriber =
         (org.ros.internal.node.topic.Subscriber<org.ros.message.std_msgs.String>) subscriberNode
-            .<org.ros.message.std_msgs.String>newSubscriber("/foo", "std_msgs/String", null);
+            .<org.ros.message.std_msgs.String>newSubscriber("foo", "std_msgs/String", null);
 
     try {
       TopicDefinition topicDefinition =
-          TopicDefinition.create(new GraphName("/foo"),
+          TopicDefinition.create(new GraphName("foo"),
               MessageDefinition.createFromTypeName("std_msgs/String"));
       subscriber.addPublisher(
           PublisherDefinition.createPublisherDefinition(

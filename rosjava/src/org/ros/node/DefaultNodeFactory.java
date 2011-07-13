@@ -20,18 +20,21 @@ import org.ros.internal.node.DefaultNode;
 import org.ros.namespace.GraphName;
 
 /**
+ * Constructs {@link DefaultNode}s.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class DefaultNodeFactory implements NodeFactory {
 
   @Override
-  public Node newNode(GraphName name, NodeConfiguration configuration) {
-    return new DefaultNode(name, configuration);
+  public Node newNode(GraphName defaultNodeName, NodeConfiguration nodeConfiguration) {
+    NodeConfiguration copy = NodeConfiguration.copyOf(nodeConfiguration);
+    return new DefaultNode(copy.setDefaultNodeName(defaultNodeName));
   }
 
   @Override
-  public Node newNode(String name, NodeConfiguration configuration) {
-    return newNode(new GraphName(name), configuration);
+  public Node newNode(String defaultNodeName, NodeConfiguration configuration) {
+    return newNode(new GraphName(defaultNodeName), configuration);
   }
 
 }

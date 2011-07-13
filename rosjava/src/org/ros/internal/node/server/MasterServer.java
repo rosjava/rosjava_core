@@ -77,7 +77,8 @@ public class MasterServer extends NodeServer {
 
   private void addSlave(SlaveIdentifier slaveIdentifier) {
     String name = slaveIdentifier.getName().toString();
-    Preconditions.checkState(slaves.get(name) == null || slaves.get(name).equals(slaveIdentifier));
+    Preconditions.checkState(slaves.get(name) == null || slaves.get(name).equals(slaveIdentifier),
+        "Failed to add slave: " + slaveIdentifier + "\nExisting slave: " + slaves.get(name));
     slaves.put(name, slaveIdentifier);
   }
 

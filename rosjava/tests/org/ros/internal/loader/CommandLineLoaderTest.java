@@ -157,10 +157,10 @@ public class CommandLineLoaderTest {
     // Test __name override
     NodeConfiguration nodeConfiguration =
         new CommandLineLoader(emptyArgv, env).createConfiguration();
-    assertEquals(null, nodeConfiguration.getNodeNameOverride());
+    assertEquals(null, nodeConfiguration.getNodeName());
     List<String> args = Lists.newArrayList("Foo", "__name:=newname");
     nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
-    assertEquals("newname", nodeConfiguration.getNodeNameOverride());
+    assertEquals("newname", nodeConfiguration.getNodeName().toString());
 
     // Test ROS_MASTER_URI from command-line
     args =

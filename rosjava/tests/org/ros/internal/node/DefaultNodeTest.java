@@ -58,6 +58,7 @@ public class DefaultNodeTest {
   private MasterServer masterServer;
   private NodeConfiguration privateNodeConfiguration;
   private NodeFactory nodeFactory;
+  private URI masterUri;
 
   void checkHostName(String hostName) {
     assertTrue(!hostName.equals("0.0.0.0"));
@@ -68,14 +69,14 @@ public class DefaultNodeTest {
   public void setUp() {
     masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
-    URI masterUri = masterServer.getUri();
+    masterUri = masterServer.getUri();
     checkHostName(masterUri.getHost());
     privateNodeConfiguration = NodeConfiguration.newPrivate(masterUri);
     nodeFactory = new DefaultNodeFactory();
   }
 
   public void testFailIfStartedWhileRunning() throws UnknownHostException {
-    Node node = nodeFactory.newNode("/node_name", privateNodeConfiguration);
+    Node node = nodeFactory.newNode("node_name", privateNodeConfiguration);
     try {
       ((DefaultNode) node).start();
       fail();
@@ -86,7 +87,7 @@ public class DefaultNodeTest {
 
   @Test
   public void testFailIfStoppedWhileNotRunning() throws UnknownHostException {
-    Node node = nodeFactory.newNode("/node_name", privateNodeConfiguration);
+    Node node = nodeFactory.newNode("node_name", privateNodeConfiguration);
     node.shutdown();
     try {
       node.shutdown();
@@ -101,7 +102,8 @@ public class DefaultNodeTest {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     assertFalse(InetAddresses.isInetAddress(host));
     Node node =
-        nodeFactory.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+        nodeFactory.newNode("node_name",
+            NodeConfiguration.newPublic(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -112,7 +114,8 @@ public class DefaultNodeTest {
   public void testCreatePublicWithIpv4() throws Exception {
     String host = "1.2.3.4";
     Node node =
-        nodeFactory.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+        nodeFactory.newNode("node_name",
+            NodeConfiguration.newPublic(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -123,7 +126,8 @@ public class DefaultNodeTest {
   public void testCreatePublicWithIpv6() throws Exception {
     String host = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     Node node =
-        nodeFactory.newNode("/node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+        nodeFactory.newNode("node_name",
+            NodeConfiguration.newPublic(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -133,7 +137,7 @@ public class DefaultNodeTest {
   @Test
   public void testCreatePrivate() {
     Node node =
-        nodeFactory.newNode("/node_name", NodeConfiguration.newPrivate(masterServer.getUri()));
+        nodeFactory.newNode("node_name", privateNodeConfiguration);
     InetSocketAddress nodeAddress = node.getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertTrue(nodeAddress.getAddress().isLoopbackAddress());
@@ -142,7 +146,7 @@ public class DefaultNodeTest {
 
   @Test
   public void testPubSubRegistration() throws InterruptedException {
-    Node node = nodeFactory.newNode("/node_name", privateNodeConfiguration);
+    Node node = nodeFactory.newNode("node_name", privateNodeConfiguration);
 
     Publisher<org.ros.message.std_msgs.String> publisher =
         node.newPublisher("/foo", "std_msgs/String");
@@ -163,8 +167,11 @@ public class DefaultNodeTest {
 
   @Test
   public void testResolveName() {
-    privateNodeConfiguration.setParentResolver(NameResolver.create("/ns1"));
-    Node node = nodeFactory.newNode("test_resolver", privateNodeConfiguration);
+    Node node =
+        nodeFactory.newNode(
+            "test_resolver",
+            NodeConfiguration.newPrivate(masterUri).setParentResolver(
+                NameResolver.create("/ns1")));
 
     assertEquals("/foo", node.resolveName("/foo"));
     assertEquals("/ns1/foo", node.resolveName("foo"));
@@ -193,8 +200,7 @@ public class DefaultNodeTest {
 
   @Test
   public void testPublicAddresses() throws InterruptedException {
-    MasterServer master =
-        new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
+    MasterServer master = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     master.start();
     URI masterUri = master.getUri();
     checkHostName(masterUri.getHost());

@@ -116,7 +116,7 @@ public class CommandLineLoader {
     nodeConfiguration.setRosPackagePath(getRosPackagePath());
     nodeConfiguration.setMasterUri(getMasterUri());
     if (specialRemappings.containsKey(CommandLineVariables.NODE_NAME)) {
-      nodeConfiguration.setNodeNameOverride(specialRemappings.get(CommandLineVariables.NODE_NAME));
+      nodeConfiguration.setNodeName(specialRemappings.get(CommandLineVariables.NODE_NAME));
     }
     return nodeConfiguration;
   }
