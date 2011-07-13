@@ -4,6 +4,8 @@ package org.ros.internal.node;
 
 import static org.junit.Assert.assertTrue;
 
+import org.ros.internal.node.client.Registrar;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +18,7 @@ import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
-import org.ros.internal.node.topic.Publisher;
+import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.namespace.GraphName;
@@ -33,12 +35,12 @@ public class MasterRegistrationTest {
 
   private MasterServer masterServer;
   private MasterClient masterClient;
-  private MasterRegistration masterRegistration;
+  private Registrar masterRegistration;
   private TopicManager topicManager;
   private ServiceManager serviceManager;
   private ParameterManager parameterManager;
   private SlaveServer slaveServer;
-  private Publisher<org.ros.message.std_msgs.String> publisher;
+  private DefaultPublisher<org.ros.message.std_msgs.String> publisher;
 
   public MasterRegistrationTest() {
     topicDefinition =
@@ -54,7 +56,7 @@ public class MasterRegistrationTest {
     masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
-    masterRegistration = new MasterRegistration(masterClient);
+    masterRegistration = new Registrar(masterClient);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
@@ -65,7 +67,7 @@ public class MasterRegistrationTest {
             parameterManager);
     slaveServer.start();
     masterRegistration.start(slaveServer.toSlaveIdentifier());
-    publisher = new Publisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer);
+    publisher = new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer);
   }
 
   @After

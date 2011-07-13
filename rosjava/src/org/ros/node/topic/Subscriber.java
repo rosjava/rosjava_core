@@ -16,6 +16,8 @@
 
 package org.ros.node.topic;
 
+import org.ros.internal.node.topic.Topic;
+
 import org.ros.message.MessageListener;
 
 /**
@@ -25,8 +27,7 @@ import org.ros.message.MessageListener;
  * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <MessageType>
- *          The message type to use. The {@link Subscriber} may only subscribe
- *          to messages of this type.
+ *          the {@link Subscriber} may only subscribe to messages of this type
  */
 public interface Subscriber<MessageType> extends Topic {
 

@@ -31,26 +31,26 @@ public class PublisherFactory {
   }
 
   /**
-   * Gets or creates a {@link Publisher} instance. {@link Publisher}s are cached
-   * and reused per topic. When a new {@link Publisher} is generated, it is
+   * Gets or creates a {@link DefaultPublisher} instance. {@link DefaultPublisher}s are cached
+   * and reused per topic. When a new {@link DefaultPublisher} is generated, it is
    * registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
    * @param topicDefinition {@link TopicDefinition} that is being published
-   * @return a {@link Subscriber} instance
+   * @return a {@link DefaultSubscriber} instance
    */
   @SuppressWarnings("unchecked")
-  public <MessageType> Publisher<MessageType> create(TopicDefinition topicDefinition,
+  public <MessageType> DefaultPublisher<MessageType> create(TopicDefinition topicDefinition,
       MessageSerializer<MessageType> serializer) {
     String topicName = topicDefinition.getName().toString();
-    Publisher<MessageType> publisher;
+    DefaultPublisher<MessageType> publisher;
     boolean createdNewPublisher = false;
 
     synchronized (topicManager) {
       if (topicManager.hasPublisher(topicName)) {
-        publisher = (Publisher<MessageType>) topicManager.getPublisher(topicName);
+        publisher = (DefaultPublisher<MessageType>) topicManager.getPublisher(topicName);
       } else {
-        publisher = new Publisher<MessageType>(topicDefinition, serializer);
+        publisher = new DefaultPublisher<MessageType>(topicDefinition, serializer);
         createdNewPublisher = true;
       }
     }

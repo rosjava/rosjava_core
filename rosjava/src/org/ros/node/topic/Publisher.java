@@ -16,6 +16,8 @@
 
 package org.ros.node.topic;
 
+import org.ros.internal.node.topic.Topic;
+
 /**
  * Publishes messages of a given type on a given ROS topic.
  * 
@@ -23,13 +25,14 @@ package org.ros.node.topic;
  * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <MessageType>
- *          The message type to use. The {@link Publisher} may only publish
- *          messages of this type.
+ *          the {@link Publisher} may only publish messages of this type
  */
 public interface Publisher<MessageType> extends Topic {
 
   /**
-   * @see http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options
+   * @see http
+   *      ://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#
+   *      Publisher_Options
    * @param enabled
    *          if {@code true}, all messages published to this topic from the
    *          {@link Publisher}'s {@link Node} will be latched

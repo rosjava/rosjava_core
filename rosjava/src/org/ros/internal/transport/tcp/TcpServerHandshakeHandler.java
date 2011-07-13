@@ -30,7 +30,7 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceResponseEncoder;
 import org.ros.internal.node.service.ServiceServer;
-import org.ros.internal.node.topic.Publisher;
+import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -82,7 +82,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
       String topicName = incomingHeader.get(ConnectionHeaderFields.TOPIC);
       Preconditions.checkState(topicManager.hasPublisher(topicName), "No publisher for topic: "
           + topicName);
-      Publisher<?> publisher = topicManager.getPublisher(topicName);
+      DefaultPublisher<?> publisher = topicManager.getPublisher(topicName);
       ChannelBuffer outgoingBuffer = publisher.finishHandshake(incomingHeader);
       Channel channel = ctx.getChannel();
       ChannelFuture future = channel.write(outgoingBuffer).await();

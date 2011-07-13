@@ -33,7 +33,7 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
 
   private static final Log log = LogFactory.getLog(UpdatePublisherRunnable.class);
 
-  private final Subscriber<MessageType> subscriber;
+  private final DefaultSubscriber<MessageType> subscriber;
   private final PublisherDefinition publisherDefinition;
   private final SlaveIdentifier slaveIdentifier;
 
@@ -43,7 +43,7 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
    *          Identifier of the subscriber's slave.
    * @param publisherDefinition
    */
-  public UpdatePublisherRunnable(Subscriber<MessageType> subscriber,
+  public UpdatePublisherRunnable(DefaultSubscriber<MessageType> subscriber,
       SlaveIdentifier slaveIdentifier, PublisherDefinition publisherDefinition) {
     this.subscriber = subscriber;
     this.slaveIdentifier = slaveIdentifier;

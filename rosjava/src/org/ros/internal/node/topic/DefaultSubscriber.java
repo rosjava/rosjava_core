@@ -39,6 +39,7 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
+import org.ros.node.topic.Subscriber;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
@@ -53,11 +54,10 @@ import java.util.concurrent.Executors;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Subscriber<MessageType> extends Topic implements
-    org.ros.node.topic.Subscriber<MessageType> {
+public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subscriber<MessageType> {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(Subscriber.class);
+  private static final Log log = LogFactory.getLog(DefaultSubscriber.class);
 
   private final Executor executor;
   private final ImmutableMap<String, String> header;
@@ -100,12 +100,12 @@ public class Subscriber<MessageType> extends Topic implements
     }
   }
 
-  public static <S> Subscriber<S> create(SlaveIdentifier slaveIdentifier,
+  public static <S> DefaultSubscriber<S> create(SlaveIdentifier slaveIdentifier,
       TopicDefinition description, Executor executor, MessageDeserializer<S> deserializer) {
-    return new Subscriber<S>(slaveIdentifier, description, deserializer, executor);
+    return new DefaultSubscriber<S>(slaveIdentifier, description, deserializer, executor);
   }
 
-  private Subscriber(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
+  private DefaultSubscriber(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
       MessageDeserializer<MessageType> deserializer, Executor executor) {
     super(topicDefinition);
     this.executor = executor;
@@ -176,11 +176,11 @@ public class Subscriber<MessageType> extends Topic implements
   }
 
   /**
-   * Updates the list of {@link Publisher}s for the topic that this
-   * {@link Subscriber} is interested in.
+   * Updates the list of {@link DefaultPublisher}s for the topic that this
+   * {@link DefaultSubscriber} is interested in.
    * 
    * @param publishers
-   *          {@link List} of {@link Publisher}s for the subscribed topic
+   *          {@link List} of {@link DefaultPublisher}s for the subscribed topic
    */
   public synchronized void updatePublishers(Collection<PublisherDefinition> publishers) {
     // Find new connections.

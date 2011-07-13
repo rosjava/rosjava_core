@@ -24,7 +24,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
 import org.ros.address.AdvertiseAddress;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
-import org.ros.internal.node.topic.Publisher;
+import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.message.MessageDeserializer;
@@ -43,7 +43,7 @@ public class ServiceServer<RequestType, ResponseType> implements
     org.ros.node.service.ServiceServer<RequestType, ResponseType> {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(Publisher.class);
+  private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
   private final ServiceDefinition definition;
   private final MessageDeserializer<RequestType> deserializer;

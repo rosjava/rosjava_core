@@ -25,7 +25,7 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.topic.PublisherDefinition;
-import org.ros.internal.node.topic.Topic;
+import org.ros.internal.node.topic.DefaultTopic;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;

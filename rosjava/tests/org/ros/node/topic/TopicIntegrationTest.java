@@ -95,8 +95,8 @@ public class TopicIntegrationTest {
   @Test
   public void testAddDisconnectedPublisher() {
     Node subscriberNode = nodeFactory.newNode("subscriber", nodeConfiguration);
-    org.ros.internal.node.topic.Subscriber<org.ros.message.std_msgs.String> subscriber =
-        (org.ros.internal.node.topic.Subscriber<org.ros.message.std_msgs.String>) subscriberNode
+    org.ros.internal.node.topic.DefaultSubscriber<org.ros.message.std_msgs.String> subscriber =
+        (org.ros.internal.node.topic.DefaultSubscriber<org.ros.message.std_msgs.String>) subscriberNode
             .<org.ros.message.std_msgs.String>newSubscriber("foo", "std_msgs/String", null);
 
     try {

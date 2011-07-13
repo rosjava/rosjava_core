@@ -24,9 +24,9 @@ import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceServer;
-import org.ros.internal.node.topic.Publisher;
+import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.PublisherDefinition;
-import org.ros.internal.node.topic.Subscriber;
+import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.SlaveImpl;
@@ -148,11 +148,11 @@ public class SlaveServer extends NodeServer {
     throw new UnsupportedOperationException();
   }
 
-  public List<Subscriber<?>> getSubscriptions() {
+  public List<DefaultSubscriber<?>> getSubscriptions() {
     return topicManager.getSubscribers();
   }
 
-  public List<Publisher<?>> getPublications() {
+  public List<DefaultPublisher<?>> getPublications() {
     return topicManager.getPublishers();
   }
 
@@ -167,7 +167,7 @@ public class SlaveServer extends NodeServer {
 
   public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
     if (topicManager.hasSubscriber(topicName)) {
-      Subscriber<?> subscriber = topicManager.getSubscriber(topicName);
+      DefaultSubscriber<?> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
       List<PublisherDefinition> identifiers =
           buildPublisherIdentifierList(publisherUris, topicDefinition);

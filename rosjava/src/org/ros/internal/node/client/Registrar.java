@@ -14,23 +14,22 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.internal.node.client;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceListener;
 import org.ros.internal.node.service.ServiceServer;
-import org.ros.internal.node.topic.Publisher;
+import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.PublisherDefinition;
-import org.ros.internal.node.topic.Subscriber;
+import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.TopicListener;
 
 import java.net.URI;
@@ -52,10 +51,10 @@ import java.util.concurrent.TimeUnit;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterRegistration implements TopicListener, ServiceListener {
+public class Registrar implements TopicListener, ServiceListener {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(MasterRegistration.class);
+  private static final Log log = LogFactory.getLog(Registrar.class);
 
   private static final long DEFAULT_RETRY_DELAY = 5;
   private static final TimeUnit DEFAULT_RETRY_TIME_UNIT = TimeUnit.SECONDS;
@@ -105,7 +104,7 @@ public class MasterRegistration implements TopicListener, ServiceListener {
     }
   }
 
-  public MasterRegistration(MasterClient masterClient) {
+  public Registrar(MasterClient masterClient) {
     this.masterClient = masterClient;
     setRetryDelay(DEFAULT_RETRY_DELAY, DEFAULT_RETRY_TIME_UNIT);
     completionService = new ExecutorCompletionService<Response<?>>(Executors.newCachedThreadPool());
@@ -137,7 +136,7 @@ public class MasterRegistration implements TopicListener, ServiceListener {
   }
 
   @Override
-  public void publisherAdded(final Publisher<?> publisher) {
+  public void publisherAdded(final DefaultPublisher<?> publisher) {
     submitCallable(new Callable<Response<?>>() {
       @Override
       public Response<List<URI>> call() throws Exception {
@@ -150,7 +149,7 @@ public class MasterRegistration implements TopicListener, ServiceListener {
   }
 
   @Override
-  public void subscriberAdded(final Subscriber<?> subscriber) {
+  public void subscriberAdded(final DefaultSubscriber<?> subscriber) {
     submitCallable(new Callable<Response<?>>() {
       @Override
       public Response<List<URI>> call() throws Exception {

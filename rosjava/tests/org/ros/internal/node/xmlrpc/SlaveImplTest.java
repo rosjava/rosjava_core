@@ -29,7 +29,7 @@ import org.ros.address.AdvertiseAddress;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ServerException;
 import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.node.topic.Publisher;
+import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.namespace.GraphName;
@@ -44,7 +44,7 @@ public class SlaveImplTest {
   @Test
   public void testGetPublicationsEmptyList() {
     SlaveServer mockSlave = mock(SlaveServer.class);
-    when(mockSlave.getPublications()).thenReturn(Lists.<Publisher<?>>newArrayList());
+    when(mockSlave.getPublications()).thenReturn(Lists.<DefaultPublisher<?>>newArrayList());
     SlaveImpl slave = new SlaveImpl(mockSlave);
     List<Object> response = slave.getPublications("/foo");
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
@@ -54,8 +54,8 @@ public class SlaveImplTest {
   @Test
   public void testGetPublications() {
     SlaveServer mockSlave = mock(SlaveServer.class);
-    Publisher<?> mockPublisher = mock(Publisher.class);
-    when(mockSlave.getPublications()).thenReturn(Lists.<Publisher<?>>newArrayList(mockPublisher));
+    DefaultPublisher<?> mockPublisher = mock(DefaultPublisher.class);
+    when(mockSlave.getPublications()).thenReturn(Lists.<DefaultPublisher<?>>newArrayList(mockPublisher));
     when(mockPublisher.getTopicName()).thenReturn(new GraphName("/bar"));
     when(mockPublisher.getTopicMessageType()).thenReturn("/baz");
     when(mockPublisher.getTopicDefinitionAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));

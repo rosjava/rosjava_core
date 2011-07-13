@@ -14,37 +14,28 @@
  * the License.
  */
 
-package org.ros.node.topic;
+package org.ros.internal.node.client;
 
-import org.ros.namespace.GraphName;
+import org.ros.internal.node.server.MasterServer;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * @see http://www.ros.org/wiki/Topics
+ * Represents something that can be registered with the {@link MasterServer} by
+ * the {@link Registrar}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface Topic {
+public interface Registrant {
 
   /**
-   * @return the name of the subscribed topic
-   */
-  GraphName getTopicName();
-
-  /**
-   * @return the message type (e.g. "std_msgs/String")
-   */
-  String getTopicMessageType();
-
-  /**
-   * @return {@code true} if the {@link Topic} consumer/producer (e.g. a
-   *         {@link Subscriber} or a {@link Publisher}) is registered with the
-   *         ROS master
+   * @return {@code true} if the {@link Registrant} is registered with the ROS
+   *         master, {@code false} otherwise
    */
   boolean isRegistered();
 
   /**
-   * Wait for the {@link Topic} to register with the ROS master.
+   * Wait for the {@link Registrant} to be registered with the ROS master.
    * 
    * <p>
    * This call blocks.
@@ -54,14 +45,14 @@ public interface Topic {
   void awaitRegistration() throws InterruptedException;
 
   /**
-   * Wait for the {@link Topic} to register with the ROS master.
+   * Wait for the {@link Registrant} to be registered with the ROS master.
    * 
    * @param timeout
    *          how long to wait for registration
    * @param unit
    *          the units for how long to wait
-   * @return {@code true} if the {@link Subscriber} registered with the ROS
-   *         master, {@code false} otherwise
+   * @return {@code true} if the {@link Registrant} successfully registered with
+   *         the ROS master, {@code false} otherwise
    * @throws InterruptedException
    */
   boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException;

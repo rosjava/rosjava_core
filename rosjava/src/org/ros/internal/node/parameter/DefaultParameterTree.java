@@ -23,6 +23,7 @@ import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.xmlrpc.ParameterServer;
 import org.ros.namespace.NameResolver;
 import org.ros.node.parameter.ParameterListener;
+import org.ros.node.parameter.ParameterTree;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -35,20 +36,20 @@ import java.util.Map;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ParameterTree implements org.ros.node.parameter.ParameterTree {
+public class DefaultParameterTree implements ParameterTree {
 
   private final ParameterClient parameterClient;
   private final NameResolver resolver;
   private final ParameterManager parameterManager;
 
-  public static ParameterTree create(SlaveIdentifier slaveIdentifier, URI masterUri,
+  public static DefaultParameterTree create(SlaveIdentifier slaveIdentifier, URI masterUri,
       NameResolver resolver, ParameterManager parameterManager) {
     ParameterClient client =
         new org.ros.internal.node.client.ParameterClient(slaveIdentifier, masterUri);
-    return new ParameterTree(client, parameterManager, resolver);
+    return new DefaultParameterTree(client, parameterManager, resolver);
   }
 
-  private ParameterTree(ParameterClient parameterClient, ParameterManager parameterManager,
+  private DefaultParameterTree(ParameterClient parameterClient, ParameterManager parameterManager,
       NameResolver resolver) {
     this.parameterClient = parameterClient;
     this.parameterManager = parameterManager;

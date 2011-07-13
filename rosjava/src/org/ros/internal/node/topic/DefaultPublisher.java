@@ -28,6 +28,7 @@ import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.message.MessageSerializer;
+import org.ros.node.topic.Publisher;
 
 import java.util.List;
 import java.util.Map;
@@ -37,16 +38,15 @@ import java.util.Map;
  * 
  * @param <MessageType>
  */
-public class Publisher<MessageType> extends Topic implements
-    org.ros.node.topic.Publisher<MessageType> {
+public class DefaultPublisher<MessageType> extends DefaultTopic implements Publisher<MessageType> {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(Publisher.class);
+  private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
   private final List<SubscriberDefinition> subscribers;
   private final OutgoingMessageQueue<MessageType> out;
 
-  public Publisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer) {
+  public DefaultPublisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer) {
     super(topicDefinition);
     subscribers = Lists.newArrayList();
     out = new OutgoingMessageQueue<MessageType>(serializer);

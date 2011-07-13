@@ -16,24 +16,25 @@
 
 package org.ros.node.service;
 
+import org.ros.internal.node.client.Registrant;
+
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
 
 /**
+ * Provides a ROS service.
+ * 
+ * @see http://www.ros.org/wiki/Services
+ * 
  * @author damonkohler@google.com (Damon Kohler)
- *
+ * 
  * @param <RequestType>
+ *          the {@link ServiceServer} responds to requests of this type
  * @param <ResponseType>
+ *          the {@link ServiceServer} returns responses of this type
  */
-public interface ServiceServer<RequestType, ResponseType> {
-
-  boolean isRegistered();
-
-  void awaitRegistration() throws InterruptedException;
-
-  boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException;
+public interface ServiceServer<RequestType, ResponseType> extends Registrant {
 
   GraphName getName();
 

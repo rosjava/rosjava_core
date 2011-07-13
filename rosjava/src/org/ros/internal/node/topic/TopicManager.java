@@ -32,8 +32,8 @@ import java.util.Map;
  */
 public class TopicManager {
 
-  private final Map<GraphName, Subscriber<?>> subscribers;
-  private final Map<GraphName, Publisher<?>> publishers;
+  private final Map<GraphName, DefaultSubscriber<?>> subscribers;
+  private final Map<GraphName, DefaultPublisher<?>> publishers;
   
   private TopicListener listener;
 
@@ -54,15 +54,15 @@ public class TopicManager {
     return publishers.containsKey(new GraphName(topicName));
   }
 
-  public Publisher<?> getPublisher(String topicName) {
+  public DefaultPublisher<?> getPublisher(String topicName) {
     return publishers.get(new GraphName(topicName));
   }
 
-  public Subscriber<?> getSubscriber(String topicName) {
+  public DefaultSubscriber<?> getSubscriber(String topicName) {
     return subscribers.get(new GraphName(topicName));
   }
 
-  public void putPublisher(Publisher<?> publisher) {
+  public void putPublisher(DefaultPublisher<?> publisher) {
     GraphName topicGraphName = publisher.getTopicName();
     publishers.put(topicGraphName, publisher);
     if (listener != null) {
@@ -70,18 +70,18 @@ public class TopicManager {
     }
   }
 
-  public void putSubscriber(Subscriber<?> subscriber) {
+  public void putSubscriber(DefaultSubscriber<?> subscriber) {
     subscribers.put(subscriber.getTopicName(), subscriber);
     if (listener != null) {
       listener.subscriberAdded(subscriber);
     }
   }
 
-  public List<Subscriber<?>> getSubscribers() {
+  public List<DefaultSubscriber<?>> getSubscribers() {
     return ImmutableList.copyOf(subscribers.values());
   }
 
-  public List<Publisher<?>> getPublishers() {
+  public List<DefaultPublisher<?>> getPublishers() {
     return ImmutableList.copyOf(publishers.values());
   }
 

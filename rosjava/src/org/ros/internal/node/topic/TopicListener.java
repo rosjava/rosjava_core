@@ -24,8 +24,8 @@ package org.ros.internal.node.topic;
  */
 public interface TopicListener {
 
-  void publisherAdded(Publisher<?> publisher);
+  void publisherAdded(DefaultPublisher<?> publisher);
   
-  void subscriberAdded(Subscriber<?> subscriber);
+  void subscriberAdded(DefaultSubscriber<?> subscriber);
   
 }

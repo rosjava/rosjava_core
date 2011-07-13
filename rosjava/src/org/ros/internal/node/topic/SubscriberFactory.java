@@ -39,27 +39,27 @@ public class SubscriberFactory {
   }
   
   /**
-   * Gets or creates a {@link Subscriber} instance. {@link Subscriber}s are
-   * cached and reused per topic. When a new {@link Subscriber} is generated, it
+   * Gets or creates a {@link DefaultSubscriber} instance. {@link DefaultSubscriber}s are
+   * cached and reused per topic. When a new {@link DefaultSubscriber} is generated, it
    * is registered with the {@link MasterServer}.
    * 
    * @param <MessageType>
    * @param topicDefinition {@link TopicDefinition} that is subscribed to
-   * @return a {@link Subscriber} instance
+   * @return a {@link DefaultSubscriber} instance
    */
   @SuppressWarnings("unchecked")
-  public <MessageType> Subscriber<MessageType> create(TopicDefinition topicDefinition,
+  public <MessageType> DefaultSubscriber<MessageType> create(TopicDefinition topicDefinition,
       MessageDeserializer<MessageType> deserializer) {
     String topicName = topicDefinition.getName().toString();
-    Subscriber<MessageType> subscriber;
+    DefaultSubscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
 
     synchronized (topicManager) {
       if (topicManager.hasSubscriber(topicName)) {
-        subscriber = (Subscriber<MessageType>) topicManager.getSubscriber(topicName);
+        subscriber = (DefaultSubscriber<MessageType>) topicManager.getSubscriber(topicName);
       } else {
         subscriber =
-            Subscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, executor,
+            DefaultSubscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, executor,
                 deserializer);
         createdNewSubscriber = true;
       }

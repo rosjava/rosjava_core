@@ -19,6 +19,8 @@ package org.ros.internal.node;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.node.client.Registrar;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RemoteException;
@@ -82,7 +84,7 @@ public class DefaultNode implements Node {
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
   private final ParameterManager parameterManager;
-  private final MasterRegistration masterRegistration;
+  private final Registrar masterRegistration;
   private final SubscriberFactory subscriberFactory;
   private final ServiceFactory serviceFactory;
   private final PublisherFactory publisherFactory;
@@ -107,7 +109,7 @@ public class DefaultNode implements Node {
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
-    masterRegistration = new MasterRegistration(masterClient);
+    masterRegistration = new Registrar(masterClient);
     topicManager.setListener(masterRegistration);
     serviceManager.setListener(masterRegistration);
     publisherFactory = new PublisherFactory(topicManager);
@@ -342,7 +344,7 @@ public class DefaultNode implements Node {
 
   @Override
   public ParameterTree newParameterTree() {
-    return org.ros.internal.node.parameter.ParameterTree.create(slaveServer.toSlaveIdentifier(),
+    return org.ros.internal.node.parameter.DefaultParameterTree.create(slaveServer.toSlaveIdentifier(),
         masterClient.getRemoteUri(), resolver, parameterManager);
   }
 
