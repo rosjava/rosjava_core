@@ -290,56 +290,113 @@ public class NodeConfiguration {
     return setDefaultNodeName(new GraphName(nodeName));
   }
 
+  /**
+   * @return the {@link MessageSerializationFactory} for the {@link Node}
+   */
   public MessageSerializationFactory getMessageSerializationFactory() {
     return messageSerializationFactory;
   }
 
+  /**
+   * @param messageSerializationFactory
+   *          the {@link MessageSerializationFactory} for the {@link Node}
+   * @return this {@link NodeConfiguration}
+   */
   public NodeConfiguration setMessageSerializationFactory(
       MessageSerializationFactory messageSerializationFactory) {
     this.messageSerializationFactory = messageSerializationFactory;
     return this;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/TCPROS
+   * @return the {@link BindAddress} for the {@link Node}'s TCPROS server
+   */
   public BindAddress getTcpRosBindAddress() {
     return tcpRosBindAddress;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/TCPROS
+   * @param tcpRosBindAddress
+   *          the {@link BindAddress} for the {@link Node}'s TCPROS server
+   */
   public NodeConfiguration setTcpRosBindAddress(BindAddress tcpRosBindAddress) {
     this.tcpRosBindAddress = tcpRosBindAddress;
     return this;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/TCPROS
+   * @return the {@link AdvertiseAddressFactory} for the {@link Node}'s TCPROS
+   *         server
+   */
   public AdvertiseAddressFactory getTcpRosAdvertiseAddressFactory() {
     return tcpRosAdvertiseAddressFactory;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/TCPROS
+   * @param tcpRosAdvertiseAddressFactory
+   *          the {@link AdvertiseAddressFactory} for the {@link Node}'s TCPROS
+   *          server
+   * @return this {@link NodeConfiguration}
+   */
   public NodeConfiguration setTcpRosAdvertiseAddressFactory(
       AdvertiseAddressFactory tcpRosAdvertiseAddressFactory) {
     this.tcpRosAdvertiseAddressFactory = tcpRosAdvertiseAddressFactory;
     return this;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/TCPROS
+   * @return the {@link AdvertiseAddress} for the {@link Node}'s TCPROS server
+   */
   public AdvertiseAddress getTcpRosAdvertiseAddress() {
     return tcpRosAdvertiseAddressFactory.create();
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * @return the {@link BindAddress} for the {@link Node}'s XML-RPC server
+   */
   public BindAddress getXmlRpcBindAddress() {
     return xmlRpcBindAddress;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * @param xmlRpcBindAddress
+   *          the {@link BindAddress} for the {@link Node}'s XML-RPC server
+   */
   public NodeConfiguration setXmlRpcBindAddress(BindAddress xmlRpcBindAddress) {
     this.xmlRpcBindAddress = xmlRpcBindAddress;
     return this;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * @return the {@link AdvertiseAddress} for the {@link Node}'s XML-RPC server
+   */
   public AdvertiseAddress getXmlRpcAdvertiseAddress() {
     return xmlRpcAdvertiseAddressFactory.create();
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * @return the {@link AdvertiseAddressFactory} for the {@link Node}'s XML-RPC
+   *         server
+   */
   public AdvertiseAddressFactory getXmlRpcAdvertiseAddressFactory() {
     return xmlRpcAdvertiseAddressFactory;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * @param xmlRpcAdvertiseAddressFactory
+   *          the {@link AdvertiseAddressFactory} for the {@link Node}'s XML-RPC
+   *          server
+   */
   public NodeConfiguration setXmlRpcAdvertiseAddressFactory(
       AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory) {
     this.xmlRpcAdvertiseAddressFactory = xmlRpcAdvertiseAddressFactory;
