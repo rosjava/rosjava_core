@@ -16,7 +16,6 @@
 
 package org.ros.node;
 
-
 /**
  * Defines a {@link Node} entry point and shutdown routine.
  * 

@@ -211,10 +211,14 @@ public class CommandLineLoader {
     }
   }
 
-  private List<String> getRosPackagePath() {
+  private List<File> getRosPackagePath() {
     if (environment.containsKey(EnvironmentVariables.ROS_PACKAGE_PATH)) {
-      String path = environment.get(EnvironmentVariables.ROS_PACKAGE_PATH);
-      return Lists.newArrayList(path.split(File.pathSeparator));
+      String rosPackagePath = environment.get(EnvironmentVariables.ROS_PACKAGE_PATH);
+      List<File> paths = Lists.newArrayList();
+      for (String path : rosPackagePath.split(File.pathSeparator)) {
+        paths.add(new File(path));
+      }
+      return paths;
     } else {
       return Lists.newArrayList();
     }

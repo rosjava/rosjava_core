@@ -19,12 +19,34 @@ package org.ros.node;
 import org.ros.namespace.GraphName;
 
 /**
+ * Builds new {@link Node}s.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface NodeFactory {
 
-  Node newNode(String name, NodeConfiguration configuration);
-
+  /**
+   * Build a new {@link Node} with the given name and {@link NodeConfiguration}.
+   * 
+   * @param name
+   *          the name of the new {@link Node}
+   * @param configuration
+   *          the {@link NodeConfiguration} for the new {@link Node}
+   * @return a new {@link Node} with the given name and
+   *         {@link NodeConfiguration}
+   */
   Node newNode(GraphName name, NodeConfiguration configuration);
+
+  /**
+   * Build a new {@link Node} with the given name and {@link NodeConfiguration}.
+   * 
+   * @param name
+   *          the name of the new {@link Node}
+   * @param configuration
+   *          the {@link NodeConfiguration} for the new {@link Node}
+   * @return a new {@link Node} with the given name and
+   *         {@link NodeConfiguration}
+   */
+  Node newNode(String name, NodeConfiguration configuration);
 
 }

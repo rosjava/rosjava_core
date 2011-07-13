@@ -101,7 +101,7 @@ public class CommandLineLoaderTest {
     // Failure: ROS_ROOT not set.
     String tmpDir = System.getProperty("java.io.tmpdir");
     String rosPackagePath = tmpDir + File.pathSeparator + defaultRosRoot;
-    List<String> rosPackagePathList = Lists.newArrayList(tmpDir, defaultRosRoot.getAbsolutePath());
+    List<File> rosPackagePathList = Lists.newArrayList(new File(tmpDir), defaultRosRoot);
     Map<String, String> env = new HashMap<String, String>();
     CommandLineLoader loader = null;
     env = Maps.newHashMap();

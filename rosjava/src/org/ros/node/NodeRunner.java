@@ -22,26 +22,49 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
+ * Executes {@link NodeMain}s in separate threads. Note that the user is
+ * responsible for shutting down {@link NodeMain}s.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class NodeRunner {
 
   private final Executor executor;
 
-  public static NodeRunner createDefault() {
+  /**
+   * @return an instance of {@link NodeRunner} that uses a default
+   *         {@link Executor}
+   */
+  public static NodeRunner newDefault() {
     return new NodeRunner(Executors.newCachedThreadPool());
   }
 
+  /**
+   * @param executor
+   *          {@link NodeMain}s will be executed using this
+   */
   public NodeRunner(Executor executor) {
     this.executor = executor;
   }
 
-  public void run(final NodeMain node, final NodeConfiguration nodeConfiguration) {
+  /**
+   * Executes the supplied {@link NodeMain} using the supplied
+   * {@link NodeConfiguration} and the configured {@link Executor}.
+   * 
+   * @param nodeMain
+   *          the {@link NodeMain} to execute
+   * @param nodeConfiguration
+   *          the {@link NodeConfiguration} that will be passed to the
+   *          {@link NodeMain}
+   * @throws RosRuntimeException
+   *           thrown if {@link NodeMain} throws an exception
+   */
+  public void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration) {
     executor.execute(new Runnable() {
       @Override
       public void run() {
         try {
-          node.main(nodeConfiguration);
+          nodeMain.main(nodeConfiguration);
         } catch (Exception e) {
           throw new RosRuntimeException(e);
         }

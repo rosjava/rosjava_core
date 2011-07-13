@@ -31,8 +31,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 /**
- * Stores contextual information about a ROS node, including common ROS
- * configuration like the master URI.
+ * Stores configuration information (e.g. ROS master URI) for {@link Node}s.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
@@ -40,6 +39,9 @@ import java.util.List;
  */
 public class NodeConfiguration {
 
+  /**
+   * The default master URI.
+   */
   public static final URI DEFAULT_MASTER_URI;
 
   static {
@@ -53,7 +55,7 @@ public class NodeConfiguration {
   private NameResolver parentResolver;
   private URI masterUri;
   private File rosRoot;
-  private List<String> rosPackagePath;
+  private List<File> rosPackagePath;
   private String nodeNameOverride;
   private MessageSerializationFactory messageSerializationFactory;
   private BindAddress tcpRosBindAddress;
@@ -61,22 +63,50 @@ public class NodeConfiguration {
   private BindAddress xmlRpcBindAddress;
   private AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory;
 
-  public static NodeConfiguration newPublic(String advertiseHostname, URI masterUri) {
+  /**
+   * Creates a new {@link NodeConfiguration} for a publicly accessible
+   * {@link Node}.
+   * 
+   * @param host
+   *          the host that the {@link Node} will run on
+   * @param masterUri
+   *          the {@link URI} for the master that the {@link Node} will register
+   *          with
+   * @return a new {@link NodeConfiguration} for a publicly accessible
+   *         {@link Node}
+   */
+  public static NodeConfiguration newPublic(String host, URI masterUri) {
     NodeConfiguration configuration = new NodeConfiguration();
     configuration.setXmlRpcBindAddress(BindAddress.newPublic());
-    configuration.setXmlRpcAdvertiseAddressFactory(new PublicAdvertiseAddressFactory(
-        advertiseHostname));
+    configuration.setXmlRpcAdvertiseAddressFactory(new PublicAdvertiseAddressFactory(host));
     configuration.setTcpRosBindAddress(BindAddress.newPublic());
-    configuration.setTcpRosAdvertiseAddressFactory(new PublicAdvertiseAddressFactory(
-        advertiseHostname));
+    configuration.setTcpRosAdvertiseAddressFactory(new PublicAdvertiseAddressFactory(host));
     configuration.setMasterUri(masterUri);
     return configuration;
   }
 
-  public static NodeConfiguration newPublic(String advertiseHostname) {
-    return newPublic(advertiseHostname, DEFAULT_MASTER_URI);
+  /**
+   * Creates a new {@link NodeConfiguration} for a publicly accessible
+   * {@link Node}.
+   * 
+   * @param host
+   *          the host that the {@link Node} will run on
+   * @return a new {@link NodeConfiguration} for a publicly accessible
+   *         {@link Node}
+   */
+  public static NodeConfiguration newPublic(String host) {
+    return newPublic(host, DEFAULT_MASTER_URI);
   }
 
+  /**
+   * Creates a new {@link NodeConfiguration} for a {@link Node} that is only
+   * accessible on the local host.
+   * 
+   * @param masterUri
+   *          the {@link URI} for the master that the {@link Node} will register
+   *          with
+   * @return a new {@link NodeConfiguration} for a private {@link Node}
+   */
   public static NodeConfiguration newPrivate(URI masterUri) {
     NodeConfiguration configuration = new NodeConfiguration();
     configuration.setXmlRpcBindAddress(BindAddress.newPrivate());
@@ -87,6 +117,12 @@ public class NodeConfiguration {
     return configuration;
   }
 
+  /**
+   * Creates a new {@link NodeConfiguration} for a {@link Node} that is only
+   * accessible on the local host.
+   * 
+   * @return a new {@link NodeConfiguration} for a private {@link Node}
+   */
   public static NodeConfiguration newPrivate() {
     return newPrivate(DEFAULT_MASTER_URI);
   }
@@ -97,48 +133,94 @@ public class NodeConfiguration {
   }
 
   /**
-   * @return The {@link DefaultNameResolver} for a {@link Node}'s parent
-   *         namespace.
+   * @return the {@link NameResolver} for the {@link Node}'s parent namespace
    */
   public NameResolver getParentResolver() {
     return parentResolver;
   }
 
+  /**
+   * @param resolver
+   *          the {@link NameResolver} for the {@link Node}'s parent namespace
+   */
   public void setParentResolver(NameResolver resolver) {
     this.parentResolver = resolver;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_MASTER_URI
+   * @return the {@link URI} of the master that the {@link Node} will register
+   *         with
+   */
   public URI getMasterUri() {
     return masterUri;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_MASTER_URI
+   * @param masterUri
+   *          the {@link URI} of the master that the {@link Node} will register
+   *          with
+   */
   public void setMasterUri(URI masterUri) {
     this.masterUri = masterUri;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_ROOT
+   * @return the location where the ROS core packages are installed
+   */
   public File getRosRoot() {
     return rosRoot;
   }
 
+  /**
+   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_ROOT
+   * @param rosRoot
+   *          the location where the ROS core packages are installed
+   */
   public void setRosRoot(File rosRoot) {
     this.rosRoot = rosRoot;
   }
 
-  public List<String> getRosPackagePath() {
+  /**
+   * These ordered paths tell the ROS system where to search for more ROS
+   * packages. If there are multiple packages of the same name, ROS will choose
+   * the one that appears in the {@link List} first.
+   * 
+   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_PACKAGE_PATH
+   * @return the {@link List} of paths where the system will look for ROS
+   *         packages
+   */
+  public List<File> getRosPackagePath() {
     return rosPackagePath;
   }
 
-  public void setRosPackagePath(List<String> rosPackagePath) {
+  /**
+   * These ordered paths tell the ROS system where to search for more ROS
+   * packages. If there are multiple packages of the same name, ROS will choose
+   * the one that appears in the {@link List} first.
+   * 
+   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_PACKAGE_PATH
+   * @param rosPackagePath
+   *          the {@link List} of paths where the system will look for ROS
+   *          packages
+   */
+  public void setRosPackagePath(List<File> rosPackagePath) {
     this.rosPackagePath = rosPackagePath;
   }
 
   /**
-   * @return Override for Node name or null if no override.
+   * @return the override for the name of the {@link Node}
    */
   public String getNodeNameOverride() {
     return nodeNameOverride;
   }
 
+  /**
+   * @param nodeNameOverride
+   *          the override for the name of the {@link Node}
+   */
   public void setNodeNameOverride(String nodeNameOverride) {
     this.nodeNameOverride = nodeNameOverride;
   }

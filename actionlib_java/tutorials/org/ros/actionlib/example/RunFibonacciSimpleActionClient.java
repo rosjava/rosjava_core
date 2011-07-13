@@ -18,7 +18,7 @@ public class RunFibonacciSimpleActionClient {
 
   public static void main(String[] args) {
     NodeConfiguration configuration = NodeConfiguration.newPrivate();
-    NodeRunner runner = NodeRunner.createDefault();
+    NodeRunner runner = NodeRunner.newDefault();
 
     run(runner, configuration);
 

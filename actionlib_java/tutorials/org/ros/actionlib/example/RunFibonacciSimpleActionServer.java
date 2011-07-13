@@ -23,7 +23,7 @@ public class RunFibonacciSimpleActionServer {
 
       NodeConfiguration configuration = NodeConfiguration.newPrivate();
 
-      NodeRunner runner = NodeRunner.createDefault();
+      NodeRunner runner = NodeRunner.newDefault();
 
       runner.run(sas, configuration);
     } catch (Exception e) {
