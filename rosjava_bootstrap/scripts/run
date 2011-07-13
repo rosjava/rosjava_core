@@ -30,38 +30,40 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+#
+# Author: Adam Stambler
 
 from generate_properties import get_classpath
 
 import roslib.packages
 import os
-import os.path
 import sys
-
-rospack = roslib.packages.ROSPackages()
+import subprocess
 
 def usage():
-	print """
+    print """
 This python script runs rosjava based jars and bootstraps the classpath
 for the node by looking at its package manifest.
 
 rosrun rosjava_bootstrap run <pkg> <node_class>  [args ... ]
 """
 
+def run(pkg, node_class, args):
+    rospack = roslib.packages.ROSPackages()
+    classpath = get_classpath(rospack, pkg , include_package =True, include_built =True, scope='all').replace(':', '/:')
 
+    cmd = ["java", "-classpath", classpath, "org.ros.RosRun", node_class] + args
+    retcode = subprocess.call(cmd)
+    return retcode
+
+    
 if __name__ == '__main__':
 	
-	if (len(sys.argv ) < 3):
-		usage()
-		exit()
+    if len(sys.argv ) < 3:
+        usage()
+        sys.exit(os.EX_USAGE)
+    pkg = sys.argv[1]
+    node_class = sys.argv[2]
+    args = sys.argv[3:]
+    run(pkg, node_class, args)
 	
-	pkg = sys.argv[1]
-	node_class = sys.argv[2]
-	args = sys.argv[3:]	
-	
-	
-	classpath = get_classpath(rospack, pkg , include_package =True, include_built =True, scope='all').replace(':', '/:')
-
-	cmd="java -classpath %s org.ros.RosRun %s %s"%(classpath, node_class , ' '.join(args))
-	
-	os.system(cmd)
