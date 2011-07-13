@@ -103,8 +103,13 @@ public class NameResolver {
     return resolve(getNamespace(), name);
   }
 
-  public String resolve(String name) {
-    return resolve(getNamespace(), new GraphName(name)).toString();
+  /**
+   * @param name
+   *          name to resolve
+   * @return the name resolved relative to the default namespace
+   */
+  public GraphName resolve(String name) {
+    return resolve(new GraphName(name));
   }
 
   protected GraphName lookUpRemapping(GraphName name) {

@@ -190,7 +190,7 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType) {
+  public <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
@@ -199,8 +199,13 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
-      final MessageListener<MessageType> listener) {
+  public <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType) {
+    return newPublisher(new GraphName(topicName), messageType);
+  }
+
+  @Override
+  public <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName,
+      String messageType, final MessageListener<MessageType> listener) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
     TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
@@ -211,12 +216,18 @@ public class DefaultNode implements Node {
   }
 
   @Override
+  public <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
+      final MessageListener<MessageType> listener) {
+    return newSubscriber(new GraphName(topicName), messageType, listener);
+  }
+
+  @Override
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
-      String serviceName, String serviceType,
+      GraphName serviceName, String serviceType,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
     // TODO(damonkohler): It's rather non-obvious that the URI will be created
     // later on the fly.
-    ServiceIdentifier identifier = new ServiceIdentifier(new GraphName(serviceName), null);
+    ServiceIdentifier identifier = new ServiceIdentifier(serviceName, null);
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
@@ -228,8 +239,15 @@ public class DefaultNode implements Node {
   }
 
   @Override
+  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
+      String serviceName, String serviceType,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
+    return newServiceServer(new GraphName(serviceName), serviceType, responseBuilder);
+  }
+
+  @Override
   public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
-      String serviceName, String serviceType) throws ServiceNotFoundException {
+      GraphName serviceName, String serviceType) throws ServiceNotFoundException {
     URI uri = lookupService(serviceName);
     if (uri == null) {
       throw new ServiceNotFoundException("No such service " + serviceName + " of type "
@@ -247,7 +265,13 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public URI lookupService(String serviceName) {
+  public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
+      String serviceName, String serviceType) throws ServiceNotFoundException {
+    return newServiceClient(new GraphName(serviceName), serviceType);
+  }
+
+  @Override
+  public URI lookupService(GraphName serviceName) {
     Response<URI> response =
         masterClient.lookupService(slaveServer.toSlaveIdentifier(), resolveName(serviceName)
             .toString());
@@ -256,6 +280,11 @@ public class DefaultNode implements Node {
     } else {
       return null;
     }
+  }
+
+  @Override
+  public URI lookupService(String serviceName) {
+    return lookupService(new GraphName(serviceName));
   }
 
   @Override

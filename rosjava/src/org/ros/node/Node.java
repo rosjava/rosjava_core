@@ -151,69 +151,141 @@ public interface Node {
 
   /**
    * @param <MessageType>
-   *          The message type to create the publisher for
+   *          the message type to create the publisher for
    * @param topicName
-   *          The topic name, will be pushed down under this namespace unless
+   *          the topic name, will be pushed down under this namespace unless
    *          '/' is prepended.
-   * @param messageClass
-   *          The Class object of the topic message type.
-   * @return A handle to a publisher that may be used to publish messages of
-   *         type MessageType
+   * @param messageType
+   *          the message data type (e.g. "std_msgs/String")
+   * @return a {@link Publisher} for the specified topic
+   */
+  <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType);
+
+  /**
+   * @param <MessageType>
+   *          the message type to create the publisher for
+   * @param topicName
+   *          the topic name, will be pushed down under this namespace unless
+   *          '/' is prepended.
+   * @param messageType
+   *          the message data type (e.g. "std_msgs/String")
+   * @return a {@link Publisher} for the specified topic
    */
   <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType);
 
   /**
    * @param <MessageType>
-   *          The message type to create the Subscriber for.
+   *          the message type to create the {@link Subscriber} for
    * @param topicName
-   *          The topic name to be subscribed to. This may be "bar" "/foo/bar"
-   *          "~my" and will be auto resolved.
-   * @param callback
-   *          The callback to be registered to this subscription. This will be
-   *          called asynchronously any time that a message is published on the
-   *          topic.
-   * @param messageClass
-   *          The class of the message type that is being published on the
-   *          topic.
-   * @return A handle to a Subscriber that may be used to subscribe messages of
-   *         type MessageType.
+   *          the topic name to be subscribed to, this will be auto resolved
+   * @param messageType
+   *          the message data type (e.g. "std_msgs/String")
+   * @param listener
+   *          the {@link MessageListener} to be added to this {@link Subscriber}
+   *          , will be called asynchronously any time that a message is
+   *          published on the specified topic
+   * @return a {@link Subscriber} for the specified topic
+   */
+  <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName, String messageType,
+      MessageListener<MessageType> listener);
+
+  /**
+   * @param <MessageType>
+   *          the message type to create the {@link Subscriber} for
+   * @param topicName
+   *          the topic name to be subscribed to, this will be auto resolved
+   * @param messageType
+   *          the message data type (e.g. "std_msgs/String")
+   * @param listener
+   *          the {@link MessageListener} to be added to this {@link Subscriber}
+   *          , will be called asynchronously any time that a message is
+   *          published on the specified topic
+   * @return a {@link Subscriber} for the specified topic
    */
   <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
       MessageListener<MessageType> listener);
 
   /**
-   * Create a server to response to a particular service.
+   * Create a {@link ServiceServer}.
    * 
    * @param <RequestType>
-   *          Type for the request.
+   *          type for the request
    * @param <ResponseType>
-   *          Type for the response.
-   * @param serviceDefinition
-   *          Definition of the service.
+   *          type for the response
+   * @param serviceName
+   *          the name of the service
+   * @param serviceType
+   *          the type of the service (e.g. "test_ros/AddTwoInts")
    * @param responseBuilder
-   *          A builder for the response.
+   *          called for every request to build a response
+   * @return a {@link ServiceServer}
+   */
+  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
+      GraphName serviceName, String serviceType,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder);
+
+  /**
+   * Create a {@link ServiceServer}.
    * 
-   * @return The service server which will handle the service requests.
-   * 
-   * @throws Exception
+   * @param <RequestType>
+   *          type for the request
+   * @param <ResponseType>
+   *          type for the response
+   * @param serviceName
+   *          the name of the service
+   * @param serviceType
+   *          the type of the service (e.g. "test_ros/AddTwoInts")
+   * @param responseBuilder
+   *          called for every request to build a response
+   * @return a {@link ServiceServer}
    */
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
       String serviceName, String serviceType,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder);
 
   /**
-   * Create a service client.
+   * Create a {@link ServiceClient}.
    * 
+   * @param <RequestType>
+   *          type for the request
    * @param <ResponseType>
-   *          The message type of the response.
+   *          type for the response
    * @param serviceName
    *          the name of the service
    * @param serviceType
-   *          the type of the service
-   * @return
+   *          the type of the service (e.g. "test_ros/AddTwoInts")
+   * @return a {@link ServiceClient}
+   * @throws ServiceNotFoundException
+   *           thrown if no matching service could be found
+   */
+  <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
+      GraphName serviceName, String serviceType) throws ServiceNotFoundException;
+
+  /**
+   * Create a {@link ServiceClient}.
+   * 
+   * @param <RequestType>
+   *          type for the request
+   * @param <ResponseType>
+   *          type for the response
+   * @param serviceName
+   *          the name of the service
+   * @param serviceType
+   *          the type of the service (e.g. "test_ros/AddTwoInts")
+   * @return a {@link ServiceClient}
+   * @throws ServiceNotFoundException
+   *           thrown if no matching service could be found
    */
   <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
       String serviceName, String serviceType) throws ServiceNotFoundException;
+
+  /**
+   * @param serviceName
+   *          the name of the service to lookup
+   * @return {@link URI} of the {@Service} provider or null if the
+   *         {@link Service} does not exist
+   */
+  URI lookupService(GraphName serviceName);
 
   /**
    * @param serviceName
