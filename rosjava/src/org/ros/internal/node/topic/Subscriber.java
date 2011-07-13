@@ -206,14 +206,6 @@ public class Subscriber<MessageType> extends Topic implements
     }
   }
 
-  /**
-   * @return this {@link Subscriber}'s connection header as an
-   *         {@link ImmutableMap}
-   */
-  public ImmutableMap<String, String> getHeader() {
-    return header;
-  }
-
   @Override
   public String toString() {
     return "Subscriber<" + getTopicDefinition() + ">";

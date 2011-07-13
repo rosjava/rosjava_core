@@ -16,83 +16,57 @@
 
 package org.ros.node.topic;
 
-import org.ros.namespace.GraphName;
-
-import java.util.concurrent.TimeUnit;
-
 /**
- * A handle for publishing messages of a particular type on a given topic.
+ * Publishes messages of a given type on a given ROS topic.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
+ * @author damonkohler@google.com (Damon Kohler)
+ * 
  * @param <MessageType>
- *          The message type to template on. The publisher may only publish
+ *          The message type to use. The {@link Publisher} may only publish
  *          messages of this type.
  */
-public interface Publisher<MessageType> {
- 
+public interface Publisher<MessageType> extends Topic {
+
+  /**
+   * @see http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options
+   * @param enabled
+   *          if {@code true}, all messages published to this topic from the
+   *          {@link Publisher}'s {@link Node} will be latched
+   */
   void setLatchMode(boolean enabled);
 
   /**
+   * Publish a message. This message will be available on the topic that this
+   * {@link Publisher} has been associated with.
+   * 
    * @param message
-   *          The message to publish. This message will be available on the
-   *          topic that this {@link Publisher} has been associated with.
+   *          the message to publish
    */
   void publish(MessageType message);
 
   /**
-   * Get the topic for the {@link Publisher}.
-   * 
-   * @return the fully-namespaced topic for the {@link Publisher}
-   */
-  String getTopicName();
-
-  GraphName getTopicGraphName();
-
-  /**
-   * Wait for the publisher to register with the master.
-   * 
-   * <p>
-   * This call blocks.
-   * 
-   * @throws InterruptedException
-   */
-  void awaitRegistration() throws InterruptedException;
-
-  /**
-   * Wait for the publisher to register with the master.
-   * 
-   * @param timeout
-   *          How long to wait for registration.
-   * @param unit
-   *          The units for how long to wait.
-   * @return True if the publisher registered with the master, false otherwise.
-   * 
-   * @throws InterruptedException
-   */
-  boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException;
-  
-  /**
-   * Does the publisher have any connected subscribers?
-   * 
-   * <p>This will be about subscribers registered. If the subscriber didn't shut down
-   * properly it will not be unregistered.
-   * 
-   * @return True if there are connected subscribers, false otherwise.
+   * @return {@code true} if {@code getNumberOfSubscribers() > 0}, {@code false}
+   *         otherwise
    */
   boolean hasSubscribers();
-  
+
   /**
-   * Get the number of subscribers currently connected to the publisher.
+   * Get the number of {@link Subscriber}s currently connected to the
+   * {@link Publisher}.
    * 
-   * <p>This will be about subscribers registered. If the subscriber didn't shut down
-   * properly it will not be unregistered.
+   * <p>
+   * This counts the number {@link Subscriber} registered. If a
+   * {@link Subscriber} does not shutdown properly it will not be unregistered
+   * and thus will contribute to this count.
    * 
-   * @return The number of subscribers currently connected to the publisher.
+   * @return the number of {@link Subscriber}s currently connected to the
+   *         {@link Publisher}
    */
   int getNumberOfSubscribers();
 
   /**
-   * Shut the publisher down.
+   * Cancels the publication and unregisters the {@link Publisher}.
    */
   void shutdown();
 

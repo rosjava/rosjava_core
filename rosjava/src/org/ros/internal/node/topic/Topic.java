@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Topic {
+public class Topic implements org.ros.node.topic.Topic {
 
   private final TopicDefinition topicDefinition;
   private final CountDownLatch registrationLatch;
@@ -44,14 +44,12 @@ public class Topic {
     return topicDefinition.toList();
   }
   
-  public String getTopicName() {
-    return getTopicGraphName().toString();
-  }
-
-  public GraphName getTopicGraphName() {
+  @Override
+  public GraphName getTopicName() {
     return topicDefinition.getName();
   }
 
+  @Override
   public String getTopicMessageType() {
     return topicDefinition.getMessageType();
   }
@@ -64,14 +62,17 @@ public class Topic {
     registrationLatch.countDown();
   }
 
+  @Override
   public boolean isRegistered() {
     return registrationLatch.getCount() == 0;
   }
 
+  @Override
   public void awaitRegistration() throws InterruptedException {
     registrationLatch.await();
   }
 
+  @Override
   public boolean awaitRegistration(long timeout, TimeUnit unit)
       throws InterruptedException {
     return registrationLatch.await(timeout, unit);

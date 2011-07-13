@@ -178,11 +178,11 @@ public class DefaultNodeTest {
     assertEquals("/ns1/test_resolver/foo", node.resolveName("~foo"));
 
     Publisher<Int64> pub = node.newPublisher("pub", "std_msgs/Int64");
-    assertEquals("/ns1/pub", pub.getTopicName());
+    assertEquals("/ns1/pub", pub.getTopicName().toString());
     pub = node.newPublisher("/pub", "std_msgs/Int64");
-    assertEquals("/pub", pub.getTopicName());
+    assertEquals("/pub", pub.getTopicName().toString());
     pub = node.newPublisher("~pub", "std_msgs/Int64");
-    assertEquals("/ns1/test_resolver/pub", pub.getTopicName());
+    assertEquals("/ns1/test_resolver/pub", pub.getTopicName().toString());
 
     MessageListener<Int64> callback = new MessageListener<Int64>() {
       @Override
@@ -191,11 +191,11 @@ public class DefaultNodeTest {
     };
 
     Subscriber<Int64> sub = node.newSubscriber("sub", "std_msgs/Int64", callback);
-    assertEquals("/ns1/sub", sub.getTopicName());
+    assertEquals("/ns1/sub", sub.getTopicName().toString());
     sub = node.newSubscriber("/sub", "std_msgs/Int64", callback);
-    assertEquals("/sub", sub.getTopicName());
+    assertEquals("/sub", sub.getTopicName().toString());
     sub = node.newSubscriber("~sub", "std_msgs/Int64", callback);
-    assertEquals("/ns1/test_resolver/sub", sub.getTopicName());
+    assertEquals("/ns1/test_resolver/sub", sub.getTopicName().toString());
   }
 
   @Test

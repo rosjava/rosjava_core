@@ -17,58 +17,35 @@
 package org.ros.node.topic;
 
 import org.ros.message.MessageListener;
-import org.ros.namespace.GraphName;
-
-import java.util.concurrent.TimeUnit;
 
 /**
- * Handles a subscription to a ROS topic.
+ * Subscribes to messages of a given type on a given ROS topic.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
+ * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <MessageType>
+ *          The message type to use. The {@link Subscriber} may only subscribe
+ *          to messages of this type.
  */
-public interface Subscriber<MessageType> {
+public interface Subscriber<MessageType> extends Topic {
 
   /**
-   * Cancels this subscription.
+   * @param listener
+   *          this {@link MessageListener} will be called for every new message
+   *          received
    */
-  void shutdown();
-
-  /**
-   * Wait for the publisher to register with the master.
-   * 
-   * <p>
-   * This call blocks.
-   * 
-   * @throws InterruptedException
-   */
-  void awaitRegistration() throws InterruptedException;
-
-  /**
-   * Wait for the publisher to register with the master.
-   * 
-   * @param timeout
-   *          How long to wait for registration.
-   * @param unit
-   *          The units for how long to wait.
-   * @return True if the publisher registered with the master, false otherwise.
-   * 
-   * @throws InterruptedException
-   */
-  boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException;
-
-  /**
-   * @return The name of the subscribed topic.
-   */
-  String getTopicName();
-
-  GraphName getTopicGraphName();
-
-  String getTopicMessageType();
-
   void addMessageListener(MessageListener<MessageType> listener);
 
+  /**
+   * @param listener
+   *          the {@link MessageListener} to remove
+   */
   void removeMessageListener(MessageListener<MessageType> listener);
+
+  /**
+   * Cancels the subscription and unregisters the {@link Subscriber}.
+   */
+  void shutdown();
 
 }

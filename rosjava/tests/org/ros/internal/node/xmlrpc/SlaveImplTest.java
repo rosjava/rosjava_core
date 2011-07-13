@@ -56,7 +56,7 @@ public class SlaveImplTest {
     SlaveServer mockSlave = mock(SlaveServer.class);
     Publisher<?> mockPublisher = mock(Publisher.class);
     when(mockSlave.getPublications()).thenReturn(Lists.<Publisher<?>>newArrayList(mockPublisher));
-    when(mockPublisher.getTopicGraphName()).thenReturn(new GraphName("/bar"));
+    when(mockPublisher.getTopicName()).thenReturn(new GraphName("/bar"));
     when(mockPublisher.getTopicMessageType()).thenReturn("/baz");
     when(mockPublisher.getTopicDefinitionAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));
     SlaveImpl slave = new SlaveImpl(mockSlave);

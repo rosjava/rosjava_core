@@ -101,7 +101,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber) {
     return Response.fromListChecked(node.registerSubscriber(slave.getName().toString(), subscriber
-        .getTopicGraphName().toString(), subscriber.getTopicMessageType(), slave.getUri()
+        .getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri()
         .toString()), new UriListResultFactory());
   }
 
@@ -117,7 +117,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber) {
     return Response.fromListChecked(node.unregisterSubscriber(slave.getName().toString(),
-        subscriber.getTopicGraphName().toString(), slave.getUri().toString()),
+        subscriber.getTopicName().toString(), slave.getUri().toString()),
         new IntegerResultFactory());
   }
 
@@ -148,7 +148,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    */
   public Response<Integer> unregisterPublisher(SlaveIdentifier slave, Publisher<?> publisher) {
     return Response.fromListChecked(node.unregisterPublisher(slave.getName().toString(), publisher
-        .getTopicGraphName().toString(), slave.getUri().toString()), new IntegerResultFactory());
+        .getTopicName().toString(), slave.getUri().toString()), new IntegerResultFactory());
   }
 
   /**
