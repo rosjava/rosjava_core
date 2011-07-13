@@ -47,7 +47,6 @@ import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.time.TimeProvider;
 import org.ros.internal.time.WallclockProvider;
 import org.ros.message.MessageListener;
-import org.ros.message.MessageSerializationFactory;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
@@ -86,7 +85,6 @@ public class DefaultNode implements Node {
   private final SubscriberFactory subscriberFactory;
   private final ServiceFactory serviceFactory;
   private final PublisherFactory publisherFactory;
-  private final MessageSerializationFactory messageSerializationFactory;
   private final URI masterUri;
 
   /**
@@ -107,7 +105,6 @@ public class DefaultNode implements Node {
     topicManager.setListener(masterRegistration);
     serviceManager.setListener(masterRegistration);
     publisherFactory = new PublisherFactory(topicManager);
-    messageSerializationFactory = nodeConfiguration.getMessageSerializationFactory();
 
     GraphName basename;
     String nodeNameOverride = nodeConfiguration.getNodeNameOverride();
@@ -160,35 +157,35 @@ public class DefaultNode implements Node {
 
   @SuppressWarnings("unchecked")
   private <MessageType> MessageDeserializer<MessageType> newMessageDeserializer(String messageType) {
-    return (MessageDeserializer<MessageType>) messageSerializationFactory
+    return (MessageDeserializer<MessageType>) nodeConfiguration.getMessageSerializationFactory()
         .newMessageDeserializer(messageType);
   }
 
   @SuppressWarnings("unchecked")
   private <ResponseType> MessageSerializer<ResponseType> newServiceResponseSerializer(
       String serviceType) {
-    return (MessageSerializer<ResponseType>) messageSerializationFactory
+    return (MessageSerializer<ResponseType>) nodeConfiguration.getMessageSerializationFactory()
         .newServiceResponseSerializer(serviceType);
   }
 
   @SuppressWarnings("unchecked")
   private <ResponseType> MessageDeserializer<ResponseType> newServiceResponseDeserializer(
       String serviceType) {
-    return (MessageDeserializer<ResponseType>) messageSerializationFactory
+    return (MessageDeserializer<ResponseType>) nodeConfiguration.getMessageSerializationFactory()
         .newServiceResponseDeserializer(serviceType);
   }
 
   @SuppressWarnings("unchecked")
   private <RequestType> MessageSerializer<RequestType> newServiceRequestSerializer(
       String serviceType) {
-    return (MessageSerializer<RequestType>) messageSerializationFactory
+    return (MessageSerializer<RequestType>) nodeConfiguration.getMessageSerializationFactory()
         .newServiceRequestSerializer(serviceType);
   }
 
   @SuppressWarnings("unchecked")
   private <RequestType> MessageDeserializer<RequestType> newServiceRequestDeserializer(
       String serviceType) {
-    return (MessageDeserializer<RequestType>) messageSerializationFactory
+    return (MessageDeserializer<RequestType>) nodeConfiguration.getMessageSerializationFactory()
         .newServiceRequestDeserializer(serviceType);
   }
 
