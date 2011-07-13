@@ -104,7 +104,7 @@ public class DefaultNodeTest {
     Node node =
         nodeFactory.newNode("node_name",
             NodeConfiguration.newPublic(host, masterServer.getUri()));
-    InetSocketAddress nodeAddress = node.getAddress();
+    InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
     node.shutdown();
@@ -116,7 +116,7 @@ public class DefaultNodeTest {
     Node node =
         nodeFactory.newNode("node_name",
             NodeConfiguration.newPublic(host, masterServer.getUri()));
-    InetSocketAddress nodeAddress = node.getAddress();
+    InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
     node.shutdown();
@@ -128,7 +128,7 @@ public class DefaultNodeTest {
     Node node =
         nodeFactory.newNode("node_name",
             NodeConfiguration.newPublic(host, masterServer.getUri()));
-    InetSocketAddress nodeAddress = node.getAddress();
+    InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
     node.shutdown();
@@ -138,7 +138,7 @@ public class DefaultNodeTest {
   public void testCreatePrivate() {
     Node node =
         nodeFactory.newNode("node_name", privateNodeConfiguration);
-    InetSocketAddress nodeAddress = node.getAddress();
+    InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertTrue(nodeAddress.getAddress().isLoopbackAddress());
     node.shutdown();

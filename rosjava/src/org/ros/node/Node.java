@@ -32,7 +32,6 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import java.net.InetSocketAddress;
 import java.net.URI;
 
 /**
@@ -60,7 +59,7 @@ import java.net.URI;
 public interface Node {
 
   /**
-   * @return The fully resolved name of this {@link Node}, e.g. "/foo/bar/boop".
+   * @return the fully resolved name of this {@link Node}, e.g. "/foo/bar/boop"
    */
   String getName();
 
@@ -221,6 +220,15 @@ public interface Node {
    */
   ParameterTree newParameterTree();
 
-  InetSocketAddress getAddress();
+  /**
+   * Is the node running?
+   * 
+   * <p>
+   * A running node may not be fully initialized yet, it is either in the
+   * process of starting up or is running.
+   * 
+   * @return True if the node is running, false otherwise.
+   */
+  boolean isRunning();
 
 }

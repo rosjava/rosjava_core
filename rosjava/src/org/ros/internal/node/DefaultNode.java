@@ -51,6 +51,7 @@ import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
+import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.parameter.ParameterTree;
@@ -92,6 +93,13 @@ public class DefaultNode implements Node {
    */
   private boolean running;
 
+  /**
+   * {@link DefaultNode}s should only be constructed using the
+   * {@link DefaultNodeFactory}.
+   * 
+   * @param nodeConfiguration
+   *          the {@link NodeConfiguration} for this {@link Node}
+   */
   public DefaultNode(NodeConfiguration nodeConfiguration) {
     this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
     running = false;
@@ -270,15 +278,7 @@ public class DefaultNode implements Node {
     return resolver.resolve(name);
   }
 
-  /**
-   * Is the node running?
-   * 
-   * <p>
-   * A running node may not be fully initialized yet, it is either in the
-   * process of starting up or is running.
-   * 
-   * @return True if the node is running, false otherwise.
-   */
+  @Override
   public boolean isRunning() {
     return running;
   }
@@ -352,11 +352,6 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public InetSocketAddress getAddress() {
-    return slaveServer.getAddress();
-  }
-
-  @Override
   public boolean isRegistered() {
     return masterRegistration.getPendingSize() == 0;
   }
@@ -364,6 +359,11 @@ public class DefaultNode implements Node {
   @Override
   public boolean isRegistrationOk() {
     return masterRegistration.isMasterRegistrationOk();
+  }
+
+  @VisibleForTesting
+  InetSocketAddress getAddress() {
+    return slaveServer.getAddress();
   }
 
 }
