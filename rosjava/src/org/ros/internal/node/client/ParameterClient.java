@@ -40,10 +40,7 @@ import java.util.Map;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-// TODO(kwc): it's a bit odd that both Master and ParameterServer are "Nodes".
-// The only API methods that require a ROS Node is the subscribe/unsubscribe,
-// which are ancillary.
-public class ParameterClient extends NodeClient<org.ros.internal.node.xmlrpc.ParameterServer> {
+public class ParameterClient extends Client<org.ros.internal.node.xmlrpc.ParameterServer> {
 
   private final SlaveIdentifier slaveIdentifier;
   private final String nodeName;

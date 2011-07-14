@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface Master extends Node {
+public interface Master extends XmlRpcEndpoint {
 
   /**
    * Register the caller as a provider of the specified service.

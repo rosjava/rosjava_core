@@ -59,7 +59,7 @@ public class NodeServer {
     startLatch = new CountDownLatch(1);
   }
 
-  public <T extends org.ros.internal.node.xmlrpc.Node> void
+  public <T extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint> void
       start(Class<T> instanceClass, T instance) {
     XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
     PropertyHandlerMapping phm = new PropertyHandlerMapping();

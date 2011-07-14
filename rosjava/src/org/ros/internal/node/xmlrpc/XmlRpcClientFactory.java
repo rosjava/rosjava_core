@@ -40,7 +40,7 @@ import java.lang.reflect.UndeclaredThrowableException;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.Node> {
+public class XmlRpcClientFactory<NodeType extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint> {
 
   private final XmlRpcClient client;
   private final TypeConverterFactory typeConverterFactory;

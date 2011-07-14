@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.ros.address.Address;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
-import org.ros.internal.node.xmlrpc.Node;
+import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
 
 import java.net.URI;
 
@@ -33,7 +33,7 @@ import java.net.URI;
  */
 public class NodeServerTest {
 
-  class FakeNode implements Node {
+  class FakeNode implements XmlRpcEndpoint {
   }
 
   @Test

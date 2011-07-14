@@ -27,6 +27,7 @@ import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.xmlrpc.Master;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
@@ -39,7 +40,7 @@ import java.util.List;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master> {
+public class MasterClient extends Client<Master> {
 
   /**
    * Create a new {@link MasterClient} connected to the specified
@@ -49,7 +50,7 @@ public class MasterClient extends NodeClient<org.ros.internal.node.xmlrpc.Master
    *          the {@link URI} of the {@link MasterServer} to connect to
    */
   public MasterClient(URI uri) {
-    super(uri, org.ros.internal.node.xmlrpc.Master.class);
+    super(uri, Master.class);
   }
 
   /**

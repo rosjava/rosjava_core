@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ParameterServer extends Node {
+public interface ParameterServer extends XmlRpcEndpoint {
 
   /**
    * Deletes a parameter.

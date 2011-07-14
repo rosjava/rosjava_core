@@ -33,7 +33,7 @@ public interface Publisher<MessageType> extends Topic {
    * @see http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options
    * @param enabled
    *          if {@code true}, all messages published to this topic from the
-   *          {@link Publisher}'s {@link Node} will be latched
+   *          {@link Publisher}'s {@link XmlRpcEndpoint} will be latched
    */
   void setLatchMode(boolean enabled);
 

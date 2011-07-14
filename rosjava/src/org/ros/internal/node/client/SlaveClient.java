@@ -25,6 +25,7 @@ import org.ros.internal.node.response.TopicDefinitionListResultFactory;
 import org.ros.internal.node.response.UriResultFactory;
 import org.ros.internal.node.response.VoidResultFactory;
 import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.xmlrpc.Slave;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.namespace.GraphName;
 
@@ -37,12 +38,12 @@ import java.util.Vector;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveClient extends NodeClient<org.ros.internal.node.xmlrpc.Slave> {
+public class SlaveClient extends Client<Slave> {
 
   private final GraphName nodeName;
 
   public SlaveClient(GraphName nodeName, URI uri) {
-    super(uri, org.ros.internal.node.xmlrpc.Slave.class);
+    super(uri, Slave.class);
     this.nodeName = nodeName;
   }
 

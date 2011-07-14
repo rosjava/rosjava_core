@@ -24,7 +24,7 @@ import org.apache.xmlrpc.server.RequestProcessorFactoryFactory;
  * 
  * @param <T>
  */
-class NodeRequestProcessorFactoryFactory<T extends org.ros.internal.node.xmlrpc.Node> implements
+class NodeRequestProcessorFactoryFactory<T extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint> implements
     RequestProcessorFactoryFactory {
   
   private final RequestProcessorFactory factory = new NodeRequestProcessorFactory();

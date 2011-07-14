@@ -17,8 +17,10 @@
 package org.ros.internal.node.xmlrpc;
 
 /**
+ * Represents the XML-RPC interface for a client or server.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface Node {
+public interface XmlRpcEndpoint {
 
 }

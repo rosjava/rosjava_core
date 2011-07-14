@@ -22,16 +22,19 @@ import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.NodeServer;
 import org.ros.internal.node.xmlrpc.XmlRpcClientFactory;
+import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 
 /**
+ * Base class for XML-RPC clients (e.g. MasterClient and SlaveClient).
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <NodeType>
+ * @param <T>
  */
-public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
+abstract class Client<T extends XmlRpcEndpoint> {
 
   private static final int CONNECTION_TIMEOUT = 60 * 1000; // 60 seconds
   private static final int REPLY_TIMEOUT = 60 * 1000; // 60 seconds
@@ -39,9 +42,9 @@ public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
 
   private final URI uri;
 
-  protected final NodeType node;
+  protected final T node;
 
-  public NodeClient(URI uri, Class<NodeType> interfaceClass) {
+  public Client(URI uri, Class<T> interfaceClass) {
     this.uri = uri;
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
     try {
@@ -56,7 +59,7 @@ public class NodeClient<NodeType extends org.ros.internal.node.xmlrpc.Node> {
     client.setTransportFactory(new XmlRpcCommonsTransportFactory(client));
     client.setConfig(config);
 
-    XmlRpcClientFactory<NodeType> factory = new XmlRpcClientFactory<NodeType>(client);
+    XmlRpcClientFactory<T> factory = new XmlRpcClientFactory<T>(client);
     node =
         interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, "",
             XMLRPC_TIMEOUT));
