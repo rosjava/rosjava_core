@@ -16,17 +16,22 @@
 
 package org.ros.message;
 
-
 /**
- * A callback for asynchronous, message-related operations that can succeed or
- * fail.
+ * A callback for asynchronous message-related operations.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <MessageType> {@link Message} type
+ * @param <MessageType>
+ *          the type of message expected
  */
 public interface MessageListener<MessageType> {
-  
+
+  /**
+   * Called when a new message arrives.
+   * 
+   * @param message
+   *          the new message
+   */
   void onNewMessage(MessageType message);
 
 }

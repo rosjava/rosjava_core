@@ -121,22 +121,15 @@ public class NameResolver {
   }
 
   /**
-   * @param name
-   *          name to resolve
-   * @return the name resolved relative to the default namespace
+   * @see #resolve(GraphName)
    */
   public GraphName resolve(String name) {
     return resolve(new GraphName(name));
   }
 
-  protected GraphName lookUpRemapping(GraphName name) {
-    GraphName rmname = name;
-    if (remappings.containsKey(name)) {
-      rmname = remappings.get(name);
-    }
-    return rmname;
-  }
-
+  /**
+   * @return remappings
+   */
   public Map<GraphName, GraphName> getRemappings() {
     return remappings;
   }
@@ -152,6 +145,14 @@ public class NameResolver {
   public NameResolver createResolver(GraphName name) {
     GraphName resolverNamespace = resolve(name);
     return new NameResolver(resolverNamespace, remappings);
+  }
+
+  protected GraphName lookUpRemapping(GraphName name) {
+    GraphName rmname = name;
+    if (remappings.containsKey(name)) {
+      rmname = remappings.get(name);
+    }
+    return rmname;
   }
 
 }

@@ -34,6 +34,8 @@ import java.util.List;
 /**
  * Stores configuration information (e.g. ROS master URI) for {@link Node}s.
  * 
+ * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+ * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
@@ -310,6 +312,7 @@ public class NodeConfiguration {
 
   /**
    * @see http://www.ros.org/wiki/ROS/TCPROS
+   * 
    * @return the {@link BindAddress} for the {@link Node}'s TCPROS server
    */
   public BindAddress getTcpRosBindAddress() {
@@ -318,6 +321,7 @@ public class NodeConfiguration {
 
   /**
    * @see http://www.ros.org/wiki/ROS/TCPROS
+   * 
    * @param tcpRosBindAddress
    *          the {@link BindAddress} for the {@link Node}'s TCPROS server
    */
@@ -328,6 +332,7 @@ public class NodeConfiguration {
 
   /**
    * @see http://www.ros.org/wiki/ROS/TCPROS
+   * 
    * @return the {@link AdvertiseAddressFactory} for the {@link Node}'s TCPROS
    *         server
    */
@@ -337,6 +342,7 @@ public class NodeConfiguration {
 
   /**
    * @see http://www.ros.org/wiki/ROS/TCPROS
+   * 
    * @param tcpRosAdvertiseAddressFactory
    *          the {@link AdvertiseAddressFactory} for the {@link Node}'s TCPROS
    *          server
@@ -350,6 +356,7 @@ public class NodeConfiguration {
 
   /**
    * @see http://www.ros.org/wiki/ROS/TCPROS
+   * 
    * @return the {@link AdvertiseAddress} for the {@link Node}'s TCPROS server
    */
   public AdvertiseAddress getTcpRosAdvertiseAddress() {
@@ -358,6 +365,7 @@ public class NodeConfiguration {
 
   /**
    * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * 
    * @return the {@link BindAddress} for the {@link Node}'s XML-RPC server
    */
   public BindAddress getXmlRpcBindAddress() {
@@ -366,6 +374,7 @@ public class NodeConfiguration {
 
   /**
    * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * 
    * @param xmlRpcBindAddress
    *          the {@link BindAddress} for the {@link Node}'s XML-RPC server
    */
@@ -376,6 +385,7 @@ public class NodeConfiguration {
 
   /**
    * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * 
    * @return the {@link AdvertiseAddress} for the {@link Node}'s XML-RPC server
    */
   public AdvertiseAddress getXmlRpcAdvertiseAddress() {
@@ -384,6 +394,7 @@ public class NodeConfiguration {
 
   /**
    * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * 
    * @return the {@link AdvertiseAddressFactory} for the {@link Node}'s XML-RPC
    *         server
    */
@@ -393,6 +404,7 @@ public class NodeConfiguration {
 
   /**
    * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * 
    * @param xmlRpcAdvertiseAddressFactory
    *          the {@link AdvertiseAddressFactory} for the {@link Node}'s XML-RPC
    *          server

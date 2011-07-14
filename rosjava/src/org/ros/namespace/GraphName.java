@@ -45,6 +45,8 @@ public class GraphName {
 
   private final String name;
 
+  // TODO(damonkohler): This is not safe across multiple hosts/processes.
+  // Instead, try to use the same algorithm as in cpp and Python.
   /**
    * Creates an anonymous {@link GraphName}.
    * 

@@ -39,15 +39,7 @@ public interface NodeFactory {
   Node newNode(GraphName defaultNodeName, NodeConfiguration configuration);
 
   /**
-   * Build a new {@link Node} with the given and {@link NodeConfiguration} and
-   * default name.
-   * 
-   * @param defaultNodeName
-   *          the name of the {@link Node} if the name is not already specified
-   *          in the {@link NodeConfiguration}
-   * @param configuration
-   *          the {@link NodeConfiguration} for the new {@link Node}
-   * @return a new {@link Node}
+   * @see #newNode(GraphName, NodeConfiguration)
    */
   Node newNode(String defaultNodeName, NodeConfiguration configuration);
 
