@@ -33,9 +33,12 @@ import java.net.URI;
  * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <T>
+ *          the XML-RPC interface this {@link Client} connects to
  */
 abstract class Client<T extends XmlRpcEndpoint> {
 
+  // TODO(damonkohler): This should be pulled out into a user configurable
+  // strategy.
   private static final int CONNECTION_TIMEOUT = 60 * 1000; // 60 seconds
   private static final int REPLY_TIMEOUT = 60 * 1000; // 60 seconds
   private static final int XMLRPC_TIMEOUT = 10 * 1000; // 10 seconds
@@ -44,6 +47,12 @@ abstract class Client<T extends XmlRpcEndpoint> {
 
   protected final T node;
 
+  /**
+   * @param uri
+   *          the {@link URI} to connect to
+   * @param interfaceClass
+   *          the class literal for the XML-RPC interface
+   */
   public Client(URI uri, Class<T> interfaceClass) {
     this.uri = uri;
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
