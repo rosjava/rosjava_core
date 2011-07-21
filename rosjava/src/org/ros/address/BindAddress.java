@@ -29,7 +29,7 @@ public class BindAddress {
 
   private final InetSocketAddress address;
 
-  public BindAddress(InetSocketAddress address) {
+  private BindAddress(InetSocketAddress address) {
     this.address = address;
   }
 
