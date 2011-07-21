@@ -59,7 +59,7 @@ def resolve_pathelements(pathelements):
     # TODO: potentially recognize keys like ROS_HOME
     return [os.path.abspath(p) for p in pathelements]
 
-def get_classpath(rospack, package, include_package=False, scope='all'):
+def get_classpath(rospack, package, include_package=False, include_built =False, scope='all'):
     """
     @param include_package: include library entries of self on path
     
@@ -83,14 +83,14 @@ def get_classpath(rospack, package, include_package=False, scope='all'):
         for e in [x for x in m.exports if x.tag == tag]:
             try:
                 # don't include this package's built resources
-                if include_package and pkg == package and \
+                if not include_built and include_package and pkg == package and \
                        e.attrs.get('built', False):
                     continue
-                else:
-                    location = os.path.join(pkg_dir, e.attrs['location'])
-                    entry_scope = e.attrs.get('scope', DEFAULT_SCOPE)
-                    if scope in SCOPE_MAP[entry_scope]:
-                        pathelements.append(location)
+                
+                location = os.path.join(pkg_dir, e.attrs['location'])
+                entry_scope = e.attrs.get('scope', DEFAULT_SCOPE)
+                if scope in SCOPE_MAP[entry_scope]:
+                    pathelements.append(location)
             except KeyError as ke:
                 print >> sys.stderr, str(ke)
                 print >> sys.stderr, "Invalid <%s> tag in package %s"%(tag, pkg)
