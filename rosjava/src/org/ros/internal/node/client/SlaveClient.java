@@ -33,7 +33,6 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -77,79 +76,54 @@ public class SlaveClient extends Client<Slave> {
         new TopicDefinitionListResultFactory());
   }
 
-  public Response<Void> paramUpdate(String parameterKey, Boolean parameterValue) {
-    return Response.fromListChecked(
-        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+  public Response<Void> paramUpdate(GraphName name, boolean value) {
+    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
-  public Response<Void> paramUpdate(String parameterKey, Character parameterValue) {
-    return Response.fromListChecked(
-        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+  public Response<Void> paramUpdate(GraphName name, char value) {
+    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
-  public Response<Void> paramUpdate(String parameterKey, Byte parameterValue) {
-    return Response.fromListChecked(
-        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+  public Response<Void> paramUpdate(GraphName name, int value) {
+    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
-  public Response<Void> paramUpdate(String parameterKey, Short parameterValue) {
-    return Response.fromListChecked(
-        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+  public Response<Void> paramUpdate(GraphName name, double value) {
+    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
-  public Response<Void> paramUpdate(String parameterKey, Integer parameterValue) {
-    return Response.fromListChecked(
-        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+  public Response<Void> paramUpdate(GraphName name, String value) {
+    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
-  public Response<Void> paramUpdate(String parameterKey, Double parameterValue) {
-    return Response.fromListChecked(
-        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+  public Response<Void> paramUpdate(GraphName name, List<?> value) {
+    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
-  public Response<Void> paramUpdate(String parameterKey, String parameterValue) {
-    return Response.fromListChecked(
-        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
+  public Response<Void> paramUpdate(GraphName name, Map<?, ?> value) {
+    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
-  public Response<Void> paramUpdate(String parameterKey, List<?> parameterValue) {
-    return Response.fromListChecked(
-        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<Void> paramUpdate(String parameterKey, Vector<?> parameterValue) {
-    return Response.fromListChecked(
-        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<Void> paramUpdate(String parameterKey, Map<?, ?> parameterValue) {
-    return Response.fromListChecked(
-        node.paramUpdate(nodeName.toString(), parameterKey, parameterValue),
-        new VoidResultFactory());
-  }
-
-  public Response<Void> publisherUpdate(String topic, Collection<URI> publisherUris) {
+  public Response<Void> publisherUpdate(GraphName topic, Collection<URI> publisherUris) {
     List<String> publishers = Lists.newArrayList();
     for (URI uri : publisherUris) {
       publishers.add(uri.toString());
     }
     return Response.fromListChecked(
-        node.publisherUpdate(nodeName.toString(), topic, publishers.toArray()),
+        node.publisherUpdate(nodeName.toString(), topic.toString(), publishers.toArray()),
         new VoidResultFactory());
   }
 
-  public Response<ProtocolDescription> requestTopic(String topic,
+  public Response<ProtocolDescription> requestTopic(GraphName topic,
       Collection<String> requestedProtocols) {
-    return Response.fromListChecked(node.requestTopic(nodeName.toString(), topic,
+    return Response.fromListChecked(node.requestTopic(nodeName.toString(), topic.toString(),
         new Object[][] { requestedProtocols.toArray() }), new ProtocolDescriptionResultFactory());
   }
 

@@ -42,19 +42,20 @@ import java.util.Map;
  */
 public class MasterServer extends NodeServer {
 
-  private final Map<String, SlaveIdentifier> slaves;
-  private final Map<String, ServiceIdentifier> services;
-  private final Multimap<String, PublisherIdentifier> publishers;
-  private final Multimap<String, SubscriberIdentifier> subscribers;
+  private final Map<GraphName, SlaveIdentifier> slaves;
+  private final Map<GraphName, ServiceIdentifier> services;
+  private final Multimap<GraphName, PublisherIdentifier> publishers;
+  private final Multimap<GraphName, SubscriberIdentifier> subscribers;
   private final GraphName masterName;
 
   public MasterServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
     super(bindAddress, advertiseAddress);
     slaves = Maps.newConcurrentMap();
     services = Maps.newConcurrentMap();
-    publishers = Multimaps.synchronizedMultimap(HashMultimap.<String, PublisherIdentifier>create());
+    publishers =
+        Multimaps.synchronizedMultimap(HashMultimap.<GraphName, PublisherIdentifier>create());
     subscribers =
-        Multimaps.synchronizedMultimap(HashMultimap.<String, SubscriberIdentifier>create());
+        Multimaps.synchronizedMultimap(HashMultimap.<GraphName, SubscriberIdentifier>create());
     masterName = new GraphName("/master");
   }
 
@@ -63,26 +64,27 @@ public class MasterServer extends NodeServer {
   }
 
   public void registerService(ServiceIdentifier description) {
-    services.put(description.getName().toString(), description);
+    services.put(description.getName(), description);
   }
 
   public int unregisterService(ServiceIdentifier serviceIdentifier) {
-    String name = serviceIdentifier.getName().toString();
-    if (services.containsKey(name)) {
-      services.remove(name);
+    GraphName serviceName = serviceIdentifier.getName();
+    if (services.containsKey(serviceName)) {
+      services.remove(serviceName);
       return 1;
     }
     return 0;
   }
 
   private void addSlave(SlaveIdentifier slaveIdentifier) {
-    String name = slaveIdentifier.getName().toString();
-    Preconditions.checkState(slaves.get(name) == null || slaves.get(name).equals(slaveIdentifier),
-        "Failed to add slave: " + slaveIdentifier + "\nExisting slave: " + slaves.get(name));
-    slaves.put(name, slaveIdentifier);
+    GraphName slaveName = slaveIdentifier.getName();
+    Preconditions.checkState(
+        slaves.get(slaveName) == null || slaves.get(slaveName).equals(slaveIdentifier),
+        "Failed to add slave: " + slaveIdentifier + "\nExisting slave: " + slaves.get(slaveName));
+    slaves.put(slaveName, slaveIdentifier);
   }
 
-  private void publisherUpdate(String topicName) {
+  private void publisherUpdate(GraphName topicName) {
     List<URI> publisherUris = Lists.newArrayList();
     synchronized (publishers) {
       for (PublisherIdentifier publisherIdentifier : publishers.get(topicName)) {
@@ -105,15 +107,15 @@ public class MasterServer extends NodeServer {
    *         publishing the specified topic.
    */
   public List<PublisherIdentifier> registerSubscriber(SubscriberIdentifier subscriberIdentifier) {
-    subscribers.put(subscriberIdentifier.getTopicName().toString(), subscriberIdentifier);
+    subscribers.put(subscriberIdentifier.getTopicName(), subscriberIdentifier);
     addSlave(subscriberIdentifier.getSlaveIdentifier());
     synchronized (publishers) {
-      return ImmutableList.copyOf(publishers.get(subscriberIdentifier.getTopicName().toString()));
+      return ImmutableList.copyOf(publishers.get(subscriberIdentifier.getTopicName()));
     }
   }
 
   public int unregisterSubscriber(SubscriberIdentifier subscriberIdentifier) {
-    String topicName = subscriberIdentifier.getTopicName().toString();
+    GraphName topicName = subscriberIdentifier.getTopicName();
     if (subscribers.containsKey(topicName)) {
       subscribers.remove(topicName, subscriberIdentifier);
       return 1;
@@ -127,16 +129,16 @@ public class MasterServer extends NodeServer {
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
    */
   public List<SubscriberIdentifier> registerPublisher(PublisherIdentifier publisher) {
-    publishers.put(publisher.getTopicName().toString(), publisher);
+    publishers.put(publisher.getTopicName(), publisher);
     addSlave(publisher.getSlaveIdentifier());
-    publisherUpdate(publisher.getTopicName().toString());
+    publisherUpdate(publisher.getTopicName());
     synchronized (subscribers) {
-      return ImmutableList.copyOf(subscribers.get(publisher.getTopicName().toString()));
+      return ImmutableList.copyOf(subscribers.get(publisher.getTopicName()));
     }
   }
 
   public int unregisterPublisher(PublisherIdentifier publisherIdentifier) {
-    String topicName = publisherIdentifier.getTopicName().toString();
+    GraphName topicName = publisherIdentifier.getTopicName();
     if (publishers.containsKey(topicName)) {
       publishers.remove(topicName, publisherIdentifier);
       return 1;

@@ -83,7 +83,7 @@ public class DefaultNode implements Node {
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
   private final ParameterManager parameterManager;
-  private final Registrar masterRegistration;
+  private final Registrar registrar;
   private final SubscriberFactory subscriberFactory;
   private final ServiceFactory serviceFactory;
   private final PublisherFactory publisherFactory;
@@ -108,9 +108,9 @@ public class DefaultNode implements Node {
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
-    masterRegistration = new Registrar(masterClient);
-    topicManager.setListener(masterRegistration);
-    serviceManager.setListener(masterRegistration);
+    registrar = new Registrar(masterClient);
+    topicManager.setListener(registrar);
+    serviceManager.setListener(registrar);
     publisherFactory = new PublisherFactory(topicManager);
 
     GraphName basename = nodeConfiguration.getNodeName();
@@ -130,10 +130,9 @@ public class DefaultNode implements Node {
     timeProvider = new WallclockProvider();
 
     // Log for /rosout.
-    log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), timeProvider);
     Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
         newPublisher("/rosout", "rosgraph_msgs/Log");
-    log.setRosoutPublisher(rosoutPublisher);
+    log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), rosoutPublisher, timeProvider);
 
     masterUri = nodeConfiguration.getMasterUri();
     start();
@@ -147,7 +146,12 @@ public class DefaultNode implements Node {
     Preconditions.checkState(!running);
     running = true;
     slaveServer.start();
-    masterRegistration.start(slaveServer.toSlaveIdentifier());
+    registrar.start(slaveServer.toSlaveIdentifier());
+  }
+
+  @VisibleForTesting
+  Registrar getRegistrar() {
+    return registrar;
   }
 
   private <MessageType> org.ros.message.MessageSerializer<MessageType> newMessageSerializer(
@@ -329,7 +333,7 @@ public class DefaultNode implements Node {
     // simply best effort cleanup.
     running = false;
     slaveServer.shutdown();
-    masterRegistration.shutdown();
+    registrar.shutdown();
     for (Publisher<?> publisher : topicManager.getPublishers()) {
       publisher.shutdown();
       try {
@@ -387,12 +391,12 @@ public class DefaultNode implements Node {
 
   @Override
   public boolean isRegistered() {
-    return masterRegistration.getPendingSize() == 0;
+    return registrar.getPendingSize() == 0;
   }
 
   @Override
   public boolean isRegistrationOk() {
-    return masterRegistration.isMasterRegistrationOk();
+    return registrar.isMasterRegistrationOk();
   }
 
   @VisibleForTesting

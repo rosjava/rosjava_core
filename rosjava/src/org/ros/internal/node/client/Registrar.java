@@ -25,11 +25,11 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.node.service.ServiceListener;
 import org.ros.internal.node.service.DefaultServiceServer;
+import org.ros.internal.node.service.ServiceListener;
 import org.ros.internal.node.topic.DefaultPublisher;
-import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.DefaultSubscriber;
+import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.TopicListener;
 
 import java.net.URI;
@@ -86,7 +86,7 @@ public class Registrar implements TopicListener, ServiceListener {
             }
           } catch (ExecutionException e) {
             registrationOk = false;
-            log.error("Master registration failed and will be retried.");
+            log.warn("Master registration failed and will be retried.", e);
             // Retry the registration task.
             final Callable<Response<?>> task = futures.get(response);
             futures.remove(response);
@@ -140,6 +140,7 @@ public class Registrar implements TopicListener, ServiceListener {
     submitCallable(new Callable<Response<?>>() {
       @Override
       public Response<List<URI>> call() throws Exception {
+        Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
         Response<List<URI>> response =
             masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
         publisher.signalRegistrationDone();
@@ -153,6 +154,7 @@ public class Registrar implements TopicListener, ServiceListener {
     submitCallable(new Callable<Response<?>>() {
       @Override
       public Response<List<URI>> call() throws Exception {
+        Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
         Response<List<URI>> response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
         List<PublisherDefinition> publishers =
             SlaveServer.buildPublisherIdentifierList(response.getResult(),
@@ -169,6 +171,7 @@ public class Registrar implements TopicListener, ServiceListener {
     submitCallable(new Callable<Response<?>>() {
       @Override
       public Response<Void> call() throws Exception {
+        Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
         Response<Void> response = masterClient.registerService(slaveIdentifier, serviceServer);
         serviceServer.signalRegistrationDone();
         return response;
@@ -178,7 +181,7 @@ public class Registrar implements TopicListener, ServiceListener {
 
   public void start(SlaveIdentifier slaveIdentifier) {
     Preconditions.checkNotNull(slaveIdentifier);
-    Preconditions.checkState(this.slaveIdentifier == null, "Already started.");
+    Preconditions.checkState(this.slaveIdentifier == null, "Registrar already started.");
     this.slaveIdentifier = slaveIdentifier;
     registrationThread.start();
   }

@@ -16,19 +16,16 @@
 
 package org.ros.internal.node;
 
-import org.ros.internal.time.TimeProvider;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.logging.Log;
+import org.ros.internal.time.TimeProvider;
 import org.ros.node.topic.Publisher;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 
-// TODO(damonkohler): This should be wrapped up in the Node already with a
-// getter. That way things like getTopics() will fell natural in this class and
-// we can get rid of setRosoutPublisher() which is probably error prone.
 /**
  * Logger that logs to both an underlying Apache Commons Log as well as /rosout.
  * 
@@ -36,37 +33,40 @@ import java.util.ArrayList;
  */
 public class RosoutLogger implements Log {
 
-  private Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher;
   private final Log log;
+  private final Publisher<org.ros.message.rosgraph_msgs.Log> publisher;
   private final TimeProvider timeProvider;
 
-  public RosoutLogger(Log log, TimeProvider timeProvider) {
+  RosoutLogger(Log log, Publisher<org.ros.message.rosgraph_msgs.Log> publisher,
+      TimeProvider timeProvider) {
     this.log = log;
+    this.publisher = publisher;
     this.timeProvider = timeProvider;
   }
 
-  public void setRosoutPublisher(Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher) {
-    this.rosoutPublisher = rosoutPublisher;
+  @VisibleForTesting
+  Publisher<org.ros.message.rosgraph_msgs.Log> getPublisher() {
+    return publisher;
   }
 
-  private void publishToRosout(Object message, Throwable t) {
-    final Writer result = new StringWriter();
-    final PrintWriter printWriter = new PrintWriter(result);
-    t.printStackTrace(printWriter);
-    publishToRosout(message.toString() + '\n' + printWriter.toString());
+  private void publish(Object message, Throwable throwable) {
+    PrintWriter printWriter = new PrintWriter(new StringWriter());
+    throwable.printStackTrace(printWriter);
+    publish(message.toString() + '\n' + printWriter.toString());
   }
 
-  private void publishToRosout(Object message) {
+  private void publish(Object message) {
     org.ros.message.rosgraph_msgs.Log m = new org.ros.message.rosgraph_msgs.Log();
     m.msg = message.toString();
     m.header.stamp = timeProvider.getCurrentTime();
     m.topics = getTopics();
-    rosoutPublisher.publish(m);
+    publisher.publish(m);
   }
 
   private ArrayList<String> getTopics() {
-    // TODO implement. Should return list of topics that node is involved with.
-    // This helps filter the rosoutconsole.
+    // TODO(damonkohler): Should return list of all published and subscribed
+    // topics for the node that created this logger. This helps filter the
+    // rosoutconsole.
     return new ArrayList<String>();
   }
 
@@ -103,96 +103,96 @@ public class RosoutLogger implements Log {
   @Override
   public void trace(Object message) {
     log.trace(message);
-    if (log.isTraceEnabled() && rosoutPublisher != null) {
-      publishToRosout(message);
+    if (log.isTraceEnabled() && publisher != null) {
+      publish(message);
     }
   }
 
   @Override
   public void trace(Object message, Throwable t) {
     log.trace(message, t);
-    if (log.isTraceEnabled() && rosoutPublisher != null) {
-      publishToRosout(message, t);
+    if (log.isTraceEnabled() && publisher != null) {
+      publish(message, t);
     }
   }
 
   @Override
   public void debug(Object message) {
     log.debug(message);
-    if (log.isDebugEnabled() && rosoutPublisher != null) {
-      publishToRosout(message);
+    if (log.isDebugEnabled() && publisher != null) {
+      publish(message);
     }
   }
 
   @Override
   public void debug(Object message, Throwable t) {
     log.debug(message, t);
-    if (log.isDebugEnabled() && rosoutPublisher != null) {
-      publishToRosout(message, t);
+    if (log.isDebugEnabled() && publisher != null) {
+      publish(message, t);
     }
   }
 
   @Override
   public void info(Object message) {
     log.info(message);
-    if (log.isInfoEnabled() && rosoutPublisher != null) {
-      publishToRosout(message);
+    if (log.isInfoEnabled() && publisher != null) {
+      publish(message);
     }
   }
 
   @Override
   public void info(Object message, Throwable t) {
     log.info(message, t);
-    if (log.isInfoEnabled() && rosoutPublisher != null) {
-      publishToRosout(message, t);
+    if (log.isInfoEnabled() && publisher != null) {
+      publish(message, t);
     }
   }
 
   @Override
   public void warn(Object message) {
     log.warn(message);
-    if (log.isWarnEnabled() && rosoutPublisher != null) {
-      publishToRosout(message);
+    if (log.isWarnEnabled() && publisher != null) {
+      publish(message);
     }
   }
 
   @Override
   public void warn(Object message, Throwable t) {
     log.warn(message, t);
-    if (log.isWarnEnabled() && rosoutPublisher != null) {
-      publishToRosout(message, t);
+    if (log.isWarnEnabled() && publisher != null) {
+      publish(message, t);
     }
   }
 
   @Override
   public void error(Object message) {
     log.error(message);
-    if (log.isErrorEnabled() && rosoutPublisher != null) {
-      publishToRosout(message);
+    if (log.isErrorEnabled() && publisher != null) {
+      publish(message);
     }
   }
 
   @Override
   public void error(Object message, Throwable t) {
     log.error(message, t);
-    if (log.isErrorEnabled() && rosoutPublisher != null) {
-      publishToRosout(message, t);
+    if (log.isErrorEnabled() && publisher != null) {
+      publish(message, t);
     }
   }
 
   @Override
   public void fatal(Object message) {
     log.fatal(message);
-    if (log.isFatalEnabled() && rosoutPublisher != null) {
-      publishToRosout(message);
+    if (log.isFatalEnabled() && publisher != null) {
+      publish(message);
     }
   }
 
   @Override
   public void fatal(Object message, Throwable t) {
     log.fatal(message, t);
-    if (log.isFatalEnabled() && rosoutPublisher != null) {
-      publishToRosout(message, t);
+    if (log.isFatalEnabled() && publisher != null) {
+      publish(message, t);
     }
   }
 

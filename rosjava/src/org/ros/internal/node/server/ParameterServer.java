@@ -120,7 +120,7 @@ public class ParameterServer {
     update(name, value, new Updater() {
       @Override
       public void update(SlaveClient client) {
-        client.paramUpdate(name.toString(), value);
+        client.paramUpdate(name, value);
       }
     });
   }
@@ -129,7 +129,7 @@ public class ParameterServer {
     update(name, value, new Updater() {
       @Override
       public void update(SlaveClient client) {
-        client.paramUpdate(name.toString(), value);
+        client.paramUpdate(name, value);
       }
     });
   }
@@ -138,7 +138,7 @@ public class ParameterServer {
     update(name, value, new Updater() {
       @Override
       public void update(SlaveClient client) {
-        client.paramUpdate(name.toString(), value);
+        client.paramUpdate(name, value);
       }
     });
   }
@@ -147,7 +147,7 @@ public class ParameterServer {
     update(name, value, new Updater() {
       @Override
       public void update(SlaveClient client) {
-        client.paramUpdate(name.toString(), value);
+        client.paramUpdate(name, value);
       }
     });
   }
@@ -156,7 +156,7 @@ public class ParameterServer {
     update(name, value, new Updater() {
       @Override
       public void update(SlaveClient client) {
-        client.paramUpdate(name.toString(), value);
+        client.paramUpdate(name, value);
       }
     });
   }
@@ -165,7 +165,7 @@ public class ParameterServer {
     update(name, value, new Updater() {
       @Override
       public void update(SlaveClient client) {
-        client.paramUpdate(name.toString(), value);
+        client.paramUpdate(name, value);
       }
     });
   }

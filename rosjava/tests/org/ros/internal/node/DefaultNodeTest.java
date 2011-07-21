@@ -76,6 +76,7 @@ public class DefaultNodeTest {
     nodeFactory = new DefaultNodeFactory();
   }
 
+  @Test
   public void testFailIfStartedWhileRunning() throws UnknownHostException {
     Node node = nodeFactory.newNode("node_name", privateNodeConfiguration);
     try {
@@ -103,8 +104,7 @@ public class DefaultNodeTest {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     assertFalse(InetAddresses.isInetAddress(host));
     Node node =
-        nodeFactory.newNode("node_name",
-            NodeConfiguration.newPublic(host, masterServer.getUri()));
+        nodeFactory.newNode("node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -115,8 +115,7 @@ public class DefaultNodeTest {
   public void testCreatePublicWithIpv4() throws Exception {
     String host = "1.2.3.4";
     Node node =
-        nodeFactory.newNode("node_name",
-            NodeConfiguration.newPublic(host, masterServer.getUri()));
+        nodeFactory.newNode("node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -127,8 +126,7 @@ public class DefaultNodeTest {
   public void testCreatePublicWithIpv6() throws Exception {
     String host = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
     Node node =
-        nodeFactory.newNode("node_name",
-            NodeConfiguration.newPublic(host, masterServer.getUri()));
+        nodeFactory.newNode("node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
     InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -137,8 +135,7 @@ public class DefaultNodeTest {
 
   @Test
   public void testCreatePrivate() {
-    Node node =
-        nodeFactory.newNode("node_name", privateNodeConfiguration);
+    Node node = nodeFactory.newNode("node_name", privateNodeConfiguration);
     InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertTrue(nodeAddress.getAddress().isLoopbackAddress());
@@ -148,6 +145,8 @@ public class DefaultNodeTest {
   @Test
   public void testPubSubRegistration() throws InterruptedException {
     Node node = nodeFactory.newNode("node_name", privateNodeConfiguration);
+    ((DefaultNode) node).getRegistrar().setRetryDelay(1, TimeUnit.MILLISECONDS);
+    assertTrue(((RosoutLogger) node.getLog()).getPublisher().awaitRegistration(1, TimeUnit.SECONDS));
 
     Publisher<org.ros.message.std_msgs.String> publisher =
         node.newPublisher("/foo", "std_msgs/String");
@@ -157,7 +156,8 @@ public class DefaultNodeTest {
         node.newSubscriber("/foo", "std_msgs/String", null);
     assertTrue(subscriber.awaitRegistration(1, TimeUnit.SECONDS));
 
-    assertEquals(1, masterServer.getRegisteredPublishers().size());
+    // There are now two registered publishers /rosout and /foo.
+    assertEquals(2, masterServer.getRegisteredPublishers().size());
     assertEquals(1, masterServer.getRegisteredSubscribers().size());
 
     node.shutdown();
@@ -169,10 +169,8 @@ public class DefaultNodeTest {
   @Test
   public void testResolveName() {
     Node node =
-        nodeFactory.newNode(
-            "test_resolver",
-            NodeConfiguration.newPrivate(masterUri).setParentResolver(
-                NameResolver.create("/ns1")));
+        nodeFactory.newNode("test_resolver", NodeConfiguration.newPrivate(masterUri)
+            .setParentResolver(NameResolver.create("/ns1")));
 
     assertGraphNameEquals("/foo", node.resolveName("/foo"));
     assertGraphNameEquals("/ns1/foo", node.resolveName("foo"));
@@ -221,7 +219,8 @@ public class DefaultNodeTest {
     // Check the TCPROS server address via the XML-RPC API.
     SlaveClient slaveClient = new SlaveClient(new GraphName("test_addresses"), nodeUri);
     Response<ProtocolDescription> response =
-        slaveClient.requestTopic("test_addresses_pub", Lists.newArrayList(ProtocolNames.TCPROS));
+        slaveClient.requestTopic(new GraphName("test_addresses_pub"),
+            Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();
     InetSocketAddress tcpRosAddress = result.getAdverstiseAddress().toInetSocketAddress();
     checkHostName(tcpRosAddress.getHostName());
