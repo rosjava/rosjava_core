@@ -70,7 +70,7 @@ public class MasterImpl implements Master, ParameterServer {
 
   @Override
   public List<Object> lookupService(String callerId, String service) {
-    ServiceIdentifier identifier = master.lookupService(callerId, service);
+    ServiceIdentifier identifier = master.lookupService(new GraphName(service));
     if (identifier != null) {
       return Response.createSuccess("Success", identifier.getUri().toString()).toList();
     }

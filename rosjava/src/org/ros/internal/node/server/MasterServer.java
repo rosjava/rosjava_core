@@ -155,7 +155,7 @@ public class MasterServer extends NodeServer {
    *          name of node to lookup
    * @return a {@link SlaveIdentifier} for the node with the given name
    */
-  public SlaveIdentifier lookupNode(String slaveName) {
+  public SlaveIdentifier lookupNode(GraphName slaveName) {
     return slaves.get(slaveName);
   }
 
@@ -171,21 +171,19 @@ public class MasterServer extends NodeServer {
     }
   }
 
-  public List<Object> getSystemState(String callerId) {
+  public List<Object> getSystemState() {
     return null;
   }
 
   /**
    * Lookup the provider of a particular service.
    * 
-   * @param callerId
-   *          ROS caller ID
    * @param service
    *          Fully-qualified name of service
    * @return service URI that provides address and port of the service. Fails if
    *         there is no provider.
    */
-  public ServiceIdentifier lookupService(String callerId, String service) {
+  public ServiceIdentifier lookupService(GraphName service) {
     return services.get(service);
   }
 
