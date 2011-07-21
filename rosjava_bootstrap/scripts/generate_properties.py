@@ -129,6 +129,21 @@ def get_stack_version_cached(s):
         _stack_version_cache[s] = val = roslib.stacks.get_stack_version(s)
         return val
 
+def is_android_library(package):
+    m = roslib.manifest.load_manifest(package)
+    return 'rosjava-android-lib' in [x.tag for x in m.exports]
+
+def is_android_app(package):
+    m = roslib.manifest.load_manifest(package)
+    return 'rosjava-android-app' in [x.tag for x in m.exports]
+
+def is_android_package(package):
+    return is_android_app(package) or is_android_library(package)
+
+def get_android_library_paths(package):
+    m = roslib.manifest.load_manifest(package)
+    return [x.attrs.get('path', '.') for x in m.exports if x.tag == 'rosjava-android-lib']
+
 def get_package_version(package):
     # could optimize stack_of() calculation by maintaining a cache
     s = roslib.stacks.stack_of(package)
@@ -137,34 +152,48 @@ def get_package_version(package):
 def generate_ros_properties(package):
     rospack = roslib.packages.ROSPackages()
     depends = rospack.depends([package])[package]
-
     generate_version = hasattr(roslib.stacks, 'get_stack_version')
-    
-    props = {}
-    props['ros.home'] = roslib.rosenv.get_ros_home()
+    props = {'ros.home': roslib.rosenv.get_ros_home()}
 
-    # add dir props for every package we depend on
+    # Used for setting Android libraries of the Android libraries.
+    package_dir = roslib.packages.get_pkg_dir(package)
+    android_lib_id = 1
+
+    # Add directory properties and Android libraries for every package we depend on.
     for p in depends:
-        props['ros.pkg.%s.dir'%(p)] = roslib.packages.get_pkg_dir(p)
-        if generate_version:
-            props['ros.pkg.%s.version'%(p)] = get_package_version(p)
+        p_dir = roslib.packages.get_pkg_dir(p)
+        props['ros.pkg.%s.dir' % (p)] = p_dir
+
+        # Note: Android libraries require relative paths inorder to work correctly.
+        #       Using an absolute path will cause mysterious error messages about
+        #       not being able to find default.properties.
+        rel_path = os.path.relpath(p_dir, package_dir)
+        for l in get_android_library_paths(p):
+            lib = os.path.join(rel_path, l)
+            props['android.library.reference.%d' % (android_lib_id)] = lib
+            android_lib_id += 1
         
+        if generate_version:
+            props['ros.pkg.%s.version' % (p)] = get_package_version(p)
+    
     props['ros.classpath'] = get_classpath(rospack, package, scope='all').replace(':', '\:')
     props['ros.compile.classpath'] = get_classpath(rospack, package, scope='compile').replace(':', '\:')
     props['ros.runtime.classpath'] = get_classpath(rospack, package, scope='runtime').replace(':', '\:')
     props['ros.test.classpath'] = get_classpath(rospack, package, scope='test').replace(':', '\:')
 
-    # re-encode for ant <fileset includes="${ros.jarfileset}">.  uses comma separator instead.
+    # Re-encode for ant <fileset includes="${ros.jarfileset}"> that uses a comma separator instead.
     for prop in ['ros.classpath', 'ros.compile.classpath', 'ros.runtime.classpath', 'ros.test.classpath']:
         props[prop.replace('classpath', 'jarfileset')] = props[prop].replace(':', ',')
     
     props['ros.test_results'] = os.path.join(roslib.rosenv.get_test_results_dir(), package)
 
     if is_android_package(package):
-        props['android.sdk.dir'] = get_android_sdk_dir()
-        # TODO: should be attribute of android export
-        props['target']='android-9'
-        props['android.library']='true'
+        props['sdk.dir'] = get_android_sdk_dir()
+        # TODO: Should be attribute of the Android export.
+        props['target'] = 'android-9'
+
+    if is_android_library(package):
+        props['android.library'] = 'true'
     
     keys = props.keys()
     for k in sorted(keys):
@@ -183,10 +212,6 @@ def get_android_sdk_dir():
         # SDK dir is two levels up in the path
         return os.path.dirname(os.path.dirname(location))
 
-def is_android_package(package):
-    m = roslib.manifest.load_manifest(package)
-    return 'android' in [x.tag for x in m.exports]
-    
 def generate_properties_main(argv=None):
     if argv is None:
         argv = sys.argv
