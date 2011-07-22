@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project default="default" name="java">
-
+<project default="default" name="java" 
+    xmlns:artifact="antlib:org.apache.maven.artifact.ant">
   <echo message="Properties: ${properties}"/>
 
   <fail message="properties file does not exist: ${properties}">
@@ -18,7 +18,9 @@
   <property name="gen-msg" location="${base}/gen/msg/${ros.package}" />
   <property name="gen-srv" location="${base}/gen/srv/${ros.package}" />
   <property name="lib" location="${base}/lib" />
-  <property name="jar" location="${lib}/${ros.package}.jar" />
+  <property name="jar" location="${ros.artifact.built}" />
+
+  <import file="${ros.maven.ant.include}" />
 
   <path id="classpath">
     <pathelement path="${ros.classpath}" />
@@ -29,7 +31,6 @@
 
   <target name="init">
     <mkdir dir="${build}" />
-    <mkdir dir="${dist}" />
     <mkdir dir="${lib}" />
   </target>
 
@@ -75,7 +76,14 @@
   <target name="jar" depends="compile">
     <jar destfile="${jar}">
       <fileset dir="${build}" />
+      <manifest>
+        <!-- OSGi properties -->
+        <attribute name='Bundle-ManifestVersion' value='2' />
+        <attribute name='Bundle-SymbolicName' value='org.ros.message.${ros.package}' />
+        <attribute name='Bundle-Version' value='0.0.0' />
+        <attribute name="Export-Package" value="${ros.osgi.exports}" />
+        <attribute name="Import-Package" value="${ros.osgi.imports}" />
+      </manifest>
     </jar>
   </target>
-
 </project>

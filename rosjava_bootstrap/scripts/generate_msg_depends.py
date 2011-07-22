@@ -44,14 +44,17 @@ def usage():
     print "generate_msg_depends.py <package-name>"
     sys.exit(os.EX_USAGE)
     
-PKG = 'rosjava_bootstrap'
+BOOTSTRAP_PKG = 'rosjava_bootstrap'
 
 _ros_home = roslib.rosenv.get_ros_home()
-_pkg_dir = roslib.packages.get_pkg_dir(PKG)
-_scripts_dir = os.path.join(_pkg_dir, 'scripts')
-_bootstrap_jar = os.path.join(_pkg_dir, 'dist', 'rosjava-bootstrap.jar')
-_build_file = os.path.join(_pkg_dir, 'scripts', 'build-msg.xml')
+_bootstrap_pkg_dir = roslib.packages.get_pkg_dir(BOOTSTRAP_PKG)
+_scripts_dir = os.path.join(_bootstrap_pkg_dir, 'scripts')
+# TODO(keith): need to calculate this when we have versions
+_bootstrap_jar = os.path.join(_bootstrap_pkg_dir, 'target', 'org.ros.rosjava.rosjava_bootstrap-0.0.0.jar')
+_build_file = os.path.join(_bootstrap_pkg_dir, 'scripts', 'build-msg.xml')
 _properties_dir = os.path.join(_ros_home, 'rosjava', 'properties')
+_parent_pom = os.path.join(_bootstrap_pkg_dir, '..', 'pom.xml')
+_maven_dir = os.path.join(_ros_home, 'rosjava', 'maven')
     
 def msggen_source_path(pkg):
     return os.path.join(_ros_home, 'rosjava', 'gen', 'msg', pkg)
@@ -63,7 +66,8 @@ def msggen_jar_path():
     return os.path.join(_ros_home, 'rosjava', 'lib')
 
 def msg_jar_file_path(package):
-    return os.path.join(_ros_home, 'rosjava', 'lib', '%s.jar'%package)
+    # TODO(keith): once versioning jars need to get this info from package
+    return os.path.join(_ros_home, 'rosjava', 'lib', 'org.ros.rosjava.%s-0.0.0.jar'%package)
 
 def is_msg_pkg(pkg):
     d = roslib.packages.get_pkg_subdir(pkg, roslib.packages.MSG_DIR, False)
@@ -93,6 +97,83 @@ def get_up_to_date():
         if f.endswith('.jar'):
             up_to_date.append(f[:-4])
     return up_to_date
+
+def run_ant(properties):
+    # generate properties for ant
+    properties_file = os.path.join(_properties_dir, 
+        'build-%s.properties'%(properties['ros.package']))
+    if not os.path.exists(os.path.dirname(properties_file)):
+        os.makedirs(os.path.dirname(properties_file))
+
+    with open(properties_file, 'w') as f:
+        for property, value in properties.iteritems():
+            f.write('%s=%s\n'%(property,value))
+
+    command = ['ant', '-f', _build_file,
+               '-Dproperties=%s'%(properties_file)]
+
+    command.append('maven-install')
+
+    subprocess.check_call(command)
+    
+def add_osgi_properties(properties, dependencies):
+    """Add to the properties a set of properties for OSGi"""
+
+    osgi_imports = ['org.ros.message']
+    for dependency in dependencies:
+        osgi_imports.append('org.ros.message.%s'%(dependency))
+
+    imports = ','.join(osgi_imports)
+    properties['ros.osgi.imports'] = imports 
+    properties['ros.osgi.exports'] = 'org.ros.message.%s;uses:="%s"'%(
+        properties['ros.package'], imports)
+    
+def prepare_maven(properties, dependencies):
+    """Create an ant fragment to be included with maven info.
+Modifies the properties list."""
+
+    maven_ant_file = os.path.join(_maven_dir, 'maven-dependencies-%s.xml'%(properties['ros.package']))
+    if not os.path.exists(os.path.dirname(maven_ant_file)):
+        os.makedirs(os.path.dirname(maven_ant_file))
+
+    properties['ros.maven.ant.include'] = maven_ant_file
+
+    # String formating in python doesn't like . as a separator
+    file_contents = ["""<?xml version="1.0"?>
+<project name="maven" default="maven-install" basedir="."  xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+  <path id="maven-ant-tasks.classpath" path="%s/maven-ant-tasks-2.1.3.jar" />
+  <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+           uri="antlib:org.apache.maven.artifact.ant"
+           classpathref="maven-ant-tasks.classpath" />
+
+<artifact:pom id="mypom" groupId="org.ros" artifactId="org.ros.rosjava.%s" version="0.0.0" packaging="jar">
+<dependency groupId="org.ros" artifactId="org.ros.rosjava.bootstrap" version="0.0.0" />
+"""%(properties['ros.bootstrap.scripts.dir'], properties['ros.package'])]
+
+    for dependency in dependencies:
+        file_contents.append('<dependency groupId="org.ros" artifactId="org.ros.rosjava.%s" version="0.0.0" />'
+                             %(dependency))
+
+    file_contents.append("""</artifact:pom>
+  <target name="maven-bug-workaround">
+    <!-- For bug in plugin that ignores in-memory poms for install -->
+    <artifact:writepom pomRefId="mypom" file="${base}/maven/${ros.package}-pom.xml" />
+    <artifact:pom id="mypom.workaround" file="${base}/maven/${ros.package}-pom.xml" />
+  </target>
+  <target name="maven-install" depends="jar,maven-bug-workaround">
+    <artifact:install file="${jar}" pomRefId="mypom.workaround" />
+  </target>
+
+  <target name="maven-deploy" depends="jar,maven-bug-workaround">
+    <artifact:deploy file="${jar}" pomRefId="mypom.workaround">
+      <remoteRepository url="file:///www/repository"/>
+    </artifact:deploy>
+  </target>
+</project>
+""")
+
+    with open(maven_ant_file, 'w') as f:
+        f.write('\n'.join(file_contents))
     
 def _generate_msgs(rospack, package, up_to_date):
     depends = get_msg_packages(rospack, package)
@@ -101,27 +182,30 @@ def _generate_msgs(rospack, package, up_to_date):
         _generate_msgs(rospack, u, up_to_date)
         
     # generate classpath, safe-encode
+    dependencies = get_all_msg_dependencies(rospack, package)
     classpath = get_msg_classpath(rospack, package)
     classpath = classpath.replace(':', '\:')
-        
-    # generate properties for ant
-    properties_file = os.path.join(_properties_dir, 'build-%s.properties'%(package))
-    if not os.path.exists(os.path.dirname(properties_file)):
-        os.makedirs(os.path.dirname(properties_file))
-    with open(properties_file, 'w') as f:
-        f.write("""ros.package=%s
-ros.home=%s
-ros.bootstrap.scripts.dir=%s
-ros.classpath=%s"""%(package, _ros_home, _scripts_dir, classpath))
+    artifact_built = msg_jar_file_path(package)
+
+    print "Hi there %s" % artifact_built
+
+    # Map for all properties
+    properties = {'ros.package': package,
+                  'ros.artifact.built': artifact_built,
+                  'ros.home': _ros_home,
+                  'ros.bootstrap.scripts.dir': _scripts_dir,
+                  'ros.classpath': classpath,
+                  'ros.gen.msg.dir':
+                      '%s/rosjava/gen/msg/%s'%(_ros_home,package)}
 
     # call ant to build everything
     # - add to up_to_date regardless to prevent infinite loop
     up_to_date.append(package)
 
-    command = ['ant', '-f', _build_file,
-               '-Dproperties=%s'%(properties_file)]
-    subprocess.check_call(command)
-    
+    add_osgi_properties(properties, dependencies)
+    prepare_maven(properties, dependencies)
+    run_ant(properties)
+
 def generate_msg_depends(package):
     rospack = roslib.packages.ROSPackages()
 
@@ -137,7 +221,12 @@ def generate_msg_depends(package):
     # let ant do the rest
     for p in set(msg_packages + srv_packages):
         _generate_msgs(rospack, p, up_to_date)
-    
+
+def get_all_msg_dependencies(rospack, package):
+    """gets all msg package dependencies"""
+    depends = rospack.depends([package])[package]
+    return [pkg for pkg in depends if is_msg_pkg(pkg) or is_srv_pkg(pkg)]
+        
 def get_msg_classpath(rospack, package):
     def resolve_pathelements(pathelements):
         return [os.path.abspath(p) for p in pathelements]

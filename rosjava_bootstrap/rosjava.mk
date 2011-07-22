@@ -3,10 +3,13 @@ CMAKE_FLAGS= -Wdev -DCMAKE_TOOLCHAIN_FILE=`rospack find rosbuild`/rostoolchain.c
 
 # The all target does the heavy lifting, creating the build directory and
 # invoking CMake
-all: ant-properties eclipse-project eclipse-classpath msg-deps
+all: obtain-dependencies ant-properties eclipse-project eclipse-classpath msg-deps
 	ant
 
 PACKAGE_NAME=$(shell basename $(PWD))
+
+obtain-dependencies:
+	rosrun rosjava_bootstrap generate_properties.py --dependencies $(PACKAGE_NAME) > dependencies.xml
 
 ant-properties:
 	rosrun rosjava_bootstrap generate_properties.py $(PACKAGE_NAME) > ros.properties
@@ -24,6 +27,7 @@ msg-deps:
 clean:
 	-if [ -f .project-generated ] ; then rm .project .project-generated; fi
 	-if [ -f .classpath-generated ] ; then rm .classpath .classpath-generated; fi
+	-if [ -f dependencies.xml ] ; then rm dependencies.xml; fi
 	-rm ros.properties
 	-ant clean
 

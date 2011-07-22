@@ -1,0 +1,9 @@
+bundle.version=0.0.0
+bundle.artifactId=org.ros.rosjava
+-output: target/${bundle.artifactId}-${bundle.version}.jar
+
+Bundle-Name: org.ros
+Bundle-SymbolicName: ${bundle.artifactId}
+Bundle-Version: ${bundle.version}
+
+Export-Package: !org.ros.internal.*, org.ros.*

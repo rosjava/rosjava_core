@@ -2,72 +2,54 @@
 <project default="default" name="java">
 
   <property file="ros.properties" />
+
+  <include file="dependencies.xml" />
   
-  <property name="build" location="build" />
-  <property name="dist" location="dist" />
+  <property name="src.main" location="src/main/java" />
+  <property name="build.main" location="target/classes" />
+  <property name="build.test" location="target/test-classes" />
+
+  <property name="src.test" location="src/test/java" />
+
+  <property name="dist" location="target" />
   <property name="javac-source" value="1.6" />
   <property name="javac-target" value="1.6" />
   <property name="debuglevel" value="source,lines,vars" />
-  <property name="jar.rosjava" location="${dist}/rosjava.jar" />
-
-  <path id="jar.classpath">
-    <pathelement location="lib/dnsjava-2.1.1.jar" />
-    <pathelement location="lib/guava-r07.jar" />
-    <pathelement location="lib/netty-3.2.4.Final.jar" />
-  </path>
-
-  <!-- only use junit and mockito in tests -->
-  <path id="jar.test.classpath">
-    <pathelement location="lib/mockito-all-1.8.5.jar" />
-    <pathelement location="lib/junit-4.8.2.jar" />
-  </path>
+  <property name="jar" location="${ros.artifact.built}" />
 
   <path id="classpath">
-    <pathelement location="${build}" />
-    <path refid="jar.classpath" />
     <pathelement path="${ros.compile.classpath}" />
   </path>
 
   <path id="test.classpath">
     <path refid="classpath" />
-    <path refid="jar.test.classpath" />
+    <pathelement path="${build.main}" />
+    <pathelement path="${build.test}" />
+    <pathelement path="${ros.test.classpath}" />
   </path>
 
   <target name="default" depends="init, compile, jar" />
 
   <target name="init">
-    <fail unless="ros.compile.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/>
-    <mkdir dir="${build}" />
+    <fail unless="ros.compile.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/> 
+    <mkdir dir="${build.main}" />
+    <mkdir dir="${build.test}" />
     <mkdir dir="${dist}" />
   </target>
 
   <target name="compile" depends="init">
-    <!-- copy all assets -->
-    <copy todir="${build}">
-      <fileset dir="src">
-        <exclude name="**/*.java" />
-      </fileset>
-      <fileset dir="tutorials">
-        <exclude name="**/*.java" />
-      </fileset>
-      <fileset dir="tests">
-        <exclude name="**/*.java" />
-      </fileset>
-    </copy>
-
-    <javac debug="true" debuglevel="${debuglevel}" destdir="${build}" source="${javac-source}"
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build.main}" source="${javac-source}"
         target="${javac-target}" includeantruntime="false">
       <classpath refid="classpath" />
-      <src path="src" />
-      <src path="tutorials" />
+      <src path="${src.main}" />
     </javac>
   </target>
 
   <target name="compile-test" depends="compile">
-    <javac debug="true" debuglevel="${debuglevel}" destdir="${build}" source="${javac-source}"
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build.test}" source="${javac-source}"
         target="${javac-target}" includeantruntime="false">
       <classpath refid="test.classpath" />
-      <src path="tests" />
+      <src path="${src.test}" />
     </javac>
   </target>
 
@@ -83,7 +65,7 @@
       <classpath refid="test.classpath" />
       <formatter type="xml" />
       <batchtest todir="${ros.test_results}">
-        <fileset dir="tests">
+        <fileset dir="${src.test}">
           <include name="**/*Test.java" />
         </fileset>
       </batchtest>
@@ -99,21 +81,23 @@
     <fail if="tests.failed" message="one or more tests failed" />
   </target>
 
-  <!-- TODO: this can end up including test artifacts -->
   <target name="jar" depends="compile">
-    <jar destfile="${jar.rosjava}">
+ <!--
+    <bnd classpath="${build.main}" files="src/main/osgi/rosjava.bnd" />
+-->
+    <jar destfile="${jar}">
       <manifest>
         <attribute name="Main-Class" value="org.ros.RosRun" />
         <attribute name="Class-Path" value="${jar.rosjava.classpath}" />
       </manifest>
-      <fileset dir="${build}" />
+      <fileset dir="${build.main}" />
     </jar>
   </target>
 
   <target name="clean">
-    <delete dir="${build}" />
+    <delete dir="${build.main}" />
+    <delete dir="${build.test}" />
     <delete dir="${dist}" />
     <delete dir="${ros.test_results}" />
   </target>
-
 </project>

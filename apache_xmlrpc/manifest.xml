@@ -9,7 +9,6 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/apache_xmlrpc</url>
 
-  <depend package="rosjava_bootstrap" />
   <depend package="apache_commons_util" />
   
   <export>
@@ -17,10 +16,11 @@
     <rosjava-src location="common/src/main/java" />
     <rosjava-src location="server/src/main/java" />
     
-    <rosjava-pathelement location="dist/apache-xmlrpc-3.1.3rosjava.jar" built="true" />
-    <rosjava-pathelement location="lib/commons-codec-1.3.jar" />
-    <rosjava-pathelement location="lib/commons-httpclient-3.1.jar" />
-    <rosjava-pathelement location="lib/commons-logging-1.1.1.jar" />
+    <rosjava-pathelement location="target/" groupId="xmlrpc" artifactId="org.ros.rosjava.apache-xmlrpc" version="3.1.3" built="true" />
+
+    <rosjava-pathelement groupId="org.apache.commons" artifactId="com.springsource.org.apache.commons.codec" version="1.3.0" />
+    <rosjava-pathelement groupId="org.apache.commons" artifactId="com.springsource.org.apache.commons.httpclient" version="3.1.0" />
+    <rosjava-pathelement groupId="org.apache.commons" artifactId="com.springsource.org.apache.commons.logging" version="1.1.1" />
   </export>
     
 </package>

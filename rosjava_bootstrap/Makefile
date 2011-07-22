@@ -1,9 +1,1 @@
-all: 
-	ant
-
-clean:
-	-ant clean
-
-# All other targets are just passed through
-test: all
-	ant test
+include $(shell rospack find rosjava_bootstrap)/rosjava.mk

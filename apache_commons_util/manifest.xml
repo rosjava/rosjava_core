@@ -9,11 +9,10 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/apache_commons_util</url>
 
-  <depend package="rosjava_bootstrap"/>
-  
   <export>
     <rosjava-src location="src/main/java" />
-    <rosjava-pathelement location="dist/apache-commons-util-1.0.2rosjava.jar" built="true" />
+
+    <rosjava-pathelement location="target" groupId="ws-commons-util" artifactId="org.ros.rosjava.ws-commons-util" version="1.0.2" built="true" />
   </export>
 
 </package>

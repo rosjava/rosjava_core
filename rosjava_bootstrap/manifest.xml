@@ -18,8 +18,9 @@
   <rosdep name="java" />
 
   <export>
-    <rosjava-src location="src" />
-    <rosjava-pathelement location="dist/rosjava-bootstrap.jar" built="true" />
+    <rosjava-src location="src/main/java" />
+
+    <rosjava-pathelement location="target/" groupId="org.ros" artifactId="org.ros.rosjava.rosjava_bootstrap" version="0.0.0" built="true" />
   </export>
     
 </package>

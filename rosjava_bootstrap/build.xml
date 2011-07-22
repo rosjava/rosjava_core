@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="jar" name="rosjava_bootstrap">
-  
-  <property name="build" location="build" />
-  <property name="dist" location="dist" />
-  <property name="jar" location="${dist}/rosjava-bootstrap.jar" />
+  <property file="ros.properties" />
+
+  <include file="dependencies.xml" />
+
+  <property name="build" location="target/classes" />
+  <property name="dist" location="target" />
+  <property name="jar" location="${ros.artifact.built}" />
 
   <path id="classpath">
     <pathelement location="${build}" />
@@ -22,13 +25,23 @@
   <target name="compile" depends="init">
     <javac destdir="${build}" includeantruntime="false">
       <classpath refid="classpath" />
-      <src path="src" />
+      <src path="src/main/java" />
     </javac>
   </target>
 
   <target name="jar" depends="init, compile">
     <jar destfile="${jar}">
       <fileset dir="${build}" />
+
+      <manifest>
+        <!-- OSGi properties -->
+        <attribute name='Bundle-ManifestVersion' value='2' />
+        <attribute name='Bundle-SymbolicName' value='org.ros.rosjava.bootstrap' />
+        <attribute name='Bundle-Version' value='0.0.0' />
+        <attribute name="Export-Package" value="org.ros.message" />
+	<attribute name="Fragment-Host" value='org.ros; bundle-version="[0.0.0,1.0.0)"' />
+      </manifest>
+
     </jar>
   </target>
 

@@ -2,15 +2,14 @@
 <project basedir="." name="apache-xmlrpc" default="jar">
 
   <property file="ros.properties" />
+
+  <include file="dependencies.xml" />
   
-  <property name="build" location="build" />
-  <property name="dist" location="dist" />
-  <property name="jar" location="${dist}/apache-xmlrpc-3.1.3rosjava.jar" />
+  <property name="build" location="target/classes" />
+  <property name="dist" location="target" />
+  <property name="jar" location="${ros.artifact.built}" />
 
   <path id="classpath">
-    <pathelement location="lib/commons-codec-1.3.jar" />
-    <pathelement location="lib/commons-httpclient-3.1.jar" />
-    <pathelement location="lib/commons-logging-1.1.1.jar" />
     <pathelement path="${ros.compile.classpath}" />
   </path>
  
