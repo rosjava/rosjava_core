@@ -26,9 +26,12 @@
   </target>
 
   <target name="jar" depends="init, compile">
+    <bnd classpath="${build}" files="src/main/osgi/apache_commons_ws.bnd" />
+<!--
     <jar destfile="${jar}">
       <fileset dir="${build}" />
     </jar>
+-->
   </target>
 
   <target name="test" />

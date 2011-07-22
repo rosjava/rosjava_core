@@ -54,11 +54,14 @@
   <target name="test" depends="compile" />
 
   <target name="jar" depends="init, compile">
+    <bnd classpath="${build}" files="src/main/osgi/actionlib_java.bnd" />
+<!--
     <jar destfile="${jar}">
       <fileset dir="${build}">
       	<exclude name="org/ros/message/actionlib_tutorials/**" />
         <exclude name="org/ros/actionlib/example/**" />
       </fileset>
     </jar>
+-->
   </target>
 </project>

@@ -1,0 +1,8 @@
+bundle.version=1.0.2
+-output: target/org.ros.rosjava.ws-commons-util-${bundle.version}.jar
+
+Bundle-Name: org.ros.rosjava.ws-commons-util
+Bundle-SymbolicName: org.ros.rosjava.ws-commons-util
+Bundle-Version: ${bundle.version}
+
+Export-Package: org.apache.ws.*

@@ -86,9 +86,8 @@
   </target>
 
   <target name="jar" depends="compile">
- <!--
     <bnd classpath="${build.main}" files="src/main/osgi/rosjava.bnd" />
--->
+<!--
     <jar destfile="${jar}">
       <manifest>
         <attribute name="Main-Class" value="org.ros.RosRun" />
@@ -96,6 +95,7 @@
       </manifest>
       <fileset dir="${build.main}" />
     </jar>
+-->
   </target>
 
   <target name="clean">
