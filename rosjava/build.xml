@@ -10,6 +10,7 @@
   <property name="build.test" location="target/test-classes" />
 
   <property name="src.test" location="src/test/java" />
+  <property name="resources.test" location="src/test/resources" />
 
   <property name="dist" location="target" />
   <property name="javac-source" value="1.6" />
@@ -51,6 +52,9 @@
       <classpath refid="test.classpath" />
       <src path="${src.test}" />
     </javac>
+    <copy todir="${build.test}">
+      <fileset dir="${resources.test}" />
+    </copy>
   </target>
 
   <target name="test" depends="compile-test">
