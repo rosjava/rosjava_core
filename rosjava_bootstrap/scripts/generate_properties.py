@@ -391,7 +391,7 @@ def write_maven_dependencies_group(f, rospack, package, scope):
     """Write out a maven <dependencies> element in the file for the given scope"""
     f.write('  <artifact:dependencies filesetId="dependency.fileset.%s">' %
             scope)
-    f.write('<artifact:remoteRepository id="org.ros.release" url="https://robotbrains.hideho.org/nexus/content/groups/ros-public" />\n')
+    f.write('<artifact:remoteRepository id="org.ros.release" url="http://robotbrains.hideho.org/nexus/content/groups/ros-public" />\n')
 
     def export_operator(pkg, pkg_dir, e):
         # TODO(khughes): Nuke location once in Maven repository
@@ -427,18 +427,23 @@ def generate_ant_maven_dependencies(package):
     rospack = roslib.packages.ROSPackages()
 
     sys.stdout.write("""<?xml version="1.0"?>
-<project name="dependencies" basedir="."  xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+<project name="dependencies" basedir="."  xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+      xmlns:ac="antlib:net.sf.antcontrib"
+>
   <taskdef resource="net/sf/antcontrib/antlib.xml"/>
 
   <path id="maven-ant-tasks.classpath" path="%s/maven-ant-tasks-2.1.3.jar" />
   <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
            uri="antlib:org.apache.maven.artifact.ant"
            classpathref="maven-ant-tasks.classpath" />
+  <typedef resource="net/sf/antcontrib/antlib.xml" 
+           uri="antlib:net.sf.antcontrib"
+           classpath="%s/ant-contrib-1.0b3.jar"/>
 
-"""% _bootstrap_scripts_dir)
+"""% (_bootstrap_scripts_dir, _bootstrap_scripts_dir))
 
     sys.stdout.write("""  <artifact:dependencies filesetId="dependency.osgi">
-    <artifact:remoteRepository id="org.ros.release" url="https://robotbrains.hideho.org/nexus/content/groups/ros-public" />
+    <artifact:remoteRepository id="org.ros.release" url="http://robotbrains.hideho.org/nexus/content/groups/ros-public" />
     <artifact:dependency groupId="biz.aQute" artifactId="bnd" version="0.0.384" />
   </artifact:dependencies>
 
@@ -457,7 +462,7 @@ def generate_ant_maven_dependencies(package):
     sys.stdout.write("""
 
   <target name="%s">
-    <for param="file">
+    <ac:for param="file">
       <path>
         <fileset refid="dependency.fileset.compile"/>
       </path>
@@ -465,8 +470,8 @@ def generate_ant_maven_dependencies(package):
 	<echo file="${%s}" append="true">compile::::@{file}
 </echo>
       </sequential>
-    </for>
-    <for param="file">
+    </ac:for>
+    <ac:for param="file">
       <path>
         <fileset refid="dependency.fileset.runtime"/>
       </path>
@@ -474,8 +479,8 @@ def generate_ant_maven_dependencies(package):
 	<echo file="${%s}" append="true">runtime::::@{file}
 </echo>
       </sequential>
-    </for>
-    <for param="file">
+    </ac:for>
+    <ac:for param="file">
       <path>
         <fileset refid="dependency.fileset.test"/>
       </path>
@@ -483,7 +488,7 @@ def generate_ant_maven_dependencies(package):
 	<echo file="${%s}" append="true">test::::@{file}
 </echo>
       </sequential>
-    </for>
+    </ac:for>
   </target>
 </project>
 """%(DEPENDENCY_GENERATION_TARGET, 
