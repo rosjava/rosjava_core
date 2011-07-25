@@ -129,13 +129,15 @@ public class DefaultNode implements Node {
     // TODO(kwc): Implement simulated time.
     timeProvider = new WallclockProvider();
 
-    // Log for /rosout.
+    masterUri = nodeConfiguration.getMasterUri();
+    start();
+
+    // NOTE(damonkohler): This must be created after start() is called so that
+    // the Registrar can be initialized with the SlaveServer's SlaveIdentifier
+    // before trying to register the /rosout Publisher.
     Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
         newPublisher("/rosout", "rosgraph_msgs/Log");
     log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), rosoutPublisher, timeProvider);
-
-    masterUri = nodeConfiguration.getMasterUri();
-    start();
   }
 
   /**
