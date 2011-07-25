@@ -19,6 +19,7 @@ ros.properties
 .project
 apache_commons_util/bin
 apache_xmlrpc/bin
+dependencies.xml
 
 syntax: regexp
-(build|dist|msg_gen|srv_gen|gen|test_output)/.*
+(target|build|dist|msg_gen|srv_gen|gen|test_output)/.*
