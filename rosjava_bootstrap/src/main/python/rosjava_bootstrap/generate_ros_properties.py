@@ -41,7 +41,7 @@ import roslib
 
 
 def usage():
-    print 'generate_properties.py <package-name>'
+    print 'generate_ros_properties.py <package-name>'
     sys.exit(os.EX_USAGE)
 
 
