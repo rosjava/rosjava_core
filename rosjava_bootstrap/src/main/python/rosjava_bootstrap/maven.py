@@ -155,25 +155,18 @@ def get_maven_dependencies(package, dependency_filename):
 
 def write_maven_dependencies_group(f, rospack, package, scope):
     """Write out a maven <dependencies> element in the file for the given scope"""
-    f.write('  <artifact:dependencies filesetId="dependency.fileset.%s">' %
-            scope)
-    f.write('<artifact:remoteRepository id="org.ros.release" url="http://robotbrains.hideho.org/nexus/content/groups/ros-public" />\n')
+    print >>f, '  <artifact:dependencies filesetId="dependency.fileset.%s">' % scope
+    print >>f, ('    <artifact:remoteRepository id="org.ros.release" '
+                'url="http://robotbrains.hideho.org/nexus/content/groups/ros-public" />')
 
     def export_operator(pkg, pkg_dir, e):
         # TODO(khughes): Nuke location once in Maven repository
         if 'groupId' in e.attrs and not 'location' in e.attrs:
-            f.write("""
-    <artifact:dependency groupId="%s" artifactId="%s" version="%s" />
-"""%(
-                e.attrs['groupId'], e.attrs['artifactId'],
-                e.attrs['version']
-                ))
+            print >>f, ('    <artifact:dependency groupId="%(groupId)s" artifactId="%(artifactId)s" '
+                        'version="%(version)s" />' % e.attrs)
 
-    walk_export_path(rospack, package,
-                     export_operator, None,
-                     True, scope)
-
-    f.write("  </artifact:dependencies>\n")
+    walk_export_path(rospack, package, export_operator, None, include_package=True, scope=scope)
+    print >>f, '  </artifact:dependencies>'
 
 
 def generate_ant_maven_dependencies(package):

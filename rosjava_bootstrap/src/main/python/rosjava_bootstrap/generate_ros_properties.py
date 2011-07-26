@@ -59,17 +59,16 @@ def get_package_version(package, stack_of_cache=None, stack_version_cache=None):
     return version
 
 
-def generate_properties(package, maven_depmap):
-    rospack = roslib.packages.ROSPackages()
+def generate_properties(rospack, package, maven_depmap):
     depends = rospack.depends([package])[package]
     properties = {'ros.home': roslib.rosenv.get_ros_home()}
 
     # Add directory properties for every package we depend on.
-    for package in depends:
-        package_directory = roslib.packages.get_pkg_dir(package)
-        properties['ros.pkg.%s.dir' % (package)] = package_directory
+    for dependency in depends:
+        dependency_directory = roslib.packages.get_pkg_dir(dependency)
+        properties['ros.pkg.%s.dir' % (dependency)] = dependency_directory
         if hasattr(roslib.stacks, 'get_stack_version'):
-            properties['ros.pkg.%s.version' % (package)] = get_package_version(package)
+            properties['ros.pkg.%s.version' % (dependency)] = get_package_version(dependency)
 
     built_artifact = maven.get_package_build_artifact(rospack, package)
     if built_artifact:
@@ -101,8 +100,9 @@ def main(argv):
     if len(argv) != 2:
         usage()
     package = argv[1]
+    rospack = roslib.packages.ROSPackages()
     maven_depmap = maven.get_maven_dependencies(package, 'dependencies.xml')
-    properties = generate_properties(package, maven_depmap)
+    properties = generate_properties(rospack, package, maven_depmap)
     print_sorted_properties(properties)
 
 

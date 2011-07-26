@@ -38,11 +38,6 @@ from generate_msg_depends import msg_jar_file_path, is_msg_pkg, is_srv_pkg
 import maven
 
 
-def _resolve_path_elements(path_elements):
-    # TODO: Potentially recognize keys like ROS_HOME
-    return [os.path.abspath(package) for package in path_elements]
-
-
 def _get_specified_classpath(rospack, package, include_package, scope):
     """
     @param include_package: include library entries of self on path
@@ -62,8 +57,7 @@ def _get_specified_classpath(rospack, package, include_package, scope):
     path_elements = []
 
     def export_operator(pkg, pkg_dir, e):
-        # If is a Maven artifact, create the entire name. Otherwise location
-        # has all.
+        # If is a Maven artifact, create the entire name. Otherwise location has all.
         if 'location' in e.attrs:
             location = e.attrs['location']
             if 'groupId' in e.attrs:
@@ -76,8 +70,9 @@ def _get_specified_classpath(rospack, package, include_package, scope):
         if is_msg_pkg(pkg) or is_srv_pkg(pkg):
             path_elements.append(msg_jar_file_path(pkg))
 
-    maven.walk_export_path(rospack, package, export_operator, package_operator, include_package, scope)
-    return _resolve_path_elements(path_elements)
+    maven.walk_export_path(rospack, package, export_operator, package_operator, include_package,
+                           scope)
+    return [os.path.abspath(path) for path in path_elements]
 
 
 def get_classpath(rospack, package, maven_depmap, include_package=False, scope='all'):
