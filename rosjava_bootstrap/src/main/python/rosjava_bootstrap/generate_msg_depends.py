@@ -33,16 +33,15 @@
 
 import os
 import sys
-import shutil
 import subprocess
 
-import roslib.rosenv
-import roslib.packages
-import roslib.stacks
+import roslib
+
 
 def usage():
     print "generate_msg_depends.py <package-name>"
     sys.exit(os.EX_USAGE)
+    
     
 BOOTSTRAP_PKG = 'rosjava_bootstrap'
 
@@ -187,8 +186,6 @@ def _generate_msgs(rospack, package, up_to_date):
     classpath = classpath.replace(':', '\:')
     artifact_built = msg_jar_file_path(package)
 
-    print "Hi there %s" % artifact_built
-
     # Map for all properties
     properties = {'ros.package': package,
                   'ros.artifact.built': artifact_built,
@@ -248,7 +245,7 @@ def wipe_msg_depends(package):
     for p in set(msg_packages + srv_packages):
         # call ant to delete build artifacts
         command = ['ant', '-f', _build_file,
-                   '-Dproperties=%s'%(properties_file),
+                   '-Dproperties=%s' % (properties_file),
                    'clean']
         subprocess.check_call(command)
     

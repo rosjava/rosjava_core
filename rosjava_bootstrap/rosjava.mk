@@ -9,13 +9,13 @@ all: obtain-dependencies ant-properties eclipse-project eclipse-classpath msg-de
 PACKAGE_NAME=$(shell basename $(PWD))
 
 obtain-dependencies:
-	rosrun rosjava_bootstrap generate_properties.py --dependencies $(PACKAGE_NAME) > dependencies.xml
+	rosrun rosjava_bootstrap generate_dependencies_xml.py $(PACKAGE_NAME) > dependencies.xml
 
 ant-properties:
-	rosrun rosjava_bootstrap generate_properties.py $(PACKAGE_NAME) > ros.properties
+	rosrun rosjava_bootstrap generate_ros_properties.py $(PACKAGE_NAME) > ros.properties
 
 eclipse-classpath:
-	if [ ! -f .classpath ] ; then rosrun rosjava_bootstrap generate_properties.py --eclipse $(PACKAGE_NAME) > .classpath ; touch .classpath-generated; fi
+	if [ ! -f .classpath ] ; then rosrun rosjava_bootstrap generate_eclipse_project.py $(PACKAGE_NAME) > .classpath ; touch .classpath-generated; fi
 
 eclipse-project:
 	if [ ! -f .project ] ; then sed s/PROJECT_NAME/$(PACKAGE_NAME)/ `rospack find rosjava_bootstrap`/eclipse/eclipse-project-template > .project ; touch .project-generated; fi

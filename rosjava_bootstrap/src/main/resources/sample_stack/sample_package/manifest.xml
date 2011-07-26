@@ -1,0 +1,21 @@
+<package>
+  <description brief="sample_package">
+      This package is solely for testing rosjava build scripts.
+  </description>
+  <author>Damon Kohler</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/sample_package</url>
+
+  <depend package="sample_package_dependency" />
+
+  <rosdep name="java" />
+
+  <export>
+    <rosjava-src location="src/main/java" />
+    <rosjava-pathelement groupId="com.domain" artifactId="com.domain.sample" version="0.0.0" />
+    <rosjava-pathelement location="target/" groupId="com.domain" artifactId="com.domain.sample.with_location" version="0.0.0" />
+    <rosjava-pathelement location="target/" groupId="com.domain" artifactId="com.domain.sample.built_with_location" version="0.0.0" built="True" />
+  </export>
+
+</package>
