@@ -116,7 +116,6 @@ def get_full_maven_name(e):
     Creates an entire Maven filename from an XML element containing
     groupId, artifactId, and version.
     """
-
     return '%s-%s.jar' % (e.attrs['artifactId'], e.attrs['version'])
 
 
@@ -142,7 +141,6 @@ def get_maven_dependencies(package, dependency_filename):
 
     f = os.fdopen(fd, "r")
     dependencies = f.read()
-
     f.close()
 
     os.remove(name)
