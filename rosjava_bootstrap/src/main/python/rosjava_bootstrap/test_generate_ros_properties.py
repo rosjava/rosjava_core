@@ -20,6 +20,7 @@ import os
 
 import base_test_case
 import generate_ros_properties
+import resources
 import roslib
 import StringIO
 
@@ -43,6 +44,6 @@ class TestGenerateRosProperties(base_test_case.BaseTestCase):
                 rospack, SAMPLE_PACKAGE, {'all': [], 'compile': [], 'runtime': [], 'test': []})
         self.assertEqual('target/com.domain.sample.built_with_location-0.0.0.jar',
                          properties['ros.artifact.built'])
-        expected = os.path.join(self.get_resources_directory(), 'sample_stack',
+        expected = os.path.join(resources.get_resources_directory(), 'sample_stack',
                                 'sample_package_dependency')
         self.assertEqual(expected, properties['ros.pkg.sample_package_dependency.dir'])
