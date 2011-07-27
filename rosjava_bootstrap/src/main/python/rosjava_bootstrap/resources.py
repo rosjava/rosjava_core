@@ -17,15 +17,10 @@
 __author__ = 'damonkohler@google.com (Damon Kohler)'
 
 import os
-import unittest
 
-import resources
+import roslib
 
 
-class BaseTestCase(unittest.TestCase):
-    
-    @classmethod
-    def setUpClass(cls):
-        resources_directory = resources.get_resources_directory()
-        os.environ['ROS_PACKAGE_PATH'] = (
-            resources_directory + os.path.pathsep + os.environ['ROS_PACKAGE_PATH'])
+def get_resources_directory(): 
+    package_directory = roslib.packages.get_pkg_dir('rosjava_bootstrap')
+    return os.path.join(package_directory, 'src', 'main', 'resources')

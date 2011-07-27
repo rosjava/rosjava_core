@@ -17,24 +17,24 @@
 __author__ = 'damonkohler@google.com (Damon Kohler)'
 
 import base_test_case
-import generate_eclipse_project
+import generate_eclipse_classpath
 import roslib
 import StringIO
 
 SAMPLE_PACKAGE = 'sample_package'
 
 
-class TestGenerateEclipseProject(base_test_case.BaseTestCase):
+class TestGenerateEclipseClasspath(base_test_case.BaseTestCase):
     
     def test_get_source_paths(self):
         rospack = roslib.packages.ROSPackages()
-        paths = generate_eclipse_project._get_source_paths(rospack, SAMPLE_PACKAGE)
+        paths = generate_eclipse_classpath._get_source_paths(rospack, SAMPLE_PACKAGE)
         self.assertEqual(['src/main/java'], paths)
 
     def test_generate_classpath_file(self):
         rospack = roslib.packages.ROSPackages()
         stream = StringIO.StringIO()
-        generate_eclipse_project.generate_classpath_file(
+        generate_eclipse_classpath.generate_classpath_file(
                 rospack, SAMPLE_PACKAGE, {'all': []}, stream)
         # TODO(damonkohler): Actually test the content of the generated classpath file.
         self.assertTrue(stream.getvalue())

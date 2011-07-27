@@ -15,10 +15,10 @@ ant-properties:
 	rosrun rosjava_bootstrap generate_ros_properties.py $(PACKAGE_NAME) > ros.properties
 
 eclipse-classpath:
-	if [ ! -f .classpath ] ; then rosrun rosjava_bootstrap generate_eclipse_project.py $(PACKAGE_NAME) > .classpath ; touch .classpath-generated; fi
+	if [ ! -f .classpath ] ; then rosrun rosjava_bootstrap generate_eclipse_classpath.py $(PACKAGE_NAME) > .classpath ; touch .classpath-generated; fi
 
 eclipse-project:
-	if [ ! -f .project ] ; then sed s/PROJECT_NAME/$(PACKAGE_NAME)/ `rospack find rosjava_bootstrap`/eclipse/eclipse-project-template > .project ; touch .project-generated; fi
+	if [ ! -f .project ] ; then rosrun rosjava_bootstrap generate_eclipse_project.py $(PACKAGE_NAME) > .project ; touch .project-generated; fi
 
 # msg-deps builds both msgs and srvs
 msg-deps:

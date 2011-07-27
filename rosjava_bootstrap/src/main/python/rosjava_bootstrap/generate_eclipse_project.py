@@ -36,61 +36,38 @@ import os
 import sys
 
 import android
-import classpath
-import maven
+import resources
 import roslib
 
-# XML tag for the rosjava manifest tag for path elements.
-TAG_ROSJAVA_PATHELEMENT = 'rosjava-pathelement'
-# XML tag for the rosjava manifest tag for source elements.
-TAG_ROSJAVA_SRC = 'rosjava-src'
-
-
-def usage():
-    print "generate_eclipse_project.py <package-name>"
-    sys.exit(os.EX_USAGE)
-
-
-def _get_source_paths(rospack, package):
-    """
-    @return: list of source paths. Source paths will be returned in the
-    relative specification used in the ros manifest.xml file.
-    @rtype: [str]
-    """
-    rospack.load_manifests([package])
-    m = rospack.manifests[package]
-    return [x.attrs['location'] for x in m.exports if x.tag == TAG_ROSJAVA_SRC]
-
-
-def generate_classpath_file(rospack, package, maven_depmap, stream=sys.stdout):
-    print >>stream, '<?xml version="1.0" encoding="UTF-8"?>\n<classpath>'
-    # TODO(damonkohler): Move Eclipse .project file generation into this
-    # script as well so that we can alter it for use with Android.
+    
+def generate_eclipse_project(package, stream=sys.stdout):
+    resources_directory = resources.get_resources_directory()
     if android.is_android_package(package):
-        print >>stream, ('\t<classpathentry kind="con" '
-                         'path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>')
-    for p in filter(None, _get_source_paths(rospack, package)):
-        print >>stream, '\t<classpathentry kind="src" path="%s"/>' % (p)
-    print >>stream, '\t<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>'
-    print >>stream, '\t<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>'
-    for p in filter(None, classpath.get_classpath(
-            rospack, package, maven_depmap, include_package=True, scope='all').split(':')):
-        print >>stream, '\t<classpathentry kind="lib" path="%s"/>' % (p)
-    print >>stream, '\t<classpathentry kind="output" path="build"/>\n</classpath>'
+        template_path = os.path.join(resources_directory, 'eclipse_project_templates',
+                                     'android_project_template')
+    else:
+        template_path = os.path.join(resources_directory, 'eclipse_project_templates',
+                                     'java_project_template')
+    for line in open(template_path):
+        print >>stream, line.replace('${PROJECT_NAME}', package)
+
+
+def _usage():
+    print 'Prints the eclipse .project file for a package to stdout.'
+    print '    ./generate_eclipse_project.py package_name'
+    sys.exit(os.EX_USAGE)
 
 
 def main(argv):
     if len(argv) != 2:
-        usage()
+        _usage()
     package = argv[1]
-    rospack = roslib.packages.ROSPackages()
-    maven_depmap = maven.get_maven_dependencies(package, 'dependencies.xml')
-    generate_classpath_file(rospack, package, maven_depmap)
+    generate_eclipse_project(package)
 
-
+    
 if __name__ == '__main__':
     try:
         main(sys.argv)
     except roslib.packages.InvalidROSPkgException as e:
-        sys.stderr.write('ERROR: '+str(e)+'\n')
+        print >>sys.stderr, 'ERROR: %s' % str(e)
         sys.exit(1)
