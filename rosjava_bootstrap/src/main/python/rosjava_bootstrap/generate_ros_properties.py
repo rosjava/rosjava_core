@@ -69,8 +69,6 @@ def generate_properties(rospack, package, maven_depmap):
     if built_artifact:
         properties['ros.artifact.built'] = built_artifact
 
-    properties['ros.classpath'] = classpath.get_classpath(
-            rospack, package, maven_depmap, scope='all')
     properties['ros.compile.classpath'] = classpath.get_classpath(
             rospack, package, maven_depmap, scope='compile')
     properties['ros.runtime.classpath'] = classpath.get_classpath(
@@ -79,7 +77,7 @@ def generate_properties(rospack, package, maven_depmap):
             rospack, package, maven_depmap, scope='test')
 
     # Re-encode for ant <fileset includes="${ros.jarfileset}">.  uses comma separator instead.
-    for prop in ['ros', 'ros.compile', 'ros.runtime', 'ros.test']:
+    for prop in ['ros.compile', 'ros.runtime', 'ros.test']:
         properties[prop + '.jarfileset'] = properties[prop + '.classpath'].replace(':', ',')
 
     properties['ros.test_results'] = os.path.join(roslib.rosenv.get_test_results_dir(), package)

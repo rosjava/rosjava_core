@@ -23,9 +23,8 @@
   <import file="${ros.maven.ant.include}" />
 
   <path id="classpath">
-    <pathelement path="${ros.classpath}" />
+    <pathelement path="${ros.compile.classpath}" />
   </path>
-  <echo message="Classpath: ${ros.classpath}"/>
 
   <target name="default" depends="jar" />
 

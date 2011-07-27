@@ -41,9 +41,10 @@ import roslib
 
 # See http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
 SCOPE_MAP = {
-    'compile': ['compile', 'runtime', 'test', 'all'],
-    'runtime': ['runtime', 'test', 'all'],
-    'test': ['test', 'all'],
+    'compile': {'compile': 'compile', 'runtime': 'runtime'},
+    'provided': {'compile': 'provided', 'runtime': 'provided'},
+    'runtime': {'compile': 'runtime', 'runtime': 'runtime'},
+    'test': {'compile': 'test', 'runtime': 'test'},
     }
 DEFAULT_SCOPE = 'compile'
 
@@ -58,13 +59,15 @@ BOOTSTRAP_PKG_DIR = roslib.packages.get_pkg_dir(BOOTSTRAP_PKG)
 BOOTSTRAP_SCRIPTS_DIR = os.path.join(BOOTSTRAP_PKG_DIR, 'scripts')
 
 
-def walk_export_path(rospack, package, export_operator, package_operator, include_package=False, scope='all'):
+def walk_export_path(rospack, package, export_operator, package_operator,
+                     include_package=False, scope=DEFAULT_SCOPE):
     """
     Walk the entire set of dependencies for a package. Run the supplied
     lambda expressions on each export and each package.
     Export lambdas for a given package are all run before the package lambda.
     """
     depends = rospack.depends([package])[package]
+    # TODO(damonkohler): Don't do this here. It's easier if this is only for transitive deps.
     if include_package:
         depends.append(package)
     for pkg in depends:
@@ -74,8 +77,14 @@ def walk_export_path(rospack, package, export_operator, package_operator, includ
             # Don't include this package's built resources.
             if include_package and pkg == package and e.attrs.get('built', False):
                 continue
-            entry_scope = e.attrs.get('scope', DEFAULT_SCOPE)
-            if scope in SCOPE_MAP[entry_scope]:
+            if include_package and pkg == package:
+                transformed_scope = scope
+            else: 
+                # Apply scope transformations to transitive dependencies.
+                element_scope = e.attrs.get('scope', DEFAULT_SCOPE)
+                scope_transformations = SCOPE_MAP[element_scope]
+                transformed_scope = scope_transformations.get(scope)
+            if transformed_scope == scope:
                 export_operator(pkg, pkg_dir, e)
         if package_operator:
             package_operator(pkg)
@@ -146,9 +155,7 @@ def get_maven_dependencies(package, dependency_filename):
         depmap[pair[0]].append(pair[1])
 
     for scope in ['compile', 'runtime', 'test']:
-        depmap[scope] = depmap.get(scope, list())
-
-    depmap['all'] = depmap['test']
+        depmap[scope] = depmap.get(scope, [])
 
     return depmap
 

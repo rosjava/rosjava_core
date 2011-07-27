@@ -21,7 +21,6 @@
   <target name="default" depends="init, compile, jar" />
 
   <target name="init">
-    <fail unless="ros.classpath" message="ros.properties is missing.  Please type 'rosmake rosjava' first "/>
     <mkdir dir="${build}" />
     <mkdir dir="${dist}" />
   </target>

@@ -30,13 +30,13 @@ class TestClasspath(base_test_case.BaseTestCase):
     def test_get_specified_classpath(self):
         rospack = roslib.packages.ROSPackages()
 
-        path = classpath._get_specified_classpath(rospack, SAMPLE_PACKAGE, False, 'all')
+        path = classpath._get_specified_classpath(rospack, SAMPLE_PACKAGE, False, 'compile')
         self.assertEqual(2, len(path))
         basenames = [os.path.basename(x) for x in path]
         self.assertTrue('com.domain.sample_dependency.with_location-0.0.0.jar' in basenames)
         self.assertTrue('com.domain.sample_dependency.built_with_location-0.0.0.jar' in basenames)
 
-        path = classpath._get_specified_classpath(rospack, SAMPLE_PACKAGE, True, 'all')
+        path = classpath._get_specified_classpath(rospack, SAMPLE_PACKAGE, True, 'compile')
         self.assertEqual(3, len(path))
         basenames = [os.path.basename(x) for x in path]
         self.assertTrue('com.domain.sample_dependency.with_location-0.0.0.jar' in basenames)
@@ -45,7 +45,7 @@ class TestClasspath(base_test_case.BaseTestCase):
 
     def test_get_classpath(self):
         rospack = roslib.packages.ROSPackages()
-        path = classpath.get_classpath(rospack, SAMPLE_PACKAGE, {'all': []})
+        path = classpath.get_classpath(rospack, SAMPLE_PACKAGE, {'compile': []})
         jars = [os.path.basename(x) for x in path.split(':')]
         self.assertEquals([
             'com.domain.sample_dependency.with_location-0.0.0.jar',

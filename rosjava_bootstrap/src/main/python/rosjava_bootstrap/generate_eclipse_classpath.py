@@ -69,7 +69,7 @@ def generate_classpath_file(rospack, package, maven_depmap, stream=sys.stdout):
     print >>stream, '\t<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>'
     print >>stream, '\t<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>'
     for p in filter(None, classpath.get_classpath(
-            rospack, package, maven_depmap, include_package=True, scope='all').split(':')):
+            rospack, package, maven_depmap, include_package=True, scope='compile').split(':')):
         print >>stream, '\t<classpathentry kind="lib" path="%s"/>' % (p)
     print >>stream, '\t<classpathentry kind="output" path="build"/>\n</classpath>'
 

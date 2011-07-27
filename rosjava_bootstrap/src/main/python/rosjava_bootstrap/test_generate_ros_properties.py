@@ -41,7 +41,7 @@ class TestGenerateRosProperties(base_test_case.BaseTestCase):
     def test_generate_properties(self):
         rospack = roslib.packages.ROSPackages()
         properties = generate_ros_properties.generate_properties(
-                rospack, SAMPLE_PACKAGE, {'all': [], 'compile': [], 'runtime': [], 'test': []})
+                rospack, SAMPLE_PACKAGE, {'compile': [], 'runtime': [], 'test': []})
         self.assertEqual('target/com.domain.sample.built_with_location-0.0.0.jar',
                          properties['ros.artifact.built'])
         expected = os.path.join(resources.get_resources_directory(), 'sample_stack',

@@ -75,7 +75,7 @@ def _get_specified_classpath(rospack, package, include_package, scope):
     return [os.path.abspath(path) for path in path_elements]
 
 
-def get_classpath(rospack, package, maven_depmap, include_package=False, scope='all'):
+def get_classpath(rospack, package, maven_depmap, include_package=False, scope=maven.DEFAULT_SCOPE):
     """
     @param include_package: include library entries of self on path
 
