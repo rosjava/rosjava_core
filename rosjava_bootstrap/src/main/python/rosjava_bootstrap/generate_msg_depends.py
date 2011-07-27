@@ -183,7 +183,6 @@ def _generate_msgs(rospack, package, up_to_date):
     # generate classpath, safe-encode
     dependencies = get_all_msg_dependencies(rospack, package)
     classpath = get_msg_classpath(rospack, package)
-    classpath = classpath.replace(':', '\:')
     artifact_built = msg_jar_file_path(package)
 
     # Map for all properties
@@ -191,7 +190,7 @@ def _generate_msgs(rospack, package, up_to_date):
                   'ros.artifact.built': artifact_built,
                   'ros.home': _ros_home,
                   'ros.bootstrap.scripts.dir': _scripts_dir,
-                  'ros.classpath': classpath,
+                  'ros.compile.classpath': classpath,
                   'ros.gen.msg.dir':
                       '%s/rosjava/gen/msg/%s'%(_ros_home,package)}
 
@@ -225,15 +224,12 @@ def get_all_msg_dependencies(rospack, package):
     return [pkg for pkg in depends if is_msg_pkg(pkg) or is_srv_pkg(pkg)]
         
 def get_msg_classpath(rospack, package):
-    def resolve_pathelements(pathelements):
-        return [os.path.abspath(p) for p in pathelements]
-
     depends = rospack.depends([package])[package]
     pathelements = [_bootstrap_jar]
     for pkg in depends:
         if is_msg_pkg(pkg) or is_srv_pkg(pkg):
             pathelements.append(msg_jar_file_path(pkg))
-    return os.pathsep.join(resolve_pathelements(pathelements))
+    return os.pathsep.join([os.path.abspath(p) for p in pathelements])
 
 def wipe_msg_depends(package):
     rospack = roslib.packages.ROSPackages()
