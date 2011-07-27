@@ -1,3 +1,0 @@
-1. Install usb_cam module.
-2. roslaunch usb_cam.launch
-3. Run MainAcitivity on the Android device.

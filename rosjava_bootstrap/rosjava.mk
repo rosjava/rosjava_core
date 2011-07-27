@@ -13,6 +13,7 @@ obtain-dependencies:
 
 ant-properties:
 	rosrun rosjava_bootstrap generate_ros_properties.py $(PACKAGE_NAME) > ros.properties
+	rosrun rosjava_bootstrap generate_android_properties.py $(PACKAGE_NAME) > default.properties
 
 eclipse-classpath:
 	if [ ! -f .classpath ] ; then rosrun rosjava_bootstrap generate_eclipse_classpath.py $(PACKAGE_NAME) > .classpath ; touch .classpath-generated; fi
@@ -25,11 +26,12 @@ msg-deps:
 	rosrun rosjava_bootstrap generate_msg_depends.py $(PACKAGE_NAME)
 
 clean:
+	-ant clean
 	-if [ -f .project-generated ] ; then rm .project .project-generated; fi
 	-if [ -f .classpath-generated ] ; then rm .classpath .classpath-generated; fi
 	-if [ -f dependencies.xml ] ; then rm dependencies.xml; fi
 	-rm ros.properties
-	-ant clean
+	-rm default.properties
 
 wipe-msgs:
 	rosrun rosjava_bootstrap generate_msg_depends.py --wipe $(PACKAGE_NAME)

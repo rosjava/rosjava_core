@@ -40,11 +40,6 @@ import maven
 import roslib
 
 
-def usage():
-    print 'generate_ros_properties.py <package-name>'
-    sys.exit(os.EX_USAGE)
-
-
 _stack_of_cache = {}
 _stack_version_cache = {}
 def get_package_version(package, stack_of_cache=None, stack_version_cache=None):
@@ -96,9 +91,14 @@ def print_sorted_properties(properties, stream=sys.stdout):
         print >>stream, '%s=%s' % (key, properties[key])
 
 
+def _usage():
+    print 'generate_ros_properties.py <package-name>'
+    sys.exit(os.EX_USAGE)
+
+
 def main(argv):
     if len(argv) != 2:
-        usage()
+        _usage()
     package = argv[1]
     rospack = roslib.packages.ROSPackages()
     maven_depmap = maven.get_maven_dependencies(package, 'dependencies.xml')

@@ -9,8 +9,6 @@ syntax: glob
 *.log
 *.ap_
 *.apk
-local.properties
-ros.properties
 .cproject
 .settings
 .classpath-generated
@@ -20,6 +18,8 @@ ros.properties
 apache_commons_util/bin
 apache_xmlrpc/bin
 dependencies.xml
+ros.properties
+default.properties
 
 syntax: regexp
 (target|build|dist|msg_gen|srv_gen|gen|test_output)/.*
