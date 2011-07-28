@@ -33,11 +33,6 @@ class TestGenerateRosProperties(base_test_case.BaseTestCase):
         self.assertEqual(42, generate_ros_properties.get_package_version(
             'package', {'package': 'stack'}, {'stack': 42}))
 
-    def test_print_sorted_properties(self):
-        stream = StringIO.StringIO()
-        generate_ros_properties.print_sorted_properties({'foo': 3, 'bar': 1, 'baz': 2}, stream)
-        self.assertEqual('bar=1\nbaz=2\nfoo=3\n', stream.getvalue())
-
     def test_generate_properties(self):
         rospack = roslib.packages.ROSPackages()
         properties = generate_ros_properties.generate_properties(

@@ -55,7 +55,7 @@ def generate_properties(rospack, package):
     return props
 
 
-def print_sorted_properties(properties, stream=sys.stdout):
+def write_sorted_properties(properties, stream=sys.stdout):
     for key in sorted(properties):
         print >>stream, '%s=%s' % (key, properties[key])
         
@@ -72,7 +72,7 @@ def main(argv):
     rospack = roslib.packages.ROSPackages()
     properties = generate_properties(rospack, package)
     if properties is not None:
-        print_sorted_properties(properties)
+        write_sorted_properties(properties)
 
 
 if __name__ == '__main__':

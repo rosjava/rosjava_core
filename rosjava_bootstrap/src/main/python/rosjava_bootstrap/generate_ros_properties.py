@@ -84,29 +84,29 @@ def generate_properties(rospack, package, maven_depmap):
     return properties
 
 
-def print_sorted_properties(properties, stream=sys.stdout):
+def write_sorted_properties(properties, stream=sys.stdout):
     for key in sorted(properties):
         print >>stream, '%s=%s' % (key, properties[key])
 
 
 def _usage():
-    print 'generate_ros_properties.py <package-name>'
+    print 'generate_ros_properties.py <package-name> [output-path]'
     sys.exit(os.EX_USAGE)
 
 
 def main(argv):
-    if len(argv) != 2:
+    if len(argv) < 2:
         _usage()
-    package = argv[1]
+    package_name = argv[1]
     rospack = roslib.packages.ROSPackages()
-    maven_depmap = maven.get_maven_dependencies(package, 'dependencies.xml')
-    properties = generate_properties(rospack, package, maven_depmap)
-    print_sorted_properties(properties)
+    maven_depmap = maven.get_maven_dependencies(package_name, 'dependencies.xml')
+    properties = generate_properties(rospack, package_name, maven_depmap)
+    if len(argv) > 2:
+        with open(argv[2], 'w') as stream:
+            write_sorted_properties(properties, stream)
+    else:
+        write_sorted_properties(properties)
 
 
 if __name__ == '__main__':
-    try:
-        main(sys.argv)
-    except roslib.packages.InvalidROSPkgException as e:
-        print >>sys.stderr, 'ERROR: %s' % str(e)
-        sys.exit(1)
+    main(sys.argv)
