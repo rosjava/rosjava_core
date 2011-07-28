@@ -4,9 +4,7 @@ CMAKE_FLAGS= -Wdev -DCMAKE_TOOLCHAIN_FILE=`rospack find rosbuild`/rostoolchain.c
 PACKAGE_NAME=$(shell basename $(PWD))
 
 all:
-	rosrun rosjava_bootstrap generate_dependencies_xml.py $(PACKAGE_NAME) dependencies.xml
-	rosrun rosjava_bootstrap generate_ros_properties.py $(PACKAGE_NAME) ros.properties
-	rosrun rosjava_bootstrap generate_android_properties.py $(PACKAGE_NAME) default.properties
+	rosrun rosjava_bootstrap make.py $(PACKAGE_NAME)
 	rosrun rosjava_bootstrap generate_msg_depends.py $(PACKAGE_NAME)
 	if [ ! -f .classpath ] ; then rosrun rosjava_bootstrap generate_eclipse_classpath.py $(PACKAGE_NAME) > .classpath ; touch .classpath-generated; fi
 	if [ ! -f .project ] ; then rosrun rosjava_bootstrap generate_eclipse_project.py $(PACKAGE_NAME) > .project ; touch .project-generated; fi

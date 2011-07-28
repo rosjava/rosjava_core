@@ -33,7 +33,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import os
-import sys
 
 import classpath
 import maven
@@ -82,31 +81,3 @@ def generate_properties(rospack, package, maven_depmap):
 
     properties['ros.test_results'] = os.path.join(roslib.rosenv.get_test_results_dir(), package)
     return properties
-
-
-def write_sorted_properties(properties, stream=sys.stdout):
-    for key in sorted(properties):
-        print >>stream, '%s=%s' % (key, properties[key])
-
-
-def _usage():
-    print 'generate_ros_properties.py <package-name> [output-path]'
-    sys.exit(os.EX_USAGE)
-
-
-def main(argv):
-    if len(argv) < 2:
-        _usage()
-    package_name = argv[1]
-    rospack = roslib.packages.ROSPackages()
-    maven_depmap = maven.get_maven_dependencies(package_name, 'dependencies.xml')
-    properties = generate_properties(rospack, package_name, maven_depmap)
-    if len(argv) > 2:
-        with open(argv[2], 'w') as stream:
-            write_sorted_properties(properties, stream)
-    else:
-        write_sorted_properties(properties)
-
-
-if __name__ == '__main__':
-    main(sys.argv)
