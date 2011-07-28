@@ -81,7 +81,7 @@ def map_package_exports(rospack, package, export_operator, scope=DEFAULT_SCOPE):
     _map_exports(rospack, package, export_operator, _identity_scope_transformation, scope)
     
 
-def map_package_dependencies(rospack, package, export_operator, dependency_operator,
+def map_package_dependencies(rospack, package, export_operator, dependency_operator=None,
                              scope=DEFAULT_SCOPE):
     """
     Walk the entire set of dependencies for a package. Run the supplied
@@ -92,7 +92,8 @@ def map_package_dependencies(rospack, package, export_operator, dependency_opera
     for dependency in depends:
         _map_exports(rospack, dependency, export_operator,
                      _transtive_dependency_scope_transformation, scope)
-        dependency_operator(dependency)
+        if dependency_operator is not None:
+            dependency_operator(dependency)
 
 
 # TODO(damonkohler): Support multiple build artifacts?
@@ -182,7 +183,7 @@ def _write_maven_dependencies_group(rospack, package, scope, stream):
         export_operator(p, d, export)
         
     map_package_exports(rospack, package, wrapped_export_operator, scope)    
-    map_package_dependencies(rospack, package, export_operator, None, scope=scope)
+    map_package_dependencies(rospack, package, export_operator, scope=scope)
     print >>stream, '  </artifact:dependencies>'
 
 

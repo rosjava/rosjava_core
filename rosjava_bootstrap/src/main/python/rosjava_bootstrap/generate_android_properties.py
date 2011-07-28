@@ -61,23 +61,24 @@ def write_sorted_properties(properties, stream=sys.stdout):
         
         
 def _usage():
-    print 'generate_android_properties.py <package-name>'
+    print 'generate_android_properties.py <package-name> [output-path]'
     sys.exit(os.EX_USAGE)
 
 
 def main(argv):
-    if len(argv) != 2:
+    if len(argv) < 2:
         _usage()
-    package = argv[1]
+    package_name = argv[1]
     rospack = roslib.packages.ROSPackages()
-    properties = generate_properties(rospack, package)
-    if properties is not None:
+    properties = generate_properties(rospack, package_name)
+    if properties is None:
+        return
+    if len(argv) > 2:
+        with open(argv[2], 'w') as stream:
+            write_sorted_properties(properties, stream)
+    else:
         write_sorted_properties(properties)
-
-
+        
+        
 if __name__ == '__main__':
-    try:
-        main(sys.argv)
-    except roslib.packages.InvalidROSPkgException as e:
-        print >>sys.stderr, 'ERROR: %s' % str(e)
-        sys.exit(1)
+    main(sys.argv)
