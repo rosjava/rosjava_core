@@ -65,28 +65,28 @@ BOOTSTRAP_PKG_DIR = roslib.packages.get_pkg_dir(BOOTSTRAP_PKG)
 BOOTSTRAP_SCRIPTS_DIR = os.path.join(BOOTSTRAP_PKG_DIR, 'scripts')
 
 
-def _direct_dependency_scope_transformation(dependency_scope, current_scope):
+def _direct_dependency_scope_check(dependency_scope, current_scope):
     if dependency_scope in SCOPE_MAP[current_scope]:
         return current_scope
     return dependency_scope
         
         
-def _transtive_dependency_scope_transformation(dependency_scope, current_scope):
-    scope_transformations = TRANSITIVE_SCOPE_MAP[dependency_scope]
-    return scope_transformations.get(current_scope)
+def _transtive_dependency_scope_check(dependency_scope, current_scope):
+    transitive_scopes = TRANSITIVE_SCOPE_MAP[dependency_scope]
+    return current_scope == transitive_scopes.get(dependency_scope)
  
  
-def _map_exports(rospack, package, export_operator, scope_transformation, scope):
+def _map_exports(rospack, package, export_operator, scope_check, scope):
     rospack.load_manifests([package])
     m = rospack.manifests[package]    
     package_directory = roslib.packages.get_pkg_dir(package)
     for export in [x for x in m.exports if x.tag == TAG_ROSJAVA_PATHELEMENT]:
-        if scope == scope_transformation(export.attrs.get('scope', DEFAULT_SCOPE), scope):
+        if scope_check(export.attrs.get('scope', DEFAULT_SCOPE), scope):
             export_operator(package, package_directory, export)
 
 
 def map_package_exports(rospack, package, export_operator, scope=DEFAULT_SCOPE):
-    _map_exports(rospack, package, export_operator, _direct_dependency_scope_transformation, scope)
+    _map_exports(rospack, package, export_operator, _direct_dependency_scope_check, scope)
     
 
 def map_package_dependencies(rospack, package, export_operator, dependency_operator=None,
@@ -99,7 +99,7 @@ def map_package_dependencies(rospack, package, export_operator, dependency_opera
     depends = rospack.depends([package])[package]
     for dependency in depends:
         _map_exports(rospack, dependency, export_operator,
-                     _transtive_dependency_scope_transformation, scope)
+                     _transtive_dependency_scope_check, scope)
         if dependency_operator is not None:
             dependency_operator(dependency)
 

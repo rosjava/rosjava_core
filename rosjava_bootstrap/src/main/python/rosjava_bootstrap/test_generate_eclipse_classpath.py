@@ -35,6 +35,6 @@ class TestGenerateEclipseClasspath(base_test_case.BaseTestCase):
         rospack = roslib.packages.ROSPackages()
         stream = StringIO.StringIO()
         generate_eclipse_classpath.generate_classpath_file(
-                rospack, SAMPLE_PACKAGE, {'compile': []}, stream)
+                rospack, SAMPLE_PACKAGE, {'compile': [], 'test': []}, stream)
         # TODO(damonkohler): Actually test the content of the generated classpath file.
         self.assertTrue(stream.getvalue())
