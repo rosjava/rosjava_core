@@ -32,13 +32,10 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import os
 import sys
 
 import android
 import classpath
-import maven
-import roslib
 
 # XML tag for the rosjava manifest tag for path elements.
 TAG_ROSJAVA_PATHELEMENT = 'rosjava-pathelement'
@@ -74,25 +71,3 @@ def generate_classpath_file(rospack, package, maven_depmap, stream=sys.stdout):
     for p in set(compile_classpath + test_classpath):
         print >>stream, '\t<classpathentry kind="lib" path="%s"/>' % (p)
     print >>stream, '\t<classpathentry kind="output" path="build"/>\n</classpath>'
-
-
-def _usage():
-    print 'generate_eclipse_classpath.py <package-name>'
-    sys.exit(os.EX_USAGE)
-
-
-def main(argv):
-    if len(argv) != 2:
-        _usage()
-    package = argv[1]
-    rospack = roslib.packages.ROSPackages()
-    maven_depmap = maven.get_maven_dependencies(package, 'dependencies.xml')
-    generate_classpath_file(rospack, package, maven_depmap)
-
-
-if __name__ == '__main__':
-    try:
-        main(sys.argv)
-    except roslib.packages.InvalidROSPkgException as e:
-        sys.stderr.write('ERROR: '+str(e)+'\n')
-        sys.exit(1)

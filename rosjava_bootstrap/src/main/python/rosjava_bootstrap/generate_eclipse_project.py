@@ -37,7 +37,6 @@ import sys
 
 import android
 import resources
-import roslib
 
     
 def generate_eclipse_project(package, stream=sys.stdout):
@@ -50,24 +49,3 @@ def generate_eclipse_project(package, stream=sys.stdout):
                                      'java_project_template')
     for line in open(template_path):
         print >>stream, line.replace('${PROJECT_NAME}', package)
-
-
-def _usage():
-    print 'Prints the eclipse .project file for a package to stdout.'
-    print '    ./generate_eclipse_project.py package_name'
-    sys.exit(os.EX_USAGE)
-
-
-def main(argv):
-    if len(argv) != 2:
-        _usage()
-    package = argv[1]
-    generate_eclipse_project(package)
-
-    
-if __name__ == '__main__':
-    try:
-        main(sys.argv)
-    except roslib.packages.InvalidROSPkgException as e:
-        print >>sys.stderr, 'ERROR: %s' % str(e)
-        sys.exit(1)
