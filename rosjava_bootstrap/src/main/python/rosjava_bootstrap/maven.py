@@ -41,6 +41,12 @@ import roslib
 
 # See http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
 SCOPE_MAP = {
+    'compile': ['compile', 'provided', 'runtime', 'test'],
+    'provided': ['provided', 'compile', 'test'],
+    'runtime': ['runtime', 'test'],
+    'test': ['test'],
+    }
+TRANSITIVE_SCOPE_MAP = {
     'compile': {'compile': 'compile', 'runtime': 'runtime'},
     'provided': {'compile': 'provided', 'runtime': 'provided'},
     'runtime': {'compile': 'runtime', 'runtime': 'runtime'},
@@ -59,12 +65,14 @@ BOOTSTRAP_PKG_DIR = roslib.packages.get_pkg_dir(BOOTSTRAP_PKG)
 BOOTSTRAP_SCRIPTS_DIR = os.path.join(BOOTSTRAP_PKG_DIR, 'scripts')
 
 
-def _identity_scope_transformation(dependency_scope, unused_current_scope):
+def _direct_dependency_scope_transformation(dependency_scope, current_scope):
+    if dependency_scope in SCOPE_MAP[current_scope]:
+        return current_scope
     return dependency_scope
         
         
 def _transtive_dependency_scope_transformation(dependency_scope, current_scope):
-    scope_transformations = SCOPE_MAP[dependency_scope]
+    scope_transformations = TRANSITIVE_SCOPE_MAP[dependency_scope]
     return scope_transformations.get(current_scope)
  
  
@@ -78,7 +86,7 @@ def _map_exports(rospack, package, export_operator, scope_transformation, scope)
 
 
 def map_package_exports(rospack, package, export_operator, scope=DEFAULT_SCOPE):
-    _map_exports(rospack, package, export_operator, _identity_scope_transformation, scope)
+    _map_exports(rospack, package, export_operator, _direct_dependency_scope_transformation, scope)
     
 
 def map_package_dependencies(rospack, package, export_operator, dependency_operator=None,
