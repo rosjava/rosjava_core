@@ -72,3 +72,30 @@ def get_android_sdk_dir():
                            'Install the Android SDK and add the tools directory to your path.')
     # SDK dir is two levels up in the path.
     return os.path.dirname(os.path.dirname(location))
+
+
+def generate_properties(rospack, package):
+    if not is_android_package(package):
+        return
+    # Used for setting Android libraries of the Android libraries.
+    package_dir = roslib.packages.get_pkg_dir(package)
+    android_lib_id = 1
+    props = {
+            'sdk.dir': get_android_sdk_dir(),
+            # TODO: Should be attribute of the Android export.
+            'target': 'android-9'
+            }
+    # Add directory properties and Android libraries for every package we depend on.
+    for p in rospack.depends([package])[package]:
+        p_dir = roslib.packages.get_pkg_dir(p)
+        # Note: Android libraries require relative paths inorder to work correctly.
+        #       Using an absolute path will cause mysterious error messages about
+        #       not being able to find default.properties.
+        rel_path = os.path.relpath(p_dir, package_dir)
+        for l in get_android_library_paths(p):
+            lib = os.path.join(rel_path, l)
+            props['android.library.reference.%d' % (android_lib_id)] = lib
+            android_lib_id += 1
+    if is_android_library(package):
+        props['android.library'] = 'true'
+    return props

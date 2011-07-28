@@ -20,12 +20,11 @@ import os
 import subprocess
 import sys
 
-import generate_android_properties
-import generate_ros_properties
+import android
+import eclipse
 import generate_msg_depends
-import generate_eclipse_classpath
-import generate_eclipse_project
 import roslib
+import ros_properties
 import maven
 
 
@@ -51,14 +50,14 @@ def build(rospack, package):
     if os.path.exists('ros.properties'):
         print 'Skipping ros.properties generation.'
     else:
-        properties = generate_ros_properties.generate_properties(rospack, package, maven_depmap)
+        properties = ros_properties.generate(rospack, package, maven_depmap)
         with open('ros.properties', 'w') as stream:
             write_sorted_properties(properties, stream)
             
     if os.path.exists('default.properties'):
         print 'Skipping default.properties generation.'
     else:
-        properties = generate_android_properties.generate_properties(rospack, package)
+        properties = android.generate_properties(rospack, package)
         if properties is not None:
             with open('default.properties', 'w') as stream:
                 write_sorted_properties(properties, stream)
@@ -69,13 +68,13 @@ def build(rospack, package):
         print 'Skipping .classpath generation.'
     else:
         with open('.classpath', 'w') as stream:
-            generate_eclipse_classpath.generate_classpath_file(rospack, package, maven_depmap, stream)
+            eclipse.write_classpath(rospack, package, maven_depmap, stream)
 
     if os.path.exists('.project'):
         print 'Skipping .project generation.'
     else:
         with open('.project', 'w') as stream:
-            generate_eclipse_project.generate_eclipse_project(package, stream)
+            eclipse.write_project(package, stream)
             
     subprocess.check_call(['ant'])
             

@@ -16,6 +16,8 @@
 
 __author__ = 'damonkohler@google.com (Damon Kohler)'
 
+import os
+
 import base_test_case
 import maven
 import roslib
@@ -25,7 +27,39 @@ SAMPLE_PACKAGE_DEPENDENCY = 'sample_package_dependency'
 
 
 class TestMaven(base_test_case.BaseTestCase):
+    
+    def test_get_specified_classpath_dependencies_only(self):
+        rospack = roslib.packages.ROSPackages()
+        path = maven._get_specified_classpath(rospack, SAMPLE_PACKAGE, False, 'compile')
+        self.assertEqual(2, len(path))
+        basenames = [os.path.basename(x) for x in path]
+        expected_basenames = [
+                'com.domain.sample_dependency.with_location-0.0.0.jar',
+                'com.domain.sample_dependency.built_with_location-0.0.0.jar',
+                ]
+        self.assertListEqual(expected_basenames, basenames)
 
+    def test_get_specified_classpath(self):
+        rospack = roslib.packages.ROSPackages()
+        path = maven._get_specified_classpath(rospack, SAMPLE_PACKAGE, True, 'compile')
+        self.assertEqual(3, len(path))
+        basenames = [os.path.basename(x) for x in path]
+        expected_basenames = [
+                'com.domain.sample.with_location-0.0.0.jar',
+                'com.domain.sample_dependency.with_location-0.0.0.jar',
+                'com.domain.sample_dependency.built_with_location-0.0.0.jar',
+                ]
+        self.assertListEqual(expected_basenames, basenames)
+
+    def test_get_classpath(self):
+        rospack = roslib.packages.ROSPackages()
+        path = maven.get_classpath(rospack, SAMPLE_PACKAGE, {'compile': []})
+        jars = [os.path.basename(x) for x in path.split(':')]
+        expected_jars = [
+                'com.domain.sample_dependency.with_location-0.0.0.jar',
+                'com.domain.sample_dependency.built_with_location-0.0.0.jar']
+        self.assertListEqual(expected_jars, jars)
+        
     def test_walk_export_path_dependencies_only(self):
         rospack = roslib.packages.ROSPackages()
         exports = []

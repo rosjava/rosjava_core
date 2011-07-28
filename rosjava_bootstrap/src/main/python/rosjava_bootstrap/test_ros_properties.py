@@ -19,10 +19,9 @@ __author__ = 'damonkohler@google.com (Damon Kohler)'
 import os
 
 import base_test_case
-import generate_ros_properties
+import ros_properties
 import resources
 import roslib
-import StringIO
 
 SAMPLE_PACKAGE = 'sample_package'
 
@@ -30,13 +29,13 @@ SAMPLE_PACKAGE = 'sample_package'
 class TestGenerateRosProperties(base_test_case.BaseTestCase):
 
     def test_get_package_version(self):
-        self.assertEqual(42, generate_ros_properties.get_package_version(
+        self.assertEqual(42, ros_properties._get_package_version(
             'package', {'package': 'stack'}, {'stack': 42}))
 
     def test_generate_properties(self):
         rospack = roslib.packages.ROSPackages()
-        properties = generate_ros_properties.generate_properties(
-                rospack, SAMPLE_PACKAGE, {'compile': [], 'runtime': [], 'test': []})
+        properties = ros_properties.generate(rospack, SAMPLE_PACKAGE,
+                                             {'compile': [], 'runtime': [], 'test': []})
         self.assertEqual('target/com.domain.sample.built_with_location-0.0.0.jar',
                          properties['ros.artifact.built'])
         expected = os.path.join(resources.get_resources_directory(), 'sample_stack',

@@ -37,6 +37,7 @@ import subprocess
 import sys
 import tempfile
 
+from generate_msg_depends import msg_jar_file_path, is_msg_pkg, is_srv_pkg
 import roslib
 
 # See http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
@@ -102,6 +103,73 @@ def map_package_dependencies(rospack, package, export_operator, dependency_opera
                      _transtive_dependency_scope_check, scope)
         if dependency_operator is not None:
             dependency_operator(dependency)
+
+
+def _get_specified_classpath(rospack, package, include_package, scope):
+    """
+    @param include_package: include library entries of self on path
+
+    @param scope: 'compile', 'runtime', 'test', or 'all'.  These classpath
+    types are generated based on the scope of an export.  Exports have a
+    default scope of 'compile', which means they are part of all types of
+    classpaths.  For an exact mapping, see SCOPE_MAP.  The behavior of these
+    scopes/classpath_types matches the Maven definition:
+
+    http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
+
+    Only gets the parts of the classpath which are not loaded by Maven.
+
+    Returns list of dependencies.
+    """
+    path_elements = []
+   
+    def export_operator(pkg, pkg_dir, e):
+        # If is a Maven artifact, create the entire name. Otherwise location has all.
+        if 'location' in e.attrs:
+            location = e.attrs['location']
+            if 'groupId' in e.attrs:
+                fullname = get_full_maven_name(e)
+                path_elements.append(os.path.join(pkg_dir, location, fullname))
+            else:
+                path_elements.append(os.path.join(pkg_dir, location))
+
+    def wrapped_export_operator(p, d, export):
+        if export.attrs.get('built', False):
+            return
+        export_operator(p, d, export)
+        
+    def package_operator(pkg):
+        if is_msg_pkg(pkg) or is_srv_pkg(pkg):
+            path_elements.append(msg_jar_file_path(pkg))
+
+    if include_package:
+        map_package_exports(rospack, package, wrapped_export_operator, scope)
+    map_package_dependencies(rospack, package, export_operator, package_operator, scope=scope)
+    return [os.path.abspath(path) for path in path_elements]
+
+
+def get_classpath(rospack, package, maven_depmap, include_package=False, scope=DEFAULT_SCOPE):
+    """
+    @param include_package: include library entries of self on path
+
+    @param maven_depmap: A map of lists for maven dependencies by scope.
+
+    @param classpath_type: (optional, default 'all').  'compile',
+    'runtime', 'test', or 'all'.  These classpath types are generated
+    based on the scope of an export.  Exports have a default scope of
+    'compile', which means they are part of all types of classpaths.
+    For an exact mapping, see SCOPE_MAP.  The behavior of these
+    scopes/classpath_types matches the Maven definition:
+
+    http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Dependency_Scope
+
+    Only gets the parts of the classpath which are not loaded by Maven.
+
+    Returns list of dependencies.
+    """
+    paths = _get_specified_classpath(rospack, package, include_package, scope)
+    paths.extend(maven_depmap[scope])
+    return os.pathsep.join(paths)
 
 
 # TODO(damonkohler): Support multiple build artifacts?

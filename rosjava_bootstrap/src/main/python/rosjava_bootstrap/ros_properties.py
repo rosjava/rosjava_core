@@ -34,14 +34,13 @@
 
 import os
 
-import classpath
 import maven
 import roslib
 
 
 _stack_of_cache = {}
 _stack_version_cache = {}
-def get_package_version(package, stack_of_cache=None, stack_version_cache=None):
+def _get_package_version(package, stack_of_cache=None, stack_version_cache=None):
     if stack_of_cache is None:
         stack_of_cache = _stack_of_cache
     if stack_version_cache is None:
@@ -53,7 +52,7 @@ def get_package_version(package, stack_of_cache=None, stack_version_cache=None):
     return version
 
 
-def generate_properties(rospack, package, maven_depmap):
+def generate(rospack, package, maven_depmap):
     depends = rospack.depends([package])[package]
     properties = {'ros.home': roslib.rosenv.get_ros_home()}
 
@@ -62,17 +61,17 @@ def generate_properties(rospack, package, maven_depmap):
         dependency_directory = roslib.packages.get_pkg_dir(dependency)
         properties['ros.pkg.%s.dir' % (dependency)] = dependency_directory
         if hasattr(roslib.stacks, 'get_stack_version'):
-            properties['ros.pkg.%s.version' % (dependency)] = get_package_version(dependency)
+            properties['ros.pkg.%s.version' % (dependency)] = _get_package_version(dependency)
 
     built_artifact = maven.get_package_build_artifact(rospack, package)
     if built_artifact:
         properties['ros.artifact.built'] = built_artifact
 
-    properties['ros.compile.classpath'] = classpath.get_classpath(
+    properties['ros.compile.classpath'] = maven.get_classpath(
             rospack, package, maven_depmap, scope='compile')
-    properties['ros.runtime.classpath'] = classpath.get_classpath(
+    properties['ros.runtime.classpath'] = maven.get_classpath(
             rospack, package, maven_depmap, scope='runtime')
-    properties['ros.test.classpath'] = classpath.get_classpath(
+    properties['ros.test.classpath'] = maven.get_classpath(
             rospack, package, maven_depmap, scope='test')
 
     # Re-encode for ant <fileset includes="${ros.jarfileset}">.  uses comma separator instead.
