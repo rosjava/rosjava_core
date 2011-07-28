@@ -81,7 +81,7 @@ def map_package_exports(rospack, package, export_operator, scope=DEFAULT_SCOPE):
     _map_exports(rospack, package, export_operator, _identity_scope_transformation, scope)
     
 
-def map_package_dependencies(rospack, package, export_operator, package_operator,
+def map_package_dependencies(rospack, package, export_operator, dependency_operator,
                              scope=DEFAULT_SCOPE):
     """
     Walk the entire set of dependencies for a package. Run the supplied
@@ -92,9 +92,10 @@ def map_package_dependencies(rospack, package, export_operator, package_operator
     for dependency in depends:
         _map_exports(rospack, dependency, export_operator,
                      _transtive_dependency_scope_transformation, scope)
-        package_operator(dependency)
+        dependency_operator(dependency)
 
 
+# TODO(damonkohler): Support multiple build artifacts?
 def get_package_build_artifact(rospack, package):
     """
     Get what a given package builds.
@@ -163,7 +164,7 @@ def get_maven_dependencies(package, dependency_filename):
     return depmap
 
 
-def write_maven_dependencies_group(stream, rospack, package, scope):
+def _write_maven_dependencies_group(rospack, package, scope, stream):
     """Write out a maven <dependencies> element in the file for the given scope"""
     print >>stream, '  <artifact:dependencies filesetId="dependency.fileset.%s">' % scope
     print >>stream, ('    <artifact:remoteRepository id="org.ros.release" '
@@ -185,7 +186,7 @@ def write_maven_dependencies_group(stream, rospack, package, scope):
     print >>stream, '  </artifact:dependencies>'
 
 
-def generate_ant_maven_dependencies(package):
+def write_ant_maven_dependencies(rospack, package, stream=sys.stdout):
     """
     Generate an Ant file which will get all dependencies needed via a Maven
     repository and provide both a classpath for ant builds and a file of
@@ -199,10 +200,7 @@ def generate_ant_maven_dependencies(package):
     The fileset id dependency.fileset is available for such things as classpaths
     for a build.
     """
-
-    rospack = roslib.packages.ROSPackages()
-
-    sys.stdout.write("""<?xml version="1.0"?>
+    print >>stream, ("""<?xml version="1.0"?>
 <project name="dependencies" basedir="."  xmlns:artifact="antlib:org.apache.maven.artifact.ant"
       xmlns:ac="antlib:net.sf.antcontrib"
 >
@@ -215,10 +213,9 @@ def generate_ant_maven_dependencies(package):
   <typedef resource="net/sf/antcontrib/antlib.xml"
            uri="antlib:net.sf.antcontrib"
            classpath="%s/ant-contrib-1.0b3.jar"/>
+""" % (BOOTSTRAP_SCRIPTS_DIR, BOOTSTRAP_SCRIPTS_DIR))
 
-"""% (BOOTSTRAP_SCRIPTS_DIR, BOOTSTRAP_SCRIPTS_DIR))
-
-    sys.stdout.write("""  <artifact:dependencies filesetId="dependency.osgi">
+    print >>stream, """  <artifact:dependencies filesetId="dependency.osgi">
     <artifact:remoteRepository id="org.ros.release" url="http://robotbrains.hideho.org/nexus/content/groups/ros-public" />
     <artifact:dependency groupId="biz.aQute" artifactId="bnd" version="0.0.384" />
   </artifact:dependencies>
@@ -227,15 +224,13 @@ def generate_ant_maven_dependencies(package):
     <fileset refid="dependency.osgi" />
   </path>
 
-  <taskdef resource="aQute/bnd/ant/taskdef.properties" classpathref="classpath.osgi" />
-""")
+  <taskdef resource="aQute/bnd/ant/taskdef.properties" classpathref="classpath.osgi" />"""
 
+    _write_maven_dependencies_group(rospack, package, 'compile', stream)
+    _write_maven_dependencies_group(rospack, package, 'test', stream)
+    _write_maven_dependencies_group(rospack, package, 'runtime', stream)
 
-    write_maven_dependencies_group(sys.stdout, rospack, package, 'compile')
-    write_maven_dependencies_group(sys.stdout, rospack, package, 'test')
-    write_maven_dependencies_group(sys.stdout, rospack, package, 'runtime')
-
-    sys.stdout.write("""
+    print >>stream, ("""
 
   <target name="%s">
     <ac:for param="file">
@@ -266,8 +261,6 @@ def generate_ant_maven_dependencies(package):
       </sequential>
     </ac:for>
   </target>
-</project>
-"""%(DEPENDENCY_GENERATION_TARGET,
-     DEPENDENCY_FILE_PROPERTY, DEPENDENCY_FILE_PROPERTY,
-     DEPENDENCY_FILE_PROPERTY))
+</project>""" % (DEPENDENCY_GENERATION_TARGET, DEPENDENCY_FILE_PROPERTY, DEPENDENCY_FILE_PROPERTY,
+                 DEPENDENCY_FILE_PROPERTY))
 

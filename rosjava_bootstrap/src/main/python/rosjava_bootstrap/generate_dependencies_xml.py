@@ -20,18 +20,24 @@ import os
 import sys
 
 import maven
+import roslib
 
 
-def usage():
-    print "generate_dependencies_xml.py <package-name>"
+def _usage():
+    print 'generate_dependencies_xml.py <package-name> [output-path]'
     sys.exit(os.EX_USAGE)
 
 
 def main(argv):
-    if len(argv) != 2:
-        usage()
-    package = argv[1]
-    maven.generate_ant_maven_dependencies(package)
+    if len(argv) < 2:
+        _usage()
+    package_name = argv[1]
+    rospack = roslib.packages.ROSPackages()
+    if len(argv) > 2:
+        with open(argv[2], 'w') as stream:
+            maven.write_ant_maven_dependencies(rospack, package_name, stream)
+    else:
+        maven.write_ant_maven_dependencies(rospack, package_name)
 
 
 if __name__ == '__main__':
