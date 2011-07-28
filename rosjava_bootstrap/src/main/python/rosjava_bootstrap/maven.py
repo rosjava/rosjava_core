@@ -59,6 +59,23 @@ BOOTSTRAP_PKG_DIR = roslib.packages.get_pkg_dir(BOOTSTRAP_PKG)
 BOOTSTRAP_SCRIPTS_DIR = os.path.join(BOOTSTRAP_PKG_DIR, 'scripts')
 
 
+def _identity_scope_transformation(dependency_scope, unused_current_scope):
+    return dependency_scope
+        
+        
+def _transtive_dependency_scope_transformation(dependency_scope, current_scope):
+    scope_transformations = SCOPE_MAP[dependency_scope]
+    return scope_transformations.get(current_scope)
+ 
+ 
+def _map_exports(rospack, package, export_operator, scope_transformation, scope):
+    m = rospack.manifests[package]    
+    package_directory = roslib.packages.get_pkg_dir(package)
+    for export in [x for x in m.exports if x.tag == TAG_ROSJAVA_PATHELEMENT]:
+        if scope == scope_transformation(export.attrs.get('scope', DEFAULT_SCOPE), scope):
+            export_operator(package, package_directory, export)
+
+
 def walk_export_path(rospack, package, export_operator, package_operator,
                      include_package=False, scope=DEFAULT_SCOPE):
     """
@@ -70,24 +87,21 @@ def walk_export_path(rospack, package, export_operator, package_operator,
     # TODO(damonkohler): Don't do this here. It's easier if this is only for transitive deps.
     if include_package:
         depends.append(package)
-    for pkg in depends:
-        m = rospack.manifests[pkg]
-        pkg_dir = roslib.packages.get_pkg_dir(pkg)
-        for e in [x for x in m.exports if x.tag == TAG_ROSJAVA_PATHELEMENT]:
-            # Don't include this package's built resources.
-            if include_package and pkg == package and e.attrs.get('built', False):
-                continue
-            if include_package and pkg == package:
-                transformed_scope = scope
-            else: 
-                # Apply scope transformations to transitive dependencies.
-                element_scope = e.attrs.get('scope', DEFAULT_SCOPE)
-                scope_transformations = SCOPE_MAP[element_scope]
-                transformed_scope = scope_transformations.get(scope)
-            if transformed_scope == scope:
-                export_operator(pkg, pkg_dir, e)
-        if package_operator:
-            package_operator(pkg)
+    
+    for dependency in depends:
+        if include_package and dependency == package:
+            
+            def wrapped_export_operator(p, d, export):
+                if export.attrs.get('built', False):
+                    return
+                export_operator(p, d, export)
+                
+            _map_exports(rospack, dependency, wrapped_export_operator,
+                         _identity_scope_transformation, scope)
+        else:
+            _map_exports(rospack, dependency, export_operator,
+                         _transtive_dependency_scope_transformation, scope)
+        package_operator(dependency)
 
 
 def get_package_build_artifact(rospack, package):

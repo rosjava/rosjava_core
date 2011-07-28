@@ -17,6 +17,7 @@
 __author__ = 'damonkohler@google.com (Damon Kohler)'
 
 import os
+import pprint
 import unittest
 
 import resources
@@ -29,3 +30,16 @@ class BaseTestCase(unittest.TestCase):
         resources_directory = resources.get_resources_directory()
         os.environ['ROS_PACKAGE_PATH'] = (
             resources_directory + os.path.pathsep + os.environ['ROS_PACKAGE_PATH'])
+        
+    def assertListEqual(self, first, second):
+        for i, e in enumerate(first):
+            if i >= len(second):
+                pprint.pprint(first)
+                pprint.pprint(second)
+                self.fail('len(first) != len(second)')
+            if e != second[i]:
+                self.fail('At index %d, %r != %r' % (i, e, second[i]))
+        if len(first) != len(second):
+            pprint.pprint(first)
+            pprint.pprint(second)
+            self.fail('len(first) != len(second)')
