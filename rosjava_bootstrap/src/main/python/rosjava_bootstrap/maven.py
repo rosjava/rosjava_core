@@ -214,15 +214,11 @@ def get_maven_dependencies(package, dependency_filename):
     fd, name = tempfile.mkstemp()
 
     command = ['ant', '-f', full_dependency_filename,
-               '-logger', 'org.apache.tools.ant.NoBannerLogger',
-               '-D%s=%s'%(DEPENDENCY_FILE_PROPERTY, name),
+               '-D%s=%s' % (DEPENDENCY_FILE_PROPERTY, name),
                DEPENDENCY_GENERATION_TARGET]
+    subprocess.check_call(command)
 
-    fnull = open(os.devnull)
-    subprocess.check_call(command, stdout=fnull, stderr=fnull)
-    fnull.close()
-
-    f = os.fdopen(fd, "r")
+    f = os.fdopen(fd, 'r')
     dependencies = f.read()
     f.close()
 
