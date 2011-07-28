@@ -69,6 +69,7 @@ def _transtive_dependency_scope_transformation(dependency_scope, current_scope):
  
  
 def _map_exports(rospack, package, export_operator, scope_transformation, scope):
+    rospack.load_manifests([package])
     m = rospack.manifests[package]    
     package_directory = roslib.packages.get_pkg_dir(package)
     for export in [x for x in m.exports if x.tag == TAG_ROSJAVA_PATHELEMENT]:
@@ -76,31 +77,21 @@ def _map_exports(rospack, package, export_operator, scope_transformation, scope)
             export_operator(package, package_directory, export)
 
 
-def walk_export_path(rospack, package, export_operator, package_operator,
-                     include_package=False, scope=DEFAULT_SCOPE):
+def map_package_exports(rospack, package, export_operator, scope=DEFAULT_SCOPE):
+    _map_exports(rospack, package, export_operator, _identity_scope_transformation, scope)
+    
+
+def map_package_dependencies(rospack, package, export_operator, package_operator,
+                             scope=DEFAULT_SCOPE):
     """
     Walk the entire set of dependencies for a package. Run the supplied
     lambda expressions on each export and each package.
     Export lambdas for a given package are all run before the package lambda.
     """
     depends = rospack.depends([package])[package]
-    # TODO(damonkohler): Don't do this here. It's easier if this is only for transitive deps.
-    if include_package:
-        depends.append(package)
-    
     for dependency in depends:
-        if include_package and dependency == package:
-            
-            def wrapped_export_operator(p, d, export):
-                if export.attrs.get('built', False):
-                    return
-                export_operator(p, d, export)
-                
-            _map_exports(rospack, dependency, wrapped_export_operator,
-                         _identity_scope_transformation, scope)
-        else:
-            _map_exports(rospack, dependency, export_operator,
-                         _transtive_dependency_scope_transformation, scope)
+        _map_exports(rospack, dependency, export_operator,
+                     _transtive_dependency_scope_transformation, scope)
         package_operator(dependency)
 
 
@@ -172,20 +163,26 @@ def get_maven_dependencies(package, dependency_filename):
     return depmap
 
 
-def write_maven_dependencies_group(f, rospack, package, scope):
+def write_maven_dependencies_group(stream, rospack, package, scope):
     """Write out a maven <dependencies> element in the file for the given scope"""
-    print >>f, '  <artifact:dependencies filesetId="dependency.fileset.%s">' % scope
-    print >>f, ('    <artifact:remoteRepository id="org.ros.release" '
+    print >>stream, '  <artifact:dependencies filesetId="dependency.fileset.%s">' % scope
+    print >>stream, ('    <artifact:remoteRepository id="org.ros.release" '
                 'url="http://robotbrains.hideho.org/nexus/content/groups/ros-public" />')
 
     def export_operator(pkg, pkg_dir, e):
         # TODO(khughes): Nuke location once in Maven repository
         if 'groupId' in e.attrs and not 'location' in e.attrs:
-            print >>f, ('    <artifact:dependency groupId="%(groupId)s" artifactId="%(artifactId)s" '
-                        'version="%(version)s" />' % e.attrs)
-
-    walk_export_path(rospack, package, export_operator, None, include_package=True, scope=scope)
-    print >>f, '  </artifact:dependencies>'
+            print >>stream, ('    <artifact:dependency groupId="%(groupId)s" '
+                             'artifactId="%(artifactId)s" version="%(version)s" />' % e.attrs)
+            
+    def wrapped_export_operator(p, d, export):
+        if export.attrs.get('built', False):
+            return
+        export_operator(p, d, export)
+        
+    map_package_exports(rospack, package, wrapped_export_operator, scope)    
+    map_package_dependencies(rospack, package, export_operator, None, scope=scope)
+    print >>stream, '  </artifact:dependencies>'
 
 
 def generate_ant_maven_dependencies(package):

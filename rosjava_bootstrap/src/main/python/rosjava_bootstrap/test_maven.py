@@ -37,8 +37,7 @@ class TestMaven(base_test_case.BaseTestCase):
         def package_operator(package):
             self.assertEqual(SAMPLE_PACKAGE_DEPENDENCY, package)
         
-        maven.walk_export_path(rospack, SAMPLE_PACKAGE, export_operator, package_operator,
-                               include_package=False)
+        maven.map_package_dependencies(rospack, SAMPLE_PACKAGE, export_operator, package_operator)
         expected_exports = [
                 {'version': '0.0.0', 'groupId': 'com.domain',
                  'artifactId': 'com.domain.sample_dependency'},
@@ -49,7 +48,7 @@ class TestMaven(base_test_case.BaseTestCase):
                 ]
         self.assertListEqual(expected_exports, exports)
 
-    def test_walk_export_path(self):
+    def test_map_package_exports(self):
         rospack = roslib.packages.ROSPackages()
         exports = []
 
@@ -60,19 +59,14 @@ class TestMaven(base_test_case.BaseTestCase):
         def package_operator(package):
             self.assertTrue(package in (SAMPLE_PACKAGE, SAMPLE_PACKAGE_DEPENDENCY))
 
-        maven.walk_export_path(rospack, SAMPLE_PACKAGE, export_operator, package_operator,
-                               include_package=True)
+        maven.map_package_exports(rospack, SAMPLE_PACKAGE, export_operator)
+        
         expected_exports = [
-                {'version': '0.0.0', 'groupId': 'com.domain',
-                 'artifactId': 'com.domain.sample_dependency'},
-                {'version': '0.0.0', 'location': 'target/', 'groupId': 'com.domain',
-                 'artifactId': 'com.domain.sample_dependency.with_location'},
-                {'groupId': 'com.domain', 'location': 'target/', 'built': 'True',
-                 'version': '0.0.0',
-                 'artifactId': 'com.domain.sample_dependency.built_with_location'},
                 {'version': '0.0.0', 'groupId': 'com.domain', 'artifactId': 'com.domain.sample'},
                 {'version': '0.0.0', 'location': 'target/', 'groupId': 'com.domain',
                  'artifactId': 'com.domain.sample.with_location'},
+                {'version': '0.0.0', 'location': 'target/', 'groupId': 'com.domain',
+                 'built': 'True', 'artifactId': 'com.domain.sample.built_with_location'},
                 ]
         self.assertListEqual(expected_exports, exports)
  

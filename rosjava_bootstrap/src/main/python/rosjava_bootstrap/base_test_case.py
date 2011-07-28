@@ -32,14 +32,14 @@ class BaseTestCase(unittest.TestCase):
             resources_directory + os.path.pathsep + os.environ['ROS_PACKAGE_PATH'])
         
     def assertListEqual(self, first, second):
-        for i, e in enumerate(first):
-            if i >= len(second):
-                pprint.pprint(first)
-                pprint.pprint(second)
+        try:
+            for i, e in enumerate(first):
+                if i >= len(second):
+                    self.fail('len(first) != len(second)')
+                if e != second[i]:
+                    self.fail('At index %d, %r != %r' % (i, e, second[i]))
+            if len(first) != len(second):
                 self.fail('len(first) != len(second)')
-            if e != second[i]:
-                self.fail('At index %d, %r != %r' % (i, e, second[i]))
-        if len(first) != len(second):
+        finally: 
             pprint.pprint(first)
             pprint.pprint(second)
-            self.fail('len(first) != len(second)')

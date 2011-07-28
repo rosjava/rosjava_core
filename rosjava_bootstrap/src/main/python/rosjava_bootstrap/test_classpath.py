@@ -27,26 +27,34 @@ SAMPLE_PACKAGE = 'sample_package'
 
 class TestClasspath(base_test_case.BaseTestCase):
 
-    def test_get_specified_classpath(self):
+    def test_get_specified_classpath_dependencies_only(self):
         rospack = roslib.packages.ROSPackages()
-
         path = classpath._get_specified_classpath(rospack, SAMPLE_PACKAGE, False, 'compile')
         self.assertEqual(2, len(path))
         basenames = [os.path.basename(x) for x in path]
-        self.assertTrue('com.domain.sample_dependency.with_location-0.0.0.jar' in basenames)
-        self.assertTrue('com.domain.sample_dependency.built_with_location-0.0.0.jar' in basenames)
+        expected_basenames = [
+                'com.domain.sample_dependency.with_location-0.0.0.jar',
+                'com.domain.sample_dependency.built_with_location-0.0.0.jar',
+                ]
+        self.assertListEqual(expected_basenames, basenames)
 
+    def test_get_specified_classpath(self):
+        rospack = roslib.packages.ROSPackages()
         path = classpath._get_specified_classpath(rospack, SAMPLE_PACKAGE, True, 'compile')
         self.assertEqual(3, len(path))
         basenames = [os.path.basename(x) for x in path]
-        self.assertTrue('com.domain.sample_dependency.with_location-0.0.0.jar' in basenames)
-        self.assertTrue('com.domain.sample_dependency.built_with_location-0.0.0.jar' in basenames)
-        self.assertTrue('com.domain.sample.with_location-0.0.0.jar' in basenames)
+        expected_basenames = [
+                'com.domain.sample.with_location-0.0.0.jar',
+                'com.domain.sample_dependency.with_location-0.0.0.jar',
+                'com.domain.sample_dependency.built_with_location-0.0.0.jar',
+                ]
+        self.assertListEqual(expected_basenames, basenames)
 
     def test_get_classpath(self):
         rospack = roslib.packages.ROSPackages()
         path = classpath.get_classpath(rospack, SAMPLE_PACKAGE, {'compile': []})
         jars = [os.path.basename(x) for x in path.split(':')]
-        self.assertEquals([
-            'com.domain.sample_dependency.with_location-0.0.0.jar',
-            'com.domain.sample_dependency.built_with_location-0.0.0.jar'], jars)
+        expected_jars = [
+                'com.domain.sample_dependency.with_location-0.0.0.jar',
+                'com.domain.sample_dependency.built_with_location-0.0.0.jar']
+        self.assertListEqual(expected_jars, jars)

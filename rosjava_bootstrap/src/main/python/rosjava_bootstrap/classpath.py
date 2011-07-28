@@ -55,7 +55,7 @@ def _get_specified_classpath(rospack, package, include_package, scope):
     Returns list of dependencies.
     """
     path_elements = []
-
+   
     def export_operator(pkg, pkg_dir, e):
         # If is a Maven artifact, create the entire name. Otherwise location has all.
         if 'location' in e.attrs:
@@ -70,8 +70,16 @@ def _get_specified_classpath(rospack, package, include_package, scope):
         if is_msg_pkg(pkg) or is_srv_pkg(pkg):
             path_elements.append(msg_jar_file_path(pkg))
 
-    maven.walk_export_path(rospack, package, export_operator, package_operator, include_package,
-                           scope)
+    if include_package:
+        
+        def wrapped_export_operator(p, d, export):
+            if export.attrs.get('built', False):
+                return
+            export_operator(p, d, export)
+            
+        maven.map_package_exports(rospack, package, wrapped_export_operator, scope)
+        
+    maven.map_package_dependencies(rospack, package, export_operator, package_operator, scope=scope)
     return [os.path.abspath(path) for path in path_elements]
 
 
