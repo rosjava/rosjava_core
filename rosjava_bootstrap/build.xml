@@ -39,7 +39,7 @@
         <attribute name='Bundle-SymbolicName' value='org.ros.rosjava.bootstrap' />
         <attribute name='Bundle-Version' value='0.0.0' />
         <attribute name="Export-Package" value="org.ros.message" />
-	<attribute name="Fragment-Host" value='org.ros; bundle-version="[0.0.0,1.0.0)"' />
+	<attribute name="Fragment-Host" value='org.ros.rosjava; bundle-version="[0.0.0,1.0.0)"' />
       </manifest>
 
     </jar>

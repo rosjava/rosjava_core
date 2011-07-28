@@ -194,6 +194,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
       subCancelGoal = node.newSubscriber("cancel", "actionlib_msgs/GoalID", cancelCallback);
 
     } catch (Exception re) {
+      node.getLog().error("Unable to start up " + getClass().getName(), re);
 
       if (subGoal != null) {
         // subGoal.shutdown();
