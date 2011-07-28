@@ -21,6 +21,7 @@ import sys
 
 import generate_android_properties
 import generate_ros_properties
+import generate_msg_depends
 import roslib
 import maven
 
@@ -53,6 +54,8 @@ def main(argv):
     if properties is not None:
         with open('default.properties', 'w') as stream:
             write_sorted_properties(properties, stream)
+            
+    generate_msg_depends.generate_msg_depends(package_name)
 
 
 if __name__ == '__main__':

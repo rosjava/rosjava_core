@@ -230,6 +230,7 @@ def get_msg_classpath(rospack, package):
             pathelements.append(msg_jar_file_path(pkg))
     return os.pathsep.join(resolve_pathelements(pathelements))
 
+
 def wipe_msg_depends(package):
     rospack = roslib.packages.ROSPackages()
     
@@ -260,6 +261,7 @@ def generate_msg_depends_main(argv=None):
         wipe_msg_depends(package)
     else:
         generate_msg_depends(package)        
+    
     
 if __name__ == '__main__':
     generate_msg_depends_main()

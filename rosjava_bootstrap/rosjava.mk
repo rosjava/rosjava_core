@@ -5,7 +5,6 @@ PACKAGE_NAME=$(shell basename $(PWD))
 
 all:
 	rosrun rosjava_bootstrap make.py $(PACKAGE_NAME)
-	rosrun rosjava_bootstrap generate_msg_depends.py $(PACKAGE_NAME)
 	if [ ! -f .classpath ] ; then rosrun rosjava_bootstrap generate_eclipse_classpath.py $(PACKAGE_NAME) > .classpath ; touch .classpath-generated; fi
 	if [ ! -f .project ] ; then rosrun rosjava_bootstrap generate_eclipse_project.py $(PACKAGE_NAME) > .project ; touch .project-generated; fi
 	ant
