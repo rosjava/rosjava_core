@@ -33,52 +33,11 @@ def _usage():
     sys.exit(os.EX_USAGE)
 
 
-def write_sorted_properties(properties, stream=sys.stdout):
+def _write_sorted_properties(properties, stream=sys.stdout):
     for key in sorted(properties):
         print >>stream, '%s=%s' % (key, properties[key])
         
-
-def build(rospack, package):
-    if os.path.exists('dependencies.xml'):
-        print 'Skipping dependencies.xml generation.'
-    else:
-        with open('dependencies.xml', 'w') as stream:
-            maven.write_ant_maven_dependencies(rospack, package, stream)
-        
-    maven_depmap = maven.get_maven_dependencies(package, 'dependencies.xml')
-    
-    if os.path.exists('ros.properties'):
-        print 'Skipping ros.properties generation.'
-    else:
-        properties = ros_properties.generate(rospack, package, maven_depmap)
-        with open('ros.properties', 'w') as stream:
-            write_sorted_properties(properties, stream)
-            
-    if os.path.exists('default.properties'):
-        print 'Skipping default.properties generation.'
-    else:
-        properties = android.generate_properties(rospack, package)
-        if properties is not None:
-            with open('default.properties', 'w') as stream:
-                write_sorted_properties(properties, stream)
-                
-    generate_msg_depends.generate_msg_depends(package)
-    
-    if os.path.exists('.classpath'):
-        print 'Skipping .classpath generation.'
-    else:
-        with open('.classpath', 'w') as stream:
-            eclipse.write_classpath(rospack, package, maven_depmap, stream)
-
-    if os.path.exists('.project'):
-        print 'Skipping .project generation.'
-    else:
-        with open('.project', 'w') as stream:
-            eclipse.write_project(package, stream)
-            
-    subprocess.check_call(['ant'])
-            
-            
+           
 def _remove(path):
     try:
         os.remove(path)
@@ -86,13 +45,50 @@ def _remove(path):
         print 'Failed to remove %r' % path
             
             
+def _run(command, checked=True):
+    print 'Executing command: %r' % command
+    retcode = subprocess.call(command)            
+    if retcode and checked:
+        sys.exit(retcode)
+            
+            
+def build(rospack, package):
+    with open('dependencies.xml', 'w') as stream:
+        maven.write_ant_maven_dependencies(rospack, package, stream)
+        
+    maven_depmap = maven.get_maven_dependencies(package, 'dependencies.xml')
+    
+    properties = ros_properties.generate(rospack, package, maven_depmap)
+    with open('ros.properties', 'w') as stream:
+        _write_sorted_properties(properties, stream)
+            
+    properties = android.generate_properties(rospack, package)
+    if properties is not None:
+        with open('default.properties', 'w') as stream:
+            _write_sorted_properties(properties, stream)
+                
+    generate_msg_depends.generate_msg_depends(package)
+    
+    with open('.classpath', 'w') as stream:
+        eclipse.write_classpath(rospack, package, maven_depmap, stream)
+
+    with open('.project', 'w') as stream:
+        eclipse.write_project(package, stream)
+            
+    _run(['ant'])
+            
+            
 def clean():
-    subprocess.call(['ant', 'clean'])
+    _run(['ant', 'clean'], checked=False)
     _remove('dependencies.xml')
     _remove('ros.properties')
     _remove('default.properties')
     _remove('.classpath')
     _remove('.project')
+    
+
+def test():
+    _run(['ant', 'test'])
 
         
 def main(argv):
@@ -104,6 +100,8 @@ def main(argv):
         build(rospack, package)
     elif argv[2] == 'clean':
         clean()
+    elif argv[2] == 'test':
+        test()
     
 
 if __name__ == '__main__':

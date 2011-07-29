@@ -32,42 +32,53 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Author: Adam Stambler
+
+__authors__ = 'astambler@willowgarage.com (Adam Stambler), damonkohler@google.com (Damon Kohler)'
 
 import os
 import sys
 import subprocess
 
-from generate_properties import get_classpath, get_maven_dependencies
+import maven
 import roslib
 
 
-def usage():
+def _usage():
     print """
 This python script runs rosjava based jars and bootstraps the classpath
 for the node by looking at its package manifest.
 
-rosrun rosjava_bootstrap run <pkg> <node_class>  [args ... ]
+rosrun rosjava_bootstrap run.py <pkg> <node_class>  [args ... ]
 """
+    sys.exit(os.EX_USAGE)
 
 
-def run(pkg, node_class, args):
-    rospack = roslib.packages.ROSPackages()
-    maven_depmap = get_maven_dependencies(pkg, 'dependencies.xml')
-    classpath = get_classpath(rospack, pkg, maven_depmap, scope='all', include_package=True)
-    cmd = ["java", "-classpath", classpath, "org.ros.RosRun", node_class] + args
-    retcode = subprocess.call(cmd)
-    return retcode
+def _build_command(rospack, maven_depmap, package, node_class, args):
+    classpath = maven.get_classpath(rospack, package, maven_depmap, scope='runtime',
+                                    include_package=True)
+    command = ['java', '-classpath', classpath, 'org.ros.RosRun', node_class]
+    command.extend(args)
+    return command
 
-    
-if __name__ == '__main__':
-    if len(sys.argv ) < 3:
-        usage()
-        sys.exit(os.EX_USAGE)
-    pkg = sys.argv[1]
+
+def main(argv):
+    if len(argv) < 3:
+        _usage()
+    package = sys.argv[1]
     node_class = sys.argv[2]
     args = sys.argv[3:]
+    rospack = roslib.packages.ROSPackages()
+    maven_depmap = maven.get_maven_dependencies(package, 'dependencies.xml')
+    command = _build_command(rospack, maven_depmap, package, node_class, args) 
+    print 'Executing command: %r' % command
+    return_code = 1
     try:
-        run(pkg, node_class, args)
+        return_code = subprocess.call(command)
     except KeyboardInterrupt:
-		pass
+        pass
+    finally:
+        sys.exit(return_code)
+    
+    
+if __name__ == '__main__':
+    main(sys.argv)

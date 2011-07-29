@@ -14,7 +14,7 @@
   <export>
     <rosjava-src location="src/main/java" />
     <rosjava-pathelement groupId="com.domain" artifactId="com.domain.sample" version="0.0.0" />
-    <rosjava-pathelement location="target/" groupId="com.domain" artifactId="com.domain.sample.with_location" version="0.0.0" />
+    <rosjava-pathelement location="lib/" groupId="com.domain" artifactId="com.domain.sample.with_location" version="0.0.0" />
     <rosjava-pathelement location="target/" groupId="com.domain" artifactId="com.domain.sample.built_with_location" version="0.0.0" built="True" />
   </export>
 

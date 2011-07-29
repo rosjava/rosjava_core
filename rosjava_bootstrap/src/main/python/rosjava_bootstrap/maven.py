@@ -67,14 +67,17 @@ BOOTSTRAP_SCRIPTS_DIR = os.path.join(BOOTSTRAP_PKG_DIR, 'scripts')
 
 
 def _direct_dependency_scope_check(dependency_scope, current_scope):
-    if dependency_scope in SCOPE_MAP[current_scope]:
-        return current_scope
-    return dependency_scope
+    return current_scope in SCOPE_MAP[dependency_scope]
         
         
-def _transtive_dependency_scope_check(dependency_scope, current_scope):
-    transitive_scopes = TRANSITIVE_SCOPE_MAP[dependency_scope]
-    return current_scope == transitive_scopes.get(dependency_scope)
+def _transtive_dependency_scope_check(transitive_dependency_scope, current_scope):
+    # NOTE(damonkohler): ROS package dependencies (<depend package="xxx" />) are not scoped. We
+    # must treat them as having the default scope.
+    transitive_scopes = TRANSITIVE_SCOPE_MAP[DEFAULT_SCOPE]
+    transformed_scope = transitive_scopes.get(transitive_dependency_scope)
+    if transformed_scope is None:
+        return False
+    return current_scope in SCOPE_MAP[transformed_scope]
  
  
 def _map_exports(rospack, package, export_operator, scope_check, scope):
@@ -132,17 +135,12 @@ def _get_specified_classpath(rospack, package, include_package, scope):
             else:
                 path_elements.append(os.path.join(pkg_dir, location))
 
-    def wrapped_export_operator(p, d, export):
-        if export.attrs.get('built', False):
-            return
-        export_operator(p, d, export)
-        
     def package_operator(pkg):
         if is_msg_pkg(pkg) or is_srv_pkg(pkg):
             path_elements.append(msg_jar_file_path(pkg))
 
     if include_package:
-        _map_package_exports(rospack, package, wrapped_export_operator, scope)
+        _map_package_exports(rospack, package, export_operator, scope)
     _map_package_dependencies(rospack, package, export_operator, package_operator, scope=scope)
     return [os.path.abspath(path) for path in path_elements]
 

@@ -31,7 +31,6 @@ class TestMaven(base_test_case.BaseTestCase):
     def test_get_specified_classpath_dependencies_only(self):
         rospack = roslib.packages.ROSPackages()
         path = maven._get_specified_classpath(rospack, SAMPLE_PACKAGE, False, 'compile')
-        self.assertEqual(2, len(path))
         basenames = [os.path.basename(x) for x in path]
         expected_basenames = [
                 'com.domain.sample_dependency.with_location-0.0.0.jar',
@@ -42,10 +41,10 @@ class TestMaven(base_test_case.BaseTestCase):
     def test_get_specified_classpath(self):
         rospack = roslib.packages.ROSPackages()
         path = maven._get_specified_classpath(rospack, SAMPLE_PACKAGE, True, 'compile')
-        self.assertEqual(3, len(path))
         basenames = [os.path.basename(x) for x in path]
         expected_basenames = [
                 'com.domain.sample.with_location-0.0.0.jar',
+                'com.domain.sample.built_with_location-0.0.0.jar',
                 'com.domain.sample_dependency.with_location-0.0.0.jar',
                 'com.domain.sample_dependency.built_with_location-0.0.0.jar',
                 ]
@@ -75,7 +74,7 @@ class TestMaven(base_test_case.BaseTestCase):
         expected_exports = [
                 {'version': '0.0.0', 'groupId': 'com.domain',
                  'artifactId': 'com.domain.sample_dependency'},
-                {'version': '0.0.0', 'location': 'target/', 'groupId': 'com.domain',
+                {'version': '0.0.0', 'location': 'lib/', 'groupId': 'com.domain',
                  'artifactId': 'com.domain.sample_dependency.with_location'},
                 {'groupId': 'com.domain', 'location': 'target/', 'built': 'True','version': '0.0.0',
                  'artifactId': 'com.domain.sample_dependency.built_with_location'},
@@ -97,7 +96,7 @@ class TestMaven(base_test_case.BaseTestCase):
         
         expected_exports = [
                 {'version': '0.0.0', 'groupId': 'com.domain', 'artifactId': 'com.domain.sample'},
-                {'version': '0.0.0', 'location': 'target/', 'groupId': 'com.domain',
+                {'version': '0.0.0', 'location': 'lib/', 'groupId': 'com.domain',
                  'artifactId': 'com.domain.sample.with_location'},
                 {'version': '0.0.0', 'location': 'target/', 'groupId': 'com.domain',
                  'built': 'True', 'artifactId': 'com.domain.sample.built_with_location'},

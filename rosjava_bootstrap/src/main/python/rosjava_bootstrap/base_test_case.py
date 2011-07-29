@@ -40,6 +40,7 @@ class BaseTestCase(unittest.TestCase):
                     self.fail('At index %d, %r != %r' % (i, e, second[i]))
             if len(first) != len(second):
                 self.fail('len(first) != len(second)')
-        finally: 
+        except Exception as e: 
             pprint.pprint(first)
             pprint.pprint(second)
+            raise e

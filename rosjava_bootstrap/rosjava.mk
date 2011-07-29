@@ -3,8 +3,13 @@ CMAKE_FLAGS= -Wdev -DCMAKE_TOOLCHAIN_FILE=`rospack find rosbuild`/rostoolchain.c
 
 PACKAGE_NAME=$(shell basename $(PWD))
 
+.PHONY: all clean test
+
 all:
 	rosrun rosjava_bootstrap make.py $(PACKAGE_NAME)
 
 clean:
 	-rosrun rosjava_bootstrap make.py $(PACKAGE_NAME) clean
+
+test: all
+	rosrun rosjava_bootstrap make.py $(PACKAGE_NAME) test
