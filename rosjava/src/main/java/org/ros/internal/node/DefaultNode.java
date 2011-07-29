@@ -48,6 +48,7 @@ import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.time.TimeProvider;
 import org.ros.internal.time.WallclockProvider;
 import org.ros.message.MessageListener;
+import org.ros.message.MessageSerializationFactory;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
@@ -400,8 +401,13 @@ public class DefaultNode implements Node {
   public boolean isRegistrationOk() {
     return registrar.isMasterRegistrationOk();
   }
+  
+  @Override
+  public MessageSerializationFactory getMessageSerializationFactory() {
+	return nodeConfiguration.getMessageSerializationFactory();
+  }
 
-  @VisibleForTesting
+@VisibleForTesting
   InetSocketAddress getAddress() {
     return slaveServer.getAddress();
   }

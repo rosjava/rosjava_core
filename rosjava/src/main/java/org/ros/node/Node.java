@@ -22,6 +22,7 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.MessageListener;
+import org.ros.message.MessageSerializationFactory;
 import org.ros.message.Service;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
@@ -264,5 +265,11 @@ public interface Node {
    * @return True if the node is running, false otherwise.
    */
   boolean isRunning();
+  
+  /**
+   * Get the {@link MessageSerializationFactory} being used by this node.
+   * @return
+   */
+  MessageSerializationFactory getMessageSerializationFactory();
 
 }

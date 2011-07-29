@@ -6,5 +6,5 @@ Bundle-Name: org.ros.rosjava
 Bundle-SymbolicName: ${bundle.artifactId}
 Bundle-Version: ${bundle.version}
 
-Export-Package: !org.ros.internal.*, org.ros.address.*, org.ros.exception.*, org.ros.message.*, org.ros.namespace.*, org.ros.node.*, org.ros.*
+Export-Package: !org.ros.internal.*, org.ros.*
 Private-Package: org.ros.internal.*
