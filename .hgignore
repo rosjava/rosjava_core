@@ -11,8 +11,6 @@ syntax: glob
 *.apk
 .cproject
 .settings
-.classpath-generated
-.project-generated
 .classpath
 .project
 apache_commons_util/bin
