@@ -71,7 +71,7 @@ class TestMaven(base_test_case.BaseTestCase):
         def package_operator(package):
             self.assertEqual(SAMPLE_PACKAGE_DEPENDENCY, package)
         
-        maven.map_package_dependencies(rospack, SAMPLE_PACKAGE, export_operator, package_operator)
+        maven._map_package_dependencies(rospack, SAMPLE_PACKAGE, export_operator, package_operator)
         expected_exports = [
                 {'version': '0.0.0', 'groupId': 'com.domain',
                  'artifactId': 'com.domain.sample_dependency'},
@@ -93,7 +93,7 @@ class TestMaven(base_test_case.BaseTestCase):
         def package_operator(package):
             self.assertTrue(package in (SAMPLE_PACKAGE, SAMPLE_PACKAGE_DEPENDENCY))
 
-        maven.map_package_exports(rospack, SAMPLE_PACKAGE, export_operator)
+        maven._map_package_exports(rospack, SAMPLE_PACKAGE, export_operator)
         
         expected_exports = [
                 {'version': '0.0.0', 'groupId': 'com.domain', 'artifactId': 'com.domain.sample'},

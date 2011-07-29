@@ -86,11 +86,11 @@ def _map_exports(rospack, package, export_operator, scope_check, scope):
             export_operator(package, package_directory, export)
 
 
-def map_package_exports(rospack, package, export_operator, scope=DEFAULT_SCOPE):
+def _map_package_exports(rospack, package, export_operator, scope=DEFAULT_SCOPE):
     _map_exports(rospack, package, export_operator, _direct_dependency_scope_check, scope)
     
 
-def map_package_dependencies(rospack, package, export_operator, dependency_operator=None,
+def _map_package_dependencies(rospack, package, export_operator, dependency_operator=None,
                              scope=DEFAULT_SCOPE):
     """
     Walk the entire set of dependencies for a package. Run the supplied
@@ -99,8 +99,7 @@ def map_package_dependencies(rospack, package, export_operator, dependency_opera
     """
     depends = rospack.depends([package])[package]
     for dependency in depends:
-        _map_exports(rospack, dependency, export_operator,
-                     _transtive_dependency_scope_check, scope)
+        _map_exports(rospack, dependency, export_operator, _transtive_dependency_scope_check, scope)
         if dependency_operator is not None:
             dependency_operator(dependency)
 
@@ -143,8 +142,8 @@ def _get_specified_classpath(rospack, package, include_package, scope):
             path_elements.append(msg_jar_file_path(pkg))
 
     if include_package:
-        map_package_exports(rospack, package, wrapped_export_operator, scope)
-    map_package_dependencies(rospack, package, export_operator, package_operator, scope=scope)
+        _map_package_exports(rospack, package, wrapped_export_operator, scope)
+    _map_package_dependencies(rospack, package, export_operator, package_operator, scope=scope)
     return [os.path.abspath(path) for path in path_elements]
 
 
@@ -254,8 +253,8 @@ def _write_maven_dependencies_group(rospack, package, scope, stream):
             return
         export_operator(p, d, export)
         
-    map_package_exports(rospack, package, wrapped_export_operator, scope)    
-    map_package_dependencies(rospack, package, export_operator, scope=scope)
+    _map_package_exports(rospack, package, wrapped_export_operator, scope)    
+    _map_package_dependencies(rospack, package, export_operator, scope=scope)
     print >>stream, '  </artifact:dependencies>'
 
 
