@@ -16,16 +16,14 @@
 
 package org.ros.internal.node;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
+import java.net.InetSocketAddress;
+import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
-import org.ros.internal.message.new_style.MessageDefinition;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
-import org.ros.internal.message.old_style.MessageDefinitionFactory;
 import org.ros.internal.message.old_style.MessageDeserializer;
 import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.message.old_style.ServiceMessageDefinitionFactory;
@@ -47,6 +45,8 @@ import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.time.TimeProvider;
 import org.ros.internal.time.WallclockProvider;
+import org.ros.message.MessageDefinition;
+import org.ros.message.MessageFactory;
 import org.ros.message.MessageListener;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.message.Time;
@@ -62,8 +62,8 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 
 /**
  * The default implementation of a {@link Node}.
@@ -199,7 +199,8 @@ public class DefaultNode implements Node {
   @Override
   public <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType) {
     GraphName resolvedTopicName = resolveName(topicName);
-    MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
+    MessageDefinition messageDefinition =
+        nodeConfiguration.getMessageDefinitionFactory().createFromString(messageType);
     TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
     org.ros.message.MessageSerializer<MessageType> serializer = newMessageSerializer(messageType);
     return publisherFactory.create(topicDefinition, serializer);
@@ -214,7 +215,8 @@ public class DefaultNode implements Node {
   public <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName,
       String messageType, final MessageListener<MessageType> listener) {
     GraphName resolvedTopicName = resolveName(topicName);
-    MessageDefinition messageDefinition = MessageDefinitionFactory.createFromString(messageType);
+    MessageDefinition messageDefinition =
+        nodeConfiguration.getMessageDefinitionFactory().createFromString(messageType);
     TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
     MessageDeserializer<MessageType> deserializer = newMessageDeserializer(messageType);
     Subscriber<MessageType> subscriber = subscriberFactory.create(topicDefinition, deserializer);
@@ -401,15 +403,19 @@ public class DefaultNode implements Node {
   public boolean isRegistrationOk() {
     return registrar.isMasterRegistrationOk();
   }
-  
+
   @Override
   public MessageSerializationFactory getMessageSerializationFactory() {
-	return nodeConfiguration.getMessageSerializationFactory();
+    return nodeConfiguration.getMessageSerializationFactory();
   }
 
-@VisibleForTesting
+  @Override
+  public MessageFactory getMessageFactory() {
+    return nodeConfiguration.getMessageFactory();
+  }
+
+  @VisibleForTesting
   InetSocketAddress getAddress() {
     return slaveServer.getAddress();
   }
-
 }

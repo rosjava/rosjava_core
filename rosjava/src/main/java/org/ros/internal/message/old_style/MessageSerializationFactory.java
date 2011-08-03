@@ -14,13 +14,16 @@ public class MessageSerializationFactory implements org.ros.message.MessageSeria
 
   @Override
   public <MessageType> MessageDeserializer<MessageType> newMessageDeserializer(String messageType) {
-    return createDeserializer(messageType, MessageDefinitionFactory.ROS_MESSAGE_CLASS_PACKAGE_PREFIX);
+    return createDeserializer(messageType,
+        MessageFactory.ROS_MESSAGE_CLASS_PACKAGE_PREFIX);
   }
 
   @SuppressWarnings("unchecked")
-  public <MessageType> MessageDeserializer<MessageType> createDeserializer(String messageType, String packagepath) {
+  public <MessageType> MessageDeserializer<MessageType> createDeserializer(String messageType,
+      String packagepath) {
     try {
-      Class<MessageType> messageClass = (Class<MessageType>)MessageDefinitionFactory.loadMessageClass(messageType, packagepath);
+      Class<MessageType> messageClass =
+          (Class<MessageType>) MessageFactory.loadMessageClass(messageType, packagepath);
       return new MessageDeserializer<MessageType>(messageClass);
     } catch (Exception e) {
       throw new RosRuntimeException(e);
@@ -30,27 +33,29 @@ public class MessageSerializationFactory implements org.ros.message.MessageSeria
   @Override
   public <MessageType> org.ros.message.MessageSerializer<MessageType> newServiceRequestSerializer(
       String serviceType) {
-    return newMessageSerializer(
-        MessageDefinitionFactory.ROS_SERVICE_CLASS_PACKAGE_PREFIX + "." + serviceType + "$Request");
+    return newMessageSerializer(MessageFactory.ROS_SERVICE_CLASS_PACKAGE_PREFIX + "."
+        + serviceType + "$Request");
   }
 
   @Override
-  public <MessageType> org.ros.message.MessageDeserializer<MessageType> newServiceRequestDeserializer(
-      String serviceType) {
+  public <MessageType> org.ros.message.MessageDeserializer<MessageType>
+      newServiceRequestDeserializer(String serviceType) {
     return createDeserializer(serviceType + "$Request",
-        MessageDefinitionFactory.ROS_SERVICE_CLASS_PACKAGE_PREFIX);
+        MessageFactory.ROS_SERVICE_CLASS_PACKAGE_PREFIX);
   }
 
   @Override
   public <MessageType> org.ros.message.MessageSerializer<MessageType> newServiceResponseSerializer(
       String serviceType) {
-    return newMessageSerializer(MessageDefinitionFactory.ROS_SERVICE_CLASS_PACKAGE_PREFIX + "." + serviceType + "$Response");
+    return newMessageSerializer(MessageFactory.ROS_SERVICE_CLASS_PACKAGE_PREFIX + "."
+        + serviceType + "$Response");
   }
 
   @Override
-  public <MessageType> org.ros.message.MessageDeserializer<MessageType> newServiceResponseDeserializer(
-      String serviceType) {
-    return createDeserializer(serviceType + "$Response", MessageDefinitionFactory.ROS_SERVICE_CLASS_PACKAGE_PREFIX);
+  public <MessageType> org.ros.message.MessageDeserializer<MessageType>
+      newServiceResponseDeserializer(String serviceType) {
+    return createDeserializer(serviceType + "$Response",
+        MessageFactory.ROS_SERVICE_CLASS_PACKAGE_PREFIX);
   }
 
 }

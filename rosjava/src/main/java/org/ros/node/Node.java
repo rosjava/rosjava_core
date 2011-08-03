@@ -21,6 +21,7 @@ import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.Master;
+import org.ros.message.MessageFactory;
 import org.ros.message.MessageListener;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.message.Service;
@@ -267,9 +268,13 @@ public interface Node {
   boolean isRunning();
   
   /**
-   * Get the {@link MessageSerializationFactory} being used by this node.
-   * @return
+   * @return the {@link MessageSerializationFactory} used by this node
    */
   MessageSerializationFactory getMessageSerializationFactory();
+
+  /**
+   * @return the {@link MessageFactory} used by this node
+   */
+  MessageFactory getMessageFactory();
 
 }

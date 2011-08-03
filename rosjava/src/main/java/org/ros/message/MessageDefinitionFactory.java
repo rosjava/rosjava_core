@@ -14,25 +14,14 @@
  * the License.
  */
 
-package org.ros.internal.message.new_style;
+package org.ros.message;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-import org.ros.message.MessageDefinition;
 
 /**
- * @author damonkohler@google.com (Damon Kohler)
+ * @author damonkohler
  */
-public class MessageDefinitionTest {
-
-  @Test
-  public void testMd5Checksum() {
-    org.ros.message.rosgraph_msgs.Log message = new org.ros.message.rosgraph_msgs.Log();
-    MessageDefinition definition =
-        MessageDefinition.create(message.getDataType(), message.getMessageDefinition(),
-            message.getMD5Sum());
-    assertEquals(message.getMD5Sum(), definition.getMd5Checksum());
-  }
+public interface MessageDefinitionFactory {
+  
+  MessageDefinition createFromString(String messageType);
 
 }

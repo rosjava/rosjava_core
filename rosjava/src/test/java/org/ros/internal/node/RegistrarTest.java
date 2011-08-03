@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
-import org.ros.internal.message.new_style.MessageDefinition;
 import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.Registrar;
@@ -20,6 +19,7 @@ import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
+import org.ros.message.MessageDefinition;
 import org.ros.namespace.GraphName;
 
 import java.util.concurrent.TimeUnit;

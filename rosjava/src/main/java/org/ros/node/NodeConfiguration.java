@@ -16,20 +16,22 @@
 
 package org.ros.node;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.AdvertiseAddressFactory;
 import org.ros.address.BindAddress;
 import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.address.PublicAdvertiseAddressFactory;
 import org.ros.exception.RosRuntimeException;
+import org.ros.message.MessageDefinitionFactory;
+import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
-
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
 
 /**
  * Stores configuration information (e.g. ROS master URI) for {@link Node}s.
@@ -80,6 +82,8 @@ public class NodeConfiguration {
   private File rosRoot;
   private List<File> rosPackagePath;
   private GraphName nodeName;
+  private MessageFactory messageFactory;
+  private MessageDefinitionFactory messageDefinitionFactory;
   private MessageSerializationFactory messageSerializationFactory;
   private BindAddress tcpRosBindAddress;
   private AdvertiseAddressFactory tcpRosAdvertiseAddressFactory;
@@ -151,6 +155,8 @@ public class NodeConfiguration {
   }
 
   private NodeConfiguration() {
+    setMessageFactory(new org.ros.internal.message.old_style.MessageFactory());
+    setMessageDefinitionFactory(new org.ros.internal.message.old_style.MessageDefinitionFactory());
     setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
     setParentResolver(NameResolver.create());
   }
@@ -308,6 +314,22 @@ public class NodeConfiguration {
       MessageSerializationFactory messageSerializationFactory) {
     this.messageSerializationFactory = messageSerializationFactory;
     return this;
+  }
+
+  public void setMessageFactory(MessageFactory messageFactory) {
+    this.messageFactory = messageFactory;
+  }
+
+  public MessageFactory getMessageFactory() {
+    return messageFactory;
+  }
+
+  public void setMessageDefinitionFactory(MessageDefinitionFactory messageDefinitionFactory) {
+    this.messageDefinitionFactory = messageDefinitionFactory;
+  }
+
+  public MessageDefinitionFactory getMessageDefinitionFactory() {
+    return messageDefinitionFactory;
   }
 
   /**

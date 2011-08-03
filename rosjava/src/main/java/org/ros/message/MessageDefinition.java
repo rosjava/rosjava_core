@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.message.new_style;
+package org.ros.message;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
