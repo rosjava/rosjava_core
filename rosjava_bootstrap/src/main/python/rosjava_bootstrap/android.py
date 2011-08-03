@@ -61,6 +61,16 @@ def get_android_library_paths(package):
     return [x.attrs.get('path', '.') for x in m.exports if x.tag == 'rosjava-android-lib']
 
 
+def get_android_target(package):
+    m = roslib.manifest.load_manifest(package)
+    for x in [x for x in m.exports if x.tag.startswith('rosjava-android')]:
+      target = x.attrs.get('target')
+      if target is not None:
+        return target
+    # TODO(damonkohler): Use a more sensible default.
+    return 'android-9'
+
+
 def get_android_sdk_dir():
     """
     @return: location of Android SDK
@@ -83,7 +93,7 @@ def generate_properties(rospack, package):
     props = {
             'sdk.dir': get_android_sdk_dir(),
             # TODO: Should be attribute of the Android export.
-            'target': 'android-9'
+            'target': get_android_target(package),
             }
     # Add directory properties and Android libraries for every package we depend on.
     for p in rospack.depends([package])[package]:

@@ -88,4 +88,4 @@ def write_project(package, stream=sys.stdout):
         template_path = os.path.join(resources_directory, 'eclipse_project_templates',
                                      'java_project_template')
     for line in open(template_path):
-        print >>stream, line.replace('${PROJECT_NAME}', package)
+        print >>stream, line.replace('${PROJECT_NAME}', package).rstrip()
