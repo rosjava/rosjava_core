@@ -200,7 +200,7 @@ public class DefaultNode implements Node {
   public <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
-        nodeConfiguration.getMessageDefinitionFactory().createFromString(messageType);
+        nodeConfiguration.getMessageDefinitionFactory().newFromString(messageType);
     TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
     org.ros.message.MessageSerializer<MessageType> serializer = newMessageSerializer(messageType);
     return publisherFactory.create(topicDefinition, serializer);
@@ -216,7 +216,7 @@ public class DefaultNode implements Node {
       String messageType, final MessageListener<MessageType> listener) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
-        nodeConfiguration.getMessageDefinitionFactory().createFromString(messageType);
+        nodeConfiguration.getMessageDefinitionFactory().newFromString(messageType);
     TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
     MessageDeserializer<MessageType> deserializer = newMessageDeserializer(messageType);
     Subscriber<MessageType> subscriber = subscriberFactory.create(topicDefinition, deserializer);

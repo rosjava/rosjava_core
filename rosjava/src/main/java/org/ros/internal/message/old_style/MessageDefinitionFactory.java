@@ -26,6 +26,12 @@ import org.ros.message.MessageDefinition;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MessageDefinitionFactory implements org.ros.message.MessageDefinitionFactory {
+  
+  private final MessageFactory messageFactory;
+  
+  public MessageDefinitionFactory() {
+    messageFactory = new MessageFactory();
+  }
 
   /**
    * Get the message definition for a given message type.
@@ -38,11 +44,9 @@ public class MessageDefinitionFactory implements org.ros.message.MessageDefiniti
    *           No class representing that name or the class is not accessible.
    */
   @Override
-  public MessageDefinition createFromString(String messageType) {
+  public MessageDefinition newFromString(String messageType) {
     try {
-      Message message =
-          MessageFactory.loadMessageClass(messageType,
-              MessageFactory.ROS_MESSAGE_CLASS_PACKAGE_PREFIX).newInstance();
+      Message message = messageFactory.newMessage(messageType);
       return MessageDefinition.create(message.getDataType(), message.getMessageDefinition(),
           message.getMD5Sum());
     } catch (Exception e) {

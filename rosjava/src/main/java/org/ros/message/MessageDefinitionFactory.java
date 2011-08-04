@@ -16,12 +16,11 @@
 
 package org.ros.message;
 
-
 /**
  * @author damonkohler
  */
 public interface MessageDefinitionFactory {
   
-  MessageDefinition createFromString(String messageType);
+  MessageDefinition newFromString(String messageType);
 
 }

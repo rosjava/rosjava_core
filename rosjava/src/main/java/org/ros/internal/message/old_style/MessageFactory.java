@@ -29,18 +29,40 @@ public class MessageFactory implements org.ros.message.MessageFactory {
   /**
    * Java package prefix for root package for messages.
    */
-  public static final String ROS_MESSAGE_CLASS_PACKAGE_PREFIX = "org.ros.message";
-  
+  private static final String ROS_MESSAGE_CLASS_PACKAGE_PREFIX = "org.ros.message";
+
   /**
    * Java package prefix for root package for services.
    */
-  public static final String ROS_SERVICE_CLASS_PACKAGE_PREFIX = "org.ros.service";
+  private static final String ROS_SERVICE_CLASS_PACKAGE_PREFIX = "org.ros.service";
 
   @SuppressWarnings("unchecked")
   @Override
   public <T> T newMessage(String messageType) {
-     try {
+    try {
       return (T) loadMessageClass(messageType, ROS_MESSAGE_CLASS_PACKAGE_PREFIX).newInstance();
+    } catch (Exception e) {
+      throw new RosRuntimeException(e);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T newServiceResponse(String serviceType) {
+    try {
+      return (T) loadMessageClass(serviceType + "$Response", ROS_SERVICE_CLASS_PACKAGE_PREFIX)
+          .newInstance();
+    } catch (Exception e) {
+      throw new RosRuntimeException(e);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T newServiceRequest(String serviceType) {
+    try {
+      return (T) loadMessageClass(serviceType + "$Request", ROS_SERVICE_CLASS_PACKAGE_PREFIX)
+          .newInstance();
     } catch (Exception e) {
       throw new RosRuntimeException(e);
     }
@@ -60,7 +82,7 @@ public class MessageFactory implements org.ros.message.MessageFactory {
    *           No class representing that name or the class is not accessible.
    */
   @SuppressWarnings("unchecked")
-  public static Class<Message> loadMessageClass(String messageType, String packagePath) {
+  private static Class<Message> loadMessageClass(String messageType, String packagePath) {
     Preconditions.checkArgument(messageType.split("/").length == 2);
     try {
       return (Class<Message>) MessageFactory.class.getClassLoader().loadClass(
