@@ -16,8 +16,18 @@
 
 package org.ros.internal.node.client;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,20 +39,11 @@ import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.service.ServiceListener;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
-import org.ros.internal.node.topic.PublisherDefinition;
+import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.TopicListener;
 
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 /**
  * Manages topic and service registrations of a {@link SlaveServer} with the
@@ -156,8 +157,8 @@ public class Registrar implements TopicListener, ServiceListener {
       public Response<List<URI>> call() throws Exception {
         Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
         Response<List<URI>> response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
-        List<PublisherDefinition> publishers =
-            SlaveServer.buildPublisherIdentifierList(response.getResult(),
+        Collection<PublisherIdentifier> publishers =
+            PublisherIdentifier.newCollectionFromUris(response.getResult(),
                 subscriber.getTopicDefinition());
         subscriber.updatePublishers(publishers);
         subscriber.signalRegistrationDone();

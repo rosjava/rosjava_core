@@ -20,26 +20,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.node.topic.PublisherDefinition;
+import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.RepeatingPublisher;
-import org.ros.internal.node.topic.TopicDefinition;
-import org.ros.message.MessageDefinition;
 import org.ros.message.MessageListener;
-import org.ros.namespace.GraphName;
 import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeFactory;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -100,12 +96,7 @@ public class TopicIntegrationTest {
             .<org.ros.message.std_msgs.String>newSubscriber("foo", "std_msgs/String", null);
 
     try {
-      TopicDefinition topicDefinition =
-          TopicDefinition.create(new GraphName("foo"),
-              MessageDefinition.createFromTypeName("std_msgs/String"));
-      subscriber.addPublisher(
-          PublisherDefinition.createPublisherDefinition(
-              SlaveIdentifier.newFromStrings("foo", "http://foo"), topicDefinition),
+      subscriber.addPublisher(PublisherIdentifier.newFromStrings("foo", "http://foo", "foo"),
           new InetSocketAddress(1234));
       fail();
     } catch (RuntimeException e) {
@@ -113,4 +104,64 @@ public class TopicIntegrationTest {
     }
   }
 
+  private class Listener implements MessageListener<org.ros.message.test_ros.TestHeader> {
+
+    private final CountDownLatch latch = new CountDownLatch(10);
+
+    private org.ros.message.test_ros.TestHeader lastMessage;
+
+    @Override
+    public void onNewMessage(org.ros.message.test_ros.TestHeader message) {
+      if (lastMessage != null) {
+        assertTrue(String.format("message seq %d <= previous seq %d", message.header.seq,
+            lastMessage.header.seq), message.header.seq > lastMessage.header.seq);
+        assertTrue(message.header.stamp.compareTo(lastMessage.header.stamp) > 0);
+      }
+      lastMessage = message;
+      latch.countDown();
+    }
+
+    public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
+      return latch.await(timeout, unit);
+    }
+  }
+
+  @Test
+  public void testHeader() throws InterruptedException {
+    final Node publisherNode = nodeFactory.newNode("publisher", nodeConfiguration);
+    final Publisher<org.ros.message.test_ros.TestHeader> publisher =
+        publisherNode.newPublisher("foo", "test_ros/TestHeader");
+
+    Node subscriberNode = nodeFactory.newNode("subscriber", nodeConfiguration);
+    Listener listener = new Listener();
+    Subscriber<org.ros.message.test_ros.TestHeader> subscriber =
+        subscriberNode.newSubscriber("foo", "test_ros/TestHeader", listener);
+
+    assertTrue(publisher.awaitRegistration(1, TimeUnit.DAYS));
+    assertTrue(subscriber.awaitRegistration(1, TimeUnit.DAYS));
+
+    Thread thread = new Thread() {
+      public void run() {
+        while (!Thread.currentThread().isInterrupted()) {
+          org.ros.message.test_ros.TestHeader headerMessage =
+              publisherNode.getMessageFactory().newMessage("test_ros/TestHeader");
+          headerMessage.header.frame_id = "frame";
+          headerMessage.header.stamp = publisherNode.getCurrentTime();
+          publisher.publish(headerMessage);
+          try {
+            // There needs to be some time between messages in order to
+            // guarantee that the timestamp increases.
+            Thread.sleep(1);
+          } catch (InterruptedException e) {
+          }
+        }
+      }
+    };
+    thread.start();
+    assertTrue(listener.await(1, TimeUnit.DAYS));
+    thread.interrupt();
+
+    publisherNode.shutdown();
+    subscriberNode.shutdown();
+  }
 }

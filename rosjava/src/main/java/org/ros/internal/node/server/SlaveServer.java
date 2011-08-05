@@ -16,7 +16,10 @@
 
 package org.ros.internal.node.server;
 
-import com.google.common.collect.Lists;
+import java.lang.management.ManagementFactory;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
 
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
@@ -26,7 +29,7 @@ import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
-import org.ros.internal.node.topic.PublisherDefinition;
+import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.SlaveImpl;
@@ -36,10 +39,7 @@ import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.namespace.GraphName;
 
-import java.lang.management.ManagementFactory;
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -52,17 +52,6 @@ public class SlaveServer extends NodeServer {
   private final ServiceManager serviceManager;
   private final ParameterManager parameterManager;
   private final TcpRosServer tcpRosServer;
-
-  public static List<PublisherDefinition> buildPublisherIdentifierList(
-      Collection<URI> publisherUriList, TopicDefinition topicDefinition) {
-    List<PublisherDefinition> publishers = Lists.newArrayList();
-    for (URI uri : publisherUriList) {
-      SlaveIdentifier slaveIdentifier = SlaveIdentifier.newAnonymous(uri);
-      publishers.add(PublisherDefinition
-          .createPublisherDefinition(slaveIdentifier, topicDefinition));
-    }
-    return publishers;
-  }
 
   public SlaveServer(GraphName nodeName, BindAddress tcpRosBindAddress,
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
@@ -169,8 +158,8 @@ public class SlaveServer extends NodeServer {
     if (topicManager.hasSubscriber(topicName)) {
       DefaultSubscriber<?> subscriber = topicManager.getSubscriber(topicName);
       TopicDefinition topicDefinition = subscriber.getTopicDefinition();
-      List<PublisherDefinition> identifiers =
-          buildPublisherIdentifierList(publisherUris, topicDefinition);
+      Collection<PublisherIdentifier> identifiers =
+          PublisherIdentifier.newCollectionFromUris(publisherUris, topicDefinition);
       subscriber.updatePublishers(identifiers);
     }
   }

@@ -16,19 +16,27 @@
 
 package org.ros.internal.message.old_style;
 
-import org.ros.message.Message;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.ros.message.Message;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageSerializer<MessageType> implements org.ros.message.MessageSerializer<MessageType> {
+public class MessageSerializer<MessageType> implements
+    org.ros.message.MessageSerializer<MessageType> {
+
+  /**
+   * Header messages receive a monotonically increasing sequence number
+   * automatically.
+   */
+  private static AtomicInteger seq = new AtomicInteger(0);
 
   @Override
   public ByteBuffer serialize(MessageType message) {
-    ByteBuffer buffer = ByteBuffer.wrap(((Message) message).serialize(0));
+    ByteBuffer buffer = ByteBuffer.wrap(((Message) message).serialize(seq.incrementAndGet()));
     buffer.order(ByteOrder.LITTLE_ENDIAN);
     return buffer;
   }

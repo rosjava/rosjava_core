@@ -35,15 +35,15 @@ public class TopicDefinition {
   private final TopicIdentifier topicIdentifier;
   private final MessageDefinition messageDefinition;
 
-  public static TopicDefinition createFromHeader(Map<String, String> header) {
+  public static TopicDefinition newFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));
     GraphName name = new GraphName(header.get(ConnectionHeaderFields.TOPIC));
     return new TopicDefinition(new TopicIdentifier(name),
         MessageDefinition.createFromHeader(header));
   }
 
-  public static TopicDefinition create(GraphName name, MessageDefinition messageDefinition) {
-    return new TopicDefinition(new TopicIdentifier(name), messageDefinition);
+  public static TopicDefinition create(GraphName topicName, MessageDefinition messageDefinition) {
+    return new TopicDefinition(new TopicIdentifier(topicName), messageDefinition);
   }
 
   public TopicDefinition(TopicIdentifier topicIdentifier, MessageDefinition messageDefinition) {
@@ -91,16 +91,23 @@ public class TopicDefinition {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
     TopicDefinition other = (TopicDefinition) obj;
     if (messageDefinition == null) {
-      if (other.messageDefinition != null) return false;
-    } else if (!messageDefinition.equals(other.messageDefinition)) return false;
+      if (other.messageDefinition != null)
+        return false;
+    } else if (!messageDefinition.equals(other.messageDefinition))
+      return false;
     if (topicIdentifier == null) {
-      if (other.topicIdentifier != null) return false;
-    } else if (!topicIdentifier.equals(other.topicIdentifier)) return false;
+      if (other.topicIdentifier != null)
+        return false;
+    } else if (!topicIdentifier.equals(other.topicIdentifier))
+      return false;
     return true;
   }
 

@@ -16,16 +16,16 @@
 
 package org.ros.internal.node.server;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -43,9 +43,19 @@ public class SlaveIdentifier {
     }
   }
 
+  /**
+   * Constructs a new {@link SlaveIdentifier}.
+   * 
+   * Note that either {@code name} or {@code uri} may be null but not both. This
+   * is necessary because one or the other may not be available.
+   * 
+   * @param name
+   *          the {@link GraphName} that the {@link SlaveServer} is known as
+   * @param uri
+   *          the {@link URI} of the {@link SlaveServer}'s XML-RPC server
+   */
   public SlaveIdentifier(GraphName name, URI uri) {
-    // TODO(damonkohler): URI is optional. There should be a factory method that
-    // creates a SlaveIdentifier without a URI.
+    Preconditions.checkArgument(name != null || uri != null);
     this.name = name;
     this.uri = uri;
   }
@@ -61,8 +71,7 @@ public class SlaveIdentifier {
 
   @Override
   public String toString() {
-    Preconditions.checkNotNull(uri);
-    return "SlaveIdentifier<" + name + ", " + uri.toString() + ">";
+    return "SlaveIdentifier<" + name + ", " + uri + ">";
   }
 
   public GraphName getName() {
@@ -89,16 +98,23 @@ public class SlaveIdentifier {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
     SlaveIdentifier other = (SlaveIdentifier) obj;
     if (name == null) {
-      if (other.name != null) return false;
-    } else if (!name.equals(other.name)) return false;
+      if (other.name != null)
+        return false;
+    } else if (!name.equals(other.name))
+      return false;
     if (uri == null) {
-      if (other.uri != null) return false;
-    } else if (!uri.equals(other.uri)) return false;
+      if (other.uri != null)
+        return false;
+    } else if (!uri.equals(other.uri))
+      return false;
     return true;
   }
 

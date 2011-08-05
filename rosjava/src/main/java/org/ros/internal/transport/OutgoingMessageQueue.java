@@ -16,6 +16,8 @@
 
 package org.ros.internal.transport;
 
+import java.nio.ByteBuffer;
+
 import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
@@ -78,13 +80,13 @@ public class OutgoingMessageQueue<MessageType> {
   }
 
   private void writeMessageToChannel(MessageType message) {
-    ChannelBuffer buffer =
-        ChannelBuffers.wrappedBuffer(serializer.serialize(message));
-    channelGroup.write(buffer);
+    ByteBuffer serializedMessage = serializer.serialize(message);
+    ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(serializedMessage);
     if (DEBUG) {
       // TODO(damonkohler): Add a utility method for a better ChannelBuffer.toString() method.
-      log.info("Wrote " + buffer.toString());
+      log.info("Sending message: " + message);
     }
+    channelGroup.write(buffer);
   }
 
   public void put(MessageType message) {
@@ -107,10 +109,20 @@ public class OutgoingMessageQueue<MessageType> {
    */
   public void addChannel(Channel channel) {
     Preconditions.checkState(thread.isAlive());
+    if (DEBUG) {
+      log.info("Adding channel: " + channel);
+    }
     channelGroup.add(channel);
     if (latchMode && latchedMessage != null) {
+      if (DEBUG) {
+        log.info("Sending latched message: " + latchedMessage);
+      }
       writeMessageToChannel(latchedMessage);
     }
+  }
+  
+  public int getChannelGroupSize() {
+    return channelGroup.size();
   }
 
 }

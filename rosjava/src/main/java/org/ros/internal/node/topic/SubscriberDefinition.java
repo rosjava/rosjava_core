@@ -40,10 +40,10 @@ public class SubscriberDefinition {
    * 
    * @return The subscriber definition from the header data.
    */
-  public static SubscriberDefinition createFromHeader(Map<String, String> header) {
+  public static SubscriberDefinition newFromHeader(Map<String, String> header) {
     SlaveIdentifier slaveIdentifier =
         new SlaveIdentifier(new GraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
-    TopicDefinition topicDefinition = TopicDefinition.createFromHeader(header);
+    TopicDefinition topicDefinition = TopicDefinition.newFromHeader(header);
     return new SubscriberDefinition(new SubscriberIdentifier(slaveIdentifier,
         topicDefinition.toIdentifier()), topicDefinition);
   }

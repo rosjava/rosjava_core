@@ -16,12 +16,15 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Set;
 
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -31,8 +34,18 @@ public class PublisherIdentifier {
   private final SlaveIdentifier slaveIdentifier;
   private final TopicIdentifier topicIdentifier;
 
+  public static Collection<PublisherIdentifier> newCollectionFromUris(
+      Collection<URI> publisherUris, TopicDefinition topicDefinition) {
+    Set<PublisherIdentifier> publishers = Sets.newHashSet();
+    for (URI uri : publisherUris) {
+      SlaveIdentifier slaveIdentifier = new SlaveIdentifier(null, uri);
+      publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition.toIdentifier()));
+    }
+    return publishers;
+  }
+
   public static PublisherIdentifier
-      createFromStrings(String nodeName, String uri, String topicName) {
+      newFromStrings(String nodeName, String uri, String topicName) {
     return new PublisherIdentifier(SlaveIdentifier.newFromStrings(nodeName, uri),
         TopicIdentifier.createFromString(topicName));
   }

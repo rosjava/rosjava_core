@@ -16,8 +16,7 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,8 +29,7 @@ import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.Publisher;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -43,12 +41,10 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
-  private final List<SubscriberDefinition> subscribers;
   private final OutgoingMessageQueue<MessageType> out;
 
   public DefaultPublisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer) {
     super(topicDefinition);
-    subscribers = Lists.newArrayList();
     out = new OutgoingMessageQueue<MessageType>(serializer);
     out.start();
   }
@@ -64,17 +60,17 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   }
 
   public PublisherDefinition toPublisherIdentifier(SlaveIdentifier description) {
-    return PublisherDefinition.createPublisherDefinition(description, getTopicDefinition());
+    return PublisherDefinition.create(description, getTopicDefinition());
   }
 
   @Override
   public boolean hasSubscribers() {
-    return !subscribers.isEmpty();
+    return out.getChannelGroupSize() > 0;
   }
 
   @Override
   public int getNumberOfSubscribers() {
-    return subscribers.size();
+    return out.getChannelGroupSize();
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
@@ -104,8 +100,6 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
         header.get(ConnectionHeaderFields.TYPE)));
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
-    SubscriberDefinition subscriber = SubscriberDefinition.createFromHeader(incomingHeader);
-    subscribers.add(subscriber);
     return ConnectionHeader.encode(header);
   }
 

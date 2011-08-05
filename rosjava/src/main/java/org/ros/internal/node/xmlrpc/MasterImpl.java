@@ -94,7 +94,7 @@ public class MasterImpl implements Master, ParameterServer {
   @Override
   public List<Object> unregisterPublisher(String callerId, String topicName, String callerApi) {
     PublisherIdentifier publisherIdentifier =
-        PublisherIdentifier.createFromStrings(callerId, callerApi, topicName);
+        PublisherIdentifier.newFromStrings(callerId, callerApi, topicName);
     return Response.createSuccess("Success", master.unregisterPublisher(publisherIdentifier))
         .toList();
   }
@@ -128,7 +128,7 @@ public class MasterImpl implements Master, ParameterServer {
   public List<Object> registerSubscriber(String callerId, String topicName, String topicType,
       String callerApi) {
     List<PublisherIdentifier> publishers =
-        master.registerSubscriber(SubscriberIdentifier.createFromStrings(callerId, callerApi,
+        master.registerSubscriber(SubscriberIdentifier.newFromStrings(callerId, callerApi,
             topicName));
     List<String> urls = Lists.newArrayList();
     for (PublisherIdentifier publisherIdentifier : publishers) {
@@ -140,7 +140,7 @@ public class MasterImpl implements Master, ParameterServer {
   @Override
   public List<Object> unregisterSubscriber(String callerId, String topicName, String callerApi) {
     SubscriberIdentifier subscriberIdentifier =
-        SubscriberIdentifier.createFromStrings(callerId, callerApi, topicName);
+        SubscriberIdentifier.newFromStrings(callerId, callerApi, topicName);
     return Response.createSuccess("Success", master.unregisterSubscriber(subscriberIdentifier))
         .toList();
   }

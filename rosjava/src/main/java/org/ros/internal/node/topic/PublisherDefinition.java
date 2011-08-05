@@ -31,7 +31,7 @@ public class PublisherDefinition {
   private final PublisherIdentifier publisherIdentifier;
   private final TopicDefinition topicDefinition;
 
-  public static PublisherDefinition createPublisherDefinition(SlaveIdentifier slaveIdentifier,
+  public static PublisherDefinition create(SlaveIdentifier slaveIdentifier,
       TopicDefinition topicDefinition) {
     return new PublisherDefinition(new PublisherIdentifier(slaveIdentifier,
         topicDefinition.toIdentifier()), topicDefinition);
@@ -83,16 +83,23 @@ public class PublisherDefinition {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
     PublisherDefinition other = (PublisherDefinition) obj;
     if (publisherIdentifier == null) {
-      if (other.publisherIdentifier != null) return false;
-    } else if (!publisherIdentifier.equals(other.publisherIdentifier)) return false;
+      if (other.publisherIdentifier != null)
+        return false;
+    } else if (!publisherIdentifier.equals(other.publisherIdentifier))
+      return false;
     if (topicDefinition == null) {
-      if (other.topicDefinition != null) return false;
-    } else if (!topicDefinition.equals(other.topicDefinition)) return false;
+      if (other.topicDefinition != null)
+        return false;
+    } else if (!topicDefinition.equals(other.topicDefinition))
+      return false;
     return true;
   }
 

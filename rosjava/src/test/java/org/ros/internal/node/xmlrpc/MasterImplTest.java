@@ -53,7 +53,7 @@ public class MasterImplTest {
   public void testRegisterPublisher() {
     MasterServer mockMaster = mock(MasterServer.class);
     final SubscriberIdentifier subscriberIdentifier =
-        SubscriberIdentifier.createFromStrings("/slave", "http://api", "/topic");
+        SubscriberIdentifier.newFromStrings("/slave", "http://api", "/topic");
     when(mockMaster.registerPublisher(argThat(new ArgumentMatcher<PublisherIdentifier>() {
       @Override
       public boolean matches(Object argument) {
@@ -86,7 +86,7 @@ public class MasterImplTest {
   public void testRegisterSubscriber() {
     MasterServer mockMaster = mock(MasterServer.class);
     final PublisherIdentifier publisherIdentifier =
-        PublisherIdentifier.createFromStrings("/slave", "http://api", "/topic");
+        PublisherIdentifier.newFromStrings("/slave", "http://api", "/topic");
     when(mockMaster.registerSubscriber(argThat(new ArgumentMatcher<SubscriberIdentifier>() {
       @Override
       public boolean matches(Object argument) {

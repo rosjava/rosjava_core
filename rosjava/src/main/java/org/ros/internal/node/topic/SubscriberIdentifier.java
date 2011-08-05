@@ -29,7 +29,7 @@ public class SubscriberIdentifier {
   private final SlaveIdentifier slaveIdentifier;
   private final TopicIdentifier topicIdentifier;
 
-  public static SubscriberIdentifier createFromStrings(String nodeName, String uri, String topicName) {
+  public static SubscriberIdentifier newFromStrings(String nodeName, String uri, String topicName) {
     return new SubscriberIdentifier(SlaveIdentifier.newFromStrings(nodeName, uri),
         TopicIdentifier.createFromString(topicName));
   }

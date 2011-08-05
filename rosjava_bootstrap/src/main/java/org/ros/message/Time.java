@@ -77,15 +77,15 @@ public class Time implements Comparable<Time> {
     return new Duration(secs - t.secs, nsecs - t.nsecs);
   }
 
-  public static Time fromMillis(double timeInMillis) {
-    int secs = (int) Math.floor(timeInMillis / 1000);
-    int nsecs = (int) (timeInMillis - secs * 1000) * 1000000;
+  public static Time fromMillis(long timeInMillis) {
+    int secs = (int) (timeInMillis / 1000);
+    int nsecs = (int) (timeInMillis % 1000) * 1000000;
     return new Time(secs, nsecs);
   }
 
   public static Time fromNano(long timeInNs) {
-    int secs = (int) Math.floor(timeInNs / 1000000000);
-    int nsecs = (int) (timeInNs - secs * 1000000000);
+    int secs = (int) (timeInNs / 1000000000);
+    int nsecs = (int) (timeInNs % 1000000000);
     return new Time(secs, nsecs);
   }
 

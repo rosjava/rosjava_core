@@ -22,9 +22,12 @@ import org.ros.exception.RemoteException;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -34,34 +37,36 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
   private static final Log log = LogFactory.getLog(UpdatePublisherRunnable.class);
 
   private final DefaultSubscriber<MessageType> subscriber;
-  private final PublisherDefinition publisherDefinition;
+  private final PublisherIdentifier publisherIdentifier;
   private final SlaveIdentifier slaveIdentifier;
 
   /**
    * @param subscriber
    * @param slaveIdentifier
-   *          Identifier of the subscriber's slave.
-   * @param publisherDefinition
+   *          {@link SlaveIdentifier} of the {@link Subscriber}'s
+   *          {@link SlaveServer}
+   * @param publisherIdentifier
+   *          {@link PublisherIdentifier} of the new {@link Publisher}
    */
   public UpdatePublisherRunnable(DefaultSubscriber<MessageType> subscriber,
-      SlaveIdentifier slaveIdentifier, PublisherDefinition publisherDefinition) {
+      SlaveIdentifier slaveIdentifier, PublisherIdentifier publisherIdentifier) {
     this.subscriber = subscriber;
     this.slaveIdentifier = slaveIdentifier;
-    this.publisherDefinition = publisherDefinition;
+    this.publisherIdentifier = publisherIdentifier;
   }
 
   @Override
   public void run() {
     SlaveClient slaveClient;
     try {
-      slaveClient = new SlaveClient(slaveIdentifier.getName(), publisherDefinition.getUri());
+      slaveClient = new SlaveClient(slaveIdentifier.getName(), publisherIdentifier.getUri());
       Response<ProtocolDescription> response =
           slaveClient.requestTopic(this.subscriber.getTopicName(), ProtocolNames.SUPPORTED);
       // TODO(kwc): all of this logic really belongs in a protocol handler
       // registry.
       ProtocolDescription selected = response.getResult();
       if (ProtocolNames.SUPPORTED.contains(selected.getName())) {
-        subscriber.addPublisher(publisherDefinition, selected.getAddress());
+        subscriber.addPublisher(publisherIdentifier, selected.getAddress());
       } else {
         log.error("Publisher returned unsupported protocol selection: " + response);
       }

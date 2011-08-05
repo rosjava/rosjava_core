@@ -16,6 +16,8 @@
 
 package org.ros.internal.transport;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -27,7 +29,10 @@ import org.ros.message.MessageDeserializer;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class IncomingMessageQueue<MessageType> {
-
+  
+  private static final boolean DEBUG = false;
+  private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
+  
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
   private final CircularBlockingQueue<MessageType> messages;
@@ -37,7 +42,11 @@ public class IncomingMessageQueue<MessageType> {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
       ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
-      messages.put(deserializer.deserialize(buffer.toByteBuffer()));
+      MessageType message = deserializer.deserialize(buffer.toByteBuffer());
+      messages.put(message);
+      if (DEBUG) {
+        log.info("Received message: " + message);
+      }
     }
   }
 
@@ -53,5 +62,4 @@ public class IncomingMessageQueue<MessageType> {
   public ChannelHandler createChannelHandler() {
     return new MessageHandler();
   }
-
 }

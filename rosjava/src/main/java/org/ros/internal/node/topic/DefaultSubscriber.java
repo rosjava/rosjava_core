@@ -16,9 +16,14 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,15 +46,10 @@ import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
 import org.ros.node.topic.Subscriber;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -65,7 +65,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   private final IncomingMessageQueue<MessageType> in;
   private final MessageReadingThread thread;
   private final ChannelFactory channelFactory;
-  private final Set<PublisherDefinition> knownPublishers;
+  private final Set<PublisherIdentifier> knownPublishers;
   private final SlaveIdentifier slaveIdentifier;
   private final ChannelGroup channelGroup;
   private final Collection<ClientBootstrap> bootstraps;
@@ -139,8 +139,13 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
     listeners.remove(listener);
   }
 
-  public synchronized void addPublisher(PublisherDefinition publisherDefinition,
+  @VisibleForTesting
+  public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
       InetSocketAddress address) {
+    // TODO(damonkohler): If the connection is dropped, knownPublishers should be updated.
+    if (knownPublishers.contains(publisherIdentifier)) {
+      return;
+    }
     TcpClientPipelineFactory factory = new TcpClientPipelineFactory(channelGroup) {
       @Override
       public ChannelPipeline getPipeline() {
@@ -164,7 +169,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
     if (DEBUG) {
       log.info("Connected to: " + channel.getRemoteAddress());
     }
-    knownPublishers.add(publisherDefinition);
+    knownPublishers.add(publisherIdentifier);
   }
 
   private ClientBootstrap createClientBootstrap(TcpClientPipelineFactory factory) {
@@ -182,15 +187,8 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    * @param publishers
    *          {@link List} of {@link DefaultPublisher}s for the subscribed topic
    */
-  public synchronized void updatePublishers(Collection<PublisherDefinition> publishers) {
-    // Find new connections.
-    ArrayList<PublisherDefinition> newPublishers = new ArrayList<PublisherDefinition>();
-    for (PublisherDefinition publisher : publishers) {
-      if (!knownPublishers.contains(publisher)) {
-        newPublishers.add(publisher);
-      }
-    }
-    for (final PublisherDefinition publisher : newPublishers) {
+  public void updatePublishers(Collection<PublisherIdentifier> publishers) {
+    for (final PublisherIdentifier publisher : publishers) {
       executor.execute(new UpdatePublisherRunnable<MessageType>(this, this.slaveIdentifier,
           publisher));
     }
