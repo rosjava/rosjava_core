@@ -47,7 +47,13 @@ public class SlaveIdentifier {
    * Constructs a new {@link SlaveIdentifier}.
    * 
    * Note that either {@code name} or {@code uri} may be null but not both. This
-   * is necessary because one or the other may not be available.
+   * is necessary because either is enough to uniquely identify a
+   * {@link SlaveServer} and because, depending on context, one or the other may
+   * not be available.
+   * 
+   * Although either value may be {@code null}, we do not treat {@code null} as
+   * a wildcard with respect to equality. Even though it should be safe to do so,
+   * wildcards are unnecessary in this case and would likely lead to buggy code.
    * 
    * @param name
    *          the {@link GraphName} that the {@link SlaveServer} is known as
