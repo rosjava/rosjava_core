@@ -16,8 +16,8 @@
 
 package org.ros.internal.node;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,8 +62,8 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
+import java.net.InetSocketAddress;
+import java.net.URI;
 
 /**
  * The default implementation of a {@link Node}.

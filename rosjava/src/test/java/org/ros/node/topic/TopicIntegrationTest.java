@@ -20,10 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -36,6 +32,10 @@ import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeFactory;
+
+import java.net.InetSocketAddress;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -141,6 +141,7 @@ public class TopicIntegrationTest {
     assertTrue(subscriber.awaitRegistration(1, TimeUnit.DAYS));
 
     Thread thread = new Thread() {
+      @Override
       public void run() {
         while (!Thread.currentThread().isInterrupted()) {
           org.ros.message.test_ros.TestHeader headerMessage =
