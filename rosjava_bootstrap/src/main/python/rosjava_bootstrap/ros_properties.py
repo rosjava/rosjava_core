@@ -46,9 +46,12 @@ def _get_package_version(package, stack_of_cache=None, stack_version_cache=None)
     if stack_version_cache is None:
         stack_version_cache = _stack_version_cache
     stack_of_cache[package] = stack = stack_of_cache.get(package) or roslib.stacks.stack_of(package)
-    stack_version_cache[stack] = version = (
-            stack_version_cache.get(stack) or
-            roslib.stacks.get_stack_version(stack)) #@UndefinedVariable
+    if stack is None:
+        stack_version_cache[stack] = version = '0.0.0-SNAPSHOT'
+    else:
+        stack_version_cache[stack] = version = (
+                stack_version_cache.get(stack) or
+                roslib.stacks.get_stack_version(stack)) #@UndefinedVariable
     return version
 
 
