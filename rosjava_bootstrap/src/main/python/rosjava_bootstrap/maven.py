@@ -274,7 +274,6 @@ def write_ant_maven_dependencies(rospack, package, stream=sys.stdout):
 <project name="dependencies" basedir="."  xmlns:artifact="antlib:org.apache.maven.artifact.ant"
       xmlns:ac="antlib:net.sf.antcontrib"
 >
-  <taskdef resource="net/sf/antcontrib/antlib.xml"/>
 
   <path id="maven-ant-tasks.classpath" path="%s/maven-ant-tasks-2.1.3.jar" />
   <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
