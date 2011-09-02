@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="android" default="compile">
+  <property file="default.properties" />
+
+  <property name="android.tools.dir" location="${sdk.dir}/tools" />
+
+  <!-- Input directories -->
+  <property name="source.dir" value="src" />
+  <property name="source.absolute.dir" location="${source.dir}" />
+  <property name="gen.dir" value="gen" />
+  <property name="gen.absolute.dir" location="${gen.dir}" />
+  <property name="resource.dir" value="res" />
+  <property name="resource.absolute.dir" location="${resource.dir}" />
+  <property name="asset.dir" value="assets" />
+  <property name="asset.absolute.dir" location="${asset.dir}" />
+
+  <!-- Directory for the third party java libraries -->
+  <property name="external.libs.dir" value="libs" />
+  <property name="external.libs.absolute.dir" location="${external.libs.dir}" />
+
+  <!-- Directory for the native libraries -->
+  <property name="native.libs.dir" value="libs" />
+  <property name="native.libs.absolute.dir" location="${native.libs.dir}" />
+
+  <!-- Output directories -->
+  <property name="out.dir" value="build" />
+  <property name="out.absolute.dir" location="${out.dir}" />
+  <property name="out.classes.dir" value="${out.absolute.dir}/classes" />
+  <property name="out.classes.absolute.dir" location="${out.classes.dir}" />
+
+  <!-- Compilation options -->
+  <property name="java.encoding" value="UTF-8" />
+  <property name="java.target" value="1.6" />
+  <property name="java.source" value="1.6" />
+
+  <path id="android.antlibs">
+    <pathelement path="${sdk.dir}/tools/lib/anttasks.jar" />
+  </path>
+
+  <taskdef name="setup"
+    classname="com.android.ant.SetupTask"
+    classpathref="android.antlibs" />
+
+  <taskdef name="aapt"
+    classname="com.android.ant.AaptExecLoopTask"
+    classpathref="android.antlibs" />
+
+  <taskdef name="xpath"
+    classname="com.android.ant.XPathTask"
+    classpathref="android.antlibs" />
+
+  <taskdef name="if"
+    classname="com.android.ant.IfElseTask"
+    classpathref="android.antlibs" />
+
+  <!-- Name of the application package extracted from manifest file -->
+  <xpath input="AndroidManifest.xml" expression="/manifest/@package"
+    output="manifest.package" />
+  <xpath input="AndroidManifest.xml" expression="/manifest/application/@android:hasCode"
+    output="manifest.hasCode" default="true" />
+
+  <!-- Verbosity -->
+  <property name="verbose" value="false" />
+  <!-- This is needed by emma as it uses multilevel verbosity instead of simple 'true' or 'false'
+         The property 'verbosity' is not user configurable and depends exclusively on 'verbose'
+         value. -->
+  <condition property="verbosity" value="verbose" else="quiet">
+    <istrue value="${verbose}" />
+  </condition>
+
+  <!-- Tools -->
+  <condition property="exe" value=".exe" else=""><os family="windows" /></condition>
+
+  <!-- Emma configuration -->
+  <property name="emma.dir" value="${sdk.dir}/tools/lib" />
+  <path id="emma.lib">
+    <pathelement location="${emma.dir}/emma.jar" />
+    <pathelement location="${emma.dir}/emma_ant.jar" />
+  </path>
+  <taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+  <!-- End of emma configuration -->
+
+  <!-- Rules -->
+
+  <!-- Creates the output directories if they don't exist yet. -->
+  <target name="init">
+    <echo>Creating output directories if needed...</echo>
+    <mkdir dir="${resource.absolute.dir}" />
+    <mkdir dir="${external.libs.absolute.dir}" />
+    <mkdir dir="${gen.absolute.dir}" />
+    <mkdir dir="${out.absolute.dir}" />
+    <mkdir dir="${out.classes.absolute.dir}" />
+  </target>
+
+  <!-- Generates the R.java file for this project's resources. -->
+  <target name="resources" depends="init">
+    <echo>Generating R.java / Manifest.java from the resources...</echo>
+    <aapt executable="${aapt}"
+      command="package"
+      verbose="${verbose}"
+      manifest="AndroidManifest.xml"
+      androidjar="${android.jar}"
+      rfolder="${gen.absolute.dir}">
+      <res path="${resource.absolute.dir}" />
+    </aapt>
+  </target>
+
+  <!-- Compiles this project's .java files into .class files. -->
+  <target name="compile" depends="resources"
+    description="Compiles project's .java files into .class files">
+    <javac encoding="${java.encoding}"
+      source="${java.source}" target="${java.target}"
+      debug="true" extdirs=""
+      destdir="${out.classes.absolute.dir}"
+      bootclasspathref="android.target.classpath"
+      verbose="${verbose}"
+      classpath="${extensible.classpath}"
+      classpathref="project.libraries.jars">
+      <src path="${source.absolute.dir}" />
+      <src path="${gen.absolute.dir}" />
+      <src refid="project.libraries.src" />
+      <classpath>
+        <pathelement path="${ros.compile.classpath}" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="clean" description="Removes output files created by other targets.">
+    <delete dir="${out.absolute.dir}" verbose="${verbose}" />
+    <delete dir="${gen.absolute.dir}" verbose="${verbose}" />
+  </target>
+
+  <setup import="false" />
+</project>
+
