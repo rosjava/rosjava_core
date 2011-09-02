@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="default" name="java">
+
+  <property file="ros.properties" />
+
+  <include file="dependencies.xml" />
+
+  <property name="src.main" location="src/main/java" />
+  <property name="build.main" location="target/classes" />
+
+  <property name="dist" location="target" />
+  <property name="javac-source" value="1.6" />
+  <property name="javac-target" value="1.6" />
+  <property name="debuglevel" value="source,lines,vars" />
+  <property name="jar" location="${ros.artifact.built}" />
+
+  <path id="classpath">
+    <pathelement path="${ros.compile.classpath}" />
+  </path>
+
+  <path id="test.classpath">
+    <path refid="classpath" />
+    <pathelement path="${build.main}" />
+    <pathelement path="${build.test}" />
+    <pathelement path="${ros.test.classpath}" />
+  </path>
+
+  <target name="default" depends="init, compile, jar" />
+
+  <target name="init">
+    <fail unless="ros.compile.classpath" message="ros.properties is missing. Run 'rosmake rosjava' first."/>
+    <mkdir dir="${build.main}" />
+    <mkdir dir="${dist}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build.main}" source="${javac-source}"
+        target="${javac-target}" includeantruntime="false">
+      <classpath refid="classpath" />
+      <src path="${src.main}" />
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile">
+    <jar destfile="${jar}">
+      <fileset dir="${build.main}" />
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build.main}" />
+    <delete dir="${dist}" />
+  </target>
+</project>
