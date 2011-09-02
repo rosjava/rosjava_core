@@ -67,8 +67,7 @@ def get_android_target(package):
       target = x.attrs.get('target')
       if target is not None:
         return target
-    # TODO(damonkohler): Use a more sensible default.
-    return 'android-9'
+    raise AndroidError('No Android target version specified.')
 
 
 def get_android_sdk_dir():
