@@ -2,7 +2,6 @@
 <project default="default" name="java">
 
   <property file="ros.properties" />
-
   <include file="dependencies.xml" />
   
   <property name="src.main" location="src/main/java" />

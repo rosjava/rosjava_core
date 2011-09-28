@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.topic;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +29,7 @@ import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.Publisher;
 
-import com.google.common.base.Preconditions;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -96,10 +96,14 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
       log.info("Publisher handshake header: " + header);
     }
     // TODO(damonkohler): Return error to the subscriber over the wire?
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
-        header.get(ConnectionHeaderFields.TYPE)));
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
-        header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
+    String incomingType = incomingHeader.get(ConnectionHeaderFields.TYPE);
+    String expectedType = header.get(ConnectionHeaderFields.TYPE);
+    Preconditions.checkState(incomingType.equals(expectedType), "Unexpected message type "
+        + incomingType + " != " + expectedType);
+    String incomingChecksum = incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
+    String expectedChecksum = header.get(ConnectionHeaderFields.MD5_CHECKSUM);
+    Preconditions.checkState(incomingChecksum.equals(expectedChecksum), "Unexpected message MD5 "
+        + incomingChecksum + " != " + expectedChecksum);
     return ConnectionHeader.encode(header);
   }
 

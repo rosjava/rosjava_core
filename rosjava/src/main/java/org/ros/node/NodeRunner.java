@@ -16,60 +16,28 @@
 
 package org.ros.node;
 
-import org.ros.exception.RosRuntimeException;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 /**
- * Executes {@link NodeMain}s in separate threads. Note that the user is
- * responsible for shutting down {@link NodeMain}s.
+ * Executes {@link NodeMain}s.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class NodeRunner {
-
-  private final Executor executor;
-
-  /**
-   * @return an instance of {@link NodeRunner} that uses a default
-   *         {@link Executor}
-   */
-  public static NodeRunner newDefault() {
-    return new NodeRunner(Executors.newCachedThreadPool());
-  }
-
-  /**
-   * @param executor
-   *          {@link NodeMain}s will be executed using this
-   */
-  public NodeRunner(Executor executor) {
-    this.executor = executor;
-  }
+public interface NodeRunner {
 
   /**
    * Executes the supplied {@link NodeMain} using the supplied
-   * {@link NodeConfiguration} and the configured {@link Executor}.
+   * {@link NodeConfiguration}.
    * 
    * @param nodeMain
    *          the {@link NodeMain} to execute
    * @param nodeConfiguration
    *          the {@link NodeConfiguration} that will be passed to the
    *          {@link NodeMain}
-   * @throws RosRuntimeException
-   *           thrown if {@link NodeMain} throws an exception
    */
-  public void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration) {
-    executor.execute(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          nodeMain.main(nodeConfiguration);
-        } catch (Exception e) {
-          throw new RosRuntimeException(e);
-        }
-      }
-    });
-  }
+  void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration);
+
+  /**
+   * Shutdown all started {@link NodeMain}s.
+   */
+  void shutdown();
 
 }

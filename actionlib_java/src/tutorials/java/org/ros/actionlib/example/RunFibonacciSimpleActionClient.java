@@ -1,5 +1,7 @@
 package org.ros.actionlib.example;
 
+import org.ros.node.NodeRunner;
+
 import org.ros.actionlib.client.SimpleActionClient;
 import org.ros.actionlib.client.SimpleActionClientCallbacks;
 import org.ros.actionlib.state.SimpleClientGoalState;
@@ -12,13 +14,13 @@ import org.ros.message.actionlib_tutorials.FibonacciFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciGoal;
 import org.ros.message.actionlib_tutorials.FibonacciResult;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeRunner;
+import org.ros.node.DefaultNodeRunner;
 
 public class RunFibonacciSimpleActionClient {
 
   public static void main(String[] args) {
     NodeConfiguration configuration = NodeConfiguration.newPrivate();
-    NodeRunner runner = NodeRunner.newDefault();
+    NodeRunner runner = DefaultNodeRunner.newDefault();
 
     run(runner, configuration);
 
