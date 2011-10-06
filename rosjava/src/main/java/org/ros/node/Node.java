@@ -45,7 +45,7 @@ import java.net.URI;
  * factories for:
  * 
  * <ul>
- * <li>{@link Publisher}</li>,
+ * <li>{@link Publisher}</li>
  * <li>{@link Subscriber}</li>
  * <li>{@link ServiceServer}</li>
  * <li>{@link ServiceClient}</li>
