@@ -98,12 +98,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
     // TODO(damonkohler): Return error to the subscriber over the wire?
     String incomingType = incomingHeader.get(ConnectionHeaderFields.TYPE);
     String expectedType = header.get(ConnectionHeaderFields.TYPE);
-    Preconditions.checkState(incomingType.equals(expectedType), "Unexpected message type "
-        + incomingType + " != " + expectedType);
+    Preconditions.checkState(incomingType.equals(expectedType) || incomingType.equals("*"), 
+    		"Unexpected message type " + incomingType + " != " + expectedType);
     String incomingChecksum = incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
     String expectedChecksum = header.get(ConnectionHeaderFields.MD5_CHECKSUM);
-    Preconditions.checkState(incomingChecksum.equals(expectedChecksum), "Unexpected message MD5 "
-        + incomingChecksum + " != " + expectedChecksum);
+    Preconditions.checkState(incomingChecksum.equals(expectedChecksum) || incomingChecksum.equals("*"), 
+    		"Unexpected message MD5 " + incomingChecksum + " != " + expectedChecksum);
     return ConnectionHeader.encode(header);
   }
 
