@@ -14,22 +14,23 @@
  * the License.
  */
 
-package org.ros.internal.time;
+package org.ros.time;
 
-import org.ros.time.TimeProvider;
-
-import org.ros.message.Time;
+import org.junit.Test;
+import org.ros.address.InetAddressFactory;
 
 /**
- * Provides wallclock (actual) time.
- * 
- * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public class WallclockProvider implements TimeProvider {
+public class NtpTimeProviderTest {
 
-  @Override
-  public Time getCurrentTime() {
-    return Time.fromMillis(System.currentTimeMillis());
+  @Test
+  public void testNtpTime() {
+    // TODO(damonkohler): This is only a simple sanity check.
+    NtpTimeProvider ntpTimeProvider =
+        new NtpTimeProvider(InetAddressFactory.newFromHostString("ntps1-0.cs.tu-berlin.de"));
+    ntpTimeProvider.updateTime();
+    ntpTimeProvider.getCurrentTime();
   }
 
 }

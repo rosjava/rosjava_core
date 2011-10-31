@@ -68,7 +68,7 @@ public class DefaultNodeRunner implements NodeRunner {
    */
   @Override
   public void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration) {
-    Preconditions.checkNotNull(nodeConfiguration.getNodeName());
+    Preconditions.checkNotNull(nodeConfiguration.getNodeName(), "Node name not specified.");
     executor.execute(new Runnable() {
       @Override
       public void run() {

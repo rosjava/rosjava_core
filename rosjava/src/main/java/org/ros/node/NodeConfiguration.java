@@ -16,13 +16,14 @@
 
 package org.ros.node;
 
+import org.ros.time.WallTimeProvider;
+
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.AdvertiseAddressFactory;
 import org.ros.address.BindAddress;
 import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.address.PublicAdvertiseAddressFactory;
 import org.ros.exception.RosRuntimeException;
-import org.ros.internal.time.WallclockProvider;
 import org.ros.message.MessageDefinitionFactory;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;
@@ -162,7 +163,7 @@ public class NodeConfiguration {
     setMessageDefinitionFactory(new org.ros.internal.message.old_style.MessageDefinitionFactory());
     setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
     setParentResolver(NameResolver.create());
-    setTimeProvider(new WallclockProvider());
+    setTimeProvider(new WallTimeProvider());
   }
 
   /**
@@ -450,7 +451,7 @@ public class NodeConfiguration {
 
   /**
    * Sets the {@link TimeProvider} that {@link Node}s will use. By default, the
-   * {@link WallclockProvider} is used.
+   * {@link WallTimeProvider} is used.
    * 
    * @param timeProvider
    *          the {@link TimeProvider} that {@link Node}s will use

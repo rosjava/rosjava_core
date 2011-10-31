@@ -31,6 +31,7 @@
     <rosjava-pathelement groupId="com.google.guava" artifactId="org.ros.rosjava.guava" version="r07" />
     <rosjava-pathelement groupId="org.jboss.netty" artifactId="netty" version="3.2.4.Final"  />
     <rosjava-pathelement groupId="org.apache.commons" artifactId="com.springsource.org.apache.commons.logging" version="1.1.1"  />
+    <rosjava-pathelement groupId="commons-net" artifactId="commons-net" version="2.0"  />
 
     <rosjava-pathelement groupId="junit" artifactId="junit" version="4.8.2" scope="test" />
     <rosjava-pathelement groupId="org.mockito" artifactId="mockito-all" version="1.8.5"  scope="test" />

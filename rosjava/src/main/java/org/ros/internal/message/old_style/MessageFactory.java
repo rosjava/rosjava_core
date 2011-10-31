@@ -16,10 +16,10 @@
 
 package org.ros.internal.message.old_style;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.exception.RosRuntimeException;
 import org.ros.message.Message;
-
-import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -72,14 +72,12 @@ public class MessageFactory implements org.ros.message.MessageFactory {
    * Get the class for a given message type.
    * 
    * @param messageType
-   *          The string giving "ros package"/"message name", e.g. std_msgs/Time
+   *          the string giving "ros package"/"message name", e.g. std_msgs/Time
    * @param packagePath
-   *          Path to the package which contain messages.
-   * 
-   * @return The class.
-   * 
+   *          path to the package which contain messages
+   * @return the message class
    * @throws RosRuntimeException
-   *           No class representing that name or the class is not accessible.
+   *           no class representing that name or the class is not accessible
    */
   @SuppressWarnings("unchecked")
   private static Class<Message> loadMessageClass(String messageType, String packagePath) {
@@ -88,7 +86,7 @@ public class MessageFactory implements org.ros.message.MessageFactory {
       return (Class<Message>) MessageFactory.class.getClassLoader().loadClass(
           packagePath + "." + messageType.replace('/', '.'));
     } catch (Exception e) {
-      throw new RosRuntimeException(e);
+      throw new RosRuntimeException("Failed to load message type: \"" + messageType + "\"", e);
     }
   }
 }

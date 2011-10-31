@@ -48,6 +48,7 @@ package org.ros.message;
 public class Duration implements Comparable<Duration> {
 
   public static final Duration MAX_VALUE = new Duration(Integer.MAX_VALUE, 999999999);
+
   public int secs;
   public int nsecs;
 
@@ -77,6 +78,18 @@ public class Duration implements Comparable<Duration> {
 
   public Duration subtract(Duration d) {
     return new Duration(secs - d.secs, nsecs - d.nsecs);
+  }
+
+  public static Duration fromMillis(long durationInMillis) {
+    int secs = (int) (durationInMillis / 1000);
+    int nsecs = (int) (durationInMillis % 1000) * 1000000;
+    return new Duration(secs, nsecs);
+  }
+
+  public static Duration fromNano(long durationInNs) {
+    int secs = (int) (durationInNs / 1000000000);
+    int nsecs = (int) (durationInNs % 1000000000);
+    return new Duration(secs, nsecs);
   }
 
   public void normalize() {
