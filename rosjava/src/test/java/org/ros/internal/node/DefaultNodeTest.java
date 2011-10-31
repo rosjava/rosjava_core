@@ -38,10 +38,8 @@ import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeFactory;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
@@ -73,12 +71,13 @@ public class DefaultNodeTest {
     masterUri = masterServer.getUri();
     checkHostName(masterUri.getHost());
     privateNodeConfiguration = NodeConfiguration.newPrivate(masterUri);
+    privateNodeConfiguration.setNodeName("node_name");
     nodeFactory = new DefaultNodeFactory();
   }
 
   @Test
   public void testFailIfStartedWhileRunning() throws UnknownHostException {
-    Node node = nodeFactory.newNode("node_name", privateNodeConfiguration);
+    Node node = nodeFactory.newNode(privateNodeConfiguration);
     try {
       ((DefaultNode) node).start();
       fail();
@@ -89,7 +88,7 @@ public class DefaultNodeTest {
 
   @Test
   public void testFailIfStoppedWhileNotRunning() throws UnknownHostException {
-    Node node = nodeFactory.newNode("node_name", privateNodeConfiguration);
+    Node node = nodeFactory.newNode(privateNodeConfiguration);
     node.shutdown();
     try {
       node.shutdown();
@@ -103,8 +102,9 @@ public class DefaultNodeTest {
   public void testCreatePublic() throws Exception {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     assertFalse(InetAddresses.isInetAddress(host));
-    Node node =
-        nodeFactory.newNode("node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, masterServer.getUri());
+    nodeConfiguration.setNodeName("node");
+    Node node = nodeFactory.newNode(nodeConfiguration);
     InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -114,8 +114,9 @@ public class DefaultNodeTest {
   @Test
   public void testCreatePublicWithIpv4() throws Exception {
     String host = "1.2.3.4";
-    Node node =
-        nodeFactory.newNode("node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, masterServer.getUri());
+    nodeConfiguration.setNodeName("node");
+    Node node = nodeFactory.newNode(nodeConfiguration);
     InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -125,8 +126,9 @@ public class DefaultNodeTest {
   @Test
   public void testCreatePublicWithIpv6() throws Exception {
     String host = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
-    Node node =
-        nodeFactory.newNode("node_name", NodeConfiguration.newPublic(host, masterServer.getUri()));
+    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, masterServer.getUri());
+    nodeConfiguration.setNodeName("node");
+    Node node = nodeFactory.newNode(nodeConfiguration);
     InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertEquals(nodeAddress.getHostName(), host);
@@ -135,7 +137,7 @@ public class DefaultNodeTest {
 
   @Test
   public void testCreatePrivate() {
-    Node node = nodeFactory.newNode("node_name", privateNodeConfiguration);
+    Node node = nodeFactory.newNode(privateNodeConfiguration);
     InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
     assertTrue(nodeAddress.getPort() > 0);
     assertTrue(nodeAddress.getAddress().isLoopbackAddress());
@@ -144,7 +146,7 @@ public class DefaultNodeTest {
 
   @Test
   public void testPubSubRegistration() throws InterruptedException {
-    Node node = nodeFactory.newNode("node_name", privateNodeConfiguration);
+    Node node = nodeFactory.newNode(privateNodeConfiguration);
     ((DefaultNode) node).getRegistrar().setRetryDelay(1, TimeUnit.MILLISECONDS);
     assertTrue(((RosoutLogger) node.getLog()).getPublisher().awaitRegistration(1, TimeUnit.SECONDS));
 
@@ -168,9 +170,10 @@ public class DefaultNodeTest {
 
   @Test
   public void testResolveName() {
-    Node node =
-        nodeFactory.newNode("test_resolver", NodeConfiguration.newPrivate(masterUri)
-            .setParentResolver(NameResolver.create("/ns1")));
+    NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate(masterUri);
+    nodeConfiguration.setParentResolver(NameResolver.create("/ns1"));
+    nodeConfiguration.setNodeName("test_resolver");
+    Node node = nodeFactory.newNode(nodeConfiguration);
 
     assertGraphNameEquals("/foo", node.resolveName("/foo"));
     assertGraphNameEquals("/ns1/foo", node.resolveName("foo"));
@@ -206,7 +209,8 @@ public class DefaultNodeTest {
 
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(masterUri.getHost(), masterUri);
-    Node node = nodeFactory.newNode("test_addresses", nodeConfiguration);
+    nodeConfiguration.setNodeName("test_addresses");
+    Node node = nodeFactory.newNode(nodeConfiguration);
 
     URI nodeUri = node.getUri();
     assertTrue(nodeUri.getPort() > 0);
@@ -225,5 +229,4 @@ public class DefaultNodeTest {
     InetSocketAddress tcpRosAddress = result.getAdverstiseAddress().toInetSocketAddress();
     checkHostName(tcpRosAddress.getHostName());
   }
-
 }

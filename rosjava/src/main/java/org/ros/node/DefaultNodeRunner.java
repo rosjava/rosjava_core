@@ -16,9 +16,14 @@
 
 package org.ros.node;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+
+import org.ros.internal.node.DefaultNodeFactory;
+import org.ros.internal.node.NodeFactory;
+import org.ros.namespace.GraphName;
+
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -29,24 +34,26 @@ import java.util.concurrent.Executors;
  */
 public class DefaultNodeRunner implements NodeRunner {
 
+  private final NodeFactory nodeFactory;
   private final Executor executor;
-  private final Collection<NodeMain> nodeMains;
+  private final Map<GraphName, NodeMain> nodeMains;
 
   /**
    * @return an instance of {@link DefaultNodeRunner} that uses a default
    *         {@link Executor}
    */
   public static NodeRunner newDefault() {
-    return new DefaultNodeRunner(Executors.newCachedThreadPool());
+    return new DefaultNodeRunner(new DefaultNodeFactory(), Executors.newCachedThreadPool());
   }
 
   /**
    * @param executor
    *          {@link NodeMain}s will be executed using this
    */
-  public DefaultNodeRunner(Executor executor) {
+  public DefaultNodeRunner(NodeFactory nodeFactory, Executor executor) {
+    this.nodeFactory = nodeFactory;
     this.executor = executor;
-    nodeMains = Collections.synchronizedCollection(new ArrayList<NodeMain>());
+    nodeMains = Maps.newConcurrentMap();
   }
 
   /**
@@ -61,12 +68,14 @@ public class DefaultNodeRunner implements NodeRunner {
    */
   @Override
   public void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration) {
-    nodeMains.add(nodeMain);
+    Preconditions.checkNotNull(nodeConfiguration.getNodeName());
     executor.execute(new Runnable() {
       @Override
       public void run() {
+        Node node = nodeFactory.newNode(nodeConfiguration);
+        nodeMains.put(node.getName(), nodeMain);
         try {
-          nodeMain.main(nodeConfiguration);
+          nodeMain.main(node);
         } catch (Exception e) {
           nodeMains.remove(nodeMain);
           // TODO(damonkohler): Log to rosout. Maybe there should be a rosout
@@ -82,7 +91,7 @@ public class DefaultNodeRunner implements NodeRunner {
   @Override
   public void shutdown() {
     synchronized (nodeMains) {
-      for (NodeMain nodeMain : nodeMains) {
+      for (NodeMain nodeMain : nodeMains.values()) {
         shutdownNodeMain(nodeMain);
       }
       nodeMains.clear();

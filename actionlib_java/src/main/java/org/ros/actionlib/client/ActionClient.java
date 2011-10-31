@@ -8,10 +8,7 @@ import org.ros.message.MessageListener;
 import org.ros.message.Time;
 import org.ros.message.actionlib_msgs.GoalID;
 import org.ros.message.actionlib_msgs.GoalStatusArray;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeFactory;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
@@ -172,12 +169,10 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
   }
 
   @Override
-  public void main(NodeConfiguration configuration) throws Exception {
-    NodeFactory nodeFactory = new DefaultNodeFactory();
-    if (parent != null)
-      initClient(nodeFactory.newNode(parent.resolveName(nodeName), configuration));
-    else
-      initClient(nodeFactory.newNode(nodeName, configuration));
+  public void main(Node node) throws Exception {
+    // TODO(damonkohler): Move resolving the node name to the location where
+    // this NodeMain is started.
+    initClient(node);
   }
 
   /**

@@ -17,9 +17,7 @@
 package org.ros;
 
 import org.ros.message.MessageListener;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
@@ -34,8 +32,8 @@ public class PassthroughTestNode implements NodeMain {
   private Node node;
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) {
-    node = new DefaultNodeFactory().newNode("test_node", nodeConfiguration);
+  public void main(final Node node) {
+    this.node = node;
 
     // The goal of the passthrough node is simply to retransmit the messages
     // sent to it. This allows us to external verify that the node is compatible
@@ -96,5 +94,4 @@ public class PassthroughTestNode implements NodeMain {
   public void shutdown() {
     node.shutdown();
   }
-
 }

@@ -10,10 +10,8 @@ import org.ros.message.Time;
 import org.ros.message.actionlib_msgs.GoalID;
 import org.ros.message.actionlib_msgs.GoalStatus;
 import org.ros.message.actionlib_msgs.GoalStatusArray;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeFactory;
 import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
@@ -123,14 +121,9 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
   }
 
   @Override
-  public void main(NodeConfiguration configuration) throws Exception {
-    NodeFactory nodeFactory = new DefaultNodeFactory();
-    if (parent != null) {
-      node = nodeFactory.newNode(parent.resolveName(name), configuration);
-    } else {
-      node = nodeFactory.newNode(name, configuration);
-    }
-
+  public void main(Node node) throws Exception {
+    // TODO(damonkohler): Move the logic for conditionally changing this node's
+    // name to the location where this NodeMain is launched.
     idGenerator = new GoalIDGenerator(node);
 
     if (!active) {

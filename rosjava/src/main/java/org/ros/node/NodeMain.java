@@ -17,7 +17,7 @@
 package org.ros.node;
 
 /**
- * Defines a {@link Node} entry point and shutdown routine.
+ * Defines a program entry point and shutdown routine.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
@@ -25,15 +25,15 @@ package org.ros.node;
 public interface NodeMain {
 
   /**
-   * {@link Node} entry point.
+   * Program entry point.
    * 
-   * @param nodeConfiguration the {@link NodeConfiguration} that will be passed to the
-   *        {@link Node}
+   * @param the
+   *          configured {@link Node} associated with this {@link NodeMain}
    */
-  void main(NodeConfiguration nodeConfiguration) throws Exception;
+  void main(Node node) throws Exception;
   
   /**
-   * {@link Node} shutdown routine.
+   * Program shutdown routine.
    */
   void shutdown();
   

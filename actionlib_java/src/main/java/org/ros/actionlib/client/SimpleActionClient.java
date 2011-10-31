@@ -10,7 +10,6 @@ import org.ros.message.Duration;
 import org.ros.message.Message;
 import org.ros.message.Time;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 /**
@@ -131,8 +130,8 @@ public class SimpleActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL
   }
 
   @Override
-  public void main(NodeConfiguration configuration) throws Exception {
-    actionClient.main(configuration);
+  public void main(Node node) throws Exception {
+    actionClient.main(node);
   }
 
   /**

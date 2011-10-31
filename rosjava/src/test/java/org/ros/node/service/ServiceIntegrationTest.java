@@ -25,13 +25,13 @@ import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.exception.RemoteException;
+import org.ros.internal.node.DefaultNodeFactory;
+import org.ros.internal.node.NodeFactory;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeFactory;
 import org.ros.service.test_ros.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
@@ -59,7 +59,8 @@ public class ServiceIntegrationTest {
 
   @Test
   public void pesistentServiceConnectionTest() throws Exception {
-    Node serverNode = nodeFactory.newNode("/server", nodeConfiguration);
+    nodeConfiguration.setNodeName("/server");
+    Node serverNode = nodeFactory.newNode(nodeConfiguration);
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -72,7 +73,8 @@ public class ServiceIntegrationTest {
             });
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
-    Node clientNode = nodeFactory.newNode("/client", nodeConfiguration);
+    nodeConfiguration.setNodeName("/client");
+    Node clientNode = nodeFactory.newNode(nodeConfiguration);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.newServiceClient(SERVICE_NAME, SERVICE_TYPE);
 
@@ -102,7 +104,8 @@ public class ServiceIntegrationTest {
   @Test
   public void requestFailureTest() throws Exception {
     final String errorMessage = "Error!";
-    Node serverNode = nodeFactory.newNode("/server", nodeConfiguration);
+    nodeConfiguration.setNodeName("/server");
+    Node serverNode = nodeFactory.newNode(nodeConfiguration);
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -113,7 +116,8 @@ public class ServiceIntegrationTest {
             });
     assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
 
-    Node clientNode = nodeFactory.newNode("/client", nodeConfiguration);
+    nodeConfiguration.setNodeName("/client");
+    Node clientNode = nodeFactory.newNode(nodeConfiguration);
     ServiceClient<AddTwoInts.Request, AddTwoInts.Response> client =
         clientNode.newServiceClient(SERVICE_NAME, SERVICE_TYPE);
 

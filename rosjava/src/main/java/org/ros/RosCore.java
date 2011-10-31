@@ -20,15 +20,13 @@ import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMain;
 
 import java.net.URI;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosCore implements NodeMain {
+public class RosCore {
 
   private final MasterServer masterServer;
   
@@ -56,8 +54,7 @@ public class RosCore implements NodeMain {
     masterServer = new MasterServer(bindAddress, advertiseAddress);
   }
 
-  @Override
-  public void main(NodeConfiguration nodeConfiguration) throws Exception {
+  public void start() {
     masterServer.start();
   }
 
@@ -73,7 +70,6 @@ public class RosCore implements NodeMain {
     }
   }
 
-  @Override
   public void shutdown() {
     masterServer.shutdown();
   }
