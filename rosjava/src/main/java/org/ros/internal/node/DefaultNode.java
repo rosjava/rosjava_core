@@ -43,8 +43,6 @@ import org.ros.internal.node.topic.SubscriberFactory;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
-import org.ros.internal.time.TimeProvider;
-import org.ros.internal.time.WallclockProvider;
 import org.ros.message.MessageDefinition;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageListener;
@@ -78,7 +76,6 @@ public class DefaultNode implements Node {
   private final NodeConfiguration nodeConfiguration;
   private final NodeNameResolver resolver;
   private final RosoutLogger log;
-  private final TimeProvider timeProvider;
   private final MasterClient masterClient;
   private final SlaveServer slaveServer;
   private final TopicManager topicManager;
@@ -127,9 +124,6 @@ public class DefaultNode implements Node {
     subscriberFactory = new SubscriberFactory(slaveServer, topicManager);
     serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager);
 
-    // TODO(kwc): Implement simulated time.
-    timeProvider = new WallclockProvider();
-
     masterUri = nodeConfiguration.getMasterUri();
     start();
 
@@ -138,7 +132,9 @@ public class DefaultNode implements Node {
     // before trying to register the /rosout Publisher.
     Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
         newPublisher("/rosout", "rosgraph_msgs/Log");
-    log = new RosoutLogger(LogFactory.getLog(nodeName.toString()), rosoutPublisher, timeProvider);
+    log =
+        new RosoutLogger(LogFactory.getLog(nodeName.toString()), rosoutPublisher,
+            nodeConfiguration.getTimeProvider());
   }
 
   /**
@@ -298,7 +294,7 @@ public class DefaultNode implements Node {
 
   @Override
   public Time getCurrentTime() {
-    return timeProvider.getCurrentTime();
+    return nodeConfiguration.getTimeProvider().getCurrentTime();
   }
 
   @Override

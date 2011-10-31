@@ -18,8 +18,9 @@ package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import org.ros.time.TimeProvider;
+
 import org.apache.commons.logging.Log;
-import org.ros.internal.time.TimeProvider;
 import org.ros.node.topic.Publisher;
 
 import java.io.PrintWriter;

@@ -16,6 +16,8 @@
 
 package org.ros.internal.time;
 
+import org.ros.time.TimeProvider;
+
 import org.ros.message.Time;
 
 /**

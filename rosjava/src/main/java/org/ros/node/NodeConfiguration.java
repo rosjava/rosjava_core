@@ -16,22 +16,24 @@
 
 package org.ros.node;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.AdvertiseAddressFactory;
 import org.ros.address.BindAddress;
 import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.address.PublicAdvertiseAddressFactory;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.time.WallclockProvider;
 import org.ros.message.MessageDefinitionFactory;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
+import org.ros.time.TimeProvider;
+
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * Stores configuration information (e.g. ROS master URI) for {@link Node}s.
@@ -89,6 +91,7 @@ public class NodeConfiguration {
   private AdvertiseAddressFactory tcpRosAdvertiseAddressFactory;
   private BindAddress xmlRpcBindAddress;
   private AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory;
+  private TimeProvider timeProvider;
 
   /**
    * Creates a new {@link NodeConfiguration} for a publicly accessible
@@ -159,6 +162,7 @@ public class NodeConfiguration {
     setMessageDefinitionFactory(new org.ros.internal.message.old_style.MessageDefinitionFactory());
     setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
     setParentResolver(NameResolver.create());
+    setTimeProvider(new WallclockProvider());
   }
 
   /**
@@ -435,6 +439,24 @@ public class NodeConfiguration {
       AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory) {
     this.xmlRpcAdvertiseAddressFactory = xmlRpcAdvertiseAddressFactory;
     return this;
+  }
+
+  /**
+   * @return the configured {@link TimeProvider}
+   */
+  public TimeProvider getTimeProvider() {
+    return timeProvider;
+  }
+
+  /**
+   * Sets the {@link TimeProvider} that {@link Node}s will use. By default, the
+   * {@link WallclockProvider} is used.
+   * 
+   * @param timeProvider
+   *          the {@link TimeProvider} that {@link Node}s will use
+   */
+  public void setTimeProvider(TimeProvider timeProvider) {
+    this.timeProvider = timeProvider;
   }
 
 }
