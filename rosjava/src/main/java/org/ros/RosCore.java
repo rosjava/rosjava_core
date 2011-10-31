@@ -24,6 +24,8 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 import java.net.URI;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -57,7 +59,7 @@ public class RosCore implements NodeMain {
   }
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) throws Exception {
+  public void main(NodeConfiguration unusedNodeConfiguration) throws Exception {
     masterServer.start();
   }
 
@@ -65,12 +67,12 @@ public class RosCore implements NodeMain {
     return masterServer.getUri();
   }
 
-  public void awaitStart() {
-    try {
-      masterServer.awaitStart();
-    } catch (InterruptedException e) {
-      throw new RosRuntimeException(e);
-    }
+  public void awaitStart() throws InterruptedException {
+    masterServer.awaitStart();
+  }
+  
+  public boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
+    return masterServer.awaitStart(timeout, unit);
   }
 
   @Override
