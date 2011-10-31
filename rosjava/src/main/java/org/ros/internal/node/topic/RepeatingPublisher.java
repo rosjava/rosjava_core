@@ -44,7 +44,7 @@ public class RepeatingPublisher<MessageType> {
           if (DEBUG) {
             log.info("Published message: " + message);
           }
-          Thread.sleep((long) (1000 * (60f / frequency)));
+          Thread.sleep((long) (1000f / frequency));
         }
       } catch (InterruptedException e) {
         // Cancelable
