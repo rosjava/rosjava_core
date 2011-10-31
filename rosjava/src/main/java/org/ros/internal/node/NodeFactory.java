@@ -14,27 +14,26 @@
  * the License.
  */
 
-package org.ros.node;
+package org.ros.internal.node;
 
-import org.ros.internal.node.DefaultNode;
-import org.ros.namespace.GraphName;
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
 
 /**
- * Constructs {@link DefaultNode}s.
+ * Builds new {@link Node}s.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultNodeFactory implements NodeFactory {
+public interface NodeFactory {
 
-  @Override
-  public Node newNode(GraphName defaultNodeName, NodeConfiguration nodeConfiguration) {
-    NodeConfiguration copy = NodeConfiguration.copyOf(nodeConfiguration);
-    return new DefaultNode(copy.setDefaultNodeName(defaultNodeName));
-  }
-
-  @Override
-  public Node newNode(String defaultNodeName, NodeConfiguration configuration) {
-    return newNode(new GraphName(defaultNodeName), configuration);
-  }
+  /**
+   * Build a new {@link Node} with the given and {@link NodeConfiguration} and
+   * default name.
+   * 
+   * @param configuration
+   *          the {@link NodeConfiguration} for the new {@link Node}
+   * @return a new {@link Node}
+   */
+  Node newNode(NodeConfiguration configuration);
 
 }

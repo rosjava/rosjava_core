@@ -7,7 +7,6 @@ import org.ros.exception.RosException;
 import org.ros.message.Message;
 import org.ros.message.actionlib_msgs.GoalStatus;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
 import java.util.concurrent.locks.Condition;
@@ -228,8 +227,8 @@ public class DefaultSimpleActionServer<T_ACTION_FEEDBACK extends Message, T_ACTI
   }
 
   @Override
-  public void main(NodeConfiguration configuration) throws Exception {
-    actionServer.main(configuration);
+  public void main(Node node) throws Exception {
+    actionServer.main(node);
   }
 
   @Override

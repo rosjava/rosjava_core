@@ -18,9 +18,7 @@ package org.ros;
 
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
@@ -34,8 +32,8 @@ public class SlaveApiTestNode implements NodeMain {
   private Node node;
 
   @Override
-  public void main(NodeConfiguration nodeConfiguration) {
-    node = new DefaultNodeFactory().newNode("test_node", nodeConfiguration);
+  public void main(Node node) {
+    this.node = node;
 
     // Basic chatter in/out test.
     Publisher<org.ros.message.std_msgs.String> pub_string =
@@ -82,5 +80,4 @@ public class SlaveApiTestNode implements NodeMain {
   public void shutdown() {
     node.shutdown();
   }
-
 }

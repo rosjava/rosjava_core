@@ -18,19 +18,15 @@ package org.ros;
 
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
-import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.MasterServer;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMain;
 
 import java.net.URI;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosCore implements NodeMain {
+public class RosCore {
 
   private final MasterServer masterServer;
   
@@ -58,8 +54,7 @@ public class RosCore implements NodeMain {
     masterServer = new MasterServer(bindAddress, advertiseAddress);
   }
 
-  @Override
-  public void main(NodeConfiguration unusedNodeConfiguration) throws Exception {
+  public void start() {
     masterServer.start();
   }
 
@@ -75,7 +70,6 @@ public class RosCore implements NodeMain {
     return masterServer.awaitStart(timeout, unit);
   }
 
-  @Override
   public void shutdown() {
     masterServer.shutdown();
   }

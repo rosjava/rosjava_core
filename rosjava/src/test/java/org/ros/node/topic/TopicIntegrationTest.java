@@ -24,14 +24,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
+import org.ros.internal.node.DefaultNodeFactory;
+import org.ros.internal.node.NodeFactory;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.RepeatingPublisher;
 import org.ros.message.MessageListener;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeFactory;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
@@ -56,7 +56,8 @@ public class TopicIntegrationTest {
 
   @Test
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
-    Node publisherNode = nodeFactory.newNode("publisher", nodeConfiguration);
+    nodeConfiguration.setNodeName("publisher");
+    Node publisherNode = nodeFactory.newNode(nodeConfiguration);
     Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.newPublisher("foo", "std_msgs/String");
 
@@ -64,7 +65,8 @@ public class TopicIntegrationTest {
     helloMessage.data = "Hello, ROS!";
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
-    Node subscriberNode = nodeFactory.newNode("subscriber", nodeConfiguration);
+    nodeConfiguration.setNodeName("subscriber");
+    Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         subscriberNode.newSubscriber("foo", "std_msgs/String",
             new MessageListener<org.ros.message.std_msgs.String>() {
@@ -90,7 +92,8 @@ public class TopicIntegrationTest {
 
   @Test
   public void testAddDisconnectedPublisher() {
-    Node subscriberNode = nodeFactory.newNode("subscriber", nodeConfiguration);
+    nodeConfiguration.setNodeName("subscriber");
+    Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
     org.ros.internal.node.topic.DefaultSubscriber<org.ros.message.std_msgs.String> subscriber =
         (org.ros.internal.node.topic.DefaultSubscriber<org.ros.message.std_msgs.String>) subscriberNode
             .<org.ros.message.std_msgs.String>newSubscriber("foo", "std_msgs/String", null);
@@ -128,11 +131,13 @@ public class TopicIntegrationTest {
 
   @Test
   public void testHeader() throws InterruptedException {
-    final Node publisherNode = nodeFactory.newNode("publisher", nodeConfiguration);
+    nodeConfiguration.setNodeName("publisher");
+    final Node publisherNode = nodeFactory.newNode(nodeConfiguration);
     final Publisher<org.ros.message.test_ros.TestHeader> publisher =
         publisherNode.newPublisher("foo", "test_ros/TestHeader");
 
-    Node subscriberNode = nodeFactory.newNode("subscriber", nodeConfiguration);
+    nodeConfiguration.setNodeName("subscriber");
+    Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
     Listener listener = new Listener();
     Subscriber<org.ros.message.test_ros.TestHeader> subscriber =
         subscriberNode.newSubscriber("foo", "test_ros/TestHeader", listener);

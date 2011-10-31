@@ -51,7 +51,6 @@ import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.parameter.ParameterTree;

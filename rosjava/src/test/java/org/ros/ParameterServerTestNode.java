@@ -24,9 +24,7 @@ import org.ros.message.test_ros.Composite;
 import org.ros.message.test_ros.TestArrays;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
-import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
@@ -46,8 +44,8 @@ public class ParameterServerTestNode implements NodeMain {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void main(NodeConfiguration nodeConfiguration) {
-    node = new DefaultNodeFactory().newNode("param_client", nodeConfiguration);
+  public void main(Node node) {
+    this.node = node;
 
     Publisher<org.ros.message.std_msgs.String> pub_tilde =
         node.newPublisher("tilde", "std_msgs/String");
@@ -132,5 +130,4 @@ public class ParameterServerTestNode implements NodeMain {
   public void shutdown() {
     node.shutdown();
   }
-
 }

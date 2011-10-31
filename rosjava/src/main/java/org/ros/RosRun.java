@@ -19,6 +19,8 @@ package org.ros;
 import com.google.common.collect.Lists;
 
 import org.ros.internal.loader.CommandLineLoader;
+import org.ros.internal.node.DefaultNodeFactory;
+import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
@@ -68,7 +70,8 @@ public class RosRun {
     }
 
     try {
-      nodeMain.main(nodeConfiguration);
+      Node node = new DefaultNodeFactory().newNode(nodeConfiguration);
+      nodeMain.main(node);
     } catch (Exception e) {
       System.err.println(e.toString());
       System.exit(6);

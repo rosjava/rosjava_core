@@ -14,30 +14,21 @@
  * the License.
  */
 
-package org.ros.node;
+package org.ros.internal.node;
+
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
 
 /**
- * Executes {@link NodeMain}s.
+ * Constructs {@link DefaultNode}s.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface NodeRunner {
+public class DefaultNodeFactory implements NodeFactory {
 
-  /**
-   * Executes the supplied {@link NodeMain} using the supplied
-   * {@link NodeConfiguration}.
-   * 
-   * @param nodeMain
-   *          the {@link NodeMain} to execute
-   * @param nodeConfiguration
-   *          the {@link NodeConfiguration} that will be used to create the
-   *          {@link Node}
-   */
-  void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration);
-
-  /**
-   * Shutdown all started {@link NodeMain}s.
-   */
-  void shutdown();
+  @Override
+  public Node newNode(NodeConfiguration nodeConfiguration) {
+    return new DefaultNode(NodeConfiguration.copyOf(nodeConfiguration));
+  }
 
 }
