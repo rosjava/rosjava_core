@@ -16,13 +16,14 @@
 
 package org.ros;
 
-import com.google.common.collect.Lists;
-
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.loader.CommandLineLoader;
-import org.ros.internal.node.DefaultNodeFactory;
-import org.ros.node.Node;
+import org.ros.node.DefaultNodeRunner;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
+import org.ros.node.NodeRunner;
+
+import com.google.common.collect.Lists;
 
 /**
  * This is a rosrun-compatible loader for rosjava-based nodes.
@@ -32,12 +33,14 @@ import org.ros.node.NodeMain;
 public class RosRun {
 
   public static void printUsage() {
-    System.err.println("Usage: java -jar rosjava.jar org.foo.MyNode [args]");
+    System.err
+        .println("Usage: rosrun rosjava_bootstrap run.py org.foo.MyNode [args] __name:=<node name>");
   }
 
-  // TODO(kwc): In the future, will need some sort of classpath bootstrapping.
   /**
-   * Usage: rosrun rosjava run org.foo.Node [args]
+   * Usage:
+   * 
+   * rosrun rosjava_bootstrap run.py org.foo.Node [args] __name:=<node name>
    * 
    * @param argv
    * @throws Exception
@@ -57,25 +60,15 @@ public class RosRun {
     try {
       nodeMain = loader.loadClass(nodeClassName);
     } catch (ClassNotFoundException e) {
-      System.err.println("Unable to locate node: " + nodeClassName);
-      System.exit(3);
+      throw new RosRuntimeException("Unable to locate node: " + nodeClassName, e);
     } catch (InstantiationException e) {
-      e.printStackTrace();
-      System.err.println("Unable to instantiate node: " + nodeClassName);
-      System.exit(4);
+      throw new RosRuntimeException("Unable to instantiate node: " + nodeClassName, e);
     } catch (IllegalAccessException e) {
-      e.printStackTrace();
-      System.err.println("Unable to instantiate node: " + nodeClassName);
-      System.exit(5);
+      throw new RosRuntimeException("Unable to instantiate node: " + nodeClassName, e);
     }
 
-    try {
-      Node node = new DefaultNodeFactory().newNode(nodeConfiguration);
-      nodeMain.main(node);
-    } catch (Exception e) {
-      System.err.println(e.toString());
-      System.exit(6);
-    }
+    NodeRunner runner = DefaultNodeRunner.newDefault();
+    runner.run(nodeMain, nodeConfiguration);
   }
 
 }
