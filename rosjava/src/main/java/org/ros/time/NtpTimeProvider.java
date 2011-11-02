@@ -16,6 +16,8 @@
 
 package org.ros.time;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 import org.ros.exception.RosRuntimeException;
@@ -30,6 +32,9 @@ import java.net.InetAddress;
  */
 public class NtpTimeProvider implements TimeProvider {
 
+  private static final boolean DEBUG = false;
+  private static final Log log = LogFactory.getLog(NtpTimeProvider.class);
+
   private final InetAddress host;
   private final NTPUDPClient ntpClient;
   private final WallTimeProvider wallTimeProvider;
@@ -43,10 +48,13 @@ public class NtpTimeProvider implements TimeProvider {
   }
 
   public void updateTime() {
+    if (DEBUG) {
+      log.info("Updating time offset from NTP server: " + host.getHostName());
+    }
     try {
       time = ntpClient.getTime(host);
     } catch (IOException e) {
-      throw new RosRuntimeException("Failed to read time from NTP server " + host.getHostName(), e);
+      throw new RosRuntimeException("Failed to read time from NTP server: " + host.getHostName(), e);
     }
     time.computeDetails();
   }
@@ -57,5 +65,4 @@ public class NtpTimeProvider implements TimeProvider {
     long offset = time.getOffset();
     return currentTime.add(Duration.fromMillis(offset));
   }
-
 }

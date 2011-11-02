@@ -16,8 +16,6 @@
 
 package org.ros.node;
 
-import org.ros.time.WallTimeProvider;
-
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.AdvertiseAddressFactory;
 import org.ros.address.BindAddress;
@@ -30,6 +28,7 @@ import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.time.TimeProvider;
+import org.ros.time.WallTimeProvider;
 
 import java.io.File;
 import java.net.URI;
@@ -75,6 +74,7 @@ public class NodeConfiguration {
     copy.messageSerializationFactory = nodeConfiguration.messageSerializationFactory;
     copy.tcpRosBindAddress = nodeConfiguration.tcpRosBindAddress;
     copy.tcpRosAdvertiseAddressFactory = nodeConfiguration.tcpRosAdvertiseAddressFactory;
+    copy.timeProvider = nodeConfiguration.timeProvider;
     copy.xmlRpcBindAddress = nodeConfiguration.xmlRpcBindAddress;
     copy.xmlRpcAdvertiseAddressFactory = nodeConfiguration.xmlRpcAdvertiseAddressFactory;
     return copy;

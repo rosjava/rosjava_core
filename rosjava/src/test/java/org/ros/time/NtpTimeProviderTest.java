@@ -28,9 +28,11 @@ public class NtpTimeProviderTest {
   public void testNtpTime() {
     // TODO(damonkohler): This is only a simple sanity check.
     NtpTimeProvider ntpTimeProvider =
-        new NtpTimeProvider(InetAddressFactory.newFromHostString("ntps1-0.cs.tu-berlin.de"));
+        new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
     ntpTimeProvider.updateTime();
     ntpTimeProvider.getCurrentTime();
+    System.out.println("System time: " + System.currentTimeMillis());
+    System.out.println("NTP time: " + ntpTimeProvider.getCurrentTime().totalNsecs() / 1000000);
   }
 
 }
