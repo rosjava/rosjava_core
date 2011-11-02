@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project>
+  <include file="dependencies.xml" />
+
+  <property name="src.main" location="src/main/java" />
+  <property name="build.main" location="target/classes" />
+  <property name="build.test" location="target/test-classes" />
+
+  <property name="src.test" location="src/test/java" />
+  <property name="resources.test" location="src/test/resources" />
+
+  <property name="dist" location="target" />
+  <property name="javac-source" value="1.6" />
+  <property name="javac-target" value="1.6" />
+  <property name="debuglevel" value="source,lines,vars" />
+  <property name="jar" location="${ros.artifact.built}" />
+
+  <path id="classpath">
+    <pathelement path="${ros.compile.classpath}" />
+  </path>
+
+  <path id="test.classpath">
+    <path refid="classpath" />
+    <pathelement path="${build.main}" />
+    <pathelement path="${build.test}" />
+    <pathelement path="${ros.test.classpath}" />
+  </path>
+
+  <target name="default" depends="init, compile, jar" />
+
+  <target name="init">
+    <fail unless="ros.compile.classpath" message="ros.properties is missing. Run 'rosmake rosjava' first."/>
+    <mkdir dir="${build.main}" />
+    <mkdir dir="${build.test}" />
+    <mkdir dir="${dist}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build.main}" source="${javac-source}"
+        target="${javac-target}" includeantruntime="false">
+      <classpath refid="classpath" />
+      <src path="${src.main}" />
+    </javac>
+  </target>
+
+  <target name="compile-test" depends="compile">
+    <javac debug="true" debuglevel="${debuglevel}" destdir="${build.test}" source="${javac-source}"
+        target="${javac-target}" includeantruntime="false">
+      <classpath refid="test.classpath" />
+      <src path="${src.test}" />
+    </javac>
+    <copy todir="${build.test}">
+      <fileset dir="${resources.test}" />
+    </copy>
+  </target>
+
+  <target name="test" depends="compile-test">
+    <!-- clear any previous results -->
+    <mkdir dir="${ros.test_results}" />
+    <delete>
+      <fileset dir="${ros.test_results}">
+        <include name="*/**" />
+      </fileset>
+    </delete>
+    <junit printsummary="yes" failureproperty="tests.failed">
+      <classpath refid="test.classpath" />
+      <formatter type="xml" />
+      <batchtest todir="${ros.test_results}">
+        <fileset dir="${src.test}">
+          <include name="**/*Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+    <junitreport todir="${ros.test_results}">
+      <fileset dir="${ros.test_results}">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report format="frames" todir="${ros.test_results}/html" />
+    </junitreport>
+    <fail if="tests.failed" message="One or more tests failed." />
+  </target>
+
+  <target name="jar" depends="compile">
+    <fail unless="ros.artifact.built" message="No build artifact specified." />
+    <jar destfile="${jar}">
+      <fileset dir="${build.main}" />
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build.main}" />
+    <delete dir="${build.test}" />
+    <delete dir="${dist}" />
+    <delete dir="${ros.test_results}" />
+  </target>
+</project>

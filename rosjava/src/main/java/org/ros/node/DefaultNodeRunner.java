@@ -19,6 +19,8 @@ package org.ros.node;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.internal.node.NodeFactory;
 import org.ros.namespace.GraphName;
@@ -33,6 +35,9 @@ import java.util.concurrent.Executors;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class DefaultNodeRunner implements NodeRunner {
+
+  private static final boolean DEBUG = false;
+  private static final Log log = LogFactory.getLog(DefaultNodeRunner.class);
 
   private final NodeFactory nodeFactory;
   private final Executor executor;
@@ -69,10 +74,16 @@ public class DefaultNodeRunner implements NodeRunner {
   @Override
   public void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration) {
     Preconditions.checkNotNull(nodeConfiguration.getNodeName(), "Node name not specified.");
+    if (DEBUG) {
+      log.info("Starting node: " + nodeConfiguration.getNodeName());
+    }
+    // NOTE(damonkohler): To help avoid race conditions, we have to make a copy
+    // of the NodeConfiguration in the current thread.
+    final NodeConfiguration nodeConfigurationCopy = NodeConfiguration.copyOf(nodeConfiguration);
     executor.execute(new Runnable() {
       @Override
       public void run() {
-        Node node = nodeFactory.newNode(nodeConfiguration);
+        Node node = nodeFactory.newNode(nodeConfigurationCopy);
         nodeMains.put(node.getName(), nodeMain);
         try {
           nodeMain.main(node);

@@ -28,7 +28,7 @@ public class DefaultNodeFactory implements NodeFactory {
 
   @Override
   public Node newNode(NodeConfiguration nodeConfiguration) {
-    return new DefaultNode(NodeConfiguration.copyOf(nodeConfiguration));
+    return new DefaultNode(nodeConfiguration);
   }
 
 }

@@ -24,6 +24,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
@@ -41,6 +43,9 @@ import java.util.Map;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MasterServer extends NodeServer {
+
+  private static final boolean DEBUG = false;
+  private static final Log log = LogFactory.getLog(MasterServer.class);
 
   private final Map<GraphName, SlaveIdentifier> slaves;
   private final Map<GraphName, ServiceIdentifier> services;
@@ -77,6 +82,7 @@ public class MasterServer extends NodeServer {
   }
 
   private void addSlave(SlaveIdentifier slaveIdentifier) {
+    Preconditions.checkNotNull(slaveIdentifier);
     GraphName slaveName = slaveIdentifier.getName();
     Preconditions.checkState(
         slaves.get(slaveName) == null || slaves.get(slaveName).equals(slaveIdentifier),
@@ -107,6 +113,9 @@ public class MasterServer extends NodeServer {
    *         publishing the specified topic.
    */
   public List<PublisherIdentifier> registerSubscriber(SubscriberIdentifier subscriberIdentifier) {
+    if (DEBUG) {
+      log.info("Registering subscriber: " + subscriberIdentifier);
+    }
     subscribers.put(subscriberIdentifier.getTopicName(), subscriberIdentifier);
     addSlave(subscriberIdentifier.getSlaveIdentifier());
     synchronized (publishers) {
@@ -128,12 +137,15 @@ public class MasterServer extends NodeServer {
    * 
    * @return List of current subscribers of topic in the form of XML-RPC URIs.
    */
-  public List<SubscriberIdentifier> registerPublisher(PublisherIdentifier publisher) {
-    publishers.put(publisher.getTopicName(), publisher);
-    addSlave(publisher.getSlaveIdentifier());
-    publisherUpdate(publisher.getTopicName());
+  public List<SubscriberIdentifier> registerPublisher(PublisherIdentifier publisherIdentifier) {
+    if (DEBUG) {
+      log.info("Registering publisher: " + publisherIdentifier);
+    }
+    publishers.put(publisherIdentifier.getTopicName(), publisherIdentifier);
+    addSlave(publisherIdentifier.getSlaveIdentifier());
+    publisherUpdate(publisherIdentifier.getTopicName());
     synchronized (subscribers) {
-      return ImmutableList.copyOf(subscribers.get(publisher.getTopicName()));
+      return ImmutableList.copyOf(subscribers.get(publisherIdentifier.getTopicName()));
     }
   }
 
