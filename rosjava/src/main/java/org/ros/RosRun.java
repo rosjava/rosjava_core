@@ -16,14 +16,14 @@
 
 package org.ros;
 
+import com.google.common.collect.Lists;
+
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.loader.CommandLineLoader;
 import org.ros.node.DefaultNodeRunner;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeRunner;
-
-import com.google.common.collect.Lists;
 
 /**
  * This is a rosrun-compatible loader for rosjava-based nodes.
@@ -70,5 +70,4 @@ public class RosRun {
     NodeRunner runner = DefaultNodeRunner.newDefault();
     runner.run(nodeMain, nodeConfiguration);
   }
-
 }

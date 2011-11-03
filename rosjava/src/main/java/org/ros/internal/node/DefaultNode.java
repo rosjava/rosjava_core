@@ -20,7 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
@@ -129,11 +128,7 @@ public class DefaultNode implements Node {
     // NOTE(damonkohler): This must be created after start() is called so that
     // the Registrar can be initialized with the SlaveServer's SlaveIdentifier
     // before trying to register the /rosout Publisher.
-    Publisher<org.ros.message.rosgraph_msgs.Log> rosoutPublisher =
-        newPublisher("/rosout", "rosgraph_msgs/Log");
-    log =
-        new RosoutLogger(LogFactory.getLog(nodeName.toString()), rosoutPublisher,
-            nodeConfiguration.getTimeProvider());
+    log = new RosoutLogger(this);
   }
 
   /**

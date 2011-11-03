@@ -16,11 +16,11 @@
 
 package org.ros.tutorials.pubsub;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
-
-import com.google.common.base.Preconditions;
 
 /**
  * This is a simple rosjava {@link Publisher} {@link Node}. It assumes an
@@ -43,8 +43,10 @@ public class Talker implements NodeMain {
       int seq = 0;
       while (true) {
         org.ros.message.std_msgs.String str = new org.ros.message.std_msgs.String();
-        str.data = "Hello world! " + seq++;
+        str.data = "Hello world! " + seq;
         publisher.publish(str);
+        node.getLog().info("Hello, world! " + seq);
+        seq++;
         Thread.sleep(1000);
       }
     } catch (Exception e) {
@@ -61,5 +63,4 @@ public class Talker implements NodeMain {
     node.shutdown();
     node = null;
   }
-
 }
