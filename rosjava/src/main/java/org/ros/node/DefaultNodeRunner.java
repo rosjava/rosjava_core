@@ -84,17 +84,26 @@ public class DefaultNodeRunner implements NodeRunner {
       @Override
       public void run() {
         Node node = nodeFactory.newNode(nodeConfigurationCopy);
-        nodeMains.put(node.getName(), nodeMain);
+        GraphName nodeName = node.getName();
+        synchronized (nodeMains) {
+          Preconditions.checkState(!nodeMains.containsKey(nodeName), "A node with name \""
+              + nodeName + "\" already exists.");
+          nodeMains.put(nodeName, nodeMain);
+        }
         try {
           nodeMain.main(node);
         } catch (Exception e) {
-          nodeMains.remove(nodeMain);
           // TODO(damonkohler): Log to rosout. Maybe there should be a rosout
           // node associated with each DefaultNodeRunner?
-          System.out.println("Exception thrown in NodeMain. Will attempt shutdown.");
+          System.err.println("Exception thrown in NodeMain. Will attempt shutdown.");
           e.printStackTrace();
           shutdownNodeMain(nodeMain);
+          nodeMains.remove(nodeName);
         }
+        // TODO(damonkohler): If NodeMain.main() exits, we no longer know when
+        // to remove it from our map. Once the NodeStateListener is implemented,
+        // we can add a listener after NodeMain.main() exits that will remove
+        // the node from the map on shutdown.
       }
     });
   }
@@ -115,7 +124,7 @@ public class DefaultNodeRunner implements NodeRunner {
       nodeMain.shutdown();
     } catch (Exception e) {
       // Ignore spurious errors during shutdown.
-      System.out.println("Exception thrown while shutting down NodeMain.");
+      System.err.println("Exception thrown while shutting down NodeMain.");
       e.printStackTrace();
       success = false;
     }
