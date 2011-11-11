@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.topic;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.namespace.GraphName;
 
 /**
@@ -30,6 +32,8 @@ public class TopicIdentifier {
   }
 
   public TopicIdentifier(GraphName name) {
+    Preconditions.checkNotNull(name);
+    Preconditions.checkArgument(name.isGlobal());
     this.name = name;
   }
 

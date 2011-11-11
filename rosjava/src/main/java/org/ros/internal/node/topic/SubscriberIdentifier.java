@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.topic;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.namespace.GraphName;
 
@@ -35,6 +37,8 @@ public class SubscriberIdentifier {
   }
 
   public SubscriberIdentifier(SlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
+    Preconditions.checkNotNull(slaveIdentifier);
+    Preconditions.checkNotNull(topicIdentifier);
     this.slaveIdentifier = slaveIdentifier;
     this.topicIdentifier = topicIdentifier;
   }

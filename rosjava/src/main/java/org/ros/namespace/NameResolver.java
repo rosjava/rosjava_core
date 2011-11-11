@@ -71,7 +71,7 @@ public class NameResolver {
    * 
    * @param namespace
    * @param name
-   * @return the fully resolved name relative to the given namespace.
+   * @return the fully resolved name relative to the given namespace
    */
   public GraphName resolve(GraphName namespace, GraphName name) {
     GraphName remappedNamespace = lookUpRemapping(namespace);
@@ -148,11 +148,11 @@ public class NameResolver {
   }
 
   protected GraphName lookUpRemapping(GraphName name) {
-    GraphName rmname = name;
+    GraphName remappedName = name;
     if (remappings.containsKey(name)) {
-      rmname = remappings.get(name);
+      remappedName = remappings.get(name);
     }
-    return rmname;
+    return remappedName;
   }
 
 }

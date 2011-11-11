@@ -224,9 +224,10 @@ public class DefaultNode implements Node {
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
       GraphName serviceName, String serviceType,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
+    GraphName resolvedServiceName = resolveName(serviceName);
     // TODO(damonkohler): It's rather non-obvious that the URI will be created
     // later on the fly.
-    ServiceIdentifier identifier = new ServiceIdentifier(serviceName, null);
+    ServiceIdentifier identifier = new ServiceIdentifier(resolvedServiceName, null);
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
@@ -247,14 +248,14 @@ public class DefaultNode implements Node {
   @Override
   public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
       GraphName serviceName, String serviceType) throws ServiceNotFoundException {
-    URI uri = lookupService(serviceName);
+    GraphName resolvedServiceName = resolveName(serviceName);
+    URI uri = lookupService(resolvedServiceName);
     if (uri == null) {
-      throw new ServiceNotFoundException("No such service " + serviceName + " of type "
+      throw new ServiceNotFoundException("No such service " + resolvedServiceName + " of type "
           + serviceType);
     }
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
-    GraphName resolvedServiceName = resolveName(serviceName);
     ServiceIdentifier serviceIdentifier = new ServiceIdentifier(resolvedServiceName, uri);
     ServiceDefinition definition = new ServiceDefinition(serviceIdentifier, messageDefinition);
     MessageSerializer<RequestType> requestSerializer = newServiceRequestSerializer(serviceType);

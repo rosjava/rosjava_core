@@ -16,16 +16,16 @@
 
 package org.ros.internal.node.server;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -62,6 +62,9 @@ public class SlaveIdentifier {
    */
   public SlaveIdentifier(GraphName name, URI uri) {
     Preconditions.checkArgument(name != null || uri != null);
+    if (name != null) {
+      Preconditions.checkArgument(name.isGlobal());
+    }
     this.name = name;
     this.uri = uri;
   }
