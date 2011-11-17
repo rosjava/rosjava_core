@@ -16,6 +16,8 @@
 
 package org.ros.time;
 
+import com.google.common.base.Preconditions;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ntp.NTPUDPClient;
@@ -26,8 +28,13 @@ import org.ros.message.Time;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
+ * Provides NTP synchronized wallclock (actual) time.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class NtpTimeProvider implements TimeProvider {
@@ -40,13 +47,21 @@ public class NtpTimeProvider implements TimeProvider {
   private final WallTimeProvider wallTimeProvider;
 
   private TimeInfo time;
+  private Timer timer;
 
+  /**
+   * @param host
+   *          the NTP host to use
+   */
   public NtpTimeProvider(InetAddress host) {
     this.host = host;
     this.wallTimeProvider = new WallTimeProvider();
     ntpClient = new NTPUDPClient();
   }
 
+  /**
+   * Update the current time offset from the configured NTP host.
+   */
   public void updateTime() {
     if (DEBUG) {
       log.info("Updating time offset from NTP server: " + host.getHostName());
@@ -57,6 +72,36 @@ public class NtpTimeProvider implements TimeProvider {
       throw new RosRuntimeException("Failed to read time from NTP server: " + host.getHostName(), e);
     }
     time.computeDetails();
+    log.info(String.format("NTP time offset: %d ms", time.getOffset()));
+  }
+
+  /**
+   * Starts periodically updating the current time offset periodically.
+   * 
+   * @param period
+   *          time between updates
+   * @param unit
+   *          unit of period
+   */
+  public void startPeriodicUpdates(long period, TimeUnit unit) {
+    Preconditions.checkState(timer == null);
+    timer = new Timer();
+    long periodInMilliseconds = TimeUnit.MILLISECONDS.convert(period, unit);
+    timer.scheduleAtFixedRate(new TimerTask() {
+      @Override
+      public void run() {
+        updateTime();
+      }
+    }, periodInMilliseconds, periodInMilliseconds);
+  }
+
+  /**
+   * Stops periodically updating the current time offset.
+   */
+  public void stopPeriodicUpdates() {
+    Preconditions.checkNotNull(timer);
+    timer.cancel();
+    timer = null;
   }
 
   @Override
