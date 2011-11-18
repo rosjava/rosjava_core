@@ -317,6 +317,8 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
    *         <tt>false</tt> - Otherwise
    */
   public boolean isServerConnected() {
+	if (node == null)
+		return false;
 
     if (!statusReceived) {
       node.getLog().debug("[ActionClient] isServerconnected -> false (didn't receive status yet)");
@@ -385,6 +387,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
    *         <tt>false</tt> - otherwise
    */
   public boolean waitForActionServerToStart(Duration timeout) {
+	// TODO(keith): Completely rewrite how this is done.
 
     if (!active) {
       node.getLog()
@@ -399,13 +402,13 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
       return false;
     }
 
-    Time timeoutTime = node.getCurrentTime().add(timeout);
+    Time timeoutTime = Time.fromNano(System.nanoTime()).add(timeout);
     Duration loopCheckTime = new Duration(0, 500000000); // check every 500ms,
                                                          // if Node is ok
 
     synchronized (waitSync) {
-      while (node.isOk() && !isServerConnected()) {
-        Duration timeLeft = timeoutTime.subtract(node.getCurrentTime());
+      while (node == null || (node.isOk() && !isServerConnected())) {
+        Duration timeLeft = timeoutTime.subtract(Time.fromNano(System.nanoTime()));
         if (timeLeft.totalNsecs() / 1000000 <= 0 && !timeout.isZero()) {
           break;
         }

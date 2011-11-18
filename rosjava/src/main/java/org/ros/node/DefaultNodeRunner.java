@@ -48,10 +48,20 @@ public class DefaultNodeRunner implements NodeRunner {
    *         {@link Executor}
    */
   public static NodeRunner newDefault() {
-    return new DefaultNodeRunner(new DefaultNodeFactory(), Executors.newCachedThreadPool());
+    return newDefault(Executors.newCachedThreadPool());
   }
 
   /**
+   * @return an instance of {@link DefaultNodeRunner} that uses the supplied
+   *         {@link Executor}
+   */
+  public static NodeRunner newDefault(Executor executor) {
+    return new DefaultNodeRunner(new DefaultNodeFactory(), executor);
+  }
+
+  /**
+   * @param nodeFactory
+   *          Node factory to use for node creation.
    * @param executor
    *          {@link NodeMain}s will be executed using this
    */

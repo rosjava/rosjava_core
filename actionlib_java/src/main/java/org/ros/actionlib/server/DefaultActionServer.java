@@ -122,6 +122,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
 
   @Override
   public void main(Node node) throws Exception {
+	this.node = node;
     // TODO(damonkohler): Move the logic for conditionally changing this node's
     // name to the location where this NodeMain is launched.
     idGenerator = new GoalIDGenerator(node);
