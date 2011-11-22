@@ -16,9 +16,12 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.nio.ByteOrder;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,12 +49,9 @@ import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.nio.ByteOrder;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.Executors;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -89,12 +89,14 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
 
   public static <S, T> DefaultServiceClient<S, T> create(GraphName nodeName,
       ServiceDefinition serviceDefinition, MessageSerializer<S> serializer,
-      MessageDeserializer<T> deserializer) {
-    return new DefaultServiceClient<S, T>(nodeName, serviceDefinition, serializer, deserializer);
+      MessageDeserializer<T> deserializer,
+      ExecutorService executorService) {
+    return new DefaultServiceClient<S, T>(nodeName, serviceDefinition, serializer, deserializer, executorService);
   }
 
   private DefaultServiceClient(GraphName nodeName, ServiceDefinition serviceDefinition,
-      MessageSerializer<RequestType> serializer, MessageDeserializer<ResponseType> deserializer) {
+      MessageSerializer<RequestType> serializer, MessageDeserializer<ResponseType> deserializer,
+      ExecutorService executorService) {
     this.serializer = serializer;
     this.deserializer = deserializer;
     responseListeners = Lists.newLinkedList();
@@ -105,8 +107,7 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
             .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceDefinition.toHeader())
             .build();
     channelFactory =
-        new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool());
+        new NioClientSocketChannelFactory(executorService, executorService);
     bootstrap = new ClientBootstrap(channelFactory);
     channelGroup = new DefaultChannelGroup();
     TcpClientPipelineFactory factory = new TcpClientPipelineFactory(channelGroup) {

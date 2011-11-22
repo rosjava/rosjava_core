@@ -35,6 +35,8 @@ import org.ros.node.NodeConfiguration;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,12 +47,15 @@ public class TopicIntegrationTest {
   private MasterServer masterServer;
   private NodeFactory nodeFactory;
   private NodeConfiguration nodeConfiguration;
+  private ExecutorService executorService;
 
   @Before
   public void setUp() {
+	executorService = Executors.newCachedThreadPool();
     masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
-    nodeConfiguration = NodeConfiguration.newPrivate(masterServer.getUri());
+    nodeConfiguration = NodeConfiguration.newPrivate(masterServer.getUri())
+        .setExecutorService(executorService);
     nodeFactory = new DefaultNodeFactory();
   }
 
@@ -81,7 +86,8 @@ public class TopicIntegrationTest {
     assertTrue(subscriber.awaitRegistration(1, TimeUnit.SECONDS));
 
     RepeatingPublisher<org.ros.message.std_msgs.String> repeatingPublisher =
-        new RepeatingPublisher<org.ros.message.std_msgs.String>(publisher, helloMessage, 1000);
+        new RepeatingPublisher<org.ros.message.std_msgs.String>(publisher, helloMessage, 1000,
+        	executorService);
     repeatingPublisher.start();
 
     assertTrue(messageReceived.await(1, TimeUnit.SECONDS));

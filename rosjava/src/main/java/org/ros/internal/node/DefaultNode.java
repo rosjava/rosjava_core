@@ -16,8 +16,9 @@
 
 package org.ros.internal.node;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.ros.exception.RemoteException;
@@ -58,8 +59,8 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 
 /**
  * The default implementation of a {@link Node}.
@@ -99,6 +100,9 @@ public class DefaultNode implements Node {
    */
   public DefaultNode(NodeConfiguration nodeConfiguration) {
     this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
+    
+    ExecutorService executorService = this.nodeConfiguration.getExecutorService();
+    
     running = false;
     masterClient = new MasterClient(nodeConfiguration.getMasterUri());
     topicManager = new TopicManager();
@@ -107,7 +111,8 @@ public class DefaultNode implements Node {
     registrar = new Registrar(masterClient);
     topicManager.setListener(registrar);
     serviceManager.setListener(registrar);
-    publisherFactory = new PublisherFactory(topicManager);
+
+    publisherFactory = new PublisherFactory(topicManager, executorService);
 
     GraphName basename = nodeConfiguration.getNodeName();
     NameResolver parentResolver = nodeConfiguration.getParentResolver();
@@ -118,9 +123,9 @@ public class DefaultNode implements Node {
             nodeConfiguration.getTcpRosAdvertiseAddress(),
             nodeConfiguration.getXmlRpcBindAddress(),
             nodeConfiguration.getXmlRpcAdvertiseAddress(), masterClient, topicManager,
-            serviceManager, parameterManager);
-    subscriberFactory = new SubscriberFactory(slaveServer, topicManager);
-    serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager);
+            serviceManager, parameterManager, executorService);
+	subscriberFactory = new SubscriberFactory(slaveServer, topicManager, executorService);
+    serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager, executorService);
 
     masterUri = nodeConfiguration.getMasterUri();
     start();

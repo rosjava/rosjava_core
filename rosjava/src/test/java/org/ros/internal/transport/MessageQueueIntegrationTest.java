@@ -19,6 +19,11 @@ package org.ros.internal.transport;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
@@ -33,6 +38,7 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.message.old_style.MessageDeserializer;
@@ -43,10 +49,6 @@ import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 import org.ros.message.Message;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
-import java.util.concurrent.Executors;
-
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -54,6 +56,7 @@ public class MessageQueueIntegrationTest {
 
   private OutgoingMessageQueue<Message> out;
   private IncomingMessageQueue<org.ros.message.std_msgs.String> in;
+  private ExecutorService executorService;
 
   private class ServerHandler extends SimpleChannelHandler {
     @Override
@@ -65,12 +68,19 @@ public class MessageQueueIntegrationTest {
 
   @Before
   public void setup() {
+	executorService = Executors.newCachedThreadPool();
     out = new OutgoingMessageQueue<Message>(new MessageSerializer<Message>());
     out.start();
     in =
         new IncomingMessageQueue<org.ros.message.std_msgs.String>(
             new MessageDeserializer<org.ros.message.std_msgs.String>(
                 org.ros.message.std_msgs.String.class));
+  }
+
+  @After
+  public void tearDown() {
+	out.shutdown();
+    executorService.shutdown();
   }
 
   @Test
@@ -123,7 +133,7 @@ public class MessageQueueIntegrationTest {
   @Test
   public void testSendAndReceiveLatchedMessage() throws InterruptedException {
     // Setting latched mode and writing a message should cause any future
-    // IncomingMessageQueue to recieve that message.
+    // IncomingMessageQueue to receive that message.
     out.setLatchMode(true);
     org.ros.message.std_msgs.String hello = new org.ros.message.std_msgs.String();
     hello.data = "Would you like to play a game?";
@@ -183,8 +193,7 @@ public class MessageQueueIntegrationTest {
       final IncomingMessageQueue<org.ros.message.std_msgs.String> in, Channel serverChannel)
       throws InterruptedException {
     ChannelFactory clientChannelFactory =
-        new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool());
+        new NioClientSocketChannelFactory(executorService, executorService);
     ClientBootstrap clientBootstrap = new ClientBootstrap(clientChannelFactory);
     clientBootstrap.setOption("bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
@@ -206,8 +215,7 @@ public class MessageQueueIntegrationTest {
     TopicManager topicManager = new TopicManager();
     ServiceManager serviceManager = new ServiceManager();
     NioServerSocketChannelFactory channelFactory =
-        new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool());
+        new NioServerSocketChannelFactory(executorService, executorService);
     ServerBootstrap bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));

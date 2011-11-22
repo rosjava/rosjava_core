@@ -26,6 +26,8 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.ros.exception.RosRuntimeException;
 
 /**
+ * A Netty channel handler for tracking a ROS connection.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ConnectionTrackingHandler extends SimpleChannelHandler {
@@ -33,6 +35,9 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ConnectionTrackingHandler.class);
   
+  /**
+   * The channel group the connection is to be part of.
+   */
   private final ChannelGroup channelGroup;
   
   public ConnectionTrackingHandler(ChannelGroup channelGroup) {

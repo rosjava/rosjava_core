@@ -20,24 +20,44 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.address.InetAddressFactory;
+import org.ros.internal.message.old_style.MessageDeserializer;
+import org.ros.internal.message.old_style.MessageSerializer;
+import org.ros.internal.transport.IncomingMessageQueue;
+import org.ros.internal.transport.OutgoingMessageQueue;
+import org.ros.message.Message;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TcpRosServerTest {
+  private ExecutorService executorService;
+	
+  @Before
+  public void setup() {
+	executorService = Executors.newCachedThreadPool();
+  }
+
+  @After
+  public void tearDown() {
+    executorService.shutdown();
+  }
 
   @Test
   public void testGetAddressFailsIfServerNotRunning() throws UnknownHostException {
     TcpRosServer tcpRosServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null);
+        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null, executorService);
 
     try {
       tcpRosServer.getAddress();
@@ -64,12 +84,12 @@ public class TcpRosServerTest {
   @Test
   public void testFailIfPortTaken() {
     TcpRosServer firstServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null);
+        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null, executorService);
     firstServer.start();
     try {
       TcpRosServer secondServer =
           new TcpRosServer(BindAddress.newPublic(firstServer.getAddress().getPort()),
-              AdvertiseAddress.newPublic(), null, null);
+              AdvertiseAddress.newPublic(), null, null, executorService);
       secondServer.start();
       fail();
     } catch (RuntimeException e) {
@@ -81,7 +101,7 @@ public class TcpRosServerTest {
   @Test
   public void testFailIfStartedWhileRunning() {
     TcpRosServer tcpRosServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null);
+        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null, executorService);
     tcpRosServer.start();
     try {
       tcpRosServer.start();
@@ -95,7 +115,7 @@ public class TcpRosServerTest {
   @Test
   public void testFailIfShutdownWhileNotRunning() {
     TcpRosServer tcpRosServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null);
+        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null, executorService);
     tcpRosServer.start();
     tcpRosServer.shutdown();
     try {

@@ -16,12 +16,11 @@
 
 package org.ros.internal.node.topic;
 
+import java.util.concurrent.ExecutorService;
+
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.MessageDeserializer;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -30,12 +29,12 @@ public class SubscriberFactory {
   
   private final SlaveServer slaveServer;
   private final TopicManager topicManager;
-  private final Executor executor;
+  private final ExecutorService executorService;
   
-  public SubscriberFactory(SlaveServer slaveServer, TopicManager topicManager) {
+  public SubscriberFactory(SlaveServer slaveServer, TopicManager topicManager, ExecutorService executorService) {
     this.slaveServer = slaveServer;
     this.topicManager = topicManager;
-    this.executor = Executors.newCachedThreadPool();
+    this.executorService = executorService;
   }
   
   /**
@@ -59,7 +58,7 @@ public class SubscriberFactory {
         subscriber = (DefaultSubscriber<MessageType>) topicManager.getSubscriber(topicName);
       } else {
         subscriber =
-            DefaultSubscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, executor,
+            DefaultSubscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, executorService,
                 deserializer);
         createdNewSubscriber = true;
       }

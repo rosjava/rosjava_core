@@ -16,7 +16,8 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,9 +30,11 @@ import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.Publisher;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
 
 /**
+ * Default implementation of a {@link Publisher}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <MessageType>
@@ -43,7 +46,8 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
 
   private final OutgoingMessageQueue<MessageType> out;
 
-  public DefaultPublisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer) {
+  public DefaultPublisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer,
+	  ExecutorService executorService) {
     super(topicDefinition);
     out = new OutgoingMessageQueue<MessageType>(serializer);
     out.start();
@@ -65,12 +69,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
 
   @Override
   public boolean hasSubscribers() {
-    return out.getChannelGroupSize() > 0;
+    return out.getNumberChannels() > 0;
   }
 
   @Override
   public int getNumberOfSubscribers() {
-    return out.getChannelGroupSize();
+    return out.getNumberChannels();
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.

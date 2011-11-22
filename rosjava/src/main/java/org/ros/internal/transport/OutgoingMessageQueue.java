@@ -121,7 +121,12 @@ public class OutgoingMessageQueue<MessageType> {
     }
   }
   
-  public int getChannelGroupSize() {
+  /**
+   * Get the number of channels which have been added to this queue.
+   * 
+   * @return The number of channels which have been added to this queue.
+   */
+  public int getNumberChannels() {
     return channelGroup.size();
   }
 

@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.base.Preconditions;
+import java.util.concurrent.ExecutorService;
 
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.internal.node.server.MasterServer;
@@ -24,6 +24,8 @@ import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
+
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -33,11 +35,14 @@ public class ServiceFactory {
   private final GraphName nodeName;
   private final SlaveServer slaveServer;
   private final ServiceManager serviceManager;
+  private final ExecutorService executorService;
 
-  public ServiceFactory(GraphName nodeName, SlaveServer slaveServer, ServiceManager serviceManager) {
+  public ServiceFactory(GraphName nodeName, SlaveServer slaveServer, ServiceManager serviceManager, 
+	  ExecutorService executorService) {
     this.nodeName = nodeName;
     this.slaveServer = slaveServer;
     this.serviceManager = serviceManager;
+    this.executorService = executorService;
   }
 
   /**
@@ -102,7 +107,7 @@ public class ServiceFactory {
         serviceClient =
             (DefaultServiceClient<RequestType, ResponseType>) serviceManager.getClient(name);
       } else {
-        serviceClient = DefaultServiceClient.create(nodeName, serviceDefinition, serializer, deserializer);
+        serviceClient = DefaultServiceClient.create(nodeName, serviceDefinition, serializer, deserializer, executorService);
         createdNewService = true;
       }
     }

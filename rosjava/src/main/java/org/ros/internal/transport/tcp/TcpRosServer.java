@@ -16,7 +16,10 @@
 
 package org.ros.internal.transport.tcp;
 
-import com.google.common.base.Preconditions;
+import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,10 +35,7 @@ import org.ros.address.BindAddress;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
+import com.google.common.base.Preconditions;
 
 /**
  * The TCP server which is used for data communication between publishers and
@@ -56,6 +56,7 @@ public class TcpRosServer {
   private final AdvertiseAddress advertiseAddress;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
+  private final ExecutorService executorService;
 
   private ChannelFactory channelFactory;
   private ServerBootstrap bootstrap;
@@ -63,18 +64,19 @@ public class TcpRosServer {
   private ChannelGroup incomingChannelGroup;
 
   public TcpRosServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress,
-      TopicManager topicManager, ServiceManager serviceManager) {
+      TopicManager topicManager, ServiceManager serviceManager,
+      ExecutorService executorService) {
     this.bindAddress = bindAddress;
     this.advertiseAddress = advertiseAddress;
     this.topicManager = topicManager;
     this.serviceManager = serviceManager;
+    this.executorService = executorService;
   }
 
   public void start() {
     Preconditions.checkState(outgoingChannel == null);
     channelFactory =
-        new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool());
+        new NioServerSocketChannelFactory(executorService, executorService);
     bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));

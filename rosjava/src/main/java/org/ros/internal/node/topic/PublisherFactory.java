@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.topic;
 
+import java.util.concurrent.ExecutorService;
+
 import org.ros.internal.node.server.MasterServer;
 import org.ros.message.MessageSerializer;
 
@@ -25,9 +27,11 @@ import org.ros.message.MessageSerializer;
 public class PublisherFactory {
 
   private final TopicManager topicManager;
+  private final ExecutorService executorService;
 
-  public PublisherFactory(TopicManager topicManager) {
+  public PublisherFactory(TopicManager topicManager, ExecutorService executorService) {
     this.topicManager = topicManager;
+    this.executorService = executorService;
   }
 
   /**
@@ -50,7 +54,7 @@ public class PublisherFactory {
       if (topicManager.hasPublisher(topicName)) {
         publisher = (DefaultPublisher<MessageType>) topicManager.getPublisher(topicName);
       } else {
-        publisher = new DefaultPublisher<MessageType>(topicDefinition, serializer);
+        publisher = new DefaultPublisher<MessageType>(topicDefinition, serializer, executorService);
         createdNewPublisher = true;
       }
     }

@@ -23,6 +23,8 @@ import org.ros.internal.node.topic.TopicManager;
 import org.ros.message.MessageDefinition;
 import org.ros.namespace.GraphName;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,6 +43,7 @@ public class MasterRegistrationTest {
   private ParameterManager parameterManager;
   private SlaveServer slaveServer;
   private DefaultPublisher<org.ros.message.std_msgs.String> publisher;
+  private ExecutorService executorService;
 
   public MasterRegistrationTest() {
     topicDefinition =
@@ -53,6 +56,7 @@ public class MasterRegistrationTest {
 
   @Before
   public void setup() {
+	executorService = Executors.newCachedThreadPool();
     masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
@@ -64,16 +68,17 @@ public class MasterRegistrationTest {
         new SlaveServer(new GraphName("/node"), BindAddress.newPrivate(),
             AdvertiseAddress.newPrivate(), BindAddress.newPrivate(),
             AdvertiseAddress.newPrivate(), masterClient, topicManager, serviceManager,
-            parameterManager);
+            parameterManager, executorService);
     slaveServer.start();
     masterRegistration.start(slaveServer.toSlaveIdentifier());
-    publisher = new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer);
+    publisher = new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer, executorService);
   }
 
   @After
   public void tearDown() {
     masterRegistration.shutdown();
     masterServer.shutdown();
+    executorService.shutdown();
   }
 
   @Test

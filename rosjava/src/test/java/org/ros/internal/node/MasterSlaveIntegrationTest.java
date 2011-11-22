@@ -19,6 +19,7 @@ package org.ros.internal.node;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -34,6 +35,8 @@ import org.ros.internal.node.topic.TopicManager;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -44,9 +47,11 @@ public class MasterSlaveIntegrationTest {
   private MasterClient masterClient;
   private SlaveServer slaveServer;
   private SlaveClient slaveClient;
+  private ExecutorService executorService;
 
   @Before
   public void setUp() {
+	executorService = Executors.newCachedThreadPool();
     masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
@@ -57,9 +62,15 @@ public class MasterSlaveIntegrationTest {
         new SlaveServer(new GraphName("/foo"), BindAddress.newPublic(),
             AdvertiseAddress.newPublic(), BindAddress.newPublic(),
             AdvertiseAddress.newPublic(), masterClient, topicManager, serviceManager,
-            parameterManager);
+            parameterManager, executorService);
     slaveServer.start();
     slaveClient = new SlaveClient(new GraphName("/bar"), slaveServer.getUri());
+  }
+
+  @After
+  public void tearDown() {
+    masterServer.shutdown();
+    executorService.shutdown();
   }
 
   @Test
