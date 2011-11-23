@@ -4,8 +4,6 @@ package org.ros.internal.node;
 
 import static org.junit.Assert.assertTrue;
 
-import org.ros.internal.node.client.Registrar;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +11,7 @@ import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.node.client.MasterClient;
+import org.ros.internal.node.client.Registrar;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
@@ -56,7 +55,7 @@ public class MasterRegistrationTest {
 
   @Before
   public void setup() {
-	executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool();
     masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
@@ -66,12 +65,13 @@ public class MasterRegistrationTest {
     parameterManager = new ParameterManager();
     slaveServer =
         new SlaveServer(new GraphName("/node"), BindAddress.newPrivate(),
-            AdvertiseAddress.newPrivate(), BindAddress.newPrivate(),
-            AdvertiseAddress.newPrivate(), masterClient, topicManager, serviceManager,
-            parameterManager, executorService);
+            AdvertiseAddress.newPrivate(), BindAddress.newPrivate(), AdvertiseAddress.newPrivate(),
+            masterClient, topicManager, serviceManager, parameterManager, executorService);
     slaveServer.start();
     masterRegistration.start(slaveServer.toSlaveIdentifier());
-    publisher = new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer, executorService);
+    publisher =
+        new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer,
+            executorService);
   }
 
   @After

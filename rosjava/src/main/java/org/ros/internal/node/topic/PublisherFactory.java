@@ -16,10 +16,10 @@
 
 package org.ros.internal.node.topic;
 
-import java.util.concurrent.ExecutorService;
-
 import org.ros.internal.node.server.MasterServer;
 import org.ros.message.MessageSerializer;
+
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -35,12 +35,14 @@ public class PublisherFactory {
   }
 
   /**
-   * Gets or creates a {@link DefaultPublisher} instance. {@link DefaultPublisher}s are cached
-   * and reused per topic. When a new {@link DefaultPublisher} is generated, it is
-   * registered with the {@link MasterServer}.
+   * Gets or creates a {@link DefaultPublisher} instance.
+   * {@link DefaultPublisher}s are cached and reused per topic. When a new
+   * {@link DefaultPublisher} is generated, it is registered with the
+   * {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition {@link TopicDefinition} that is being published
+   * @param topicDefinition
+   *          {@link TopicDefinition} that is being published
    * @return a {@link DefaultSubscriber} instance
    */
   @SuppressWarnings("unchecked")

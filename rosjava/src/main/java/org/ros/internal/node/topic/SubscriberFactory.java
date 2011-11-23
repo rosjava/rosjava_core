@@ -16,34 +16,37 @@
 
 package org.ros.internal.node.topic;
 
-import java.util.concurrent.ExecutorService;
-
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.MessageDeserializer;
+
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class SubscriberFactory {
-  
+
   private final SlaveServer slaveServer;
   private final TopicManager topicManager;
   private final ExecutorService executorService;
-  
-  public SubscriberFactory(SlaveServer slaveServer, TopicManager topicManager, ExecutorService executorService) {
+
+  public SubscriberFactory(SlaveServer slaveServer, TopicManager topicManager,
+      ExecutorService executorService) {
     this.slaveServer = slaveServer;
     this.topicManager = topicManager;
     this.executorService = executorService;
   }
-  
+
   /**
-   * Gets or creates a {@link DefaultSubscriber} instance. {@link DefaultSubscriber}s are
-   * cached and reused per topic. When a new {@link DefaultSubscriber} is generated, it
-   * is registered with the {@link MasterServer}.
+   * Gets or creates a {@link DefaultSubscriber} instance.
+   * {@link DefaultSubscriber}s are cached and reused per topic. When a new
+   * {@link DefaultSubscriber} is generated, it is registered with the
+   * {@link MasterServer}.
    * 
    * @param <MessageType>
-   * @param topicDefinition {@link TopicDefinition} that is subscribed to
+   * @param topicDefinition
+   *          {@link TopicDefinition} that is subscribed to
    * @return a {@link DefaultSubscriber} instance
    */
   @SuppressWarnings("unchecked")
@@ -58,8 +61,8 @@ public class SubscriberFactory {
         subscriber = (DefaultSubscriber<MessageType>) topicManager.getSubscriber(topicName);
       } else {
         subscriber =
-            DefaultSubscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition, executorService,
-                deserializer);
+            DefaultSubscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition,
+                executorService, deserializer);
         createdNewSubscriber = true;
       }
     }

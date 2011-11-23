@@ -16,13 +16,6 @@
 
 package org.ros.node;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.AdvertiseAddressFactory;
 import org.ros.address.BindAddress;
@@ -36,6 +29,13 @@ import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.time.TimeProvider;
 import org.ros.time.WallTimeProvider;
+
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Stores configuration information (e.g. ROS master URI) for {@link Node}s.
@@ -80,7 +80,7 @@ public class NodeConfiguration {
     copy.xmlRpcBindAddress = nodeConfiguration.xmlRpcBindAddress;
     copy.xmlRpcAdvertiseAddressFactory = nodeConfiguration.xmlRpcAdvertiseAddressFactory;
     copy.executorService = nodeConfiguration.executorService;
-    
+
     return copy;
   }
 
@@ -97,9 +97,10 @@ public class NodeConfiguration {
   private BindAddress xmlRpcBindAddress;
   private AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory;
   private TimeProvider timeProvider;
-  
+
   /**
-   * Executor service which should be used for all thread creation in the ROS app.
+   * Executor service which should be used for all thread creation in the ROS
+   * app.
    */
   private ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -349,7 +350,8 @@ public class NodeConfiguration {
    *          the {@link MessageDefinitionFactory} for the {@link Node}
    * @return this {@link NodeConfiguration}
    */
-  public NodeConfiguration setMessageDefinitionFactory(MessageDefinitionFactory messageDefinitionFactory) {
+  public NodeConfiguration setMessageDefinitionFactory(
+      MessageDefinitionFactory messageDefinitionFactory) {
     this.messageDefinitionFactory = messageDefinitionFactory;
     return this;
   }
@@ -483,8 +485,8 @@ public class NodeConfiguration {
   }
 
   /**
-   * Get the {@link ExecutorService} which should be used for all thread creation within
-   * the {@link Node}.
+   * Get the {@link ExecutorService} which should be used for all thread
+   * creation within the {@link Node}.
    * 
    * @return the configured {@link ExecutorService}
    */

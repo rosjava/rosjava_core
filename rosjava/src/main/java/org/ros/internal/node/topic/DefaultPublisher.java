@@ -16,8 +16,7 @@
 
 package org.ros.internal.node.topic;
 
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +29,8 @@ import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.Publisher;
 
-import com.google.common.base.Preconditions;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Default implementation of a {@link Publisher}.
@@ -46,9 +46,11 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
 
   private final OutgoingMessageQueue<MessageType> out;
 
-  public DefaultPublisher(TopicDefinition topicDefinition, MessageSerializer<MessageType> serializer,
-	  ExecutorService executorService) {
+  public DefaultPublisher(TopicDefinition topicDefinition,
+      MessageSerializer<MessageType> serializer, ExecutorService executorService) {
     super(topicDefinition);
+    // TODO(khughes): Use the handed in ExecutorService in the
+    // OutgoingMessageQueue.
     out = new OutgoingMessageQueue<MessageType>(serializer);
     out.start();
   }
@@ -69,12 +71,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
 
   @Override
   public boolean hasSubscribers() {
-    return out.getNumberChannels() > 0;
+    return out.getNumberOfChannels() > 0;
   }
 
   @Override
   public int getNumberOfSubscribers() {
-    return out.getNumberChannels();
+    return out.getNumberOfChannels();
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
@@ -102,12 +104,13 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
     // TODO(damonkohler): Return error to the subscriber over the wire?
     String incomingType = incomingHeader.get(ConnectionHeaderFields.TYPE);
     String expectedType = header.get(ConnectionHeaderFields.TYPE);
-    Preconditions.checkState(incomingType.equals(expectedType) || incomingType.equals("*"), 
-    		"Unexpected message type " + incomingType + " != " + expectedType);
+    Preconditions.checkState(incomingType.equals(expectedType) || incomingType.equals("*"),
+        "Unexpected message type " + incomingType + " != " + expectedType);
     String incomingChecksum = incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
     String expectedChecksum = header.get(ConnectionHeaderFields.MD5_CHECKSUM);
-    Preconditions.checkState(incomingChecksum.equals(expectedChecksum) || incomingChecksum.equals("*"), 
-    		"Unexpected message MD5 " + incomingChecksum + " != " + expectedChecksum);
+    Preconditions.checkState(
+        incomingChecksum.equals(expectedChecksum) || incomingChecksum.equals("*"),
+        "Unexpected message MD5 " + incomingChecksum + " != " + expectedChecksum);
     return ConnectionHeader.encode(header);
   }
 

@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.service;
 
-import java.util.concurrent.ExecutorService;
+import com.google.common.base.Preconditions;
 
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.internal.node.server.MasterServer;
@@ -25,7 +25,7 @@ import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 
-import com.google.common.base.Preconditions;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -37,8 +37,8 @@ public class ServiceFactory {
   private final ServiceManager serviceManager;
   private final ExecutorService executorService;
 
-  public ServiceFactory(GraphName nodeName, SlaveServer slaveServer, ServiceManager serviceManager, 
-	  ExecutorService executorService) {
+  public ServiceFactory(GraphName nodeName, SlaveServer slaveServer, ServiceManager serviceManager,
+      ExecutorService executorService) {
     this.nodeName = nodeName;
     this.slaveServer = slaveServer;
     this.serviceManager = serviceManager;
@@ -46,9 +46,10 @@ public class ServiceFactory {
   }
 
   /**
-   * Gets or creates a {@link DefaultServiceServer} instance. {@link DefaultServiceServer}s
-   * are cached and reused per service. When a new {@link DefaultServiceServer} is
-   * generated, it is registered with the {@link MasterServer}.
+   * Gets or creates a {@link DefaultServiceServer} instance.
+   * {@link DefaultServiceServer}s are cached and reused per service. When a new
+   * {@link DefaultServiceServer} is generated, it is registered with the
+   * {@link MasterServer}.
    * 
    * @param serviceDefinition
    *          the {@link ServiceMessageDefinition} that is being served
@@ -84,9 +85,10 @@ public class ServiceFactory {
   }
 
   /**
-   * Gets or creates a {@link DefaultServiceClient} instance. {@link DefaultServiceClient}s
-   * are cached and reused per service. When a new {@link DefaultServiceClient} is
-   * created, it is connected to the {@link DefaultServiceServer}.
+   * Gets or creates a {@link DefaultServiceClient} instance.
+   * {@link DefaultServiceClient}s are cached and reused per service. When a new
+   * {@link DefaultServiceClient} is created, it is connected to the
+   * {@link DefaultServiceServer}.
    * 
    * @param <ResponseType>
    * @param serviceDefinition
@@ -107,7 +109,9 @@ public class ServiceFactory {
         serviceClient =
             (DefaultServiceClient<RequestType, ResponseType>) serviceManager.getClient(name);
       } else {
-        serviceClient = DefaultServiceClient.create(nodeName, serviceDefinition, serializer, deserializer, executorService);
+        serviceClient =
+            DefaultServiceClient.create(nodeName, serviceDefinition, serializer, deserializer,
+                executorService);
         createdNewService = true;
       }
     }

@@ -16,8 +16,6 @@
 
 package org.ros.internal.transport;
 
-import java.nio.ByteBuffer;
-
 import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
@@ -29,6 +27,8 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.ros.message.MessageSerializer;
 
+import java.nio.ByteBuffer;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -36,14 +36,14 @@ public class OutgoingMessageQueue<MessageType> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
-  
+
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
   private final ChannelGroup channelGroup;
   private final CircularBlockingQueue<MessageType> messages;
   private final MessageSendingThread thread;
   private final MessageSerializer<MessageType> serializer;
-  
+
   private boolean latchMode;
   private MessageType latchedMessage;
 
@@ -74,7 +74,7 @@ public class OutgoingMessageQueue<MessageType> {
     thread = new MessageSendingThread();
     latchMode = false;
   }
-  
+
   public void setLatchMode(boolean enabled) {
     latchMode = enabled;
   }
@@ -83,7 +83,8 @@ public class OutgoingMessageQueue<MessageType> {
     ByteBuffer serializedMessage = serializer.serialize(message);
     ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(serializedMessage);
     if (DEBUG) {
-      // TODO(damonkohler): Add a utility method for a better ChannelBuffer.toString() method.
+      // TODO(damonkohler): Add a utility method for a better
+      // ChannelBuffer.toString() method.
       log.info("Sending message: " + message);
     }
     channelGroup.write(buffer);
@@ -104,8 +105,8 @@ public class OutgoingMessageQueue<MessageType> {
   }
 
   /**
-   * @param channel added to this {@link OutgoingMessageQueue}'s
-   *        {@link ChannelGroup}
+   * @param channel
+   *          added to this {@link OutgoingMessageQueue}'s {@link ChannelGroup}
    */
   public void addChannel(Channel channel) {
     Preconditions.checkState(thread.isAlive());
@@ -120,13 +121,11 @@ public class OutgoingMessageQueue<MessageType> {
       writeMessageToChannel(latchedMessage);
     }
   }
-  
+
   /**
-   * Get the number of channels which have been added to this queue.
-   * 
-   * @return The number of channels which have been added to this queue.
+   * @return the number of {@link Channel}s which have been added to this queue
    */
-  public int getNumberChannels() {
+  public int getNumberOfChannels() {
     return channelGroup.size();
   }
 

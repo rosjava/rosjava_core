@@ -51,11 +51,11 @@ public class TopicIntegrationTest {
 
   @Before
   public void setUp() {
-	executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool();
     masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
-    nodeConfiguration = NodeConfiguration.newPrivate(masterServer.getUri())
-        .setExecutorService(executorService);
+    nodeConfiguration =
+        NodeConfiguration.newPrivate(masterServer.getUri()).setExecutorService(executorService);
     nodeFactory = new DefaultNodeFactory();
   }
 
@@ -87,7 +87,7 @@ public class TopicIntegrationTest {
 
     RepeatingPublisher<org.ros.message.std_msgs.String> repeatingPublisher =
         new RepeatingPublisher<org.ros.message.std_msgs.String>(publisher, helloMessage, 1000,
-        	executorService);
+            executorService);
     repeatingPublisher.start();
 
     assertTrue(messageReceived.await(1, TimeUnit.SECONDS));

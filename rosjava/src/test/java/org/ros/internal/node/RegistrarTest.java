@@ -55,7 +55,7 @@ public class RegistrarTest {
 
   @Before
   public void setup() {
-	executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool();
     masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());

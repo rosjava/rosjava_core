@@ -19,11 +19,6 @@ package org.ros.internal.transport;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
@@ -49,6 +44,11 @@ import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 import org.ros.message.Message;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -68,7 +68,7 @@ public class MessageQueueIntegrationTest {
 
   @Before
   public void setup() {
-	executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool();
     out = new OutgoingMessageQueue<Message>(new MessageSerializer<Message>());
     out.start();
     in =
@@ -79,7 +79,7 @@ public class MessageQueueIntegrationTest {
 
   @After
   public void tearDown() {
-	out.shutdown();
+    out.shutdown();
     executorService.shutdown();
   }
 

@@ -16,10 +16,7 @@
 
 package org.ros.internal.transport.tcp;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
+import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +32,10 @@ import org.ros.address.BindAddress;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 
-import com.google.common.base.Preconditions;
+import java.net.InetSocketAddress;
+import java.nio.ByteOrder;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 /**
  * The TCP server which is used for data communication between publishers and
@@ -64,8 +64,7 @@ public class TcpRosServer {
   private ChannelGroup incomingChannelGroup;
 
   public TcpRosServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress,
-      TopicManager topicManager, ServiceManager serviceManager,
-      ExecutorService executorService) {
+      TopicManager topicManager, ServiceManager serviceManager, ExecutorService executorService) {
     this.bindAddress = bindAddress;
     this.advertiseAddress = advertiseAddress;
     this.topicManager = topicManager;
@@ -75,8 +74,7 @@ public class TcpRosServer {
 
   public void start() {
     Preconditions.checkState(outgoingChannel == null);
-    channelFactory =
-        new NioServerSocketChannelFactory(executorService, executorService);
+    channelFactory = new NioServerSocketChannelFactory(executorService, executorService);
     bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));

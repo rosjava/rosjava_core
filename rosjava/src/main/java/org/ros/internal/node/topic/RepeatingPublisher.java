@@ -16,14 +16,15 @@
 
 package org.ros.internal.node.topic;
 
-import java.util.concurrent.ExecutorService;
+import com.google.common.base.Preconditions;
+
+import org.ros.concurrent.CancellableLoop;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.internal.util.InterruptableLoopableRunnable;
 import org.ros.node.topic.Publisher;
 
-import com.google.common.base.Preconditions;
+import java.util.concurrent.Executor;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -36,16 +37,16 @@ public class RepeatingPublisher<MessageType> {
   private final Publisher<MessageType> publisher;
   private final MessageType message;
   private final int frequency;
-  private final RepeatingPublisherThread runnable;
+  private final RepeatingPublisherLoop runnable;
   
   /**
-   * Executor used to run the repeating publisher.
+   * Executor used to run the {@link RepeatingPublisherLoop}.
    */
-  private final ExecutorService executorService;
+  private final Executor executor;
 
-  private final class RepeatingPublisherThread extends InterruptableLoopableRunnable {
+  private final class RepeatingPublisherLoop extends CancellableLoop {
     @Override
-    public void doLoopBody() throws InterruptedException {
+    public void loop() throws InterruptedException {
       publisher.publish(message);
       if (DEBUG) {
         log.info("Published message: " + message);
@@ -61,17 +62,17 @@ public class RepeatingPublisher<MessageType> {
    *          the frequency of publication in Hz
    */
   public RepeatingPublisher(Publisher<MessageType> publisher, MessageType message, int frequency,
-	  ExecutorService executorService) {
+	  Executor executor) {
     this.publisher = publisher;
     this.message = message;
     this.frequency = frequency;
-    this.executorService = executorService;
-    runnable = new RepeatingPublisherThread();
+    this.executor = executor;
+    runnable = new RepeatingPublisherLoop();
   }
 
   public void start() {
     Preconditions.checkState(!runnable.isRunning());
-    executorService.execute(runnable);
+    executor.execute(runnable);
   }
 
   public void cancel() {

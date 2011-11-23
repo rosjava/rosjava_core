@@ -51,7 +51,7 @@ public class MasterSlaveIntegrationTest {
 
   @Before
   public void setUp() {
-	executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool();
     masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
@@ -60,9 +60,8 @@ public class MasterSlaveIntegrationTest {
     ParameterManager parameterManager = new ParameterManager();
     slaveServer =
         new SlaveServer(new GraphName("/foo"), BindAddress.newPublic(),
-            AdvertiseAddress.newPublic(), BindAddress.newPublic(),
-            AdvertiseAddress.newPublic(), masterClient, topicManager, serviceManager,
-            parameterManager, executorService);
+            AdvertiseAddress.newPublic(), BindAddress.newPublic(), AdvertiseAddress.newPublic(),
+            masterClient, topicManager, serviceManager, parameterManager, executorService);
     slaveServer.start();
     slaveClient = new SlaveClient(new GraphName("/bar"), slaveServer.getUri());
   }

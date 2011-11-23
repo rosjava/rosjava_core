@@ -34,16 +34,16 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ConnectionTrackingHandler.class);
-  
+
   /**
    * The channel group the connection is to be part of.
    */
   private final ChannelGroup channelGroup;
-  
+
   public ConnectionTrackingHandler(ChannelGroup channelGroup) {
     this.channelGroup = channelGroup;
   }
-  
+
   @Override
   public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
     if (DEBUG) {
@@ -51,7 +51,7 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
     }
     channelGroup.add(e.getChannel());
   }
-  
+
   @Override
   public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
     if (DEBUG) {
@@ -67,5 +67,5 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
     e.getChannel().close();
     throw new RosRuntimeException(e.getCause());
   }
-  
+
 }

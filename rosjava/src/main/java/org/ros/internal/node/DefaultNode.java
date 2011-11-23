@@ -16,9 +16,8 @@
 
 package org.ros.internal.node;
 
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.util.concurrent.ExecutorService;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.ros.exception.RemoteException;
@@ -59,8 +58,9 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.concurrent.ExecutorService;
 
 /**
  * The default implementation of a {@link Node}.
@@ -100,9 +100,6 @@ public class DefaultNode implements Node {
    */
   public DefaultNode(NodeConfiguration nodeConfiguration) {
     this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
-    
-    ExecutorService executorService = this.nodeConfiguration.getExecutorService();
-    
     running = false;
     masterClient = new MasterClient(nodeConfiguration.getMasterUri());
     topicManager = new TopicManager();
@@ -112,6 +109,7 @@ public class DefaultNode implements Node {
     topicManager.setListener(registrar);
     serviceManager.setListener(registrar);
 
+    ExecutorService executorService = nodeConfiguration.getExecutorService();
     publisherFactory = new PublisherFactory(topicManager, executorService);
 
     GraphName basename = nodeConfiguration.getNodeName();
@@ -124,7 +122,7 @@ public class DefaultNode implements Node {
             nodeConfiguration.getXmlRpcBindAddress(),
             nodeConfiguration.getXmlRpcAdvertiseAddress(), masterClient, topicManager,
             serviceManager, parameterManager, executorService);
-	subscriberFactory = new SubscriberFactory(slaveServer, topicManager, executorService);
+    subscriberFactory = new SubscriberFactory(slaveServer, topicManager, executorService);
     serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager, executorService);
 
     masterUri = nodeConfiguration.getMasterUri();
