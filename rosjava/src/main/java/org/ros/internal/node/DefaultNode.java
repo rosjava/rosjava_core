@@ -71,6 +71,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class DefaultNode implements Node {
 
+  private static final boolean DEBUG = false;
+
   private final GraphName nodeName;
   private final NodeConfiguration nodeConfiguration;
   private final NodeNameResolver resolver;
@@ -336,7 +338,13 @@ public class DefaultNode implements Node {
     for (Publisher<?> publisher : topicManager.getPublishers()) {
       publisher.shutdown();
       try {
-        masterClient.unregisterPublisher(slaveServer.toSlaveIdentifier(), publisher);
+        Response<Integer> response =
+            masterClient.unregisterPublisher(slaveServer.toSlaveIdentifier(), publisher);
+        if (DEBUG) {
+          if (response.getResult() == 0) {
+            System.err.println("Failed to unregister publisher: " + publisher.getTopicName());
+          }
+        }
       } catch (XmlRpcTimeoutException e) {
         log.error(e);
       } catch (RemoteException e) {
@@ -346,7 +354,13 @@ public class DefaultNode implements Node {
     for (Subscriber<?> subscriber : topicManager.getSubscribers()) {
       subscriber.shutdown();
       try {
-        masterClient.unregisterSubscriber(slaveServer.toSlaveIdentifier(), subscriber);
+        Response<Integer> response =
+            masterClient.unregisterSubscriber(slaveServer.toSlaveIdentifier(), subscriber);
+        if (DEBUG) {
+          if (response.getResult() == 0) {
+            System.err.println("Failed to unregister subscriber: " + subscriber.getTopicName());
+          }
+        }
       } catch (XmlRpcTimeoutException e) {
         log.error(e);
       } catch (RemoteException e) {
@@ -355,7 +369,13 @@ public class DefaultNode implements Node {
     }
     for (ServiceServer<?, ?> serviceServer : serviceManager.getServers()) {
       try {
-        masterClient.unregisterService(slaveServer.toSlaveIdentifier(), serviceServer);
+        Response<Integer> response =
+            masterClient.unregisterService(slaveServer.toSlaveIdentifier(), serviceServer);
+        if (DEBUG) {
+          if (response.getResult() == 0) {
+            System.err.println("Failed to unregister service: " + serviceServer.getName());
+          }
+        }
       } catch (XmlRpcTimeoutException e) {
         log.error(e);
       } catch (RemoteException e) {

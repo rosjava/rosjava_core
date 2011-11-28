@@ -74,11 +74,7 @@ public class MasterServer extends NodeServer {
 
   public int unregisterService(ServiceIdentifier serviceIdentifier) {
     GraphName serviceName = serviceIdentifier.getName();
-    if (services.containsKey(serviceName)) {
-      services.remove(serviceName);
-      return 1;
-    }
-    return 0;
+    return services.remove(serviceName) != null ? 1 : 0;
   }
 
   private void addSlave(SlaveIdentifier slaveIdentifier) {
@@ -124,12 +120,10 @@ public class MasterServer extends NodeServer {
   }
 
   public int unregisterSubscriber(SubscriberIdentifier subscriberIdentifier) {
-    GraphName topicName = subscriberIdentifier.getTopicName();
-    if (subscribers.containsKey(topicName)) {
-      subscribers.remove(topicName, subscriberIdentifier);
-      return 1;
+    if (DEBUG) {
+      log.info("Unregistering subscriber: " + subscriberIdentifier);
     }
-    return 0;
+    return subscribers.remove(subscriberIdentifier.getTopicName(), subscriberIdentifier) ? 1 : 0;
   }
 
   /**
@@ -150,12 +144,10 @@ public class MasterServer extends NodeServer {
   }
 
   public int unregisterPublisher(PublisherIdentifier publisherIdentifier) {
-    GraphName topicName = publisherIdentifier.getTopicName();
-    if (publishers.containsKey(topicName)) {
-      publishers.remove(topicName, publisherIdentifier);
-      return 1;
+    if (DEBUG) {
+      log.info("Unregistering publisher: " + publisherIdentifier);
     }
-    return 0;
+    return publishers.remove(publisherIdentifier.getTopicName(), publisherIdentifier) ? 1 : 0;
   }
 
   /**

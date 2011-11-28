@@ -164,6 +164,9 @@ public class DefaultNodeTest {
 
     node.shutdown();
 
+    // HACK(damonkohler): It's unclear why there is a race here.
+    Thread.sleep(1000);
+
     assertEquals(0, masterServer.getRegisteredPublishers().size());
     assertEquals(0, masterServer.getRegisteredSubscribers().size());
   }

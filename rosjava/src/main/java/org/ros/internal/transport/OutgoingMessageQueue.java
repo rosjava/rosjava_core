@@ -16,6 +16,7 @@
 
 package org.ros.internal.transport;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
@@ -127,6 +128,11 @@ public class OutgoingMessageQueue<MessageType> {
    */
   public int getNumberOfChannels() {
     return channelGroup.size();
+  }
+
+  @VisibleForTesting
+  ChannelGroup getChannelGroup() {
+    return channelGroup;
   }
 
 }

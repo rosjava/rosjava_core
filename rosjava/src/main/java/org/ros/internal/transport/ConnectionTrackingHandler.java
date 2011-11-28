@@ -26,7 +26,7 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.ros.exception.RosRuntimeException;
 
 /**
- * A Netty channel handler for tracking a ROS connection.
+ * Adds new {@link Channels} to the provided {@link ChannelGroup}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -50,13 +50,6 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
       log.info("Channel opened: " + e.getChannel().toString());
     }
     channelGroup.add(e.getChannel());
-  }
-
-  @Override
-  public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    if (DEBUG) {
-      log.info("Channel closed: " + e.getChannel().toString());
-    }
   }
 
   @Override

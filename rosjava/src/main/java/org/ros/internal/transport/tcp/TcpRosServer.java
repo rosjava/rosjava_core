@@ -78,6 +78,7 @@ public class TcpRosServer {
     bootstrap = new ServerBootstrap(channelFactory);
     bootstrap.setOption("child.bufferFactory",
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    bootstrap.setOption("child.keepAlive", true);
     incomingChannelGroup = new DefaultChannelGroup();
     bootstrap.setPipelineFactory(new TcpServerPipelineFactory(incomingChannelGroup, topicManager,
         serviceManager));
