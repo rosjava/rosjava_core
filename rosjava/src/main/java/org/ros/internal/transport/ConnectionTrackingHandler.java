@@ -20,10 +20,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
-import org.ros.exception.RosRuntimeException;
 
 /**
  * Adds new {@link Channels} to the provided {@link ChannelGroup}.
@@ -45,20 +43,11 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
   }
 
   @Override
-  public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {
+  public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
     if (DEBUG) {
       log.info("Channel opened: " + e.getChannel().toString());
     }
     channelGroup.add(e.getChannel());
+    super.channelOpen(ctx, e);
   }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-    if (DEBUG) {
-      log.info("Channel exception: " + e.getChannel().toString());
-    }
-    e.getChannel().close();
-    throw new RosRuntimeException(e.getCause());
-  }
-
 }

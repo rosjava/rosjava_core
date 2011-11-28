@@ -119,12 +119,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
     channelGroup = new DefaultChannelGroup();
     bootstrap =
         new ClientBootstrap(new NioClientSocketChannelFactory(executorService, executorService));
-    tcpClientPipelineFactory = new TcpClientPipelineFactory(channelGroup) {
+    tcpClientPipelineFactory = new TcpClientPipelineFactory(channelGroup, bootstrap) {
       @Override
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();
         pipeline.addLast("SubscriberHandshakeHandler", new SubscriberHandshakeHandler<MessageType>(
-            header, in, bootstrap));
+            header, in));
         return pipeline;
       }
     };

@@ -73,16 +73,18 @@ public class MessageQueueIntegrationTest {
 
   private class ServerHandler extends SimpleChannelHandler {
     @Override
-    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
+    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
       log.info("Channel connected: " + e.getChannel().toString());
       Channel channel = e.getChannel();
       outgoingMessageQueue.addChannel(channel);
+      super.channelConnected(ctx, e);
     }
 
     @Override
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e)
         throws Exception {
       log.info("Channel disconnected: " + e.getChannel().toString());
+      super.channelDisconnected(ctx, e);
     }
 
     @Override
@@ -202,13 +204,12 @@ public class MessageQueueIntegrationTest {
     final ClientBootstrap bootstrap = new ClientBootstrap(clientChannelFactory);
     bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     bootstrap.setOption("keepAlive", true);
-    ChannelGroup clientChannelGroup = new DefaultChannelGroup();
+    ChannelGroup channelGroup = new DefaultChannelGroup();
     TcpClientPipelineFactory clientPipelineFactory =
-        new TcpClientPipelineFactory(clientChannelGroup) {
+        new TcpClientPipelineFactory(channelGroup, bootstrap) {
           @Override
           public ChannelPipeline getPipeline() {
             ChannelPipeline pipeline = super.getPipeline();
-            pipeline.addLast("RetryingConnectionHandler", new RetryingConnectionHandler(bootstrap));
             pipeline.addLast("MessageHandler", in.createChannelHandler());
             return pipeline;
           }

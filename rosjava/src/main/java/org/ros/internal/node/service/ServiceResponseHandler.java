@@ -57,6 +57,6 @@ class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
       String message = Charset.forName("US-ASCII").decode(buffer).toString();
       listener.onFailure(new RemoteException(StatusCode.ERROR, message));
     }
+    super.messageReceived(ctx, e);
   }
-
 }

@@ -39,5 +39,4 @@ public class ConnectionTrackingChannelPipelineFactory implements ChannelPipeline
     pipeline.addLast(CONNECTION_TRACKING_HANDLER, connectionTrackingHandler);
     return pipeline;
   }
-  
 }

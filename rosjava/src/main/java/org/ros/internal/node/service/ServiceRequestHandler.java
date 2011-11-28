@@ -50,7 +50,7 @@ class ServiceRequestHandler<RequestType, ResponseType> extends SimpleChannelHand
   }
 
   @Override
-  public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
+  public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     ChannelBuffer requestBuffer = (ChannelBuffer) e.getMessage();
     ServiceServerResponse response = new ServiceServerResponse();
     ChannelBuffer responseBuffer;
@@ -68,6 +68,7 @@ class ServiceRequestHandler<RequestType, ResponseType> extends SimpleChannelHand
     response.setMessageLength(responseBuffer.readableBytes());
     response.setMessage(responseBuffer);
     ctx.getChannel().write(response);
+    super.messageReceived(ctx, e);
   }
 
 }

@@ -84,6 +84,7 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
       pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<ResponseType>());
       pipeline.addLast("ResponseHandler", new ServiceResponseHandler<ResponseType>(
           responseListeners, deserializer));
+      super.messageReceived(ctx, e);
     }
   }
 
@@ -109,7 +110,7 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
     channelFactory = new NioClientSocketChannelFactory(executorService, executorService);
     bootstrap = new ClientBootstrap(channelFactory);
     channelGroup = new DefaultChannelGroup();
-    TcpClientPipelineFactory factory = new TcpClientPipelineFactory(channelGroup) {
+    TcpClientPipelineFactory factory = new TcpClientPipelineFactory(channelGroup, bootstrap) {
       @Override
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();

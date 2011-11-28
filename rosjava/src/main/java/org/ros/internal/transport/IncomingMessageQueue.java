@@ -47,6 +47,7 @@ public class IncomingMessageQueue<MessageType> {
       if (DEBUG) {
         log.info("Received message: " + message);
       }
+      super.messageReceived(ctx, e);
     }
   }
 

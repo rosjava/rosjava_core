@@ -95,7 +95,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
       // channel. Replace the handshake handler with a handler which will
       // drop everything.
       pipeline.replace(this, "DiscardHandler", new SimpleChannelHandler());
+      super.messageReceived(ctx, e);
     }
   }
-
 }

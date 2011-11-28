@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -31,7 +30,6 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
-import org.ros.internal.transport.RetryingConnectionHandler;
 
 import java.util.Map;
 
@@ -45,13 +43,11 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
 
   private final ImmutableMap<String, String> header;
   private final IncomingMessageQueue<MessageType> in;
-  private final ClientBootstrap bootstrap;
 
   public SubscriberHandshakeHandler(ImmutableMap<String, String> header,
-      IncomingMessageQueue<MessageType> in, ClientBootstrap bootstrap) {
+      IncomingMessageQueue<MessageType> in) {
     this.header = header;
     this.in = in;
-    this.bootstrap = bootstrap;
   }
 
   private void handshake(ChannelBuffer buffer) {
@@ -73,8 +69,7 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
     Channel channel = e.getChannel();
     ChannelPipeline pipeline = channel.getPipeline();
     pipeline.remove(this);
-    pipeline.addLast("RetryingConnectionHandler", new RetryingConnectionHandler(bootstrap));
     pipeline.addLast("MessageHandler", in.createChannelHandler());
+    super.messageReceived(ctx, e);
   }
-
 }

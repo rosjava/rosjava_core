@@ -58,24 +58,24 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
 
   @Override
   public void connectRequested(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    super.connectRequested(ctx, e);
     if (DEBUG) {
       log.info("Connect requested: " + e.getChannel().toString());
     }
     reconnect = true;
+    super.connectRequested(ctx, e);
   }
 
   @Override
   public void disconnectRequested(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    super.disconnectRequested(ctx, e);
     if (DEBUG) {
       log.info("Disconnect requested: " + e.getChannel().toString());
     }
     reconnect = false;
+    super.disconnectRequested(ctx, e);
   }
 
   @Override
-  public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) {
+  public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
     if (reconnect) {
       if (DEBUG) {
         log.info("Channel closed, will reconnect: " + e.getChannel().toString());
@@ -96,6 +96,7 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
         log.info("Channel closed, will not reconnect: " + e.getChannel().toString());
       }
     }
+    super.channelClosed(ctx, e);
   }
 
   @Override
@@ -106,5 +107,4 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
     e.getChannel().close();
     throw new RosRuntimeException(e.getCause());
   }
-
 }
