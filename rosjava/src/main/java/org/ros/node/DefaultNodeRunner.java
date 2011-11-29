@@ -179,9 +179,7 @@ public class DefaultNodeRunner implements NodeRunner {
   /**
    * A {@link NodeMain} which wraps the client's main so that various items can be trapped.
    *
-   *
    * @author Keith M. Hughes
-   * @since Nov 28, 2011
    */
   private class NodeRunnerNodeMain extends NodeMain {
     /**
@@ -199,18 +197,15 @@ public class DefaultNodeRunner implements NodeRunner {
     }
 
     @Override
-    public void onNodeCreate(Node node) {
+    public void onStart(Node node) {
       this.mainNode = node;
-      
-      original.onNodeCreate(node);
-      
+      original.onStart(node);
       registerNodeMain(this);
     }
 
     @Override
-    public void onNodeShutdown(Node node) {
-      original.onNodeShutdown(node);
-      
+    public void onShutdown(Node node) {
+      original.onShutdown(node);
       unregisterNodeMain(this);
     }
 
@@ -220,6 +215,5 @@ public class DefaultNodeRunner implements NodeRunner {
     public Node getMainNode() {
       return mainNode;
     }
-
   }
 }

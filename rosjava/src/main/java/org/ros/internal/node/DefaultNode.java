@@ -494,7 +494,7 @@ public class DefaultNode implements Node {
    */
   public void signalCreate() {
     for (NodeListener listener : nodeListeners) {
-      listener.onNodeCreate(this);
+      listener.onStart(this);
     }
   }
 
@@ -510,7 +510,7 @@ public class DefaultNode implements Node {
       @Override
       public void run() {
         for (NodeListener listener : nodeListeners) {
-          listener.onNodeShutdown(node);
+          listener.onShutdown(node);
         }
       }
     });

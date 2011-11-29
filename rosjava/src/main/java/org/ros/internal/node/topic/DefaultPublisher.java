@@ -162,6 +162,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
    * <p>
    * Done in another thread.
    */
+  @Override
   public void signalRegistrationDone() {
     final Publisher<MessageType> publisher = this;
     executorService.execute(new Runnable() {

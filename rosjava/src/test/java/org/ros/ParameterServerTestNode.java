@@ -44,7 +44,7 @@ public class ParameterServerTestNode extends NodeMain {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void onNodeCreate(Node node) {
+  public void onStart(Node node) {
     this.node = node;
 
     Publisher<org.ros.message.std_msgs.String> pub_tilde =

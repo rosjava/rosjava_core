@@ -16,8 +16,6 @@
 
 package org.ros.node.topic;
 
-import java.util.List;
-
 import org.ros.internal.node.topic.Topic;
 import org.ros.message.MessageListener;
 

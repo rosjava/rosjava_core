@@ -240,7 +240,15 @@ public class MessageQueueIntegrationTest {
     connectIncomingMessageQueue(secondIncomingMessageQueue, serverChannel);
     expectMessage();
 
+    // Disconnect the outgoing queue's incoming connections.
     ChannelGroupFuture future = outgoingMessageQueue.getChannelGroup().close();
+    assertTrue(future.await(1, TimeUnit.SECONDS));
+    assertTrue(future.isCompleteSuccess());
+    expectMessage();
+
+    // Disconnect the outgoing queue's incoming connections again to see that
+    // retries work more than once.
+    future = outgoingMessageQueue.getChannelGroup().close();
     assertTrue(future.await(1, TimeUnit.SECONDS));
     assertTrue(future.isCompleteSuccess());
     expectMessage();

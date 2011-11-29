@@ -20,7 +20,7 @@ package org.ros.node;
  * The one required {@link NodeListener} for node creation.
  * 
  * <p>
- * {@link NodeListener#onNodeCreate(Node)} should be used to initialize a node.
+ * {@link NodeListener#onStart(Node)} should be used to initialize a node.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
@@ -30,8 +30,8 @@ public abstract class NodeMain implements NodeListener {
   /**
    * Program shutdown routine.
    */
-  public void onNodeShutdown(Node node) {
-	// Default is to do nothing.
+  @Override
+  public void onShutdown(Node node) {
+    // Default is to do nothing.
   }
-  
 }

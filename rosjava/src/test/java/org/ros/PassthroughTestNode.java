@@ -32,7 +32,7 @@ public class PassthroughTestNode extends NodeMain {
   private Node node;
 
   @Override
-  public void onNodeCreate(final Node node) {
+  public void onStart(final Node node) {
     this.node = node;
 
     // The goal of the passthrough node is simply to retransmit the messages

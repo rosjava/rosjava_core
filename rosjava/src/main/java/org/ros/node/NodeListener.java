@@ -20,30 +20,22 @@ package org.ros.node;
  * A listener for lifecycle events on a {@link Node}.
  *
  * @author Keith M. Hughes
- * @since Nov 22, 2011
  */
 public interface NodeListener {
 
   /**
-   * The node has just been created.
-   * 
-   * <p>
-   * The node will not have been started yet.
+   * Called when the {@link Node} has been started.
    * 
    * @param node
-   *          The {@link Node} which has been started.
+   *          the {@link Node} that has been started
    */
-  void onNodeCreate(Node node);
+  void onStart(Node node);
   
   /**
-   * The node has just been shut down.
-   * 
-   * <p>
-   * The node will have been shut down.
+   * Called when the {@link Node} has been shut down.
    * 
    * @param node
-   *          The {@link Node} which has been shut down.
+   *          the {@link Node} that has been shut down
    */
-  void onNodeShutdown(Node node);
-
+  void onShutdown(Node node);
 }

@@ -16,6 +16,23 @@
 
 package org.ros.internal.node.client;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.ros.concurrent.CancellableLoop;
+import org.ros.internal.node.response.Response;
+import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.service.DefaultServiceServer;
+import org.ros.internal.node.service.ServiceListener;
+import org.ros.internal.node.topic.DefaultPublisher;
+import org.ros.internal.node.topic.DefaultSubscriber;
+import org.ros.internal.node.topic.PublisherIdentifier;
+import org.ros.internal.node.topic.TopicListener;
+
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -29,22 +46,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.ros.internal.node.response.Response;
-import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.node.service.DefaultServiceServer;
-import org.ros.internal.node.service.ServiceListener;
-import org.ros.internal.node.topic.DefaultPublisher;
-import org.ros.internal.node.topic.DefaultSubscriber;
-import org.ros.internal.node.topic.PublisherIdentifier;
-import org.ros.internal.node.topic.TopicListener;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 /**
  * Manages topic, and service registrations of a {@link SlaveServer} with the
@@ -62,60 +63,55 @@ public class Registrar implements TopicListener, ServiceListener {
   private static final TimeUnit DEFAULT_RETRY_TIME_UNIT = TimeUnit.SECONDS;
 
   private final MasterClient masterClient;
-  private final MasterRegistrationThread registrationThread;
+  private final RetryLoop retryLoop;
   private final CompletionService<Response<?>> completionService;
   private final Map<Future<Response<?>>, Callable<Response<?>>> futures;
   private final ScheduledExecutorService retryExecutor;
   private final ExecutorService executorService;
-  
+
   private long retryDelay;
   private TimeUnit retryTimeUnit;
   private SlaveIdentifier slaveIdentifier;
 
-  class MasterRegistrationThread extends Thread {
+  class RetryLoop extends CancellableLoop {
     @Override
-    public void run() {
+    public void loop() throws InterruptedException {
+      Future<Response<?>> response = completionService.take();
       try {
-        while (!Thread.currentThread().isInterrupted()) {
-          Future<Response<?>> response = completionService.take();
-          try {
-            if (response.get().isSuccess()) {
-              futures.remove(response);
-            }
-          } catch (ExecutionException e) {
-            log.warn("Master registration failed and will be retried.", e);
-            // Retry the registration task.
-            final Callable<Response<?>> task = futures.get(response);
-            futures.remove(response);
-            retryExecutor.schedule(new Runnable() {
-              @Override
-              public void run() {
-                submitCallable(task);
-              }
-            }, retryDelay, retryTimeUnit);
-          }
+        if (response.get().isSuccess()) {
+          futures.remove(response);
         }
-      } catch (InterruptedException e) {
-        // Cancelable
+      } catch (ExecutionException e) {
+        log.warn("Master registration failed and will be retried.", e);
+        // Retry the registration task.
+        final Callable<Response<?>> task = futures.get(response);
+        futures.remove(response);
+        retryExecutor.schedule(new Runnable() {
+          @Override
+          public void run() {
+            submitCallable(task);
+          }
+        }, retryDelay, retryTimeUnit);
       }
     }
   }
 
   /**
    * @param masterClient
-   *          A client to the ROS master server.
+   *          a {@link MasterClient} for communicating with the ROS master
    * @param executorService
-   *          An {@link ExecutorService} to be used for all async operations.
+   *          an {@link ExecutorService} to be used for all asynchronous
+   *          operations
    */
   public Registrar(MasterClient masterClient, ExecutorService executorService) {
     this.masterClient = masterClient;
     this.executorService = executorService;
-    
-    setRetryDelay(DEFAULT_RETRY_DELAY, DEFAULT_RETRY_TIME_UNIT);
+    retryLoop = new RetryLoop();
     completionService = new ExecutorCompletionService<Response<?>>(executorService);
     futures = Maps.newConcurrentMap();
+    retryDelay = DEFAULT_RETRY_DELAY;
+    retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
     retryExecutor = Executors.newSingleThreadScheduledExecutor();
-    registrationThread = new MasterRegistrationThread();
     if (DEBUG) {
       log.info("Remote URI: " + masterClient.getRemoteUri());
     }
@@ -127,9 +123,10 @@ public class Registrar implements TopicListener, ServiceListener {
   }
 
   /**
-   * Get the number of pending async registration requests to the master.
+   * Get the number of pending asynchronous registration requests to the master.
    * 
-   * @return The number of pending async registration requests to the master.
+   * @return the number of pending asynchronous registration requests to the
+   *         master
    */
   public int getPendingSize() {
     return futures.size();
@@ -193,11 +190,11 @@ public class Registrar implements TopicListener, ServiceListener {
     Preconditions.checkNotNull(slaveIdentifier);
     Preconditions.checkState(this.slaveIdentifier == null, "Registrar already started.");
     this.slaveIdentifier = slaveIdentifier;
-    registrationThread.start();
+    executorService.execute(retryLoop);
   }
 
   public void shutdown() {
-    registrationThread.interrupt();
+    retryLoop.cancel();
     synchronized (futures) {
       for (Future<Response<?>> future : futures.keySet()) {
         future.cancel(true);

@@ -32,7 +32,7 @@ public class SlaveApiTestNode extends NodeMain {
   private Node node;
 
   @Override
-  public void onNodeCreate(Node node) {
+  public void onStart(Node node) {
     this.node = node;
 
     // Basic chatter in/out test.
