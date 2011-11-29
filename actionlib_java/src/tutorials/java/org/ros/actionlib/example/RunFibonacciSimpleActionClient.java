@@ -41,10 +41,14 @@ public class RunFibonacciSimpleActionClient {
       runner.run(new NodeMain() {
 
         @Override
-        public void onNodeCreate(Node node) {
+        public void onStart(Node node) {
           sac.addClientPubSub(node);
         }
         
+        @Override
+        public void onShutdown(Node node) {
+        }
+
       }, configuration);
 
       System.out.println("[Test] Waiting for action server to start");
@@ -112,10 +116,14 @@ public class RunFibonacciSimpleActionClient {
       runner.run(new NodeMain() {
 
         @Override
-        public void onNodeCreate(Node node) {
+        public void onStart(Node node) {
           sac.addClientPubSub(node);
         }
         
+        @Override
+        public void onShutdown(Node node) {
+        }
+
       }, configuration);
 
       System.out.println("[Test] Waiting for action server to start");

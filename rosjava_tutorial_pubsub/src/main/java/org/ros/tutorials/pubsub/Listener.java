@@ -22,8 +22,6 @@ import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
 
-import com.google.common.base.Preconditions;
-
 /**
  * This is a simple rosjava {@link Subscriber} {@link Node}. It assumes an
  * external roscore is already running.
@@ -32,12 +30,8 @@ import com.google.common.base.Preconditions;
  */
 public class Listener implements NodeMain {
 
-  private Node node;
-
   @Override
-  public void main(Node node) {
-    Preconditions.checkState(this.node == null);
-    this.node = node;
+  public void onStart(Node node) {
     try {
       final Log log = node.getLog();
       node.newSubscriber("chatter", "std_msgs/String",
@@ -57,9 +51,6 @@ public class Listener implements NodeMain {
   }
 
   @Override
-  public void shutdown() {
-    node.shutdown();
-    node = null;
+  public void onShutdown(Node node) {
   }
-
 }

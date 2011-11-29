@@ -141,7 +141,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
       throws RosException {
     this.nodeName = name;
     this.spec = spec;
-    this.publisherListener = new CountDownPublisherListener(2, 2, 2);
+    this.publisherListener = new CountDownPublisherListener(2, 2, 2, 2);
   }
 
   /**
@@ -319,7 +319,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
    *         established)
    */
   public void waitForActionServerToStart() throws InterruptedException {
-    publisherListener.awaitRemoteConnection();
+    publisherListener.awaitNewSubscriber();
   }
 
   /**
@@ -341,7 +341,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
     // TODO(keith): This isn't quite right since it will only have connection to
     // the goal and cancel publishers. This should be extended to include the
     // subscribers.
-    return publisherListener.awaitRemoteConnection(timeout, units);
+    return publisherListener.awaitNewSubscriber(timeout, units);
   }
 
   /**

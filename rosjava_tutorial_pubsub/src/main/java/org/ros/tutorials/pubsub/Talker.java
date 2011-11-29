@@ -34,7 +34,7 @@ public class Talker implements NodeMain {
   private Node node;
 
   @Override
-  public void main(Node node) {
+  public void onStart(Node node) {
     Preconditions.checkState(this.node == null);
     this.node = node;
     try {
@@ -59,8 +59,6 @@ public class Talker implements NodeMain {
   }
 
   @Override
-  public void shutdown() {
-    node.shutdown();
-    node = null;
+  public void onShutdown(Node node) {
   }
 }

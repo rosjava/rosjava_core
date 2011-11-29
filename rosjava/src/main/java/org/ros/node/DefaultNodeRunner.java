@@ -17,8 +17,11 @@
 package org.ros.node;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 
@@ -45,6 +48,7 @@ public class DefaultNodeRunner implements NodeRunner {
   private final NodeFactory nodeFactory;
   private final ExecutorService executorService;
   private final Multimap<GraphName, Node> nodes;
+  private final BiMap<Node, NodeMain> nodeMains;
 
   /**
    * @return an instance of {@link DefaultNodeRunner} that uses a default
@@ -72,6 +76,7 @@ public class DefaultNodeRunner implements NodeRunner {
     this.nodeFactory = nodeFactory;
     this.executorService = executorService;
     nodes = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, Node>create());
+    nodeMains = Maps.synchronizedBiMap(HashBiMap.<Node, NodeMain>create());
   }
 
   @Override
@@ -94,7 +99,8 @@ public class DefaultNodeRunner implements NodeRunner {
           nodeListenersCopy.addAll(nodeListeners);
         }
         // The new Node will call onStart().
-        nodeFactory.newNode(nodeConfigurationCopy, nodeListenersCopy);
+        Node node = nodeFactory.newNode(nodeConfigurationCopy, nodeListenersCopy);
+        nodeMains.put(node, nodeMain);
       }
     });
   }
@@ -102,6 +108,14 @@ public class DefaultNodeRunner implements NodeRunner {
   @Override
   public void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
     run(nodeMain, nodeConfiguration, null);
+  }
+
+  @Override
+  public void shutdownNodeMain(NodeMain nodeMain) {
+    Node node = nodeMains.inverse().get(nodeMain);
+    if (node != null) {
+      safelyShutdownNode(node);
+    }
   }
 
   @Override
@@ -161,6 +175,7 @@ public class DefaultNodeRunner implements NodeRunner {
    */
   private void unregisterNode(Node node) {
     nodes.get(node.getName()).remove(node);
+    nodeMains.remove(node);
   }
 
   private class RegistrationListener implements NodeListener {

@@ -38,7 +38,7 @@ import java.util.Map;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class ParameterServerTestNode extends NodeMain {
+public class ParameterServerTestNode implements NodeMain {
 
   @SuppressWarnings("rawtypes")
   @Override
@@ -120,5 +120,9 @@ public class ParameterServerTestNode extends NodeMain {
       } catch (InterruptedException e) {
       }
     }
+  }
+
+  @Override
+  public void onShutdown(Node node) {
   }
 }

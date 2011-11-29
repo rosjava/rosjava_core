@@ -1,8 +1,7 @@
 package org.ros.actionlib.example;
 
-import org.ros.node.Node;
-
 import org.ros.node.DefaultNodeRunner;
+import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeRunner;
@@ -32,10 +31,14 @@ public class RunFibonacciSimpleActionServer {
       runner.run(new NodeMain() {
 
         @Override
-        public void onNodeCreate(Node node) {
+        public void onStart(Node node) {
           sas.addClientPubSub(node);
         }
         
+        @Override
+        public void onShutdown(Node node) {
+        }
+
       }, configuration);
     } catch (Exception e) {
       // TODO Auto-generated catch block

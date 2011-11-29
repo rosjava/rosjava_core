@@ -27,7 +27,7 @@ import org.ros.node.topic.Publisher;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class PassthroughTestNode extends NodeMain {
+public class PassthroughTestNode implements NodeMain {
 
   @Override
   public void onStart(final Node node) {
@@ -84,5 +84,9 @@ public class PassthroughTestNode extends NodeMain {
           }
         };
     node.newSubscriber("composite_in", "test_ros/Composite", composite_cb);
+  }
+
+  @Override
+  public void onShutdown(Node node) {
   }
 }

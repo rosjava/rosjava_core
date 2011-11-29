@@ -27,7 +27,7 @@ import org.ros.node.topic.Publisher;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class SlaveApiTestNode extends NodeMain {
+public class SlaveApiTestNode implements NodeMain {
 
   @Override
   public void onStart(Node node) {
@@ -70,5 +70,9 @@ public class SlaveApiTestNode extends NodeMain {
         e.printStackTrace();
       }
     }
+  }
+
+  @Override
+  public void onShutdown(Node node) {
   }
 }

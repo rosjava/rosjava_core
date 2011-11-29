@@ -17,6 +17,7 @@
 package org.ros.node;
 
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Executes {@link NodeMain}s.
@@ -54,7 +55,22 @@ public interface NodeRunner {
   void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration);
 
   /**
-   * Shutdown all started {@link Node}s.
+   * Shuts down the supplied {@link NodeMain} (i.e.
+   * {@link NodeMain#onShutdown(Node)} will be called). This does not
+   * necessarily shut down the {@link Node} that is associated with the
+   * {@link NodeMain}.
+   * 
+   * <p>
+   * This has no effect if the {@link NodeMain} has not started.
+   * 
+   * @param nodeMain
+   *          the {@link NodeMain} to shutdown
+   */
+  void shutdownNodeMain(NodeMain nodeMain);
+
+  /**
+   * Shutdown all started {@link Node}s. This does not shut down the supplied
+   * {@link ExecutorService}.
    */
   void shutdown();
 }

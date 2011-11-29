@@ -16,22 +16,18 @@
 
 package org.ros.node;
 
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
+
 /**
  * The one required {@link NodeListener} for node creation.
  * 
  * <p>
- * {@link NodeListener#onStart(Node)} should be used to initialize a node.
+ * {@link NodeListener#onStart(Node)} should be used to set up your program's
+ * {@link Publisher}s, {@link Subscriber}s, and services.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class NodeMain implements NodeListener {
-
-  /**
-   * Program shutdown routine.
-   */
-  @Override
-  public void onShutdown(Node node) {
-    // Default is to do nothing.
-  }
+public interface NodeMain extends NodeListener {
 }
