@@ -81,13 +81,18 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   private final class MessageReader extends CancellableLoop {
     @Override
     public void loop() throws InterruptedException {
-      MessageType message = incomingMessageQueue.take();
+      final MessageType message = incomingMessageQueue.take();
       if (DEBUG) {
         log.info("Received message: " + message + " " + message.getClass().getCanonicalName());
       }
-      for (MessageListener<MessageType> listener : messageListeners) {
+      for (final MessageListener<MessageType> listener : messageListeners) {
         // TODO(damonkohler): Recycle Message objects to avoid GC.
-        listener.onNewMessage(message);
+        executorService.execute(new Runnable() {
+          @Override
+          public void run() {
+            listener.onNewMessage(message);
+          }
+        });
       }
     }
   }
