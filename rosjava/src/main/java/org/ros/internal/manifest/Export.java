@@ -16,13 +16,13 @@
 
 package org.ros.internal.manifest;
 
-import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Map;
-import java.util.Map.Entry;
+import com.google.common.collect.Maps;
 
 public class Export implements XmlSerializable {
   

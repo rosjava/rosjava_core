@@ -30,6 +30,10 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 /**
+ * A {@link Runnable} which is used whenever new publishers are being added to a
+ * {@link DefaultSubscriber}. It takes care of registration between the {@link Subscriber}
+ * and remote {@link Publisher}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 class UpdatePublisherRunnable<MessageType> implements Runnable {

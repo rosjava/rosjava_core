@@ -1,5 +1,7 @@
 package org.ros.actionlib.server;
 
+import org.ros.actionlib.ActionConstants;
+
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.util.GoalIDGenerator;
 import org.ros.exception.RosException;
@@ -12,7 +14,6 @@ import org.ros.message.actionlib_msgs.GoalStatus;
 import org.ros.message.actionlib_msgs.GoalStatusArray;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
@@ -29,13 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * <p>
  * This server should be started by calling {@link #main(NodeConfiguration)}.
  */
-public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extends Message, T_ACTION_RESULT extends Message, T_FEEDBACK extends Message, T_GOAL extends Message, T_RESULT extends Message>
-    implements NodeMain {
-  /**
-   * Parent node, if any. Can be null.
-   */
-  protected Node parent;
-
+public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extends Message, T_ACTION_RESULT extends Message, T_FEEDBACK extends Message, T_GOAL extends Message, T_RESULT extends Message> {
   /**
    * Name of the server node.
    */
@@ -105,24 +100,21 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
       String name,
       ActionSpec<?, T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> spec,
       ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks) {
-
-    this(null, name, spec, callbacks);
-  }
-
-  public DefaultActionServer(
-      Node parent,
-      String name,
-      ActionSpec<?, T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> spec,
-      ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks) {
-    this.parent = parent;
     this.name = name;
     this.callbacks = callbacks;
     this.spec = spec;
   }
 
-  @Override
-  public void main(Node node) throws Exception {
-	this.node = node;
+  /**
+   * Add all actionclient publishers and subscribers to the given node.
+   * 
+   * <p>
+   * Lifetime of the node is taken over by the client.
+   * 
+   * @param node
+   */
+  public void addClientPubSub(Node node) {
+    this.node = node;
     // TODO(damonkohler): Move the logic for conditionally changing this node's
     // name to the location where this NodeMain is launched.
     idGenerator = new GoalIDGenerator(node);
@@ -139,7 +131,9 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
     }
   }
 
-  @Override
+  /**
+   * Shut the server down.
+   */
   public void shutdown() {
     if (statusTimer != null) {
       statusTimer.cancel();
@@ -167,9 +161,9 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
   protected boolean initServer() {
 
     try {
-      pubFeedback = node.newPublisher("feedback", spec.getActionFeedbackMessage());
-      pubResult = node.newPublisher("result", spec.getActionResultMessage());
-      pubStatus = node.newPublisher("status", "actionlib_msgs/GoalStatusArray");
+      pubFeedback = node.newPublisher(ActionConstants.TOPIC_NAME_FEEDBACK, spec.getActionFeedbackMessage());
+      pubResult = node.newPublisher(ActionConstants.TOPIC_NAME_RESULT, spec.getActionResultMessage());
+      pubStatus = node.newPublisher(ActionConstants.TOPIC_NAME_STATUS, ActionConstants.MESSAGE_TYPE_STATUS);
 
       MessageListener<T_ACTION_GOAL> goalCallback = new MessageListener<T_ACTION_GOAL>() {
         @Override
@@ -177,7 +171,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
           doGoalCallback(actionGoal);
         }
       };
-      subGoal = node.newSubscriber("goal", spec.getActionGoalMessage(), goalCallback);
+      subGoal = node.newSubscriber(ActionConstants.TOPIC_NAME_GOAL, spec.getActionGoalMessage(), goalCallback);
 
       MessageListener<GoalID> cancelCallback = new MessageListener<GoalID>() {
         @Override
@@ -185,7 +179,7 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
           doCancelCallback(goalID);
         }
       };
-      subCancelGoal = node.newSubscriber("cancel", "actionlib_msgs/GoalID", cancelCallback);
+      subCancelGoal = node.newSubscriber(ActionConstants.TOPIC_NAME_CANCEL, ActionConstants.MESSAGE_TYPE_CANCEL, cancelCallback);
 
     } catch (Exception re) {
       node.getLog().error("Unable to start up " + getClass().getName(), re);

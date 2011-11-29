@@ -24,6 +24,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -46,7 +47,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 /**
- * Manages topic and service registrations of a {@link SlaveServer} with the
+ * Manages topic, and service registrations of a {@link SlaveServer} with the
  * {@link MasterServer}.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
@@ -65,14 +66,11 @@ public class Registrar implements TopicListener, ServiceListener {
   private final CompletionService<Response<?>> completionService;
   private final Map<Future<Response<?>>, Callable<Response<?>>> futures;
   private final ScheduledExecutorService retryExecutor;
-
+  private final ExecutorService executorService;
+  
   private long retryDelay;
   private TimeUnit retryTimeUnit;
   private SlaveIdentifier slaveIdentifier;
-
-  // TODO(damonkohler): This flag isn't useful if the connection to the master
-  // is flaky. We need a better indicator.
-  private boolean registrationOk;
 
   class MasterRegistrationThread extends Thread {
     @Override
@@ -82,11 +80,9 @@ public class Registrar implements TopicListener, ServiceListener {
           Future<Response<?>> response = completionService.take();
           try {
             if (response.get().isSuccess()) {
-              registrationOk = true;
               futures.remove(response);
             }
           } catch (ExecutionException e) {
-            registrationOk = false;
             log.warn("Master registration failed and will be retried.", e);
             // Retry the registration task.
             final Callable<Response<?>> task = futures.get(response);
@@ -105,13 +101,20 @@ public class Registrar implements TopicListener, ServiceListener {
     }
   }
 
-  public Registrar(MasterClient masterClient) {
+  /**
+   * @param masterClient
+   *          A client to the ROS master server.
+   * @param executorService
+   *          An {@link ExecutorService} to be used for all async operations.
+   */
+  public Registrar(MasterClient masterClient, ExecutorService executorService) {
     this.masterClient = masterClient;
+    this.executorService = executorService;
+    
     setRetryDelay(DEFAULT_RETRY_DELAY, DEFAULT_RETRY_TIME_UNIT);
-    completionService = new ExecutorCompletionService<Response<?>>(Executors.newCachedThreadPool());
+    completionService = new ExecutorCompletionService<Response<?>>(executorService);
     futures = Maps.newConcurrentMap();
     retryExecutor = Executors.newSingleThreadScheduledExecutor();
-    registrationOk = false;
     registrationThread = new MasterRegistrationThread();
     if (DEBUG) {
       log.info("Remote URI: " + masterClient.getRemoteUri());
@@ -123,14 +126,20 @@ public class Registrar implements TopicListener, ServiceListener {
     retryTimeUnit = unit;
   }
 
+  /**
+   * Get the number of pending async registration requests to the master.
+   * 
+   * @return The number of pending async registration requests to the master.
+   */
   public int getPendingSize() {
     return futures.size();
   }
 
-  public boolean isMasterRegistrationOk() {
-    return registrationOk;
-  }
-
+  /**
+   * Submit a task to the completion service.
+   * 
+   * @param task
+   */
   private void submitCallable(Callable<Response<?>> task) {
     Future<Response<?>> future = completionService.submit(task);
     futures.put(future, task);

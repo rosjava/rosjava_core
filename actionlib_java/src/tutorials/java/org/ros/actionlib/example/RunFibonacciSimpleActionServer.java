@@ -1,7 +1,10 @@
 package org.ros.actionlib.example;
 
+import org.ros.node.Node;
+
 import org.ros.node.DefaultNodeRunner;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
 import org.ros.node.NodeRunner;
 
 /**
@@ -19,14 +22,21 @@ public class RunFibonacciSimpleActionServer {
       FibonacciSimpleActionServerCallbacks impl = new FibonacciSimpleActionServerCallbacks();
 
       FibonacciActionSpec spec = new FibonacciActionSpec();
-      FibonacciSimpleActionServer sas =
+      final FibonacciSimpleActionServer sas =
           spec.buildSimpleActionServer("fibonacci_server", impl, true);
 
       NodeConfiguration configuration = NodeConfiguration.newPrivate();
 
       NodeRunner runner = DefaultNodeRunner.newDefault();
 
-      runner.run(sas, configuration);
+      runner.run(new NodeMain() {
+
+        @Override
+        public void onNodeCreate(Node node) {
+          sas.addClientPubSub(node);
+        }
+        
+      }, configuration);
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

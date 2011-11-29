@@ -1,17 +1,23 @@
 package org.ros.actionlib.client;
 
+import com.google.common.collect.Lists;
+
+import org.ros.actionlib.ActionConstants;
 import org.ros.actionlib.ActionSpec;
 import org.ros.exception.RosException;
-import org.ros.message.Duration;
 import org.ros.message.Message;
 import org.ros.message.MessageListener;
 import org.ros.message.Time;
 import org.ros.message.actionlib_msgs.GoalID;
 import org.ros.message.actionlib_msgs.GoalStatusArray;
 import org.ros.node.Node;
-import org.ros.node.NodeMain;
+import org.ros.node.topic.CountDownPublisherListener;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An ActionClient is the client interface of the actionlib package. It provides
@@ -42,8 +48,7 @@ import org.ros.node.topic.Subscriber;
  * @param <T_RESULT>
  *          result message
  */
-public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extends Message, T_ACTION_RESULT extends Message, T_FEEDBACK extends Message, T_GOAL extends Message, T_RESULT extends Message>
-    implements NodeMain {
+public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extends Message, T_ACTION_RESULT extends Message, T_FEEDBACK extends Message, T_GOAL extends Message, T_RESULT extends Message> {
   /**
    * The action specification
    */
@@ -54,11 +59,6 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
    * GoalHandles on the reception of status, feedback and result messages
    */
   protected GoalManager<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> goalManager;
-
-  /**
-   * Parent node of node for action client. Can be null.
-   */
-  protected Node parent;
 
   /**
    * The ActionClient's node.
@@ -118,13 +118,13 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
   protected volatile boolean active = true;
 
   /**
-   * Monitor used to wait for the action server to start up and get notified as
-   * soon as it is ready.
+   * Listener to know when the client is connected or not.
    */
-  private Object waitSync = new Object();
+  private CountDownPublisherListener publisherListener;
 
   /**
-   * Constructor used to create an ActionClient that communicates in a given
+   * Constructor used to create an ActionClient that will be a child node of the
+   * node represented by the given node handle. It communicates in a given
    * nodeName space on a given action specification.
    * 
    * @param nameSpace
@@ -139,53 +139,23 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
       String name,
       ActionSpec<?, T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> spec)
       throws RosException {
-
-    this(null, name, spec);
-  }
-
-  /**
-   * Constructor used to create an ActionClient that will be a child node of the
-   * node represented by the given node handle. It communicates in a given nodeName
-   * space on a given action specification.
-   * 
-   * @param parent
-   *          The parent node of this action client. Can be null.
-   * @param nameSpace
-   *          The nodeName space to communicate within (specified by the action
-   *          server)
-   * @param spec
-   *          The specification of the action the ActionClient shall use
-   * @throws RosException
-   *           If setting up the needed subscribers and publishers fail
-   */
-  public ActionClient(
-      Node parent,
-      String name,
-      ActionSpec<?, T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> spec)
-      throws RosException {
-    this.parent = parent;
     this.nodeName = name;
     this.spec = spec;
-  }
-
-  @Override
-  public void main(Node node) throws Exception {
-    // TODO(damonkohler): Move resolving the node name to the location where
-    // this NodeMain is started.
-    initClient(node);
+    this.publisherListener = new CountDownPublisherListener(2, 2, 2);
   }
 
   /**
-   * Sets up subscribers for the action server's status, feedback and result
-   * topics and publishers for the action client's goal and cancel topics.
+   * Add all actionclient publishers and subscribers to the given node.
+   * 
+   * <p>
+   * Lifetime of the node is taken over by the client.
    * 
    * @param node
-   *          The node handle to be used by the ActionClient
-   * @throws RosException
-   *           If setting up the needed subscribers and publishers fail
    */
-  protected void initClient(Node node) throws RosException {
+  public void addClientPubSub(Node node) {
     this.node = node;
+
+    List<? extends PublisherListener> publisherListeners = Lists.newArrayList(publisherListener);
 
     MessageListener<T_ACTION_FEEDBACK> feedbackCallback = new MessageListener<T_ACTION_FEEDBACK>() {
       @Override
@@ -194,7 +164,8 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
       }
     };
     subFeedback =
-        node.newSubscriber("feedback", spec.getActionFeedbackMessage(), feedbackCallback);
+        node.newSubscriber(ActionConstants.TOPIC_NAME_FEEDBACK, spec.getActionFeedbackMessage(),
+            feedbackCallback);
 
     MessageListener<T_ACTION_RESULT> resultCallback = new MessageListener<T_ACTION_RESULT>() {
       @Override
@@ -202,7 +173,9 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
         doResultCallback(actionResult);
       }
     };
-    subResult = node.newSubscriber("result", spec.getActionResultMessage(), resultCallback);
+    subResult =
+        node.newSubscriber(ActionConstants.TOPIC_NAME_RESULT, spec.getActionResultMessage(),
+            resultCallback);
 
     MessageListener<GoalStatusArray> statusCallback = new MessageListener<GoalStatusArray>() {
       @Override
@@ -210,10 +183,16 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
         doStatusCallback(statusArray);
       }
     };
-    subStatus = node.newSubscriber("status", "actionlib_msgs/GoalStatusArray", statusCallback);
+    subStatus =
+        node.newSubscriber(ActionConstants.TOPIC_NAME_STATUS, ActionConstants.MESSAGE_TYPE_STATUS,
+            statusCallback);
 
-    pubGoal = node.newPublisher("goal", spec.getActionGoalMessage());
-    pubCancelGoal = node.newPublisher("cancel", "actionlib_msgs/GoalID");
+    pubGoal =
+        node.newPublisher(ActionConstants.TOPIC_NAME_GOAL, spec.getActionGoalMessage(),
+            publisherListeners);
+    pubCancelGoal =
+        node.newPublisher(ActionConstants.TOPIC_NAME_CANCEL, ActionConstants.MESSAGE_TYPE_CANCEL,
+            publisherListeners);
 
     // Uses the node of the action client so must be done here.
     goalManager =
@@ -310,39 +289,8 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
   }
 
   /**
-   * Checks if a connection to the action server is established.
-   * 
-   * @return <tt>true</tt> - If the ActionClient and the action server are
-   *         connected<br>
-   *         <tt>false</tt> - Otherwise
+   * Shut the action client down.
    */
-  public boolean isServerConnected() {
-	if (node == null)
-		return false;
-
-    if (!statusReceived) {
-      node.getLog().debug("[ActionClient] isServerconnected -> false (didn't receive status yet)");
-      return false;
-    }
-
-    if (!pubGoal.hasSubscribers()) {
-      node.getLog().debug(
-          "[ActionClient] isServerconnected -> false (no subscriber for goal topic)");
-      return false;
-    }
-    if (!pubCancelGoal.hasSubscribers()) {
-      node.getLog().debug(
-          "[ActionClient] isServerconnected -> false (no subscriber for cancel topic)");
-      return false;
-    }
-
-    node.getLog().debug(
-        "[ActionClient] isServerConnected -> true (action server '" + callerID + "')");
-    return true;
-
-  }
-
-  @Override
   public void shutdown() {
     // Shuts down all subscribers and publishers and stops tracking all
     // goals without canceling them. All ClientGoalHandles created by
@@ -370,8 +318,8 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
    *         (normally, the method would block forever if no connection is
    *         established)
    */
-  public boolean waitForActionServerToStart() {
-    return waitForActionServerToStart(new Duration(0, 0));
+  public void waitForActionServerToStart() throws InterruptedException {
+    publisherListener.awaitRemoteConnection();
   }
 
   /**
@@ -382,51 +330,18 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
    * @param timeout
    *          The maximum duration to wait for the action server to start up. A
    *          zero length duration results in unlimited waiting.
+   * @param units
+   *          The units for {@code timeout}
    * @return <tt>true</tt> - if the ActionClient could establish a connection to
    *         the action server within the given time<br>
    *         <tt>false</tt> - otherwise
    */
-  public boolean waitForActionServerToStart(Duration timeout) {
-	// TODO(keith): Completely rewrite how this is done.
-
-    if (!active) {
-      node.getLog()
-          .warn(
-              "[ActionClient] Trying to waitForActionServerToStart() on an inactive ActionClient. You are incorrectly using an ActionClient.");
-      return false;
-    }
-    if (timeout.isNegative()) {
-      node.getLog().warn(
-          "[ActionClient] Timeouts can't be negative. Timeout is ["
-              + (timeout.totalNsecs() / 1000000) + " ms]");
-      return false;
-    }
-
-    Time timeoutTime = Time.fromNano(System.nanoTime()).add(timeout);
-    Duration loopCheckTime = new Duration(0, 500000000); // check every 500ms,
-                                                         // if Node is ok
-
-    synchronized (waitSync) {
-      while (node == null || (node.isOk() && !isServerConnected())) {
-        Duration timeLeft = timeoutTime.subtract(Time.fromNano(System.nanoTime()));
-        if (timeLeft.totalNsecs() / 1000000 <= 0 && !timeout.isZero()) {
-          break;
-        }
-
-        if ((timeLeft.totalNsecs() > loopCheckTime.totalNsecs()) || timeout.isZero()) {
-          timeLeft = loopCheckTime;
-        }
-
-        try {
-          waitSync.wait(timeLeft.totalNsecs() / 1000000);
-        } catch (InterruptedException e) {
-        }
-
-      }
-    }
-
-    return isServerConnected();
-
+  public boolean waitForActionServerToStart(long timeout, TimeUnit units)
+      throws InterruptedException {
+    // TODO(keith): This isn't quite right since it will only have connection to
+    // the goal and cancel publishers. This should be extended to include the
+    // subscribers.
+    return publisherListener.awaitRemoteConnection(timeout, units);
   }
 
   /**
@@ -489,12 +404,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
     callerID = currCallerID;
     latestStatusTime = goalStatuses.header.stamp;
 
-    synchronized (waitSync) {
-      waitSync.notifyAll();
-    }
-
     goalManager.updateStatuses(goalStatuses);
-
   }
 
   /**

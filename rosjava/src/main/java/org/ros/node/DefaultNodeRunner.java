@@ -17,6 +17,7 @@
 package org.ros.node;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +26,8 @@ import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.internal.node.NodeFactory;
 import org.ros.namespace.GraphName;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -41,7 +44,7 @@ public class DefaultNodeRunner implements NodeRunner {
 
   private final NodeFactory nodeFactory;
   private final Executor executor;
-  private final Map<GraphName, NodeMain> nodeMains;
+  private final Map<GraphName, NodeRunnerNodeMain> nodeMains;
 
   /**
    * @return an instance of {@link DefaultNodeRunner} that uses a default
@@ -71,18 +74,9 @@ public class DefaultNodeRunner implements NodeRunner {
     nodeMains = Maps.newConcurrentMap();
   }
 
-  /**
-   * Executes the supplied {@link NodeMain} using the supplied
-   * {@link NodeConfiguration} and the configured {@link Executor}.
-   * 
-   * @param nodeMain
-   *          the {@link NodeMain} to execute
-   * @param nodeConfiguration
-   *          the {@link NodeConfiguration} that will be passed to the
-   *          {@link NodeMain}
-   */
   @Override
-  public void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration) {
+  public void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration,
+      final Collection<? extends NodeListener> nodeListeners) {
     Preconditions.checkNotNull(nodeConfiguration.getNodeName(), "Node name not specified.");
     if (DEBUG) {
       log.info("Starting node: " + nodeConfiguration.getNodeName());
@@ -93,23 +87,25 @@ public class DefaultNodeRunner implements NodeRunner {
     executor.execute(new Runnable() {
       @Override
       public void run() {
-        Node node = nodeFactory.newNode(nodeConfigurationCopy);
-        GraphName nodeName = node.getName();
-        synchronized (nodeMains) {
-          Preconditions.checkState(!nodeMains.containsKey(nodeName), "A node with name \""
-              + nodeName + "\" already exists.");
-          nodeMains.put(nodeName, nodeMain);
+        List<NodeListener> finalNodeListeners = Lists.newArrayList();
+        NodeRunnerNodeMain finalNodeMain = new NodeRunnerNodeMain(nodeMain);
+        finalNodeListeners.add(finalNodeMain);
+        if (nodeListeners != null) {
+          for (NodeListener listener : nodeListeners) {
+            finalNodeListeners.add(listener);
+          }
         }
+        
         try {
-          nodeMain.main(node);
+          // The node factory willcall onCreate for the NodeMain.
+          nodeFactory.newNode(nodeConfigurationCopy, finalNodeListeners);
         } catch (Exception e) {
           // TODO(damonkohler): Log to rosout. Maybe there should be a rosout
           // node associated with each DefaultNodeRunner?
           System.err.println("Exception thrown in NodeMain. Will attempt shutdown.");
           e.printStackTrace();
-          shutdownNodeMain(nodeMain);
-          nodeMains.remove(nodeName);
-        }
+          shutdownNodeMain(finalNodeMain);
+       }
         // TODO(damonkohler): If NodeMain.main() exits, we no longer know when
         // to remove it from our map. Once the NodeStateListener is implemented,
         // we can add a listener after NodeMain.main() exits that will remove
@@ -119,19 +115,56 @@ public class DefaultNodeRunner implements NodeRunner {
   }
 
   @Override
+  public void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
+    run(nodeMain, nodeConfiguration, null);
+  }
+
+  @Override
   public void shutdown() {
     synchronized (nodeMains) {
-      for (NodeMain nodeMain : nodeMains.values()) {
+      for (NodeRunnerNodeMain nodeMain : nodeMains.values()) {
         shutdownNodeMain(nodeMain);
       }
       nodeMains.clear();
     }
   }
 
-  private void shutdownNodeMain(NodeMain nodeMain) {
+  /**
+   * Register a node main with the runner.
+   * 
+   * @param finalNodeMain
+   */
+  private void registerNodeMain(NodeRunnerNodeMain finalNodeMain) {
+    GraphName nodeName = finalNodeMain.getMainNode().getName();
+    synchronized (nodeMains) {
+      Preconditions.checkState(!nodeMains.containsKey(nodeName), "A node with name \""
+          + nodeName + "\" already exists.");
+      nodeMains.put(nodeName, finalNodeMain);
+    }
+  }
+
+  /**
+   * Unregister a node main with the runner.
+   * 
+   * @param finalNodeMain
+   * @param node
+   */
+  private void unregisterNodeMain(NodeRunnerNodeMain finalNodeMain) {
+    GraphName nodeName = finalNodeMain.getMainNode().getName();
+    synchronized (nodeMains) {
+      nodeMains.remove(nodeName);
+    }
+  }
+
+  /**
+   * Shut down the node associated with the node main.
+   * 
+   * @param nodeMain
+   */
+  private void shutdownNodeMain(NodeRunnerNodeMain nodeMain) {
     boolean success = true;
     try {
-      nodeMain.shutdown();
+      nodeMain.getMainNode().shutdown();
     } catch (Exception e) {
       // Ignore spurious errors during shutdown.
       System.err.println("Exception thrown while shutting down NodeMain.");
@@ -141,5 +174,52 @@ public class DefaultNodeRunner implements NodeRunner {
     if (success) {
       System.out.println("Shutdown successful.");
     }
+  }
+  
+  /**
+   * A {@link NodeMain} which wraps the client's main so that various items can be trapped.
+   *
+   *
+   * @author Keith M. Hughes
+   * @since Nov 28, 2011
+   */
+  private class NodeRunnerNodeMain extends NodeMain {
+    /**
+     * The {@link NodeMain} handed in by the client.
+     */
+    private NodeMain original;
+    
+    /**
+     * The node created for the original {link NodeMain}.
+     */
+    private Node mainNode;
+    
+    public NodeRunnerNodeMain(NodeMain original) {
+      this.original = original;
+    }
+
+    @Override
+    public void onNodeCreate(Node node) {
+      this.mainNode = node;
+      
+      original.onNodeCreate(node);
+      
+      registerNodeMain(this);
+    }
+
+    @Override
+    public void onNodeShutdown(Node node) {
+      original.onNodeShutdown(node);
+      
+      unregisterNodeMain(this);
+    }
+
+    /**
+     * @return the node which was created for the node main.
+     */
+    public Node getMainNode() {
+      return mainNode;
+    }
+
   }
 }

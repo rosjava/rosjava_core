@@ -16,13 +16,13 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
 
 import org.ros.namespace.GraphName;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 /**
  * Stores internal Publisher and Subscriber instances.

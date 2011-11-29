@@ -16,12 +16,12 @@
 
 package org.ros.internal.message.old_style;
 
-import com.google.common.base.Preconditions;
+import java.nio.ByteBuffer;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.message.Message;
 
-import java.nio.ByteBuffer;
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

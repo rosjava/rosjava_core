@@ -58,7 +58,7 @@ public interface Publisher<MessageType> extends Topic {
    * {@link Publisher}.
    * 
    * <p>
-   * This counts the number {@link Subscriber} registered. If a
+   * This counts the number of {@link Subscriber} registered. If a
    * {@link Subscriber} does not shutdown properly it will not be unregistered
    * and thus will contribute to this count.
    * 
@@ -71,6 +71,25 @@ public interface Publisher<MessageType> extends Topic {
    * Cancels the publication and unregisters the {@link Publisher}.
    */
   void shutdown();
+  
+  /**
+   * Add a new lifecycle listener to the publisher.
+   * 
+   * @param listener
+   *          The listener to add.
+   */
+  void addPublisherListener(PublisherListener listener);
+  
+  /**
+   * Remove a lifecycle listener from the publisher.
+   * 
+   * <p>
+   * Nothing will happen if the given listener is not registered.
+   * 
+   * @param listener
+   *          The listener to remove.
+   */
+  void removePublisherListener(PublisherListener listener);
 
   /**
    * @param limit

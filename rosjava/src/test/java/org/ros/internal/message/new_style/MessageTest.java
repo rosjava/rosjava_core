@@ -18,16 +18,16 @@ package org.ros.internal.message.new_style;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.Lists;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

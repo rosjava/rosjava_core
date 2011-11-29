@@ -8,7 +8,6 @@ import org.ros.message.actionlib_tutorials.FibonacciActionResult;
 import org.ros.message.actionlib_tutorials.FibonacciFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciGoal;
 import org.ros.message.actionlib_tutorials.FibonacciResult;
-import org.ros.node.Node;
 
 /**
  * The FibonacciSimpleActionClient is a specialized SimpleActionClient that is
@@ -27,11 +26,6 @@ public class FibonacciSimpleActionClient
   public FibonacciSimpleActionClient(String nameSpace, FibonacciActionSpec spec)
       throws RosException {
     super(nameSpace, spec);
-  }
-
-  public FibonacciSimpleActionClient(Node parentNode, String nameSpace, FibonacciActionSpec spec)
-      throws RosException {
-    super(parentNode, nameSpace, spec);
   }
 
 }

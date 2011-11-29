@@ -16,14 +16,14 @@
 
 package org.ros.internal.message.new_style;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.List;
+
 import org.ros.exception.RosRuntimeException;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 import org.ros.message.std_msgs.Char;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

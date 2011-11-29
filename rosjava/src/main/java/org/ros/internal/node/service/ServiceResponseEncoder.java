@@ -16,13 +16,13 @@
 
 package org.ros.internal.node.service;
 
+import java.nio.ByteOrder;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
-
-import java.nio.ByteOrder;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

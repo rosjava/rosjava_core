@@ -16,13 +16,13 @@
 
 package org.ros.namespace;
 
-import com.google.common.base.Preconditions;
-
-import org.ros.exception.RosRuntimeException;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.ros.exception.RosRuntimeException;
+
+import com.google.common.base.Preconditions;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)

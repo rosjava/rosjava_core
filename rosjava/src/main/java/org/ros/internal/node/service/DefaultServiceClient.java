@@ -143,8 +143,9 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
   @Override
   public void shutdown() {
     channelGroup.close().awaitUninterruptibly();
-    channelFactory.releaseExternalResources();
-    bootstrap.releaseExternalResources();
+    // Not calling channelFactory.releaseExternalResources() or 
+    // bootstrap.releaseExternalResources() since only external resources are the
+    // ExecutorService and control of that must remain with the overall application.
     channel = null;
   }
 

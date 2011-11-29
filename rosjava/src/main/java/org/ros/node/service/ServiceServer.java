@@ -16,7 +16,6 @@
 
 package org.ros.node.service;
 
-import org.ros.internal.node.client.Registrant;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
@@ -33,7 +32,7 @@ import java.net.URI;
  * @param <ResponseType>
  *          the {@link ServiceServer} returns responses of this type
  */
-public interface ServiceServer<RequestType, ResponseType> extends Registrant {
+public interface ServiceServer<RequestType, ResponseType> {
 
   /**
    * @return the name of the {@link ServiceServer}
@@ -49,5 +48,24 @@ public interface ServiceServer<RequestType, ResponseType> extends Registrant {
    * Stops the service and unregisters it.
    */
   void shutdown();
+
+  /**
+   * Add a new lifecycle listener to the server.
+   * 
+   * @param listener
+   *          The listener to add.
+   */
+  void addServiceServerListener(ServiceServerListener listener);
+
+  /**
+   * Remove a lifecycle listener from the server.
+   * 
+   * <p>
+   * Nothing is done if the listener was never added.
+   *
+   * @param listener
+   *          The listener to remove.
+   */
+  void removeServiceServerListener(ServiceServerListener listener);
 
 }

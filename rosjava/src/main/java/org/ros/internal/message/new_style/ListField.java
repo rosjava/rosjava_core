@@ -16,11 +16,11 @@
 
 package org.ros.internal.message.new_style;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-
 import java.nio.ByteBuffer;
 import java.util.List;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

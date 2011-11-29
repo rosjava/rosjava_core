@@ -16,11 +16,11 @@
 
 package org.ros.internal.message.old_style;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.message.Service;
+
+import com.google.common.base.Preconditions;
 
 
 public class ServiceMessageDefinitionFactory {

@@ -18,14 +18,14 @@ package org.ros.internal.message.new_style;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.net.URL;
+import java.nio.ByteBuffer;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.ByteBuffer;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

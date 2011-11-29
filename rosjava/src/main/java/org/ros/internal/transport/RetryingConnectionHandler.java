@@ -47,7 +47,7 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
   private final ClientBootstrap bootstrap;
   private final Timer timer;
 
-  private volatile boolean reconnect;
+  private volatile boolean reconnect = false;
 
   public RetryingConnectionHandler(ClientBootstrap bootstrap) {
     this.bootstrap = bootstrap;

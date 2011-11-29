@@ -11,7 +11,6 @@ import org.ros.message.actionlib_tutorials.FibonacciActionResult;
 import org.ros.message.actionlib_tutorials.FibonacciFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciGoal;
 import org.ros.message.actionlib_tutorials.FibonacciResult;
-import org.ros.node.Node;
 
 /**
  * The FibonacciActionSpec class represents the action specification for the
@@ -50,37 +49,11 @@ public class FibonacciActionSpec
   }
 
   @Override
-  public FibonacciActionClient buildActionClient(Node node, String nameSpace) {
-
-    FibonacciActionClient ac = null;
-    try {
-      ac = new FibonacciActionClient(node, nameSpace, this);
-    } catch (RosException e) {
-      e.printStackTrace();
-    }
-    return ac;
-
-  }
-
-  @Override
   public FibonacciSimpleActionClient buildSimpleActionClient(String nameSpace) {
 
     FibonacciSimpleActionClient sac = null;
     try {
       return new FibonacciSimpleActionClient(nameSpace, this);
-    } catch (RosException e) {
-      e.printStackTrace();
-    }
-    return sac;
-
-  }
-
-  @Override
-  public FibonacciSimpleActionClient buildSimpleActionClient(Node node, String nameSpace) {
-
-    FibonacciSimpleActionClient sac = null;
-    try {
-      sac = new FibonacciSimpleActionClient(node, nameSpace, this);
     } catch (RosException e) {
       e.printStackTrace();
     }
@@ -101,18 +74,6 @@ public class FibonacciActionSpec
 
   @Override
   public
-      FibonacciActionServer
-      buildActionServer(
-          Node node,
-          String nameSpace,
-          ActionServerCallbacks<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> callbacks) {
-
-    return new FibonacciActionServer(node, nameSpace, this, callbacks);
-
-  }
-
-  @Override
-  public
       FibonacciSimpleActionServer
       buildSimpleActionServer(
           String nameSpace,
@@ -120,20 +81,6 @@ public class FibonacciActionSpec
           boolean useBlockingGoalCallback) {
 
     return new FibonacciSimpleActionServer(nameSpace, this, callbacks, useBlockingGoalCallback);
-
-  }
-
-  @Override
-  public
-      FibonacciSimpleActionServer
-      buildSimpleActionServer(
-          Node node,
-          String nameSpace,
-          SimpleActionServerCallbacks<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> callbacks,
-          boolean useBlockingGoalCallback) {
-
-    return new FibonacciSimpleActionServer(node, nameSpace, this, callbacks,
-        useBlockingGoalCallback);
 
   }
 

@@ -16,16 +16,16 @@
 
 package org.ros.internal.node;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 
 /**
  * Logger that logs to both an underlying Apache Commons Log as well as /rosout.

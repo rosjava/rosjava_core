@@ -16,17 +16,17 @@
 
 package org.ros.internal.transport;
 
-import com.google.common.collect.Maps;
+import java.nio.ByteOrder;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.google.common.collect.Maps;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

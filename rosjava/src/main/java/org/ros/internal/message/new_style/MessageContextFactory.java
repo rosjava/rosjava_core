@@ -16,13 +16,13 @@
 
 package org.ros.internal.message.new_style;
 
-import com.google.common.base.Preconditions;
-
-import org.ros.exception.RosRuntimeException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+
+import org.ros.exception.RosRuntimeException;
+
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

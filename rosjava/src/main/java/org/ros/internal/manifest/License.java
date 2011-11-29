@@ -16,14 +16,14 @@
 
 package org.ros.internal.manifest;
 
-import com.google.common.base.Preconditions;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.google.common.base.Preconditions;
 
 public class License implements XmlSerializable {
   

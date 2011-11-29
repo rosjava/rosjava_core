@@ -16,12 +16,12 @@
 
 package org.ros.internal.transport;
 
-import com.google.common.collect.Lists;
+import java.net.InetSocketAddress;
+import java.util.List;
 
 import org.ros.address.AdvertiseAddress;
 
-import java.net.InetSocketAddress;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

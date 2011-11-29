@@ -16,9 +16,9 @@
 
 package org.ros.internal.message.new_style;
 
-import com.google.common.base.Preconditions;
-
 import java.nio.ByteBuffer;
+
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

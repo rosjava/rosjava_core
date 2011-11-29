@@ -16,15 +16,15 @@
 
 package org.ros.internal.message.new_style;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-
-import org.ros.exception.RosRuntimeException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
+
+import org.ros.exception.RosRuntimeException;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

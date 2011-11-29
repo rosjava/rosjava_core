@@ -27,12 +27,12 @@ import org.ros.node.topic.Publisher;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class PassthroughTestNode implements NodeMain {
+public class PassthroughTestNode extends NodeMain {
 
   private Node node;
 
   @Override
-  public void main(final Node node) {
+  public void onNodeCreate(final Node node) {
     this.node = node;
 
     // The goal of the passthrough node is simply to retransmit the messages
@@ -88,10 +88,5 @@ public class PassthroughTestNode implements NodeMain {
           }
         };
     node.newSubscriber("composite_in", "test_ros/Composite", composite_cb);
-  }
-
-  @Override
-  public void shutdown() {
-    node.shutdown();
   }
 }

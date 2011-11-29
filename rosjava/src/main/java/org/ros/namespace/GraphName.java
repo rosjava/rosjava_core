@@ -16,10 +16,10 @@
 
 package org.ros.namespace;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * ROS graph resource name.

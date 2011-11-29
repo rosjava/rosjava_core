@@ -16,9 +16,9 @@
 
 package org.ros.internal.transport;
 
-import com.google.common.collect.Sets;
-
 import java.util.Collection;
+
+import com.google.common.collect.Sets;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

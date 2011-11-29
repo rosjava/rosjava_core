@@ -16,14 +16,14 @@
 
 package org.ros.internal.node.response;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.List;
 
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.message.MessageDefinition;
 import org.ros.namespace.GraphName;
 
-import java.util.Arrays;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

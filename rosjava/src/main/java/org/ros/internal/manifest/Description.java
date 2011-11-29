@@ -16,11 +16,11 @@
 
 package org.ros.internal.manifest;
 
-import com.google.common.base.Preconditions;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import com.google.common.base.Preconditions;
 
 public class Description implements XmlSerializable {
   

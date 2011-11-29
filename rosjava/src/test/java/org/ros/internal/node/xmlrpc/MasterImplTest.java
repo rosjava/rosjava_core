@@ -21,7 +21,7 @@ import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -31,7 +31,7 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

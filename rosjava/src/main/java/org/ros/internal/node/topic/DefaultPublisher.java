@@ -28,8 +28,12 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.PublisherListener;
+import org.ros.node.topic.Subscriber;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -44,11 +48,26 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
+  /**
+   * Queue of all messages being published by this publisher.
+   */
   private final OutgoingMessageQueue<MessageType> outgoingMessageQueue;
+
+  /**
+   * All {@link PublisherListener} instances added to the publisher.
+   */
+  private final List<PublisherListener> publisherListeners =
+      new CopyOnWriteArrayList<PublisherListener>();
+
+  /**
+   * The {@link ExecutorService} to be used for all thread creation.
+   */
+  private final ExecutorService executorService;
 
   public DefaultPublisher(TopicDefinition topicDefinition,
       MessageSerializer<MessageType> serializer, ExecutorService executorService) {
     super(topicDefinition);
+    this.executorService = executorService;
     outgoingMessageQueue = new OutgoingMessageQueue<MessageType>(serializer, executorService);
   }
 
@@ -60,6 +79,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   @Override
   public void shutdown() {
     outgoingMessageQueue.shutdown();
+    signalShutdown();
   }
 
   public PublisherDefinition toPublisherIdentifier(SlaveIdentifier description) {
@@ -111,11 +131,83 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
     return ConnectionHeader.encode(header);
   }
 
-  public void addChannel(Channel channel) {
+
+  /**
+   * A remote {@link Subscriber} is being added to this publisher.
+   * 
+   * @param channel
+   *          channel for the remote connection
+   */
+  public void addRemoteConnection(Channel channel) {
     if (DEBUG) {
       log.info("Adding channel: " + channel);
     }
     outgoingMessageQueue.addChannel(channel);
+    signalRemoteConnection();
+  }
+
+  @Override
+  public void addPublisherListener(PublisherListener listener) {
+    publisherListeners.add(listener);
+  }
+
+  @Override
+  public void removePublisherListener(PublisherListener listener) {
+    publisherListeners.add(listener);
+  }
+
+  /**
+   * Notify listeners that the node has been registered.
+   * 
+   * <p>
+   * Done in another thread.
+   */
+  public void signalRegistrationDone() {
+    final Publisher<MessageType> publisher = this;
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        for (PublisherListener listener : publisherListeners) {
+          listener.onPublisherMasterRegistration(publisher);
+        }
+      }
+    });
+  }
+
+  /**
+   * Notify listeners that the node has been registered.
+   * 
+   * <p>
+   * Done in another thread.
+   */
+  private void signalRemoteConnection() {
+    final Publisher<MessageType> publisher = this;
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        for (PublisherListener listener : publisherListeners) {
+          listener.onPublisherRemoteConnection(publisher);
+        }
+      }
+    });
+  }
+
+  /**
+   * Notify listeners that the node has shutdown.
+   * 
+   * <p>
+   * Done in another thread.
+   */
+  private void signalShutdown() {
+    final Publisher<MessageType> publisher = this;
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        for (PublisherListener listener : publisherListeners) {
+          listener.onPublisherShutdown(publisher);
+        }
+      }
+    });
   }
 
   @Override

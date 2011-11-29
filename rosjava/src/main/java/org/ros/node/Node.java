@@ -18,7 +18,6 @@ package org.ros.node;
 
 import org.apache.commons.logging.Log;
 import org.ros.exception.ServiceNotFoundException;
-import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.MessageFactory;
@@ -32,10 +31,14 @@ import org.ros.namespace.NodeNameResolver;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
+import org.ros.node.service.ServiceServerListener;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
+import org.ros.node.topic.SubscriberListener;
 
 import java.net.URI;
+import java.util.Collection;
 
 /**
  * A node in the ROS graph.
@@ -92,40 +95,9 @@ public interface Node {
   URI getUri();
 
   /**
-   * Is the node ok?
-   * 
-   * <p>
-   * "ok" means that the node is in the running state and registered with the
-   * master.
-   * 
-   * @return True if the node is OK, false otherwise.
-   */
-  boolean isOk();
-
-  /**
    * Shut the node down.
    */
   void shutdown();
-
-  /**
-   * Poll for whether or not Node is current fully registered with
-   * {@link MasterServer}.
-   * 
-   * @return true if Node is fully registered with {@link MasterServer}.
-   *         {@code isRegistered()} can go to false if new publisher or
-   *         subscribers are created.
-   */
-  boolean isRegistered();
-
-  /**
-   * Poll for whether or not registration with the {@link MasterServer} is
-   * proceeding normally. If this returns false, it means that the
-   * {@link MasterServer} is out of contact or is misbehaving.
-   * 
-   * @return true if Node registrations are proceeding normally with
-   *         {@link MasterServer}.
-   */
-  boolean isRegistrationOk();
 
   /**
    * @return {@link URI} of {@link Master} that this node is attached to.
@@ -159,6 +131,27 @@ public interface Node {
   <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType);
 
   /**
+   * @param <MessageType>
+   *          the message type to create the publisher for
+   * @param topicName
+   *          the topic name, will be pushed down under this namespace unless
+   *          '/' is prepended.
+   * @param messageType
+   *          the message data type (e.g. "std_msgs/String")
+   * @param listeners
+   *          lifecycle listeners for the publisher (can be {@code null})
+   * @return a {@link Publisher} for the specified topic
+   */
+  <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType,
+      Collection<? extends PublisherListener> listeners);
+
+  /**
+   * @see #newPublisher(GraphName, String, Collection<PublisherListener>)
+   */
+  <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType,
+      Collection<? extends PublisherListener> listeners);
+
+  /**
    * @see #newPublisher(GraphName, String)
    */
   <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType);
@@ -170,7 +163,27 @@ public interface Node {
    *          the topic name to be subscribed to, this will be auto resolved
    * @param messageType
    *          the message data type (e.g. "std_msgs/String")
-   * @param listener
+   * @param messageListener
+   *          the {@link MessageListener} to be added to this {@link Subscriber}
+   *          , will be called asynchronously any time that a message is
+   *          published on the specified topic
+   * @param listeners
+   *          lifecycle listeners for the {@link Subscriber} instance (can be
+   *          {@code null})
+   * @return a {@link Subscriber} for the specified topic
+   */
+  <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName, String messageType,
+      MessageListener<MessageType> messageListener,
+      Collection<? extends SubscriberListener> listeners);
+
+  /**
+   * @param <MessageType>
+   *          the message type to create the {@link Subscriber} for
+   * @param topicName
+   *          the topic name to be subscribed to, this will be auto resolved
+   * @param messageType
+   *          the message data type (e.g. "std_msgs/String")
+   * @param messageListener
    *          the {@link MessageListener} to be added to this {@link Subscriber}
    *          , will be called asynchronously any time that a message is
    *          published on the specified topic
@@ -178,6 +191,13 @@ public interface Node {
    */
   <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName, String messageType,
       MessageListener<MessageType> listener);
+
+  /**
+   * @see #newSubscriber(GraphName, String, MessageListener,
+   *      Collection<SubscriberListener>)
+   */
+  <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
+      MessageListener<MessageType> listener, Collection<? extends SubscriberListener> listeners);
 
   /**
    * @see #newSubscriber(GraphName, String, MessageListener)
@@ -198,16 +218,48 @@ public interface Node {
    *          the type of the service (e.g. "test_ros/AddTwoInts")
    * @param responseBuilder
    *          called for every request to build a response
+   * @param serverListeners
+   *          a collection of @link {@link ServiceServerListener} instances to
+   *          be added to the server (can be {@code null}.
    * @return a {@link ServiceServer}
    */
-  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
+  <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
+      GraphName serviceName, String serviceType,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
+      Collection<? extends ServiceServerListener> serverListeners);
+
+  /**
+   * Create a {@link ServiceServer}.
+   * 
+   * @param <RequestType>
+   *          type for the request
+   * @param <ResponseType>
+   *          type for the response
+   * @param serviceName
+   *          the name of the service
+   * @param serviceType
+   *          the type of the service (e.g. "test_ros/AddTwoInts")
+   * @param responseBuilder
+   *          called for every request to build a response
+   * @return a {@link ServiceServer}
+   */
+  <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
       GraphName serviceName, String serviceType,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder);
 
   /**
+   * @see #newServiceServer(GraphName, String, ServiceResponseBuilder,
+   *      Collection)
+   */
+  <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
+      String serviceName, String serviceType,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
+      Collection<? extends ServiceServerListener> serverListeners);
+
+  /**
    * @see #newServiceServer(GraphName, String, ServiceResponseBuilder)
    */
-  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
+  <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
       String serviceName, String serviceType,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder);
 
@@ -266,7 +318,7 @@ public interface Node {
    * @return True if the node is running, false otherwise.
    */
   boolean isRunning();
-  
+
   /**
    * @return the {@link MessageSerializationFactory} used by this node
    */
@@ -276,5 +328,24 @@ public interface Node {
    * @return the {@link MessageFactory} used by this node
    */
   MessageFactory getMessageFactory();
+
+  /**
+   * Add a new lifecycle listener to the node.
+   * 
+   * @param listener
+   *          The listener to add.
+   */
+  void addNodeListener(NodeListener listener);
+
+  /**
+   * Remove a lifecycle listener from the node.
+   * 
+   * <p>
+   * Nothing will happen if the given listener is not registered.
+   * 
+   * @param listener
+   *          The listener to remove.
+   */
+  void removeNodeListener(NodeListener listener);
 
 }

@@ -16,22 +16,34 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-
-import org.ros.node.service.ServiceClient;
-
 import java.util.List;
 import java.util.Map;
 
+import org.ros.node.service.ServiceClient;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+
 /**
+ * A manager for ROS services.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ServiceManager {
 
+  /**
+   * A mapping from service name to the server for the service.
+   */
   private final Map<String, DefaultServiceServer<?, ?>> serviceServers;
+
+  /**
+   * A mapping from service name to a client for the service.
+   */
   private final Map<String, ServiceClient<?, ?>> serviceClients;
   
+  /**
+   * A listener for whoever cares about service registrations.
+   */
   private ServiceListener listener;
 
   public ServiceManager() {

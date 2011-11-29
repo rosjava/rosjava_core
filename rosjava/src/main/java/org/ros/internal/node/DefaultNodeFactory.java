@@ -16,6 +16,10 @@
 
 package org.ros.internal.node;
 
+import org.ros.node.NodeListener;
+
+import java.util.Collection;
+
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 
@@ -27,8 +31,24 @@ import org.ros.node.NodeConfiguration;
 public class DefaultNodeFactory implements NodeFactory {
 
   @Override
+  public Node newNode(NodeConfiguration nodeConfiguration,
+      Collection<? extends NodeListener> listeners) {
+    DefaultNode node = new DefaultNode(nodeConfiguration);
+    
+    if (listeners != null) {
+      for (NodeListener listener : listeners) {
+        node.addNodeListener(listener);
+      }
+    }
+    
+    node.signalCreate();
+
+    return node;
+  }
+
+  @Override
   public Node newNode(NodeConfiguration nodeConfiguration) {
-    return new DefaultNode(nodeConfiguration);
+    return newNode(nodeConfiguration, null);
   }
 
 }

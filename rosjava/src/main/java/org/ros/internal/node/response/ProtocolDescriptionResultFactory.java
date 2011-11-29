@@ -16,15 +16,15 @@
 
 package org.ros.internal.node.response;
 
-import com.google.common.base.Preconditions;
+import java.util.Arrays;
+import java.util.List;
 
 import org.ros.address.AdvertiseAddress;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 
-import java.util.Arrays;
-import java.util.List;
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

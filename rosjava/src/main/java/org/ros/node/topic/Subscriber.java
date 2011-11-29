@@ -16,6 +16,8 @@
 
 package org.ros.node.topic;
 
+import java.util.List;
+
 import org.ros.internal.node.topic.Topic;
 import org.ros.message.MessageListener;
 
@@ -47,6 +49,25 @@ public interface Subscriber<MessageType> extends Topic {
    * Cancels the subscription and unregisters the {@link Subscriber}.
    */
   void shutdown();
+  
+  /**
+   * Add a new lifecycle listener to the subscriber.
+   * 
+   * @param listener
+   *          The listener to add.
+   */
+  void addSubscriberListener(SubscriberListener listener);
+  
+  /**
+   * Remove a lifecycle listener from the subscriber.
+   * 
+   * <p>
+   * Nothing will happen if the given listener is not registered.
+   * 
+   * @param listener
+   *          The listener to remove.
+   */
+  void removeSubscriberListener(SubscriberListener listener);
 
   /**
    * @param limit

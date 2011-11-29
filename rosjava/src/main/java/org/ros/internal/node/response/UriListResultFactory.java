@@ -16,14 +16,14 @@
 
 package org.ros.internal.node.response;
 
-import com.google.common.collect.Lists;
-
-import org.ros.exception.RosRuntimeException;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
+
+import org.ros.exception.RosRuntimeException;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
