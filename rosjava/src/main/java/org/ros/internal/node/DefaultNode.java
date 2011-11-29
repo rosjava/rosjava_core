@@ -65,7 +65,6 @@ import org.ros.node.topic.SubscriberListener;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
@@ -103,10 +102,10 @@ public class DefaultNode implements Node {
   /**
    * All {@link NodeListener} instances registered with the node.
    */
-  private final List<NodeListener> nodeListeners = new CopyOnWriteArrayList<NodeListener>();
+  private final Collection<NodeListener> nodeListeners;
 
   /**
-   * True if the node is in a running state, false otherwise.
+   * {@code true} if the node is in a running state, {@code false} otherwise.
    */
   private boolean running;
 
@@ -117,8 +116,12 @@ public class DefaultNode implements Node {
    * @param nodeConfiguration
    *          the {@link NodeConfiguration} for this {@link Node}
    */
-  public DefaultNode(NodeConfiguration nodeConfiguration) {
+  public DefaultNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> nodeListeners) {
     this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
+    this.nodeListeners = new CopyOnWriteArrayList<NodeListener>();
+    if (nodeListeners != null) {
+      this.nodeListeners.addAll(nodeListeners);
+    }
     running = false;
     executorService = nodeConfiguration.getExecutorService();
     masterClient = new MasterClient(nodeConfiguration.getMasterUri());
@@ -162,6 +165,7 @@ public class DefaultNode implements Node {
     running = true;
     slaveServer.start();
     registrar.start(slaveServer.toSlaveIdentifier());
+    signalOnStart();
   }
 
   @VisibleForTesting
@@ -441,8 +445,7 @@ public class DefaultNode implements Node {
     for (ServiceClient<?, ?> serviceClient : serviceManager.getClients()) {
       serviceClient.shutdown();
     }
-
-    signalShutdown();
+    signalOnShutdown();
   }
 
   @Override
@@ -477,43 +480,49 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public void addNodeListener(NodeListener listener) {
+  public void addListener(NodeListener listener) {
     nodeListeners.add(listener);
   }
 
   @Override
-  public void removeNodeListener(NodeListener listener) {
+  public void removeListener(NodeListener listener) {
     nodeListeners.remove(listener);
   }
 
   /**
-   * Let all listeners know the node is being created.
+   * Signal all {@link NodeListener}s that the {@link Node} has started.
    * 
    * <p>
-   * Run in the same thread as the caller.
+   * Each listener is called in a separate thread.
    */
-  public void signalCreate() {
-    for (NodeListener listener : nodeListeners) {
-      listener.onStart(this);
+  private void signalOnStart() {
+    final Node node = this;
+    for (final NodeListener listener : nodeListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onStart(node);
+        }
+      });
     }
   }
 
   /**
-   * Let all listeners know the node is being shut down.
+   * Signal all {@link NodeListener}s that the {@link Node} has shut down.
    * 
    * <p>
-   * Run in a separate thread from the caller.
+   * Each listener is called in a separate thread.
    */
-  private void signalShutdown() {
+  private void signalOnShutdown() {
     final Node node = this;
-    executorService.execute(new Runnable() {
-      @Override
-      public void run() {
-        for (NodeListener listener : nodeListeners) {
+    for (final NodeListener listener : nodeListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
           listener.onShutdown(node);
         }
-      }
-    });
+      });
+    }
   }
 
   @VisibleForTesting

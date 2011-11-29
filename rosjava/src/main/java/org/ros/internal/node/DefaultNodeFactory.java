@@ -30,16 +30,8 @@ import java.util.Collection;
 public class DefaultNodeFactory implements NodeFactory {
 
   @Override
-  public Node newNode(NodeConfiguration nodeConfiguration,
-      Collection<? extends NodeListener> listeners) {
-    DefaultNode node = new DefaultNode(nodeConfiguration);
-    if (listeners != null) {
-      for (NodeListener listener : listeners) {
-        node.addNodeListener(listener);
-      }
-    }
-    node.signalCreate();
-    return node;
+  public Node newNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> listeners) {
+    return new DefaultNode(nodeConfiguration, listeners);
   }
 
   @Override

@@ -30,8 +30,7 @@ import java.util.Collection;
 public interface NodeFactory {
 
   /**
-   * Build a new {@link Node} with the given and {@link NodeConfiguration} and
-   * default name.
+   * Build a new {@link Node} with the given {@link NodeConfiguration}.
    * 
    * @param configuration
    *          the {@link NodeConfiguration} for the new {@link Node}
@@ -40,8 +39,8 @@ public interface NodeFactory {
   Node newNode(NodeConfiguration configuration);
 
   /**
-   * Build a new {@link Node} with the given and {@link NodeConfiguration} and
-   * default name.
+   * Build a new {@link Node} with the given {@link NodeConfiguration} and
+   * {@link NodeListener}s.
    * 
    * @param configuration
    *          the {@link NodeConfiguration} for the new {@link Node}
@@ -50,6 +49,5 @@ public interface NodeFactory {
    *          registered with the node (can be {@code null})
    * @return a new {@link Node}
    */
-  Node newNode(NodeConfiguration configuration, Collection<? extends NodeListener> listeners);
-
+  Node newNode(NodeConfiguration configuration, Collection<NodeListener> listeners);
 }

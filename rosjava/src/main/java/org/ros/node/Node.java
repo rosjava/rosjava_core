@@ -330,22 +330,21 @@ public interface Node {
   MessageFactory getMessageFactory();
 
   /**
-   * Add a new lifecycle listener to the node.
+   * Add a new {@link NodeListener} to the {@link Node}.
    * 
    * @param listener
-   *          The listener to add.
+   *          the {@link NodeListener} to add
    */
-  void addNodeListener(NodeListener listener);
+  void addListener(NodeListener listener);
 
   /**
-   * Remove a lifecycle listener from the node.
+   * Remove a {@link NodeListener} from the {@link Node}.
    * 
    * <p>
-   * Nothing will happen if the given listener is not registered.
+   * If the given {@link NodeListener} is not registered, this has no effect.
    * 
    * @param listener
-   *          The listener to remove.
+   *          the {@link NodeListener} to remove
    */
-  void removeNodeListener(NodeListener listener);
-
+  void removeListener(NodeListener listener);
 }
