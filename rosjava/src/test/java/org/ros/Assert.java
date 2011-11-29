@@ -28,5 +28,4 @@ public class Assert {
   public static void assertGraphNameEquals(String name, GraphName graphName) {
     assertEquals(name, graphName.toString());
   }
-
 }
