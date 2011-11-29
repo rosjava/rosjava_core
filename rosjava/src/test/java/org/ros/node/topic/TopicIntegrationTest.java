@@ -20,11 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.Lists;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +35,11 @@ import org.ros.message.MessageListener;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 
-import com.google.common.collect.Lists;
+import java.net.InetSocketAddress;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -76,17 +76,16 @@ public class TopicIntegrationTest {
     final CountDownLatch messageReceived = new CountDownLatch(1);
     nodeConfiguration.setNodeName("subscriber");
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
-    
+
     CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
-    Subscriber<org.ros.message.std_msgs.String> subscriber =
-        subscriberNode.newSubscriber("foo", "std_msgs/String",
-            new MessageListener<org.ros.message.std_msgs.String>() {
-              @Override
-              public void onNewMessage(org.ros.message.std_msgs.String message) {
-                assertEquals(helloMessage, message);
-                messageReceived.countDown();
-              }
-            }, Lists.newArrayList(subscriberListener));
+    subscriberNode.newSubscriber("foo", "std_msgs/String",
+        new MessageListener<org.ros.message.std_msgs.String>() {
+          @Override
+          public void onNewMessage(org.ros.message.std_msgs.String message) {
+            assertEquals(helloMessage, message);
+            messageReceived.countDown();
+          }
+        }, Lists.newArrayList(subscriberListener));
 
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
@@ -147,14 +146,14 @@ public class TopicIntegrationTest {
     final Node publisherNode = nodeFactory.newNode(nodeConfiguration);
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     final Publisher<org.ros.message.test_ros.TestHeader> publisher =
-        publisherNode.newPublisher("foo", "test_ros/TestHeader", Lists.newArrayList(publisherListener));
+        publisherNode.newPublisher("foo", "test_ros/TestHeader",
+            Lists.newArrayList(publisherListener));
 
     nodeConfiguration.setNodeName("subscriber");
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
     Listener listener = new Listener();
     CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
-    Subscriber<org.ros.message.test_ros.TestHeader> subscriber =
-        subscriberNode.newSubscriber("foo", "test_ros/TestHeader", listener,
+    subscriberNode.newSubscriber("foo", "test_ros/TestHeader", listener,
         Lists.newArrayList(subscriberListener));
 
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.DAYS));

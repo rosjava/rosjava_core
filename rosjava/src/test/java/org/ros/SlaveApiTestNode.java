@@ -29,12 +29,8 @@ import org.ros.node.topic.Publisher;
  */
 public class SlaveApiTestNode extends NodeMain {
 
-  private Node node;
-
   @Override
   public void onStart(Node node) {
-    this.node = node;
-
     // Basic chatter in/out test.
     Publisher<org.ros.message.std_msgs.String> pub_string =
         node.newPublisher("chatter_out", "std_msgs/String");

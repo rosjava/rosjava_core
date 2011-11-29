@@ -22,9 +22,6 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.Lists;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -38,6 +35,9 @@ import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.service.test_ros.AddTwoInts;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -64,16 +64,15 @@ public class ServiceIntegrationTest {
     nodeConfiguration.setNodeName("/server");
     Node serverNode = nodeFactory.newNode(nodeConfiguration);
     CountDownServiceServerListener serverListener = new CountDownServiceServerListener();
-    ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
-        serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
-            new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
-              @Override
-              public AddTwoInts.Response build(AddTwoInts.Request request) {
-                AddTwoInts.Response response = new AddTwoInts.Response();
-                response.sum = request.a + request.b;
-                return response;
-              }
-            }, Lists.newArrayList(serverListener));
+    serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
+        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
+          @Override
+          public AddTwoInts.Response build(AddTwoInts.Request request) {
+            AddTwoInts.Response response = new AddTwoInts.Response();
+            response.sum = request.a + request.b;
+            return response;
+          }
+        }, Lists.newArrayList(serverListener));
     assertTrue(serverListener.awaitRegistration(1, TimeUnit.SECONDS));
 
     nodeConfiguration.setNodeName("/client");
@@ -110,14 +109,13 @@ public class ServiceIntegrationTest {
     nodeConfiguration.setNodeName("/server");
     Node serverNode = nodeFactory.newNode(nodeConfiguration);
     CountDownServiceServerListener serverListener = new CountDownServiceServerListener();
-    ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
-        serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
-            new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
-              @Override
-              public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
-                throw new ServiceException(errorMessage);
-              }
-            }, Lists.newArrayList(serverListener));
+    serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
+        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
+          @Override
+          public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
+            throw new ServiceException(errorMessage);
+          }
+        }, Lists.newArrayList(serverListener));
     assertTrue(serverListener.awaitRegistration(1, TimeUnit.SECONDS));
 
     nodeConfiguration.setNodeName("/client");
@@ -145,5 +143,4 @@ public class ServiceIntegrationTest {
     });
     assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
-
 }

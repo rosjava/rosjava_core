@@ -16,9 +16,6 @@
 
 package org.ros;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.ros.message.std_msgs.Bool;
 import org.ros.message.std_msgs.Float64;
@@ -32,6 +29,9 @@ import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
 
+import java.util.Arrays;
+import java.util.Map;
+
 /**
  * This node is used in rostest end-to-end integration tests with other client
  * libraries.
@@ -40,13 +40,9 @@ import org.ros.node.topic.Publisher;
  */
 public class ParameterServerTestNode extends NodeMain {
 
-  private Node node;
-
   @SuppressWarnings("rawtypes")
   @Override
   public void onStart(Node node) {
-    this.node = node;
-
     Publisher<org.ros.message.std_msgs.String> pub_tilde =
         node.newPublisher("tilde", "std_msgs/String");
     Publisher<org.ros.message.std_msgs.String> pub_string =
@@ -111,7 +107,7 @@ public class ParameterServerTestNode extends NodeMain {
     param.set(setResolver.resolve("composite"), composite_map);
     param.set(setResolver.resolve("list"), Arrays.asList(list));
 
-    while (true) {
+    while (node.isRunning()) {
       pub_tilde.publish(tilde_m);
       pub_string.publish(string_m);
       pub_int.publish(int_m);

@@ -29,12 +29,8 @@ import org.ros.node.topic.Publisher;
  */
 public class PassthroughTestNode extends NodeMain {
 
-  private Node node;
-
   @Override
   public void onStart(final Node node) {
-    this.node = node;
-
     // The goal of the passthrough node is simply to retransmit the messages
     // sent to it. This allows us to external verify that the node is compatible
     // with multiple publishers, multiple subscribers, etc...

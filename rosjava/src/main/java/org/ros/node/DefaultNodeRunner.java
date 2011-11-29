@@ -17,8 +17,10 @@
 package org.ros.node;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,9 +29,7 @@ import org.ros.internal.node.NodeFactory;
 import org.ros.namespace.GraphName;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -43,12 +43,12 @@ public class DefaultNodeRunner implements NodeRunner {
   private static final Log log = LogFactory.getLog(DefaultNodeRunner.class);
 
   private final NodeFactory nodeFactory;
-  private final Executor executor;
-  private final Map<GraphName, NodeRunnerNodeMain> nodeMains;
+  private final ExecutorService executorService;
+  private final Multimap<GraphName, Node> nodes;
 
   /**
    * @return an instance of {@link DefaultNodeRunner} that uses a default
-   *         {@link Executor}
+   *         {@link ExecutorService}
    */
   public static NodeRunner newDefault() {
     return newDefault(Executors.newCachedThreadPool());
@@ -56,27 +56,27 @@ public class DefaultNodeRunner implements NodeRunner {
 
   /**
    * @return an instance of {@link DefaultNodeRunner} that uses the supplied
-   *         {@link Executor}
+   *         {@link ExecutorService}
    */
-  public static NodeRunner newDefault(Executor executor) {
-    return new DefaultNodeRunner(new DefaultNodeFactory(), executor);
+  public static NodeRunner newDefault(ExecutorService executorService) {
+    return new DefaultNodeRunner(new DefaultNodeFactory(), executorService);
   }
 
   /**
    * @param nodeFactory
    *          Node factory to use for node creation.
-   * @param executor
+   * @param executorService
    *          {@link NodeMain}s will be executed using this
    */
-  public DefaultNodeRunner(NodeFactory nodeFactory, Executor executor) {
+  public DefaultNodeRunner(NodeFactory nodeFactory, ExecutorService executorService) {
     this.nodeFactory = nodeFactory;
-    this.executor = executor;
-    nodeMains = Maps.newConcurrentMap();
+    this.executorService = executorService;
+    nodes = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, Node>create());
   }
 
   @Override
   public void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration,
-      final Collection<? extends NodeListener> nodeListeners) {
+      final Collection<NodeListener> nodeListeners) {
     Preconditions.checkNotNull(nodeConfiguration.getNodeName(), "Node name not specified.");
     if (DEBUG) {
       log.info("Starting node: " + nodeConfiguration.getNodeName());
@@ -84,32 +84,17 @@ public class DefaultNodeRunner implements NodeRunner {
     // NOTE(damonkohler): To help avoid race conditions, we have to make a copy
     // of the NodeConfiguration in the current thread.
     final NodeConfiguration nodeConfigurationCopy = NodeConfiguration.copyOf(nodeConfiguration);
-    executor.execute(new Runnable() {
+    executorService.execute(new Runnable() {
       @Override
       public void run() {
-        List<NodeListener> finalNodeListeners = Lists.newArrayList();
-        NodeRunnerNodeMain finalNodeMain = new NodeRunnerNodeMain(nodeMain);
-        finalNodeListeners.add(finalNodeMain);
+        Collection<NodeListener> nodeListenersCopy = Lists.newArrayList();
+        nodeListenersCopy.add(new RegistrationListener());
+        nodeListenersCopy.add(nodeMain);
         if (nodeListeners != null) {
-          for (NodeListener listener : nodeListeners) {
-            finalNodeListeners.add(listener);
-          }
+          nodeListenersCopy.addAll(nodeListeners);
         }
-        
-        try {
-          // The node factory willcall onCreate for the NodeMain.
-          nodeFactory.newNode(nodeConfigurationCopy, finalNodeListeners);
-        } catch (Exception e) {
-          // TODO(damonkohler): Log to rosout. Maybe there should be a rosout
-          // node associated with each DefaultNodeRunner?
-          System.err.println("Exception thrown in NodeMain. Will attempt shutdown.");
-          e.printStackTrace();
-          shutdownNodeMain(finalNodeMain);
-       }
-        // TODO(damonkohler): If NodeMain.main() exits, we no longer know when
-        // to remove it from our map. Once the NodeStateListener is implemented,
-        // we can add a listener after NodeMain.main() exits that will remove
-        // the node from the map on shutdown.
+        // The new Node will call onStart().
+        nodeFactory.newNode(nodeConfigurationCopy, nodeListenersCopy);
       }
     });
   }
@@ -121,50 +106,23 @@ public class DefaultNodeRunner implements NodeRunner {
 
   @Override
   public void shutdown() {
-    synchronized (nodeMains) {
-      for (NodeRunnerNodeMain nodeMain : nodeMains.values()) {
-        shutdownNodeMain(nodeMain);
+    synchronized (nodes) {
+      for (Node node : nodes.values()) {
+        safelyShutdownNode(node);
       }
-      nodeMains.clear();
     }
   }
 
   /**
-   * Register a node main with the runner.
+   * Trap and log any exceptions while shutting down the supplied {@link Node}.
    * 
-   * @param finalNodeMain
-   */
-  private void registerNodeMain(NodeRunnerNodeMain finalNodeMain) {
-    GraphName nodeName = finalNodeMain.getMainNode().getName();
-    synchronized (nodeMains) {
-      Preconditions.checkState(!nodeMains.containsKey(nodeName), "A node with name \""
-          + nodeName + "\" already exists.");
-      nodeMains.put(nodeName, finalNodeMain);
-    }
-  }
-
-  /**
-   * Unregister a node main with the runner.
-   * 
-   * @param finalNodeMain
    * @param node
+   *          the {@link Node} to shut down
    */
-  private void unregisterNodeMain(NodeRunnerNodeMain finalNodeMain) {
-    GraphName nodeName = finalNodeMain.getMainNode().getName();
-    synchronized (nodeMains) {
-      nodeMains.remove(nodeName);
-    }
-  }
-
-  /**
-   * Shut down the node associated with the node main.
-   * 
-   * @param nodeMain
-   */
-  private void shutdownNodeMain(NodeRunnerNodeMain nodeMain) {
+  private void safelyShutdownNode(Node node) {
     boolean success = true;
     try {
-      nodeMain.getMainNode().shutdown();
+      node.shutdown();
     } catch (Exception e) {
       // Ignore spurious errors during shutdown.
       System.err.println("Exception thrown while shutting down NodeMain.");
@@ -175,45 +133,45 @@ public class DefaultNodeRunner implements NodeRunner {
       System.out.println("Shutdown successful.");
     }
   }
-  
-  /**
-   * A {@link NodeMain} which wraps the client's main so that various items can be trapped.
-   *
-   * @author Keith M. Hughes
-   */
-  private class NodeRunnerNodeMain extends NodeMain {
-    /**
-     * The {@link NodeMain} handed in by the client.
-     */
-    private NodeMain original;
-    
-    /**
-     * The node created for the original {link NodeMain}.
-     */
-    private Node mainNode;
-    
-    public NodeRunnerNodeMain(NodeMain original) {
-      this.original = original;
-    }
 
+  /**
+   * Register a {@link Node} with the {@link NodeRunner}.
+   * 
+   * @param nodeMain
+   *          the {@link NodeMain} associated with the {@link Node}
+   */
+  private void registerNode(Node node) {
+    GraphName nodeName = node.getName();
+    synchronized (nodes) {
+      for (Node illegalNode : nodes.get(nodeName)) {
+        System.err.println(String.format(
+            "Node name collision. Existing node %s (%s) will be shutdown.", nodeName,
+            illegalNode.getUri()));
+        illegalNode.shutdown();
+      }
+      nodes.put(nodeName, node);
+    }
+  }
+
+  /**
+   * Unregister a {@link Node} with the {@link NodeRunner}.
+   * 
+   * @param node
+   *          the {@link Node} to unregister
+   */
+  private void unregisterNode(Node node) {
+    nodes.get(node.getName()).remove(node);
+  }
+
+  private class RegistrationListener implements NodeListener {
     @Override
     public void onStart(Node node) {
-      this.mainNode = node;
-      original.onStart(node);
-      registerNodeMain(this);
+      registerNode(node);
     }
 
     @Override
     public void onShutdown(Node node) {
-      original.onShutdown(node);
-      unregisterNodeMain(this);
-    }
-
-    /**
-     * @return the node which was created for the node main.
-     */
-    public Node getMainNode() {
-      return mainNode;
+      unregisterNode(node);
     }
   }
 }

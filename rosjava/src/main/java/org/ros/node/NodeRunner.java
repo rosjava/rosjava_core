@@ -35,12 +35,12 @@ public interface NodeRunner {
    *          the {@link NodeConfiguration} that will be used to create the
    *          {@link Node}
    * @param nodeListeners
-   *        A collection of {@link NodeListener} instances to be added to the node
-   *        immediately after creation (can be {@code null})
+   *          a {@link Collection} of {@link NodeListener}s to be added to the
+   *          {@link Node} before it starts (can be {@code null})
    */
   void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
-      Collection<? extends NodeListener> nodeListeners);
-  
+      Collection<NodeListener> nodeListeners);
+
   /**
    * Executes the supplied {@link NodeMain} using the supplied
    * {@link NodeConfiguration}.
@@ -54,8 +54,7 @@ public interface NodeRunner {
   void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration);
 
   /**
-   * Shutdown all started {@link NodeMain}s.
+   * Shutdown all started {@link Node}s.
    */
   void shutdown();
-
 }
