@@ -17,6 +17,7 @@
 package org.ros.node.topic;
 
 import org.ros.internal.node.topic.Topic;
+import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
 
 /**
  * Publishes messages of a given type on a given ROS topic.
@@ -71,4 +72,14 @@ public interface Publisher<MessageType> extends Topic {
    */
   void shutdown();
 
+  /**
+   * @param limit
+   *          the maximum number of messages to queue (i.e. buffer) for sending
+   */
+  void setQueueLimit(int limit);
+
+  /**
+   * @return the maximum number of messages to queue (i.e. buffer) for sending
+   */
+  int getQueueLimit();
 }

@@ -18,7 +18,6 @@ package org.ros.internal.transport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -100,8 +99,8 @@ public class MessageQueueIntegrationTest {
     executorService = Executors.newCachedThreadPool();
     expectedMessage = new org.ros.message.std_msgs.String();
     expectedMessage.data = "Would you like to play a game?";
-    outgoingMessageQueue = new OutgoingMessageQueue<Message>(new MessageSerializer<Message>());
-    outgoingMessageQueue.start();
+    outgoingMessageQueue =
+        new OutgoingMessageQueue<Message>(new MessageSerializer<Message>(), executorService);
 
     repeatingPublisher = new CancellableLoop() {
       @Override
@@ -126,28 +125,6 @@ public class MessageQueueIntegrationTest {
   public void tearDown() {
     outgoingMessageQueue.shutdown();
     executorService.shutdown();
-  }
-
-  @Test
-  public void testStartFailsIfRunning() {
-    try {
-      outgoingMessageQueue.start();
-      fail();
-    } catch (RuntimeException e) {
-      // start() must fail if the queue is already running.
-    }
-  }
-
-  @Test
-  public void testStartFailsAfterShutdown() {
-    outgoingMessageQueue.shutdown();
-    try {
-      outgoingMessageQueue.start();
-      fail();
-    } catch (RuntimeException e) {
-      // start() must fail if the queue has been started and stopped once
-      // already.
-    }
   }
 
   @Test

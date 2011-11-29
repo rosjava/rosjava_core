@@ -51,5 +51,4 @@ public class TcpServerPipelineFactory extends ConnectionTrackingChannelPipelineF
     pipeline.addLast(HANDSHAKE_HANDLER, new TcpServerHandshakeHandler(topicManager, serviceManager));
     return pipeline;
   }
-
 }

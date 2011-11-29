@@ -17,7 +17,6 @@
 package org.ros.node.topic;
 
 import org.ros.internal.node.topic.Topic;
-
 import org.ros.message.MessageListener;
 
 /**
@@ -49,4 +48,14 @@ public interface Subscriber<MessageType> extends Topic {
    */
   void shutdown();
 
+  /**
+   * @param limit
+   *          the maximum number of incoming messages to queue (i.e. buffer)
+   */
+  void setQueueLimit(int limit);
+
+  /**
+   * @return the maximum number of incoming messages to queue (i.e. buffer)
+   */
+  int getQueueLimit();
 }

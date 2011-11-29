@@ -44,25 +44,22 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
-  private final OutgoingMessageQueue<MessageType> out;
+  private final OutgoingMessageQueue<MessageType> outgoingMessageQueue;
 
   public DefaultPublisher(TopicDefinition topicDefinition,
       MessageSerializer<MessageType> serializer, ExecutorService executorService) {
     super(topicDefinition);
-    // TODO(khughes): Use the handed in ExecutorService in the
-    // OutgoingMessageQueue.
-    out = new OutgoingMessageQueue<MessageType>(serializer);
-    out.start();
+    outgoingMessageQueue = new OutgoingMessageQueue<MessageType>(serializer, executorService);
   }
 
   @Override
   public void setLatchMode(boolean enabled) {
-    out.setLatchMode(enabled);
+    outgoingMessageQueue.setLatchMode(enabled);
   }
 
   @Override
   public void shutdown() {
-    out.shutdown();
+    outgoingMessageQueue.shutdown();
   }
 
   public PublisherDefinition toPublisherIdentifier(SlaveIdentifier description) {
@@ -71,12 +68,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
 
   @Override
   public boolean hasSubscribers() {
-    return out.getNumberOfChannels() > 0;
+    return outgoingMessageQueue.getNumberOfChannels() > 0;
   }
 
   @Override
   public int getNumberOfSubscribers() {
-    return out.getNumberOfChannels();
+    return outgoingMessageQueue.getNumberOfChannels();
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
@@ -85,7 +82,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
     if (DEBUG) {
       log.info("Publishing message: " + message);
     }
-    out.put(message);
+    outgoingMessageQueue.put(message);
   }
 
   /**
@@ -118,7 +115,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
     if (DEBUG) {
       log.info("Adding channel: " + channel);
     }
-    out.addChannel(channel);
+    outgoingMessageQueue.addChannel(channel);
   }
 
   @Override
@@ -126,4 +123,13 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
     return "Publisher<" + getTopicDefinition() + ">";
   }
 
+  @Override
+  public void setQueueLimit(int limit) {
+    outgoingMessageQueue.setLimit(limit);
+  }
+
+  @Override
+  public int getQueueLimit() {
+    return outgoingMessageQueue.getLimit();
+  }
 }

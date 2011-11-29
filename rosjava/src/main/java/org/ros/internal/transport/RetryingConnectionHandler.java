@@ -26,7 +26,6 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
-import org.ros.exception.RosRuntimeException;
 
 import java.net.InetSocketAddress;
 import java.util.Timer;
@@ -39,7 +38,7 @@ import java.util.TimerTask;
  */
 public class RetryingConnectionHandler extends SimpleChannelHandler {
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(RetryingConnectionHandler.class);
 
   // TODO(damonkohler): Use binary backoff.
@@ -105,6 +104,8 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
       log.info("Channel exception: " + e.getChannel().toString());
     }
     e.getChannel().close();
-    throw new RosRuntimeException(e.getCause());
+    Preconditions.checkState(reconnect == false);
+    reconnect = true;
+    super.exceptionCaught(ctx, e);
   }
 }

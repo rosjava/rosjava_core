@@ -2,12 +2,12 @@
  * Copyright (C) 2011 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
+ * use this file except incomingMessageQueue compliance with the License. You may obtain a copy of
  * the License at
  * 
  * http://www.apache.org/licenses/LICENSE-2.0
  * 
- * Unless required by applicable law or agreed to in writing, software
+ * Unless required by applicable law or agreed to incomingMessageQueue writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
@@ -30,6 +30,7 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
+import org.ros.concurrent.CancellableLoop;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
@@ -61,7 +62,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   private final ExecutorService executorService;
   private final ImmutableMap<String, String> header;
   private final CopyOnWriteArrayList<MessageListener<MessageType>> listeners;
-  private final IncomingMessageQueue<MessageType> in;
+  private final IncomingMessageQueue<MessageType> incomingMessageQueue;
   private final MessageReader messageReader;
   private final Set<PublisherIdentifier> knownPublishers;
   private final SlaveIdentifier slaveIdentifier;
@@ -69,33 +70,20 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   private TcpClientPipelineFactory tcpClientPipelineFactory;
   private ClientBootstrap bootstrap;
 
-  private final class MessageReader implements Runnable {
+  private final class MessageReader extends CancellableLoop {
     @Override
-    public void run() {
-      try {
-        while (!Thread.currentThread().isInterrupted()) {
-          MessageType message = in.take();
-          if (DEBUG) {
-            log.info("Received message: " + message + " " + message.getClass().getCanonicalName());
-          }
-          for (MessageListener<MessageType> listener : listeners) {
-            if (Thread.currentThread().isInterrupted()) {
-              break;
-            }
-            // TODO(damonkohler): Recycle Message objects to avoid GC.
-            listener.onNewMessage(message);
-          }
-        }
-      } catch (InterruptedException e) {
-        // Cancelable
-        if (DEBUG) {
-          log.info("Canceled.");
-        }
+    public void loop() throws InterruptedException {
+      MessageType message = incomingMessageQueue.take();
+      if (DEBUG) {
+        log.info("Received message: " + message + " " + message.getClass().getCanonicalName());
       }
-    }
-
-    public void cancel() {
-      Thread.currentThread().interrupt();
+      for (MessageListener<MessageType> listener : listeners) {
+        if (Thread.currentThread().isInterrupted()) {
+          break;
+        }
+        // TODO(damonkohler): Recycle Message objects to avoid GC.
+        listener.onNewMessage(message);
+      }
     }
   }
 
@@ -110,7 +98,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
     super(topicDefinition);
     this.executorService = executorService;
     this.listeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
-    this.in = new IncomingMessageQueue<MessageType>(deserializer);
+    this.incomingMessageQueue = new IncomingMessageQueue<MessageType>(deserializer);
     this.slaveIdentifier = slaveIdentifier;
     header =
         ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
@@ -124,7 +112,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();
         pipeline.addLast("SubscriberHandshakeHandler", new SubscriberHandshakeHandler<MessageType>(
-            header, in));
+            header, incomingMessageQueue));
         return pipeline;
       }
     };
@@ -175,7 +163,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
 
   /**
    * Updates the list of {@link DefaultPublisher}s for the topic that this
-   * {@link DefaultSubscriber} is interested in.
+   * {@link DefaultSubscriber} is interested incomingMessageQueue.
    * 
    * @param publishers
    *          {@link List} of {@link DefaultPublisher}s for the subscribed topic
@@ -197,6 +185,16 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   @Override
   public String toString() {
     return "Subscriber<" + getTopicDefinition() + ">";
+  }
+
+  @Override
+  public void setQueueLimit(int limit) {
+    incomingMessageQueue.setLimit(limit);
+  }
+
+  @Override
+  public int getQueueLimit() {
+    return incomingMessageQueue.getLimit();
   }
 
 }

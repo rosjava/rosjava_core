@@ -52,9 +52,10 @@ public class RosoutLogger implements Log {
   }
 
   private void publish(byte level, Object message, Throwable throwable) {
-    PrintWriter printWriter = new PrintWriter(new StringWriter());
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
     throwable.printStackTrace(printWriter);
-    publish(level, message.toString() + '\n' + printWriter.toString());
+    publish(level, message.toString() + '\n' + stringWriter.toString());
   }
 
   private void publish(byte level, Object message) {

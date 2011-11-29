@@ -56,6 +56,20 @@ public class IncomingMessageQueue<MessageType> {
     messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
   }
 
+  /**
+   * @see CircularBlockingQueue#setLimit(int)
+   */
+  public void setLimit(int limit) {
+    messages.setLimit(limit);
+  }
+
+  /**
+   * @see CircularBlockingQueue#getLimit()
+   */
+  public int getLimit() {
+    return messages.getLimit();
+  }
+
   public MessageType take() throws InterruptedException {
     return messages.take();
   }

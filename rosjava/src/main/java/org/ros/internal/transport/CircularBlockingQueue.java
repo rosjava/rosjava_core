@@ -16,27 +16,72 @@
 
 package org.ros.internal.transport;
 
+import com.google.common.base.Preconditions;
+
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
+ * A {@link BlockingQueue} that removes the old elements when the number of
+ * elements exceeds the limit.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class CircularBlockingQueue<T> extends LinkedBlockingQueue<T> {
 
+  private final int capacity;
+
+  /**
+   * The number of elements allowed in the queue at one time. Unlike
+   * {@link #capacity}, this can be changed at runtime and is only best effort.
+   */
+  private int limit;
+
+  /**
+   * @param capacity
+   *          the maximum number of elements allowed in the queue
+   */
   public CircularBlockingQueue(int capacity) {
     super(capacity);
+    this.capacity = capacity;
+    this.limit = capacity;
+  }
+
+  /**
+   * Remove elements until the size of the queue is lower than the limit.
+   */
+  private void shrink() {
+    while (size() > limit) {
+      remove();
+    }
+  }
+
+  /**
+   * Sets a soft limit on the number of elements allowed in the queue.
+   * 
+   * @param limit
+   *          the number of elements allowed in the queue
+   */
+  public void setLimit(int limit) {
+    Preconditions.checkArgument(limit <= capacity);
+    this.limit = limit;
+    shrink();
+  }
+
+  /**
+   * @return the number of elements allowed in the queue
+   */
+  public int getLimit() {
+    return limit;
   }
 
   @Override
   public void put(T entry) {
-    if (remainingCapacity() == 1) {
-      remove();
-    }
+    shrink();
     try {
       super.put(entry);
     } catch (InterruptedException e) {
       throw new IllegalStateException(e);
     }
   }
-
 }

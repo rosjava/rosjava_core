@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 
@@ -49,5 +50,14 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
     }
     channelGroup.add(e.getChannel());
     super.channelOpen(ctx, e);
+  }
+
+  @Override
+  public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+    log.error("Exception occured on channel: " + ctx.getChannel(), e.getCause());
+    ctx.getChannel().close();
+    // NOTE(damonkohler): We ignore exceptions here because they are common
+    // (e.g. network failure, connection reset by peer, etc.) and should not be
+    // fatal. However, in all cases the channel should be closed.
   }
 }

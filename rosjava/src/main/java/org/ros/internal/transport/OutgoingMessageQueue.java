@@ -26,9 +26,11 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.ros.concurrent.CancellableLoop;
 import org.ros.message.MessageSerializer;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -40,40 +42,29 @@ public class OutgoingMessageQueue<MessageType> {
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
-  private final ChannelGroup channelGroup;
-  private final CircularBlockingQueue<MessageType> messages;
-  private final MessageSendingThread thread;
   private final MessageSerializer<MessageType> serializer;
+  private final CircularBlockingQueue<MessageType> messages;
+  private final ChannelGroup channelGroup;
+  private final MessageWriter messageWriter;
 
   private boolean latchMode;
   private MessageType latchedMessage;
 
-  private final class MessageSendingThread extends Thread {
+  private final class MessageWriter extends CancellableLoop {
     @Override
-    public void run() {
-      try {
-        while (!Thread.currentThread().isInterrupted()) {
-          writeMessageToChannel(messages.take());
-        }
-      } catch (InterruptedException e) {
-        // Cancelable
-        if (DEBUG) {
-          log.info("Interrupted.");
-        }
-      }
-    }
-
-    public void cancel() {
-      interrupt();
+    public void loop() throws InterruptedException {
+      writeMessageToChannel(messages.take());
     }
   }
 
-  public OutgoingMessageQueue(MessageSerializer<MessageType> serializer) {
+  public OutgoingMessageQueue(MessageSerializer<MessageType> serializer,
+      ExecutorService executorService) {
     this.serializer = serializer;
-    channelGroup = new DefaultChannelGroup();
     messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
-    thread = new MessageSendingThread();
+    channelGroup = new DefaultChannelGroup();
+    messageWriter = new MessageWriter();
     latchMode = false;
+    executorService.execute(messageWriter);
   }
 
   public void setLatchMode(boolean enabled) {
@@ -86,23 +77,40 @@ public class OutgoingMessageQueue<MessageType> {
     if (DEBUG) {
       // TODO(damonkohler): Add a utility method for a better
       // ChannelBuffer.toString() method.
-      log.info("Sending message: " + message);
+      log.info("Writing message: " + message);
     }
     channelGroup.write(buffer);
   }
 
+  /**
+   * @param message
+   *          the message to add to the queue
+   */
   public void put(MessageType message) {
     messages.put(message);
     latchedMessage = message;
   }
 
+  /**
+   * Stop writing messages.
+   */
   public void shutdown() {
-    thread.cancel();
+    messageWriter.cancel();
     channelGroup.close().awaitUninterruptibly();
   }
 
-  public void start() {
-    thread.start();
+  /**
+   * @see {@link CircularBlockingQueue#setLimit(int)}
+   */
+  public void setLimit(int limit) {
+    messages.setLimit(limit);
+  }
+
+  /**
+   * @see {@link CircularBlockingQueue#getLimit()}
+   */
+  public int getLimit() {
+    return messages.getLimit();
   }
 
   /**
@@ -110,14 +118,14 @@ public class OutgoingMessageQueue<MessageType> {
    *          added to this {@link OutgoingMessageQueue}'s {@link ChannelGroup}
    */
   public void addChannel(Channel channel) {
-    Preconditions.checkState(thread.isAlive());
+    Preconditions.checkState(messageWriter.isRunning());
     if (DEBUG) {
       log.info("Adding channel: " + channel);
     }
     channelGroup.add(channel);
     if (latchMode && latchedMessage != null) {
       if (DEBUG) {
-        log.info("Sending latched message: " + latchedMessage);
+        log.info("Writing latched message: " + latchedMessage);
       }
       writeMessageToChannel(latchedMessage);
     }
@@ -134,5 +142,4 @@ public class OutgoingMessageQueue<MessageType> {
   ChannelGroup getChannelGroup() {
     return channelGroup;
   }
-
 }
