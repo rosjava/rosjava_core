@@ -66,10 +66,6 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   private final ExecutorService executorService;
   private final ImmutableMap<String, String> header;
   private final CopyOnWriteArrayList<MessageListener<MessageType>> messageListeners;
-  /**
-   * All {@link SubscriberListener} instances added to the subscriber.
-   */
-  private final CopyOnWriteArrayList<SubscriberListener> subscriberListeners;
   private final IncomingMessageQueue<MessageType> incomingMessageQueue;
   private final MessageReader messageReader;
   private final Set<PublisherIdentifier> knownPublishers;
@@ -77,6 +73,11 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   private final ChannelGroup channelGroup;
   private final TcpClientPipelineFactory tcpClientPipelineFactory;
   private final ClientBootstrap bootstrap;
+
+  /**
+   * All {@link SubscriberListener} instances added to the subscriber.
+   */
+  private final CopyOnWriteArrayList<SubscriberListener> subscriberListeners;
 
   private final class MessageReader extends CancellableLoop {
     @Override

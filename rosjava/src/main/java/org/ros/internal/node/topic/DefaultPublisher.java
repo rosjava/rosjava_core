@@ -56,8 +56,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   /**
    * All {@link PublisherListener} instances added to the publisher.
    */
-  private final List<PublisherListener> publisherListeners =
-      new CopyOnWriteArrayList<PublisherListener>();
+  private final List<PublisherListener> publisherListeners;
 
   /**
    * The {@link ExecutorService} to be used for all thread creation.
@@ -68,6 +67,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
       MessageSerializer<MessageType> serializer, ExecutorService executorService) {
     super(topicDefinition);
     this.executorService = executorService;
+    publisherListeners = new CopyOnWriteArrayList<PublisherListener>();
     outgoingMessageQueue = new OutgoingMessageQueue<MessageType>(serializer, executorService);
   }
 
