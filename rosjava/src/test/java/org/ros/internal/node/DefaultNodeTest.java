@@ -162,19 +162,19 @@ public class DefaultNodeTest {
     //assertTrue(((RosoutLogger) node.getLog()).getPublisher().awaitRegistration(1, TimeUnit.SECONDS));
 
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
-    assertFalse(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertFalse(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     assertFalse(publisherListener.awaitShutdown(1, TimeUnit.SECONDS));
 
     CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
-    assertFalse(subscriberListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertFalse(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     assertFalse(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
    
     node.newPublisher("/foo", "std_msgs/String", Lists.newArrayList(publisherListener));
-    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     assertFalse(publisherListener.awaitShutdown(1, TimeUnit.SECONDS));
 
     node.newSubscriber("/foo", "std_msgs/String", null, Lists.newArrayList(subscriberListener));
-    assertTrue(subscriberListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     assertFalse(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
 
     // There are now two registered publishers /rosout and /foo.
@@ -240,7 +240,7 @@ public class DefaultNodeTest {
 
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     node.newPublisher("test_addresses_pub", "std_msgs/Int64", Lists.newArrayList(publisherListener));
-    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     // Check the TCPROS server address via the XML-RPC API.
     SlaveClient slaveClient = new SlaveClient(new GraphName("test_addresses"), nodeUri);

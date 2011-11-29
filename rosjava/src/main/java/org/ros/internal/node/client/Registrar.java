@@ -150,7 +150,7 @@ public class Registrar implements TopicListener, ServiceListener {
         Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
         Response<List<URI>> response =
             masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
-        publisher.signalRegistrationDone();
+        publisher.signalOnMasterRegistrationSuccess();
         return response;
       }
     });
@@ -167,7 +167,7 @@ public class Registrar implements TopicListener, ServiceListener {
             PublisherIdentifier.newCollectionFromUris(response.getResult(),
                 subscriber.getTopicDefinition());
         subscriber.updatePublishers(publishers);
-        subscriber.signalRegistrationDone();
+        subscriber.signalOnMasterRegistrationSuccess();
         return response;
       }
     });

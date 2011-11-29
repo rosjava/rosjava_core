@@ -89,7 +89,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
       if (!future.isSuccess()) {
         throw new RosRuntimeException(future.getCause());
       }
-      publisher.addRemoteConnection(channel);
+      publisher.addSubscriberChannel(channel);
 
       // Once the handshake is complete, there will be nothing incoming on the
       // channel. Replace the handshake handler with a handler which will

@@ -21,77 +21,91 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * A {@link PublisherListener} which uses separate {@link CountDownLatch}
- * instances for all messages.
+ * instances for all signals.
  * 
  * @author Keith M. Hughes
  */
 public class CountDownPublisherListener implements PublisherListener {
-  private CountDownLatch registrationLatch;
+
+  private CountDownLatch masterRegistrationSuccessLatch;
+  private CountDownLatch masterRegistrationFailureLatch;
   private CountDownLatch shutdownLatch;
-  private CountDownLatch remoteConnectionLatch;
+  private CountDownLatch newSubscriberLatch;
 
   /**
-   * Listener with counts of 1.
+   * Construct a {@link CountDownPublisherListener} with all counts set to 1.
    */
   public CountDownPublisherListener() {
-    this(1, 1, 1);
+    this(1, 1, 1, 1);
   }
 
   /**
-   * @param registerationCount
-   *          the number of counts to wait for for a registration
+   * @param masterRegistrationSuccessCount
+   *          the number of counts to wait for for a successful master
+   *          registration
+   * @param masterRegistrationFailureCount
+   *          the number of counts to wait for for a failing master registration
    * @param shutdownCount
    *          the number of counts to wait for for a shutdown
    * @param remoteConnectionCount
-   *          the number of counts to wait for for a remore connection
+   *          the number of counts to wait for for a new subscriber
    */
-  public CountDownPublisherListener(int registerationCount, int shutdownCount,
-      int remoteConnectionCount) {
-    this(new CountDownLatch(registerationCount), new CountDownLatch(shutdownCount),
-        new CountDownLatch(remoteConnectionCount));
+  public CountDownPublisherListener(int masterRegistrationSuccessCount,
+      int masterRegistrationFailureCount, int shutdownCount, int remoteConnectionCount) {
+    this(new CountDownLatch(masterRegistrationSuccessCount), new CountDownLatch(
+        masterRegistrationFailureCount), new CountDownLatch(shutdownCount), new CountDownLatch(
+        remoteConnectionCount));
   }
 
   /**
-   * @param registerationLatch
+   * @param masterRegistrationSuccessLatch
    *          the latch to use for a registration
    * @param shutdownLatch
    *          the latch to use for a shutdown
-   * @param remoteConnectionLatch
+   * @param newSubscriberLatch
    *          the latch to use for a remote connection
    */
-  public CountDownPublisherListener(CountDownLatch registerationLatch,
-      CountDownLatch shutdownLatch, CountDownLatch remoteConnectionLatch) {
-    this.registrationLatch = registerationLatch;
+  public CountDownPublisherListener(CountDownLatch masterRegistrationSuccessLatch,
+      CountDownLatch masterRegistrationFailureLatch, CountDownLatch shutdownLatch,
+      CountDownLatch remoteConnectionLatch) {
+    this.masterRegistrationSuccessLatch = masterRegistrationSuccessLatch;
+    this.masterRegistrationFailureLatch = masterRegistrationFailureLatch;
     this.shutdownLatch = shutdownLatch;
-    this.remoteConnectionLatch = remoteConnectionLatch;
+    this.newSubscriberLatch = remoteConnectionLatch;
   }
 
   @Override
-  public void onPublisherMasterRegistration(Publisher<?> publisher) {
-    registrationLatch.countDown();
+  public void onMasterRegistrationSuccess(Publisher<?> publisher) {
+    masterRegistrationSuccessLatch.countDown();
   }
 
   @Override
-  public void onPublisherRemoteConnection(Publisher<?> publisher) {
-    remoteConnectionLatch.countDown();
+  public void onMasterRegistrationFailure(Publisher<?> publisher) {
+    masterRegistrationFailureLatch.countDown();
   }
 
   @Override
-  public void onPublisherShutdown(Publisher<?> publisher) {
+  public void onNewSubscriber(Publisher<?> publisher) {
+    newSubscriberLatch.countDown();
+  }
+
+  @Override
+  public void onShutdown(Publisher<?> publisher) {
     shutdownLatch.countDown();
   }
 
   /**
-   * Await for the requested number of registrations.
+   * Await for the requested number of successful registrations.
    * 
    * @throws InterruptedException
    */
-  public void awaitRegistration() throws InterruptedException {
-    registrationLatch.await();
+  public void awaitMasterRegistrationSuccess() throws InterruptedException {
+    masterRegistrationSuccessLatch.await();
   }
 
   /**
-   * Await for the requested number of registrations for the given time period.
+   * Await for the requested number of successful registrations for the given
+   * time period.
    * 
    * @param timeout
    *          the maximum time to wait
@@ -103,8 +117,37 @@ public class CountDownPublisherListener implements PublisherListener {
    * 
    * @throws InterruptedException
    */
-  public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
-    return registrationLatch.await(timeout, unit);
+  public boolean awaitMasterRegistrationSuccess(long timeout, TimeUnit unit)
+      throws InterruptedException {
+    return masterRegistrationSuccessLatch.await(timeout, unit);
+  }
+
+  /**
+   * Await for the requested number of failed registrations.
+   * 
+   * @throws InterruptedException
+   */
+  public void awaitMasterRegistrationFailure() throws InterruptedException {
+    masterRegistrationFailureLatch.await();
+  }
+
+  /**
+   * Await for the requested number of failed registrations for the given time
+   * period.
+   * 
+   * @param timeout
+   *          the maximum time to wait
+   * @param unit
+   *          the time unit of the {@code timeout} argument
+   * 
+   * @return {@code true} if the registration happened within the time period
+   *         {@code false} otherwise.
+   * 
+   * @throws InterruptedException
+   */
+  public boolean awaitMasterRegistrationFailure(long timeout, TimeUnit unit)
+      throws InterruptedException {
+    return masterRegistrationFailureLatch.await(timeout, unit);
   }
 
   /**
@@ -112,8 +155,8 @@ public class CountDownPublisherListener implements PublisherListener {
    * 
    * @throws InterruptedException
    */
-  public void awaitRemoteConnection() throws InterruptedException {
-    remoteConnectionLatch.await();
+  public void awaitNewSubscriber() throws InterruptedException {
+    newSubscriberLatch.await();
   }
 
   /**
@@ -130,8 +173,8 @@ public class CountDownPublisherListener implements PublisherListener {
    * 
    * @throws InterruptedException
    */
-  public boolean awaitRemoteConnection(long timeout, TimeUnit unit) throws InterruptedException {
-    return remoteConnectionLatch.await(timeout, unit);
+  public boolean awaitNewSubscriber(long timeout, TimeUnit unit) throws InterruptedException {
+    return newSubscriberLatch.await(timeout, unit);
   }
 
   /**
@@ -159,5 +202,4 @@ public class CountDownPublisherListener implements PublisherListener {
   public boolean awaitShutdown(long timeout, TimeUnit unit) throws InterruptedException {
     return shutdownLatch.await(timeout, unit);
   }
-
 }

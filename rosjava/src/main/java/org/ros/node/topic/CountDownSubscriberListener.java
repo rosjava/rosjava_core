@@ -27,72 +27,85 @@ import java.util.concurrent.TimeUnit;
  */
 public class CountDownSubscriberListener implements SubscriberListener {
 
-  private CountDownLatch registrationLatch;
+  private CountDownLatch masterRegistrationSuccessLatch;
+  private CountDownLatch masterRegistrationFailureLatch;
   private CountDownLatch shutdownLatch;
-  private CountDownLatch remoteConnectionLatch;
+  private CountDownLatch newPublisherLatch;
 
   /**
-   * Listener with counts of 1.
+   * Construct a {@link CountDownSubscriberListener} with all counts set to 1.
    */
   public CountDownSubscriberListener() {
-    this(1, 1, 1);
+    this(1, 1, 1, 1);
   }
 
   /**
-   * @param registerationCount
-   *          the number of counts to wait for for a registration
+   * @param masterRegistrationSuccessCount
+   *          the number of counts to wait for for a successful master
+   *          registration
+   * @param masterRegistrationFailureCount
+   *          the number of counts to wait for for a failed master registration
    * @param shutdownCount
    *          the number of counts to wait for for a shutdown
    * @param remoteConnectionCount
    *          the number of counts to wait for for a remore connection
    */
-  public CountDownSubscriberListener(int registerationCount, int shutdownCount,
-      int remoteConnectionCount) {
-    this(new CountDownLatch(registerationCount), new CountDownLatch(shutdownCount),
-        new CountDownLatch(remoteConnectionCount));
+  public CountDownSubscriberListener(int masterRegistrationSuccessCount,
+      int masterRegistrationFailureCount, int shutdownCount, int remoteConnectionCount) {
+    this(new CountDownLatch(masterRegistrationSuccessCount), new CountDownLatch(
+        masterRegistrationFailureCount), new CountDownLatch(shutdownCount), new CountDownLatch(
+        remoteConnectionCount));
   }
 
   /**
-   * @param registerationLatch
+   * @param masterRegistrationSuccessLatch
    *          the latch to use for a registration
    * @param shutdownLatch
    *          the latch to use for a shutdown
-   * @param remoteConnectionLatch
+   * @param newPublisherLatch
    *          the latch to use for a remote connection
    */
-  public CountDownSubscriberListener(CountDownLatch registerationLatch,
-      CountDownLatch shutdownLatch, CountDownLatch remoteConnectionLatch) {
-    this.registrationLatch = registerationLatch;
+  public CountDownSubscriberListener(CountDownLatch masterRegistrationSuccessLatch,
+      CountDownLatch masterRegistrationFailureLatch, CountDownLatch shutdownLatch,
+      CountDownLatch remoteConnectionLatch) {
+    this.masterRegistrationSuccessLatch = masterRegistrationSuccessLatch;
+    this.masterRegistrationFailureLatch = masterRegistrationFailureLatch;
     this.shutdownLatch = shutdownLatch;
-    this.remoteConnectionLatch = remoteConnectionLatch;
+    this.newPublisherLatch = remoteConnectionLatch;
   }
 
   @Override
-  public void onSubscriberMasterRegistration(Subscriber<?> subscriber) {
-    registrationLatch.countDown();
+  public void onMasterRegistrationSuccess(Subscriber<?> subscriber) {
+    masterRegistrationSuccessLatch.countDown();
   }
 
   @Override
-  public void onSubscriberRemoteConnection(Subscriber<?> subscriber) {
-    remoteConnectionLatch.countDown();
+  public void onMasterRegistrationFailure(Subscriber<?> subscriber) {
+    masterRegistrationFailureLatch.countDown();
   }
 
   @Override
-  public void onSubscriberShutdown(Subscriber<?> subscriber) {
+  public void onNewPublisher(Subscriber<?> subscriber) {
+    newPublisherLatch.countDown();
+  }
+
+  @Override
+  public void onShutdown(Subscriber<?> subscriber) {
     shutdownLatch.countDown();
   }
 
   /**
-   * Await for the requested number of registrations.
+   * Await for the requested number of successful registrations.
    * 
    * @throws InterruptedException
    */
-  public void awaitRegistration() throws InterruptedException {
-    registrationLatch.await();
+  public void awaitMasterRegistrationSuccess() throws InterruptedException {
+    masterRegistrationSuccessLatch.await();
   }
 
   /**
-   * Await for the requested number of registrations for the given time period.
+   * Await for the requested number of successful registrations for the given
+   * time period.
    * 
    * @param timeout
    *          the maximum time to wait
@@ -104,8 +117,37 @@ public class CountDownSubscriberListener implements SubscriberListener {
    * 
    * @throws InterruptedException
    */
-  public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
-    return registrationLatch.await(timeout, unit);
+  public boolean awaitMasterRegistrationSuccess(long timeout, TimeUnit unit)
+      throws InterruptedException {
+    return masterRegistrationSuccessLatch.await(timeout, unit);
+  }
+
+  /**
+   * Await for the requested number of failed registrations.
+   * 
+   * @throws InterruptedException
+   */
+  public void awaitMasterRegistrationFailure() throws InterruptedException {
+    masterRegistrationFailureLatch.await();
+  }
+
+  /**
+   * Await for the requested number of failed registrations for the given time
+   * period.
+   * 
+   * @param timeout
+   *          the maximum time to wait
+   * @param unit
+   *          the time unit of the {@code timeout} argument
+   * 
+   * @return {@code true} if the registration happened within the time period
+   *         {@code false} otherwise.
+   * 
+   * @throws InterruptedException
+   */
+  public boolean awaitMasterRegistrationFailure(long timeout, TimeUnit unit)
+      throws InterruptedException {
+    return masterRegistrationFailureLatch.await(timeout, unit);
   }
 
   /**
@@ -113,25 +155,26 @@ public class CountDownSubscriberListener implements SubscriberListener {
    * 
    * @throws InterruptedException
    */
-  public void awaitRemoteConntections() throws InterruptedException {
-    remoteConnectionLatch.await();
+  public void awaitNewPublisher() throws InterruptedException {
+    newPublisherLatch.await();
   }
 
   /**
-   * Await for the requested number of remote connections for the given time period.
+   * Await for the requested number of remote connections for the given time
+   * period.
    * 
    * @param timeout
    *          the maximum time to wait
    * @param unit
    *          the time unit of the {@code timeout} argument
    * 
-   * @return {@code true} if the remote connections happened within the time period
-   *         {@code false} otherwise.
+   * @return {@code true} if the remote connections happened within the time
+   *         period {@code false} otherwise.
    * 
    * @throws InterruptedException
    */
-  public boolean awaitRemoteConnections(long timeout, TimeUnit unit) throws InterruptedException {
-    return remoteConnectionLatch.await(timeout, unit);
+  public boolean awaitNewPublisher(long timeout, TimeUnit unit) throws InterruptedException {
+    return newPublisherLatch.await(timeout, unit);
   }
 
   /**

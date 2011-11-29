@@ -39,6 +39,7 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
+import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import org.ros.node.topic.SubscriberListener;
 
@@ -52,7 +53,7 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * Default implementation of the {@link Subscriber}.
- *
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subscriber<MessageType> {
@@ -164,7 +165,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
       log.info("Connected to: " + channel.getRemoteAddress());
     }
     knownPublishers.add(publisherIdentifier);
-    signalRemoteConnection();
+    signalOnNewPublisher();
   }
 
   /**
@@ -172,7 +173,8 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    * {@link DefaultSubscriber} is interested in.
    * 
    * @param publishers
-   *          {@link List} of {@link PublisherIdentifier}s for the subscribed topic
+   *          {@link List} of {@link PublisherIdentifier}s for the subscribed
+   *          topic
    */
   public void updatePublishers(Collection<PublisherIdentifier> publishers) {
     for (final PublisherIdentifier publisher : publishers) {
@@ -185,9 +187,11 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   public void shutdown() {
     messageReader.cancel();
     channelGroup.close().awaitUninterruptibly();
-    // Not calling channelFactory.releaseExternalResources() or 
-    // bootstrap.releaseExternalResources() since only external resources are the
-    // ExecutorService and control of that must remain with the overall application.
+    // Not calling channelFactory.releaseExternalResources() or
+    // bootstrap.releaseExternalResources() since only external resources are
+    // the
+    // ExecutorService and control of that must remain with the overall
+    // application.
     signalShutdown();
   }
 
@@ -202,58 +206,81 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   }
 
   /**
-   * Notify messageListeners that the node has been registered.
+   * Signal all {@link SubscriberListener}s that the {@link Subscriber} has
+   * successfully registered with the master.
    * 
    * <p>
-   * Done in another thread.
+   * Each listener is called in a separate thread.
    */
   @Override
-  public void signalRegistrationDone() {
+  public void signalOnMasterRegistrationSuccess() {
     final Subscriber<MessageType> subscriber = this;
-	executorService.execute(new Runnable() {
-	  @Override
-	  public void run() {
-	    for(SubscriberListener listener : subscriberListeners) {
-		  listener.onSubscriberMasterRegistration(subscriber);
-		}
-      }
-	});
+    for (final SubscriberListener listener : subscriberListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onMasterRegistrationSuccess(subscriber);
+        }
+      });
+    }
   }
 
   /**
-   * Notify messageListeners that there have been remote connections.
+   * Signal all {@link SubscriberListener}s that the {@link Subscriber} has
+   * failed to register with the master.
    * 
    * <p>
-   * Done in another thread.
+   * Each listener is called in a separate thread.
    */
-  public void signalRemoteConnection() {
+  @Override
+  public void signalOnMasterRegistrationFailure() {
     final Subscriber<MessageType> subscriber = this;
-    executorService.execute(new Runnable() {
-      @Override
-      public void run() {
-        for(SubscriberListener listener : subscriberListeners) {
-          listener.onSubscriberRemoteConnection(subscriber);
+    for (final SubscriberListener listener : subscriberListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onMasterRegistrationFailure(subscriber);
         }
-      }
-    });
+      });
+    }
   }
-  
+
   /**
-   * Notify messageListeners that the subscriber has shutdown.
+   * Signal all {@link SubscriberListener}s that a new {@link Publisher} has
+   * connected.
    * 
    * <p>
-   * Done in another thread.
+   * Each listener is called in a separate thread.
+   */
+  public void signalOnNewPublisher() {
+    final Subscriber<MessageType> subscriber = this;
+    for (final SubscriberListener listener : subscriberListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onNewPublisher(subscriber);
+        }
+      });
+    }
+  }
+
+  /**
+   * Signal all {@link SubscriberListener}s that the {@link Subscriber} has shut
+   * down.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
    */
   private void signalShutdown() {
     final Subscriber<MessageType> subscriber = this;
-    executorService.execute(new Runnable() {
-	  @Override
-	  public void run() {
-	    for (SubscriberListener listener : subscriberListeners) {
-	      listener.onSubscriberShutdown(subscriber);
-	    }
-	  }
-    });
+    for (final SubscriberListener listener : subscriberListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onShutdown(subscriber);
+        }
+      });
+    }
   }
 
   @Override

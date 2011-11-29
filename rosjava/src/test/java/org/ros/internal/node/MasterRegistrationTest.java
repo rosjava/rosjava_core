@@ -89,7 +89,7 @@ public class MasterRegistrationTest {
   @Test
   public void testRegisterPublisher() throws InterruptedException {
     masterRegistration.publisherAdded(publisher);
-    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
   }
 
   @Test
@@ -102,7 +102,7 @@ public class MasterRegistrationTest {
         new MasterServer(BindAddress.newPrivate(masterServer.getAdvertiseAddress().getPort()),
             AdvertiseAddress.newPrivate());
     masterServer.start();
-    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
   }
 
 }

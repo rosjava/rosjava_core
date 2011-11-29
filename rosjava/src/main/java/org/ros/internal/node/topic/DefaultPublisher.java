@@ -131,19 +131,18 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
     return ConnectionHeader.encode(header);
   }
 
-
   /**
-   * A remote {@link Subscriber} is being added to this publisher.
+   * Add a {@link Subscriber} connection to this {@link Publisher}.
    * 
    * @param channel
-   *          channel for the remote connection
+   *          the communication {@link Channel} to the {@link Subscriber}
    */
-  public void addRemoteConnection(Channel channel) {
+  public void addSubscriberChannel(Channel channel) {
     if (DEBUG) {
       log.info("Adding channel: " + channel);
     }
     outgoingMessageQueue.addChannel(channel);
-    signalRemoteConnection();
+    signalOnNewSubscriber();
   }
 
   @Override
@@ -157,58 +156,81 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   }
 
   /**
-   * Notify listeners that the node has been registered.
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has been
+   * successfully registered with the master.
    * 
    * <p>
-   * Done in another thread.
+   * Each listener is called in a separate thread.
    */
   @Override
-  public void signalRegistrationDone() {
+  public void signalOnMasterRegistrationSuccess() {
     final Publisher<MessageType> publisher = this;
-    executorService.execute(new Runnable() {
-      @Override
-      public void run() {
-        for (PublisherListener listener : publisherListeners) {
-          listener.onPublisherMasterRegistration(publisher);
+    for (final PublisherListener listener : publisherListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onMasterRegistrationSuccess(publisher);
         }
-      }
-    });
+      });
+    }
   }
 
   /**
-   * Notify listeners that the node has been registered.
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has been
+   * successfully registered with the master.
    * 
    * <p>
-   * Done in another thread.
+   * Each listener is called in a separate thread.
    */
-  private void signalRemoteConnection() {
+  @Override
+  public void signalOnMasterRegistrationFailure() {
     final Publisher<MessageType> publisher = this;
-    executorService.execute(new Runnable() {
-      @Override
-      public void run() {
-        for (PublisherListener listener : publisherListeners) {
-          listener.onPublisherRemoteConnection(publisher);
+    for (final PublisherListener listener : publisherListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onMasterRegistrationFailure(publisher);
         }
-      }
-    });
+      });
+    }
   }
 
   /**
-   * Notify listeners that the node has shutdown.
+   * Signal all {@link PublisherListener}s that the {@link Publisher} failed to
+   * register with the master.
    * 
    * <p>
-   * Done in another thread.
+   * Each listener is called in a separate thread.
+   */
+  private void signalOnNewSubscriber() {
+    final Publisher<MessageType> publisher = this;
+    for (final PublisherListener listener : publisherListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onNewSubscriber(publisher);
+        }
+      });
+    }
+  }
+
+  /**
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has been
+   * shutdown.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
    */
   private void signalShutdown() {
     final Publisher<MessageType> publisher = this;
-    executorService.execute(new Runnable() {
-      @Override
-      public void run() {
-        for (PublisherListener listener : publisherListeners) {
-          listener.onPublisherShutdown(publisher);
+    for (final PublisherListener listener : publisherListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onShutdown(publisher);
         }
-      }
-    });
+      });
+    }
   }
 
   @Override

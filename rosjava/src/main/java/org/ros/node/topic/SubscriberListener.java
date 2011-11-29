@@ -18,33 +18,40 @@ package org.ros.node.topic;
 
 /**
  * A lifecycle listener for {@link Subscriber} instances.
- *
+ * 
  * @author Keith M. Hughes
  */
 public interface SubscriberListener {
-	
-  /**
-   * The subscriber has been registered with the master.
-   * 
-   * @param subscriber
-   *          The subscriber which has been registered.
-   */
-  void onSubscriberMasterRegistration(Subscriber<?> subscriber);
-  
-  /**
-   * A remote connection has been made to the subscriber.
-   * 
-   * @param subscriber
-   *          the subscriber which has received the new connection
-   */
-  void onSubscriberRemoteConnection(Subscriber<?> subscriber);
-	
-  /**
-   * The subscriber has been shut down.
-   * 
-   * @param subscriber
-   *          The subscriber which has been shut down.
-   */
-  void onSubscriberShutdown(Subscriber<?> subscriber);
 
+  /**
+   * The {@link Subscriber} has successfully registered with the master.
+   * 
+   * @param subscriber
+   *          the {@link Subscriber} which has been registered.
+   */
+  void onMasterRegistrationSuccess(Subscriber<?> subscriber);
+
+  /**
+   * The {@link Subscriber} has failed to register with the master.
+   * 
+   * @param subscriber
+   *          the {@link Subscriber} which has failed to register
+   */
+  void onMasterRegistrationFailure(Subscriber<?> subscriber);
+
+  /**
+   * A new {@link Publisher} has connected to the {@link Subscriber}.
+   * 
+   * @param subscriber
+   *          the {@link Subscriber} that the {@link Publisher} connected to
+   */
+  void onNewPublisher(Subscriber<?> subscriber);
+
+  /**
+   * The {@link Subscriber} has been shut down.
+   * 
+   * @param subscriber
+   *          the {@link Subscriber} that was shut down
+   */
+  void onShutdown(Subscriber<?> subscriber);
 }

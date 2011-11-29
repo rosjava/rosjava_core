@@ -17,24 +17,29 @@
 package org.ros.node.topic;
 
 /**
- * A {@link SubscriberListener} which provides empty defaults for all messages.
- *
+ * A {@link SubscriberListener} which provides empty defaults for all signals.
+ * 
  * @author Keith M. Hughes
  */
-public class BaseSubscriberListener implements SubscriberListener {
+public class DefaultSubscriberListener implements SubscriberListener {
 
   @Override
-  public void onSubscriberMasterRegistration(Subscriber<?> subscriber) {
+  public void onMasterRegistrationSuccess(Subscriber<?> subscriber) {
 	// Default is do nothing.
   }
 
   @Override
-  public void onSubscriberRemoteConnection(Subscriber<?> subscriber) {
+  public void onMasterRegistrationFailure(Subscriber<?> subscriber) {
+	// Default is do nothing.
+  }
+
+  @Override
+  public void onNewPublisher(Subscriber<?> subscriber) {
     // Default is do nothing.
   }
 
   @Override
-  public void onSubscriberShutdown(Subscriber<?> subscriber) {
+  public void onShutdown(Subscriber<?> subscriber) {
 	// Default is do nothing.
   }
 

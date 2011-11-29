@@ -17,25 +17,29 @@
 package org.ros.node.topic;
 
 /**
- * A {@link PublisherListener} which provides empty defaults for all messages.
- *
+ * A {@link PublisherListener} which provides empty defaults for all signals.
+ * 
  * @author Keith M. Hughes
  */
-public class BasePublisherListener implements PublisherListener {
+public class DefaultPublisherListener implements PublisherListener {
 
   @Override
-  public void onPublisherMasterRegistration(Publisher<?> publisher) {
+  public void onMasterRegistrationSuccess(Publisher<?> publisher) {
     // Default is do nothing.
   }
 
   @Override
-  public void onPublisherRemoteConnection(Publisher<?> publisher) {
+  public void onMasterRegistrationFailure(Publisher<?> publisher) {
     // Default is do nothing.
   }
 
   @Override
-  public void onPublisherShutdown(Publisher<?> publisher) {
+  public void onNewSubscriber(Publisher<?> publisher) {
+    // Default is do nothing.
+  }
+
+  @Override
+  public void onShutdown(Publisher<?> publisher) {
 	// Default is do nothing.
   }
-
 }

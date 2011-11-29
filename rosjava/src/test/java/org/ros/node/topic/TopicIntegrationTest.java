@@ -88,8 +88,8 @@ public class TopicIntegrationTest {
               }
             }, Lists.newArrayList(subscriberListener));
 
-    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
-    assertTrue(subscriberListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
+    assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     RepeatingPublisher<org.ros.message.std_msgs.String> repeatingPublisher =
         new RepeatingPublisher<org.ros.message.std_msgs.String>(publisher, helloMessage, 1000,
@@ -157,8 +157,8 @@ public class TopicIntegrationTest {
         subscriberNode.newSubscriber("foo", "test_ros/TestHeader", listener,
         Lists.newArrayList(subscriberListener));
 
-    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.DAYS));
-    assertTrue(subscriberListener.awaitRegistration(1, TimeUnit.DAYS));
+    assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.DAYS));
+    assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.DAYS));
 
     Thread thread = new Thread() {
       @Override
