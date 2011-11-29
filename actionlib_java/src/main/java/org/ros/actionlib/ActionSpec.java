@@ -310,34 +310,6 @@ public class ActionSpec<
   }
 
   /**
-   * Creates an ActionClient using this ActionSpec and a given node handle and
-   * nodeName space.
-   * 
-   * @param node
-   *          The node handle to be used by the ActionClient as its parent node
-   * @param nameSpace
-   *          The nodeName space to communicate within (specified by the action
-   *          server)
-   * @return An ActionClient object
-   */
-  public
-      ActionClient<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>
-      buildActionClient(Node node, String nameSpace) {
-
-    ActionClient<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> ac =
-        null;
-    try {
-      ac =
-          new ActionClient<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
-              node, nameSpace, this);
-    } catch (RosException e) {
-      e.printStackTrace();
-    }
-    return ac;
-
-  }
-
-  /**
    * Creates a SimpleActionClient using this ActionSpec and a given nodeName space.
    * The SimpleActionClient gets parameterized to create a new thread to service
    * the callbacks. This spares the users the effort to call spin() or
@@ -358,36 +330,6 @@ public class ActionSpec<
       sac =
           new SimpleActionClient<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
               nameSpace, this);
-    } catch (RosException e) {
-      e.printStackTrace();
-    }
-    return sac;
-
-  }
-
-  /**
-   * Creates a SimpleActionClient using this ActionSpec, a given node handle and
-   * nodeName space. The SimpleActionClient gets parameterized to create a new
-   * thread to service the callbacks. This spares the users the effort to call
-   * spin() or spinOnce() themselves.
-   * 
-   * @param node
-   *          The node handle to be used by the SimpleActionClient as its parent
-   *          node
-   * @param nameSpace
-   *          The nodeName space to communicate within (specified by the action
-   *          server)
-   * @return A SimpleActionClient object
-   */
-  public SimpleActionClient<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>
-      buildSimpleActionClient(Node node, String nameSpace) {
-
-    SimpleActionClient<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> sac =
-        null;
-    try {
-      sac =
-          new SimpleActionClient<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
-              node, nameSpace, this);
     } catch (RosException e) {
       e.printStackTrace();
     }
@@ -421,34 +363,6 @@ public class ActionSpec<
   }
 
   /**
-   * Creates an DefaultActionServer using this ActionSpec, a given node handle
-   * and nodeName space and a callback object intended to be used by the server.
-   * 
-   * @param node
-   *          The node handle to be used by the DefaultActionServer as its
-   *          parent node
-   * @param nodeName
-   *          The nodeName space to communicate within
-   * @param callbacks
-   *          A callback object providing callback methods, which get called by
-   *          the server
-   * @param autoStart
-   *          A flag, indicating whether the server shall be immediately started
-   *          or not
-   * @return An DefaultActionServer object
-   */
-  public
-      DefaultActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>
-      buildActionServer(
-          Node node,
-          String name,
-          ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks) {
-
-    return new DefaultActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
-        node, name, this, callbacks);
-  }
-
-  /**
    * Creates a DefaultSimpleActionServer using this ActionSpec, a given nodeName
    * space and a callback object intended to be used by the server. The
    * useBlockingGoalCallback parameter specifies which callback method will be
@@ -479,44 +393,6 @@ public class ActionSpec<
 
     return new DefaultSimpleActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
         nameSpace, this, callbacks, useBlockingGoalCallback);
-
-  }
-
-  /**
-   * Creates a DefaultSimpleActionServer using this ActionSpec, a given node
-   * handle and nodeName space and a callback object intended to be used by the
-   * server. The useBlockingGoalCallback parameter specifies which callback
-   * method will be used on the reception of goal messages.
-   * 
-   * @param node
-   *          The node handle to be used by the DefaultActionServer as its
-   *          parent node
-   * @param nameSpace
-   *          The nodeName space to communicate within
-   * @param callbacks
-   *          A callback object providing callback methods, which get called by
-   *          the server
-   * @param useBlockingGoalCallback
-   *          A Flag, indicating whether the blocking or non-blocking callback
-   *          method shall be used
-   * @param autoStart
-   *          A flag, indicating whether the server shall be immediately started
-   *          or not
-   * @return A DefaultSimpleActionServer object
-   * 
-   * @see SimpleActionServerCallbacks#blockingGoalCallback(Message)
-   * @see SimpleActionServerCallbacks#goalCallback()
-   */
-  public
-      SimpleActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>
-      buildSimpleActionServer(
-          Node node,
-          String nameSpace,
-          SimpleActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks,
-          boolean useBlockingGoalCallback) {
-
-    return new DefaultSimpleActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
-        node, nameSpace, this, callbacks, useBlockingGoalCallback);
 
   }
 

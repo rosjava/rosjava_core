@@ -20,22 +20,23 @@ import org.ros.namespace.GraphName;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
+ * Base definition of a {@link Topic}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultTopic implements Topic {
+public abstract class DefaultTopic implements Topic {
 
   private final TopicDefinition topicDefinition;
-  private final CountDownLatch registrationLatch;
 
   public DefaultTopic(TopicDefinition topicDefinition) {
     this.topicDefinition = topicDefinition;
-    registrationLatch = new CountDownLatch(1);
   }
 
+  /**
+   * @return the definition of the topic.
+   */
   public TopicDefinition getTopicDefinition() {
     return topicDefinition;
   }
@@ -43,7 +44,7 @@ public class DefaultTopic implements Topic {
   public List<String> getTopicDefinitionAsList() {
     return topicDefinition.toList();
   }
-  
+
   @Override
   public GraphName getTopicName() {
     return topicDefinition.getName();
@@ -54,28 +55,18 @@ public class DefaultTopic implements Topic {
     return topicDefinition.getMessageType();
   }
 
+  /**
+   * Get the definition header for the topic.
+   * 
+   * @return
+   */
   public Map<String, String> getTopicDefinitionHeader() {
     return topicDefinition.toHeader();
   }
 
-  public void signalRegistrationDone() {
-    registrationLatch.countDown();
-  }
-
-  @Override
-  public boolean isRegistered() {
-    return registrationLatch.getCount() == 0;
-  }
-
-  @Override
-  public void awaitRegistration() throws InterruptedException {
-    registrationLatch.await();
-  }
-
-  @Override
-  public boolean awaitRegistration(long timeout, TimeUnit unit)
-      throws InterruptedException {
-    return registrationLatch.await(timeout, unit);
-  }
+  /**
+   * Signal that the topic is now registered with the master.
+   */
+  public abstract void signalRegistrationDone();
 
 }

@@ -19,14 +19,14 @@ package org.ros.internal.node.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.Maps;
+import java.util.Collection;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.namespace.GraphName;
 
-import java.util.Collection;
-import java.util.Map;
+import com.google.common.collect.Maps;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

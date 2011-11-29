@@ -16,9 +16,9 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.namespace.GraphName;
+
+import com.google.common.base.Preconditions;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

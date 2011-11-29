@@ -16,7 +16,7 @@
 
 package org.ros.internal.transport.tcp;
 
-import com.google.common.base.Preconditions;
+import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
@@ -35,7 +35,7 @@ import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
 
 /**
  * A {@link ChannelHandler} which will process the TCP server handshake.
@@ -89,7 +89,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
       if (!future.isSuccess()) {
         throw new RosRuntimeException(future.getCause());
       }
-      publisher.addChannel(channel);
+      publisher.addRemoteConnection(channel);
 
       // Once the handshake is complete, there will be nothing incoming on the
       // channel. Replace the handshake handler with a handler which will

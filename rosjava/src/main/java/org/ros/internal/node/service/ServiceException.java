@@ -16,11 +16,11 @@
 
 package org.ros.internal.node.service;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

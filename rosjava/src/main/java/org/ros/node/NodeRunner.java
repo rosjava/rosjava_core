@@ -16,6 +16,8 @@
 
 package org.ros.node;
 
+import java.util.Collection;
+
 /**
  * Executes {@link NodeMain}s.
  * 
@@ -32,8 +34,24 @@ public interface NodeRunner {
    * @param nodeConfiguration
    *          the {@link NodeConfiguration} that will be used to create the
    *          {@link Node}
+   * @param nodeListeners
+   *        A collection of {@link NodeListener} instances to be added to the node
+   *        immediately after creation (can be {@code null})
    */
-  void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration);
+  void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
+      Collection<? extends NodeListener> nodeListeners);
+  
+  /**
+   * Executes the supplied {@link NodeMain} using the supplied
+   * {@link NodeConfiguration}.
+   * 
+   * @param nodeMain
+   *          the {@link NodeMain} to execute
+   * @param nodeConfiguration
+   *          the {@link NodeConfiguration} that will be used to create the
+   *          {@link Node}
+   */
+  void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration);
 
   /**
    * Shutdown all started {@link NodeMain}s.

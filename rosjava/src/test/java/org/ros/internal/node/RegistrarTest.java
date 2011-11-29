@@ -4,6 +4,8 @@ package org.ros.internal.node;
 
 import static org.junit.Assert.assertTrue;
 
+import org.ros.node.topic.CountDownPublisherListener;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +29,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Tests for the {@link Registrar} class.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class RegistrarTest {
@@ -43,6 +47,7 @@ public class RegistrarTest {
   private SlaveServer slaveServer;
   private DefaultPublisher<org.ros.message.std_msgs.String> publisher;
   private ExecutorService executorService;
+  private CountDownPublisherListener publisherListener;
 
   public RegistrarTest() {
     topicDefinition =
@@ -59,7 +64,7 @@ public class RegistrarTest {
     masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
-    registrar = new Registrar(masterClient);
+    registrar = new Registrar(masterClient, executorService);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
@@ -69,11 +74,14 @@ public class RegistrarTest {
             masterClient, topicManager, serviceManager, parameterManager, executorService);
     slaveServer.start();
     registrar.start(slaveServer.toSlaveIdentifier());
-    publisher =
-        new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer,
-            executorService);
-  }
 
+    publisherListener = new CountDownPublisherListener();    
+    publisher =
+            new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer,
+                executorService);
+    publisher.addPublisherListener(publisherListener);
+  }
+  
   @After
   public void tearDown() {
     registrar.shutdown();
@@ -84,7 +92,7 @@ public class RegistrarTest {
   @Test
   public void testRegisterPublisher() throws InterruptedException {
     registrar.publisherAdded(publisher);
-    assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
   }
 
   @Test
@@ -97,7 +105,7 @@ public class RegistrarTest {
         new MasterServer(BindAddress.newPrivate(masterServer.getAdvertiseAddress().getPort()),
             AdvertiseAddress.newPrivate());
     masterServer.start();
-    assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
   }
 
 }

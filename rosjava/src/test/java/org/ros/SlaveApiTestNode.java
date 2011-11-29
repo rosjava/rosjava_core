@@ -27,12 +27,12 @@ import org.ros.node.topic.Publisher;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class SlaveApiTestNode implements NodeMain {
+public class SlaveApiTestNode extends NodeMain {
 
   private Node node;
 
   @Override
-  public void main(Node node) {
+  public void onNodeCreate(Node node) {
     this.node = node;
 
     // Basic chatter in/out test.
@@ -74,10 +74,5 @@ public class SlaveApiTestNode implements NodeMain {
         e.printStackTrace();
       }
     }
-  }
-
-  @Override
-  public void shutdown() {
-    node.shutdown();
   }
 }

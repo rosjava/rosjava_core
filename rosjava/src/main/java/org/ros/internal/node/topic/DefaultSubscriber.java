@@ -39,9 +39,11 @@ import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
 import org.ros.node.topic.Subscriber;
+import org.ros.node.topic.SubscriberListener;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -49,6 +51,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 /**
+ * Default implementation of the {@link Subscriber}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subscriber<MessageType> {
@@ -67,19 +71,30 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   private final SlaveIdentifier slaveIdentifier;
   private final ChannelGroup channelGroup;
   private TcpClientPipelineFactory tcpClientPipelineFactory;
-  private ClientBootstrap bootstrap;
+  private ClientBootstrap bootstrap; 
+ 
+  /**
+   * All {@link SubscriberListener} instances added to the subscriber.
+   */
+  private final List<SubscriberListener> subscriberListeners = new ArrayList<SubscriberListener>();
 
   private final class MessageReader implements Runnable {
+	/**
+	 * Thread the reader is running in.
+	 */
+	private Thread thread;
+	
     @Override
     public void run() {
+      thread = Thread.currentThread();
       try {
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!thread.isInterrupted()) {
           MessageType message = in.take();
           if (DEBUG) {
             log.info("Received message: " + message + " " + message.getClass().getCanonicalName());
           }
           for (MessageListener<MessageType> listener : listeners) {
-            if (Thread.currentThread().isInterrupted()) {
+            if (thread.isInterrupted()) {
               break;
             }
             // TODO(damonkohler): Recycle Message objects to avoid GC.
@@ -95,7 +110,9 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
     }
 
     public void cancel() {
-      Thread.currentThread().interrupt();
+      if (thread != null) {
+        thread.interrupt();
+      }
     }
   }
 
@@ -171,6 +188,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
       log.info("Connected to: " + channel.getRemoteAddress());
     }
     knownPublishers.add(publisherIdentifier);
+    signalRemoteConnection();
   }
 
   /**
@@ -178,7 +196,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    * {@link DefaultSubscriber} is interested in.
    * 
    * @param publishers
-   *          {@link List} of {@link DefaultPublisher}s for the subscribed topic
+   *          {@link List} of {@link PublisherIdentifier}s for the subscribed topic
    */
   public void updatePublishers(Collection<PublisherIdentifier> publishers) {
     for (final PublisherIdentifier publisher : publishers) {
@@ -191,12 +209,80 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   public void shutdown() {
     messageReader.cancel();
     channelGroup.close().awaitUninterruptibly();
-    bootstrap.releaseExternalResources();
+    // Not calling channelFactory.releaseExternalResources() or 
+    // bootstrap.releaseExternalResources() since only external resources are the
+    // ExecutorService and control of that must remain with the overall application.
+    
+    signalShutdown();
   }
 
   @Override
   public String toString() {
     return "Subscriber<" + getTopicDefinition() + ">";
+  }
+  
+  @Override
+  public void addSubscriberListener(SubscriberListener listener) {
+	subscriberListeners.add(listener);
+  }
+
+  @Override
+  public void removeSubscriberListener(SubscriberListener listener) {
+	subscriberListeners.add(listener);
+  }
+
+  /**
+   * Notify listeners that the node has been registered.
+   * 
+   * <p>
+   * Done in another thread.
+   */
+  public void signalRegistrationDone() {
+    final Subscriber<MessageType> subscriber = this;
+	executorService.execute(new Runnable() {
+	  @Override
+	  public void run() {
+	    for(SubscriberListener listener : subscriberListeners) {
+		  listener.onSubscriberMasterRegistration(subscriber);
+		}
+      }
+	});
+  }
+
+  /**
+   * Notify listeners that there have been remote connections.
+   * 
+   * <p>
+   * Done in another thread.
+   */
+  public void signalRemoteConnection() {
+    final Subscriber<MessageType> subscriber = this;
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        for(SubscriberListener listener : subscriberListeners) {
+          listener.onSubscriberRemoteConnection(subscriber);
+        }
+      }
+    });
+  }
+  
+  /**
+   * Notify listeners that the subscriber has shutdown.
+   * 
+   * <p>
+   * Done in another thread.
+   */
+  private void signalShutdown() {
+    final Subscriber<MessageType> subscriber = this;
+    executorService.execute(new Runnable() {
+	  @Override
+	  public void run() {
+	    for (SubscriberListener listener : subscriberListeners) {
+	      listener.onSubscriberShutdown(subscriber);
+	    }
+	  }
+    });
   }
 
 }

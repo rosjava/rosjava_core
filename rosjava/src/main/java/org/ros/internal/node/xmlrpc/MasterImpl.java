@@ -16,7 +16,12 @@
 
 package org.ros.internal.node.xmlrpc;
 
-import com.google.common.collect.Lists;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
@@ -28,12 +33,7 @@ import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicIdentifier;
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

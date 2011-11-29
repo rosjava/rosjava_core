@@ -52,14 +52,21 @@ import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
+import org.ros.node.service.ServiceServerListener;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
+import org.ros.node.topic.SubscriberListener;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -89,6 +96,16 @@ public class DefaultNode implements Node {
   private final URI masterUri;
 
   /**
+   * Use for all thread creation.
+   */
+  private final ExecutorService executorService;
+
+  /**
+   * All {@link NodeListener} instances registered with the node.
+   */
+  private final List<NodeListener> nodeListeners = new CopyOnWriteArrayList<NodeListener>();
+
+  /**
    * True if the node is in a running state, false otherwise.
    */
   private boolean running;
@@ -103,15 +120,15 @@ public class DefaultNode implements Node {
   public DefaultNode(NodeConfiguration nodeConfiguration) {
     this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
     running = false;
+    executorService = nodeConfiguration.getExecutorService();
     masterClient = new MasterClient(nodeConfiguration.getMasterUri());
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
-    registrar = new Registrar(masterClient);
+    registrar = new Registrar(masterClient, executorService);
     topicManager.setListener(registrar);
     serviceManager.setListener(registrar);
 
-    ExecutorService executorService = nodeConfiguration.getExecutorService();
     publisherFactory = new PublisherFactory(topicManager, executorService);
 
     GraphName basename = nodeConfiguration.getNodeName();
@@ -193,42 +210,70 @@ public class DefaultNode implements Node {
 
   @Override
   public <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType) {
+    return newPublisher(topicName, messageType, null);
+  }
+
+  @Override
+  public <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType,
+      Collection<? extends PublisherListener> listeners) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
         nodeConfiguration.getMessageDefinitionFactory().newFromString(messageType);
     TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
     org.ros.message.MessageSerializer<MessageType> serializer = newMessageSerializer(messageType);
-    return publisherFactory.create(topicDefinition, serializer);
+    return publisherFactory.create(topicDefinition, serializer, listeners);
+  }
+
+  @Override
+  public <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType,
+      Collection<? extends PublisherListener> listeners) {
+    return newPublisher(new GraphName(topicName), messageType, listeners);
   }
 
   @Override
   public <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType) {
-    return newPublisher(new GraphName(topicName), messageType);
+    return newPublisher(topicName, messageType, null);
   }
 
   @Override
   public <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName,
-      String messageType, final MessageListener<MessageType> listener) {
+      String messageType, final MessageListener<MessageType> messageListener,
+      Collection<? extends SubscriberListener> listeners) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
         nodeConfiguration.getMessageDefinitionFactory().newFromString(messageType);
     TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
     MessageDeserializer<MessageType> deserializer = newMessageDeserializer(messageType);
-    Subscriber<MessageType> subscriber = subscriberFactory.create(topicDefinition, deserializer);
-    subscriber.addMessageListener(listener);
+    Subscriber<MessageType> subscriber =
+        subscriberFactory.create(topicDefinition, deserializer, listeners);
+    subscriber.addMessageListener(messageListener);
     return subscriber;
   }
 
   @Override
+  public <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName,
+      String messageType, final MessageListener<MessageType> messageListener) {
+    return newSubscriber(topicName, messageType, messageListener, null);
+  }
+
+  @Override
   public <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
-      final MessageListener<MessageType> listener) {
-    return newSubscriber(new GraphName(topicName), messageType, listener);
+      final MessageListener<MessageType> messageListener,
+      Collection<? extends SubscriberListener> listeners) {
+    return newSubscriber(new GraphName(topicName), messageType, messageListener, listeners);
+  }
+
+  @Override
+  public <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
+      final MessageListener<MessageType> messageListener) {
+    return newSubscriber(topicName, messageType, messageListener, null);
   }
 
   @Override
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
       GraphName serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
+      Collection<? extends ServiceServerListener> serverListeners) {
     GraphName resolvedServiceName = resolveName(serviceName);
     // TODO(damonkohler): It's rather non-obvious that the URI will be created
     // later on the fly.
@@ -240,14 +285,30 @@ public class DefaultNode implements Node {
         newServiceRequestDeserializer(serviceType);
     MessageSerializer<ResponseType> responseSerializer = newServiceResponseSerializer(serviceType);
     return serviceFactory.createServer(definition, requestDeserializer, responseSerializer,
-        responseBuilder);
+        responseBuilder, serverListeners);
+  }
+
+  @Override
+  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
+      GraphName serviceName, String serviceType,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
+    return newServiceServer(serviceName, serviceType, responseBuilder, null);
+  }
+
+  @Override
+  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
+      String serviceName, String serviceType,
+      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
+      Collection<? extends ServiceServerListener> serverListeners) {
+    return newServiceServer(new GraphName(serviceName), serviceType, responseBuilder,
+        serverListeners);
   }
 
   @Override
   public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
       String serviceName, String serviceType,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
-    return newServiceServer(new GraphName(serviceName), serviceType, responseBuilder);
+    return newServiceServer(serviceName, serviceType, responseBuilder, null);
   }
 
   @Override
@@ -323,11 +384,6 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public boolean isOk() {
-    return isRunning() && isRegistered();
-  }
-
-  @Override
   public void shutdown() {
     // NOTE(damonkohler): We don't want to raise potentially spurious
     // exceptions during shutdown that would interrupt the process. This is
@@ -385,6 +441,8 @@ public class DefaultNode implements Node {
     for (ServiceClient<?, ?> serviceClient : serviceManager.getClients()) {
       serviceClient.shutdown();
     }
+
+    signalShutdown();
   }
 
   @Override
@@ -409,16 +467,6 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public boolean isRegistered() {
-    return registrar.getPendingSize() == 0;
-  }
-
-  @Override
-  public boolean isRegistrationOk() {
-    return registrar.isMasterRegistrationOk();
-  }
-
-  @Override
   public MessageSerializationFactory getMessageSerializationFactory() {
     return nodeConfiguration.getMessageSerializationFactory();
   }
@@ -426,6 +474,46 @@ public class DefaultNode implements Node {
   @Override
   public MessageFactory getMessageFactory() {
     return nodeConfiguration.getMessageFactory();
+  }
+
+  @Override
+  public void addNodeListener(NodeListener listener) {
+    nodeListeners.add(listener);
+  }
+
+  @Override
+  public void removeNodeListener(NodeListener listener) {
+    nodeListeners.remove(listener);
+  }
+
+  /**
+   * Let all listeners know the node is being created.
+   * 
+   * <p>
+   * Run in the same thread as the caller.
+   */
+  public void signalCreate() {
+    for (NodeListener listener : nodeListeners) {
+      listener.onNodeCreate(this);
+    }
+  }
+
+  /**
+   * Let all listeners know the node is being shut down.
+   * 
+   * <p>
+   * Run in a separate thread from the caller.
+   */
+  private void signalShutdown() {
+    final Node node = this;
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        for (NodeListener listener : nodeListeners) {
+          listener.onNodeShutdown(node);
+        }
+      }
+    });
   }
 
   @VisibleForTesting

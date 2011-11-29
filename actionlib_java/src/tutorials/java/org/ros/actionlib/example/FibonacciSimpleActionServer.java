@@ -9,7 +9,6 @@ import org.ros.message.actionlib_tutorials.FibonacciActionResult;
 import org.ros.message.actionlib_tutorials.FibonacciFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciGoal;
 import org.ros.message.actionlib_tutorials.FibonacciResult;
-import org.ros.node.Node;
 
 /**
  * The FibonacciSimpleActionServer is a specialized DefaultSimpleActionServer
@@ -33,12 +32,4 @@ public class FibonacciSimpleActionServer
     super(nameSpace, spec, callbacks, useBlockingGoalCallback);
   }
 
-  public FibonacciSimpleActionServer(
-      Node parent,
-      String nameSpace,
-      ActionSpec<?, FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> spec,
-      SimpleActionServerCallbacks<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> callbacks,
-      boolean useBlockingGoalCallback) {
-    super(parent, nameSpace, spec, callbacks, useBlockingGoalCallback);
-  }
 }

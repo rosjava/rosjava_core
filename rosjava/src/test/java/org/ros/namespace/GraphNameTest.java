@@ -21,8 +21,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.ros.Assert.assertGraphNameEquals;
 
-import org.junit.Test;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,6 +28,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import org.junit.Test;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)

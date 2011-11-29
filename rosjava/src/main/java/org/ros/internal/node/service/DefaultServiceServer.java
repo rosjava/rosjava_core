@@ -31,13 +31,17 @@ import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceServer;
+import org.ros.node.service.ServiceServerListener;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
 
 /**
+ * Default implementation of a {@link ServiceServer}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class DefaultServiceServer<RequestType, ResponseType> implements
@@ -51,18 +55,19 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
   private final MessageSerializer<ResponseType> serializer;
   private final AdvertiseAddress advertiseAddress;
   private final ServiceResponseBuilder<RequestType, ResponseType> responseBuilder;
-  private final CountDownLatch registrationLatch;
-
+  private final List<ServiceServerListener> serverListeners = new CopyOnWriteArrayList<ServiceServerListener>();
+  private final ExecutorService executorService;
+  
   public DefaultServiceServer(ServiceDefinition definition,
       MessageDeserializer<RequestType> deserializer, MessageSerializer<ResponseType> serializer,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
-      AdvertiseAddress advertiseAddress) {
+      AdvertiseAddress advertiseAddress, ExecutorService executorService) {
     this.definition = definition;
     this.deserializer = deserializer;
     this.serializer = serializer;
     this.responseBuilder = responseBuilder;
     this.advertiseAddress = advertiseAddress;
-    registrationLatch = new CountDownLatch(1);
+    this.executorService = executorService;
   }
 
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
@@ -106,28 +111,36 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
         responseBuilder);
   }
 
+  /**
+   * Signal to all registered {@link ServiceServerListener} instances that registration
+   * is complete.
+   */
   public void signalRegistrationDone() {
-    registrationLatch.countDown();
-  }
-
-  @Override
-  public boolean isRegistered() {
-    return registrationLatch.getCount() == 0;
-  }
-
-  @Override
-  public void awaitRegistration() throws InterruptedException {
-    registrationLatch.await();
-  }
-
-  @Override
-  public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
-    return registrationLatch.await(timeout, unit);
+    final ServiceServer<RequestType, ResponseType> server = this;
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        for (ServiceServerListener listener : serverListeners) {
+          listener.onServiceServerRegistration(server);
+        }
+      }
+      
+    });
   }
 
   @Override
   public void shutdown() {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void addServiceServerListener(ServiceServerListener listener) {
+    serverListeners.add(listener);
+  }
+
+  @Override
+  public void removeServiceServerListener(ServiceServerListener listener) {
+    serverListeners.remove(listener);
   }
 
 }

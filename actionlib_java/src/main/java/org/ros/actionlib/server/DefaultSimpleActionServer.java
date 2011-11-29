@@ -1,13 +1,10 @@
 package org.ros.actionlib.server;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.actionlib.ActionSpec;
 import org.ros.exception.RosException;
 import org.ros.message.Message;
 import org.ros.message.actionlib_msgs.GoalStatus;
 import org.ros.node.Node;
-import org.ros.node.NodeMain;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -19,7 +16,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DefaultSimpleActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extends Message, T_ACTION_RESULT extends Message, T_FEEDBACK extends Message, T_GOAL extends Message, T_RESULT extends Message>
     implements
     ActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>,
-    NodeMain,
     SimpleActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> {
   /**
    * The action server which is doing all of the work.
@@ -65,29 +61,11 @@ public class DefaultSimpleActionServer<T_ACTION_FEEDBACK extends Message, T_ACTI
       ActionSpec<?, T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> spec,
       SimpleActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks,
       boolean useBlockingGoalCallback) {
-    Preconditions.checkNotNull(callbacks);
+
     this.callbacks = callbacks;
     this.actionServer =
         new DefaultActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
             nameSpace, spec, this);
-    if (useBlockingGoalCallback) {
-      this.useBlockingGoalCallback = true;
-      startCallbackThread();
-    }
-
-  }
-
-  public DefaultSimpleActionServer(
-      Node parent,
-      String nameSpace,
-      ActionSpec<?, T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> spec,
-      SimpleActionServerCallbacks<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> callbacks,
-      boolean useBlockingGoalCallback) {
-
-    this.callbacks = callbacks;
-    this.actionServer =
-        new DefaultActionServer<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>(
-            parent, nameSpace, spec, this);
     if (useBlockingGoalCallback) {
       this.useBlockingGoalCallback = true;
       startCallbackThread();
@@ -226,19 +204,28 @@ public class DefaultSimpleActionServer<T_ACTION_FEEDBACK extends Message, T_ACTI
     currentGoal.publishFeedback(feedback);
   }
 
-  @Override
-  public void main(Node node) throws Exception {
-    actionServer.main(node);
+  /**
+   * Add all actionclient publishers and subscribers to the given node.
+   * 
+   * <p>
+   * Lifetime of the node is taken over by the client.
+   * 
+   * @param node
+   */
+  public void addClientPubSub(Node node) {
+    actionServer.addClientPubSub(node);
   }
 
-  @Override
+  /**
+   * Shut the server down.
+   */
   public void shutdown() {
     stopCallbackThread();
     actionServer.shutdown();
   }
 
   protected void startCallbackThread() {
-
+    // TODO(keith): make this truly asynchronous and remove this thread.
     synchronized (threadSync) {
       if (callbackThread == null) {
 

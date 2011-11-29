@@ -20,6 +20,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.Lists;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -33,9 +38,6 @@ import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.service.test_ros.AddTwoInts;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -61,6 +63,7 @@ public class ServiceIntegrationTest {
   public void pesistentServiceConnectionTest() throws Exception {
     nodeConfiguration.setNodeName("/server");
     Node serverNode = nodeFactory.newNode(nodeConfiguration);
+    CountDownServiceServerListener serverListener = new CountDownServiceServerListener();
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -70,8 +73,8 @@ public class ServiceIntegrationTest {
                 response.sum = request.a + request.b;
                 return response;
               }
-            });
-    assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
+            }, Lists.newArrayList(serverListener));
+    assertTrue(serverListener.awaitRegistration(1, TimeUnit.SECONDS));
 
     nodeConfiguration.setNodeName("/client");
     Node clientNode = nodeFactory.newNode(nodeConfiguration);
@@ -106,6 +109,7 @@ public class ServiceIntegrationTest {
     final String errorMessage = "Error!";
     nodeConfiguration.setNodeName("/server");
     Node serverNode = nodeFactory.newNode(nodeConfiguration);
+    CountDownServiceServerListener serverListener = new CountDownServiceServerListener();
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> server =
         serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -113,8 +117,8 @@ public class ServiceIntegrationTest {
               public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
                 throw new ServiceException(errorMessage);
               }
-            });
-    assertTrue(server.awaitRegistration(1, TimeUnit.SECONDS));
+            }, Lists.newArrayList(serverListener));
+    assertTrue(serverListener.awaitRegistration(1, TimeUnit.SECONDS));
 
     nodeConfiguration.setNodeName("/client");
     Node clientNode = nodeFactory.newNode(nodeConfiguration);

@@ -16,10 +16,10 @@
 
 package org.ros.internal.node.response;
 
-import org.ros.exception.RosRuntimeException;
-
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import org.ros.exception.RosRuntimeException;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

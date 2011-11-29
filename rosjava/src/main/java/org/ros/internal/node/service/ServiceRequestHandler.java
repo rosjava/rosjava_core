@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.service;
 
+import java.nio.ByteBuffer;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -23,8 +25,6 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
-
-import java.nio.ByteBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

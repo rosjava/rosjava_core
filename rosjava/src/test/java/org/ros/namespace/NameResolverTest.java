@@ -20,9 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.ros.Assert.assertGraphNameEquals;
 
-import org.junit.Test;
-
 import java.util.HashMap;
+
+import org.junit.Test;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)

@@ -40,6 +40,8 @@ import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.topic.CountDownPublisherListener;
+import org.ros.node.topic.CountDownSubscriberListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
@@ -47,6 +49,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -58,6 +62,7 @@ public class DefaultNodeTest {
   private NodeConfiguration privateNodeConfiguration;
   private NodeFactory nodeFactory;
   private URI masterUri;
+  private ExecutorService executorService;
 
   void checkHostName(String hostName) {
     assertTrue(!hostName.equals("0.0.0.0"));
@@ -65,14 +70,20 @@ public class DefaultNodeTest {
   }
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    executorService = Executors.newCachedThreadPool();
     masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
     masterUri = masterServer.getUri();
     checkHostName(masterUri.getHost());
     privateNodeConfiguration = NodeConfiguration.newPrivate(masterUri);
     privateNodeConfiguration.setNodeName("node_name");
+    privateNodeConfiguration.setExecutorService(executorService);
     nodeFactory = new DefaultNodeFactory();
+  }
+  
+  public void shutdown() {
+	executorService.shutdown();
   }
 
   @Test
@@ -148,15 +159,23 @@ public class DefaultNodeTest {
   public void testPubSubRegistration() throws InterruptedException {
     Node node = nodeFactory.newNode(privateNodeConfiguration);
     ((DefaultNode) node).getRegistrar().setRetryDelay(1, TimeUnit.MILLISECONDS);
-    assertTrue(((RosoutLogger) node.getLog()).getPublisher().awaitRegistration(1, TimeUnit.SECONDS));
+    //assertTrue(((RosoutLogger) node.getLog()).getPublisher().awaitRegistration(1, TimeUnit.SECONDS));
 
-    Publisher<org.ros.message.std_msgs.String> publisher =
-        node.newPublisher("/foo", "std_msgs/String");
-    assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
+    CountDownPublisherListener publisherListener = new CountDownPublisherListener();
+    assertFalse(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertFalse(publisherListener.awaitShutdown(1, TimeUnit.SECONDS));
 
-    Subscriber<org.ros.message.std_msgs.String> subscriber =
-        node.newSubscriber("/foo", "std_msgs/String", null);
-    assertTrue(subscriber.awaitRegistration(1, TimeUnit.SECONDS));
+    CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
+    assertFalse(subscriberListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertFalse(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
+   
+    node.newPublisher("/foo", "std_msgs/String", Lists.newArrayList(publisherListener));
+    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertFalse(publisherListener.awaitShutdown(1, TimeUnit.SECONDS));
+
+    node.newSubscriber("/foo", "std_msgs/String", null, Lists.newArrayList(subscriberListener));
+    assertTrue(subscriberListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertFalse(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
 
     // There are now two registered publishers /rosout and /foo.
     assertEquals(2, masterServer.getRegisteredPublishers().size());
@@ -164,8 +183,8 @@ public class DefaultNodeTest {
 
     node.shutdown();
 
-    // HACK(damonkohler): It's unclear why there is a race here.
-    Thread.sleep(1000);
+    assertTrue(publisherListener.awaitShutdown(1, TimeUnit.SECONDS));
+    assertTrue(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
 
     assertEquals(0, masterServer.getRegisteredPublishers().size());
     assertEquals(0, masterServer.getRegisteredSubscribers().size());
@@ -219,9 +238,9 @@ public class DefaultNodeTest {
     assertTrue(nodeUri.getPort() > 0);
     checkHostName(nodeUri.getHost());
 
-    Publisher<org.ros.message.std_msgs.Int64> publisher =
-        node.newPublisher("test_addresses_pub", "std_msgs/Int64");
-    assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
+    CountDownPublisherListener publisherListener = new CountDownPublisherListener();
+    node.newPublisher("test_addresses_pub", "std_msgs/Int64", Lists.newArrayList(publisherListener));
+    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
 
     // Check the TCPROS server address via the XML-RPC API.
     SlaveClient slaveClient = new SlaveClient(new GraphName("test_addresses"), nodeUri);
@@ -232,4 +251,5 @@ public class DefaultNodeTest {
     InetSocketAddress tcpRosAddress = result.getAdverstiseAddress().toInetSocketAddress();
     checkHostName(tcpRosAddress.getHostName());
   }
+
 }

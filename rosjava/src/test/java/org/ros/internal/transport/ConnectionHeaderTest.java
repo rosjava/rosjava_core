@@ -18,12 +18,12 @@ package org.ros.internal.transport;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.Maps;
+import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.junit.Test;
 
-import java.util.Map;
+import com.google.common.collect.Maps;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

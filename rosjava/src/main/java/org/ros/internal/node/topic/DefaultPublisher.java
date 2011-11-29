@@ -28,8 +28,11 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.PublisherListener;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -44,25 +47,43 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
-  private final OutgoingMessageQueue<MessageType> out;
+  /**
+   * Queue of all messages being published by this publisher.
+   */
+  private final OutgoingMessageQueue<MessageType> outgoingMessages;
+
+  /**
+   * All {@link PublisherListener} instances added to the publisher.
+   */
+  private final List<PublisherListener> publisherListeners =
+      new CopyOnWriteArrayList<PublisherListener>();
+
+  /**
+   * Th {@link ExecutorService} to be used for all thread creation.
+   */
+  private final ExecutorService executorService;
 
   public DefaultPublisher(TopicDefinition topicDefinition,
       MessageSerializer<MessageType> serializer, ExecutorService executorService) {
     super(topicDefinition);
+    this.executorService = executorService;
+
     // TODO(khughes): Use the handed in ExecutorService in the
     // OutgoingMessageQueue.
-    out = new OutgoingMessageQueue<MessageType>(serializer);
-    out.start();
+    outgoingMessages = new OutgoingMessageQueue<MessageType>(serializer);
+    outgoingMessages.start();
   }
 
   @Override
   public void setLatchMode(boolean enabled) {
-    out.setLatchMode(enabled);
+    outgoingMessages.setLatchMode(enabled);
   }
 
   @Override
   public void shutdown() {
-    out.shutdown();
+    outgoingMessages.shutdown();
+
+    signalShutdown();
   }
 
   public PublisherDefinition toPublisherIdentifier(SlaveIdentifier description) {
@@ -71,12 +92,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
 
   @Override
   public boolean hasSubscribers() {
-    return out.getNumberOfChannels() > 0;
+    return outgoingMessages.getNumberChannels() > 0;
   }
 
   @Override
   public int getNumberOfSubscribers() {
-    return out.getNumberOfChannels();
+    return outgoingMessages.getNumberChannels();
   }
 
   // TODO(damonkohler): Recycle Message objects to avoid GC.
@@ -85,7 +106,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
     if (DEBUG) {
       log.info("Publishing message: " + message);
     }
-    out.put(message);
+    outgoingMessages.put(message);
   }
 
   /**
@@ -114,11 +135,82 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
     return ConnectionHeader.encode(header);
   }
 
-  public void addChannel(Channel channel) {
+  /**
+   * A remote {@link Subscriber} is being added to this publisher.
+   * 
+   * @param channel
+   *          channel for the remote connection
+   */
+  public void addRemoteConnection(Channel channel) {
     if (DEBUG) {
       log.info("Adding channel: " + channel);
     }
-    out.addChannel(channel);
+    outgoingMessages.addChannel(channel);
+    signalRemoteConnection();
+  }
+
+  @Override
+  public void addPublisherListener(PublisherListener listener) {
+    publisherListeners.add(listener);
+  }
+
+  @Override
+  public void removePublisherListener(PublisherListener listener) {
+    publisherListeners.add(listener);
+  }
+
+  /**
+   * Notify listeners that the node has been registered.
+   * 
+   * <p>
+   * Done in another thread.
+   */
+  public void signalRegistrationDone() {
+    final Publisher<MessageType> publisher = this;
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        for (PublisherListener listener : publisherListeners) {
+          listener.onPublisherMasterRegistration(publisher);
+        }
+      }
+    });
+  }
+
+  /**
+   * Notify listeners that the node has been registered.
+   * 
+   * <p>
+   * Done in another thread.
+   */
+  private void signalRemoteConnection() {
+    final Publisher<MessageType> publisher = this;
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        for (PublisherListener listener : publisherListeners) {
+          listener.onPublisherRemoteConnection(publisher);
+        }
+      }
+    });
+  }
+
+  /**
+   * Notify listeners that the node has shutdown.
+   * 
+   * <p>
+   * Done in another thread.
+   */
+  private void signalShutdown() {
+    final Publisher<MessageType> publisher = this;
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        for (PublisherListener listener : publisherListeners) {
+          listener.onPublisherShutdown(publisher);
+        }
+      }
+    });
   }
 
   @Override

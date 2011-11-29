@@ -16,8 +16,6 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.node.client.Registrant;
-
 import org.ros.namespace.GraphName;
 
 /**
@@ -27,7 +25,7 @@ import org.ros.namespace.GraphName;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface Topic extends Registrant {
+public interface Topic {
 
   /**
    * @return the name of the subscribed topic

@@ -20,6 +20,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -33,11 +39,7 @@ import org.ros.message.MessageListener;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -63,8 +65,10 @@ public class TopicIntegrationTest {
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
     nodeConfiguration.setNodeName("publisher");
     Node publisherNode = nodeFactory.newNode(nodeConfiguration);
+
+    CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     Publisher<org.ros.message.std_msgs.String> publisher =
-        publisherNode.newPublisher("foo", "std_msgs/String");
+        publisherNode.newPublisher("foo", "std_msgs/String", Lists.newArrayList(publisherListener));
 
     final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
     helloMessage.data = "Hello, ROS!";
@@ -72,6 +76,8 @@ public class TopicIntegrationTest {
     final CountDownLatch messageReceived = new CountDownLatch(1);
     nodeConfiguration.setNodeName("subscriber");
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
+    
+    CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         subscriberNode.newSubscriber("foo", "std_msgs/String",
             new MessageListener<org.ros.message.std_msgs.String>() {
@@ -80,10 +86,10 @@ public class TopicIntegrationTest {
                 assertEquals(helloMessage, message);
                 messageReceived.countDown();
               }
-            });
+            }, Lists.newArrayList(subscriberListener));
 
-    assertTrue(publisher.awaitRegistration(1, TimeUnit.SECONDS));
-    assertTrue(subscriber.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(subscriberListener.awaitRegistration(1, TimeUnit.SECONDS));
 
     RepeatingPublisher<org.ros.message.std_msgs.String> repeatingPublisher =
         new RepeatingPublisher<org.ros.message.std_msgs.String>(publisher, helloMessage, 1000,
@@ -139,17 +145,20 @@ public class TopicIntegrationTest {
   public void testHeader() throws InterruptedException {
     nodeConfiguration.setNodeName("publisher");
     final Node publisherNode = nodeFactory.newNode(nodeConfiguration);
+    CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     final Publisher<org.ros.message.test_ros.TestHeader> publisher =
-        publisherNode.newPublisher("foo", "test_ros/TestHeader");
+        publisherNode.newPublisher("foo", "test_ros/TestHeader", Lists.newArrayList(publisherListener));
 
     nodeConfiguration.setNodeName("subscriber");
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
     Listener listener = new Listener();
+    CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
     Subscriber<org.ros.message.test_ros.TestHeader> subscriber =
-        subscriberNode.newSubscriber("foo", "test_ros/TestHeader", listener);
+        subscriberNode.newSubscriber("foo", "test_ros/TestHeader", listener,
+        Lists.newArrayList(subscriberListener));
 
-    assertTrue(publisher.awaitRegistration(1, TimeUnit.DAYS));
-    assertTrue(subscriber.awaitRegistration(1, TimeUnit.DAYS));
+    assertTrue(publisherListener.awaitRegistration(1, TimeUnit.DAYS));
+    assertTrue(subscriberListener.awaitRegistration(1, TimeUnit.DAYS));
 
     Thread thread = new Thread() {
       @Override

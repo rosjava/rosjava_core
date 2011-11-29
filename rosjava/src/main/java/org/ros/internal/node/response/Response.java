@@ -16,14 +16,16 @@
 
 package org.ros.internal.node.response;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
 
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
+ * The response from an XML-RPC call.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <ResultType>

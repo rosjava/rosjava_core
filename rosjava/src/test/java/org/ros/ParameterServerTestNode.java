@@ -16,6 +16,9 @@
 
 package org.ros;
 
+import java.util.Arrays;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.ros.message.std_msgs.Bool;
 import org.ros.message.std_msgs.Float64;
@@ -29,22 +32,19 @@ import org.ros.node.NodeMain;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
 
-import java.util.Arrays;
-import java.util.Map;
-
 /**
  * This node is used in rostest end-to-end integration tests with other client
  * libraries.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class ParameterServerTestNode implements NodeMain {
+public class ParameterServerTestNode extends NodeMain {
 
   private Node node;
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void main(Node node) {
+  public void onNodeCreate(Node node) {
     this.node = node;
 
     Publisher<org.ros.message.std_msgs.String> pub_tilde =
@@ -124,10 +124,5 @@ public class ParameterServerTestNode implements NodeMain {
       } catch (InterruptedException e) {
       }
     }
-  }
-
-  @Override
-  public void shutdown() {
-    node.shutdown();
   }
 }

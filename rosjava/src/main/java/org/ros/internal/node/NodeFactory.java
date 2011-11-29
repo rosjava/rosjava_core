@@ -18,6 +18,9 @@ package org.ros.internal.node;
 
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeListener;
+
+import java.util.Collection;
 
 /**
  * Builds new {@link Node}s.
@@ -35,5 +38,18 @@ public interface NodeFactory {
    * @return a new {@link Node}
    */
   Node newNode(NodeConfiguration configuration);
+
+  /**
+   * Build a new {@link Node} with the given and {@link NodeConfiguration} and
+   * default name.
+   * 
+   * @param configuration
+   *          the {@link NodeConfiguration} for the new {@link Node}
+   * @param listeners
+   *          a collection of {@link NodeListener} instances which will be
+   *          registered with the node (can be {@code null})
+   * @return a new {@link Node}
+   */
+  Node newNode(NodeConfiguration configuration, Collection<? extends NodeListener> listeners);
 
 }

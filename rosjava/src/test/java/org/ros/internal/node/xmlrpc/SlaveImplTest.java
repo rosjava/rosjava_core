@@ -20,8 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.List;
 
 import org.junit.Test;
 import org.mockito.Matchers;
@@ -34,7 +33,8 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.namespace.GraphName;
 
-import java.util.List;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

@@ -16,7 +16,11 @@
 
 package org.ros.time;
 
-import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,11 +30,7 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
+import com.google.common.base.Preconditions;
 
 /**
  * Provides NTP synchronized wallclock (actual) time.

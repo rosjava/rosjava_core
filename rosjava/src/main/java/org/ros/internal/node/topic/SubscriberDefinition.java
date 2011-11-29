@@ -16,14 +16,14 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.collect.ImmutableMap;
+import java.net.URI;
+import java.util.Map;
 
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
-import java.net.URI;
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

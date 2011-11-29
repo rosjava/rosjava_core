@@ -16,12 +16,12 @@
 
 package org.ros;
 
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
+
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
-
-import java.net.URI;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

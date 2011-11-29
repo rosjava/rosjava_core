@@ -16,9 +16,9 @@
 
 package org.ros.internal.node.client;
 
-import org.ros.internal.node.server.MasterServer;
-
 import java.util.concurrent.TimeUnit;
+
+import org.ros.internal.node.server.MasterServer;
 
 /**
  * Represents something that can be registered with the {@link MasterServer} by
