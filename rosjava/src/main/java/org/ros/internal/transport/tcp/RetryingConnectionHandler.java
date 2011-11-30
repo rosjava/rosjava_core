@@ -14,20 +14,18 @@
  * the License.
  */
 
-package org.ros.internal.transport;
-
-import com.google.common.base.Preconditions;
+package org.ros.internal.transport.tcp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,53 +39,37 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(RetryingConnectionHandler.class);
 
-  // TODO(damonkohler): Use binary backoff.
+  // TODO(damonkohler): Allow the TcpClientConnection to alter the reconnect
+  // strategy (e.g. binary backoff, faster retries for tests, etc.)
   private static final long RECONNECT_DELAY = 1000;
 
-  private final ClientBootstrap bootstrap;
+  private final TcpClientConnection context;
   private final Timer timer;
 
-  private volatile boolean reconnect = false;
-
-  public RetryingConnectionHandler(ClientBootstrap bootstrap) {
-    this.bootstrap = bootstrap;
+  public RetryingConnectionHandler(TcpClientConnection context) {
+    this.context = context;
     this.timer = new Timer();
-    reconnect = true;
-  }
-
-  @Override
-  public void connectRequested(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    if (DEBUG) {
-      log.info("Connect requested: " + e.getChannel().toString());
-    }
-    reconnect = true;
-    super.connectRequested(ctx, e);
-  }
-
-  @Override
-  public void disconnectRequested(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    if (DEBUG) {
-      log.info("Disconnect requested: " + e.getChannel().toString());
-    }
-    reconnect = false;
-    super.disconnectRequested(ctx, e);
   }
 
   @Override
   public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    if (reconnect) {
+    context.setChannel(null);
+    if (context.isPersistent()) {
       if (DEBUG) {
         log.info("Channel closed, will reconnect: " + e.getChannel().toString());
       }
-      final InetSocketAddress remoteAddress = (InetSocketAddress) e.getChannel().getRemoteAddress();
-      Preconditions.checkNotNull(remoteAddress);
       timer.schedule(new TimerTask() {
         @Override
         public void run() {
+          SocketAddress remoteAddress = context.getRemoteAddress();
           if (DEBUG) {
             log.info("Reconnecting to: " + remoteAddress);
           }
-          bootstrap.connect(remoteAddress);
+          ChannelFuture future =
+              context.getBootstrap().connect(remoteAddress).awaitUninterruptibly();
+          if (future.isSuccess()) {
+            context.setChannel(future.getChannel());
+          }
         }
       }, RECONNECT_DELAY);
     } else {
@@ -104,8 +86,6 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
       log.info("Channel exception: " + e.getChannel().toString());
     }
     e.getChannel().close();
-    Preconditions.checkState(reconnect == false);
-    reconnect = true;
     super.exceptionCaught(ctx, e);
   }
 }

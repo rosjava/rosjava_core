@@ -16,7 +16,8 @@
 
 package org.ros.internal.node.topic;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,8 +31,7 @@ import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -42,12 +42,12 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
   private static final Log log = LogFactory.getLog(SubscriberHandshakeHandler.class);
 
   private final ImmutableMap<String, String> header;
-  private final IncomingMessageQueue<MessageType> in;
+  private final IncomingMessageQueue<MessageType> incomingMessageQueue;
 
   public SubscriberHandshakeHandler(ImmutableMap<String, String> header,
-      IncomingMessageQueue<MessageType> in) {
+      IncomingMessageQueue<MessageType> incomingMessageQueue) {
     this.header = header;
-    this.in = in;
+    this.incomingMessageQueue = incomingMessageQueue;
   }
 
   private void handshake(ChannelBuffer buffer) {
@@ -69,7 +69,7 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
     Channel channel = e.getChannel();
     ChannelPipeline pipeline = channel.getPipeline();
     pipeline.remove(this);
-    pipeline.addLast("MessageHandler", in.createChannelHandler());
+    pipeline.addLast("MessageHandler", incomingMessageQueue.createChannelHandler());
     super.messageReceived(ctx, e);
   }
 }

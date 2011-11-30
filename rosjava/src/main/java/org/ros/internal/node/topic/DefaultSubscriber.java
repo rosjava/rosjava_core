@@ -22,21 +22,15 @@ import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.buffer.HeapChannelBufferFactory;
-import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
-import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
+import org.ros.internal.transport.tcp.TcpClientConnection;
+import org.ros.internal.transport.tcp.TcpClientConnectionManager;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
 import org.ros.node.topic.Publisher;
@@ -44,7 +38,6 @@ import org.ros.node.topic.Subscriber;
 import org.ros.node.topic.SubscriberListener;
 
 import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -61,8 +54,6 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultSubscriber.class);
 
-  private static final int CONNECTION_TIMEOUT_MILLIS = 5000;
-
   private final ExecutorService executorService;
   private final ImmutableMap<String, String> header;
   private final CopyOnWriteArrayList<MessageListener<MessageType>> messageListeners;
@@ -70,9 +61,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   private final MessageReader messageReader;
   private final Set<PublisherIdentifier> knownPublishers;
   private final SlaveIdentifier slaveIdentifier;
-  private final ChannelGroup channelGroup;
-  private final TcpClientPipelineFactory tcpClientPipelineFactory;
-  private final ClientBootstrap bootstrap;
+  private final TcpClientConnectionManager tcpClientConnectionManager;
 
   /**
    * All {@link SubscriberListener} instances added to the subscriber.
@@ -116,22 +105,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
         ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
             .putAll(topicDefinition.toHeader()).build();
     knownPublishers = Sets.newHashSet();
-    channelGroup = new DefaultChannelGroup();
-    bootstrap =
-        new ClientBootstrap(new NioClientSocketChannelFactory(executorService, executorService));
-    tcpClientPipelineFactory = new TcpClientPipelineFactory(channelGroup, bootstrap) {
-      @Override
-      public ChannelPipeline getPipeline() {
-        ChannelPipeline pipeline = super.getPipeline();
-        pipeline.addLast("SubscriberHandshakeHandler", new SubscriberHandshakeHandler<MessageType>(
-            header, incomingMessageQueue));
-        return pipeline;
-      }
-    };
-    bootstrap.setPipelineFactory(tcpClientPipelineFactory);
-    bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-    bootstrap.setOption("connectionTimeoutMillis", CONNECTION_TIMEOUT_MILLIS);
-    bootstrap.setOption("keepAlive", true);
+    tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
     messageReader = new MessageReader();
     executorService.execute(messageReader);
   }
@@ -158,17 +132,13 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
     if (knownPublishers.contains(publisherIdentifier)) {
       return;
     }
-    ChannelFuture future = bootstrap.connect(address).awaitUninterruptibly();
+    TcpClientConnection tcpClientConnection =
+        tcpClientConnectionManager.connect(address, new SubscriberHandshakeHandler<MessageType>(
+            header, incomingMessageQueue), "SubscriberHandshakeHandler");
+    ChannelFuture future =
+        tcpClientConnection.write(ConnectionHeader.encode(header)).awaitUninterruptibly();
     if (!future.isSuccess()) {
       throw new RosRuntimeException(future.getCause());
-    }
-    Channel channel = future.getChannel();
-    future = channel.write(ConnectionHeader.encode(header)).awaitUninterruptibly();
-    if (!future.isSuccess()) {
-      throw new RosRuntimeException(future.getCause());
-    }
-    if (DEBUG) {
-      log.info("Connected to: " + channel.getRemoteAddress());
     }
     knownPublishers.add(publisherIdentifier);
     signalOnNewPublisher();
@@ -192,12 +162,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   @Override
   public void shutdown() {
     messageReader.cancel();
-    channelGroup.close().awaitUninterruptibly();
-    // Not calling channelFactory.releaseExternalResources() or
-    // bootstrap.releaseExternalResources() since only external resources are
-    // the
-    // ExecutorService and control of that must remain with the overall
-    // application.
+    tcpClientConnectionManager.shutdown();
     signalShutdown();
   }
 
@@ -303,5 +268,4 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   public int getQueueLimit() {
     return incomingMessageQueue.getLimit();
   }
-
 }

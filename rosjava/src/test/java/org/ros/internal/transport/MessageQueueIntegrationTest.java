@@ -21,12 +21,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -35,7 +32,6 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.junit.After;
 import org.junit.Before;
@@ -45,7 +41,8 @@ import org.ros.internal.message.old_style.MessageDeserializer;
 import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
-import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
+import org.ros.internal.transport.tcp.TcpClientConnection;
+import org.ros.internal.transport.tcp.TcpClientConnectionManager;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 import org.ros.message.Message;
 import org.ros.message.std_msgs.String;
@@ -64,6 +61,7 @@ public class MessageQueueIntegrationTest {
   private static final Log log = LogFactory.getLog(MessageQueueIntegrationTest.class);
 
   private ExecutorService executorService;
+  private TcpClientConnectionManager tcpClientConnectionManager;
   private CancellableLoop repeatingPublisher;
   private OutgoingMessageQueue<Message> outgoingMessageQueue;
   private IncomingMessageQueue<org.ros.message.std_msgs.String> firstIncomingMessageQueue;
@@ -97,6 +95,7 @@ public class MessageQueueIntegrationTest {
   @Before
   public void setup() {
     executorService = Executors.newCachedThreadPool();
+    tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
     expectedMessage = new org.ros.message.std_msgs.String();
     expectedMessage.data = "Would you like to play a game?";
     outgoingMessageQueue =
@@ -127,6 +126,13 @@ public class MessageQueueIntegrationTest {
     executorService.shutdown();
   }
 
+  private TcpClientConnection connectIncomingMessageQueue(
+      final IncomingMessageQueue<org.ros.message.std_msgs.String> incomingMessageQueue,
+      Channel serverChannel) throws InterruptedException {
+    return tcpClientConnectionManager.connect(serverChannel.getLocalAddress(),
+        incomingMessageQueue.createChannelHandler(), "MessageHandler");
+  }
+
   @Test
   public void testSendAndReceiveMessage() throws InterruptedException {
     Channel serverChannel = buildServerChannel();
@@ -150,8 +156,8 @@ public class MessageQueueIntegrationTest {
   @Test
   public void testSendAfterIncomingQueueShutdown() throws InterruptedException {
     Channel serverChannel = buildServerChannel();
-    ChannelFuture future = connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
-    future.getChannel().close().await();
+    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
+    tcpClientConnectionManager.shutdown();
     outgoingMessageQueue.put(expectedMessage);
   }
 
@@ -169,30 +175,6 @@ public class MessageQueueIntegrationTest {
     connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
     outgoingMessageQueue.shutdown();
     outgoingMessageQueue.put(expectedMessage);
-  }
-
-  // TODO(damonkohler): There's a lot of code duplicated from the
-  // SubscriberHandshakeHandler.
-  private ChannelFuture connectIncomingMessageQueue(
-      final IncomingMessageQueue<org.ros.message.std_msgs.String> in, Channel serverChannel)
-      throws InterruptedException {
-    ChannelFactory clientChannelFactory =
-        new NioClientSocketChannelFactory(executorService, executorService);
-    final ClientBootstrap bootstrap = new ClientBootstrap(clientChannelFactory);
-    bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
-    bootstrap.setOption("keepAlive", true);
-    ChannelGroup channelGroup = new DefaultChannelGroup();
-    TcpClientPipelineFactory clientPipelineFactory =
-        new TcpClientPipelineFactory(channelGroup, bootstrap) {
-          @Override
-          public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = super.getPipeline();
-            pipeline.addLast("MessageHandler", in.createChannelHandler());
-            return pipeline;
-          }
-        };
-    bootstrap.setPipelineFactory(clientPipelineFactory);
-    return bootstrap.connect(serverChannel.getLocalAddress()).awaitUninterruptibly();
   }
 
   private Channel buildServerChannel() {
@@ -225,7 +207,6 @@ public class MessageQueueIntegrationTest {
   }
 
   private void expectMessage() throws InterruptedException {
-    // TODO(damonkohler): Add a take with timeout.
     assertEquals(firstIncomingMessageQueue.take(), expectedMessage);
     assertEquals(secondIncomingMessageQueue.take(), expectedMessage);
   }
@@ -252,5 +233,14 @@ public class MessageQueueIntegrationTest {
     assertTrue(future.await(1, TimeUnit.SECONDS));
     assertTrue(future.isCompleteSuccess());
     expectMessage();
+
+    // Shutdown the TcpClientConnectionManager to check that we will not
+    // reconnect.
+    tcpClientConnectionManager.shutdown();
+    future = outgoingMessageQueue.getChannelGroup().close();
+    assertTrue(future.await(1, TimeUnit.SECONDS));
+    assertTrue(future.isCompleteSuccess());
+    assertEquals(null, firstIncomingMessageQueue.poll(3, TimeUnit.SECONDS));
+    assertEquals(null, secondIncomingMessageQueue.poll(3, TimeUnit.SECONDS));
   }
 }

@@ -25,14 +25,16 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.message.MessageDeserializer;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class IncomingMessageQueue<MessageType> {
-  
+
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
-  
+
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
   private final CircularBlockingQueue<MessageType> messages;
@@ -70,10 +72,24 @@ public class IncomingMessageQueue<MessageType> {
     return messages.getLimit();
   }
 
+  /**
+   * @see CircularBlockingQueue#take()
+   */
   public MessageType take() throws InterruptedException {
     return messages.take();
   }
 
+  /**
+   * @see CircularBlockingQueue#poll(long, TimeUnit)
+   */
+  public MessageType poll(long timeout, TimeUnit unit) throws InterruptedException {
+    return messages.poll(timeout, unit);
+  }
+
+  /**
+   * @return a new {@link ChannelHandler} that will receive messages and add
+   *         them to the queue
+   */
   public ChannelHandler createChannelHandler() {
     return new MessageHandler();
   }
