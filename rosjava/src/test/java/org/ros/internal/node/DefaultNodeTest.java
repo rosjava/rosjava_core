@@ -87,17 +87,6 @@ public class DefaultNodeTest {
   }
 
   @Test
-  public void testFailIfStartedWhileRunning() throws UnknownHostException {
-    Node node = nodeFactory.newNode(privateNodeConfiguration);
-    try {
-      ((DefaultNode) node).start();
-      fail();
-    } catch (RuntimeException e) {
-      // Calling start() while the node is running must fail.
-    }
-  }
-
-  @Test
   public void testFailIfStoppedWhileNotRunning() throws UnknownHostException {
     Node node = nodeFactory.newNode(privateNodeConfiguration);
     node.shutdown();

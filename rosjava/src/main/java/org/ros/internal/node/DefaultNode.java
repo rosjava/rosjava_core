@@ -122,9 +122,9 @@ public class DefaultNode implements Node {
     if (nodeListeners != null) {
       this.nodeListeners.addAll(nodeListeners);
     }
-    running = false;
     executorService = nodeConfiguration.getExecutorService();
-    masterClient = new MasterClient(nodeConfiguration.getMasterUri());
+    masterUri = nodeConfiguration.getMasterUri();
+    masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
@@ -147,24 +147,14 @@ public class DefaultNode implements Node {
     subscriberFactory = new SubscriberFactory(slaveServer, topicManager, executorService);
     serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager, executorService);
 
-    masterUri = nodeConfiguration.getMasterUri();
-    start();
-
-    // NOTE(damonkohler): This must be created after start() is called so that
-    // the Registrar can be initialized with the SlaveServer's SlaveIdentifier
-    // before trying to register the /rosout Publisher.
-    log = new RosoutLogger(this);
-  }
-
-  /**
-   * Start the node and initiate master registration.
-   */
-  @VisibleForTesting
-  void start() {
-    Preconditions.checkState(!running);
-    running = true;
     slaveServer.start();
     registrar.start(slaveServer.toSlaveIdentifier());
+
+    // NOTE(damonkohler): This must be created after the Registrar has been
+    // initialized with the SlaveServer's SlaveIdentifier so that it can
+    // register the /rosout Publisher.
+    log = new RosoutLogger(this);
+    running = true;
     signalOnStart();
   }
 
@@ -389,6 +379,7 @@ public class DefaultNode implements Node {
 
   @Override
   public void shutdown() {
+    Preconditions.checkState(running == true, "Not running.");
     // NOTE(damonkohler): We don't want to raise potentially spurious
     // exceptions during shutdown that would interrupt the process. This is
     // simply best effort cleanup.
