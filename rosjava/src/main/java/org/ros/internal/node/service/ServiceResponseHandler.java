@@ -16,9 +16,7 @@
 
 package org.ros.internal.node.service;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.Queue;
+import com.google.common.base.Preconditions;
 
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
@@ -28,7 +26,9 @@ import org.ros.internal.node.response.StatusCode;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.service.ServiceResponseListener;
 
-import com.google.common.base.Preconditions;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.Queue;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -38,7 +38,7 @@ class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
   private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
   private final MessageDeserializer<ResponseType> deserializer;
 
-  ServiceResponseHandler(
+  public ServiceResponseHandler(
       Queue<ServiceResponseListener<ResponseType>> messageListeners,
       MessageDeserializer<ResponseType> deserializer) {
     this.responseListeners = messageListeners;

@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ClientBootstrap;
+import org.jboss.netty.buffer.ChannelBufferFactory;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
@@ -49,21 +50,23 @@ public class TcpClientConnectionManager {
 
   private final ChannelFactory channelFactory;
   private final ChannelGroup channelGroup;
+  private final ChannelBufferFactory channelBufferFactory;
   private final Collection<TcpClientConnection> tcpClientConnections;
 
   public TcpClientConnectionManager(ExecutorService executorService) {
     channelFactory = new NioClientSocketChannelFactory(executorService, executorService);
     channelGroup = new DefaultChannelGroup();
+    channelBufferFactory = new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN);
     tcpClientConnections = Lists.newArrayList();
   }
 
-  public TcpClientConnection connect(SocketAddress address, final ChannelHandler handler,
-      final String handlerName) {
+  public TcpClientConnection connect(String connectionName, SocketAddress address,
+      final ChannelHandler handler, final String handlerName) {
     ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
-    bootstrap.setOption("bufferFactory", new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
+    bootstrap.setOption("bufferFactory", channelBufferFactory);
     bootstrap.setOption("connectionTimeoutMillis", CONNECTION_TIMEOUT_MILLIS);
     bootstrap.setOption("keepAlive", true);
-    TcpClientConnection tcpClientConnection = newTcpClientConnection(address, bootstrap);
+    TcpClientConnection tcpClientConnection = newTcpClient(connectionName, bootstrap, address);
     TcpClientPipelineFactory factory =
         new TcpClientPipelineFactory(channelGroup, tcpClientConnection) {
           @Override
@@ -87,9 +90,8 @@ public class TcpClientConnectionManager {
     return tcpClientConnection;
   }
 
-  private TcpClientConnection newTcpClientConnection(SocketAddress address,
-      ClientBootstrap bootstrap) {
-    TcpClientConnection tcpClientConnection = new TcpClientConnection(bootstrap, address);
+  private TcpClientConnection newTcpClient(String name, ClientBootstrap bootstrap, SocketAddress address) {
+    TcpClientConnection tcpClientConnection = new TcpClientConnection(name, bootstrap, address);
     tcpClientConnections.add(tcpClientConnection);
     return tcpClientConnection;
   }

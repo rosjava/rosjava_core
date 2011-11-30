@@ -30,8 +30,9 @@ import java.net.SocketAddress;
  */
 public class TcpClientConnection {
 
-  private final ClientBootstrap bootstrap;
+  private final String name;
   private final SocketAddress remoteAddress;
+  private final ClientBootstrap bootstrap;
 
   /**
    * {@code true} if this client connection should reconnect when disconnected.
@@ -39,10 +40,17 @@ public class TcpClientConnection {
   private boolean persistent;
 
   /**
+   * {@code true} if this connection is defunct (e.g. received a connection
+   * refused error)
+   */
+  private boolean defunct;
+
+  /**
    * This connection's {@link Channel}. May be {@code null} if we're not
    * currently connected.
    */
   private Channel channel;
+
 
   /**
    * @param bootstrap
@@ -50,10 +58,12 @@ public class TcpClientConnection {
    * @param remoteAddress
    *          the {@link SocketAddress} to reconnect to
    */
-  TcpClientConnection(ClientBootstrap bootstrap, SocketAddress remoteAddress) {
+  TcpClientConnection(String name, ClientBootstrap bootstrap, SocketAddress remoteAddress) {
+    this.name = name;
     this.bootstrap = bootstrap;
     this.remoteAddress = remoteAddress;
     persistent = true;
+    defunct = false;
   }
 
   /**
@@ -102,5 +112,29 @@ public class TcpClientConnection {
    */
   void setChannel(Channel channel) {
     this.channel = channel;
+  }
+
+  /**
+   * @return the name of this connection (e.g. Subscriber</topic/foo>)
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * @return {@code true} if this connection is defunct (e.g. received a
+   *         connection refused error)
+   */
+  public boolean isDefunct() {
+    return defunct;
+  }
+
+  /**
+   * @param defunct
+   *          {@code true} if this connection is defunct (e.g. received a
+   *          connection refused error)
+   */
+  public void setDefunct(boolean defunct) {
+    this.defunct = defunct;
   }
 }

@@ -22,14 +22,10 @@ import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.netty.channel.ChannelFuture;
 import org.ros.concurrent.CancellableLoop;
-import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
-import org.ros.internal.transport.tcp.TcpClientConnection;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
@@ -102,8 +98,10 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
     this.incomingMessageQueue = new IncomingMessageQueue<MessageType>(deserializer);
     this.slaveIdentifier = slaveIdentifier;
     header =
-        ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
-            .putAll(topicDefinition.toHeader()).build();
+        ImmutableMap.<String, String>builder()
+            .putAll(slaveIdentifier.toHeader())
+            .putAll(topicDefinition.toHeader())
+            .build();
     knownPublishers = Sets.newHashSet();
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
     messageReader = new MessageReader();
@@ -132,14 +130,9 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
     if (knownPublishers.contains(publisherIdentifier)) {
       return;
     }
-    TcpClientConnection tcpClientConnection =
-        tcpClientConnectionManager.connect(address, new SubscriberHandshakeHandler<MessageType>(
-            header, incomingMessageQueue), "SubscriberHandshakeHandler");
-    ChannelFuture future =
-        tcpClientConnection.write(ConnectionHeader.encode(header)).awaitUninterruptibly();
-    if (!future.isSuccess()) {
-      throw new RosRuntimeException(future.getCause());
-    }
+    tcpClientConnectionManager.connect(toString(), address,
+        new SubscriberHandshakeHandler<MessageType>(header, incomingMessageQueue),
+        "SubscriberHandshakeHandler");
     knownPublishers.add(publisherIdentifier);
     signalOnNewPublisher();
   }

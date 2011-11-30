@@ -25,6 +25,7 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 
+import java.net.ConnectException;
 import java.net.SocketAddress;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -39,42 +40,52 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(RetryingConnectionHandler.class);
 
-  // TODO(damonkohler): Allow the TcpClientConnection to alter the reconnect
-  // strategy (e.g. binary backoff, faster retries for tests, etc.)
+  private static final String CONNECTION_REFUSED = "Connection refused";
+
+  // TODO(damonkohler): Allow the TcpClientConnection to alter the
+  // reconnect strategy (e.g. binary backoff, faster retries for tests, etc.)
   private static final long RECONNECT_DELAY = 1000;
 
-  private final TcpClientConnection context;
+  private final TcpClientConnection tcpClientConnection;
   private final Timer timer;
 
-  public RetryingConnectionHandler(TcpClientConnection context) {
-    this.context = context;
+  public RetryingConnectionHandler(TcpClientConnection tcpClientConnection) {
+    this.tcpClientConnection = tcpClientConnection;
     this.timer = new Timer();
   }
 
   @Override
   public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    context.setChannel(null);
-    if (context.isPersistent()) {
+    tcpClientConnection.setChannel(null);
+    if (DEBUG) {
+      if (tcpClientConnection.isDefunct()) {
+        log.info("Connection defunct: " + tcpClientConnection.getName());
+      }
+    }
+    if (tcpClientConnection.isPersistent() && !tcpClientConnection.isDefunct()) {
       if (DEBUG) {
-        log.info("Channel closed, will reconnect: " + e.getChannel().toString());
+        log.info("Connection closed, will reconnect: " + tcpClientConnection.getName());
       }
       timer.schedule(new TimerTask() {
         @Override
         public void run() {
-          SocketAddress remoteAddress = context.getRemoteAddress();
+          SocketAddress remoteAddress = tcpClientConnection.getRemoteAddress();
           if (DEBUG) {
-            log.info("Reconnecting to: " + remoteAddress);
+            log.info("Reconnecting: " + tcpClientConnection.getName());
           }
           ChannelFuture future =
-              context.getBootstrap().connect(remoteAddress).awaitUninterruptibly();
+              tcpClientConnection.getBootstrap().connect(remoteAddress).awaitUninterruptibly();
           if (future.isSuccess()) {
-            context.setChannel(future.getChannel());
+            tcpClientConnection.setChannel(future.getChannel());
+            if (DEBUG) {
+              log.info("Reconnect successful: " + tcpClientConnection.getName());
+            }
           }
         }
       }, RECONNECT_DELAY);
     } else {
       if (DEBUG) {
-        log.info("Channel closed, will not reconnect: " + e.getChannel().toString());
+        log.info("Connection closed, will not reconnect: " + tcpClientConnection.getName());
       }
     }
     super.channelClosed(ctx, e);
@@ -83,9 +94,14 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
     if (DEBUG) {
-      log.info("Channel exception: " + e.getChannel().toString());
+      log.error("Connection exception: " + tcpClientConnection.getName(), e.getCause());
     }
     e.getChannel().close();
+    // TODO(damonkohler): Is there a better way to check for connection refused?
+    if (e.getCause() instanceof ConnectException
+        && e.getCause().getMessage().equals(CONNECTION_REFUSED)) {
+      tcpClientConnection.setDefunct(true);
+    }
     super.exceptionCaught(ctx, e);
   }
 }

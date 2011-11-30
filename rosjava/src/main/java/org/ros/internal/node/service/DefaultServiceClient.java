@@ -24,15 +24,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
-import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientConnection;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
-import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
@@ -41,7 +35,6 @@ import org.ros.node.service.ServiceResponseListener;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 
@@ -51,44 +44,17 @@ import java.util.concurrent.ExecutorService;
 public class DefaultServiceClient<RequestType, ResponseType> implements
     ServiceClient<RequestType, ResponseType> {
 
-  private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(DefaultServiceClient.class);
+  static final boolean DEBUG = false;
+  static final Log log = LogFactory.getLog(DefaultServiceClient.class);
 
+  private final ServiceDefinition serviceDefinition;
+  private final TcpClientConnectionManager tcpClientConnectionManager;
   private final MessageSerializer<RequestType> serializer;
   private final MessageDeserializer<ResponseType> deserializer;
   private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
-  private final Map<String, String> header;
-  private final TcpClientConnectionManager tcpClientConnectionManager;
+  private final ImmutableMap<String, String> header;
 
   private TcpClientConnection tcpClientConnection;
-
-  private final class HandshakeHandler extends SimpleChannelHandler {
-    @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-      ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
-      // TODO(damonkohler): Handle handshake errors.
-      handshake(incomingBuffer);
-      ChannelPipeline pipeline = e.getChannel().getPipeline();
-      pipeline.remove(TcpClientPipelineFactory.LENGTH_FIELD_BASED_FRAME_DECODER);
-      pipeline.remove(this);
-      pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<ResponseType>());
-      pipeline.addLast("ResponseHandler", new ServiceResponseHandler<ResponseType>(
-          responseListeners, deserializer));
-      super.messageReceived(ctx, e);
-    }
-
-    private void handshake(ChannelBuffer buffer) {
-      Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
-      if (DEBUG) {
-        log.info("Incoming handshake header: " + incomingHeader);
-        log.info("Expected handshake header: " + header);
-      }
-      Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
-          header.get(ConnectionHeaderFields.TYPE)));
-      Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
-          header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
-    }
-  }
 
   public static <S, T> DefaultServiceClient<S, T> create(GraphName nodeName,
       ServiceDefinition serviceDefinition, MessageSerializer<S> serializer,
@@ -100,6 +66,7 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
   private DefaultServiceClient(GraphName nodeName, ServiceDefinition serviceDefinition,
       MessageSerializer<RequestType> serializer, MessageDeserializer<ResponseType> deserializer,
       ExecutorService executorService) {
+    this.serviceDefinition = serviceDefinition;
     this.serializer = serializer;
     this.deserializer = deserializer;
     responseListeners = Lists.newLinkedList();
@@ -107,7 +74,8 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
             // TODO(damonkohler): Support non-persistent connections.
-            .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceDefinition.toHeader())
+            .put(ConnectionHeaderFields.PERSISTENT, "1")
+            .putAll(serviceDefinition.toHeader())
             .build();
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
   }
@@ -119,9 +87,9 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
     Preconditions.checkState(tcpClientConnection == null, "Already connected once.");
     InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
     tcpClientConnection =
-        tcpClientConnectionManager.connect(address, new HandshakeHandler(), "HandshakeHandler");
-    ChannelBuffer encodedHeader = ConnectionHeader.encode(header);
-    tcpClientConnection.write(encodedHeader).awaitUninterruptibly();
+        tcpClientConnectionManager.connect(toString(), address,
+            new ServiceClientHandshakeHandler<RequestType, ResponseType>(header, responseListeners,
+                deserializer), "ServiceClientHandshakeHandler");
   }
 
   @Override
@@ -135,5 +103,10 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
     ChannelBuffer wrappedBuffer = ChannelBuffers.wrappedBuffer(serializer.serialize(request));
     responseListeners.add(listener);
     tcpClientConnection.write(wrappedBuffer).awaitUninterruptibly();
+  }
+
+  @Override
+  public String toString() {
+    return "ServiceClient<" + serviceDefinition + ">";
   }
 }

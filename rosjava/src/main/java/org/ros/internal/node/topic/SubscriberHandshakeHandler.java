@@ -25,6 +25,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
+import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.transport.ConnectionHeader;
@@ -60,6 +61,12 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
         header.get(ConnectionHeaderFields.TYPE)));
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
+  }
+
+  @Override
+  public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+    e.getChannel().write(ConnectionHeader.encode(header));
+    super.channelConnected(ctx, e);
   }
 
   @Override

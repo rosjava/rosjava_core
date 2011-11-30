@@ -54,8 +54,10 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-    log.error("Exception occured on channel: " + ctx.getChannel(), e.getCause());
     ctx.getChannel().close();
+    if (DEBUG) {
+      log.error("Channel exception: " + ctx.getChannel(), e.getCause());
+    }
     // NOTE(damonkohler): We ignore exceptions here because they are common
     // (e.g. network failure, connection reset by peer, etc.) and should not be
     // fatal. However, in all cases the channel should be closed.
