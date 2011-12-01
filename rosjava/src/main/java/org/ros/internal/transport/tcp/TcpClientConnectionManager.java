@@ -85,7 +85,8 @@ public class TcpClientConnectionManager {
         log.info("Connected to: " + address);
       }
     } else {
-      throw new RosRuntimeException("Connection failed: " + address, future.getCause());
+      // We expect the first connection to succeed. If not, fail fast.
+      throw new RosRuntimeException("Connection exception: " + address, future.getCause());
     }
     return tcpClientConnection;
   }

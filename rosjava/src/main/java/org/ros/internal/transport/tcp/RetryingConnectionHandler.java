@@ -80,6 +80,21 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
             if (DEBUG) {
               log.info("Reconnect successful: " + tcpClientConnection.getName());
             }
+          } else {
+            if (DEBUG) {
+              log.error("Reconnect failed: " + tcpClientConnection.getName(), future.getCause());
+            }
+            // TODO(damonkohler): Is there a better way to check for connection
+            // refused?
+            if (future.getCause() instanceof ConnectException
+                && future.getCause().getMessage().equals(CONNECTION_REFUSED)) {
+              if (DEBUG) {
+                log.error(
+                    "Connection refused, marking as defunct: " + tcpClientConnection.getName(),
+                    future.getCause());
+              }
+              tcpClientConnection.setDefunct(true);
+            }
           }
         }
       }, RECONNECT_DELAY);
@@ -97,11 +112,6 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
       log.error("Connection exception: " + tcpClientConnection.getName(), e.getCause());
     }
     e.getChannel().close();
-    // TODO(damonkohler): Is there a better way to check for connection refused?
-    if (e.getCause() instanceof ConnectException
-        && e.getCause().getMessage().equals(CONNECTION_REFUSED)) {
-      tcpClientConnection.setDefunct(true);
-    }
     super.exceptionCaught(ctx, e);
   }
 }
