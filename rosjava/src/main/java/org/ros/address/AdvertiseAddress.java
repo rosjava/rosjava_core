@@ -16,14 +16,14 @@
 
 package org.ros.address;
 
+import com.google.common.base.Preconditions;
+
+import org.ros.exception.RosRuntimeException;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.concurrent.Callable;
-
-import org.ros.exception.RosRuntimeException;
-
-import com.google.common.base.Preconditions;
 
 /**
  * A wrapper for {@link InetSocketAddress} that emphasizes the difference
@@ -106,7 +106,7 @@ public class AdvertiseAddress {
     try {
       return new URI(scheme, null, host, portCallable.call(), null, null, null);
     } catch (Exception e) {
-      throw new RosRuntimeException(e);
+      throw new RosRuntimeException("Failed to create URI: " + this, e);
     }
   }
 

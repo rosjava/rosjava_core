@@ -19,13 +19,15 @@ package org.ros.time;
 import org.junit.Test;
 import org.ros.address.InetAddressFactory;
 
+import java.io.IOException;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class NtpTimeProviderTest {
 
   @Test
-  public void testNtpTime() {
+  public void testNtpTime() throws IOException {
     // TODO(damonkohler): This is only a simple sanity check.
     NtpTimeProvider ntpTimeProvider =
         new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));

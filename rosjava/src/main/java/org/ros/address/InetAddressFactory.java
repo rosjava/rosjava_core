@@ -16,6 +16,11 @@
 
 package org.ros.address;
 
+import com.google.common.collect.Lists;
+import com.google.common.net.InetAddresses;
+
+import org.ros.exception.RosRuntimeException;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -24,11 +29,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import org.ros.exception.RosRuntimeException;
-
-import com.google.common.collect.Lists;
-import com.google.common.net.InetAddresses;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)

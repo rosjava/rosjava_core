@@ -16,21 +16,20 @@
 
 package org.ros.time;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
+import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
-import org.ros.exception.RosRuntimeException;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
-import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides NTP synchronized wallclock (actual) time.
@@ -61,15 +60,18 @@ public class NtpTimeProvider implements TimeProvider {
 
   /**
    * Update the current time offset from the configured NTP host.
+   * 
+   * @throws IOException
    */
-  public void updateTime() {
+  public void updateTime() throws IOException {
     if (DEBUG) {
       log.info("Updating time offset from NTP server: " + host.getHostName());
     }
     try {
       time = ntpClient.getTime(host);
     } catch (IOException e) {
-      throw new RosRuntimeException("Failed to read time from NTP server: " + host.getHostName(), e);
+      log.error("Failed to read time from NTP server: " + host.getHostName(), e);
+      throw e;
     }
     time.computeDetails();
     log.info(String.format("NTP time offset: %d ms", time.getOffset()));
@@ -77,6 +79,13 @@ public class NtpTimeProvider implements TimeProvider {
 
   /**
    * Starts periodically updating the current time offset periodically.
+   * 
+   * <p>
+   * The first time update happens immediately.
+   * 
+   * <p>
+   * Note that errors thrown while periodically updating time will be logged but
+   * not rethrown.
    * 
    * @param period
    *          time between updates
@@ -90,9 +99,13 @@ public class NtpTimeProvider implements TimeProvider {
     timer.scheduleAtFixedRate(new TimerTask() {
       @Override
       public void run() {
-        updateTime();
+        try {
+          updateTime();
+        } catch (IOException e) {
+          log.error("Periodic NTP update failed.", e);
+        }
       }
-    }, periodInMilliseconds, periodInMilliseconds);
+    }, 0, periodInMilliseconds);
   }
 
   /**
