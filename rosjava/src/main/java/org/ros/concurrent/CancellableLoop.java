@@ -18,8 +18,6 @@ package org.ros.concurrent;
 
 import com.google.common.base.Preconditions;
 
-import java.util.concurrent.ExecutorService;
-
 /**
  * An interruptable loop that can be run by an {@link ExecutorService}.
  * 
@@ -44,6 +42,7 @@ public abstract class CancellableLoop implements Runnable {
       thread = Thread.currentThread();
     }
     try {
+      setup();
       while (!thread.isInterrupted()) {
         loop();
       }
@@ -52,6 +51,14 @@ public abstract class CancellableLoop implements Runnable {
     } finally {
       thread = null;
     }
+  }
+
+  /**
+   * The setup block for the loop. This will be called exactly once before
+   * the first call to {@link #loop()}.
+   */
+  protected void setup() {
+    // Do nothing by default.
   }
 
   /**
