@@ -7,6 +7,7 @@ java:
   freebsd: openjdk6
 ant:
   ubuntu: 
-    '10.04': ant1.8
-    '10.10': ant
-    '11.04': ant
+    lucid: ant1.8
+    maverick: ant
+    natty: ant
+    oneiric: ant
