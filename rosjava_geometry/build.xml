@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="default">
+  <property file="ros.properties" />
+  <import file="${ros.pkg.rosjava_bootstrap.dir}/simple_build.xml" />
+</project>
+
