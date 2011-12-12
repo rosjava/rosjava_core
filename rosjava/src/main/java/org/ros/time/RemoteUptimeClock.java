@@ -125,13 +125,13 @@ public class RemoteUptimeClock {
     long newUptime = result.newUptime;
     long nanosecondsDelta = newNanoseconds - nanoseconds;
     long uptimeDelta = newUptime - uptime;
-    double newDrift = calculateDrift(nanosecondsDelta, uptimeDelta);
     long error = nanosecondsDelta - (long) (uptimeDelta * drift);
-    log.info(String.format("Drift: %.4f, Error: %d ns", newDrift, error));
+    double newDrift = calculateDrift(nanosecondsDelta, uptimeDelta);
     drift = (1 - sensitivity) * drift + sensitivity * newDrift;
     uptime = newUptime;
     nanoseconds = newNanoseconds;
     epochTime = result.newEpochTime;
+    log.info(String.format("Drift: %.4f, Error: %d ns", drift, error));
   }
 
   private UptimeCalculationResult calculateNewUptime(Callable<Long> callable) {

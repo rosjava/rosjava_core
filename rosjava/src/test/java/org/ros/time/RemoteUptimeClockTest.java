@@ -19,14 +19,11 @@ package org.ros.time;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.ros.time.RemoteUptimeClock;
-import org.ros.time.RemoteUptimeClock.NanoTimeProvider;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.message.Duration;
 import org.ros.message.Time;
-import org.ros.time.TimeProvider;
+import org.ros.time.RemoteUptimeClock.NanoTimeProvider;
 
 import java.util.concurrent.Callable;
 
@@ -66,6 +63,7 @@ public class RemoteUptimeClockTest {
     drift = 1;
     uptime = new long[] { 0 };
     uptimeCallable = new Callable<Long>() {
+      @Override
       public Long call() throws Exception {
         long previousUptime = uptime[0];
         moveTimeForward(UPTIME_LATENCY_NS);
