@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
+import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.internal.node.NodeFactory;
 import org.ros.internal.node.server.MasterServer;
@@ -159,27 +160,22 @@ public class TopicIntegrationTest {
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.DAYS));
     assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.DAYS));
 
-    Thread thread = new Thread() {
+    CancellableLoop publisherLoop = new CancellableLoop() {
       @Override
-      public void run() {
-        while (!Thread.currentThread().isInterrupted()) {
-          org.ros.message.test_ros.TestHeader headerMessage =
-              publisherNode.getMessageFactory().newMessage("test_ros/TestHeader");
-          headerMessage.header.frame_id = "frame";
-          headerMessage.header.stamp = publisherNode.getCurrentTime();
-          publisher.publish(headerMessage);
-          try {
-            // There needs to be some time between messages in order to
-            // guarantee that the timestamp increases.
-            Thread.sleep(1);
-          } catch (InterruptedException e) {
-          }
-        }
+      public void loop() throws InterruptedException {
+        org.ros.message.test_ros.TestHeader headerMessage =
+            publisherNode.getMessageFactory().newMessage("test_ros/TestHeader");
+        headerMessage.header.frame_id = "frame";
+        headerMessage.header.stamp = publisherNode.getCurrentTime();
+        publisher.publish(headerMessage);
+        // There needs to be some time between messages in order to
+        // guarantee that the timestamp increases.
+        Thread.sleep(1);
       }
     };
-    thread.start();
+    executorService.execute(publisherLoop);
     assertTrue(listener.await(1, TimeUnit.DAYS));
-    thread.interrupt();
+    publisherLoop.cancel();
 
     publisherNode.shutdown();
     subscriberNode.shutdown();
