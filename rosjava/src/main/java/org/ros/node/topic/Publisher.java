@@ -68,26 +68,26 @@ public interface Publisher<MessageType> extends Topic {
   int getNumberOfSubscribers();
 
   /**
-   * Cancels the publication and unregisters the {@link Publisher}.
+   * Shuts down and unregisters the {@link Publisher}.
    */
   void shutdown();
   
   /**
-   * Add a new lifecycle listener to the publisher.
+   * Add a new lifecycle listener to the {@link Publisher}.
    * 
    * @param listener
-   *          The listener to add.
+   *          the {@link PublisherListener} to add
    */
   void addPublisherListener(PublisherListener listener);
   
   /**
-   * Remove a lifecycle listener from the publisher.
+   * Remove a lifecycle listener from the {@link Publisher}.
    * 
    * <p>
    * Nothing will happen if the given listener is not registered.
    * 
    * @param listener
-   *          The listener to remove.
+   *          the {@link PublisherListener} to remove
    */
   void removePublisherListener(PublisherListener listener);
 

@@ -81,9 +81,9 @@ public class DefaultNodeTest {
     privateNodeConfiguration.setExecutorService(executorService);
     nodeFactory = new DefaultNodeFactory();
   }
-  
+
   public void shutdown() {
-	executorService.shutdown();
+    executorService.shutdown();
   }
 
   @Test
@@ -148,7 +148,8 @@ public class DefaultNodeTest {
   public void testPubSubRegistration() throws InterruptedException {
     Node node = nodeFactory.newNode(privateNodeConfiguration);
     ((DefaultNode) node).getRegistrar().setRetryDelay(1, TimeUnit.MILLISECONDS);
-    //assertTrue(((RosoutLogger) node.getLog()).getPublisher().awaitRegistration(1, TimeUnit.SECONDS));
+    // assertTrue(((RosoutLogger)
+    // node.getLog()).getPublisher().awaitRegistration(1, TimeUnit.SECONDS));
 
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     assertFalse(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
@@ -157,12 +158,17 @@ public class DefaultNodeTest {
     CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
     assertFalse(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     assertFalse(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
-   
-    node.newPublisher("/foo", "std_msgs/String", Lists.newArrayList(publisherListener));
+
+    Publisher<org.ros.message.std_msgs.String> publisher =
+        node.newPublisher("/foo", "std_msgs/String");
+    publisher.addPublisherListener(publisherListener);
+
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     assertFalse(publisherListener.awaitShutdown(1, TimeUnit.SECONDS));
 
-    node.newSubscriber("/foo", "std_msgs/String", null, Lists.newArrayList(subscriberListener));
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        node.newSubscriber("/foo", "std_msgs/String");
+    subscriber.addSubscriberListener(subscriberListener);
     assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     assertFalse(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
 
@@ -203,11 +209,14 @@ public class DefaultNodeTest {
       }
     };
 
-    Subscriber<Int64> sub = node.newSubscriber("sub", "std_msgs/Int64", callback);
+    Subscriber<Int64> sub = node.newSubscriber("sub", "std_msgs/Int64");
+    sub.addMessageListener(callback);
     assertGraphNameEquals("/ns1/sub", sub.getTopicName());
-    sub = node.newSubscriber("/sub", "std_msgs/Int64", callback);
+    sub = node.newSubscriber("/sub", "std_msgs/Int64");
+    sub.addMessageListener(callback);
     assertGraphNameEquals("/sub", sub.getTopicName());
-    sub = node.newSubscriber("~sub", "std_msgs/Int64", callback);
+    sub = node.newSubscriber("~sub", "std_msgs/Int64");
+    sub.addMessageListener(callback);
     assertGraphNameEquals("/ns1/test_resolver/sub", sub.getTopicName());
   }
 
@@ -228,7 +237,9 @@ public class DefaultNodeTest {
     checkHostName(nodeUri.getHost());
 
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
-    node.newPublisher("test_addresses_pub", "std_msgs/Int64", Lists.newArrayList(publisherListener));
+    Publisher<org.ros.message.std_msgs.Int64> publisher =
+        node.newPublisher("test_addresses_pub", "std_msgs/Int64");
+    publisher.addPublisherListener(publisherListener);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     // Check the TCPROS server address via the XML-RPC API.
@@ -240,5 +251,4 @@ public class DefaultNodeTest {
     InetSocketAddress tcpRosAddress = result.getAdverstiseAddress().toInetSocketAddress();
     checkHostName(tcpRosAddress.getHostName());
   }
-
 }

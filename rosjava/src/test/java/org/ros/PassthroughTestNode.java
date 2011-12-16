@@ -20,6 +20,7 @@ import org.ros.message.MessageListener;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 /**
  * This node is used in rostest end-to-end integration tests with other client
@@ -45,7 +46,9 @@ public class PassthroughTestNode implements NodeMain {
             pub_string.publish(m);
           }
         };
-    node.newSubscriber("string_in", "std_msgs/String", string_cb);
+    Subscriber<org.ros.message.std_msgs.String> stringSubscriber =
+        node.newSubscriber("string_in", "std_msgs/String");
+    stringSubscriber.addMessageListener(string_cb);
 
     // Int64 pass through
     final Publisher<org.ros.message.std_msgs.Int64> pub_int64 =
@@ -57,7 +60,9 @@ public class PassthroughTestNode implements NodeMain {
             pub_int64.publish(m);
           }
         };
-    node.newSubscriber("int64_in", "std_msgs/Int64", int64_cb);
+    Subscriber<org.ros.message.std_msgs.Int64> int64Subscriber =
+        node.newSubscriber("int64_in", "std_msgs/Int64");
+    int64Subscriber.addMessageListener(int64_cb);
 
     // TestHeader pass through
     final Publisher<org.ros.message.test_ros.TestHeader> pub_header =
@@ -71,7 +76,9 @@ public class PassthroughTestNode implements NodeMain {
             pub_header.publish(m);
           }
         };
-    node.newSubscriber("test_header_in", "test_ros/TestHeader", header_cb);
+    Subscriber<org.ros.message.test_ros.TestHeader> testHeaderSubscriber =
+        node.newSubscriber("test_header_in", "test_ros/TestHeader");
+    testHeaderSubscriber.addMessageListener(header_cb);
 
     // TestComposite pass through
     final Publisher<org.ros.message.test_ros.Composite> pub_composite =
@@ -83,7 +90,9 @@ public class PassthroughTestNode implements NodeMain {
             pub_composite.publish(m);
           }
         };
-    node.newSubscriber("composite_in", "test_ros/Composite", composite_cb);
+    Subscriber<org.ros.message.test_ros.Composite> compositeSubscriber =
+        node.newSubscriber("composite_in", "test_ros/Composite");
+    compositeSubscriber.addMessageListener(composite_cb);
   }
 
   @Override

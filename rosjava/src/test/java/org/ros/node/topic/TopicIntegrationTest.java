@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.common.collect.Lists;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -69,7 +67,8 @@ public class TopicIntegrationTest {
 
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     Publisher<org.ros.message.std_msgs.String> publisher =
-        publisherNode.newPublisher("foo", "std_msgs/String", Lists.newArrayList(publisherListener));
+        publisherNode.newPublisher("foo", "std_msgs/String");
+    publisher.addPublisherListener(publisherListener);
 
     final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
     helloMessage.data = "Hello, ROS!";
@@ -79,14 +78,16 @@ public class TopicIntegrationTest {
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
 
     CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
-    subscriberNode.newSubscriber("foo", "std_msgs/String",
-        new MessageListener<org.ros.message.std_msgs.String>() {
-          @Override
-          public void onNewMessage(org.ros.message.std_msgs.String message) {
-            assertEquals(helloMessage, message);
-            messageReceived.countDown();
-          }
-        }, Lists.newArrayList(subscriberListener));
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        subscriberNode.newSubscriber("foo", "std_msgs/String");
+    subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
+      @Override
+      public void onNewMessage(org.ros.message.std_msgs.String message) {
+        assertEquals(helloMessage, message);
+        messageReceived.countDown();
+      }
+    });
+    subscriber.addSubscriberListener(subscriberListener);
 
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
@@ -108,7 +109,7 @@ public class TopicIntegrationTest {
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
     org.ros.internal.node.topic.DefaultSubscriber<org.ros.message.std_msgs.String> subscriber =
         (org.ros.internal.node.topic.DefaultSubscriber<org.ros.message.std_msgs.String>) subscriberNode
-            .<org.ros.message.std_msgs.String>newSubscriber("foo", "std_msgs/String", null);
+            .<org.ros.message.std_msgs.String>newSubscriber("foo", "std_msgs/String");
 
     try {
       subscriber.addPublisher(PublisherIdentifier.newFromStrings("foo", "http://foo", "foo"),
@@ -147,15 +148,17 @@ public class TopicIntegrationTest {
     final Node publisherNode = nodeFactory.newNode(nodeConfiguration);
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     final Publisher<org.ros.message.test_ros.TestHeader> publisher =
-        publisherNode.newPublisher("foo", "test_ros/TestHeader",
-            Lists.newArrayList(publisherListener));
+        publisherNode.newPublisher("foo", "test_ros/TestHeader");
+    publisher.addPublisherListener(publisherListener);
 
     nodeConfiguration.setNodeName("subscriber");
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
     Listener listener = new Listener();
     CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
-    subscriberNode.newSubscriber("foo", "test_ros/TestHeader", listener,
-        Lists.newArrayList(subscriberListener));
+    Subscriber<org.ros.message.test_ros.TestHeader> subscriber =
+        subscriberNode.newSubscriber("foo", "test_ros/TestHeader");
+    subscriber.addMessageListener(listener);
+    subscriber.addSubscriberListener(subscriberListener);
 
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.DAYS));
     assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.DAYS));

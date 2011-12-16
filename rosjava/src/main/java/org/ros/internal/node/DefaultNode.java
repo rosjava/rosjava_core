@@ -44,7 +44,6 @@ import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.message.MessageDefinition;
 import org.ros.message.MessageFactory;
-import org.ros.message.MessageListener;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
@@ -58,9 +57,7 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.service.ServiceServerListener;
 import org.ros.node.topic.Publisher;
-import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
-import org.ros.node.topic.SubscriberListener;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -208,63 +205,34 @@ public class DefaultNode implements Node {
 
   @Override
   public <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType) {
-    return newPublisher(topicName, messageType, null);
-  }
-
-  @Override
-  public <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType,
-      Collection<? extends PublisherListener> listeners) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
         nodeConfiguration.getMessageDefinitionFactory().newFromString(messageType);
     TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
     org.ros.message.MessageSerializer<MessageType> serializer = newMessageSerializer(messageType);
-    return publisherFactory.create(topicDefinition, serializer, listeners);
-  }
-
-  @Override
-  public <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType,
-      Collection<? extends PublisherListener> listeners) {
-    return newPublisher(new GraphName(topicName), messageType, listeners);
+    return publisherFactory.create(topicDefinition, serializer);
   }
 
   @Override
   public <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType) {
-    return newPublisher(topicName, messageType, null);
+    return newPublisher(new GraphName(topicName), messageType);
   }
 
   @Override
-  public <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName,
-      String messageType, final MessageListener<MessageType> messageListener,
-      Collection<? extends SubscriberListener> listeners) {
+  public <MessageType> Subscriber<MessageType>
+      newSubscriber(GraphName topicName, String messageType) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
         nodeConfiguration.getMessageDefinitionFactory().newFromString(messageType);
     TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
     MessageDeserializer<MessageType> deserializer = newMessageDeserializer(messageType);
-    Subscriber<MessageType> subscriber =
-        subscriberFactory.create(topicDefinition, deserializer, listeners);
-    subscriber.addMessageListener(messageListener);
+    Subscriber<MessageType> subscriber = subscriberFactory.create(topicDefinition, deserializer);
     return subscriber;
   }
 
   @Override
-  public <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName,
-      String messageType, final MessageListener<MessageType> messageListener) {
-    return newSubscriber(topicName, messageType, messageListener, null);
-  }
-
-  @Override
-  public <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
-      final MessageListener<MessageType> messageListener,
-      Collection<? extends SubscriberListener> listeners) {
-    return newSubscriber(new GraphName(topicName), messageType, messageListener, listeners);
-  }
-
-  @Override
-  public <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
-      final MessageListener<MessageType> messageListener) {
-    return newSubscriber(topicName, messageType, messageListener, null);
+  public <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType) {
+    return newSubscriber(new GraphName(topicName), messageType);
   }
 
   @Override

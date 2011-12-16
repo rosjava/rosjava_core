@@ -32,22 +32,15 @@ public class Listener implements NodeMain {
 
   @Override
   public void onStart(Node node) {
-    try {
-      final Log log = node.getLog();
-      node.newSubscriber("chatter", "std_msgs/String",
-          new MessageListener<org.ros.message.std_msgs.String>() {
-            @Override
-            public void onNewMessage(org.ros.message.std_msgs.String message) {
-              log.info("I heard: \"" + message.data + "\"");
-            }
-          });
-    } catch (Exception e) {
-      if (node != null) {
-        node.getLog().fatal(e);
-      } else {
-        e.printStackTrace();
+    final Log log = node.getLog();
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        node.newSubscriber("chatter", "std_msgs/String");
+    subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
+      @Override
+      public void onNewMessage(org.ros.message.std_msgs.String message) {
+        log.info("I heard: \"" + message.data + "\"");
       }
-    }
+    });
   }
 
   @Override

@@ -22,6 +22,7 @@ import org.ros.message.std_msgs.Int64;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 /**
  * This node is used to test the slave API externally using rostest.
@@ -43,7 +44,9 @@ public class SlaveApiTestNode implements NodeMain {
           }
         };
 
-    node.newSubscriber("chatter_in", "std_msgs/String", chatter_cb);
+    Subscriber<org.ros.message.std_msgs.String> stringSubscriber =
+        node.newSubscriber("chatter_in", "std_msgs/String");
+    stringSubscriber.addMessageListener(chatter_cb);
 
     // Have at least one case of dual pub/sub on the same topic.
     final Publisher<Int64> pub_int64_pubsub = node.newPublisher("int64", "std_msgs/Int64");
@@ -53,7 +56,9 @@ public class SlaveApiTestNode implements NodeMain {
       }
     };
 
-    node.newSubscriber("int64", "std_msgs/Int64", int64_cb);
+    Subscriber<org.ros.message.std_msgs.Int64> int64Subscriber =
+        node.newSubscriber("int64", "std_msgs/Int64");
+    int64Subscriber.addMessageListener(int64_cb);
 
     // Don't do any performance optimizations here. We want to make sure that
     // GC, etc. is working.

@@ -20,9 +20,7 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.topic.Subscriber;
-import org.ros.node.topic.SubscriberListener;
 
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -54,12 +52,13 @@ public class SubscriberFactory {
    *          {@link TopicDefinition} that is subscribed to
    * @param deserializer
    * @param listeners
-   *          lifecycle listeners for the {@link Subscriber} instance (can be {@code null})
+   *          lifecycle listeners for the {@link Subscriber} instance (can be
+   *          {@code null})
    * @return a {@link DefaultSubscriber} instance
    */
   @SuppressWarnings("unchecked")
   public <MessageType> Subscriber<MessageType> create(TopicDefinition topicDefinition,
-      MessageDeserializer<MessageType> deserializer, Collection<? extends SubscriberListener> listeners) {
+      MessageDeserializer<MessageType> deserializer) {
     String topicName = topicDefinition.getName().toString();
     DefaultSubscriber<MessageType> subscriber;
     boolean createdNewSubscriber = false;
@@ -78,14 +77,6 @@ public class SubscriberFactory {
     if (createdNewSubscriber) {
       topicManager.putSubscriber(subscriber);
     }
-    
-    if (listeners != null) {
-      for (SubscriberListener listener : listeners) {
-        subscriber.addSubscriberListener(listener);
-      }
-    }
-
     return subscriber;
   }
-
 }
