@@ -18,7 +18,7 @@ package org.ros.node;
 
 /**
  * A listener for lifecycle events on a {@link Node}.
- *
+ * 
  * @author Keith M. Hughes
  */
 public interface NodeListener {
@@ -30,12 +30,27 @@ public interface NodeListener {
    *          the {@link Node} that has been started
    */
   void onStart(Node node);
-  
+
   /**
-   * Called when the {@link Node} has been shut down.
+   * Called when the {@link Node} has started shutting down. Shutdown will be
+   * delayed, although not indefinitely, until all {@link NodeListener}s have
+   * returned from this method.
+   * 
+   * <p>
+   * Since this method can potentially delay {@link Node} shutdown, it is
+   * preferred to use {@link #onShutdownComplete(Node)} when {@link Node}
+   * resources are not required during the method call.
    * 
    * @param node
-   *          the {@link Node} that has been shut down
+   *          the {@link Node} that has started shutting down
    */
   void onShutdown(Node node);
+
+  /**
+   * Called when the {@link Node} has shut down.
+   * 
+   * @param node
+   *          the {@link Node} that has shut down
+   */
+  void onShutdownComplete(Node node);
 }

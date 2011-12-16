@@ -17,9 +17,9 @@
 package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
+import org.ros.concurrent.CancellableLoop;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
@@ -66,7 +66,9 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The default implementation of a {@link Node}.
@@ -78,6 +80,14 @@ import java.util.concurrent.ExecutorService;
 public class DefaultNode implements Node {
 
   private static final boolean DEBUG = false;
+
+  /**
+   * The maximum delay before shutdown will begin even if all
+   * {@link NodeListener}s have not yet returned from their
+   * {@link NodeListener#onShutdown(Node)} callback.
+   */
+  private static final int MAX_SHUTDOWN_DELAY_DURATION = 5;
+  private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;
 
   private final GraphName nodeName;
   private final NodeConfiguration nodeConfiguration;
@@ -95,7 +105,7 @@ public class DefaultNode implements Node {
   private final URI masterUri;
 
   /**
-   * Use for all thread creation.
+   * Used for all thread creation.
    */
   private final ExecutorService executorService;
 
@@ -103,11 +113,6 @@ public class DefaultNode implements Node {
    * All {@link NodeListener} instances registered with the node.
    */
   private final Collection<NodeListener> nodeListeners;
-
-  /**
-   * {@code true} if the node is in a running state, {@code false} otherwise.
-   */
-  private boolean running;
 
   /**
    * {@link DefaultNode}s should only be constructed using the
@@ -154,7 +159,6 @@ public class DefaultNode implements Node {
     // initialized with the SlaveServer's SlaveIdentifier so that it can
     // register the /rosout Publisher.
     log = new RosoutLogger(this);
-    running = true;
     signalOnStart();
   }
 
@@ -373,17 +377,11 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public boolean isRunning() {
-    return running;
-  }
-
-  @Override
   public void shutdown() {
-    Preconditions.checkState(running == true, "Not running.");
+    signalOnShutdown();
     // NOTE(damonkohler): We don't want to raise potentially spurious
     // exceptions during shutdown that would interrupt the process. This is
     // simply best effort cleanup.
-    running = false;
     slaveServer.shutdown();
     registrar.shutdown();
     for (Publisher<?> publisher : topicManager.getPublishers()) {
@@ -436,7 +434,7 @@ public class DefaultNode implements Node {
     for (ServiceClient<?, ?> serviceClient : serviceManager.getClients()) {
       serviceClient.shutdown();
     }
-    signalOnShutdown();
+    signalOnShutdownComplete();
   }
 
   @Override
@@ -499,18 +497,45 @@ public class DefaultNode implements Node {
   }
 
   /**
-   * Signal all {@link NodeListener}s that the {@link Node} has shut down.
+   * Signal all {@link NodeListener}s that the {@link Node} has started shutting
+   * down.
    * 
    * <p>
    * Each listener is called in a separate thread.
    */
   private void signalOnShutdown() {
     final Node node = this;
+    final CountDownLatch latch = new CountDownLatch(nodeListeners.size());
     for (final NodeListener listener : nodeListeners) {
       executorService.execute(new Runnable() {
         @Override
         public void run() {
           listener.onShutdown(node);
+          latch.countDown();
+        }
+      });
+    }
+    try {
+      latch.await(MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
+    } catch (InterruptedException e) {
+      // Ignored since we do not guarantee that all listeners will finish before
+      // shutdown begins.
+    }
+  }
+
+  /**
+   * Signal all {@link NodeListener}s that the {@link Node} has shut down.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
+   */
+  private void signalOnShutdownComplete() {
+    final Node node = this;
+    for (final NodeListener listener : nodeListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onShutdownComplete(node);
         }
       });
     }
@@ -519,5 +544,24 @@ public class DefaultNode implements Node {
   @VisibleForTesting
   InetSocketAddress getAddress() {
     return slaveServer.getAddress();
+  }
+
+  @Override
+  public void execute(final CancellableLoop cancellableLoop) {
+    executorService.execute(cancellableLoop);
+    addListener(new NodeListener() {
+      @Override
+      public void onStart(Node node) {
+      }
+
+      @Override
+      public void onShutdown(Node node) {
+        cancellableLoop.cancel();
+      }
+
+      @Override
+      public void onShutdownComplete(Node node) {
+      }
+    });
   }
 }

@@ -17,6 +17,7 @@
 package org.ros.node;
 
 import org.apache.commons.logging.Log;
+import org.ros.concurrent.CancellableLoop;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.Master;
@@ -39,6 +40,7 @@ import org.ros.node.topic.SubscriberListener;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 /**
  * A node in the ROS graph.
@@ -309,17 +311,6 @@ public interface Node {
   ParameterTree newParameterTree();
 
   /**
-   * Is the node running?
-   * 
-   * <p>
-   * A running node may not be fully initialized yet, it is either in the
-   * process of starting up or is running.
-   * 
-   * @return True if the node is running, false otherwise.
-   */
-  boolean isRunning();
-
-  /**
    * @return the {@link MessageSerializationFactory} used by this node
    */
   MessageSerializationFactory getMessageSerializationFactory();
@@ -347,4 +338,18 @@ public interface Node {
    *          the {@link NodeListener} to remove
    */
   void removeListener(NodeListener listener);
+
+  /**
+   * Executes a {@link CancellableLoop} using the {@link Node}'s
+   * {@link ExecutorService}. The {@link CancellableLoop} will be canceled when
+   * the {@link Node} starts shutting down.
+   * 
+   * <p>
+   * Any blocking calls executed in the provided {@link CancellableLoop} can
+   * potentially delay {@link Node} shutdown and should be avoided.
+   * 
+   * @param cancellableLoop
+   *          the {@link CancellableLoop} to execute
+   */
+  void execute(CancellableLoop cancellableLoop);
 }

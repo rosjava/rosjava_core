@@ -39,6 +39,10 @@ public class RunFibonacciSimpleActionServer {
         public void onShutdown(Node node) {
         }
 
+        @Override
+        public void onShutdownComplete(Node node) {
+        }
+
       }, configuration);
     } catch (Exception e) {
       // TODO Auto-generated catch block
