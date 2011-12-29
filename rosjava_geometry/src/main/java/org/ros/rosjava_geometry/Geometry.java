@@ -1,9 +1,32 @@
+/*
+ * Copyright (C) 2011 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.ros.rosjava_geometry;
 
 import org.ros.message.geometry_msgs.Point;
 import org.ros.message.geometry_msgs.Quaternion;
+import org.ros.message.geometry_msgs.Transform;
 import org.ros.message.geometry_msgs.Vector3;
 
+/**
+ * This class contains geometry utilities that work on ROS geometry messages.
+ * 
+ * @author moesenle@google.com (Lorenz Moesenlechner)
+ * 
+ */
 public class Geometry {
   public static double calculateRotationAngle(Quaternion quaternion) {
     return 2 * Math.acos(quaternion.w);
@@ -59,5 +82,29 @@ public class Geometry {
 
   public static double vectorLength(Point point) {
     return Math.sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
+  }
+
+  public static Vector3 invertVector(Vector3 vector) {
+    Vector3 result = new Vector3();
+    result.x = -vector.x;
+    result.y = -vector.y;
+    result.z = -vector.z;
+    return result;
+  }
+
+  public static Quaternion invertQuaternion(Quaternion quaternion) {
+    Quaternion result = new Quaternion();
+    result.x = -quaternion.x;
+    result.y = -quaternion.y;
+    result.z = -quaternion.z;
+    result.w = quaternion.w;
+    return result;
+  }
+
+  public static Transform invertTransform(Transform transform) {
+    Transform result = new Transform();
+    result.translation = invertVector(transform.translation);
+    result.rotation = invertQuaternion(transform.rotation);
+    return result;
   }
 }
