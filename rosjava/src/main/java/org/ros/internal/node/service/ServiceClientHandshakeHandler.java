@@ -33,6 +33,7 @@ import org.ros.node.service.ServiceResponseListener;
 
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -45,13 +46,15 @@ class ServiceClientHandshakeHandler<RequestType, ResponseType> extends SimpleCha
   private final ImmutableMap<String, String> header;
   private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
   private final MessageDeserializer<ResponseType> deserializer;
+  private final ExecutorService executorService;
 
   public ServiceClientHandshakeHandler(ImmutableMap<String, String> header,
       Queue<ServiceResponseListener<ResponseType>> responseListeners,
-      MessageDeserializer<ResponseType> deserializer) {
+      MessageDeserializer<ResponseType> deserializer, ExecutorService executorService) {
     this.header = header;
     this.responseListeners = responseListeners;
     this.deserializer = deserializer;
+    this.executorService = executorService;
   }
 
   @Override
@@ -70,7 +73,7 @@ class ServiceClientHandshakeHandler<RequestType, ResponseType> extends SimpleCha
     pipeline.remove(this);
     pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<ResponseType>());
     pipeline.addLast("ResponseHandler", new ServiceResponseHandler<ResponseType>(responseListeners,
-        deserializer));
+        deserializer, executorService));
     super.messageReceived(ctx, e);
   }
 

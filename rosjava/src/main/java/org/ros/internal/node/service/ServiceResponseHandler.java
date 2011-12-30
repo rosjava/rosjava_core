@@ -29,6 +29,7 @@ import org.ros.node.service.ServiceResponseListener;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -37,26 +38,32 @@ class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
 
   private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
   private final MessageDeserializer<ResponseType> deserializer;
+  private final ExecutorService executorService;
 
-  public ServiceResponseHandler(
-      Queue<ServiceResponseListener<ResponseType>> messageListeners,
-      MessageDeserializer<ResponseType> deserializer) {
+  public ServiceResponseHandler(Queue<ServiceResponseListener<ResponseType>> messageListeners,
+      MessageDeserializer<ResponseType> deserializer, ExecutorService executorService) {
     this.responseListeners = messageListeners;
     this.deserializer = deserializer;
+    this.executorService = executorService;
   }
 
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-    ServiceResponseListener<ResponseType> listener = responseListeners.poll();
-    Preconditions.checkNotNull(listener);
-    ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
-    ByteBuffer buffer = response.getMessage().toByteBuffer();
-    if (response.getErrorCode() == 1) {
-      listener.onSuccess(deserializer.deserialize(buffer));
-    } else {
-      String message = Charset.forName("US-ASCII").decode(buffer).toString();
-      listener.onFailure(new RemoteException(StatusCode.ERROR, message));
-    }
+    final ServiceResponseListener<ResponseType> listener = responseListeners.poll();
+    Preconditions.checkNotNull(listener, "No listener for incoming service response.");
+    final ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
+    final ByteBuffer buffer = response.getMessage().toByteBuffer();
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        if (response.getErrorCode() == 1) {
+          listener.onSuccess(deserializer.deserialize(buffer));
+        } else {
+          String message = Charset.forName("US-ASCII").decode(buffer).toString();
+          listener.onFailure(new RemoteException(StatusCode.ERROR, message));
+        }
+      }
+    });
     super.messageReceived(ctx, e);
   }
 }

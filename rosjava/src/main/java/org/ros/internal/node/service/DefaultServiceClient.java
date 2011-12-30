@@ -53,6 +53,7 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
   private final MessageDeserializer<ResponseType> deserializer;
   private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
   private final ImmutableMap<String, String> header;
+  private final ExecutorService executorService;
 
   private TcpClientConnection tcpClientConnection;
 
@@ -69,6 +70,7 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
     this.serviceDefinition = serviceDefinition;
     this.serializer = serializer;
     this.deserializer = deserializer;
+    this.executorService = executorService;
     responseListeners = Lists.newLinkedList();
     header =
         ImmutableMap.<String, String>builder()
@@ -89,7 +91,7 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
     tcpClientConnection =
         tcpClientConnectionManager.connect(toString(), address,
             new ServiceClientHandshakeHandler<RequestType, ResponseType>(header, responseListeners,
-                deserializer), "ServiceClientHandshakeHandler");
+                deserializer, executorService), "ServiceClientHandshakeHandler");
   }
 
   @Override
