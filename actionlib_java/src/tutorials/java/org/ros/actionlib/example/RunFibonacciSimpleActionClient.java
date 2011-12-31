@@ -49,6 +49,10 @@ public class RunFibonacciSimpleActionClient {
         public void onShutdown(Node node) {
         }
 
+        @Override
+        public void onShutdownComplete(Node node) {
+        }
+
       }, configuration);
 
       System.out.println("[Test] Waiting for action server to start");
@@ -122,6 +126,10 @@ public class RunFibonacciSimpleActionClient {
         
         @Override
         public void onShutdown(Node node) {
+        }
+
+        @Override
+        public void onShutdownComplete(Node node) {
         }
 
       }, configuration);

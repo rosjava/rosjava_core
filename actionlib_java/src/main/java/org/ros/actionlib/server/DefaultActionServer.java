@@ -1,7 +1,6 @@
 package org.ros.actionlib.server;
 
 import org.ros.actionlib.ActionConstants;
-
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.util.GoalIDGenerator;
 import org.ros.exception.RosException;
@@ -161,9 +160,12 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
   protected boolean initServer() {
 
     try {
-      pubFeedback = node.newPublisher(ActionConstants.TOPIC_NAME_FEEDBACK, spec.getActionFeedbackMessage());
-      pubResult = node.newPublisher(ActionConstants.TOPIC_NAME_RESULT, spec.getActionResultMessage());
-      pubStatus = node.newPublisher(ActionConstants.TOPIC_NAME_STATUS, ActionConstants.MESSAGE_TYPE_STATUS);
+      pubFeedback =
+          node.newPublisher(ActionConstants.TOPIC_NAME_FEEDBACK, spec.getActionFeedbackMessage());
+      pubResult =
+          node.newPublisher(ActionConstants.TOPIC_NAME_RESULT, spec.getActionResultMessage());
+      pubStatus =
+          node.newPublisher(ActionConstants.TOPIC_NAME_STATUS, ActionConstants.MESSAGE_TYPE_STATUS);
 
       MessageListener<T_ACTION_GOAL> goalCallback = new MessageListener<T_ACTION_GOAL>() {
         @Override
@@ -171,7 +173,9 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
           doGoalCallback(actionGoal);
         }
       };
-      subGoal = node.newSubscriber(ActionConstants.TOPIC_NAME_GOAL, spec.getActionGoalMessage(), goalCallback);
+      subGoal =
+          node.newSubscriber(ActionConstants.TOPIC_NAME_GOAL, spec.getActionGoalMessage());
+      subGoal.addMessageListener(goalCallback);
 
       MessageListener<GoalID> cancelCallback = new MessageListener<GoalID>() {
         @Override
@@ -179,7 +183,10 @@ public class DefaultActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOA
           doCancelCallback(goalID);
         }
       };
-      subCancelGoal = node.newSubscriber(ActionConstants.TOPIC_NAME_CANCEL, ActionConstants.MESSAGE_TYPE_CANCEL, cancelCallback);
+      subCancelGoal =
+          node.newSubscriber(ActionConstants.TOPIC_NAME_CANCEL,
+              ActionConstants.MESSAGE_TYPE_CANCEL);
+      subCancelGoal.addMessageListener(cancelCallback);
 
     } catch (Exception re) {
       node.getLog().error("Unable to start up " + getClass().getName(), re);

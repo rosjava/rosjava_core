@@ -1,7 +1,5 @@
 package org.ros.actionlib.client;
 
-import com.google.common.collect.Lists;
-
 import org.ros.actionlib.ActionConstants;
 import org.ros.actionlib.ActionSpec;
 import org.ros.exception.RosException;
@@ -13,10 +11,8 @@ import org.ros.message.actionlib_msgs.GoalStatusArray;
 import org.ros.node.Node;
 import org.ros.node.topic.CountDownPublisherListener;
 import org.ros.node.topic.Publisher;
-import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -155,8 +151,6 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
   public void addClientPubSub(Node node) {
     this.node = node;
 
-    List<? extends PublisherListener> publisherListeners = Lists.newArrayList(publisherListener);
-
     MessageListener<T_ACTION_FEEDBACK> feedbackCallback = new MessageListener<T_ACTION_FEEDBACK>() {
       @Override
       public void onNewMessage(T_ACTION_FEEDBACK actionFeedback) {
@@ -164,8 +158,8 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
       }
     };
     subFeedback =
-        node.newSubscriber(ActionConstants.TOPIC_NAME_FEEDBACK, spec.getActionFeedbackMessage(),
-            feedbackCallback);
+        node.newSubscriber(ActionConstants.TOPIC_NAME_FEEDBACK, spec.getActionFeedbackMessage());
+    subFeedback.addMessageListener(feedbackCallback);
 
     MessageListener<T_ACTION_RESULT> resultCallback = new MessageListener<T_ACTION_RESULT>() {
       @Override
@@ -174,8 +168,8 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
       }
     };
     subResult =
-        node.newSubscriber(ActionConstants.TOPIC_NAME_RESULT, spec.getActionResultMessage(),
-            resultCallback);
+        node.newSubscriber(ActionConstants.TOPIC_NAME_RESULT, spec.getActionResultMessage());
+    subResult.addMessageListener(resultCallback);
 
     MessageListener<GoalStatusArray> statusCallback = new MessageListener<GoalStatusArray>() {
       @Override
@@ -184,15 +178,14 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
       }
     };
     subStatus =
-        node.newSubscriber(ActionConstants.TOPIC_NAME_STATUS, ActionConstants.MESSAGE_TYPE_STATUS,
-            statusCallback);
+        node.newSubscriber(ActionConstants.TOPIC_NAME_STATUS, ActionConstants.MESSAGE_TYPE_STATUS);
+    subStatus.addMessageListener(statusCallback);
 
-    pubGoal =
-        node.newPublisher(ActionConstants.TOPIC_NAME_GOAL, spec.getActionGoalMessage(),
-            publisherListeners);
+    pubGoal = node.newPublisher(ActionConstants.TOPIC_NAME_GOAL, spec.getActionGoalMessage());
+    pubGoal.addPublisherListener(publisherListener);
     pubCancelGoal =
-        node.newPublisher(ActionConstants.TOPIC_NAME_CANCEL, ActionConstants.MESSAGE_TYPE_CANCEL,
-            publisherListeners);
+        node.newPublisher(ActionConstants.TOPIC_NAME_CANCEL, ActionConstants.MESSAGE_TYPE_CANCEL);
+    pubCancelGoal.addPublisherListener(publisherListener);
 
     // Uses the node of the action client so must be done here.
     goalManager =

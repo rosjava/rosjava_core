@@ -17,11 +17,11 @@
 package org.ros.node;
 
 import org.apache.commons.logging.Log;
+import org.ros.concurrent.CancellableLoop;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.message.MessageFactory;
-import org.ros.message.MessageListener;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.message.Service;
 import org.ros.message.Time;
@@ -33,12 +33,11 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.service.ServiceServerListener;
 import org.ros.node.topic.Publisher;
-import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
-import org.ros.node.topic.SubscriberListener;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 /**
  * A node in the ROS graph.
@@ -131,27 +130,6 @@ public interface Node {
   <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType);
 
   /**
-   * @param <MessageType>
-   *          the message type to create the publisher for
-   * @param topicName
-   *          the topic name, will be pushed down under this namespace unless
-   *          '/' is prepended.
-   * @param messageType
-   *          the message data type (e.g. "std_msgs/String")
-   * @param listeners
-   *          lifecycle listeners for the publisher (can be {@code null})
-   * @return a {@link Publisher} for the specified topic
-   */
-  <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType,
-      Collection<? extends PublisherListener> listeners);
-
-  /**
-   * @see #newPublisher(GraphName, String, Collection<PublisherListener>)
-   */
-  <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType,
-      Collection<? extends PublisherListener> listeners);
-
-  /**
    * @see #newPublisher(GraphName, String)
    */
   <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType);
@@ -163,47 +141,15 @@ public interface Node {
    *          the topic name to be subscribed to, this will be auto resolved
    * @param messageType
    *          the message data type (e.g. "std_msgs/String")
-   * @param messageListener
-   *          the {@link MessageListener} to be added to this {@link Subscriber}
-   *          , will be called asynchronously any time that a message is
-   *          published on the specified topic
-   * @param listeners
-   *          lifecycle listeners for the {@link Subscriber} instance (can be
-   *          {@code null})
    * @return a {@link Subscriber} for the specified topic
    */
-  <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName, String messageType,
-      MessageListener<MessageType> messageListener,
-      Collection<? extends SubscriberListener> listeners);
-
-  /**
-   * @param <MessageType>
-   *          the message type to create the {@link Subscriber} for
-   * @param topicName
-   *          the topic name to be subscribed to, this will be auto resolved
-   * @param messageType
-   *          the message data type (e.g. "std_msgs/String")
-   * @param messageListener
-   *          the {@link MessageListener} to be added to this {@link Subscriber}
-   *          , will be called asynchronously any time that a message is
-   *          published on the specified topic
-   * @return a {@link Subscriber} for the specified topic
-   */
-  <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName, String messageType,
-      MessageListener<MessageType> listener);
+  <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName, String messageType);
 
   /**
    * @see #newSubscriber(GraphName, String, MessageListener,
    *      Collection<SubscriberListener>)
    */
-  <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
-      MessageListener<MessageType> listener, Collection<? extends SubscriberListener> listeners);
-
-  /**
-   * @see #newSubscriber(GraphName, String, MessageListener)
-   */
-  <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType,
-      MessageListener<MessageType> listener);
+  <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType);
 
   /**
    * Create a {@link ServiceServer}.
@@ -309,17 +255,6 @@ public interface Node {
   ParameterTree newParameterTree();
 
   /**
-   * Is the node running?
-   * 
-   * <p>
-   * A running node may not be fully initialized yet, it is either in the
-   * process of starting up or is running.
-   * 
-   * @return True if the node is running, false otherwise.
-   */
-  boolean isRunning();
-
-  /**
    * @return the {@link MessageSerializationFactory} used by this node
    */
   MessageSerializationFactory getMessageSerializationFactory();
@@ -347,4 +282,18 @@ public interface Node {
    *          the {@link NodeListener} to remove
    */
   void removeListener(NodeListener listener);
+
+  /**
+   * Executes a {@link CancellableLoop} using the {@link Node}'s
+   * {@link ExecutorService}. The {@link CancellableLoop} will be canceled when
+   * the {@link Node} starts shutting down.
+   * 
+   * <p>
+   * Any blocking calls executed in the provided {@link CancellableLoop} can
+   * potentially delay {@link Node} shutdown and should be avoided.
+   * 
+   * @param cancellableLoop
+   *          the {@link CancellableLoop} to execute
+   */
+  void execute(CancellableLoop cancellableLoop);
 }

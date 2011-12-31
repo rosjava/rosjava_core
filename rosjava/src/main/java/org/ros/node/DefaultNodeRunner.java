@@ -188,5 +188,9 @@ public class DefaultNodeRunner implements NodeRunner {
     public void onShutdown(Node node) {
       unregisterNode(node);
     }
+
+    @Override
+    public void onShutdownComplete(Node node) {
+    }
   }
 }

@@ -16,11 +16,13 @@
 
 package org.ros;
 
+import org.ros.concurrent.CancellableLoop;
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 /**
  * This node is used to test the slave API externally using rostest.
@@ -32,7 +34,7 @@ public class SlaveApiTestNode implements NodeMain {
   @Override
   public void onStart(Node node) {
     // Basic chatter in/out test.
-    Publisher<org.ros.message.std_msgs.String> pub_string =
+    final Publisher<org.ros.message.std_msgs.String> pub_string =
         node.newPublisher("chatter_out", "std_msgs/String");
     MessageListener<org.ros.message.std_msgs.String> chatter_cb =
         new MessageListener<org.ros.message.std_msgs.String>() {
@@ -42,37 +44,44 @@ public class SlaveApiTestNode implements NodeMain {
           }
         };
 
-    node.newSubscriber("chatter_in", "std_msgs/String", chatter_cb);
+    Subscriber<org.ros.message.std_msgs.String> stringSubscriber =
+        node.newSubscriber("chatter_in", "std_msgs/String");
+    stringSubscriber.addMessageListener(chatter_cb);
 
     // Have at least one case of dual pub/sub on the same topic.
-    Publisher<Int64> pub_int64_pubsub = node.newPublisher("int64", "std_msgs/Int64");
+    final Publisher<Int64> pub_int64_pubsub = node.newPublisher("int64", "std_msgs/Int64");
     MessageListener<Int64> int64_cb = new MessageListener<Int64>() {
       @Override
       public void onNewMessage(Int64 m) {
       }
     };
 
-    node.newSubscriber("int64", "std_msgs/Int64", int64_cb);
+    Subscriber<org.ros.message.std_msgs.Int64> int64Subscriber =
+        node.newSubscriber("int64", "std_msgs/Int64");
+    int64Subscriber.addMessageListener(int64_cb);
 
     // Don't do any performance optimizations here. We want to make sure that
     // GC, etc. is working.
-    while (true) {
-      org.ros.message.std_msgs.String chatter = new org.ros.message.std_msgs.String();
-      chatter.data = "hello " + System.currentTimeMillis();
-      pub_string.publish(chatter);
+    node.execute(new CancellableLoop() {
+      @Override
+      protected void loop() throws InterruptedException {
+        org.ros.message.std_msgs.String chatter = new org.ros.message.std_msgs.String();
+        chatter.data = "hello " + System.currentTimeMillis();
+        pub_string.publish(chatter);
 
-      Int64 num = new Int64();
-      num.data = 1;
-      pub_int64_pubsub.publish(num);
-      try {
+        Int64 num = new Int64();
+        num.data = 1;
+        pub_int64_pubsub.publish(num);
         Thread.sleep(100);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
       }
-    }
+    });
   }
 
   @Override
   public void onShutdown(Node node) {
+  }
+
+  @Override
+  public void onShutdownComplete(Node node) {
   }
 }

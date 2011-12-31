@@ -16,10 +16,7 @@
 
 package org.ros.internal.node.parameter;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Preconditions;
 
 import org.ros.exception.ParameterClassCastException;
 import org.ros.exception.ParameterNotFoundException;
@@ -33,7 +30,10 @@ import org.ros.namespace.NameResolver;
 import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 
-import com.google.common.base.Preconditions;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides access to the ROS {@link ParameterServer}.
@@ -339,5 +339,4 @@ public class DefaultParameterTree implements ParameterTree {
   public Map<?, ?> getMap(String name, Map<?, ?> defaultValue) {
     return getMap(new GraphName(name), defaultValue);
   }
-
 }
