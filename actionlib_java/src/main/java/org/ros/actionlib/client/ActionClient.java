@@ -137,7 +137,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
       throws RosException {
     this.nodeName = name;
     this.spec = spec;
-    this.publisherListener = new CountDownPublisherListener(2, 2, 2, 2);
+    this.publisherListener = new CountDownPublisherListener(2, 2, 2, 2, 2, 2);
   }
 
   /**
