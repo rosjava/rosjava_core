@@ -18,6 +18,8 @@ package org.ros.internal.node.topic;
 
 import org.ros.internal.node.server.MasterServer;
 import org.ros.message.MessageSerializer;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.PublisherListener;
 
 import java.util.concurrent.ExecutorService;
 
@@ -57,6 +59,32 @@ public class PublisherFactory {
         publisher = (DefaultPublisher<MessageType>) topicManager.getPublisher(topicName);
       } else {
         publisher = new DefaultPublisher<MessageType>(topicDefinition, serializer, executorService);
+        publisher.addPublisherListener(new PublisherListener() {
+          @Override
+          public void onShutdown(Publisher<?> publisher) {
+            topicManager.removePublisher((DefaultPublisher<?>) publisher);
+          }
+          
+          @Override
+          public void onNewSubscriber(Publisher<?> publisher) {
+          }
+          
+          @Override
+          public void onMasterRegistrationSuccess(Publisher<?> publisher) {
+          }
+          
+          @Override
+          public void onMasterRegistrationFailure(Publisher<?> publisher) {
+          }
+
+          @Override
+          public void onMasterUnregistrationSuccess(Publisher<?> publisher) {
+          }
+
+          @Override
+          public void onMasterUnregistrationFailure(Publisher<?> publisher) {
+          }
+        });
         createdNewPublisher = true;
       }
     }

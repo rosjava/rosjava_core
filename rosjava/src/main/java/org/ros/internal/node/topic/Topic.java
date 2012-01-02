@@ -36,5 +36,4 @@ public interface Topic {
    * @return the message type (e.g. "std_msgs/String")
    */
   String getTopicMessageType();
-
 }

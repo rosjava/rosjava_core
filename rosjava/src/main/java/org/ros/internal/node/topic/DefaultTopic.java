@@ -74,4 +74,13 @@ public abstract class DefaultTopic implements Topic {
    */
   public abstract void signalOnMasterRegistrationFailure();
 
+  /**
+   * Signal that the {@link Topic} successfully unregistered with the master.
+   */
+  public abstract void signalOnMasterUnregistrationSuccess();
+
+  /**
+   * Signal that the {@link Topic} failed to unregister with the master.
+   */
+  public abstract void signalOnMasterUnregistrationFailure();
 }

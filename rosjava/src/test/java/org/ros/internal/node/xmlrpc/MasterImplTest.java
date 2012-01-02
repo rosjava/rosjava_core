@@ -101,7 +101,6 @@ public class MasterImplTest {
     List<Object> response =
         master.registerSubscriber("/slave", "/topic", "/topicType", "http://api");
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
-    assertEquals(Lists.newArrayList(publisherIdentifier.getUri().toString()), response.get(2));
+    assertEquals(Lists.newArrayList(publisherIdentifier.getSlaveUri().toString()), response.get(2));
   }
-
 }

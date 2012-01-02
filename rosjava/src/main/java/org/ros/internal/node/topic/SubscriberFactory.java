@@ -20,6 +20,7 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.topic.Subscriber;
+import org.ros.node.topic.SubscriberListener;
 
 import java.util.concurrent.ExecutorService;
 
@@ -70,6 +71,32 @@ public class SubscriberFactory {
         subscriber =
             DefaultSubscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition,
                 executorService, deserializer);
+        subscriber.addSubscriberListener(new SubscriberListener() {
+          @Override
+          public void onShutdown(Subscriber<?> subscriber) {
+            topicManager.removeSubscriber((DefaultSubscriber<?>) subscriber);
+          }
+          
+          @Override
+          public void onNewPublisher(Subscriber<?> subscriber) {
+          }
+          
+          @Override
+          public void onMasterRegistrationSuccess(Subscriber<?> subscriber) {
+          }
+          
+          @Override
+          public void onMasterRegistrationFailure(Subscriber<?> subscriber) {
+          }
+
+          @Override
+          public void onMasterUnregistrationSuccess(Subscriber<?> subscriber) {
+          }
+
+          @Override
+          public void onMasterUnregistrationFailure(Subscriber<?> subscriber) {
+          }
+        });
         createdNewSubscriber = true;
       }
     }

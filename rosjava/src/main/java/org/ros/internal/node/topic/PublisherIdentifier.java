@@ -16,15 +16,15 @@
 
 package org.ros.internal.node.topic;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.Set;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.namespace.GraphName;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -60,8 +60,12 @@ public class PublisherIdentifier {
   public SlaveIdentifier getSlaveIdentifier() {
     return slaveIdentifier;
   }
+  
+  public GraphName getSlaveName() {
+    return slaveIdentifier.getName();
+  }
 
-  public URI getUri() {
+  public URI getSlaveUri() {
     return slaveIdentifier.getUri();
   }
 
@@ -108,5 +112,4 @@ public class PublisherIdentifier {
       return false;
     return true;
   }
-
 }

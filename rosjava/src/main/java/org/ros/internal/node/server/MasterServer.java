@@ -90,7 +90,7 @@ public class MasterServer extends NodeServer {
     List<URI> publisherUris = Lists.newArrayList();
     synchronized (publishers) {
       for (PublisherIdentifier publisherIdentifier : publishers.get(topicName)) {
-        publisherUris.add(publisherIdentifier.getUri());
+        publisherUris.add(publisherIdentifier.getSlaveUri());
       }
     }
     for (SlaveIdentifier slaveIdentifier : slaves.values()) {

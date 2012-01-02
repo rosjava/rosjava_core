@@ -16,9 +16,6 @@
 
 package org.ros.internal.node.client;
 
-import java.net.URI;
-import java.util.List;
-
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.UriListResultFactory;
@@ -28,12 +25,16 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.topic.PublisherDefinition;
+import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.xmlrpc.Master;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+
+import java.net.URI;
+import java.util.List;
 
 /**
  * Provides access to the XML-RPC API exposed by a {@link MasterServer}.
@@ -102,8 +103,8 @@ public class MasterClient extends Client<Master> {
    */
   public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber) {
     return Response.fromListChecked(node.registerSubscriber(slave.getName().toString(), subscriber
-        .getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri()
-        .toString()), new UriListResultFactory());
+        .getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri().toString()),
+        new UriListResultFactory());
   }
 
   /**
@@ -125,31 +126,38 @@ public class MasterClient extends Client<Master> {
   /**
    * Registers the specified {@link PublisherDefinition}.
    * 
-   * @param publisher
+   * @param publisherDefinition
    *          the {@link PublisherDefinition} of the {@link Publisher} to
    *          register
    * @return a {@link Response} with a {@link List} of the current
    *         {@link SlaveServer} URIs which have {@link Subscriber}s for the
    *         published {@link Topic}.
    */
-  public Response<List<URI>> registerPublisher(PublisherDefinition publisher) {
-    return Response.fromListChecked(node.registerPublisher(publisher.getSlaveName().toString(),
-        publisher.getTopicName().toString(), publisher.getTopicMessageType(), publisher.getUri()
-            .toString()), new UriListResultFactory());
+  public Response<List<URI>> registerPublisher(PublisherDefinition publisherDefinition) {
+    String slaveName = publisherDefinition.getSlaveName().toString();
+    String slaveUri = publisherDefinition.getSlaveUri().toString();
+    String topicName = publisherDefinition.getTopicName().toString();
+    String messageType = publisherDefinition.getTopicMessageType();
+    return Response.fromListChecked(
+        node.registerPublisher(slaveName, topicName, messageType, slaveUri),
+        new UriListResultFactory());
   }
 
   /**
    * Unregisters the specified {@link PublisherDefinition}.
    * 
-   * @param publisher
-   *          the {@link PublisherDefinition} of the {@link Publisher} to
+   * @param publisherIdentifierr
+   *          the {@link PublisherIdentifier} of the {@link Publisher} to
    *          unregister
    * @return a {@link Response} with the number of unregistered
    *         {@link Publisher}s as the result
    */
-  public Response<Integer> unregisterPublisher(SlaveIdentifier slave, Publisher<?> publisher) {
-    return Response.fromListChecked(node.unregisterPublisher(slave.getName().toString(), publisher
-        .getTopicName().toString(), slave.getUri().toString()), new IntegerResultFactory());
+  public Response<Integer> unregisterPublisher(PublisherIdentifier publisherIdentifier) {
+    String slaveName = publisherIdentifier.getSlaveName().toString();
+    String slaveUri = publisherIdentifier.getSlaveUri().toString();
+    String topicName = publisherIdentifier.getTopicName().toString();
+    return Response.fromListChecked(node.unregisterPublisher(slaveName, topicName, slaveUri),
+        new IntegerResultFactory());
   }
 
   /**
@@ -201,5 +209,4 @@ public class MasterClient extends Client<Master> {
   public Response<Object> getSystemState(SlaveIdentifier slave) {
     throw new UnsupportedOperationException();
   }
-
 }

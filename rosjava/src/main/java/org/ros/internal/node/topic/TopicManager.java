@@ -16,16 +16,18 @@
 
 package org.ros.internal.node.topic;
 
-import java.util.List;
-import java.util.Map;
-
-import org.ros.namespace.GraphName;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
+import org.ros.namespace.GraphName;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
+
+import java.util.List;
+import java.util.Map;
+
 /**
- * Stores internal Publisher and Subscriber instances.
+ * Stores internal {@link Publisher} and {@link Subscriber} instances.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
@@ -34,7 +36,8 @@ public class TopicManager {
 
   private final Map<GraphName, DefaultSubscriber<?>> subscribers;
   private final Map<GraphName, DefaultPublisher<?>> publishers;
-  
+
+  // TODO(damonkohler): Change to collection of listeners.
   private TopicListener listener;
 
   public TopicManager() {
@@ -63,10 +66,16 @@ public class TopicManager {
   }
 
   public void putPublisher(DefaultPublisher<?> publisher) {
-    GraphName topicGraphName = publisher.getTopicName();
-    publishers.put(topicGraphName, publisher);
+    publishers.put(publisher.getTopicName(), publisher);
     if (listener != null) {
       listener.publisherAdded(publisher);
+    }
+  }
+
+  public void removePublisher(DefaultPublisher<?> publisher) {
+    publishers.remove(publisher.getTopicName());
+    if (listener != null) {
+      listener.publisherRemoved(publisher);
     }
   }
 
@@ -77,6 +86,13 @@ public class TopicManager {
     }
   }
 
+  public void removeSubscriber(DefaultSubscriber<?> subscriber) {
+    subscribers.remove(subscriber.getTopicName());
+    if (listener != null) {
+      listener.subscriberRemoved(subscriber);
+    }
+  }
+
   public List<DefaultSubscriber<?>> getSubscribers() {
     return ImmutableList.copyOf(subscribers.values());
   }
@@ -84,5 +100,4 @@ public class TopicManager {
   public List<DefaultPublisher<?>> getPublishers() {
     return ImmutableList.copyOf(publishers.values());
   }
-
 }

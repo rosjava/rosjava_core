@@ -210,6 +210,46 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   }
 
   /**
+   * Signal all {@link SubscriberListener}s that the {@link Subscriber} has
+   * successfully unregistered with the master.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
+   */
+  @Override
+  public void signalOnMasterUnregistrationSuccess() {
+    final Subscriber<MessageType> subscriber = this;
+    for (final SubscriberListener listener : subscriberListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onMasterUnregistrationSuccess(subscriber);
+        }
+      });
+    }
+  }
+
+  /**
+   * Signal all {@link SubscriberListener}s that the {@link Subscriber} has
+   * failed to unregister with the master.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
+   */
+  @Override
+  public void signalOnMasterUnregistrationFailure() {
+    final Subscriber<MessageType> subscriber = this;
+    for (final SubscriberListener listener : subscriberListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onMasterUnregistrationFailure(subscriber);
+        }
+      });
+    }
+  }
+
+  /**
    * Signal all {@link SubscriberListener}s that a new {@link Publisher} has
    * connected.
    * 

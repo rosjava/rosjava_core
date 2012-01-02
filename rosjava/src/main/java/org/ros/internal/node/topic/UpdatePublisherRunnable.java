@@ -63,7 +63,7 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
   public void run() {
     SlaveClient slaveClient;
     try {
-      slaveClient = new SlaveClient(slaveIdentifier.getName(), publisherIdentifier.getUri());
+      slaveClient = new SlaveClient(slaveIdentifier.getName(), publisherIdentifier.getSlaveUri());
       Response<ProtocolDescription> response =
           slaveClient.requestTopic(this.subscriber.getTopicName(), ProtocolNames.SUPPORTED);
       // TODO(kwc): all of this logic really belongs in a protocol handler

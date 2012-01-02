@@ -19,29 +19,9 @@ package org.ros.node.topic;
 /**
  * A lifecycle listener for {@link Publisher} instances.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
-public interface PublisherListener {
-
-  /**
-   * The {@link Publisher} has been registered with the master.
-   * 
-   * @param publisher
-   *          the {@link Publisher} which has been registered
-   */
-  void onMasterRegistrationSuccess(Publisher<?> publisher);
-
-  /**
-   * The {@link Publisher} has failed to register with the master.
-   * 
-   * <p>
-   * This may be called multiple times per {@link Publisher} since master
-   * registration will be retried until success.
-   * 
-   * @param publisher
-   *          the {@link Publisher} which has been registered
-   */
-  void onMasterRegistrationFailure(Publisher<?> publisher);
+public interface PublisherListener extends RegistrantListener<Publisher<?>> {
 
   /**
    * A {@link Subscriber} has connected to the {@link Publisher}.

@@ -19,25 +19,9 @@ package org.ros.node.topic;
 /**
  * A lifecycle listener for {@link Subscriber} instances.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
-public interface SubscriberListener {
-
-  /**
-   * The {@link Subscriber} has successfully registered with the master.
-   * 
-   * @param subscriber
-   *          the {@link Subscriber} which has been registered.
-   */
-  void onMasterRegistrationSuccess(Subscriber<?> subscriber);
-
-  /**
-   * The {@link Subscriber} has failed to register with the master.
-   * 
-   * @param subscriber
-   *          the {@link Subscriber} which has failed to register
-   */
-  void onMasterRegistrationFailure(Subscriber<?> subscriber);
+public interface SubscriberListener extends RegistrantListener<Subscriber<?>> {
 
   /**
    * A new {@link Publisher} has connected to the {@link Subscriber}.

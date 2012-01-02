@@ -4,8 +4,6 @@ package org.ros.internal.node;
 
 import static org.junit.Assert.assertTrue;
 
-import org.ros.node.topic.CountDownPublisherListener;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +21,7 @@ import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.message.MessageDefinition;
 import org.ros.namespace.GraphName;
+import org.ros.node.topic.CountDownPublisherListener;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -107,5 +106,4 @@ public class RegistrarTest {
     masterServer.start();
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
   }
-
 }

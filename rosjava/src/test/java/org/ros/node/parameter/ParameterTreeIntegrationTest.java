@@ -21,11 +21,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,8 +38,11 @@ import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -69,6 +69,7 @@ public class ParameterTreeIntegrationTest {
   @After
   public void tearDown() {
     node.shutdown();
+    masterServer.shutdown();
   }
 
   @Test
@@ -187,5 +188,4 @@ public class ParameterTreeIntegrationTest {
     subscriberNode.shutdown();
     publisherNode.shutdown();
   }
-
 }

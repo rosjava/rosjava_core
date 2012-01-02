@@ -82,8 +82,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
     signalShutdown();
   }
 
-  public PublisherDefinition toPublisherIdentifier(SlaveIdentifier description) {
-    return PublisherDefinition.create(description, getTopicDefinition());
+  public PublisherIdentifier toIdentifier(SlaveIdentifier slaveIdentifier) {
+    return new PublisherIdentifier(slaveIdentifier, getTopicDefinition().toIdentifier());
+  }
+
+  public PublisherDefinition toDefinition(SlaveIdentifier slaveIdentifier) {
+    return PublisherDefinition.create(slaveIdentifier, getTopicDefinition());
   }
 
   @Override
@@ -152,7 +156,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
 
   @Override
   public void removePublisherListener(PublisherListener listener) {
-    publisherListeners.add(listener);
+    publisherListeners.remove(listener);
   }
 
   /**
@@ -196,8 +200,48 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   }
 
   /**
-   * Signal all {@link PublisherListener}s that the {@link Publisher} failed to
-   * register with the master.
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has been
+   * successfully unregistered with the master.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
+   */
+  @Override
+  public void signalOnMasterUnregistrationSuccess() {
+    final Publisher<MessageType> publisher = this;
+    for (final PublisherListener listener : publisherListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onMasterUnregistrationSuccess(publisher);
+        }
+      });
+    }
+  }
+
+  /**
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has been
+   * successfully unregistered with the master.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
+   */
+  @Override
+  public void signalOnMasterUnregistrationFailure() {
+    final Publisher<MessageType> publisher = this;
+    for (final PublisherListener listener : publisherListeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onMasterUnregistrationFailure(publisher);
+        }
+      });
+    }
+  }
+
+  /**
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has a new
+   * {@link Subscriber}.
    * 
    * <p>
    * Each listener is called in a separate thread.

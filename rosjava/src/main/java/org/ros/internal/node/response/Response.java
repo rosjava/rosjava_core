@@ -16,12 +16,12 @@
 
 package org.ros.internal.node.response;
 
-import java.util.List;
+import com.google.common.collect.Lists;
 
 import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 /**
  * The response from an XML-RPC call.
@@ -157,7 +157,6 @@ public class Response<ResultType> {
   }
 
   public boolean isSuccess() {
-    return result == StatusCode.SUCCESS;
+    return statusCode == StatusCode.SUCCESS;
   }
-
 }

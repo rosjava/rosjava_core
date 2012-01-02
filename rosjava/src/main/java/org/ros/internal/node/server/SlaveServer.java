@@ -192,5 +192,4 @@ public class SlaveServer extends NodeServer {
   public SlaveIdentifier toSlaveIdentifier() {
     return new SlaveIdentifier(nodeName, getUri());
   }
-
 }

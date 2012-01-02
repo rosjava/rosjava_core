@@ -17,11 +17,9 @@
 package org.ros.internal.node.client;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -36,15 +34,8 @@ import org.ros.internal.node.topic.TopicListener;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -56,45 +47,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class Registrar implements TopicListener, ServiceListener {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(Registrar.class);
 
-  private static final long DEFAULT_RETRY_DELAY = 5;
-  private static final TimeUnit DEFAULT_RETRY_TIME_UNIT = TimeUnit.SECONDS;
-
+  private final RetryingCompletionService retryingCompletionService;
   private final MasterClient masterClient;
-  private final RetryLoop retryLoop;
-  private final CompletionService<Response<?>> completionService;
-  private final Map<Future<Response<?>>, Callable<Response<?>>> futures;
-  private final ScheduledExecutorService retryExecutor;
-  private final ExecutorService executorService;
 
-  private long retryDelay;
-  private TimeUnit retryTimeUnit;
   private SlaveIdentifier slaveIdentifier;
-
-  class RetryLoop extends CancellableLoop {
-    @Override
-    public void loop() throws InterruptedException {
-      Future<Response<?>> response = completionService.take();
-      try {
-        if (response.get().isSuccess()) {
-          futures.remove(response);
-        }
-      } catch (ExecutionException e) {
-        log.warn("Master registration failed and will be retried.", e);
-        // Retry the registration task.
-        final Callable<Response<?>> task = futures.get(response);
-        futures.remove(response);
-        retryExecutor.schedule(new Runnable() {
-          @Override
-          public void run() {
-            submitCallable(task);
-          }
-        }, retryDelay, retryTimeUnit);
-      }
-    }
-  }
 
   /**
    * @param masterClient
@@ -105,83 +64,127 @@ public class Registrar implements TopicListener, ServiceListener {
    */
   public Registrar(MasterClient masterClient, ExecutorService executorService) {
     this.masterClient = masterClient;
-    this.executorService = executorService;
-    retryLoop = new RetryLoop();
-    completionService = new ExecutorCompletionService<Response<?>>(executorService);
-    futures = Maps.newConcurrentMap();
-    retryDelay = DEFAULT_RETRY_DELAY;
-    retryTimeUnit = DEFAULT_RETRY_TIME_UNIT;
-    retryExecutor = Executors.newSingleThreadScheduledExecutor();
+    retryingCompletionService = new RetryingCompletionService(executorService);
     if (DEBUG) {
-      log.info("Remote URI: " + masterClient.getRemoteUri());
+      log.info("Master URI: " + masterClient.getRemoteUri());
     }
   }
 
   public void setRetryDelay(long delay, TimeUnit unit) {
-    retryDelay = delay;
-    retryTimeUnit = unit;
-  }
-
-  /**
-   * Get the number of pending asynchronous registration requests to the master.
-   * 
-   * @return the number of pending asynchronous registration requests to the
-   *         master
-   */
-  public int getPendingSize() {
-    return futures.size();
-  }
-
-  /**
-   * Submit a task to the completion service.
-   * 
-   * @param task
-   */
-  private void submitCallable(Callable<Response<?>> task) {
-    Future<Response<?>> future = completionService.submit(task);
-    futures.put(future, task);
+    retryingCompletionService.setRetryDelay(delay, unit);
   }
 
   @Override
   public void publisherAdded(final DefaultPublisher<?> publisher) {
-    submitCallable(new Callable<Response<?>>() {
+    if (DEBUG) {
+      log.info("Registering publisher: " + publisher);
+    }
+    retryingCompletionService.submit(new Callable<Boolean>() {
       @Override
-      public Response<List<URI>> call() throws Exception {
+      public Boolean call() throws Exception {
         Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
         Response<List<URI>> response =
-            masterClient.registerPublisher(publisher.toPublisherIdentifier(slaveIdentifier));
-        publisher.signalOnMasterRegistrationSuccess();
-        return response;
+            masterClient.registerPublisher(publisher.toDefinition(slaveIdentifier));
+        if (response.isSuccess()) {
+          log.info("Publisher registered: " + publisher);
+          publisher.signalOnMasterRegistrationSuccess();
+          return false;
+        } else {
+          log.info(String.format("Publisher registration failed: %s: %s",
+              response.getStatusMessage(), publisher));
+          publisher.signalOnMasterRegistrationFailure();
+          return true;
+        }
+      }
+    });
+  }
+
+  @Override
+  public void publisherRemoved(final DefaultPublisher<?> publisher) {
+    if (DEBUG) {
+      log.info("Unregistering publisher: " + publisher);
+    }
+    retryingCompletionService.submit(new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
+        Response<Integer> response =
+            masterClient.unregisterPublisher(publisher.toIdentifier(slaveIdentifier));
+        if (response.isSuccess()) {
+          log.info("Publisher unregistered: " + publisher);
+          publisher.signalOnMasterUnregistrationSuccess();
+          return false;
+        } else {
+          log.info(String.format("Publisher unregistration failed: %s: %s",
+              response.getStatusMessage(), publisher));
+          publisher.signalOnMasterUnregistrationFailure();
+          return true;
+        }
       }
     });
   }
 
   @Override
   public void subscriberAdded(final DefaultSubscriber<?> subscriber) {
-    submitCallable(new Callable<Response<?>>() {
+    if (DEBUG) {
+      log.info("Registering subscriber: " + subscriber);
+    }
+    retryingCompletionService.submit(new Callable<Boolean>() {
       @Override
-      public Response<List<URI>> call() throws Exception {
+      public Boolean call() throws Exception {
         Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
         Response<List<URI>> response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
-        Collection<PublisherIdentifier> publishers =
-            PublisherIdentifier.newCollectionFromUris(response.getResult(),
-                subscriber.getTopicDefinition());
-        subscriber.updatePublishers(publishers);
-        subscriber.signalOnMasterRegistrationSuccess();
-        return response;
+        if (response.isSuccess()) {
+          Collection<PublisherIdentifier> publishers =
+              PublisherIdentifier.newCollectionFromUris(response.getResult(),
+                  subscriber.getTopicDefinition());
+          subscriber.updatePublishers(publishers);
+          subscriber.signalOnMasterRegistrationSuccess();
+          return false;
+        } else {
+          subscriber.signalOnMasterUnregistrationSuccess();
+          return true;
+        }
+      }
+    });
+  }
+
+  @Override
+  public void subscriberRemoved(final DefaultSubscriber<?> subscriber) {
+    if (DEBUG) {
+      log.info("Unregistering subscriber: " + subscriber);
+    }
+    retryingCompletionService.submit(new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
+        Response<Integer> response = masterClient.unregisterSubscriber(slaveIdentifier, subscriber);
+        if (response.isSuccess()) {
+          subscriber.signalOnMasterUnregistrationSuccess();
+          return false;
+        } else {
+          subscriber.signalOnMasterUnregistrationFailure();
+          return true;
+        }
       }
     });
   }
 
   @Override
   public void serviceServerAdded(final DefaultServiceServer<?, ?> serviceServer) {
-    submitCallable(new Callable<Response<?>>() {
+    if (DEBUG) {
+      log.info("ServiceServer added: " + serviceServer);
+    }
+    retryingCompletionService.submit(new Callable<Boolean>() {
       @Override
-      public Response<Void> call() throws Exception {
+      public Boolean call() throws Exception {
         Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
         Response<Void> response = masterClient.registerService(slaveIdentifier, serviceServer);
-        serviceServer.signalRegistrationDone();
-        return response;
+        if (response.isSuccess()) {
+          serviceServer.signalRegistrationDone();
+          return false;
+        }
+        return true;
       }
     });
   }
@@ -190,16 +193,9 @@ public class Registrar implements TopicListener, ServiceListener {
     Preconditions.checkNotNull(slaveIdentifier);
     Preconditions.checkState(this.slaveIdentifier == null, "Registrar already started.");
     this.slaveIdentifier = slaveIdentifier;
-    executorService.execute(retryLoop);
   }
 
   public void shutdown() {
-    retryLoop.cancel();
-    synchronized (futures) {
-      for (Future<Response<?>> future : futures.keySet()) {
-        future.cancel(true);
-      }
-    }
+    retryingCompletionService.shutdown();
   }
-
 }

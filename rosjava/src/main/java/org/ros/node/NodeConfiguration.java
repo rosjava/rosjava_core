@@ -80,7 +80,6 @@ public class NodeConfiguration {
     copy.xmlRpcBindAddress = nodeConfiguration.xmlRpcBindAddress;
     copy.xmlRpcAdvertiseAddressFactory = nodeConfiguration.xmlRpcAdvertiseAddressFactory;
     copy.executorService = nodeConfiguration.executorService;
-
     return copy;
   }
 
@@ -102,7 +101,7 @@ public class NodeConfiguration {
    * Executor service which should be used for all thread creation in the ROS
    * app.
    */
-  private ExecutorService executorService = Executors.newCachedThreadPool();
+  private ExecutorService executorService;
 
   /**
    * Creates a new {@link NodeConfiguration} for a publicly accessible
@@ -174,6 +173,7 @@ public class NodeConfiguration {
     setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
     setParentResolver(NameResolver.create());
     setTimeProvider(new WallTimeProvider());
+    setExecutorService(Executors.newCachedThreadPool());
   }
 
   /**

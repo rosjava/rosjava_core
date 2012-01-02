@@ -123,5 +123,4 @@ public class TcpRosServer {
   public AdvertiseAddress getAdvertiseAddress() {
     return advertiseAddress;
   }
-
 }

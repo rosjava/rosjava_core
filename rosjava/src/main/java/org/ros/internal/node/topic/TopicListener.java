@@ -16,6 +16,9 @@
 
 package org.ros.internal.node.topic;
 
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
+
 /**
  * Listen to creation of new publisher and subscriber instances.
  * 
@@ -25,19 +28,22 @@ package org.ros.internal.node.topic;
 public interface TopicListener {
 
   /**
-   * A publisher has been added.
+   * Called when a new {@link Publisher} has been added.
    * 
    * @param publisher
-   *          The publisher which has been added.
+   *          the {@link Publisher} which has been added
    */
   void publisherAdded(DefaultPublisher<?> publisher);
 
+  void publisherRemoved(DefaultPublisher<?> publisher);
+
   /**
-   * A subscriber has been added.
+   * Called when a {@link Subscriber} has been added.
    * 
    * @param subscriber
-   *          The subscriber which has been added.
+   *          the {@link Subscriber} which has been added
    */
   void subscriberAdded(DefaultSubscriber<?> subscriber);
 
+  void subscriberRemoved(DefaultSubscriber<?> subscriber);
 }

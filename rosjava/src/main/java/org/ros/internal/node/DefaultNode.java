@@ -350,39 +350,11 @@ public class DefaultNode implements Node {
     // NOTE(damonkohler): We don't want to raise potentially spurious
     // exceptions during shutdown that would interrupt the process. This is
     // simply best effort cleanup.
-    slaveServer.shutdown();
-    registrar.shutdown();
     for (Publisher<?> publisher : topicManager.getPublishers()) {
       publisher.shutdown();
-      try {
-        Response<Integer> response =
-            masterClient.unregisterPublisher(slaveServer.toSlaveIdentifier(), publisher);
-        if (DEBUG) {
-          if (response.getResult() == 0) {
-            System.err.println("Failed to unregister publisher: " + publisher.getTopicName());
-          }
-        }
-      } catch (XmlRpcTimeoutException e) {
-        log.error(e);
-      } catch (RemoteException e) {
-        log.error(e);
-      }
     }
     for (Subscriber<?> subscriber : topicManager.getSubscribers()) {
       subscriber.shutdown();
-      try {
-        Response<Integer> response =
-            masterClient.unregisterSubscriber(slaveServer.toSlaveIdentifier(), subscriber);
-        if (DEBUG) {
-          if (response.getResult() == 0) {
-            System.err.println("Failed to unregister subscriber: " + subscriber.getTopicName());
-          }
-        }
-      } catch (XmlRpcTimeoutException e) {
-        log.error(e);
-      } catch (RemoteException e) {
-        log.error(e);
-      }
     }
     for (ServiceServer<?, ?> serviceServer : serviceManager.getServers()) {
       try {
@@ -402,6 +374,8 @@ public class DefaultNode implements Node {
     for (ServiceClient<?, ?> serviceClient : serviceManager.getClients()) {
       serviceClient.shutdown();
     }
+    registrar.shutdown();
+    slaveServer.shutdown();
     signalOnShutdownComplete();
   }
 

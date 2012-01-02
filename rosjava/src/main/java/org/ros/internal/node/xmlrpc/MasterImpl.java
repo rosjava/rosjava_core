@@ -132,7 +132,7 @@ public class MasterImpl implements Master, ParameterServer {
             topicName));
     List<String> urls = Lists.newArrayList();
     for (PublisherIdentifier publisherIdentifier : publishers) {
-      urls.add(publisherIdentifier.getUri().toString());
+      urls.add(publisherIdentifier.getSlaveUri().toString());
     }
     return Response.createSuccess("Success", urls).toList();
   }
@@ -232,5 +232,4 @@ public class MasterImpl implements Master, ParameterServer {
     }
     return Response.createSuccess("Success", stringNames).toList();
   }
-
 }
