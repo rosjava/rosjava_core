@@ -22,6 +22,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
+import org.ros.concurrent.ListenerCollection;
+import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -31,10 +33,9 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Default implementation of a {@link Publisher}.
@@ -49,25 +50,23 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
   /**
-   * Queue of all messages being published by this publisher.
+   * The maximum delay before shutdown will begin even if all
+   * {@link PublisherListener}s have not yet returned from their
+   * {@link PublisherListener#onShutdown(Publisher)} callback.
+   */
+  private static final int MAX_SHUTDOWN_DELAY_DURATION = 5;
+  private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;
+
+  /**
+   * Queue of all messages being published by this {@link Publisher}.
    */
   private final OutgoingMessageQueue<MessageType> outgoingMessageQueue;
-
-  /**
-   * All {@link PublisherListener} instances added to the publisher.
-   */
-  private final List<PublisherListener> publisherListeners;
-
-  /**
-   * The {@link ExecutorService} to be used for all thread creation.
-   */
-  private final ExecutorService executorService;
+  private final ListenerCollection<PublisherListener> publisherListeners;
 
   public DefaultPublisher(TopicDefinition topicDefinition,
       MessageSerializer<MessageType> serializer, ExecutorService executorService) {
     super(topicDefinition);
-    this.executorService = executorService;
-    publisherListeners = new CopyOnWriteArrayList<PublisherListener>();
+    publisherListeners = new ListenerCollection<PublisherListener>(executorService);
     outgoingMessageQueue = new OutgoingMessageQueue<MessageType>(serializer, executorService);
   }
 
@@ -78,8 +77,9 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
 
   @Override
   public void shutdown() {
+    signalOnShutdown();
+    publisherListeners.clear();
     outgoingMessageQueue.shutdown();
-    signalShutdown();
   }
 
   public PublisherIdentifier toIdentifier(SlaveIdentifier slaveIdentifier) {
@@ -169,14 +169,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   @Override
   public void signalOnMasterRegistrationSuccess() {
     final Publisher<MessageType> publisher = this;
-    for (final PublisherListener listener : publisherListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onMasterRegistrationSuccess(publisher);
-        }
-      });
-    }
+    publisherListeners.signal(new SignalRunnable<PublisherListener>() {
+      @Override
+      public void run(PublisherListener listener) {
+        listener.onMasterRegistrationSuccess(publisher);
+      }
+    });
   }
 
   /**
@@ -189,14 +187,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   @Override
   public void signalOnMasterRegistrationFailure() {
     final Publisher<MessageType> publisher = this;
-    for (final PublisherListener listener : publisherListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onMasterRegistrationFailure(publisher);
-        }
-      });
-    }
+    publisherListeners.signal(new SignalRunnable<PublisherListener>() {
+      @Override
+      public void run(PublisherListener listener) {
+        listener.onMasterRegistrationFailure(publisher);
+      }
+    });
   }
 
   /**
@@ -209,14 +205,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   @Override
   public void signalOnMasterUnregistrationSuccess() {
     final Publisher<MessageType> publisher = this;
-    for (final PublisherListener listener : publisherListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onMasterUnregistrationSuccess(publisher);
-        }
-      });
-    }
+    publisherListeners.signal(new SignalRunnable<PublisherListener>() {
+      @Override
+      public void run(PublisherListener listener) {
+        listener.onMasterUnregistrationSuccess(publisher);
+      }
+    });
   }
 
   /**
@@ -229,14 +223,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   @Override
   public void signalOnMasterUnregistrationFailure() {
     final Publisher<MessageType> publisher = this;
-    for (final PublisherListener listener : publisherListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onMasterUnregistrationFailure(publisher);
-        }
-      });
-    }
+    publisherListeners.signal(new SignalRunnable<PublisherListener>() {
+      @Override
+      public void run(PublisherListener listener) {
+        listener.onMasterUnregistrationFailure(publisher);
+      }
+    });
   }
 
   /**
@@ -248,32 +240,33 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
    */
   private void signalOnNewSubscriber() {
     final Publisher<MessageType> publisher = this;
-    for (final PublisherListener listener : publisherListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onNewSubscriber(publisher);
-        }
-      });
-    }
+    publisherListeners.signal(new SignalRunnable<PublisherListener>() {
+      @Override
+      public void run(PublisherListener listener) {
+        listener.onNewSubscriber(publisher);
+      }
+    });
   }
 
   /**
-   * Signal all {@link PublisherListener}s that the {@link Publisher} has been
-   * shutdown.
+   * Signal all {@link PublisherListener}s that the {@link Publisher} is being
+   * shut down. Listeners should exit quickly since they may block shut down.
    * 
    * <p>
    * Each listener is called in a separate thread.
    */
-  private void signalShutdown() {
+  private void signalOnShutdown() {
     final Publisher<MessageType> publisher = this;
-    for (final PublisherListener listener : publisherListeners) {
-      executorService.execute(new Runnable() {
+    try {
+      publisherListeners.signal(new SignalRunnable<PublisherListener>() {
         @Override
-        public void run() {
+        public void run(PublisherListener listener) {
           listener.onShutdown(publisher);
         }
-      });
+      }, MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
+    } catch (InterruptedException e) {
+      // Ignored since we do not guarantee that all listeners will finish before
+      // shutdown begins.
     }
   }
 

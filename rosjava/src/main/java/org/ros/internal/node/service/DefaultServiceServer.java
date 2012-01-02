@@ -112,7 +112,7 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
   }
 
   /**
-   * Signal to all registered {@link ServiceServerListener} instances that registration
+   * SignalRunnable to all registered {@link ServiceServerListener} instances that registration
    * is complete.
    */
   public void signalRegistrationDone() {

@@ -20,6 +20,8 @@ import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.logging.Log;
 import org.ros.concurrent.CancellableLoop;
+import org.ros.concurrent.ListenerCollection;
+import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
@@ -62,8 +64,6 @@ import org.ros.node.topic.Subscriber;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -109,7 +109,7 @@ public class DefaultNode implements Node {
   /**
    * All {@link NodeListener} instances registered with the node.
    */
-  private final Collection<NodeListener> nodeListeners;
+  private final ListenerCollection<NodeListener> nodeListeners;
 
   /**
    * {@link DefaultNode}s should only be constructed using the
@@ -117,14 +117,14 @@ public class DefaultNode implements Node {
    * 
    * @param nodeConfiguration
    *          the {@link NodeConfiguration} for this {@link Node}
+   * @param nodeListeners
+   *          a {@link Collection} of {@link NodeListener}s that will be added
+   *          to this {@link Node} before it starts
    */
   public DefaultNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> nodeListeners) {
     this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
-    this.nodeListeners = new CopyOnWriteArrayList<NodeListener>();
-    if (nodeListeners != null) {
-      this.nodeListeners.addAll(nodeListeners);
-    }
     executorService = nodeConfiguration.getExecutorService();
+    this.nodeListeners = new ListenerCollection<NodeListener>(nodeListeners, executorService);
     masterUri = nodeConfiguration.getMasterUri();
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
@@ -421,44 +421,37 @@ public class DefaultNode implements Node {
   }
 
   /**
-   * Signal all {@link NodeListener}s that the {@link Node} has started.
+   * SignalRunnable all {@link NodeListener}s that the {@link Node} has started.
    * 
    * <p>
    * Each listener is called in a separate thread.
    */
   private void signalOnStart() {
     final Node node = this;
-    for (final NodeListener listener : nodeListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onStart(node);
-        }
-      });
-    }
+    nodeListeners.signal(new SignalRunnable<NodeListener>() {
+      @Override
+      public void run(NodeListener listener) {
+        listener.onStart(node);
+      }
+    });
   }
 
   /**
-   * Signal all {@link NodeListener}s that the {@link Node} has started shutting
-   * down.
+   * SignalRunnable all {@link NodeListener}s that the {@link Node} has started
+   * shutting down.
    * 
    * <p>
    * Each listener is called in a separate thread.
    */
   private void signalOnShutdown() {
     final Node node = this;
-    final CountDownLatch latch = new CountDownLatch(nodeListeners.size());
-    for (final NodeListener listener : nodeListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onShutdown(node);
-          latch.countDown();
-        }
-      });
-    }
     try {
-      latch.await(MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
+      nodeListeners.signal(new SignalRunnable<NodeListener>() {
+        @Override
+        public void run(NodeListener listener) {
+          listener.onShutdown(node);
+        }
+      }, MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
     } catch (InterruptedException e) {
       // Ignored since we do not guarantee that all listeners will finish before
       // shutdown begins.
@@ -466,21 +459,20 @@ public class DefaultNode implements Node {
   }
 
   /**
-   * Signal all {@link NodeListener}s that the {@link Node} has shut down.
+   * SignalRunnable all {@link NodeListener}s that the {@link Node} has shut
+   * down.
    * 
    * <p>
    * Each listener is called in a separate thread.
    */
   private void signalOnShutdownComplete() {
     final Node node = this;
-    for (final NodeListener listener : nodeListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onShutdownComplete(node);
-        }
-      });
-    }
+    nodeListeners.signal(new SignalRunnable<NodeListener>() {
+      @Override
+      public void run(NodeListener listener) {
+        listener.onShutdownComplete(node);
+      }
+    });
   }
 
   @VisibleForTesting

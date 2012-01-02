@@ -23,6 +23,8 @@ import com.google.common.collect.Sets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.CancellableLoop;
+import org.ros.concurrent.ListenerCollection;
+import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
@@ -37,8 +39,8 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Default implementation of the {@link Subscriber}.
@@ -50,9 +52,17 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultSubscriber.class);
 
+  /**
+   * The maximum delay before shutdown will begin even if all
+   * {@link SubscriberListener}s have not yet returned from their
+   * {@link SubscriberListener#onShutdown(Subscriber)} callback.
+   */
+  private static final int MAX_SHUTDOWN_DELAY_DURATION = 5;
+  private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;
+
   private final ExecutorService executorService;
   private final ImmutableMap<String, String> header;
-  private final CopyOnWriteArrayList<MessageListener<MessageType>> messageListeners;
+  private final ListenerCollection<MessageListener<MessageType>> messageListeners;
   private final IncomingMessageQueue<MessageType> incomingMessageQueue;
   private final MessageReader messageReader;
   private final Set<PublisherIdentifier> knownPublishers;
@@ -62,7 +72,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   /**
    * All {@link SubscriberListener} instances added to the subscriber.
    */
-  private final CopyOnWriteArrayList<SubscriberListener> subscriberListeners;
+  private final ListenerCollection<SubscriberListener> subscriberListeners;
 
   private final class MessageReader extends CancellableLoop {
     @Override
@@ -71,15 +81,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
       if (DEBUG) {
         log.info("Received message: " + message + " " + message.getClass().getCanonicalName());
       }
-      for (final MessageListener<MessageType> listener : messageListeners) {
-        // TODO(damonkohler): Recycle Message objects to avoid GC.
-        executorService.execute(new Runnable() {
-          @Override
-          public void run() {
-            listener.onNewMessage(message);
-          }
-        });
-      }
+      messageListeners.signal(new SignalRunnable<MessageListener<MessageType>>() {
+        @Override
+        public void run(MessageListener<MessageType> listener) {
+          listener.onNewMessage(message);
+        }
+      });
     }
   }
 
@@ -93,15 +100,13 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
       MessageDeserializer<MessageType> deserializer, ExecutorService executorService) {
     super(topicDefinition);
     this.executorService = executorService;
-    this.messageListeners = new CopyOnWriteArrayList<MessageListener<MessageType>>();
-    this.subscriberListeners = new CopyOnWriteArrayList<SubscriberListener>();
+    this.messageListeners = new ListenerCollection<MessageListener<MessageType>>(executorService);
+    this.subscriberListeners = new ListenerCollection<SubscriberListener>(executorService);
     this.incomingMessageQueue = new IncomingMessageQueue<MessageType>(deserializer);
     this.slaveIdentifier = slaveIdentifier;
     header =
-        ImmutableMap.<String, String>builder()
-            .putAll(slaveIdentifier.toHeader())
-            .putAll(topicDefinition.toHeader())
-            .build();
+        ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
+            .putAll(topicDefinition.toHeader()).build();
     knownPublishers = Sets.newHashSet();
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
     messageReader = new MessageReader();
@@ -154,9 +159,9 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
 
   @Override
   public void shutdown() {
+    signalShutdown();
     messageReader.cancel();
     tcpClientConnectionManager.shutdown();
-    signalShutdown();
   }
 
   @Override
@@ -179,14 +184,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   @Override
   public void signalOnMasterRegistrationSuccess() {
     final Subscriber<MessageType> subscriber = this;
-    for (final SubscriberListener listener : subscriberListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onMasterRegistrationSuccess(subscriber);
-        }
-      });
-    }
+    subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+      @Override
+      public void run(SubscriberListener listener) {
+        listener.onMasterRegistrationSuccess(subscriber);
+      }
+    });
   }
 
   /**
@@ -199,14 +202,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   @Override
   public void signalOnMasterRegistrationFailure() {
     final Subscriber<MessageType> subscriber = this;
-    for (final SubscriberListener listener : subscriberListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onMasterRegistrationFailure(subscriber);
-        }
-      });
-    }
+    subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+      @Override
+      public void run(SubscriberListener listener) {
+        listener.onMasterRegistrationFailure(subscriber);
+      }
+    });
   }
 
   /**
@@ -219,14 +220,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   @Override
   public void signalOnMasterUnregistrationSuccess() {
     final Subscriber<MessageType> subscriber = this;
-    for (final SubscriberListener listener : subscriberListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onMasterUnregistrationSuccess(subscriber);
-        }
-      });
-    }
+    subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+      @Override
+      public void run(SubscriberListener listener) {
+        listener.onMasterUnregistrationSuccess(subscriber);
+      }
+    });
   }
 
   /**
@@ -239,14 +238,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   @Override
   public void signalOnMasterUnregistrationFailure() {
     final Subscriber<MessageType> subscriber = this;
-    for (final SubscriberListener listener : subscriberListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onMasterUnregistrationFailure(subscriber);
-        }
-      });
-    }
+    subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+      @Override
+      public void run(SubscriberListener listener) {
+        listener.onMasterUnregistrationFailure(subscriber);
+      }
+    });
   }
 
   /**
@@ -258,14 +255,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    */
   public void signalOnNewPublisher() {
     final Subscriber<MessageType> subscriber = this;
-    for (final SubscriberListener listener : subscriberListeners) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          listener.onNewPublisher(subscriber);
-        }
-      });
-    }
+    subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+      @Override
+      public void run(SubscriberListener listener) {
+        listener.onNewPublisher(subscriber);
+      }
+    });
   }
 
   /**
@@ -277,13 +272,16 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    */
   private void signalShutdown() {
     final Subscriber<MessageType> subscriber = this;
-    for (final SubscriberListener listener : subscriberListeners) {
-      executorService.execute(new Runnable() {
+    try {
+      subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
         @Override
-        public void run() {
+        public void run(SubscriberListener listener) {
           listener.onShutdown(subscriber);
         }
-      });
+      }, MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
+    } catch (InterruptedException e) {
+      // Ignored since we do not guarantee that all listeners will finish before
+      // shutdown begins.
     }
   }
 

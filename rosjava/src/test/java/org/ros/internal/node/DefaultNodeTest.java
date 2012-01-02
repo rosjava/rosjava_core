@@ -148,29 +148,23 @@ public class DefaultNodeTest {
   public void testPubSubRegistration() throws InterruptedException {
     Node node = nodeFactory.newNode(privateNodeConfiguration);
     ((DefaultNode) node).getRegistrar().setRetryDelay(1, TimeUnit.MILLISECONDS);
-    // assertTrue(((RosoutLogger)
-    // node.getLog()).getPublisher().awaitRegistration(1, TimeUnit.SECONDS));
+
+    RosoutLogger rosoutLogger = (RosoutLogger) node.getLog();
+    CountDownPublisherListener rosoutLoggerPublisherListener = new CountDownPublisherListener();
+    rosoutLogger.getPublisher().addPublisherListener(rosoutLoggerPublisherListener);
+    assertTrue(rosoutLoggerPublisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
-    assertFalse(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
-    assertFalse(publisherListener.awaitShutdown(1, TimeUnit.SECONDS));
-
-    CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
-    assertFalse(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
-    assertFalse(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
-
     Publisher<org.ros.message.std_msgs.String> publisher =
         node.newPublisher("/foo", "std_msgs/String");
     publisher.addPublisherListener(publisherListener);
-
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
-    assertFalse(publisherListener.awaitShutdown(1, TimeUnit.SECONDS));
 
+    CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         node.newSubscriber("/foo", "std_msgs/String");
     subscriber.addSubscriberListener(subscriberListener);
     assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
-    assertFalse(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
 
     // There are now two registered publishers /rosout and /foo.
     assertEquals(2, masterServer.getRegisteredPublishers().size());
