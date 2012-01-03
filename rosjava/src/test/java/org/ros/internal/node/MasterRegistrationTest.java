@@ -76,7 +76,7 @@ public class MasterRegistrationTest {
     publisherListener = new CountDownPublisherListener();
     
     publisher = new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer, executorService);
-    publisher.addPublisherListener(publisherListener);
+    publisher.addListener(publisherListener);
   }
 
   @After

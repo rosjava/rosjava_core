@@ -163,12 +163,12 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   }
 
   @Override
-  public void addPublisherListener(PublisherListener listener) {
+  public void addListener(PublisherListener listener) {
     publisherListeners.add(listener);
   }
 
   @Override
-  public void removePublisherListener(PublisherListener listener) {
+  public void removeListener(PublisherListener listener) {
     publisherListeners.remove(listener);
   }
 

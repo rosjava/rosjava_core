@@ -151,13 +151,13 @@ public class DefaultNodeTest {
 
     RosoutLogger rosoutLogger = (RosoutLogger) node.getLog();
     CountDownPublisherListener rosoutLoggerPublisherListener = new CountDownPublisherListener();
-    rosoutLogger.getPublisher().addPublisherListener(rosoutLoggerPublisherListener);
+    rosoutLogger.getPublisher().addListener(rosoutLoggerPublisherListener);
     assertTrue(rosoutLoggerPublisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     Publisher<org.ros.message.std_msgs.String> publisher =
         node.newPublisher("/foo", "std_msgs/String");
-    publisher.addPublisherListener(publisherListener);
+    publisher.addListener(publisherListener);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
@@ -233,7 +233,7 @@ public class DefaultNodeTest {
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     Publisher<org.ros.message.std_msgs.Int64> publisher =
         node.newPublisher("test_addresses_pub", "std_msgs/Int64");
-    publisher.addPublisherListener(publisherListener);
+    publisher.addListener(publisherListener);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     // Check the TCPROS server address via the XML-RPC API.

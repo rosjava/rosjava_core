@@ -182,10 +182,10 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
     subStatus.addMessageListener(statusCallback);
 
     pubGoal = node.newPublisher(ActionConstants.TOPIC_NAME_GOAL, spec.getActionGoalMessage());
-    pubGoal.addPublisherListener(publisherListener);
+    pubGoal.addListener(publisherListener);
     pubCancelGoal =
         node.newPublisher(ActionConstants.TOPIC_NAME_CANCEL, ActionConstants.MESSAGE_TYPE_CANCEL);
-    pubCancelGoal.addPublisherListener(publisherListener);
+    pubCancelGoal.addListener(publisherListener);
 
     // Uses the node of the action client so must be done here.
     goalManager =

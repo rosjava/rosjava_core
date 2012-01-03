@@ -104,7 +104,7 @@ public interface Publisher<MessageType> extends Topic {
    * @param listener
    *          the {@link PublisherListener} to add
    */
-  void addPublisherListener(PublisherListener listener);
+  void addListener(PublisherListener listener);
 
   /**
    * Remove a lifecycle listener from the {@link Publisher}.
@@ -115,7 +115,7 @@ public interface Publisher<MessageType> extends Topic {
    * @param listener
    *          the {@link PublisherListener} to remove
    */
-  void removePublisherListener(PublisherListener listener);
+  void removeListener(PublisherListener listener);
 
   /**
    * @param limit

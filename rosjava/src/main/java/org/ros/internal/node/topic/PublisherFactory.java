@@ -59,7 +59,7 @@ public class PublisherFactory {
         publisher = (DefaultPublisher<MessageType>) topicManager.getPublisher(topicName);
       } else {
         publisher = new DefaultPublisher<MessageType>(topicDefinition, serializer, executorService);
-        publisher.addPublisherListener(new PublisherListener() {
+        publisher.addListener(new PublisherListener() {
           @Override
           public void onShutdown(Publisher<?> publisher) {
             topicManager.removePublisher((DefaultPublisher<?>) publisher);

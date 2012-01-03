@@ -68,7 +68,7 @@ public class TopicIntegrationTest {
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.newPublisher("foo", "std_msgs/String");
-    publisher.addPublisherListener(publisherListener);
+    publisher.addListener(publisherListener);
 
     final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
     helloMessage.data = "Hello, ROS!";
@@ -149,7 +149,7 @@ public class TopicIntegrationTest {
     CountDownPublisherListener publisherListener = new CountDownPublisherListener();
     final Publisher<org.ros.message.test_ros.TestHeader> publisher =
         publisherNode.newPublisher("foo", "test_ros/TestHeader");
-    publisher.addPublisherListener(publisherListener);
+    publisher.addListener(publisherListener);
 
     nodeConfiguration.setNodeName("subscriber");
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
