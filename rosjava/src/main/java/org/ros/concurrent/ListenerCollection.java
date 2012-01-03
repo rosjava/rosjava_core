@@ -7,6 +7,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Manages a collection of listeners and makes it easy to execute a listener
+ * callback on the entire collection.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ListenerCollection<T> {
@@ -18,11 +21,23 @@ public class ListenerCollection<T> {
     void run(U listener);
   }
 
+  /**
+   * @param executorService
+   *          the {@link ExecutorService} to use when executing listener
+   *          callbacks
+   */
   public ListenerCollection(ExecutorService executorService) {
     this.executorService = executorService;
     listeners = new CopyOnWriteArrayList<T>();
   }
 
+  /**
+   * @param listeners
+   *          an initial {@link Collection} of listeners to add
+   * @param executorService
+   *          the {@link ExecutorService} to use when executing listener
+   *          callbacks
+   */
   public ListenerCollection(Collection<T> listeners, ExecutorService executorService) {
     this(executorService);
     if (listeners != null) {
@@ -30,18 +45,33 @@ public class ListenerCollection<T> {
     }
   }
 
+  /**
+   * @param listener
+   *          the listener to add
+   */
   public void add(T listener) {
     listeners.add(listener);
   }
 
+  /**
+   * @param listeners
+   *          a {@link Collection} of listeners to add
+   */
   public void addAll(Collection<T> listeners) {
     this.listeners.addAll(listeners);
   }
 
+  /**
+   * @param listener
+   *          the listener to remove
+   */
   public void remove(T listener) {
     listeners.remove(listener);
   }
 
+  /**
+   * Removes all listeners.
+   */
   public void clear() {
     listeners.clear();
   }
@@ -50,7 +80,7 @@ public class ListenerCollection<T> {
    * Signal all listeners.
    * 
    * <p>
-   * Each listener is called in a separate thread.
+   * Each {@link SignalRunnable} is executed in a separate thread.
    */
   public void signal(SignalRunnable<T> signalRunnable) {
     try {
@@ -66,7 +96,7 @@ public class ListenerCollection<T> {
    * return.
    * 
    * <p>
-   * Each listener is called in a separate thread.
+   * Each {@link SignalRunnable} is executed in a separate thread.
    */
   public void signal(final SignalRunnable<T> signalRunnable, long timeout, TimeUnit unit)
       throws InterruptedException {

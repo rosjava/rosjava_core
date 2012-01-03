@@ -53,5 +53,4 @@ public interface ServiceClient<RequestType, ResponseType> {
    * Stops the client (e.g. disconnect a persistent service connection).
    */
   void shutdown();
-
 }
