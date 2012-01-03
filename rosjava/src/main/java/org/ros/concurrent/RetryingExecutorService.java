@@ -35,6 +35,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Wraps an {@link ExecutorService} to execute {@link Callable}s with retries.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class RetryingExecutorService {
@@ -82,6 +84,10 @@ public class RetryingExecutorService {
     }
   }
 
+  /**
+   * @param executorService
+   *          the {@link ExecutorService} to wrap
+   */
   public RetryingExecutorService(ExecutorService executorService) {
     retryLoop = new RetryLoop();
     retryExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -96,7 +102,9 @@ public class RetryingExecutorService {
   }
 
   /**
-   * Submit a new {@link Callable} to be executed.
+   * Submit a new {@link Callable} to be executed. The submitted
+   * {@link Callable} should return {@code true} to be retried, {@code false}
+   * otherwise.
    * 
    * @param callable
    *          the {@link Callable} to execute
@@ -113,11 +121,27 @@ public class RetryingExecutorService {
     }
   }
 
+  /**
+   * @param delay
+   *          the delay in units of {@code unit}
+   * @param unit
+   *          the {@link TimeUnit} of the delay
+   */
   public void setRetryDelay(long delay, TimeUnit unit) {
     retryDelay = delay;
     retryTimeUnit = unit;
   }
 
+  /**
+   * Stops accepting new {@link Callable}s and waits for all submitted
+   * {@link Callable}s to finish within the specified timeout.
+   * 
+   * @param timeout
+   *          the timeout in units of {@code unit}
+   * @param unit
+   *          the {@link TimeUnit} of {@code timeout}
+   * @throws InterruptedException
+   */
   public void shutdown(long timeout, TimeUnit unit) throws InterruptedException {
     running = false;
     for (CountDownLatch latch : latches.values()) {
