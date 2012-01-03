@@ -92,6 +92,11 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   }
 
   @Override
+  public boolean getLatchMode() {
+    return incomingMessageQueue.getLatchMode();
+  }
+
+  @Override
   public void addMessageListener(MessageListener<MessageType> listener) {
     incomingMessageQueue.addListener(listener);
   }

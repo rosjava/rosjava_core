@@ -97,4 +97,10 @@ public interface Subscriber<MessageType> extends Topic {
    * @return the maximum number of incoming messages to queue (i.e. buffer)
    */
   int getQueueLimit();
+
+  /**
+   * @return {@code true} if the {@link Publisher} of this {@link Subscriber}'s
+   *         topic is latched, {@code false} otherwise
+   */
+  boolean getLatchMode();
 }

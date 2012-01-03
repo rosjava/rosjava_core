@@ -16,8 +16,6 @@
 
 package org.ros.internal.transport;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -96,6 +94,10 @@ public class IncomingMessageQueue<MessageType> {
 
   public void setLatchMode(boolean enabled) {
     latchMode = enabled;
+  }
+
+  public boolean getLatchMode() {
+    return latchMode;
   }
 
   public void addListener(final MessageListener<MessageType> listener) {
