@@ -97,7 +97,7 @@ public class TopicIntegrationTest {
             executorService);
     repeatingPublisher.start();
 
-    assertTrue(messageReceived.await(1, TimeUnit.SECONDS));
+    assertTrue(messageReceived.await(5, TimeUnit.DAYS));
 
     repeatingPublisher.cancel();
     publisher.shutdown();

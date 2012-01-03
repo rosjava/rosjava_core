@@ -20,9 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -49,22 +46,17 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subscriber<MessageType> {
 
-  private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(DefaultSubscriber.class);
-
   /**
    * The maximum delay before shutdown will begin even if all
    * {@link SubscriberListener}s have not yet returned from their
    * {@link SubscriberListener#onShutdown(Subscriber)} callback.
    */
-  private static final int MAX_SHUTDOWN_DELAY_DURATION = 5;
-  private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;
+  private static final int DEFAULT_SHUTDOWN_TIMEOUT = 5;
+  private static final TimeUnit DEFAULT_SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
   private final ExecutorService executorService;
   private final ImmutableMap<String, String> header;
-  private final ListenerCollection<MessageListener<MessageType>> messageListeners;
   private final IncomingMessageQueue<MessageType> incomingMessageQueue;
-  private final MessageReader messageReader;
   private final Set<PublisherIdentifier> knownPublishers;
   private final SlaveIdentifier slaveIdentifier;
   private final TcpClientConnectionManager tcpClientConnectionManager;
@@ -73,22 +65,6 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    * All {@link SubscriberListener} instances added to the subscriber.
    */
   private final ListenerCollection<SubscriberListener> subscriberListeners;
-
-  private final class MessageReader extends CancellableLoop {
-    @Override
-    public void loop() throws InterruptedException {
-      final MessageType message = incomingMessageQueue.take();
-      if (DEBUG) {
-        log.info("Received message: " + message + " " + message.getClass().getCanonicalName());
-      }
-      messageListeners.signal(new SignalRunnable<MessageListener<MessageType>>() {
-        @Override
-        public void run(MessageListener<MessageType> listener) {
-          listener.onNewMessage(message);
-        }
-      });
-    }
-  }
 
   public static <S> DefaultSubscriber<S> create(SlaveIdentifier slaveIdentifier,
       TopicDefinition description, ExecutorService executorService,
@@ -100,17 +76,15 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
       MessageDeserializer<MessageType> deserializer, ExecutorService executorService) {
     super(topicDefinition);
     this.executorService = executorService;
-    this.messageListeners = new ListenerCollection<MessageListener<MessageType>>(executorService);
     this.subscriberListeners = new ListenerCollection<SubscriberListener>(executorService);
-    this.incomingMessageQueue = new IncomingMessageQueue<MessageType>(deserializer);
+    this.incomingMessageQueue =
+        new IncomingMessageQueue<MessageType>(deserializer, executorService);
     this.slaveIdentifier = slaveIdentifier;
     header =
         ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
             .putAll(topicDefinition.toHeader()).build();
     knownPublishers = Sets.newHashSet();
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
-    messageReader = new MessageReader();
-    executorService.execute(messageReader);
   }
 
   public Collection<String> getSupportedProtocols() {
@@ -119,12 +93,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
 
   @Override
   public void addMessageListener(MessageListener<MessageType> listener) {
-    messageListeners.add(listener);
+    incomingMessageQueue.addListener(listener);
   }
 
   @Override
   public void removeMessageListener(MessageListener<MessageType> listener) {
-    messageListeners.remove(listener);
+    incomingMessageQueue.removeListener(listener);
   }
 
   @VisibleForTesting
@@ -158,10 +132,15 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   }
 
   @Override
-  public void shutdown() {
+  public void shutdown(long timeout, TimeUnit unit) {
     signalShutdown();
-    messageReader.cancel();
+    incomingMessageQueue.shutdown();
     tcpClientConnectionManager.shutdown();
+  }
+
+  @Override
+  public void shutdown() {
+    shutdown(DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEOUT_UNITS);
   }
 
   @Override
@@ -278,7 +257,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
         public void run(SubscriberListener listener) {
           listener.onShutdown(subscriber);
         }
-      }, MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
+      }, DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEOUT_UNITS);
     } catch (InterruptedException e) {
       // Ignored since we do not guarantee that all listeners will finish before
       // shutdown begins.

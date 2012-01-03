@@ -17,6 +17,7 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,8 +55,8 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
    * {@link PublisherListener}s have not yet returned from their
    * {@link PublisherListener#onShutdown(Publisher)} callback.
    */
-  private static final int MAX_SHUTDOWN_DELAY_DURATION = 5;
-  private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;
+  private static final long DEFAULT_SHUTDOWN_TIMEOUT = 5;
+  private static final TimeUnit DEFAULT_SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
   /**
    * Queue of all messages being published by this {@link Publisher}.
@@ -76,10 +77,20 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   }
 
   @Override
-  public void shutdown() {
-    signalOnShutdown();
+  public boolean getLatchMode() {
+    return outgoingMessageQueue.getLatchMode();
+  }
+
+  @Override
+  public void shutdown(long timeout, TimeUnit unit) {
+    signalOnShutdown(timeout, unit);
     publisherListeners.clear();
     outgoingMessageQueue.shutdown();
+  }
+
+  @Override
+  public void shutdown() {
+    shutdown(DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEOUT_UNITS);
   }
 
   public PublisherIdentifier toIdentifier(SlaveIdentifier slaveIdentifier) {
@@ -104,7 +115,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
   @Override
   public void publish(MessageType message) {
     if (DEBUG) {
-      log.info("Publishing message: " + message);
+      // log.info("Publishing message: " + message);
     }
     outgoingMessageQueue.put(message);
   }
@@ -117,22 +128,24 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
    * @return encoded connection header from subscriber
    */
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
-    Map<String, String> header = getTopicDefinitionHeader();
+    Map<String, String> topicDefinitionHeader = getTopicDefinitionHeader();
     if (DEBUG) {
       log.info("Subscriber handshake header: " + incomingHeader);
-      log.info("Publisher handshake header: " + header);
+      log.info("Publisher handshake header: " + topicDefinitionHeader);
     }
     // TODO(damonkohler): Return error to the subscriber over the wire?
     String incomingType = incomingHeader.get(ConnectionHeaderFields.TYPE);
-    String expectedType = header.get(ConnectionHeaderFields.TYPE);
+    String expectedType = topicDefinitionHeader.get(ConnectionHeaderFields.TYPE);
     Preconditions.checkState(incomingType.equals(expectedType) || incomingType.equals("*"),
         "Unexpected message type " + incomingType + " != " + expectedType);
     String incomingChecksum = incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
-    String expectedChecksum = header.get(ConnectionHeaderFields.MD5_CHECKSUM);
+    String expectedChecksum = topicDefinitionHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
     Preconditions.checkState(
         incomingChecksum.equals(expectedChecksum) || incomingChecksum.equals("*"),
         "Unexpected message MD5 " + incomingChecksum + " != " + expectedChecksum);
-    return ConnectionHeader.encode(header);
+    Map<String, String> header = Maps.newHashMap(topicDefinitionHeader);
+    header.put(ConnectionHeaderFields.LATCHING, getLatchMode() ? "1" : "0");
+    return ConnectionHeader.encode(topicDefinitionHeader);
   }
 
   /**
@@ -255,7 +268,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
    * <p>
    * Each listener is called in a separate thread.
    */
-  private void signalOnShutdown() {
+  private void signalOnShutdown(long timeout, TimeUnit unit) {
     final Publisher<MessageType> publisher = this;
     try {
       publisherListeners.signal(new SignalRunnable<PublisherListener>() {
@@ -263,7 +276,7 @@ public class DefaultPublisher<MessageType> extends DefaultTopic implements Publi
         public void run(PublisherListener listener) {
           listener.onShutdown(publisher);
         }
-      }, MAX_SHUTDOWN_DELAY_DURATION, MAX_SHUTDOWN_DELAY_UNITS);
+      }, timeout, unit);
     } catch (InterruptedException e) {
       // Ignored since we do not guarantee that all listeners will finish before
       // shutdown begins.

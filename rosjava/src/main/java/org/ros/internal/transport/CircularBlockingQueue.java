@@ -27,13 +27,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class CircularBlockingQueue<T> extends LinkedBlockingQueue<T> {
+public class CircularBlockingQueue<T> {
 
   private final int capacity;
+  private final LinkedBlockingQueue<T> queue;
 
   /**
    * The number of elements allowed in the queue at one time. Unlike
-   * {@link #capacity}, this can be changed at runtime and is only best effort.
+   * {@link #capacity}, this can be changed at runtime.
    */
   private int limit;
 
@@ -42,28 +43,29 @@ public class CircularBlockingQueue<T> extends LinkedBlockingQueue<T> {
    *          the maximum number of elements allowed in the queue
    */
   public CircularBlockingQueue(int capacity) {
-    super(capacity);
+    queue = new LinkedBlockingQueue<T>(capacity);
     this.capacity = capacity;
-    this.limit = capacity;
+    this.limit = capacity - 1;
   }
 
   /**
    * Remove elements until the size of the queue is lower than the limit.
    */
   private void shrink() {
-    while (size() > limit) {
-      remove();
+    while (queue.size() > limit) {
+      queue.remove();
     }
   }
 
   /**
-   * Sets a soft limit on the number of elements allowed in the queue.
+   * Adjusts the limit on the number of elements allowed in the queue. The limit
+   * must be less than the capacity and defaults to {@code capacity - 1}.
    * 
    * @param limit
    *          the number of elements allowed in the queue
    */
   public void setLimit(int limit) {
-    Preconditions.checkArgument(limit <= capacity);
+    Preconditions.checkArgument(limit < capacity, "Limit must be less than capacity.");
     this.limit = limit;
     shrink();
   }
@@ -75,13 +77,34 @@ public class CircularBlockingQueue<T> extends LinkedBlockingQueue<T> {
     return limit;
   }
 
-  @Override
-  public void put(T entry) {
-    shrink();
-    try {
-      super.put(entry);
-    } catch (InterruptedException e) {
-      throw new IllegalStateException(e);
+  /**
+   * @return the number of elements in the queue
+   */
+  public int getSize() {
+    return queue.size();
+  }
+
+  public void put(T entry) throws InterruptedException {
+    synchronized (queue) {
+      try {
+        queue.put(entry);
+      } finally {
+        shrink();
+      }
+      queue.notify();
+    }
+  }
+
+  public T take() throws InterruptedException {
+    T element = null;
+    synchronized (queue) {
+      while (true) {
+        element = queue.poll();
+        if (element != null) {
+          return element;
+        }
+        queue.wait();
+      }
     }
   }
 }

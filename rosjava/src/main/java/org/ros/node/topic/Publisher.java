@@ -17,7 +17,8 @@
 package org.ros.node.topic;
 
 import org.ros.internal.node.topic.Topic;
-import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Publishes messages of a given type on a given ROS topic.
@@ -33,10 +34,17 @@ public interface Publisher<MessageType> extends Topic {
   /**
    * @see http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options
    * @param enabled
-   *          if {@code true}, all messages published to this topic from the
-   *          {@link Publisher}'s {@link XmlRpcEndpoint} will be latched
+   *          {@code true} if published messages should be latched,
+   *          {@code false} otherwise
    */
   void setLatchMode(boolean enabled);
+
+  /**
+   * @see http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options
+   * @return {@code true} if published messages will be latched, {@code false}
+   *         otherwise
+   */
+  boolean getLatchMode();
 
   /**
    * Publishes a message. This message will be available on the topic that this
@@ -68,10 +76,28 @@ public interface Publisher<MessageType> extends Topic {
   int getNumberOfSubscribers();
 
   /**
-   * Shuts down and unregisters the {@link Publisher}.
+   * Shuts down and unregisters the {@link Publisher}. Shutdown is delayed by at
+   * most the specified timeout to allow
+   * {@link PublisherListener#onShutdown(Publisher)} callbacks to complete.
+   * 
+   * <p>
+   * {@link PublisherListener#onShutdown(Publisher)} callbacks are executed in
+   * separate threads.
+   */
+  void shutdown(long timeout, TimeUnit unit);
+
+  /**
+   * Shuts down and unregisters the {@link Publisher} using the default timeout
+   * for {@link PublisherListener#onShutdown(Publisher)} callbacks.
+   * 
+   * <p>
+   * {@link PublisherListener#onShutdown(Publisher)} callbacks are executed in
+   * separate threads.
+   * 
+   * @see Publisher#shutdown(long, TimeUnit)
    */
   void shutdown();
-  
+
   /**
    * Add a new lifecycle listener to the {@link Publisher}.
    * 
@@ -79,7 +105,7 @@ public interface Publisher<MessageType> extends Topic {
    *          the {@link PublisherListener} to add
    */
   void addPublisherListener(PublisherListener listener);
-  
+
   /**
    * Remove a lifecycle listener from the {@link Publisher}.
    * 

@@ -18,13 +18,13 @@ package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.concurrent.CancellableLoop;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.concurrent.CancellableLoop;
 import org.ros.node.topic.Publisher;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -42,7 +42,7 @@ public class RepeatingPublisher<MessageType> {
   /**
    * Executor used to run the {@link RepeatingPublisherLoop}.
    */
-  private final Executor executor;
+  private final Executor executorService;
 
   private final class RepeatingPublisherLoop extends CancellableLoop {
     @Override
@@ -51,7 +51,7 @@ public class RepeatingPublisher<MessageType> {
       if (DEBUG) {
         log.info("Published message: " + message);
       }
-      Thread.sleep((long) (1000f / frequency));
+      Thread.sleep((long) (1000.0d / frequency));
     }
   }
 
@@ -62,22 +62,21 @@ public class RepeatingPublisher<MessageType> {
    *          the frequency of publication in Hz
    */
   public RepeatingPublisher(Publisher<MessageType> publisher, MessageType message, int frequency,
-	  Executor executor) {
+	  ExecutorService executorService) {
     this.publisher = publisher;
     this.message = message;
     this.frequency = frequency;
-    this.executor = executor;
+    this.executorService = executorService;
     runnable = new RepeatingPublisherLoop();
   }
 
   public void start() {
     Preconditions.checkState(!runnable.isRunning());
-    executor.execute(runnable);
+    executorService.execute(runnable);
   }
 
   public void cancel() {
     Preconditions.checkState(runnable.isRunning());
     runnable.cancel();
   }
-
 }

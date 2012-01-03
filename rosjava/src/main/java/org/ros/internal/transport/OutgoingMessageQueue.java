@@ -17,7 +17,6 @@
 package org.ros.internal.transport;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +26,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.ros.concurrent.CancellableLoop;
+import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageSerializer;
 
 import java.nio.ByteBuffer;
@@ -45,12 +45,12 @@ public class OutgoingMessageQueue<MessageType> {
   private final MessageSerializer<MessageType> serializer;
   private final CircularBlockingQueue<MessageType> messages;
   private final ChannelGroup channelGroup;
-  private final MessageWriter messageWriter;
+  private final Writer writer;
 
   private boolean latchMode;
   private MessageType latchedMessage;
 
-  private final class MessageWriter extends CancellableLoop {
+  private final class Writer extends CancellableLoop {
     @Override
     public void loop() throws InterruptedException {
       writeMessageToChannel(messages.take());
@@ -62,13 +62,17 @@ public class OutgoingMessageQueue<MessageType> {
     this.serializer = serializer;
     messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
     channelGroup = new DefaultChannelGroup();
-    messageWriter = new MessageWriter();
+    writer = new Writer();
     latchMode = false;
-    executorService.execute(messageWriter);
+    executorService.execute(writer);
   }
 
   public void setLatchMode(boolean enabled) {
     latchMode = enabled;
+  }
+
+  public boolean getLatchMode() {
+    return latchMode;
   }
 
   private void writeMessageToChannel(MessageType message) {
@@ -87,15 +91,19 @@ public class OutgoingMessageQueue<MessageType> {
    *          the message to add to the queue
    */
   public void put(MessageType message) {
-    messages.put(message);
+    try {
+      messages.put(message);
+    } catch (InterruptedException e) {
+      throw new RosRuntimeException(e);
+    }
     latchedMessage = message;
   }
 
   /**
-   * Stop writing messages.
+   * Stop writing messages and close all outgoing connections.
    */
   public void shutdown() {
-    messageWriter.cancel();
+    writer.cancel();
     channelGroup.close().awaitUninterruptibly();
   }
 
@@ -118,7 +126,10 @@ public class OutgoingMessageQueue<MessageType> {
    *          added to this {@link OutgoingMessageQueue}'s {@link ChannelGroup}
    */
   public void addChannel(Channel channel) {
-    Preconditions.checkState(messageWriter.isRunning());
+    if (!writer.isRunning()) {
+      log.warn("Failed to add channel. Cannot add channels after shutdown.");
+      return;
+    }
     if (DEBUG) {
       log.info("Adding channel: " + channel);
     }

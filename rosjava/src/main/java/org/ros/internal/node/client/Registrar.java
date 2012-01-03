@@ -18,10 +18,9 @@ package org.ros.internal.node.client;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.concurrent.RetryingExecutorService;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.concurrent.RetryingExecutorService;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
@@ -50,7 +49,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Registrar implements TopicListener, ServiceListener {
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Registrar.class);
 
   private final RetryingExecutorService retryingExecutorService;
@@ -138,6 +137,7 @@ public class Registrar implements TopicListener, ServiceListener {
         Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
         Response<List<URI>> response = masterClient.registerSubscriber(slaveIdentifier, subscriber);
         if (response.isSuccess()) {
+          log.info("Subscriber registered: " + subscriber);
           Collection<PublisherIdentifier> publishers =
               PublisherIdentifier.newCollectionFromUris(response.getResult(),
                   subscriber.getTopicDefinition());
@@ -145,7 +145,7 @@ public class Registrar implements TopicListener, ServiceListener {
           subscriber.signalOnMasterRegistrationSuccess();
           return false;
         } else {
-          subscriber.signalOnMasterUnregistrationSuccess();
+          subscriber.signalOnMasterUnregistrationFailure();
           return true;
         }
       }
@@ -163,6 +163,7 @@ public class Registrar implements TopicListener, ServiceListener {
         Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
         Response<Integer> response = masterClient.unregisterSubscriber(slaveIdentifier, subscriber);
         if (response.isSuccess()) {
+          log.info("Subscriber unregistered: " + subscriber);
           subscriber.signalOnMasterUnregistrationSuccess();
           return false;
         } else {

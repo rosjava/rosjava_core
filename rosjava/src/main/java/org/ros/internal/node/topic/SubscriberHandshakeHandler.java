@@ -51,7 +51,7 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
     this.incomingMessageQueue = incomingMessageQueue;
   }
 
-  private void handshake(ChannelBuffer buffer) {
+  private Map<String, String> handshake(ChannelBuffer buffer) {
     Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
     if (DEBUG) {
       log.info("Outgoing handshake header: " + header);
@@ -61,6 +61,7 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
         header.get(ConnectionHeaderFields.TYPE)));
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
         header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
+    return incomingHeader;
   }
 
   @Override
@@ -72,11 +73,15 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
-    handshake(incomingBuffer);
+    Map<String, String> handshakeHeader = handshake(incomingBuffer);
     Channel channel = e.getChannel();
     ChannelPipeline pipeline = channel.getPipeline();
     pipeline.remove(this);
     pipeline.addLast("MessageHandler", incomingMessageQueue.createChannelHandler());
+    String latching = handshakeHeader.get(ConnectionHeaderFields.LATCHING);
+    if (latching != null && latching.equals("1")) {
+      incomingMessageQueue.setLatchMode(true);
+    }
     super.messageReceived(ctx, e);
   }
 }

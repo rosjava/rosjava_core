@@ -19,6 +19,8 @@ package org.ros.node.topic;
 import org.ros.internal.node.topic.Topic;
 import org.ros.message.MessageListener;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Subscribes to messages of a given type on a given ROS topic.
  * 
@@ -44,10 +46,28 @@ public interface Subscriber<MessageType> extends Topic {
   void removeMessageListener(MessageListener<MessageType> listener);
 
   /**
-   * Cancels the subscription and unregisters the {@link Subscriber}.
+   * Shuts down and unregisters the {@link Subscriber}. using the default
+   * timeout Shutdown is delayed by at most the specified timeout to allow
+   * {@link SubscriberListener#onShutdown(Subscriber)} callbacks to complete.
+   * 
+   * <p>
+   * {@link SubscriberListener#onShutdown(Subscriber)} callbacks are executed in
+   * separate threads.
+   */
+  void shutdown(long timeout, TimeUnit unit);
+
+  /**
+   * Shuts down and unregisters the {@link Subscriber} using the default timeout
+   * for {@link SubscriberListener#onShutdown(Subscriber)} callbacks.
+   * 
+   * <p>
+   * {@link SubscriberListener#onShutdown(Subscriber)} callbacks are executed in
+   * separate threads.
+   * 
+   * @see Subscriber#shutdown(long, TimeUnit)
    */
   void shutdown();
-  
+
   /**
    * Add a new lifecycle listener to the subscriber.
    * 
@@ -55,7 +75,7 @@ public interface Subscriber<MessageType> extends Topic {
    *          The listener to add.
    */
   void addSubscriberListener(SubscriberListener listener);
-  
+
   /**
    * Remove a lifecycle listener from the subscriber.
    * 

@@ -23,6 +23,9 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.ros.internal.transport.ConnectionTrackingHandler;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class ConnectionTrackingChannelPipelineFactory implements ChannelPipelineFactory {
 
   public static final String CONNECTION_TRACKING_HANDLER = "ConnectionTrackingHandler";

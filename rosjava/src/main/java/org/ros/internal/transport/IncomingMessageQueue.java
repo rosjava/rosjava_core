@@ -16,6 +16,8 @@
 
 package org.ros.internal.transport;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -23,9 +25,13 @@ import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.ros.concurrent.CancellableLoop;
+import org.ros.concurrent.ListenerCollection;
+import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageListener;
 
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -37,10 +43,16 @@ public class IncomingMessageQueue<MessageType> {
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
-  private final CircularBlockingQueue<MessageType> messages;
   private final MessageDeserializer<MessageType> deserializer;
+  private final ExecutorService executorService;
+  private final CircularBlockingQueue<MessageType> messages;
+  private final ListenerCollection<MessageListener<MessageType>> listeners;
+  private final Dispatcher dispatcher;
 
-  private final class MessageHandler extends SimpleChannelHandler {
+  private boolean latchMode;
+  private MessageType latchedMessage;
+
+  private final class Receiver extends SimpleChannelHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
       ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
@@ -53,9 +65,63 @@ public class IncomingMessageQueue<MessageType> {
     }
   }
 
-  public IncomingMessageQueue(MessageDeserializer<MessageType> deserializer) {
+  private final class Dispatcher extends CancellableLoop {
+    @Override
+    public void loop() throws InterruptedException {
+      final MessageType message = messages.take();
+      latchedMessage = message;
+      if (DEBUG) {
+        log.info("Dispatched message: " + message);
+      }
+      listeners.signal(new SignalRunnable<MessageListener<MessageType>>() {
+        @Override
+        public void run(MessageListener<MessageType> listener) {
+          listener.onNewMessage(message);
+        }
+      });
+    }
+  }
+
+  public IncomingMessageQueue(MessageDeserializer<MessageType> deserializer,
+      ExecutorService executorService) {
     this.deserializer = deserializer;
+    this.executorService = executorService;
     messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
+    listeners = new ListenerCollection<MessageListener<MessageType>>(executorService);
+    dispatcher = new Dispatcher();
+    latchMode = false;
+    latchedMessage = null;
+    executorService.execute(dispatcher);
+  }
+
+  public void setLatchMode(boolean enabled) {
+    latchMode = enabled;
+  }
+
+  public void addListener(final MessageListener<MessageType> listener) {
+    if (DEBUG) {
+      log.info("Adding listener.");
+    }
+    listeners.add(listener);
+    if (latchMode && latchedMessage != null) {
+      if (DEBUG) {
+        log.info("Dispatching latched message: " + latchedMessage);
+      }
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          listener.onNewMessage(latchedMessage);
+        }
+      });
+    }
+  }
+
+  public void removeListener(MessageListener<MessageType> listener) {
+    listeners.remove(listener);
+  }
+
+  public void shutdown() {
+    dispatcher.cancel();
   }
 
   /**
@@ -73,24 +139,10 @@ public class IncomingMessageQueue<MessageType> {
   }
 
   /**
-   * @see CircularBlockingQueue#take()
-   */
-  public MessageType take() throws InterruptedException {
-    return messages.take();
-  }
-
-  /**
-   * @see CircularBlockingQueue#poll(long, TimeUnit)
-   */
-  public MessageType poll(long timeout, TimeUnit unit) throws InterruptedException {
-    return messages.poll(timeout, unit);
-  }
-
-  /**
    * @return a new {@link ChannelHandler} that will receive messages and add
    *         them to the queue
    */
   public ChannelHandler createChannelHandler() {
-    return new MessageHandler();
+    return new Receiver();
   }
 }

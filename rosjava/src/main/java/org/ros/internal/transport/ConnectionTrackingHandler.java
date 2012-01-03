@@ -23,6 +23,10 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
+import org.ros.exception.RosRuntimeException;
+
+import java.io.IOException;
+import java.nio.channels.Channels;
 
 /**
  * Adds new {@link Channels} to the provided {@link ChannelGroup}.
@@ -55,11 +59,18 @@ public class ConnectionTrackingHandler extends SimpleChannelHandler {
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
     ctx.getChannel().close();
-    if (DEBUG) {
-      log.error("Channel exception: " + ctx.getChannel(), e.getCause());
+    if (e.getCause() instanceof IOException) {
+      // NOTE(damonkohler): We ignore exceptions here because they are common
+      // (e.g. network failure, connection reset by peer, shutting down, etc.)
+      // and should not be fatal. However, in all cases the channel should be
+      // closed.
+      if (DEBUG) {
+        log.error("Channel exception: " + ctx.getChannel(), e.getCause());
+      } else {
+        log.error("Channel exception: " + e.getCause());
+      }
+    } else {
+      throw new RosRuntimeException(e.getCause());
     }
-    // NOTE(damonkohler): We ignore exceptions here because they are common
-    // (e.g. network failure, connection reset by peer, etc.) and should not be
-    // fatal. However, in all cases the channel should be closed.
   }
 }

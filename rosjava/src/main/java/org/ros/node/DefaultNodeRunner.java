@@ -68,11 +68,11 @@ public class DefaultNodeRunner implements NodeRunner {
 
   /**
    * @param nodeFactory
-   *          Node factory to use for node creation.
+   *          {@link NodeFactory} to use for node creation.
    * @param executorService
    *          {@link NodeMain}s will be executed using this
    */
-  public DefaultNodeRunner(NodeFactory nodeFactory, ExecutorService executorService) {
+  private DefaultNodeRunner(NodeFactory nodeFactory, ExecutorService executorService) {
     this.nodeFactory = nodeFactory;
     this.executorService = executorService;
     nodes = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, Node>create());

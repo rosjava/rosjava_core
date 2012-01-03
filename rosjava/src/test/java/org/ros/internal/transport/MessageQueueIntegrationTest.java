@@ -17,6 +17,7 @@
 package org.ros.internal.transport;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.logging.Log;
@@ -44,11 +45,11 @@ import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.transport.tcp.TcpClientConnection;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
-import org.ros.message.Message;
-import org.ros.message.std_msgs.String;
+import org.ros.message.MessageListener;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -58,20 +59,22 @@ import java.util.concurrent.TimeUnit;
  */
 public class MessageQueueIntegrationTest {
 
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(MessageQueueIntegrationTest.class);
 
   private ExecutorService executorService;
   private TcpClientConnectionManager tcpClientConnectionManager;
-  private CancellableLoop repeatingPublisher;
-  private OutgoingMessageQueue<Message> outgoingMessageQueue;
+  private OutgoingMessageQueue<org.ros.message.std_msgs.String> outgoingMessageQueue;
   private IncomingMessageQueue<org.ros.message.std_msgs.String> firstIncomingMessageQueue;
-  private IncomingMessageQueue<String> secondIncomingMessageQueue;
+  private IncomingMessageQueue<org.ros.message.std_msgs.String> secondIncomingMessageQueue;
   private org.ros.message.std_msgs.String expectedMessage;
 
   private class ServerHandler extends SimpleChannelHandler {
     @Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-      log.info("Channel connected: " + e.getChannel().toString());
+      if (DEBUG) {
+        log.info("Channel connected: " + e.getChannel().toString());
+      }
       Channel channel = e.getChannel();
       outgoingMessageQueue.addChannel(channel);
       super.channelConnected(ctx, e);
@@ -80,13 +83,17 @@ public class MessageQueueIntegrationTest {
     @Override
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e)
         throws Exception {
-      log.info("Channel disconnected: " + e.getChannel().toString());
+      if (DEBUG) {
+        log.info("Channel disconnected: " + e.getChannel().toString());
+      }
       super.channelDisconnected(ctx, e);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-      log.info("Channel exception: " + e.getChannel().toString());
+      if (DEBUG) {
+        log.info("Channel exception: " + e.getChannel().toString());
+      }
       e.getChannel().close();
       throw new RuntimeException(e.getCause());
     }
@@ -99,25 +106,16 @@ public class MessageQueueIntegrationTest {
     expectedMessage = new org.ros.message.std_msgs.String();
     expectedMessage.data = "Would you like to play a game?";
     outgoingMessageQueue =
-        new OutgoingMessageQueue<Message>(new MessageSerializer<Message>(), executorService);
-
-    repeatingPublisher = new CancellableLoop() {
-      @Override
-      protected void loop() throws InterruptedException {
-        outgoingMessageQueue.put(expectedMessage);
-        Thread.sleep(100);
-      }
-    };
-    executorService.execute(repeatingPublisher);
-
+        new OutgoingMessageQueue<org.ros.message.std_msgs.String>(
+            new MessageSerializer<org.ros.message.std_msgs.String>(), executorService);
     firstIncomingMessageQueue =
         new IncomingMessageQueue<org.ros.message.std_msgs.String>(
             new MessageDeserializer<org.ros.message.std_msgs.String>(
-                org.ros.message.std_msgs.String.class));
+                org.ros.message.std_msgs.String.class), executorService);
     secondIncomingMessageQueue =
         new IncomingMessageQueue<org.ros.message.std_msgs.String>(
             new MessageDeserializer<org.ros.message.std_msgs.String>(
-                org.ros.message.std_msgs.String.class));
+                org.ros.message.std_msgs.String.class), executorService);
   }
 
   @After
@@ -126,55 +124,14 @@ public class MessageQueueIntegrationTest {
     executorService.shutdown();
   }
 
-  private TcpClientConnection connectIncomingMessageQueue(
-      final IncomingMessageQueue<org.ros.message.std_msgs.String> incomingMessageQueue,
-      Channel serverChannel) throws InterruptedException {
-    return tcpClientConnectionManager.connect("Foo", serverChannel.getLocalAddress(),
-        incomingMessageQueue.createChannelHandler(), "MessageHandler");
-  }
-
-  @Test
-  public void testSendAndReceiveMessage() throws InterruptedException {
-    Channel serverChannel = buildServerChannel();
-    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
-    connectIncomingMessageQueue(secondIncomingMessageQueue, serverChannel);
-    expectMessage();
-  }
-
-  @Test
-  public void testSendAndReceiveLatchedMessage() throws InterruptedException {
-    // Setting latched mode and writing a message should cause any future
-    // IncomingMessageQueue to receive that message.
-    outgoingMessageQueue.setLatchMode(true);
-    repeatingPublisher.cancel();
-    Channel serverChannel = buildServerChannel();
-    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
-    connectIncomingMessageQueue(secondIncomingMessageQueue, serverChannel);
-    expectMessage();
-  }
-
-  @Test
-  public void testSendAfterIncomingQueueShutdown() throws InterruptedException {
-    Channel serverChannel = buildServerChannel();
-    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
-    tcpClientConnectionManager.shutdown();
-    outgoingMessageQueue.put(expectedMessage);
-  }
-
-  @Test
-  public void testSendAfterServerChannelClosed() throws InterruptedException {
-    Channel serverChannel = buildServerChannel();
-    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
-    serverChannel.close().await();
-    outgoingMessageQueue.put(expectedMessage);
-  }
-
-  @Test
-  public void testSendAfterOutgoingQueueShutdown() throws InterruptedException {
-    Channel serverChannel = buildServerChannel();
-    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
-    outgoingMessageQueue.shutdown();
-    outgoingMessageQueue.put(expectedMessage);
+  private void startRepeatingPublisher() {
+    executorService.execute(new CancellableLoop() {
+      @Override
+      protected void loop() throws InterruptedException {
+        outgoingMessageQueue.put(expectedMessage);
+        Thread.sleep(100);
+      }
+    });
   }
 
   private Channel buildServerChannel() {
@@ -193,9 +150,8 @@ public class MessageQueueIntegrationTest {
           public ChannelPipeline getPipeline() {
             ChannelPipeline pipeline = super.getPipeline();
             // We're not interested firstIncomingMessageQueue testing the
-            // handshake
-            // here. Removing it
-            // means connections are established immediately.
+            // handshake here. Removing it means connections are established
+            // immediately.
             pipeline.remove(TcpServerPipelineFactory.HANDSHAKE_HANDLER);
             pipeline.addLast("ServerHandler", new ServerHandler());
             return pipeline;
@@ -206,33 +162,122 @@ public class MessageQueueIntegrationTest {
     return serverChannel;
   }
 
-  private void expectMessage() throws InterruptedException {
-    assertEquals(firstIncomingMessageQueue.take(), expectedMessage);
-    assertEquals(secondIncomingMessageQueue.take(), expectedMessage);
+  private TcpClientConnection connectIncomingMessageQueue(
+      final IncomingMessageQueue<org.ros.message.std_msgs.String> incomingMessageQueue,
+      Channel serverChannel) throws InterruptedException {
+    return tcpClientConnectionManager.connect("Foo", serverChannel.getLocalAddress(),
+        incomingMessageQueue.createChannelHandler(), "MessageHandler");
   }
 
-  /**
-   * @throws InterruptedException
-   */
+  private CountDownLatch expectMessage(
+      IncomingMessageQueue<org.ros.message.std_msgs.String> incomingMessageQueue)
+      throws InterruptedException {
+    final CountDownLatch latch = new CountDownLatch(1);
+    incomingMessageQueue.addListener(new MessageListener<org.ros.message.std_msgs.String>() {
+      @Override
+      public void onNewMessage(org.ros.message.std_msgs.String message) {
+        assertEquals(message, expectedMessage);
+        latch.countDown();
+      }
+    });
+    return latch;
+  }
+
+  private void expectMessages() throws InterruptedException {
+    CountDownLatch firstLatch = expectMessage(firstIncomingMessageQueue);
+    // CountDownLatch secondLatch = expectMessage(secondIncomingMessageQueue);
+    assertTrue(firstLatch.await(3, TimeUnit.SECONDS));
+    // assertTrue(secondLatch.await(3, TimeUnit.SECONDS));
+  }
+
+  private void expectNoMessages() throws InterruptedException {
+    CountDownLatch firstLatch = expectMessage(firstIncomingMessageQueue);
+    CountDownLatch secondLatch = expectMessage(secondIncomingMessageQueue);
+    assertFalse(firstLatch.await(3, TimeUnit.SECONDS));
+    assertFalse(secondLatch.await(3, TimeUnit.SECONDS));
+  }
+
   @Test
-  public void testReconnect() throws InterruptedException {
+  public void testSendAndReceiveMessage() throws InterruptedException {
+    startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
     connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
     connectIncomingMessageQueue(secondIncomingMessageQueue, serverChannel);
-    expectMessage();
+    expectMessages();
+  }
+
+  @Test
+  public void testSendAndReceiveLatchedMessage() throws InterruptedException {
+    // Setting latched mode and writing a message should cause any future
+    // IncomingMessageQueue to receive that message.
+    outgoingMessageQueue.setLatchMode(true);
+    outgoingMessageQueue.setLimit(0);
+    outgoingMessageQueue.put(expectedMessage);
+    Channel serverChannel = buildServerChannel();
+    firstIncomingMessageQueue.setLatchMode(true);
+    secondIncomingMessageQueue.setLatchMode(true);
+    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
+    connectIncomingMessageQueue(secondIncomingMessageQueue, serverChannel);
+    // The first set of incoming messages could either be from the Publisher
+    // latching or the Subscriber latching. This is equivalent to waiting for
+    // the message to arrive and ensures that we've latched it in.
+    expectMessages();
+    // Configure both queues to drop all incoming messages and any that are
+    // currently queued.
+    firstIncomingMessageQueue.setLimit(0);
+    secondIncomingMessageQueue.setLimit(0);
+    // The second set of incoming messages can only be from the Subscriber
+    // latching since we've dropped all other messages.
+    expectMessages();
+  }
+
+  @Test
+  public void testSendAfterIncomingQueueShutdown() throws InterruptedException {
+    startRepeatingPublisher();
+    Channel serverChannel = buildServerChannel();
+    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
+    tcpClientConnectionManager.shutdown();
+    outgoingMessageQueue.put(expectedMessage);
+  }
+
+  @Test
+  public void testSendAfterServerChannelClosed() throws InterruptedException {
+    startRepeatingPublisher();
+    Channel serverChannel = buildServerChannel();
+    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
+    serverChannel.close().await();
+    outgoingMessageQueue.put(expectedMessage);
+  }
+
+  @Test
+  public void testSendAfterOutgoingQueueShutdown() throws InterruptedException {
+    startRepeatingPublisher();
+    Channel serverChannel = buildServerChannel();
+    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
+    outgoingMessageQueue.shutdown();
+    outgoingMessageQueue.put(expectedMessage);
+  }
+
+  @Test
+  public void testReconnect() throws InterruptedException {
+    startRepeatingPublisher();
+    Channel serverChannel = buildServerChannel();
+    connectIncomingMessageQueue(firstIncomingMessageQueue, serverChannel);
+    connectIncomingMessageQueue(secondIncomingMessageQueue, serverChannel);
+    expectMessages();
 
     // Disconnect the outgoing queue's incoming connections.
     ChannelGroupFuture future = outgoingMessageQueue.getChannelGroup().close();
     assertTrue(future.await(1, TimeUnit.SECONDS));
     assertTrue(future.isCompleteSuccess());
-    expectMessage();
+    expectMessages();
 
     // Disconnect the outgoing queue's incoming connections again to see that
     // retries work more than once.
     future = outgoingMessageQueue.getChannelGroup().close();
     assertTrue(future.await(1, TimeUnit.SECONDS));
     assertTrue(future.isCompleteSuccess());
-    expectMessage();
+    expectMessages();
 
     // Shutdown the TcpClientConnectionManager to check that we will not
     // reconnect.
@@ -240,7 +285,6 @@ public class MessageQueueIntegrationTest {
     future = outgoingMessageQueue.getChannelGroup().close();
     assertTrue(future.await(1, TimeUnit.SECONDS));
     assertTrue(future.isCompleteSuccess());
-    assertEquals(null, firstIncomingMessageQueue.poll(3, TimeUnit.SECONDS));
-    assertEquals(null, secondIncomingMessageQueue.poll(3, TimeUnit.SECONDS));
+    expectNoMessages();
   }
 }
