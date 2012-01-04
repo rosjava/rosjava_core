@@ -27,23 +27,23 @@ import java.util.concurrent.TimeUnit;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <MessageType>
+ * @param <T>
  *          the {@link Subscriber} may only subscribe to messages of this type
  */
-public interface Subscriber<MessageType> extends Topic {
+public interface Subscriber<T> extends Topic {
 
   /**
    * @param listener
    *          this {@link MessageListener} will be called for every new message
    *          received
    */
-  void addMessageListener(MessageListener<MessageType> listener);
+  void addMessageListener(MessageListener<T> listener);
 
   /**
    * @param listener
    *          the {@link MessageListener} to remove
    */
-  void removeMessageListener(MessageListener<MessageType> listener);
+  void removeMessageListener(MessageListener<T> listener);
 
   /**
    * Shuts down and unregisters the {@link Subscriber}. using the default
@@ -74,7 +74,7 @@ public interface Subscriber<MessageType> extends Topic {
    * @param listener
    *          The listener to add.
    */
-  void addSubscriberListener(SubscriberListener listener);
+  void addSubscriberListener(SubscriberListener<T> listener);
 
   /**
    * Remove a lifecycle listener from the subscriber.
@@ -85,7 +85,7 @@ public interface Subscriber<MessageType> extends Topic {
    * @param listener
    *          The listener to remove.
    */
-  void removeSubscriberListener(SubscriberListener listener);
+  void removeSubscriberListener(SubscriberListener<T> listener);
 
   /**
    * @param limit

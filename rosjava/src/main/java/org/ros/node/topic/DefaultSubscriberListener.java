@@ -21,29 +21,29 @@ package org.ros.node.topic;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class DefaultSubscriberListener implements SubscriberListener {
+public class DefaultSubscriberListener<T> implements SubscriberListener<T> {
 
   @Override
-  public void onMasterRegistrationSuccess(Subscriber<?> subscriber) {
+  public void onMasterRegistrationSuccess(Subscriber<T> subscriber) {
   }
 
   @Override
-  public void onMasterRegistrationFailure(Subscriber<?> subscriber) {
+  public void onMasterRegistrationFailure(Subscriber<T> subscriber) {
   }
 
   @Override
-  public void onMasterUnregistrationSuccess(Subscriber<?> subscriber) {
+  public void onMasterUnregistrationSuccess(Subscriber<T> subscriber) {
   }
 
   @Override
-  public void onMasterUnregistrationFailure(Subscriber<?> subscriber) {
+  public void onMasterUnregistrationFailure(Subscriber<T> subscriber) {
   }
 
   @Override
-  public void onNewPublisher(Subscriber<?> subscriber) {
+  public void onNewPublisher(Subscriber<T> subscriber) {
   }
 
   @Override
-  public void onShutdown(Subscriber<?> subscriber) {
+  public void onShutdown(Subscriber<T> subscriber) {
   }
 }

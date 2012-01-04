@@ -31,20 +31,17 @@ import org.ros.namespace.NodeNameResolver;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
-import org.ros.node.service.ServiceServerListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 import java.net.URI;
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 /**
  * A node in the ROS graph.
  * 
  * <p>
- * Nodes provide for communication with the ROS master. They also serve as
- * factories for:
+ * Nodes serve as factories for:
  * 
  * <ul>
  * <li>{@link Publisher}</li>
@@ -54,12 +51,7 @@ import java.util.concurrent.ExecutorService;
  * <li>{@link ParameterTree}</li>
  * </ul>
  * 
- * <p>
- * Lifetime of any objects created from a node are controlled by the creating
- * node.
- * 
- * @author Keith M. Hughes
- * @since Jun 20, 2011
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public interface Node {
 
@@ -118,7 +110,7 @@ public interface Node {
   Log getLog();
 
   /**
-   * @param <MessageType>
+   * @param <T>
    *          the message type to create the publisher for
    * @param topicName
    *          the topic name, will be pushed down under this namespace unless
@@ -127,15 +119,15 @@ public interface Node {
    *          the message data type (e.g. "std_msgs/String")
    * @return a {@link Publisher} for the specified topic
    */
-  <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType);
+  <T> Publisher<T> newPublisher(GraphName topicName, String messageType);
 
   /**
    * @see #newPublisher(GraphName, String)
    */
-  <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType);
+  <T> Publisher<T> newPublisher(String topicName, String messageType);
 
   /**
-   * @param <MessageType>
+   * @param <T>
    *          the message type to create the {@link Subscriber} for
    * @param topicName
    *          the topic name to be subscribed to, this will be auto resolved
@@ -143,79 +135,37 @@ public interface Node {
    *          the message data type (e.g. "std_msgs/String")
    * @return a {@link Subscriber} for the specified topic
    */
-  <MessageType> Subscriber<MessageType> newSubscriber(GraphName topicName, String messageType);
+  <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType);
 
   /**
    * @see #newSubscriber(GraphName, String, MessageListener,
    *      Collection<SubscriberListener>)
    */
-  <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType);
+  <T> Subscriber<T> newSubscriber(String topicName, String messageType);
 
   /**
    * Create a {@link ServiceServer}.
    * 
-   * @param <RequestType>
-   *          type for the request
-   * @param <ResponseType>
-   *          type for the response
    * @param serviceName
    *          the name of the service
    * @param serviceType
    *          the type of the service (e.g. "test_ros/AddTwoInts")
-   * @param responseBuilder
-   *          called for every request to build a response
-   * @param serverListeners
-   *          a collection of @link {@link ServiceServerListener} instances to
-   *          be added to the server (can be {@code null}.
-   * @return a {@link ServiceServer}
-   */
-  <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
-      GraphName serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
-      Collection<? extends ServiceServerListener> serverListeners);
-
-  /**
-   * Create a {@link ServiceServer}.
-   * 
-   * @param <RequestType>
-   *          type for the request
-   * @param <ResponseType>
-   *          type for the response
-   * @param serviceName
-   *          the name of the service
-   * @param serviceType
-   *          the type of the service (e.g. "test_ros/AddTwoInts")
-   * @param responseBuilder
+   * @param serviceResponseBuilder
    *          called for every request to build a response
    * @return a {@link ServiceServer}
    */
-  <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
-      GraphName serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder);
+  <T, S> ServiceServer<T, S> newServiceServer(GraphName serviceName, String serviceType,
+      ServiceResponseBuilder<T, S> serviceResponseBuilder);
 
   /**
-   * @see #newServiceServer(GraphName, String, ServiceResponseBuilder,
-   *      Collection)
+   * @see Node#newServiceServer(GraphName, String, ServiceResponseBuilder)
    */
-  <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
-      String serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
-      Collection<? extends ServiceServerListener> serverListeners);
-
-  /**
-   * @see #newServiceServer(GraphName, String, ServiceResponseBuilder)
-   */
-  <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
-      String serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder);
+  <T, S> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
+      ServiceResponseBuilder<T, S> serviceResponseBuilder);
 
   /**
    * Create a {@link ServiceClient}.
    * 
-   * @param <RequestType>
-   *          type for the request
-   * @param <ResponseType>
-   *          type for the response
    * @param serviceName
    *          the name of the service
    * @param serviceType
@@ -224,14 +174,14 @@ public interface Node {
    * @throws ServiceNotFoundException
    *           thrown if no matching service could be found
    */
-  <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
-      GraphName serviceName, String serviceType) throws ServiceNotFoundException;
+  <T, S> ServiceClient<T, S> newServiceClient(GraphName serviceName, String serviceType)
+      throws ServiceNotFoundException;
 
   /**
    * @see #newServiceClient(GraphName, String)
    */
-  <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
-      String serviceName, String serviceType) throws ServiceNotFoundException;
+  <T, S> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
+      throws ServiceNotFoundException;
 
   /**
    * @param serviceName

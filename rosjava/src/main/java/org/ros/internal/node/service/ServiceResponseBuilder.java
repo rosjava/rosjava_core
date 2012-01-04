@@ -19,8 +19,7 @@ package org.ros.internal.node.service;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ServiceResponseBuilder<RequestType, ResponseType> {
+public interface ServiceResponseBuilder<T, S> {
 
-  ResponseType build(RequestType request) throws ServiceException;
-
+  S build(T request) throws ServiceException;
 }

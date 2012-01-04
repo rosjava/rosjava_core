@@ -16,10 +16,9 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.node.server.MasterServer;
 import org.ros.message.MessageSerializer;
+import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
-import org.ros.node.topic.PublisherListener;
 
 import java.util.concurrent.ExecutorService;
 
@@ -37,52 +36,34 @@ public class PublisherFactory {
   }
 
   /**
-   * Gets or creates a {@link DefaultPublisher} instance.
-   * {@link DefaultPublisher}s are cached and reused per topic. When a new
-   * {@link DefaultPublisher} is generated, it is registered with the
-   * {@link MasterServer}.
+   * Gets or creates a {@link Publisher} instance. {@link Publisher}s are cached
+   * and reused per topic. When a new {@link Publisher} is generated, it is
+   * registered with the master.
    * 
-   * @param <MessageType>
+   * @param <T>
+   *          the message type associated with the {@link Publisher}
    * @param topicDefinition
    *          {@link TopicDefinition} that is being published
-   * @return a {@link DefaultSubscriber} instance
+   * @param messageSerializer
+   *          the {@link MessageSerializer} used for published messages
+   * @return a new or cached {@link Publisher} instance
    */
   @SuppressWarnings("unchecked")
-  public <MessageType> DefaultPublisher<MessageType> create(TopicDefinition topicDefinition,
-      MessageSerializer<MessageType> serializer) {
+  public <T> Publisher<T> create(TopicDefinition topicDefinition,
+      MessageSerializer<T> messageSerializer) {
     String topicName = topicDefinition.getName().toString();
-    DefaultPublisher<MessageType> publisher;
+    DefaultPublisher<T> publisher;
     boolean createdNewPublisher = false;
 
     synchronized (topicManager) {
       if (topicManager.hasPublisher(topicName)) {
-        publisher = (DefaultPublisher<MessageType>) topicManager.getPublisher(topicName);
+        publisher = (DefaultPublisher<T>) topicManager.getPublisher(topicName);
       } else {
-        publisher = new DefaultPublisher<MessageType>(topicDefinition, serializer, executorService);
-        publisher.addListener(new PublisherListener() {
+        publisher = new DefaultPublisher<T>(topicDefinition, messageSerializer, executorService);
+        publisher.addListener(new DefaultPublisherListener<T>() {
           @Override
-          public void onShutdown(Publisher<?> publisher) {
-            topicManager.removePublisher((DefaultPublisher<?>) publisher);
-          }
-          
-          @Override
-          public void onNewSubscriber(Publisher<?> publisher) {
-          }
-          
-          @Override
-          public void onMasterRegistrationSuccess(Publisher<?> publisher) {
-          }
-          
-          @Override
-          public void onMasterRegistrationFailure(Publisher<?> publisher) {
-          }
-
-          @Override
-          public void onMasterUnregistrationSuccess(Publisher<?> publisher) {
-          }
-
-          @Override
-          public void onMasterUnregistrationFailure(Publisher<?> publisher) {
+          public void onShutdown(Publisher<T> publisher) {
+            topicManager.removePublisher((DefaultPublisher<T>) publisher);
           }
         });
         createdNewPublisher = true;

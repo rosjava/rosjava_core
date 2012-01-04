@@ -65,7 +65,8 @@ public class TopicIntegrationTest {
     nodeConfiguration.setNodeName("publisher");
     Node publisherNode = nodeFactory.newNode(nodeConfiguration);
 
-    CountDownPublisherListener publisherListener = new CountDownPublisherListener();
+    CountDownPublisherListener<org.ros.message.std_msgs.String> publisherListener =
+        CountDownPublisherListener.create();
     Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.newPublisher("foo", "std_msgs/String");
     publisher.addListener(publisherListener);
@@ -77,7 +78,8 @@ public class TopicIntegrationTest {
     nodeConfiguration.setNodeName("subscriber");
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
 
-    CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
+    CountDownSubscriberListener<org.ros.message.std_msgs.String> subscriberListener =
+        CountDownSubscriberListener.create();
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         subscriberNode.newSubscriber("foo", "std_msgs/String");
     subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
@@ -146,7 +148,8 @@ public class TopicIntegrationTest {
   public void testHeader() throws InterruptedException {
     nodeConfiguration.setNodeName("publisher");
     final Node publisherNode = nodeFactory.newNode(nodeConfiguration);
-    CountDownPublisherListener publisherListener = new CountDownPublisherListener();
+    CountDownPublisherListener<org.ros.message.test_ros.TestHeader> publisherListener =
+        CountDownPublisherListener.create();
     final Publisher<org.ros.message.test_ros.TestHeader> publisher =
         publisherNode.newPublisher("foo", "test_ros/TestHeader");
     publisher.addListener(publisherListener);
@@ -154,7 +157,8 @@ public class TopicIntegrationTest {
     nodeConfiguration.setNodeName("subscriber");
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
     Listener listener = new Listener();
-    CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
+    CountDownSubscriberListener<org.ros.message.test_ros.TestHeader> subscriberListener =
+        CountDownSubscriberListener.create();
     Subscriber<org.ros.message.test_ros.TestHeader> subscriber =
         subscriberNode.newSubscriber("foo", "test_ros/TestHeader");
     subscriber.addMessageListener(listener);
@@ -177,7 +181,7 @@ public class TopicIntegrationTest {
       }
     };
     executorService.execute(publisherLoop);
-    assertTrue(listener.await(1, TimeUnit.DAYS));
+    assertTrue(listener.await(1, TimeUnit.SECONDS));
     publisherLoop.cancel();
 
     publisherNode.shutdown();

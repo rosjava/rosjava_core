@@ -25,17 +25,14 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class CountDownPublisherListener extends CountDownRegistrantListener<Publisher<?>> implements
-    PublisherListener {
+public class CountDownPublisherListener<T> extends CountDownRegistrantListener<Publisher<T>>
+    implements PublisherListener<T> {
 
   private CountDownLatch shutdownLatch;
   private CountDownLatch newSubscriberLatch;
 
-  /**
-   * Construct a {@link CountDownPublisherListener} with all counts set to 1.
-   */
-  public CountDownPublisherListener() {
-    this(1, 1, 1, 1, 1, 1);
+  public static <T> CountDownPublisherListener<T> create() {
+    return newFromCounts(1, 1, 1, 1, 1, 1);
   }
 
   /**
@@ -49,11 +46,12 @@ public class CountDownPublisherListener extends CountDownRegistrantListener<Publ
    * @param newSubscriberCount
    *          the number of counts to wait for for a new subscriber
    */
-  public CountDownPublisherListener(int masterRegistrationSuccessCount,
+  public static <T> CountDownPublisherListener<T> newFromCounts(int masterRegistrationSuccessCount,
       int masterRegistrationFailureCount, int masterUnregistrationSuccessCount,
       int masterUnregistrationFailureCount, int shutdownCount, int newSubscriberCount) {
-    this(new CountDownLatch(masterRegistrationSuccessCount), new CountDownLatch(
-        masterRegistrationFailureCount), new CountDownLatch(masterUnregistrationSuccessCount),
+    return new CountDownPublisherListener<T>(new CountDownLatch(masterRegistrationSuccessCount),
+        new CountDownLatch(masterRegistrationFailureCount), new CountDownLatch(
+            masterUnregistrationSuccessCount),
         new CountDownLatch(masterUnregistrationFailureCount), new CountDownLatch(shutdownCount),
         new CountDownLatch(newSubscriberCount));
   }
@@ -66,7 +64,7 @@ public class CountDownPublisherListener extends CountDownRegistrantListener<Publ
    * @param newSubscriberLatch
    *          the latch to use for a remote connection
    */
-  public CountDownPublisherListener(CountDownLatch masterRegistrationSuccessLatch,
+  private CountDownPublisherListener(CountDownLatch masterRegistrationSuccessLatch,
       CountDownLatch masterRegistrationFailureLatch,
       CountDownLatch masterUnregistrationSuccessLatch,
       CountDownLatch masterUnregistrationFailureLatch, CountDownLatch shutdownLatch,
@@ -78,12 +76,12 @@ public class CountDownPublisherListener extends CountDownRegistrantListener<Publ
   }
 
   @Override
-  public void onNewSubscriber(Publisher<?> publisher) {
+  public void onNewSubscriber(Publisher<T> publisher) {
     newSubscriberLatch.countDown();
   }
 
   @Override
-  public void onShutdown(Publisher<?> publisher) {
+  public void onShutdown(Publisher<T> publisher) {
     shutdownLatch.countDown();
   }
 

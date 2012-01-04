@@ -57,7 +57,6 @@ import org.ros.node.NodeListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
-import org.ros.node.service.ServiceServerListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
@@ -236,10 +235,8 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
-      GraphName serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
-      Collection<? extends ServiceServerListener> serverListeners) {
+  public <T, S> ServiceServer<T, S> newServiceServer(GraphName serviceName, String serviceType,
+      ServiceResponseBuilder<T, S> responseBuilder) {
     GraphName resolvedServiceName = resolveName(serviceName);
     // TODO(damonkohler): It's rather non-obvious that the URI will be created
     // later on the fly.
@@ -247,34 +244,16 @@ public class DefaultNode implements Node {
     ServiceMessageDefinition messageDefinition =
         ServiceMessageDefinitionFactory.createFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
-    MessageDeserializer<RequestType> requestDeserializer =
-        newServiceRequestDeserializer(serviceType);
-    MessageSerializer<ResponseType> responseSerializer = newServiceResponseSerializer(serviceType);
-    return serviceFactory.createServer(definition, requestDeserializer, responseSerializer,
-        responseBuilder, serverListeners);
+    MessageDeserializer<T> requestDeserializer = newServiceRequestDeserializer(serviceType);
+    MessageSerializer<S> responseSerializer = newServiceResponseSerializer(serviceType);
+    return serviceFactory.newServer(definition, requestDeserializer, responseSerializer,
+        responseBuilder);
   }
 
   @Override
-  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
-      GraphName serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
-    return newServiceServer(serviceName, serviceType, responseBuilder, null);
-  }
-
-  @Override
-  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
-      String serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
-      Collection<? extends ServiceServerListener> serverListeners) {
-    return newServiceServer(new GraphName(serviceName), serviceType, responseBuilder,
-        serverListeners);
-  }
-
-  @Override
-  public <RequestType, ResponseType> ServiceServer<RequestType, ResponseType> newServiceServer(
-      String serviceName, String serviceType,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
-    return newServiceServer(serviceName, serviceType, responseBuilder, null);
+  public <T, S> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
+      ServiceResponseBuilder<T, S> responseBuilder) {
+    return newServiceServer(new GraphName(serviceName), serviceType, responseBuilder);
   }
 
   @Override
@@ -293,12 +272,12 @@ public class DefaultNode implements Node {
     MessageSerializer<RequestType> requestSerializer = newServiceRequestSerializer(serviceType);
     MessageDeserializer<ResponseType> responseDeserializer =
         newServiceResponseDeserializer(serviceType);
-    return serviceFactory.createClient(definition, requestSerializer, responseDeserializer);
+    return serviceFactory.newClient(definition, requestSerializer, responseDeserializer);
   }
 
   @Override
-  public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
-      String serviceName, String serviceType) throws ServiceNotFoundException {
+  public <T, S> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
+      throws ServiceNotFoundException {
     return newServiceClient(new GraphName(serviceName), serviceType);
   }
 

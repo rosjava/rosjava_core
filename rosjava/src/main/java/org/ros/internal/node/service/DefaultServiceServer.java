@@ -44,29 +44,27 @@ import java.util.concurrent.ExecutorService;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultServiceServer<RequestType, ResponseType> implements
-    ServiceServer<RequestType, ResponseType> {
+public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
   private final ServiceDefinition definition;
-  private final MessageDeserializer<RequestType> deserializer;
-  private final MessageSerializer<ResponseType> serializer;
+  private final MessageDeserializer<T> deserializer;
+  private final MessageSerializer<S> serializer;
   private final AdvertiseAddress advertiseAddress;
-  private final ServiceResponseBuilder<RequestType, ResponseType> responseBuilder;
-  private final ListenerCollection<ServiceServerListener> listeners;
+  private final ServiceResponseBuilder<T, S> responseBuilder;
+  private final ListenerCollection<ServiceServerListener<T, S>> listeners;
 
-  public DefaultServiceServer(ServiceDefinition definition,
-      MessageDeserializer<RequestType> deserializer, MessageSerializer<ResponseType> serializer,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
+  public DefaultServiceServer(ServiceDefinition definition, MessageDeserializer<T> deserializer,
+      MessageSerializer<S> serializer, ServiceResponseBuilder<T, S> responseBuilder,
       AdvertiseAddress advertiseAddress, ExecutorService executorService) {
     this.definition = definition;
     this.deserializer = deserializer;
     this.serializer = serializer;
     this.responseBuilder = responseBuilder;
     this.advertiseAddress = advertiseAddress;
-    listeners = new ListenerCollection<ServiceServerListener>(executorService);
+    listeners = new ListenerCollection<ServiceServerListener<T, S>>(executorService);
   }
 
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
@@ -106,8 +104,7 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
   }
 
   public ChannelHandler createRequestHandler() {
-    return new ServiceRequestHandler<RequestType, ResponseType>(deserializer, serializer,
-        responseBuilder);
+    return new ServiceRequestHandler<T, S>(deserializer, serializer, responseBuilder);
   }
 
   /**
@@ -115,10 +112,10 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
    * registration is complete.
    */
   public void signalRegistrationDone() {
-    final ServiceServer<RequestType, ResponseType> serviceServer = this;
-    listeners.signal(new SignalRunnable<ServiceServerListener>() {
+    final ServiceServer<T, S> serviceServer = this;
+    listeners.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
       @Override
-      public void run(ServiceServerListener listener) {
+      public void run(ServiceServerListener<T, S> listener) {
         listener.onServiceServerRegistration(serviceServer);
       }
     });
@@ -130,12 +127,12 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
   }
 
   @Override
-  public void addListener(ServiceServerListener listener) {
+  public void addListener(ServiceServerListener<T, S> listener) {
     listeners.add(listener);
   }
 
   @Override
-  public void removeListener(ServiceServerListener listener) {
+  public void removeListener(ServiceServerListener<T, S> listener) {
     listeners.remove(listener);
   }
 }

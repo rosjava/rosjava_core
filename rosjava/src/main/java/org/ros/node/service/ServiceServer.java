@@ -27,12 +27,12 @@ import java.net.URI;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <RequestType>
+ * @param <T>
  *          the {@link ServiceServer} responds to requests of this type
- * @param <ResponseType>
+ * @param <S>
  *          the {@link ServiceServer} returns responses of this type
  */
-public interface ServiceServer<RequestType, ResponseType> {
+public interface ServiceServer<T, S> {
 
   /**
    * @return the name of the {@link ServiceServer}
@@ -55,7 +55,7 @@ public interface ServiceServer<RequestType, ResponseType> {
    * @param listener
    *          the {@link ServiceServerListener} to add
    */
-  void addListener(ServiceServerListener listener);
+  void addListener(ServiceServerListener<T, S> listener);
 
   /**
    * Remove a {@link ServiceServerListener}.
@@ -67,5 +67,5 @@ public interface ServiceServer<RequestType, ResponseType> {
    * @param listener
    *          the {@link ServiceServerListener} to remove
    */
-  void removeListener(ServiceServerListener listener);
+  void removeListener(ServiceServerListener<T, S> listener);
 }

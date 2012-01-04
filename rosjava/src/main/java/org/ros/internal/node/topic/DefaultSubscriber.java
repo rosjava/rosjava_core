@@ -40,11 +40,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Default implementation of the {@link Subscriber}.
+ * Default implementation of a {@link Subscriber}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subscriber<MessageType> {
+public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> {
 
   /**
    * The maximum delay before shutdown will begin even if all
@@ -56,7 +56,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
 
   private final ExecutorService executorService;
   private final ImmutableMap<String, String> header;
-  private final IncomingMessageQueue<MessageType> incomingMessageQueue;
+  private final IncomingMessageQueue<T> incomingMessageQueue;
   private final Set<PublisherIdentifier> knownPublishers;
   private final SlaveIdentifier slaveIdentifier;
   private final TcpClientConnectionManager tcpClientConnectionManager;
@@ -64,7 +64,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   /**
    * All {@link SubscriberListener} instances added to the subscriber.
    */
-  private final ListenerCollection<SubscriberListener> subscriberListeners;
+  private final ListenerCollection<SubscriberListener<T>> subscriberListeners;
 
   public static <S> DefaultSubscriber<S> create(SlaveIdentifier slaveIdentifier,
       TopicDefinition description, ExecutorService executorService,
@@ -73,12 +73,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   }
 
   private DefaultSubscriber(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
-      MessageDeserializer<MessageType> deserializer, ExecutorService executorService) {
+      MessageDeserializer<T> deserializer, ExecutorService executorService) {
     super(topicDefinition);
     this.executorService = executorService;
-    this.subscriberListeners = new ListenerCollection<SubscriberListener>(executorService);
+    this.subscriberListeners = new ListenerCollection<SubscriberListener<T>>(executorService);
     this.incomingMessageQueue =
-        new IncomingMessageQueue<MessageType>(deserializer, executorService);
+        new IncomingMessageQueue<T>(deserializer, executorService);
     this.slaveIdentifier = slaveIdentifier;
     header =
         ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
@@ -97,12 +97,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   }
 
   @Override
-  public void addMessageListener(MessageListener<MessageType> listener) {
+  public void addMessageListener(MessageListener<T> listener) {
     incomingMessageQueue.addListener(listener);
   }
 
   @Override
-  public void removeMessageListener(MessageListener<MessageType> listener) {
+  public void removeMessageListener(MessageListener<T> listener) {
     incomingMessageQueue.removeListener(listener);
   }
 
@@ -115,7 +115,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
       return;
     }
     tcpClientConnectionManager.connect(toString(), address,
-        new SubscriberHandshakeHandler<MessageType>(header, incomingMessageQueue),
+        new SubscriberHandshakeHandler<T>(header, incomingMessageQueue),
         "SubscriberHandshakeHandler");
     knownPublishers.add(publisherIdentifier);
     signalOnNewPublisher();
@@ -131,7 +131,7 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    */
   public void updatePublishers(Collection<PublisherIdentifier> publishers) {
     for (final PublisherIdentifier publisher : publishers) {
-      executorService.execute(new UpdatePublisherRunnable<MessageType>(this, this.slaveIdentifier,
+      executorService.execute(new UpdatePublisherRunnable<T>(this, this.slaveIdentifier,
           publisher));
     }
   }
@@ -149,12 +149,12 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
   }
 
   @Override
-  public void addSubscriberListener(SubscriberListener listener) {
+  public void addSubscriberListener(SubscriberListener<T> listener) {
     subscriberListeners.add(listener);
   }
 
   @Override
-  public void removeSubscriberListener(SubscriberListener listener) {
+  public void removeSubscriberListener(SubscriberListener<T> listener) {
     subscriberListeners.add(listener);
   }
 
@@ -167,10 +167,10 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    */
   @Override
   public void signalOnMasterRegistrationSuccess() {
-    final Subscriber<MessageType> subscriber = this;
-    subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+    final Subscriber<T> subscriber = this;
+    subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
       @Override
-      public void run(SubscriberListener listener) {
+      public void run(SubscriberListener<T> listener) {
         listener.onMasterRegistrationSuccess(subscriber);
       }
     });
@@ -185,10 +185,10 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    */
   @Override
   public void signalOnMasterRegistrationFailure() {
-    final Subscriber<MessageType> subscriber = this;
-    subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+    final Subscriber<T> subscriber = this;
+    subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
       @Override
-      public void run(SubscriberListener listener) {
+      public void run(SubscriberListener<T> listener) {
         listener.onMasterRegistrationFailure(subscriber);
       }
     });
@@ -203,10 +203,10 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    */
   @Override
   public void signalOnMasterUnregistrationSuccess() {
-    final Subscriber<MessageType> subscriber = this;
-    subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+    final Subscriber<T> subscriber = this;
+    subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
       @Override
-      public void run(SubscriberListener listener) {
+      public void run(SubscriberListener<T> listener) {
         listener.onMasterUnregistrationSuccess(subscriber);
       }
     });
@@ -221,10 +221,10 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    */
   @Override
   public void signalOnMasterUnregistrationFailure() {
-    final Subscriber<MessageType> subscriber = this;
-    subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+    final Subscriber<T> subscriber = this;
+    subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
       @Override
-      public void run(SubscriberListener listener) {
+      public void run(SubscriberListener<T> listener) {
         listener.onMasterUnregistrationFailure(subscriber);
       }
     });
@@ -238,10 +238,10 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    * Each listener is called in a separate thread.
    */
   public void signalOnNewPublisher() {
-    final Subscriber<MessageType> subscriber = this;
-    subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+    final Subscriber<T> subscriber = this;
+    subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
       @Override
-      public void run(SubscriberListener listener) {
+      public void run(SubscriberListener<T> listener) {
         listener.onNewPublisher(subscriber);
       }
     });
@@ -255,11 +255,11 @@ public class DefaultSubscriber<MessageType> extends DefaultTopic implements Subs
    * Each listener is called in a separate thread.
    */
   private void signalShutdown() {
-    final Subscriber<MessageType> subscriber = this;
+    final Subscriber<T> subscriber = this;
     try {
-      subscriberListeners.signal(new SignalRunnable<SubscriberListener>() {
+      subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
         @Override
-        public void run(SubscriberListener listener) {
+        public void run(SubscriberListener<T> listener) {
           listener.onShutdown(subscriber);
         }
       }, DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEOUT_UNITS);

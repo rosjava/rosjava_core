@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class CountDownSubscriberListener extends CountDownRegistrantListener<Subscriber<?>>
-    implements SubscriberListener {
+public class CountDownSubscriberListener<T> extends CountDownRegistrantListener<Subscriber<T>>
+    implements SubscriberListener<T> {
 
   private CountDownLatch shutdownLatch;
   private CountDownLatch newPublisherLatch;
@@ -34,8 +34,8 @@ public class CountDownSubscriberListener extends CountDownRegistrantListener<Sub
   /**
    * Construct a {@link CountDownSubscriberListener} with all counts set to 1.
    */
-  public CountDownSubscriberListener() {
-    this(1, 1, 1, 1, 1, 1);
+  public static <T> CountDownSubscriberListener<T> create() {
+    return newFromCounts(1, 1, 1, 1, 1, 1);
   }
 
   /**
@@ -47,13 +47,15 @@ public class CountDownSubscriberListener extends CountDownRegistrantListener<Sub
    * @param shutdownCount
    *          the number of counts to wait for for a shutdown
    * @param newPublisherCount
-   *          the number of counts to wait for for a new publisher 
+   *          the number of counts to wait for for a new publisher
    */
-  public CountDownSubscriberListener(int masterRegistrationSuccessCount,
-      int masterRegistrationFailureCount, int masterUnregistrationSuccessCount,
-      int masterUnregistrationFailureCount, int shutdownCount, int newSubscriberCount) {
-    this(new CountDownLatch(masterRegistrationSuccessCount), new CountDownLatch(
-        masterRegistrationFailureCount), new CountDownLatch(masterUnregistrationSuccessCount),
+  public static <T> CountDownSubscriberListener<T> newFromCounts(
+      int masterRegistrationSuccessCount, int masterRegistrationFailureCount,
+      int masterUnregistrationSuccessCount, int masterUnregistrationFailureCount,
+      int shutdownCount, int newSubscriberCount) {
+    return new CountDownSubscriberListener<T>(new CountDownLatch(masterRegistrationSuccessCount),
+        new CountDownLatch(masterRegistrationFailureCount), new CountDownLatch(
+            masterUnregistrationSuccessCount),
         new CountDownLatch(masterUnregistrationFailureCount), new CountDownLatch(shutdownCount),
         new CountDownLatch(newSubscriberCount));
   }
@@ -66,7 +68,7 @@ public class CountDownSubscriberListener extends CountDownRegistrantListener<Sub
    * @param newPublisherLatch
    *          the latch to use for a remote connection
    */
-  public CountDownSubscriberListener(CountDownLatch masterRegistrationSuccessLatch,
+  private CountDownSubscriberListener(CountDownLatch masterRegistrationSuccessLatch,
       CountDownLatch masterRegistrationFailureLatch,
       CountDownLatch masterUnregistrationSuccessLatch,
       CountDownLatch masterUnregistrationFailureLatch, CountDownLatch shutdownLatch,
@@ -78,12 +80,12 @@ public class CountDownSubscriberListener extends CountDownRegistrantListener<Sub
   }
 
   @Override
-  public void onNewPublisher(Subscriber<?> subscriber) {
+  public void onNewPublisher(Subscriber<T> subscriber) {
     newPublisherLatch.countDown();
   }
 
   @Override
-  public void onShutdown(Subscriber<?> subscriber) {
+  public void onShutdown(Subscriber<T> subscriber) {
     shutdownLatch.countDown();
   }
 
@@ -97,7 +99,7 @@ public class CountDownSubscriberListener extends CountDownRegistrantListener<Sub
   }
 
   /**
-   * Await for the requested number of remote connections for the given time
+   * Wait for the requested number of remote connections for the given time
    * period.
    * 
    * @param timeout
@@ -115,7 +117,7 @@ public class CountDownSubscriberListener extends CountDownRegistrantListener<Sub
   }
 
   /**
-   * Await for the requested number of shutdowns.
+   * Wait for the requested number of shutdowns.
    * 
    * @throws InterruptedException
    */
@@ -124,7 +126,7 @@ public class CountDownSubscriberListener extends CountDownRegistrantListener<Sub
   }
 
   /**
-   * Await for the requested number of shutdowns for the given time period.
+   * Wait for the requested number of shutdowns for the given time period.
    * 
    * @param timeout
    *          the maximum time to wait

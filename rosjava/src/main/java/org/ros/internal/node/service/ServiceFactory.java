@@ -24,13 +24,14 @@ import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
+import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceServer;
 import org.ros.node.service.ServiceServerListener;
 
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 /**
- * A factory for ROS service objects.
+ * A factory for {@link ServiceServer}s and {@link ServiceClient}s.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -66,22 +67,21 @@ public class ServiceFactory {
    * @return a {@link DefaultServiceServer} instance
    */
   @SuppressWarnings("unchecked")
-  public <RequestType, ResponseType> DefaultServiceServer<RequestType, ResponseType> createServer(
-      ServiceDefinition serviceDefinition, MessageDeserializer<RequestType> deserializer,
-      MessageSerializer<ResponseType> serializer,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
-      Collection<? extends ServiceServerListener> serverListeners) {
-    DefaultServiceServer<RequestType, ResponseType> serviceServer;
+  public <T, S> DefaultServiceServer<T, S> newServer(
+      ServiceDefinition serviceDefinition, MessageDeserializer<T> deserializer,
+      MessageSerializer<S> serializer,
+      ServiceResponseBuilder<T, S> responseBuilder) {
+    DefaultServiceServer<T, S> serviceServer;
     String name = serviceDefinition.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasServer(name)) {
         serviceServer =
-            (DefaultServiceServer<RequestType, ResponseType>) serviceManager.getServer(name);
+            (DefaultServiceServer<T, S>) serviceManager.getServer(name);
       } else {
         serviceServer =
-            new DefaultServiceServer<RequestType, ResponseType>(serviceDefinition, deserializer,
+            new DefaultServiceServer<T, S>(serviceDefinition, deserializer,
                 serializer, responseBuilder, slaveServer.getTcpRosAdvertiseAddress(),
                 executorService);
         createdNewService = true;
@@ -91,13 +91,6 @@ public class ServiceFactory {
     if (createdNewService) {
       slaveServer.addService(serviceServer);
     }
-
-    if (serverListeners != null) {
-      for (ServiceServerListener listener : serverListeners) {
-        serviceServer.addListener(listener);
-      }
-    }
-
     return serviceServer;
   }
 
@@ -113,7 +106,7 @@ public class ServiceFactory {
    * @return a {@link DefaultServiceClient} instance
    */
   @SuppressWarnings("unchecked")
-  public <RequestType, ResponseType> DefaultServiceClient<RequestType, ResponseType> createClient(
+  public <RequestType, ResponseType> DefaultServiceClient<RequestType, ResponseType> newClient(
       ServiceDefinition serviceDefinition, MessageSerializer<RequestType> serializer,
       MessageDeserializer<ResponseType> deserializer) {
     Preconditions.checkNotNull(serviceDefinition.getUri());

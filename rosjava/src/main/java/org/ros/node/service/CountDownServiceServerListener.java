@@ -23,17 +23,19 @@ import java.util.concurrent.TimeUnit;
  * A {@link ServiceServerListener} which uses {@link CountDownLatch} to track
  * message invocations.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
-public class CountDownServiceServerListener implements ServiceServerListener {
+public class CountDownServiceServerListener<T, S> implements ServiceServerListener<T, S> {
+
   private CountDownLatch registrationLatch;
   private CountDownLatch shutdownLatch;
 
   /**
-   * Listener with counts of 1.
+   * Construct a {@link CountDownServiceServerListener} with all counts set to
+   * 1.
    */
-  public CountDownServiceServerListener() {
-    this(1, 1);
+  public static <T, S> CountDownServiceServerListener<T, S> create() {
+    return new CountDownServiceServerListener<T, S>(1, 1);
   }
 
   /**
@@ -42,18 +44,18 @@ public class CountDownServiceServerListener implements ServiceServerListener {
    * @param shutdownCount
    *          the number of counts to wait for for a shutdown
    */
-  public CountDownServiceServerListener(int registerationCount, int shutdownCount) {
+  private CountDownServiceServerListener(int registerationCount, int shutdownCount) {
     registrationLatch = new CountDownLatch(registerationCount);
     shutdownLatch = new CountDownLatch(shutdownCount);
   }
 
   @Override
-  public void onServiceServerRegistration(ServiceServer<?, ?> server) {
+  public void onServiceServerRegistration(ServiceServer<T, S> server) {
     registrationLatch.countDown();
   }
 
   @Override
-  public void onServiceServerShutdown(ServiceServer<?, ?> server) {
+  public void onServiceServerShutdown(ServiceServer<T, S> server) {
     shutdownLatch.countDown();
   }
   /**
@@ -107,5 +109,4 @@ public class CountDownServiceServerListener implements ServiceServerListener {
   public boolean awaitShutdown(long timeout, TimeUnit unit) throws InterruptedException {
     return shutdownLatch.await(timeout, unit);
   }
-
 }

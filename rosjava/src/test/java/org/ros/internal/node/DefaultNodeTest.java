@@ -150,17 +150,20 @@ public class DefaultNodeTest {
     ((DefaultNode) node).getRegistrar().setRetryDelay(1, TimeUnit.MILLISECONDS);
 
     RosoutLogger rosoutLogger = (RosoutLogger) node.getLog();
-    CountDownPublisherListener rosoutLoggerPublisherListener = new CountDownPublisherListener();
+    CountDownPublisherListener<org.ros.message.rosgraph_msgs.Log> rosoutLoggerPublisherListener =
+        CountDownPublisherListener.create();
     rosoutLogger.getPublisher().addListener(rosoutLoggerPublisherListener);
     assertTrue(rosoutLoggerPublisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
-    CountDownPublisherListener publisherListener = new CountDownPublisherListener();
+    CountDownPublisherListener<org.ros.message.std_msgs.String> publisherListener =
+        CountDownPublisherListener.create();
     Publisher<org.ros.message.std_msgs.String> publisher =
         node.newPublisher("/foo", "std_msgs/String");
     publisher.addListener(publisherListener);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
-    CountDownSubscriberListener subscriberListener = new CountDownSubscriberListener();
+    CountDownSubscriberListener<org.ros.message.std_msgs.String> subscriberListener =
+        CountDownSubscriberListener.create();
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         node.newSubscriber("/foo", "std_msgs/String");
     subscriber.addSubscriberListener(subscriberListener);
@@ -230,7 +233,8 @@ public class DefaultNodeTest {
     assertTrue(nodeUri.getPort() > 0);
     checkHostName(nodeUri.getHost());
 
-    CountDownPublisherListener publisherListener = new CountDownPublisherListener();
+    CountDownPublisherListener<org.ros.message.std_msgs.Int64> publisherListener =
+        CountDownPublisherListener.create();
     Publisher<org.ros.message.std_msgs.Int64> publisher =
         node.newPublisher("test_addresses_pub", "std_msgs/Int64");
     publisher.addListener(publisherListener);

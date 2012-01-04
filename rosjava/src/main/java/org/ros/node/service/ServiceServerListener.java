@@ -19,23 +19,19 @@ package org.ros.node.service;
 /**
  * A listener for events from a {@link ServiceServer}.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
-public interface ServiceServerListener {
+public interface ServiceServerListener<T, S> {
 
   /**
-   * A {@link ServiceServer} has been registered.
-   * 
-   * @param server
-   *          The server which has been registered.
+   * @param serviceServer
+   *          the {@link ServiceServer} which has been registered
    */
-  void onServiceServerRegistration(ServiceServer<?, ?> server);
+  void onServiceServerRegistration(ServiceServer<T, S> serviceServer);
 
   /**
-   * A {@link ServiceServer} has been shut down.
-   * 
-   * @param server
-   *          The server which has been shut down.
+   * @param serviceServer
+   *          the {@link ServiceServer} which has been shut down
    */
-  void onServiceServerShutdown(ServiceServer<?, ?> server);
+  void onServiceServerShutdown(ServiceServer<T, S> serviceServer);
 }

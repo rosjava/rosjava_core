@@ -21,29 +21,29 @@ package org.ros.node.topic;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class DefaultPublisherListener implements PublisherListener {
+public class DefaultPublisherListener<T> implements PublisherListener<T> {
 
   @Override
-  public void onMasterRegistrationSuccess(Publisher<?> publisher) {
+  public void onMasterRegistrationSuccess(Publisher<T> publisher) {
   }
 
   @Override
-  public void onMasterRegistrationFailure(Publisher<?> publisher) {
+  public void onMasterRegistrationFailure(Publisher<T> publisher) {
   }
 
   @Override
-  public void onMasterUnregistrationSuccess(Publisher<?> publisher) {
+  public void onMasterUnregistrationSuccess(Publisher<T> publisher) {
   }
 
   @Override
-  public void onMasterUnregistrationFailure(Publisher<?> publisher) {
+  public void onMasterUnregistrationFailure(Publisher<T> publisher) {
   }
 
   @Override
-  public void onNewSubscriber(Publisher<?> publisher) {
+  public void onNewSubscriber(Publisher<T> publisher) {
   }
 
   @Override
-  public void onShutdown(Publisher<?> publisher) {
+  public void onShutdown(Publisher<T> publisher) {
   }
 }

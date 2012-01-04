@@ -37,6 +37,7 @@ public class RegistrarTest {
   private final TopicDefinition topicDefinition;
   private final MessageSerializer<org.ros.message.std_msgs.String> messageSerializer;
 
+  private ExecutorService executorService;
   private MasterServer masterServer;
   private MasterClient masterClient;
   private Registrar registrar;
@@ -45,8 +46,7 @@ public class RegistrarTest {
   private ParameterManager parameterManager;
   private SlaveServer slaveServer;
   private DefaultPublisher<org.ros.message.std_msgs.String> publisher;
-  private ExecutorService executorService;
-  private CountDownPublisherListener publisherListener;
+  private CountDownPublisherListener<org.ros.message.std_msgs.String> publisherListener;
 
   public RegistrarTest() {
     topicDefinition =
@@ -74,13 +74,13 @@ public class RegistrarTest {
     slaveServer.start();
     registrar.start(slaveServer.toSlaveIdentifier());
 
-    publisherListener = new CountDownPublisherListener();    
     publisher =
-            new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer,
-                executorService);
+        new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer,
+            executorService);
+    publisherListener = CountDownPublisherListener.create();
     publisher.addListener(publisherListener);
   }
-  
+
   @After
   public void tearDown() {
     registrar.shutdown();

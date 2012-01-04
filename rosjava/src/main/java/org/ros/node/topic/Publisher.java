@@ -26,10 +26,10 @@ import java.util.concurrent.TimeUnit;
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <MessageType>
+ * @param <T>
  *          the {@link Publisher} may only publish messages of this type
  */
-public interface Publisher<MessageType> extends Topic {
+public interface Publisher<T> extends Topic {
 
   /**
    * @see http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options
@@ -53,7 +53,7 @@ public interface Publisher<MessageType> extends Topic {
    * @param message
    *          the message to publish
    */
-  void publish(MessageType message);
+  void publish(T message);
 
   /**
    * @return {@code true} if {@code getNumberOfSubscribers() > 0}, {@code false}
@@ -104,7 +104,7 @@ public interface Publisher<MessageType> extends Topic {
    * @param listener
    *          the {@link PublisherListener} to add
    */
-  void addListener(PublisherListener listener);
+  void addListener(PublisherListener<T> listener);
 
   /**
    * Remove a lifecycle listener from the {@link Publisher}.
@@ -115,7 +115,7 @@ public interface Publisher<MessageType> extends Topic {
    * @param listener
    *          the {@link PublisherListener} to remove
    */
-  void removeListener(PublisherListener listener);
+  void removeListener(PublisherListener<T> listener);
 
   /**
    * @param limit

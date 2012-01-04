@@ -21,7 +21,7 @@ package org.ros.node.topic;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public interface PublisherListener extends RegistrantListener<Publisher<?>> {
+public interface PublisherListener<T> extends RegistrantListener<Publisher<T>> {
 
   /**
    * A {@link Subscriber} has connected to the {@link Publisher}.
@@ -29,7 +29,7 @@ public interface PublisherListener extends RegistrantListener<Publisher<?>> {
    * @param publisher
    *          the {@link Publisher} which has received the new connection
    */
-  void onNewSubscriber(Publisher<?> publisher);
+  void onNewSubscriber(Publisher<T> publisher);
 
   /**
    * The {@link Publisher} has been shut down.
@@ -37,5 +37,5 @@ public interface PublisherListener extends RegistrantListener<Publisher<?>> {
    * @param publisher
    *          the {@link Publisher} which has been shut down
    */
-  void onShutdown(Publisher<?> publisher);
+  void onShutdown(Publisher<T> publisher);
 }

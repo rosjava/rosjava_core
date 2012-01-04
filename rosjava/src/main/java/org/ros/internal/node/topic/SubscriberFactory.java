@@ -16,11 +16,10 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.MessageDeserializer;
+import org.ros.node.topic.DefaultSubscriberListener;
 import org.ros.node.topic.Subscriber;
-import org.ros.node.topic.SubscriberListener;
 
 import java.util.concurrent.ExecutorService;
 
@@ -43,58 +42,36 @@ public class SubscriberFactory {
   }
 
   /**
-   * Gets or creates a {@link DefaultSubscriber} instance.
-   * {@link DefaultSubscriber}s are cached and reused per topic. When a new
-   * {@link DefaultSubscriber} is generated, it is registered with the
-   * {@link MasterServer}.
+   * Gets or creates a {@link Subscriber} instance. {@link Subscriber}s are
+   * cached and reused per topic. When a new {@link Subscriber} is generated, it
+   * is registered with the master.
    * 
-   * @param <MessageType>
+   * @param <T>
+   *          the message type associated with the new {@link Subscriber}
    * @param topicDefinition
    *          {@link TopicDefinition} that is subscribed to
-   * @param deserializer
-   * @param listeners
-   *          lifecycle listeners for the {@link Subscriber} instance (can be
-   *          {@code null})
-   * @return a {@link DefaultSubscriber} instance
+   * @param messageDeserializer
+   *          the {@link MessageDeserializer} to use for incoming messages
+   * @return a new or cached {@link Subscriber} instance
    */
   @SuppressWarnings("unchecked")
-  public <MessageType> Subscriber<MessageType> create(TopicDefinition topicDefinition,
-      MessageDeserializer<MessageType> deserializer) {
+  public <T> Subscriber<T> create(TopicDefinition topicDefinition,
+      MessageDeserializer<T> messageDeserializer) {
     String topicName = topicDefinition.getName().toString();
-    DefaultSubscriber<MessageType> subscriber;
+    DefaultSubscriber<T> subscriber;
     boolean createdNewSubscriber = false;
 
     synchronized (topicManager) {
       if (topicManager.hasSubscriber(topicName)) {
-        subscriber = (DefaultSubscriber<MessageType>) topicManager.getSubscriber(topicName);
+        subscriber = (DefaultSubscriber<T>) topicManager.getSubscriber(topicName);
       } else {
         subscriber =
             DefaultSubscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition,
-                executorService, deserializer);
-        subscriber.addSubscriberListener(new SubscriberListener() {
+                executorService, messageDeserializer);
+        subscriber.addSubscriberListener(new DefaultSubscriberListener<T>() {
           @Override
-          public void onShutdown(Subscriber<?> subscriber) {
-            topicManager.removeSubscriber((DefaultSubscriber<?>) subscriber);
-          }
-          
-          @Override
-          public void onNewPublisher(Subscriber<?> subscriber) {
-          }
-          
-          @Override
-          public void onMasterRegistrationSuccess(Subscriber<?> subscriber) {
-          }
-          
-          @Override
-          public void onMasterRegistrationFailure(Subscriber<?> subscriber) {
-          }
-
-          @Override
-          public void onMasterUnregistrationSuccess(Subscriber<?> subscriber) {
-          }
-
-          @Override
-          public void onMasterUnregistrationFailure(Subscriber<?> subscriber) {
+          public void onShutdown(Subscriber<T> subscriber) {
+            topicManager.removeSubscriber((DefaultSubscriber<T>) subscriber);
           }
         });
         createdNewSubscriber = true;

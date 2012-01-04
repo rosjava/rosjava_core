@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class CountDownRegistrantListener<T> implements RegistrantListener<T> {
+class CountDownRegistrantListener<T> implements RegistrantListener<T> {
 
   private CountDownLatch masterRegistrationSuccessLatch;
   private CountDownLatch masterRegistrationFailureLatch;

@@ -9,10 +9,12 @@ import org.ros.message.Time;
 import org.ros.message.actionlib_msgs.GoalID;
 import org.ros.message.actionlib_msgs.GoalStatusArray;
 import org.ros.node.Node;
-import org.ros.node.topic.CountDownPublisherListener;
+import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
+import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -114,9 +116,11 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
   protected volatile boolean active = true;
 
   /**
-   * Listener to know when the client is connected or not.
+   * Listeners to know when the client is connected or not.
    */
-  private CountDownPublisherListener publisherListener;
+  private CountDownLatch readyLatch;
+  private PublisherListener<T_ACTION_GOAL> goalPublisherListener;
+  private PublisherListener<GoalID> cancelPublisherListener;
 
   /**
    * Constructor used to create an ActionClient that will be a child node of the
@@ -137,11 +141,23 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
       throws RosException {
     this.nodeName = name;
     this.spec = spec;
-    this.publisherListener = new CountDownPublisherListener(2, 2, 2, 2, 2, 2);
+    this.readyLatch = new CountDownLatch(2);
+    this.goalPublisherListener = new DefaultPublisherListener<T_ACTION_GOAL>() {
+      @Override
+      public void onNewSubscriber(Publisher<T_ACTION_GOAL> publisher) {
+        readyLatch.countDown();
+      }
+    };
+    this.cancelPublisherListener = new DefaultPublisherListener<GoalID>() {
+      @Override
+      public void onNewSubscriber(Publisher<GoalID> publisher) {
+        readyLatch.countDown();
+      }
+    };
   }
 
   /**
-   * Add all actionclient publishers and subscribers to the given node.
+   * Add all action client publishers and subscribers to the given node.
    * 
    * <p>
    * Lifetime of the node is taken over by the client.
@@ -182,10 +198,10 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
     subStatus.addMessageListener(statusCallback);
 
     pubGoal = node.newPublisher(ActionConstants.TOPIC_NAME_GOAL, spec.getActionGoalMessage());
-    pubGoal.addListener(publisherListener);
+    pubGoal.addListener(goalPublisherListener);
     pubCancelGoal =
         node.newPublisher(ActionConstants.TOPIC_NAME_CANCEL, ActionConstants.MESSAGE_TYPE_CANCEL);
-    pubCancelGoal.addListener(publisherListener);
+    pubCancelGoal.addListener(cancelPublisherListener);
 
     // Uses the node of the action client so must be done here.
     goalManager =
@@ -312,7 +328,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
    *         established)
    */
   public void waitForActionServerToStart() throws InterruptedException {
-    publisherListener.awaitNewSubscriber();
+    readyLatch.await();
   }
 
   /**
@@ -334,7 +350,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
     // TODO(keith): This isn't quite right since it will only have connection to
     // the goal and cancel publishers. This should be extended to include the
     // subscribers.
-    return publisherListener.awaitNewSubscriber(timeout, units);
+    return readyLatch.await(timeout, units);
   }
 
   /**
