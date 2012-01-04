@@ -93,6 +93,8 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
                     "Connection refused, marking as defunct: " + tcpClientConnection.getName(),
                     future.getCause());
               }
+              // TODO(damonkohler): Add a listener so that publishers and
+              // subscribers can be notified when they lose a connection.
               tcpClientConnection.setDefunct(true);
             }
           }

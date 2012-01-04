@@ -55,7 +55,6 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
   private final MessageSerializer<ResponseType> serializer;
   private final AdvertiseAddress advertiseAddress;
   private final ServiceResponseBuilder<RequestType, ResponseType> responseBuilder;
-  private final ExecutorService executorService;
   private final ListenerCollection<ServiceServerListener> listeners;
 
   public DefaultServiceServer(ServiceDefinition definition,
@@ -67,7 +66,6 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
     this.serializer = serializer;
     this.responseBuilder = responseBuilder;
     this.advertiseAddress = advertiseAddress;
-    this.executorService = executorService;
     listeners = new ListenerCollection<ServiceServerListener>(executorService);
   }
 
