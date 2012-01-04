@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
 import org.ros.address.AdvertiseAddress;
+import org.ros.concurrent.ListenerCollection;
+import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.transport.ConnectionHeader;
@@ -34,9 +36,7 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.service.ServiceServerListener;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -55,9 +55,9 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
   private final MessageSerializer<ResponseType> serializer;
   private final AdvertiseAddress advertiseAddress;
   private final ServiceResponseBuilder<RequestType, ResponseType> responseBuilder;
-  private final List<ServiceServerListener> serverListeners = new CopyOnWriteArrayList<ServiceServerListener>();
   private final ExecutorService executorService;
-  
+  private final ListenerCollection<ServiceServerListener> listeners;
+
   public DefaultServiceServer(ServiceDefinition definition,
       MessageDeserializer<RequestType> deserializer, MessageSerializer<ResponseType> serializer,
       ServiceResponseBuilder<RequestType, ResponseType> responseBuilder,
@@ -68,6 +68,7 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
     this.responseBuilder = responseBuilder;
     this.advertiseAddress = advertiseAddress;
     this.executorService = executorService;
+    listeners = new ListenerCollection<ServiceServerListener>(executorService);
   }
 
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
@@ -112,19 +113,16 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
   }
 
   /**
-   * SignalRunnable to all registered {@link ServiceServerListener} instances that registration
-   * is complete.
+   * Signal all registered {@link ServiceServerListener} instances that
+   * registration is complete.
    */
   public void signalRegistrationDone() {
-    final ServiceServer<RequestType, ResponseType> server = this;
-    executorService.execute(new Runnable() {
+    final ServiceServer<RequestType, ResponseType> serviceServer = this;
+    listeners.signal(new SignalRunnable<ServiceServerListener>() {
       @Override
-      public void run() {
-        for (ServiceServerListener listener : serverListeners) {
-          listener.onServiceServerRegistration(server);
-        }
+      public void run(ServiceServerListener listener) {
+        listener.onServiceServerRegistration(serviceServer);
       }
-      
     });
   }
 
@@ -134,13 +132,12 @@ public class DefaultServiceServer<RequestType, ResponseType> implements
   }
 
   @Override
-  public void addServiceServerListener(ServiceServerListener listener) {
-    serverListeners.add(listener);
+  public void addListener(ServiceServerListener listener) {
+    listeners.add(listener);
   }
 
   @Override
-  public void removeServiceServerListener(ServiceServerListener listener) {
-    serverListeners.remove(listener);
+  public void removeListener(ServiceServerListener listener) {
+    listeners.remove(listener);
   }
-
 }

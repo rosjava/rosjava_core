@@ -94,7 +94,7 @@ public class ServiceFactory {
 
     if (serverListeners != null) {
       for (ServiceServerListener listener : serverListeners) {
-        serviceServer.addServiceServerListener(listener);
+        serviceServer.addListener(listener);
       }
     }
 

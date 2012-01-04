@@ -56,31 +56,29 @@ public abstract class DefaultTopic implements Topic {
   }
 
   /**
-   * Get the definition header for the topic.
-   * 
-   * @return
+   * @return the connection header for the {@link Topic}
    */
   public Map<String, String> getTopicDefinitionHeader() {
     return topicDefinition.toHeader();
   }
 
   /**
-   * SignalRunnable that the {@link Topic} successfully registered with the master.
+   * Signal that the {@link Topic} successfully registered with the master.
    */
   public abstract void signalOnMasterRegistrationSuccess();
 
   /**
-   * SignalRunnable that the {@link Topic} failed to register with the master.
+   * Signal that the {@link Topic} failed to register with the master.
    */
   public abstract void signalOnMasterRegistrationFailure();
 
   /**
-   * SignalRunnable that the {@link Topic} successfully unregistered with the master.
+   * Signal that the {@link Topic} successfully unregistered with the master.
    */
   public abstract void signalOnMasterUnregistrationSuccess();
 
   /**
-   * SignalRunnable that the {@link Topic} failed to unregister with the master.
+   * Signal that the {@link Topic} failed to unregister with the master.
    */
   public abstract void signalOnMasterUnregistrationFailure();
 }

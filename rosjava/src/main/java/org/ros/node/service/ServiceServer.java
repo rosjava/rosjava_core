@@ -50,22 +50,22 @@ public interface ServiceServer<RequestType, ResponseType> {
   void shutdown();
 
   /**
-   * Add a new lifecycle listener to the server.
+   * Add a {@link ServiceServerListener}.
    * 
    * @param listener
-   *          The listener to add.
+   *          the {@link ServiceServerListener} to add
    */
-  void addServiceServerListener(ServiceServerListener listener);
+  void addListener(ServiceServerListener listener);
 
   /**
-   * Remove a lifecycle listener from the server.
+   * Remove a {@link ServiceServerListener}.
    * 
    * <p>
-   * Nothing is done if the listener was never added.
-   *
+   * This has no effect if the specified {@link ServiceServerListener} was never
+   * added.
+   * 
    * @param listener
-   *          The listener to remove.
+   *          the {@link ServiceServerListener} to remove
    */
-  void removeServiceServerListener(ServiceServerListener listener);
-
+  void removeListener(ServiceServerListener listener);
 }

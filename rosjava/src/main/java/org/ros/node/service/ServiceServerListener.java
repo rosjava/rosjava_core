@@ -38,5 +38,4 @@ public interface ServiceServerListener {
    *          The server which has been shut down.
    */
   void onServiceServerShutdown(ServiceServer<?, ?> server);
-
 }

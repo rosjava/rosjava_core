@@ -16,12 +16,12 @@
 
 package org.ros.message;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 import org.ros.internal.transport.ConnectionHeaderFields;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -75,6 +75,7 @@ public class MessageDefinition {
     return new ImmutableMap.Builder<String, String>()
         .put(ConnectionHeaderFields.TYPE, type)
         .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum)
+        .put(ConnectionHeaderFields.MESSAGE_DEFINITION, definition)
         .build();
   }
 
@@ -106,5 +107,4 @@ public class MessageDefinition {
     } else if (!md5Checksum.equals(other.md5Checksum)) return false;
     return true;
   }
-
 }
