@@ -35,6 +35,12 @@ public interface TopicListener {
    */
   void publisherAdded(DefaultPublisher<?> publisher);
 
+  /**
+   * Called when a new {@link Publisher} has been removed.
+   * 
+   * @param publisher
+   *          the {@link Publisher} which has been removed
+   */
   void publisherRemoved(DefaultPublisher<?> publisher);
 
   /**
@@ -45,5 +51,11 @@ public interface TopicListener {
    */
   void subscriberAdded(DefaultSubscriber<?> subscriber);
 
+  /**
+   * Called when a {@link Subscriber} has been removed.
+   * 
+   * @param subscriber
+   *          the {@link Subscriber} which has been removed
+   */
   void subscriberRemoved(DefaultSubscriber<?> subscriber);
 }

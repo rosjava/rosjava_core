@@ -153,7 +153,7 @@ public class Response<ResultType> {
 
   @Override
   public String toString() {
-    return "Response<" + statusCode + ", " + statusMessage + ", " + result.toString() + ">";
+    return "Response<" + statusCode + ", " + statusMessage + ", " + result + ">";
   }
 
   public boolean isSuccess() {

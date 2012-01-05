@@ -111,13 +111,14 @@ public class ServiceIntegrationTest {
     Node serverNode = nodeFactory.newNode(nodeConfiguration);
     CountDownServiceServerListener<AddTwoInts.Request, AddTwoInts.Response> serviceServerListener =
         CountDownServiceServerListener.create();
-    ServiceServer<AddTwoInts.Request, AddTwoInts.Response> serviceServer = serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
-        new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
-          @Override
-          public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
-            throw new ServiceException(errorMessage);
-          }
-        });
+    ServiceServer<AddTwoInts.Request, AddTwoInts.Response> serviceServer =
+        serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
+            new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
+              @Override
+              public AddTwoInts.Response build(AddTwoInts.Request request) throws ServiceException {
+                throw new ServiceException(errorMessage);
+              }
+            });
     serviceServer.addListener(serviceServerListener);
     assertTrue(serviceServerListener.awaitRegistration(1, TimeUnit.SECONDS));
 

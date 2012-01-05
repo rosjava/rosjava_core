@@ -20,6 +20,7 @@ import com.google.common.collect.Maps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.exception.RosRuntimeException;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -66,7 +67,7 @@ public class RetryingExecutorService {
       try {
         retry = future.get();
       } catch (ExecutionException e) {
-        retry = true;
+        throw new RosRuntimeException(e);
       }
       if (retry) {
         if (DEBUG) {

@@ -20,6 +20,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -28,6 +30,7 @@ import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
+import org.ros.node.topic.DefaultSubscriberListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import org.ros.node.topic.SubscriberListener;
@@ -45,6 +48,8 @@ import java.util.concurrent.TimeUnit;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> {
+
+  private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
   /**
    * The maximum delay before shutdown will begin even if all
@@ -76,15 +81,37 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
       MessageDeserializer<T> deserializer, ExecutorService executorService) {
     super(topicDefinition);
     this.executorService = executorService;
-    this.subscriberListeners = new ListenerCollection<SubscriberListener<T>>(executorService);
-    this.incomingMessageQueue =
-        new IncomingMessageQueue<T>(deserializer, executorService);
+    this.incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
     this.slaveIdentifier = slaveIdentifier;
     header =
-        ImmutableMap.<String, String>builder().putAll(slaveIdentifier.toHeader())
-            .putAll(topicDefinition.toHeader()).build();
+        ImmutableMap.<String, String>builder()
+            .putAll(slaveIdentifier.toHeader())
+            .putAll(topicDefinition.toHeader())
+            .build();
     knownPublishers = Sets.newHashSet();
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
+    subscriberListeners = new ListenerCollection<SubscriberListener<T>>(executorService);
+    subscriberListeners.add(new DefaultSubscriberListener<T>() {
+      @Override
+      public void onMasterRegistrationSuccess(Subscriber<T> registrant) {
+        log.info("Subscriber registered: " + DefaultSubscriber.this);
+      }
+
+      @Override
+      public void onMasterRegistrationFailure(Subscriber<T> registrant) {
+        log.info("Subscriber registration failed: " + DefaultSubscriber.this);
+      }
+
+      @Override
+      public void onMasterUnregistrationSuccess(Subscriber<T> registrant) {
+        log.info("Subscriber unregistered: " + DefaultSubscriber.this);
+      }
+
+      @Override
+      public void onMasterUnregistrationFailure(Subscriber<T> registrant) {
+        log.info("Subscriber unregistration failed: " + DefaultSubscriber.this);
+      }
+    });
   }
 
   public Collection<String> getSupportedProtocols() {
@@ -114,9 +141,8 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
     if (knownPublishers.contains(publisherIdentifier)) {
       return;
     }
-    tcpClientConnectionManager.connect(toString(), address,
-        new SubscriberHandshakeHandler<T>(header, incomingMessageQueue),
-        "SubscriberHandshakeHandler");
+    tcpClientConnectionManager.connect(toString(), address, new SubscriberHandshakeHandler<T>(
+        header, incomingMessageQueue), "SubscriberHandshakeHandler");
     knownPublishers.add(publisherIdentifier);
     signalOnNewPublisher();
   }
@@ -131,8 +157,8 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
    */
   public void updatePublishers(Collection<PublisherIdentifier> publishers) {
     for (final PublisherIdentifier publisher : publishers) {
-      executorService.execute(new UpdatePublisherRunnable<T>(this, this.slaveIdentifier,
-          publisher));
+      executorService
+          .execute(new UpdatePublisherRunnable<T>(this, this.slaveIdentifier, publisher));
     }
   }
 

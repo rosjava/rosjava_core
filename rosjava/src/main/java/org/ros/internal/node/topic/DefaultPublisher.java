@@ -30,6 +30,7 @@ import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.OutgoingMessageQueue;
 import org.ros.message.MessageSerializer;
+import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
@@ -65,8 +66,29 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   public DefaultPublisher(TopicDefinition topicDefinition, MessageSerializer<T> serializer,
       ExecutorService executorService) {
     super(topicDefinition);
-    publisherListeners = new ListenerCollection<PublisherListener<T>>(executorService);
     outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
+    publisherListeners = new ListenerCollection<PublisherListener<T>>(executorService);
+    publisherListeners.add(new DefaultPublisherListener<T>() {
+      @Override
+      public void onMasterRegistrationSuccess(Publisher<T> registrant) {
+        log.info("Publisher registered: " + DefaultPublisher.this);
+      }
+
+      @Override
+      public void onMasterRegistrationFailure(Publisher<T> registrant) {
+        log.info("Publisher registration failed: " + DefaultPublisher.this);
+      }
+
+      @Override
+      public void onMasterUnregistrationSuccess(Publisher<T> registrant) {
+        log.info("Publisher unregistered: " + DefaultPublisher.this);
+      }
+
+      @Override
+      public void onMasterUnregistrationFailure(Publisher<T> registrant) {
+        log.info("Publisher unregistration failed: " + DefaultPublisher.this);
+      }
+    });
   }
 
   @Override
