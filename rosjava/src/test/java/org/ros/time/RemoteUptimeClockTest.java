@@ -17,13 +17,10 @@
 package org.ros.time;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.message.Duration;
-import org.ros.message.Time;
-import org.ros.time.RemoteUptimeClock.NanoTimeProvider;
+import org.ros.time.RemoteUptimeClock.LocalUptimeProvider;
 
 import java.util.concurrent.Callable;
 
@@ -32,108 +29,121 @@ import java.util.concurrent.Callable;
  */
 public class RemoteUptimeClockTest {
 
-  private static final long UPTIME_LATENCY_NS = (long) 1e6;
-  private static final double SENSITIVITY = 0.1;
-
-  private TimeProvider epochTimeProvider;
-  private Time epochTime;
-  private NanoTimeProvider nanoTimeProvider;
-  private long[] nanoTime;
+  private double localUptime;
+  private double remoteUptime;
+  private double delta;
   private double drift;
-  private long[] uptime;
-  private RemoteUptimeClock remoteUptimeClock;
-  private Callable<Long> uptimeCallable;
+  private double driftSensitivity;
+  private double errorReductionCoefficientSensitivity;
+  private int latencyOutlierFilterSampleSize;
+  private double latencyOutlierFilterThreshold;
 
   @Before
   public void setup() {
-    epochTime = new Time(0, 100);
-    epochTimeProvider = new TimeProvider() {
-      @Override
-      public Time getCurrentTime() {
-        return new Time(epochTime);
-      }
-    };
-    nanoTime = new long[] { 0 };
-    nanoTimeProvider = new NanoTimeProvider() {
-      @Override
-      public long nanoTime() {
-        return nanoTime[0];
-      }
-    };
+    localUptime = 0;
+    remoteUptime = 0;
+  }
+
+  private RemoteUptimeClock newRemoteUptimeClock() {
+    RemoteUptimeClock remoteUptimeClock =
+        new RemoteUptimeClock(new LocalUptimeProvider() {
+          @Override
+          public double getSeconds() {
+            moveTimeForward(delta, drift);
+            return localUptime;
+          }
+        }, new Callable<Double>() {
+          @Override
+          public Double call() throws Exception {
+            return remoteUptime;
+          }
+        }, driftSensitivity, errorReductionCoefficientSensitivity, latencyOutlierFilterSampleSize,
+            latencyOutlierFilterThreshold);
+    return remoteUptimeClock;
+  }
+
+  private void moveTimeForward(double delta, double drift) {
+    localUptime += delta;
+    remoteUptime += delta / drift;
+  }
+
+  @Test
+  public void testUnityDrift() throws Exception {
+    delta = 7;
     drift = 1;
-    uptime = new long[] { 0 };
-    uptimeCallable = new Callable<Long>() {
-      @Override
-      public Long call() throws Exception {
-        long previousUptime = uptime[0];
-        moveTimeForward(UPTIME_LATENCY_NS);
-        return (long) uptime[0] - (uptime[0] - previousUptime) / 2;
-      }
-    };
-    remoteUptimeClock =
-        new RemoteUptimeClock(epochTimeProvider, nanoTimeProvider, uptimeCallable, SENSITIVITY);
-  }
-
-  private void assertTimeEquals(Time expected, Time actual, Duration delta) {
-    int nanosecondsDelta = Math.abs(expected.nsecs - actual.nsecs);
-    assertTrue(String.format("%s != %s (delta: %s ns)", expected, actual, nanosecondsDelta),
-        nanosecondsDelta <= delta.nsecs);
-    int secondsDelta = Math.abs(expected.secs - actual.secs);
-    assertTrue(String.format("%s != %s (delta: %s)", expected, actual, secondsDelta),
-        secondsDelta <= delta.secs);
-  }
-
-  private void assertEpochTimeEquals(long uptime, int seconds, int nanoseconds) {
-    Time epochTime = remoteUptimeClock.toEpochTime(uptime);
-    try {
-      assertTimeEquals(new Time(seconds, nanoseconds), epochTime, new Duration(0, 5));
-    } catch (AssertionError e) {
-      System.err.println(String.format("Uptime: %d", uptime));
-      throw e;
+    driftSensitivity = 1;
+    errorReductionCoefficientSensitivity = 1;
+    latencyOutlierFilterSampleSize = 1;
+    latencyOutlierFilterThreshold = 1.5;
+    RemoteUptimeClock remoteUptimeClock = newRemoteUptimeClock();
+    remoteUptimeClock.calibrate(10, 0);
+    for (int i = 0; i < 10000; i++) {
+      remoteUptimeClock.update();
+      assertEquals(1, remoteUptimeClock.getDrift(), 1e-6);
     }
-  }
-
-  private void assertDriftEquals(double expectedDrift) {
-    assertEquals(expectedDrift, remoteUptimeClock.getDrift(), 1e-4);
-    for (int i = 0; i < 1000; i++) {
-      try {
-        assertEpochTimeEquals(uptime[0] - i, 0, (int) (100 + (uptime[0] - i) * expectedDrift));
-        assertEpochTimeEquals(uptime[0] + i, 0, (int) (100 + (uptime[0] + i) * expectedDrift));
-      } catch (AssertionError e) {
-        System.err.println(String.format("Expected drift: %f, Calculated drift: %f", expectedDrift,
-            remoteUptimeClock.getDrift()));
-        throw e;
-      }
-    }
-  }
-
-  private void moveTimeForward(long nanoseconds) {
-    nanoTime[0] += nanoseconds;
-    uptime[0] = (long) (nanoTime[0] / drift);
-    epochTime.nsecs += nanoseconds;
-    epochTime.normalize();
+    assertEquals(0, remoteUptimeClock.getErrorReductionCoefficient(), 1e-9);
   }
 
   @Test
-  public void testCalibrate() {
-    for (int i = 1; i < 10; i++) {
-      setup();
-      drift = i;
-      remoteUptimeClock.calibrate(10);
-      assertEquals(i, remoteUptimeClock.getDrift(), 1e-4);
+  public void testDrift() throws Exception {
+    delta = 31;
+    drift = 2;
+    driftSensitivity = 1;
+    errorReductionCoefficientSensitivity = 1;
+    latencyOutlierFilterSampleSize = 1;
+    latencyOutlierFilterThreshold = 1.5;
+    RemoteUptimeClock remoteUptimeClock = newRemoteUptimeClock();
+    remoteUptimeClock.calibrate(10, 0);
+    for (int i = 0; i < 10000; i++) {
+      remoteUptimeClock.update();
+      assertEquals(2, remoteUptimeClock.getDrift(), 1e-6);
     }
+    assertEquals(0, remoteUptimeClock.getErrorReductionCoefficient(), 1e-9);
   }
 
   @Test
-  public void testDrift() {
-    for (int i = 1; i < 10; i++) {
-      setup();
-      drift = i;
-      remoteUptimeClock.calibrate(10);
-      for (int unused = 0; unused < 10; unused++) {
-        remoteUptimeClock.update();
-        assertDriftEquals(i);
-      }
+  public void testConvergence() {
+    delta = 7;
+    drift = 2;
+    driftSensitivity = 1;
+    errorReductionCoefficientSensitivity = 1;
+    latencyOutlierFilterSampleSize = 1;
+    latencyOutlierFilterThreshold = 1.5;
+    RemoteUptimeClock remoteUptimeClock = newRemoteUptimeClock();
+    remoteUptimeClock.calibrate(10, 0);
+    // Remote clock jumps.
+    remoteUptime += 71;
+    // We update less often.
+    delta = 31;
+    // Calibrated drift was wrong.
+    drift = 6;
+    for (int i = 0; i < 3; i++) {
+      remoteUptimeClock.update();
     }
+    assertEquals(6, remoteUptimeClock.getDrift(), 1e-6);
+    for (int i = 0; i < 11; i++) {
+      remoteUptimeClock.update();
+      assertEquals(6, remoteUptimeClock.getDrift(), 1e-6);
+    }
+    assertEquals(0, remoteUptimeClock.getErrorReductionCoefficient(), 1e-9);
+  }
+
+  @Test
+  public void testConvergenceSensitivity() {
+    delta = 7;
+    drift = 2;
+    driftSensitivity = 0.5;
+    errorReductionCoefficientSensitivity = 0.5;
+    latencyOutlierFilterSampleSize = 1;
+    latencyOutlierFilterThreshold = 1.5;
+    RemoteUptimeClock remoteUptimeClock = newRemoteUptimeClock();
+    remoteUptimeClock.calibrate(10, 0);
+    // Calibrated drift was wrong.
+    drift = 2.1;
+    for (int i = 0; i < 11; i++) {
+      remoteUptimeClock.update();
+    }
+    assertEquals(2.1, remoteUptimeClock.getDrift(), 1e-4);
+    assertEquals(0, remoteUptimeClock.getErrorReductionCoefficient(), 1e-3);
   }
 }

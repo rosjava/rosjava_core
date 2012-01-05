@@ -94,6 +94,10 @@ public class Time implements Comparable<Time> {
     return secs + ":" + nsecs;
   }
 
+  public double toSeconds() {
+    return totalNsecs() / 1e9;
+  }
+
   public long totalNsecs() {
     return ((long) secs) * 1000000000 + nsecs;
   }
