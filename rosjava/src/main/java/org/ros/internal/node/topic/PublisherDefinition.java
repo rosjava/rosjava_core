@@ -16,12 +16,15 @@
 
 package org.ros.internal.node.topic;
 
-import java.net.URI;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.namespace.GraphName;
 
-import com.google.common.base.Preconditions;
+import java.net.URI;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -45,6 +48,15 @@ public class PublisherDefinition {
         topicDefinition.toIdentifier()));
     this.publisherIdentifier = publisherIdentifier;
     this.topicDefinition = topicDefinition;
+  }
+  
+  public Map<String, String> toHeader() {
+    // NOTE(damonkohler): ImmutableMap.Builder does not allow duplicate fields
+    // while building.
+    Map<String, String> header = Maps.newHashMap();
+    header.putAll(publisherIdentifier.toHeader());
+    header.putAll(topicDefinition.toHeader());
+    return ImmutableMap.copyOf(header);
   }
 
   public SlaveIdentifier getSlaveIdentifier() {

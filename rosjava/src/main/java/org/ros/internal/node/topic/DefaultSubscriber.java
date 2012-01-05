@@ -17,7 +17,6 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
@@ -59,11 +58,10 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
   private static final int DEFAULT_SHUTDOWN_TIMEOUT = 5;
   private static final TimeUnit DEFAULT_SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
+  private final SlaveIdentifier slaveIdentifier;
   private final ExecutorService executorService;
-  private final ImmutableMap<String, String> header;
   private final IncomingMessageQueue<T> incomingMessageQueue;
   private final Set<PublisherIdentifier> knownPublishers;
-  private final SlaveIdentifier slaveIdentifier;
   private final TcpClientConnectionManager tcpClientConnectionManager;
 
   /**
@@ -80,14 +78,9 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
   private DefaultSubscriber(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
       MessageDeserializer<T> deserializer, ExecutorService executorService) {
     super(topicDefinition);
-    this.executorService = executorService;
-    this.incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
     this.slaveIdentifier = slaveIdentifier;
-    header =
-        ImmutableMap.<String, String>builder()
-            .putAll(slaveIdentifier.toHeader())
-            .putAll(topicDefinition.toHeader())
-            .build();
+    this.executorService = executorService;
+    incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
     knownPublishers = Sets.newHashSet();
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
     subscriberListeners = new ListenerCollection<SubscriberListener<T>>(executorService);
@@ -112,6 +105,14 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
         log.info("Subscriber unregistration failed: " + DefaultSubscriber.this);
       }
     });
+  }
+
+  public SubscriberIdentifier toIdentifier() {
+    return new SubscriberIdentifier(slaveIdentifier, getTopicDefinition().toIdentifier());
+  }
+
+  public SubscriberDefinition toDefinition() {
+    return new SubscriberDefinition(toIdentifier(), getTopicDefinition());
   }
 
   public Collection<String> getSupportedProtocols() {
@@ -142,7 +143,7 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
       return;
     }
     tcpClientConnectionManager.connect(toString(), address, new SubscriberHandshakeHandler<T>(
-        header, incomingMessageQueue), "SubscriberHandshakeHandler");
+        toDefinition().toHeader(), incomingMessageQueue), "SubscriberHandshakeHandler");
     knownPublishers.add(publisherIdentifier);
     signalOnNewPublisher();
   }

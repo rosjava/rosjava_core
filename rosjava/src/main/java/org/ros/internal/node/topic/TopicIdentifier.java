@@ -16,9 +16,13 @@
 
 package org.ros.internal.node.topic;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+
+import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
-import com.google.common.base.Preconditions;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -35,6 +39,12 @@ public class TopicIdentifier {
     Preconditions.checkNotNull(name);
     Preconditions.checkArgument(name.isGlobal());
     this.name = name;
+  }
+  
+  public Map<String, String> toHeader() {
+    return new ImmutableMap.Builder<String, String>()
+        .put(ConnectionHeaderFields.TOPIC, name.toString())
+        .build();
   }
 
   public GraphName getName() {

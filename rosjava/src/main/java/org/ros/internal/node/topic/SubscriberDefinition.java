@@ -16,14 +16,15 @@
 
 package org.ros.internal.node.topic;
 
-import java.net.URI;
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
-import com.google.common.collect.ImmutableMap;
+import java.net.URI;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -67,10 +68,12 @@ public class SubscriberDefinition {
   }
 
   public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>()
-        .putAll(subscriberIdentifier.getSlaveIdentifier().toHeader())
-        .putAll(topicDefinition.toHeader())
-        .build();
+    // NOTE(damonkohler): ImmutableMap.Builder does not allow duplicate fields
+    // while building.
+    Map<String, String> header = Maps.newHashMap();
+    header.putAll(subscriberIdentifier.toHeader());
+    header.putAll(topicDefinition.toHeader());
+    return ImmutableMap.copyOf(header);
   }
 
   @Override
@@ -102,5 +105,4 @@ public class SubscriberDefinition {
     } else if (!topicDefinition.equals(other.topicDefinition)) return false;
     return true;
   }
-
 }

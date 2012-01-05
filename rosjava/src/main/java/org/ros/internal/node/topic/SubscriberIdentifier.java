@@ -16,12 +16,14 @@
 
 package org.ros.internal.node.topic;
 
-import java.net.URI;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.namespace.GraphName;
 
-import com.google.common.base.Preconditions;
+import java.net.URI;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -41,6 +43,13 @@ public class SubscriberIdentifier {
     Preconditions.checkNotNull(topicIdentifier);
     this.slaveIdentifier = slaveIdentifier;
     this.topicIdentifier = topicIdentifier;
+  }
+
+  public Map<String, String> toHeader() {
+    return new ImmutableMap.Builder<String, String>()
+        .putAll(slaveIdentifier.toHeader())
+        .putAll(topicIdentifier.toHeader())
+        .build();
   }
 
   public SlaveIdentifier getSlaveIdentifier() {

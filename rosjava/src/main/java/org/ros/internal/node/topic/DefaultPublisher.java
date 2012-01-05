@@ -17,6 +17,7 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import org.apache.commons.logging.Log;
@@ -62,10 +63,12 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
    */
   private final OutgoingMessageQueue<T> outgoingMessageQueue;
   private final ListenerCollection<PublisherListener<T>> publisherListeners;
+  private final SlaveIdentifier slaveIdentifier;
 
-  public DefaultPublisher(TopicDefinition topicDefinition, MessageSerializer<T> serializer,
-      ExecutorService executorService) {
+  public DefaultPublisher(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
+      MessageSerializer<T> serializer, ExecutorService executorService) {
     super(topicDefinition);
+    this.slaveIdentifier = slaveIdentifier;
     outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
     publisherListeners = new ListenerCollection<PublisherListener<T>>(executorService);
     publisherListeners.add(new DefaultPublisherListener<T>() {
@@ -113,11 +116,11 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
     shutdown(DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEOUT_UNITS);
   }
 
-  public PublisherIdentifier toIdentifier(SlaveIdentifier slaveIdentifier) {
+  public PublisherIdentifier toIdentifier() {
     return new PublisherIdentifier(slaveIdentifier, getTopicDefinition().toIdentifier());
   }
 
-  public PublisherDefinition toDefinition(SlaveIdentifier slaveIdentifier) {
+  public PublisherDefinition toDefinition() {
     return PublisherDefinition.newFromSlaveIdentifier(slaveIdentifier, getTopicDefinition());
   }
 
@@ -135,7 +138,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   @Override
   public void publish(T message) {
     if (DEBUG) {
-      // log.info("Publishing message: " + message);
+      log.info("Publishing message: " + message);
     }
     outgoingMessageQueue.put(message);
   }
@@ -163,9 +166,12 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
     Preconditions.checkState(
         incomingChecksum.equals(expectedChecksum) || incomingChecksum.equals("*"),
         "Unexpected message MD5 " + incomingChecksum + " != " + expectedChecksum);
-    Map<String, String> header = Maps.newHashMap(topicDefinitionHeader);
+    Map<String, String> header = Maps.newHashMap();
+    header.putAll(toDefinition().toHeader());
+    // TODO(damonkohler): Force latch mode to be consistent throughout the life
+    // of the publisher.
     header.put(ConnectionHeaderFields.LATCHING, getLatchMode() ? "1" : "0");
-    return ConnectionHeader.encode(topicDefinitionHeader);
+    return ConnectionHeader.encode(ImmutableMap.copyOf(header));
   }
 
   /**
@@ -305,7 +311,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
 
   @Override
   public String toString() {
-    return "Publisher<" + getTopicDefinition() + ">";
+    return "Publisher<" + toDefinition() + ">";
   }
 
   @Override

@@ -68,7 +68,7 @@ public class TopicDefinition {
 
   public Map<String, String> toHeader() {
     return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.TOPIC, getName().toString())
+        .putAll(topicIdentifier.toHeader())
         .putAll(messageDefinition.toHeader())
         .build();
   }

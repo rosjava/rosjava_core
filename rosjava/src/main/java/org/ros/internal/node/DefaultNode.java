@@ -33,6 +33,7 @@ import org.ros.internal.node.client.Registrar;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceFactory;
@@ -94,10 +95,10 @@ public class DefaultNode implements Node {
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
   private final ParameterManager parameterManager;
-  private final Registrar registrar;
+  private final PublisherFactory publisherFactory;
   private final SubscriberFactory subscriberFactory;
   private final ServiceFactory serviceFactory;
-  private final PublisherFactory publisherFactory;
+  private final Registrar registrar;
   private final URI masterUri;
 
   /**
@@ -129,11 +130,6 @@ public class DefaultNode implements Node {
     topicManager = new TopicManager();
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
-    registrar = new Registrar(masterClient, executorService);
-    topicManager.setListener(registrar);
-    serviceManager.setListener(registrar);
-
-    publisherFactory = new PublisherFactory(topicManager, executorService);
 
     GraphName basename = nodeConfiguration.getNodeName();
     NameResolver parentResolver = nodeConfiguration.getParentResolver();
@@ -145,11 +141,17 @@ public class DefaultNode implements Node {
             nodeConfiguration.getXmlRpcBindAddress(),
             nodeConfiguration.getXmlRpcAdvertiseAddress(), masterClient, topicManager,
             serviceManager, parameterManager, executorService);
-    subscriberFactory = new SubscriberFactory(slaveServer, topicManager, executorService);
+    slaveServer.start();
+
+    SlaveIdentifier slaveIdentifier = slaveServer.toSlaveIdentifier();
+    publisherFactory = new PublisherFactory(slaveIdentifier, topicManager, executorService);
+    subscriberFactory = new SubscriberFactory(slaveIdentifier, topicManager, executorService);
     serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager, executorService);
 
-    slaveServer.start();
-    registrar.start(slaveServer.toSlaveIdentifier());
+    registrar = new Registrar(masterClient, executorService);
+    topicManager.setListener(registrar);
+    serviceManager.setListener(registrar);
+    registrar.start(slaveIdentifier);
 
     // NOTE(damonkohler): This must be created after the Registrar has been
     // initialized with the SlaveServer's SlaveIdentifier so that it can
@@ -207,7 +209,8 @@ public class DefaultNode implements Node {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
         nodeConfiguration.getMessageDefinitionFactory().newFromMessageType(messageType);
-    TopicDefinition topicDefinition = TopicDefinition.newFromTopicName(resolvedTopicName, messageDefinition);
+    TopicDefinition topicDefinition =
+        TopicDefinition.newFromTopicName(resolvedTopicName, messageDefinition);
     org.ros.message.MessageSerializer<MessageType> serializer = newMessageSerializer(messageType);
     return publisherFactory.newOrExisting(topicDefinition, serializer);
   }
@@ -223,9 +226,11 @@ public class DefaultNode implements Node {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
         nodeConfiguration.getMessageDefinitionFactory().newFromMessageType(messageType);
-    TopicDefinition topicDefinition = TopicDefinition.newFromTopicName(resolvedTopicName, messageDefinition);
+    TopicDefinition topicDefinition =
+        TopicDefinition.newFromTopicName(resolvedTopicName, messageDefinition);
     MessageDeserializer<MessageType> deserializer = newMessageDeserializer(messageType);
-    Subscriber<MessageType> subscriber = subscriberFactory.newOrExisting(topicDefinition, deserializer);
+    Subscriber<MessageType> subscriber =
+        subscriberFactory.newOrExisting(topicDefinition, deserializer);
     return subscriber;
   }
 

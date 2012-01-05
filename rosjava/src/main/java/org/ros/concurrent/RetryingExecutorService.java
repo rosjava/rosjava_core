@@ -67,7 +67,7 @@ public class RetryingExecutorService {
       try {
         retry = future.get();
       } catch (ExecutionException e) {
-        throw new RosRuntimeException(e);
+        throw new RosRuntimeException(e.getCause());
       }
       if (retry) {
         if (DEBUG) {

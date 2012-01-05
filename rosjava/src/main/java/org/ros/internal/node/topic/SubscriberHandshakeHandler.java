@@ -17,7 +17,6 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,10 +41,10 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(SubscriberHandshakeHandler.class);
 
-  private final ImmutableMap<String, String> header;
+  private final Map<String, String> header;
   private final IncomingMessageQueue<MessageType> incomingMessageQueue;
 
-  public SubscriberHandshakeHandler(ImmutableMap<String, String> header,
+  public SubscriberHandshakeHandler(Map<String, String> header,
       IncomingMessageQueue<MessageType> incomingMessageQueue) {
     this.header = header;
     this.incomingMessageQueue = incomingMessageQueue;

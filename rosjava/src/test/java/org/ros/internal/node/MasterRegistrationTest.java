@@ -14,6 +14,7 @@ import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.Registrar;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
@@ -57,7 +58,7 @@ public class MasterRegistrationTest {
 
   @Before
   public void setup() {
-	executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newCachedThreadPool();
     masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
@@ -67,15 +68,14 @@ public class MasterRegistrationTest {
     parameterManager = new ParameterManager();
     slaveServer =
         new SlaveServer(new GraphName("/node"), BindAddress.newPrivate(),
-            AdvertiseAddress.newPrivate(), BindAddress.newPrivate(),
-            AdvertiseAddress.newPrivate(), masterClient, topicManager, serviceManager,
-            parameterManager, executorService);
+            AdvertiseAddress.newPrivate(), BindAddress.newPrivate(), AdvertiseAddress.newPrivate(),
+            masterClient, topicManager, serviceManager, parameterManager, executorService);
     slaveServer.start();
-    masterRegistration.start(slaveServer.toSlaveIdentifier());
-
+    SlaveIdentifier slaveIdentifier = slaveServer.toSlaveIdentifier();
+    masterRegistration.start(slaveIdentifier);
     publisher =
-        new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer,
-            executorService);
+        new DefaultPublisher<org.ros.message.std_msgs.String>(slaveIdentifier, topicDefinition,
+            messageSerializer, executorService);
     publisherListener = CountDownPublisherListener.newDefault();
     publisher.addListener(publisherListener);
   }

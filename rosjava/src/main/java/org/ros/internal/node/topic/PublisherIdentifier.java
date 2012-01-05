@@ -17,6 +17,7 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 import org.ros.internal.node.server.SlaveIdentifier;
@@ -24,6 +25,7 @@ import org.ros.namespace.GraphName;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -57,6 +59,13 @@ public class PublisherIdentifier {
     this.topicIdentifier = topicIdentifier;
   }
 
+  public Map<String, String> toHeader() {
+    return new ImmutableMap.Builder<String, String>()
+        .putAll(slaveIdentifier.toHeader())
+        .putAll(topicIdentifier.toHeader())
+        .build();
+  }
+  
   public SlaveIdentifier getSlaveIdentifier() {
     return slaveIdentifier;
   }

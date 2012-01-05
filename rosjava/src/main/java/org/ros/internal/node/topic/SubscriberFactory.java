@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.topic.DefaultSubscriberListener;
 import org.ros.node.topic.Subscriber;
@@ -30,13 +30,13 @@ import java.util.concurrent.ExecutorService;
  */
 public class SubscriberFactory {
 
-  private final SlaveServer slaveServer;
+  private final SlaveIdentifier slaveIdentifier;
   private final TopicManager topicManager;
   private final ExecutorService executorService;
 
-  public SubscriberFactory(SlaveServer slaveServer, TopicManager topicManager,
+  public SubscriberFactory(SlaveIdentifier slaveIdentifier, TopicManager topicManager,
       ExecutorService executorService) {
-    this.slaveServer = slaveServer;
+    this.slaveIdentifier = slaveIdentifier;
     this.topicManager = topicManager;
     this.executorService = executorService;
   }
@@ -66,7 +66,7 @@ public class SubscriberFactory {
         subscriber = (DefaultSubscriber<T>) topicManager.getSubscriber(topicName);
       } else {
         subscriber =
-            DefaultSubscriber.newDefault(slaveServer.toSlaveIdentifier(), topicDefinition,
+            DefaultSubscriber.newDefault(slaveIdentifier, topicDefinition,
                 executorService, messageDeserializer);
         subscriber.addSubscriberListener(new DefaultSubscriberListener<T>() {
           @Override
