@@ -34,7 +34,7 @@ public class CountDownServiceServerListener<T, S> implements ServiceServerListen
    * Construct a {@link CountDownServiceServerListener} with all counts set to
    * 1.
    */
-  public static <T, S> CountDownServiceServerListener<T, S> create() {
+  public static <T, S> CountDownServiceServerListener<T, S> newDefault() {
     return new CountDownServiceServerListener<T, S>(1, 1);
   }
 

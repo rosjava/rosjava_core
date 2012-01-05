@@ -67,11 +67,11 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
   private final TcpClientConnectionManager tcpClientConnectionManager;
 
   /**
-   * All {@link SubscriberListener} instances added to the subscriber.
+   * Manages the {@link SubscriberListener}s for this {@link Subscriber}.
    */
   private final ListenerCollection<SubscriberListener<T>> subscriberListeners;
 
-  public static <S> DefaultSubscriber<S> create(SlaveIdentifier slaveIdentifier,
+  public static <S> DefaultSubscriber<S> newDefault(SlaveIdentifier slaveIdentifier,
       TopicDefinition description, ExecutorService executorService,
       MessageDeserializer<S> deserializer) {
     return new DefaultSubscriber<S>(slaveIdentifier, description, deserializer, executorService);

@@ -108,13 +108,13 @@ public class CommandLineLoaderTest {
     env = Maps.newHashMap();
     env.put(EnvironmentVariables.ROS_ROOT, defaultRosRoot.getAbsolutePath());
     loader = new CommandLineLoader(emptyArgv, env);
-    NodeConfiguration nodeConfiguration = loader.createConfiguration();
+    NodeConfiguration nodeConfiguration = loader.build();
     assertEquals(NodeConfiguration.DEFAULT_MASTER_URI, nodeConfiguration.getMasterUri());
 
     // Construct artificial environment. Set required environment variables.
     env = getDefaultEnv();
     loader = new CommandLineLoader(emptyArgv, env);
-    nodeConfiguration = loader.createConfiguration();
+    nodeConfiguration = loader.build();
     assertEquals(defaultMasterUri, nodeConfiguration.getMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
     assertTrue(nodeConfiguration.getParentResolver().getNamespace().isRoot());
@@ -128,7 +128,7 @@ public class CommandLineLoaderTest {
     env.put(EnvironmentVariables.ROS_NAMESPACE, "/foo/bar");
     env.put(EnvironmentVariables.ROS_PACKAGE_PATH, rosPackagePath);
     loader = new CommandLineLoader(emptyArgv, env);
-    nodeConfiguration = loader.createConfiguration();
+    nodeConfiguration = loader.build();
 
     assertEquals(defaultMasterUri, nodeConfiguration.getMasterUri());
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
@@ -142,12 +142,12 @@ public class CommandLineLoaderTest {
     env = getDefaultEnv();
     env.put(EnvironmentVariables.ROS_NAMESPACE, "baz/bar");
     loader = new CommandLineLoader(emptyArgv, env);
-    nodeConfiguration = loader.createConfiguration();
+    nodeConfiguration = loader.build();
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
     env = getDefaultEnv();
     env.put(EnvironmentVariables.ROS_NAMESPACE, "baz/bar/");
     loader = new CommandLineLoader(emptyArgv, env);
-    nodeConfiguration = loader.createConfiguration();
+    nodeConfiguration = loader.build();
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
   }
 
@@ -157,44 +157,44 @@ public class CommandLineLoaderTest {
 
     // Test __name override
     NodeConfiguration nodeConfiguration =
-        new CommandLineLoader(emptyArgv, env).createConfiguration();
+        new CommandLineLoader(emptyArgv, env).build();
     assertEquals(null, nodeConfiguration.getNodeName());
     List<String> args = Lists.newArrayList("Foo", "__name:=newname");
-    nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
+    nodeConfiguration = new CommandLineLoader(args, env).build();
     assertEquals("newname", nodeConfiguration.getNodeName().toString());
 
     // Test ROS_MASTER_URI from command-line
     args =
         Lists.newArrayList("Foo", CommandLineVariables.ROS_MASTER_URI + ":=http://override:22622");
-    nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
+    nodeConfiguration = new CommandLineLoader(args, env).build();
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
 
     // Test again with env var removed, make sure that it still behaves the
     // same.
     env.remove(EnvironmentVariables.ROS_MASTER_URI);
-    nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
+    nodeConfiguration = new CommandLineLoader(args, env).build();
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
 
     // Test ROS namespace resolution and canonicalization
     GraphName canonical = new GraphName("/baz/bar");
     env = getDefaultEnv();
     args = Lists.newArrayList("Foo", CommandLineVariables.ROS_NAMESPACE + ":=baz/bar");
-    nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
+    nodeConfiguration = new CommandLineLoader(args, env).build();
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
 
     args = Lists.newArrayList("Foo", CommandLineVariables.ROS_NAMESPACE + ":=baz/bar/");
-    nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
+    nodeConfiguration = new CommandLineLoader(args, env).build();
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
 
     // Verify precedence of command-line __ns over environment.
     env.put(EnvironmentVariables.ROS_NAMESPACE, "wrong/answer/");
-    nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
+    nodeConfiguration = new CommandLineLoader(args, env).build();
     assertEquals(canonical, nodeConfiguration.getParentResolver().getNamespace());
 
     // Verify address override.
     env = getDefaultEnv();
     args = Lists.newArrayList("Foo", CommandLineVariables.ROS_IP + ":=192.168.0.2");
-    nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
+    nodeConfiguration = new CommandLineLoader(args, env).build();
     assertEquals("192.168.0.2", nodeConfiguration.getTcpRosAdvertiseAddress().getHost());
     assertEquals("192.168.0.2", nodeConfiguration.getXmlRpcAdvertiseAddress().getHost());
 
@@ -204,7 +204,7 @@ public class CommandLineLoaderTest {
         Lists.newArrayList("Foo", CommandLineVariables.ROS_NAMESPACE + ":=baz/bar/", "ignore",
             CommandLineVariables.ROS_MASTER_URI + ":=http://override:22622", "--bad",
             CommandLineVariables.ROS_IP + ":=192.168.0.2");
-    nodeConfiguration = new CommandLineLoader(args, env).createConfiguration();
+    nodeConfiguration = new CommandLineLoader(args, env).build();
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
     assertEquals("192.168.0.2", nodeConfiguration.getTcpRosAdvertiseAddress().getHost());
     assertEquals("192.168.0.2", nodeConfiguration.getXmlRpcAdvertiseAddress().getHost());
@@ -221,14 +221,14 @@ public class CommandLineLoaderTest {
 
     // Test with no args.
     CommandLineLoader loader = new CommandLineLoader(emptyArgv, env);
-    NodeConfiguration nodeConfiguration = loader.createConfiguration();
+    NodeConfiguration nodeConfiguration = loader.build();
     nodeConfiguration.getParentResolver().getRemappings();
-    nodeConfiguration = loader.createConfiguration();
+    nodeConfiguration = loader.build();
 
     // Test with no remappings.
     List<String> args = Lists.newArrayList("Foo", "foo", "--bar");
     loader = new CommandLineLoader(args, env);
-    nodeConfiguration = loader.createConfiguration();
+    nodeConfiguration = loader.build();
     NameResolver resolver = nodeConfiguration.getParentResolver();
     assertTrue(resolver.getRemappings().isEmpty());
 
@@ -239,7 +239,7 @@ public class CommandLineLoaderTest {
     for (String test : tests) {
       args = Lists.newArrayList(("Foo " + test).split("\\s+"));
       loader = new CommandLineLoader(args, env);
-      nodeConfiguration = loader.createConfiguration();
+      nodeConfiguration = loader.build();
 
       // Test that our remappings loaded.
       NameResolver r = nodeConfiguration.getParentResolver();

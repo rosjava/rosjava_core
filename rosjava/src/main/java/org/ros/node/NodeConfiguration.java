@@ -171,7 +171,7 @@ public class NodeConfiguration {
     setMessageFactory(new org.ros.internal.message.old_style.MessageFactory());
     setMessageDefinitionFactory(new org.ros.internal.message.old_style.MessageDefinitionFactory());
     setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
-    setParentResolver(NameResolver.create());
+    setParentResolver(NameResolver.newRoot());
     setTimeProvider(new WallTimeProvider());
     setExecutorService(Executors.newCachedThreadPool());
   }
@@ -410,7 +410,7 @@ public class NodeConfiguration {
    * @return the {@link AdvertiseAddress} for the {@link Node}'s TCPROS server
    */
   public AdvertiseAddress getTcpRosAdvertiseAddress() {
-    return tcpRosAdvertiseAddressFactory.create();
+    return tcpRosAdvertiseAddressFactory.newDefault();
   }
 
   /**
@@ -439,7 +439,7 @@ public class NodeConfiguration {
    * @return the {@link AdvertiseAddress} for the {@link Node}'s XML-RPC server
    */
   public AdvertiseAddress getXmlRpcAdvertiseAddress() {
-    return xmlRpcAdvertiseAddressFactory.create();
+    return xmlRpcAdvertiseAddressFactory.newDefault();
   }
 
   /**
@@ -504,5 +504,4 @@ public class NodeConfiguration {
     this.executorService = executorService;
     return this;
   }
-
 }

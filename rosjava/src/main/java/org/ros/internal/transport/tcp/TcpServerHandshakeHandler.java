@@ -74,7 +74,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
         e.getChannel().write(outgoingBuffer);
         pipeline.replace(TcpServerPipelineFactory.LENGTH_FIELD_PREPENDER, "ServiceResponseEncoder",
             new ServiceResponseEncoder());
-        pipeline.replace(this, "ServiceRequestHandler", serviceServer.createRequestHandler());
+        pipeline.replace(this, "ServiceRequestHandler", serviceServer.newRequestHandler());
       }
     } else {
       Preconditions.checkState(incomingHeader.containsKey(ConnectionHeaderFields.TOPIC),

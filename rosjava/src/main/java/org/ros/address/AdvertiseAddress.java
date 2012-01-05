@@ -43,7 +43,7 @@ public class AdvertiseAddress {
   private Callable<Integer> portCallable;
 
   public static AdvertiseAddress newPrivate() {
-    return new PrivateAdvertiseAddressFactory().create();
+    return new PrivateAdvertiseAddressFactory().newDefault();
   }
 
   /**
@@ -54,7 +54,7 @@ public class AdvertiseAddress {
    *         {@link BindAddress}
    */
   public static AdvertiseAddress newPublic() {
-    return new PublicAdvertiseAddressFactory().create();
+    return new PublicAdvertiseAddressFactory().newDefault();
   }
 
   public AdvertiseAddress(String host) {

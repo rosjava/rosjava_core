@@ -57,7 +57,7 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
 
   private TcpClientConnection tcpClientConnection;
 
-  public static <S, T> DefaultServiceClient<S, T> create(GraphName nodeName,
+  public static <S, T> DefaultServiceClient<S, T> newDefault(GraphName nodeName,
       ServiceDefinition serviceDefinition, MessageSerializer<S> serializer,
       MessageDeserializer<T> deserializer, ExecutorService executorService) {
     return new DefaultServiceClient<S, T>(nodeName, serviceDefinition, serializer, deserializer,

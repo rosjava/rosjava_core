@@ -62,7 +62,7 @@ public class ServiceIntegrationTest {
     nodeConfiguration.setNodeName("/server");
     Node serverNode = nodeFactory.newNode(nodeConfiguration);
     CountDownServiceServerListener<AddTwoInts.Request, AddTwoInts.Response> serviceServerListener =
-        CountDownServiceServerListener.create();
+        CountDownServiceServerListener.newDefault();
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> serviceServer =
         serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
@@ -110,7 +110,7 @@ public class ServiceIntegrationTest {
     nodeConfiguration.setNodeName("/server");
     Node serverNode = nodeFactory.newNode(nodeConfiguration);
     CountDownServiceServerListener<AddTwoInts.Request, AddTwoInts.Response> serviceServerListener =
-        CountDownServiceServerListener.create();
+        CountDownServiceServerListener.newDefault();
     ServiceServer<AddTwoInts.Request, AddTwoInts.Response> serviceServer =
         serverNode.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
             new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {

@@ -66,8 +66,8 @@ public class ParameterServerTestNode implements NodeMain {
     GraphName targetNamespace = new GraphName(param.getString("target_namespace"));
     log.info("parameter_namespace: " + paramNamespace);
     log.info("target_namespace: " + targetNamespace);
-    NameResolver resolver = node.getResolver().createResolver(paramNamespace);
-    NameResolver setResolver = node.getResolver().createResolver(targetNamespace);
+    NameResolver resolver = node.getResolver().newChild(paramNamespace);
+    NameResolver setResolver = node.getResolver().newChild(targetNamespace);
 
     final org.ros.message.std_msgs.String string_m = new org.ros.message.std_msgs.String();
     string_m.data = param.getString(resolver.resolve("string"));

@@ -16,13 +16,13 @@
 
 package org.ros.namespace;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.base.Preconditions;
 
 import org.ros.exception.RosRuntimeException;
 
-import com.google.common.base.Preconditions;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author ethan.rublee@gmail.com (Ethan Rublee)
@@ -33,24 +33,25 @@ public class NameResolver {
   private final GraphName namespace;
   private final Map<GraphName, GraphName> remappings;
 
-  public static NameResolver create(String namespace, Map<GraphName, GraphName> remappings) {
-    return new NameResolver(new GraphName(namespace), remappings);
-  }
-
-  public static NameResolver create(GraphName namespace) {
+  public static NameResolver newFromNamespace(GraphName namespace) {
     return new NameResolver(namespace, new HashMap<GraphName, GraphName>());
   }
 
-  public static NameResolver create(String namespace) {
-    return create(new GraphName(namespace));
+  public static NameResolver newFromNamespace(String namespace) {
+    return newFromNamespace(new GraphName(namespace));
   }
 
-  public static NameResolver create(Map<GraphName, GraphName> remappings) {
+  public static NameResolver newRoot() {
+    return newFromNamespace(GraphName.newRoot());
+  }
+
+  public static NameResolver newRootFromRemappings(Map<GraphName, GraphName> remappings) {
     return new NameResolver(GraphName.newRoot(), remappings);
   }
 
-  public static NameResolver create() {
-    return create(GraphName.newRoot());
+  public static NameResolver newFromNamespaceAndRemappings(String namespace,
+      Map<GraphName, GraphName> remappings) {
+    return new NameResolver(new GraphName(namespace), remappings);
   }
 
   public NameResolver(GraphName namespace, Map<GraphName, GraphName> remappings) {
@@ -135,16 +136,26 @@ public class NameResolver {
   }
 
   /**
-   * Construct a new {@link NameResolver} with the same remappings as this
-   * resolver has. The namespace of the new resolver will be the value of the
-   * name parameter resolved in this namespace.
+   * Construct a new child {@link NameResolver} with the same remappings as this
+   * {@link NameResolver}. The namespace of the new child {@link NameResolver}
+   * will be the resolved in this namespace.
    * 
-   * @param name
-   * @return {@link NameResolver} relative to the current namespace.
+   * @param namespace
+   *          the namespace of the child {@link NameResolver} relative to this
+   *          {@link NameResolver}'s namespace
+   * @return a new child {@link NameResolver} whose namespace is relative to the
+   *         parent {@link NameResolver}'s namespace
    */
-  public NameResolver createResolver(GraphName name) {
-    GraphName resolverNamespace = resolve(name);
+  public NameResolver newChild(GraphName namespace) {
+    GraphName resolverNamespace = resolve(namespace);
     return new NameResolver(resolverNamespace, remappings);
+  }
+
+  /**
+   * @see #newChild(GraphName)
+   */
+  public NameResolver newChild(String namespace) {
+    return newChild(new GraphName(namespace));
   }
 
   protected GraphName lookUpRemapping(GraphName name) {
@@ -154,5 +165,4 @@ public class NameResolver {
     }
     return remappedName;
   }
-
 }

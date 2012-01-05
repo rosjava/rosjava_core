@@ -21,10 +21,24 @@ package org.ros.message;
  */
 public interface MessageFactory {
 
+  /**
+   * @param messageType
+   *          the type of message to create
+   * @return a new message
+   */
   <T> T newMessage(String messageType);
 
+  /**
+   * @param serviceType
+   *          the type of service to create a request for
+   * @return a new service request message
+   */
   <T> T newServiceRequest(String serviceType);
 
+  /**
+   * @param serviceType
+   *          the type of service to create a response for
+   * @return a new service response message
+   */
   <T> T newServiceResponse(String serviceType);
-
 }

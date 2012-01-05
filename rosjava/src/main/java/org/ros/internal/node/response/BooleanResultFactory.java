@@ -22,8 +22,7 @@ package org.ros.internal.node.response;
 public class BooleanResultFactory implements ResultFactory<Boolean> {
   
   @Override
-  public Boolean create(Object value) {
+  public Boolean newFromValue(Object value) {
     return (Boolean) value;
   }
-  
 }

@@ -31,7 +31,7 @@ public class PublisherDefinition {
   private final PublisherIdentifier publisherIdentifier;
   private final TopicDefinition topicDefinition;
 
-  public static PublisherDefinition create(SlaveIdentifier slaveIdentifier,
+  public static PublisherDefinition newFromSlaveIdentifier(SlaveIdentifier slaveIdentifier,
       TopicDefinition topicDefinition) {
     return new PublisherDefinition(new PublisherIdentifier(slaveIdentifier,
         topicDefinition.toIdentifier()), topicDefinition);

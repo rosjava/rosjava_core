@@ -18,13 +18,15 @@ package org.ros.internal.node.response;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ *          the result type
  */
-public interface ResultFactory<ResultType> {
-  
+public interface ResultFactory<T> {
+
   /**
    * @param value
-   * @return a result to be returned as part of a {@link Response}
+   * @return a value to be returned as the result part of a {@link Response}
    */
-  public ResultType create(Object value);
-
+  public T newFromValue(Object value);
 }

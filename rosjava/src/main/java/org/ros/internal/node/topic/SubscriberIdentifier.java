@@ -33,7 +33,7 @@ public class SubscriberIdentifier {
 
   public static SubscriberIdentifier newFromStrings(String nodeName, String uri, String topicName) {
     return new SubscriberIdentifier(SlaveIdentifier.newFromStrings(nodeName, uri),
-        TopicIdentifier.createFromString(topicName));
+        TopicIdentifier.newFromString(topicName));
   }
 
   public SubscriberIdentifier(SlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
@@ -87,5 +87,4 @@ public class SubscriberIdentifier {
     } else if (!topicIdentifier.equals(other.topicIdentifier)) return false;
     return true;
   }
-
 }

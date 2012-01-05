@@ -16,12 +16,12 @@
 
 package org.ros.internal.message.new_style;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 import org.ros.internal.transport.ConnectionHeaderFields;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -87,5 +87,4 @@ public class ServiceMessageDefinition {
       return false;
     return true;
   }
-
 }

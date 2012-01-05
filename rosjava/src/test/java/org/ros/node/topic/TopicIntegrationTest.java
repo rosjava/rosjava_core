@@ -66,7 +66,7 @@ public class TopicIntegrationTest {
     Node publisherNode = nodeFactory.newNode(nodeConfiguration);
 
     CountDownPublisherListener<org.ros.message.std_msgs.String> publisherListener =
-        CountDownPublisherListener.create();
+        CountDownPublisherListener.newDefault();
     Publisher<org.ros.message.std_msgs.String> publisher =
         publisherNode.newPublisher("foo", "std_msgs/String");
     publisher.addListener(publisherListener);
@@ -79,7 +79,7 @@ public class TopicIntegrationTest {
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
 
     CountDownSubscriberListener<org.ros.message.std_msgs.String> subscriberListener =
-        CountDownSubscriberListener.create();
+        CountDownSubscriberListener.newDefault();
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         subscriberNode.newSubscriber("foo", "std_msgs/String");
     subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
@@ -149,7 +149,7 @@ public class TopicIntegrationTest {
     nodeConfiguration.setNodeName("publisher");
     final Node publisherNode = nodeFactory.newNode(nodeConfiguration);
     CountDownPublisherListener<org.ros.message.test_ros.TestHeader> publisherListener =
-        CountDownPublisherListener.create();
+        CountDownPublisherListener.newDefault();
     final Publisher<org.ros.message.test_ros.TestHeader> publisher =
         publisherNode.newPublisher("foo", "test_ros/TestHeader");
     publisher.addListener(publisherListener);
@@ -158,7 +158,7 @@ public class TopicIntegrationTest {
     Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
     Listener listener = new Listener();
     CountDownSubscriberListener<org.ros.message.test_ros.TestHeader> subscriberListener =
-        CountDownSubscriberListener.create();
+        CountDownSubscriberListener.newDefault();
     Subscriber<org.ros.message.test_ros.TestHeader> subscriber =
         subscriberNode.newSubscriber("foo", "test_ros/TestHeader");
     subscriber.addMessageListener(listener);

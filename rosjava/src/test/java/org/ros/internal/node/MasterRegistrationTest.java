@@ -48,7 +48,7 @@ public class MasterRegistrationTest {
 
   public MasterRegistrationTest() {
     topicDefinition =
-        TopicDefinition.create(new GraphName("/topic"), MessageDefinition.create(
+        TopicDefinition.newFromTopicName(new GraphName("/topic"), MessageDefinition.newFromStrings(
             org.ros.message.std_msgs.String.__s_getDataType(),
             org.ros.message.std_msgs.String.__s_getMessageDefinition(),
             org.ros.message.std_msgs.String.__s_getMD5Sum()));
@@ -76,7 +76,7 @@ public class MasterRegistrationTest {
     publisher =
         new DefaultPublisher<org.ros.message.std_msgs.String>(topicDefinition, messageSerializer,
             executorService);
-    publisherListener = CountDownPublisherListener.create();
+    publisherListener = CountDownPublisherListener.newDefault();
     publisher.addListener(publisherListener);
   }
 

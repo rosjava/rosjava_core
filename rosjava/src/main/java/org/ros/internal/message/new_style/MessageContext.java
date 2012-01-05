@@ -43,25 +43,25 @@ class MessageContext {
   }
 
   <T> void addConstantField(String name, FieldType type, T value) {
-    ScalarField<T> field = ScalarField.createConstant(name, type, value);
+    ScalarField<T> field = ScalarField.newConstant(name, type, value);
     fields.put(name, field);
     orderedFields.add(field);
   }
 
   <T> void addConstantListField(String name, FieldType type, List<T> value) {
-    ListField<T> field = ListField.createConstant(name, type, value);
+    ListField<T> field = ListField.newConstant(name, type, value);
     fields.put(name, field);
     orderedFields.add(field);
   }
 
   void addValueField(String name, FieldType type) {
-    ScalarField<?> field = ScalarField.createValue(name, type);
+    ScalarField<?> field = ScalarField.newValue(name, type);
     fields.put(name, field);
     orderedFields.add(field);
   }
 
   void addValueListField(String name, FieldType type) {
-    ListField<?> field = ListField.createValue(name, type);
+    ListField<?> field = ListField.newValue(name, type);
     fields.put(name, field);
     orderedFields.add(field);
   }
@@ -108,5 +108,4 @@ class MessageContext {
     } else if (!orderedFields.equals(other.orderedFields)) return false;
     return true;
   }
-
 }

@@ -16,16 +16,16 @@
 
 package org.ros.internal.node.topic;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.message.MessageDefinition;
 import org.ros.namespace.GraphName;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -39,10 +39,11 @@ public class TopicDefinition {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));
     GraphName name = new GraphName(header.get(ConnectionHeaderFields.TOPIC));
     return new TopicDefinition(new TopicIdentifier(name),
-        MessageDefinition.createFromHeader(header));
+        MessageDefinition.newFromHeader(header));
   }
 
-  public static TopicDefinition create(GraphName topicName, MessageDefinition messageDefinition) {
+  public static TopicDefinition newFromTopicName(GraphName topicName,
+      MessageDefinition messageDefinition) {
     return new TopicDefinition(new TopicIdentifier(topicName), messageDefinition);
   }
 
@@ -111,5 +112,4 @@ public class TopicDefinition {
       return false;
     return true;
   }
-
 }

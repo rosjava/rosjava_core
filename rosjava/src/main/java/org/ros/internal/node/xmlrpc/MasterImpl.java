@@ -72,9 +72,9 @@ public class MasterImpl implements Master, ParameterServer {
   public List<Object> lookupService(String callerId, String service) {
     ServiceIdentifier identifier = master.lookupService(new GraphName(service));
     if (identifier != null) {
-      return Response.createSuccess("Success", identifier.getUri().toString()).toList();
+      return Response.newSuccess("Success", identifier.getUri().toString()).toList();
     }
-    return Response.createError("No such service.", null).toList();
+    return Response.newError("No such service.", null).toList();
   }
 
   @Override
@@ -88,14 +88,14 @@ public class MasterImpl implements Master, ParameterServer {
     for (SubscriberIdentifier subscriberIdentifier : subscribers) {
       urls.add(subscriberIdentifier.getUri().toString());
     }
-    return Response.createSuccess("Success", urls).toList();
+    return Response.newSuccess("Success", urls).toList();
   }
 
   @Override
   public List<Object> unregisterPublisher(String callerId, String topicName, String callerApi) {
     PublisherIdentifier publisherIdentifier =
         PublisherIdentifier.newFromStrings(callerId, callerApi, topicName);
-    return Response.createSuccess("Success", master.unregisterPublisher(publisherIdentifier))
+    return Response.newSuccess("Success", master.unregisterPublisher(publisherIdentifier))
         .toList();
   }
 
@@ -109,7 +109,7 @@ public class MasterImpl implements Master, ParameterServer {
       throw new RosRuntimeException(e);
     }
     master.registerService(serviceIdentifier);
-    return Response.createSuccess("Success", 0).toList();
+    return Response.newSuccess("Success", 0).toList();
   }
 
   @Override
@@ -121,7 +121,7 @@ public class MasterImpl implements Master, ParameterServer {
       throw new RosRuntimeException(e);
     }
     int result = master.unregisterService(serviceIdentifier);
-    return Response.createSuccess("Success", result).toList();
+    return Response.newSuccess("Success", result).toList();
   }
 
   @Override
@@ -134,60 +134,60 @@ public class MasterImpl implements Master, ParameterServer {
     for (PublisherIdentifier publisherIdentifier : publishers) {
       urls.add(publisherIdentifier.getSlaveUri().toString());
     }
-    return Response.createSuccess("Success", urls).toList();
+    return Response.newSuccess("Success", urls).toList();
   }
 
   @Override
   public List<Object> unregisterSubscriber(String callerId, String topicName, String callerApi) {
     SubscriberIdentifier subscriberIdentifier =
         SubscriberIdentifier.newFromStrings(callerId, callerApi, topicName);
-    return Response.createSuccess("Success", master.unregisterSubscriber(subscriberIdentifier))
+    return Response.newSuccess("Success", master.unregisterSubscriber(subscriberIdentifier))
         .toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, Boolean value) {
     parameterServer.set(new GraphName(key), value);
-    return Response.createSuccess("Success", null).toList();
+    return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, Integer value) {
     parameterServer.set(new GraphName(key), value);
-    return Response.createSuccess("Success", null).toList();
+    return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, Double value) {
     parameterServer.set(new GraphName(key), value);
-    return Response.createSuccess("Success", null).toList();
+    return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, String value) {
     parameterServer.set(new GraphName(key), value);
-    return Response.createSuccess("Success", null).toList();
+    return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, List<?> value) {
     parameterServer.set(new GraphName(key), value);
-    return Response.createSuccess("Success", null).toList();
+    return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, Map<?, ?> value) {
     parameterServer.set(new GraphName(key), value);
-    return Response.createSuccess("Success", null).toList();
+    return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> getParam(String callerId, String key) {
     Object value = parameterServer.get(new GraphName(key));
     if (value == null) {
-      return Response.createError("Parameter \"" + key + "\" is not set.", null).toList();
+      return Response.newError("Parameter \"" + key + "\" is not set.", null).toList();
     }
-    return Response.createSuccess("Success", value).toList();
+    return Response.newSuccess("Success", value).toList();
   }
 
   @Override
@@ -204,7 +204,7 @@ public class MasterImpl implements Master, ParameterServer {
       // Must return an empty map as the value of an unset parameter.
       value = new HashMap<String, Object>();
     }
-    return Response.createSuccess("Success", value).toList();
+    return Response.newSuccess("Success", value).toList();
   }
 
   @Override
@@ -215,12 +215,12 @@ public class MasterImpl implements Master, ParameterServer {
   @Override
   public List<Object> deleteParam(String callerId, String key) {
     parameterServer.delete(new GraphName(key));
-    return Response.createSuccess("Success", null).toList();
+    return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> hasParam(String callerId, String key) {
-    return Response.createSuccess("Success", parameterServer.has(new GraphName(key))).toList();
+    return Response.newSuccess("Success", parameterServer.has(new GraphName(key))).toList();
   }
 
   @Override
@@ -230,6 +230,6 @@ public class MasterImpl implements Master, ParameterServer {
     for (GraphName name : names) {
       stringNames.add(name.toString());
     }
-    return Response.createSuccess("Success", stringNames).toList();
+    return Response.newSuccess("Success", stringNames).toList();
   }
 }

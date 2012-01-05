@@ -16,10 +16,10 @@
 
 package org.ros.internal.message.new_style;
 
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+// TODO(damonkohler): This should implement org.ros.message.MessageFactory
 /**
  * Creates {@link MessageImpl} instances.
  * 
@@ -38,18 +38,18 @@ public class MessageFactory {
     messageContextFactory = new MessageContextFactory(this);
   }
 
-  <MessageType> MessageType createMessage(String messageName, String messageDefinition,
-      Class<MessageType> messageClass) {
-    MessageContext context = messageContextFactory.create(messageName, messageDefinition);
-    return ProxyFactory.createProxy(messageClass, new MessageImpl(context));
+  <T> T newProxy(String messageName, String messageDefinition, Class<T> messageClass) {
+    MessageContext context = messageContextFactory.newFromStrings(messageName, messageDefinition);
+    return ProxyFactory.newProxy(messageClass, new MessageImpl(context));
   }
 
   @SuppressWarnings("unchecked")
-  public <MessageType extends Message> MessageType createMessage(String messageName) {
+  public <T extends Message> T newMessage(String messageName) {
     MessageContext context =
-        messageContextFactory.create(messageName, messageDefinitionProvider.get(messageName));
-    return ProxyFactory.createProxy((Class<MessageType>) messageClasses.get(messageName),
-        new MessageImpl(context));
+        messageContextFactory.newFromStrings(messageName,
+            messageDefinitionProvider.get(messageName));
+    return ProxyFactory.newProxy((Class<T>) messageClasses.get(messageName), new MessageImpl(
+        context));
   }
 
   @SuppressWarnings("unchecked")
@@ -57,7 +57,7 @@ public class MessageFactory {
       ByteBuffer buffer) {
     buffer.order(ByteOrder.LITTLE_ENDIAN);
     MessageType message =
-        (MessageType) createMessage(messageName, messageDefinitionProvider.get(messageName),
+        (MessageType) newProxy(messageName, messageDefinitionProvider.get(messageName),
             messageClasses.get(messageName));
     for (Field field : message.getFields()) {
       if (!field.isConstant()) {
@@ -66,5 +66,4 @@ public class MessageFactory {
     }
     return message;
   }
-
 }

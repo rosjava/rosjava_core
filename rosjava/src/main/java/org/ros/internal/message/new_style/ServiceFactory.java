@@ -16,16 +16,17 @@
 
 package org.ros.internal.message.new_style;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+
+import org.ros.exception.RosRuntimeException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
 
-import org.ros.exception.RosRuntimeException;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-
+// TODO(damonkohler): This should be rolled into a org.ros.message.MessageFactory implementation.
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -41,22 +42,22 @@ public class ServiceFactory {
   public ServiceFactory(ServiceLoader serviceLoader, MessageFactory messageFactory) {
     this.serviceLoader = serviceLoader;
     this.messageFactory = messageFactory;
-    requestMessageClassRegistry = new DefaultedClassMap<Service.Request>(Service.Request.class);
-    responseMessageClassRegistry = new DefaultedClassMap<Service.Response>(Service.Response.class);
+    requestMessageClassRegistry = DefaultedClassMap.newFromDefaultClass(Service.Request.class);
+    responseMessageClassRegistry = DefaultedClassMap.newFromDefaultClass(Service.Response.class);
     requestDefinitions = Maps.newConcurrentMap();
     responseDefinitions = Maps.newConcurrentMap();
   }
 
-  public Service createService(String serviceName) {
+  public Service newService(String serviceName) {
     if (!requestDefinitions.containsKey(serviceName)) {
       Preconditions.checkState(!responseDefinitions.containsKey(serviceName));
       addServiceDefinition(serviceName);
     }
     Service.Request request =
-        messageFactory.createMessage(serviceName, requestDefinitions.get(serviceName),
+        messageFactory.newProxy(serviceName, requestDefinitions.get(serviceName),
             requestMessageClassRegistry.get(serviceName));
     Service.Response response =
-        messageFactory.createMessage(serviceName, responseDefinitions.get(serviceName),
+        messageFactory.newProxy(serviceName, responseDefinitions.get(serviceName),
             responseMessageClassRegistry.get(serviceName));
     return new Service(request, response);
   }
@@ -85,5 +86,4 @@ public class ServiceFactory {
     requestDefinitions.put(serviceName, request.toString());
     responseDefinitions.put(serviceName, response.toString());
   }
-
 }

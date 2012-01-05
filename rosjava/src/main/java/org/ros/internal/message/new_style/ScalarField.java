@@ -27,11 +27,11 @@ class ScalarField<ValueType> extends Field {
 
   private ValueType value;
 
-  static <T> ScalarField<T> createConstant(String name, FieldType type, T value) {
+  static <T> ScalarField<T> newConstant(String name, FieldType type, T value) {
     return new ScalarField<T>(name, type, value, true);
   }
 
-  static <T> ScalarField<T> createValue(String name, FieldType type) {
+  static <T> ScalarField<T> newValue(String name, FieldType type) {
     // TODO(damonkohler): All values should have a default.
     return new ScalarField<T>(name, type, null, false);
   }

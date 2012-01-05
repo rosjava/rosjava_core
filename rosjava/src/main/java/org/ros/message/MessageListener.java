@@ -21,10 +21,10 @@ package org.ros.message;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <MessageType>
+ * @param <T>
  *          the type of message expected
  */
-public interface MessageListener<MessageType> {
+public interface MessageListener<T> {
 
   /**
    * Called when a new message arrives.
@@ -32,6 +32,5 @@ public interface MessageListener<MessageType> {
    * @param message
    *          the new message
    */
-  void onNewMessage(MessageType message);
-
+  void onNewMessage(T message);
 }

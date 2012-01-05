@@ -36,15 +36,15 @@ public class Response<ResultType> {
   private final String statusMessage;
   private final ResultType result;
 
-  public static <ResultType> Response<ResultType> createError(String message, ResultType value) {
+  public static <ResultType> Response<ResultType> newError(String message, ResultType value) {
     return new Response<ResultType>(StatusCode.ERROR, message, value);
   }
 
-  public static <ResultType> Response<ResultType> createFailure(String message, ResultType value) {
+  public static <ResultType> Response<ResultType> newFailure(String message, ResultType value) {
     return new Response<ResultType>(StatusCode.FAILURE, message, value);
   }
 
-  public static <ResultType> Response<ResultType> createSuccess(String message, ResultType value) {
+  public static <ResultType> Response<ResultType> newSuccess(String message, ResultType value) {
     return new Response<ResultType>(StatusCode.SUCCESS, message, value);
   }
 
@@ -81,7 +81,7 @@ public class Response<ResultType> {
           "Remote side did not return correct type (status code/message).", e);
     }
     try {
-      return new Response<ResultType>(statusCode, message, resultFactory.create(response.get(2)));
+      return new Response<ResultType>(statusCode, message, resultFactory.newFromValue(response.get(2)));
     } catch (ClassCastException e) {
       throw new RosRuntimeException("Remote side did not return correct value type.", e);
     }
@@ -119,7 +119,7 @@ public class Response<ResultType> {
           "Remote side did not return correct type (status code/message).", e);
     }
     try {
-      return new Response<ResultType>(statusCode, message, resultFactory.create(response.get(2)));
+      return new Response<ResultType>(statusCode, message, resultFactory.newFromValue(response.get(2)));
     } catch (ClassCastException e) {
       throw new RosRuntimeException("Remote side did not return correct value type.", e);
     }

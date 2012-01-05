@@ -38,7 +38,7 @@ public class ServiceTest {
     File searchPath = new File(resource.getPath());
     messageLoader.addSearchPath(searchPath);
     messageLoader.updateMessageDefinitions();
-    messageClassRegistry = DefaultedClassMap.create(Message.class);
+    messageClassRegistry = DefaultedClassMap.newFromDefaultClass(Message.class);
     messageFactory = new MessageFactory(messageLoader, messageClassRegistry);
   }
 
@@ -47,11 +47,10 @@ public class ServiceTest {
     ServiceLoader loader = new ServiceLoader();
     loader.addServiceDefinition("Echo", "string data\n---\nstring data");
     ServiceFactory factory = new ServiceFactory(loader, messageFactory);
-    Service echoService = factory.createService("Echo");
+    Service echoService = factory.newService("Echo");
     Message request = echoService.getRequest();
     Message response = echoService.getResponse();
     request.setString("data", "Hello, ROS!");
     response.setString("data", "Hello, ROS!");
   }
-
 }

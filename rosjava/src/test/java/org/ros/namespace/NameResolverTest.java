@@ -31,7 +31,7 @@ public class NameResolverTest {
 
   @Test
   public void testResolveNameOneArg() {
-    NameResolver r = NameResolver.create();
+    NameResolver r = NameResolver.newRoot();
 
     assertGraphNameEquals("/foo", r.resolve("foo"));
     assertGraphNameEquals("/foo", r.resolve("/foo"));
@@ -44,7 +44,7 @@ public class NameResolverTest {
       // Should throw if trying to resolve private name.
     }
 
-    r = NameResolver.create("/ns1");
+    r = NameResolver.newFromNamespace("/ns1");
 
     assertGraphNameEquals("/ns1/foo", r.resolve("foo"));
     assertGraphNameEquals("/foo", r.resolve("/foo"));
@@ -54,7 +54,7 @@ public class NameResolverTest {
   @Test
   public void testResolveNameTwoArg() {
     // These tests are based on test_roslib_names.py.
-    NameResolver r = NameResolver.create();
+    NameResolver r = NameResolver.newRoot();
     try {
       r.resolve("foo", "bar");
       fail("should have raised");
@@ -102,7 +102,7 @@ public class NameResolverTest {
     remappings.put(new GraphName("name"), new GraphName("/my/name"));
     remappings.put(new GraphName("foo"), new GraphName("/my/foo"));
 
-    NameResolver r = NameResolver.create(remappings);
+    NameResolver r = NameResolver.newRootFromRemappings(remappings);
 
     GraphName n = r.resolve("name");
     assertGraphNameEquals("/my/name", n);
@@ -110,5 +110,4 @@ public class NameResolverTest {
     assertGraphNameEquals("/my/foo", r.resolve("foo"));
     assertGraphNameEquals("/my/name", r.resolve("/my/name"));
   }
-
 }

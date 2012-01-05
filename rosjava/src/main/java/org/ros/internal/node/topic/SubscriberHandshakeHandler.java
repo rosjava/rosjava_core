@@ -77,7 +77,7 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
     Channel channel = e.getChannel();
     ChannelPipeline pipeline = channel.getPipeline();
     pipeline.remove(this);
-    pipeline.addLast("MessageHandler", incomingMessageQueue.createChannelHandler());
+    pipeline.addLast("MessageHandler", incomingMessageQueue.newChannelHandler());
     String latching = handshakeHeader.get(ConnectionHeaderFields.LATCHING);
     if (latching != null && latching.equals("1")) {
       incomingMessageQueue.setLatchMode(true);

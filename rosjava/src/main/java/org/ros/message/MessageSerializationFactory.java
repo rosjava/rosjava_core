@@ -21,18 +21,55 @@ package org.ros.message;
  */
 public interface MessageSerializationFactory {
 
-  <MessageType> MessageSerializer<MessageType> newMessageSerializer(String messageType);
+  /**
+   * @param messageType
+   *          the type of message that the new {@link MessageSerializer} should
+   *          serialize
+   * @return a new {@link MessageSerializer} for the provided message type
+   */
+  <T> MessageSerializer<T> newMessageSerializer(String messageType);
 
-  <MessageType> MessageDeserializer<MessageType> newMessageDeserializer(String messageType);
+  /**
+   * @param messageType
+   *          the type of message that the new {@link MessageDeserializer}
+   *          should deserialize
+   * @return a new {@link MessageDeserializer} for the provided message type
+   */
+  <T> MessageDeserializer<T> newMessageDeserializer(String messageType);
 
-  <MessageType> MessageSerializer<MessageType> newServiceRequestSerializer(String serviceType);
+  /**
+   * @param serviceType
+   *          the type of service that the new {@link MessageSerializer} should
+   *          serialize requests for
+   * @return a new {@link MessageSerializer} for requests to the provided
+   *         service type
+   */
+  <T> MessageSerializer<T> newServiceRequestSerializer(String serviceType);
 
-  <MessageType> MessageDeserializer<MessageType>
-      newServiceRequestDeserializer(String serviceType);
+  /**
+   * @param serviceType
+   *          the type of service that the new {@link MessageDeserializer}
+   *          should deserialize requests for
+   * @return a new {@link MessageDeserializer} for requests to the provided
+   *         service type
+   */
+  <T> MessageDeserializer<T> newServiceRequestDeserializer(String serviceType);
 
-  <MessageType> MessageSerializer<MessageType> newServiceResponseSerializer(String serviceType);
+  /**
+   * @param serviceType
+   *          the type of service that the new {@link MessageSerializer} should
+   *          serialize responses for
+   * @return a new {@link MessageSerializer} for responses from the provided
+   *         service type
+   */
+  <T> MessageSerializer<T> newServiceResponseSerializer(String serviceType);
 
-  <MessageType> MessageDeserializer<MessageType> newServiceResponseDeserializer(
-      String serviceType);
-
+  /**
+   * @param serviceType
+   *          the type of service that the new {@link MessageDeserializer}
+   *          should deserialize responses for
+   * @return a new {@link MessageDeserializer} for responses from the provided
+   *         service type
+   */
+  <T> MessageDeserializer<T> newServiceResponseDeserializer(String serviceType);
 }

@@ -31,7 +31,7 @@ public class CountDownPublisherListener<T> extends CountDownRegistrantListener<P
   private CountDownLatch shutdownLatch;
   private CountDownLatch newSubscriberLatch;
 
-  public static <T> CountDownPublisherListener<T> create() {
+  public static <T> CountDownPublisherListener<T> newDefault() {
     return newFromCounts(1, 1, 1, 1, 1, 1);
   }
 

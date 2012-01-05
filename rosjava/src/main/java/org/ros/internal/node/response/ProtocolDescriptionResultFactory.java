@@ -32,7 +32,7 @@ import com.google.common.base.Preconditions;
 public class ProtocolDescriptionResultFactory implements ResultFactory<ProtocolDescription> {
 
   @Override
-  public ProtocolDescription create(Object value) {
+  public ProtocolDescription newFromValue(Object value) {
     List<Object> protocolParameters = Arrays.asList((Object[]) value);
     Preconditions.checkState(protocolParameters.size() == 3);
     Preconditions.checkState(protocolParameters.get(0).equals(ProtocolNames.TCPROS));
@@ -40,5 +40,4 @@ public class ProtocolDescriptionResultFactory implements ResultFactory<ProtocolD
     address.setStaticPort((Integer) protocolParameters.get(2));
     return new TcpRosProtocolDescription(address);
   }
-
 }

@@ -120,7 +120,7 @@ public class ServiceFactory {
             (DefaultServiceClient<RequestType, ResponseType>) serviceManager.getClient(name);
       } else {
         serviceClient =
-            DefaultServiceClient.create(nodeName, serviceDefinition, serializer, deserializer,
+            DefaultServiceClient.newDefault(nodeName, serviceDefinition, serializer, deserializer,
                 executorService);
         createdNewService = true;
       }

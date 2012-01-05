@@ -16,17 +16,19 @@
 
 package org.ros.internal.message.old_style;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.message.Service;
 
-import com.google.common.base.Preconditions;
-
-
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class ServiceMessageDefinitionFactory {
 
   @SuppressWarnings("unchecked")
-  public static ServiceMessageDefinition createFromString(String serviceType) {
+  public static ServiceMessageDefinition newFromString(String serviceType) {
     Preconditions.checkArgument(serviceType.split("/").length == 2);
     Class<Service<?, ?>> serviceClass;
     Service<?, ?> service;
@@ -40,5 +42,4 @@ public class ServiceMessageDefinitionFactory {
     }
     return new ServiceMessageDefinition(service.getDataType(), service.getMD5Sum());
   }
-
 }

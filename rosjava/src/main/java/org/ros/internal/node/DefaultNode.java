@@ -206,10 +206,10 @@ public class DefaultNode implements Node {
   public <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
-        nodeConfiguration.getMessageDefinitionFactory().newFromString(messageType);
-    TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
+        nodeConfiguration.getMessageDefinitionFactory().newFromMessageType(messageType);
+    TopicDefinition topicDefinition = TopicDefinition.newFromTopicName(resolvedTopicName, messageDefinition);
     org.ros.message.MessageSerializer<MessageType> serializer = newMessageSerializer(messageType);
-    return publisherFactory.create(topicDefinition, serializer);
+    return publisherFactory.newOrExisting(topicDefinition, serializer);
   }
 
   @Override
@@ -222,10 +222,10 @@ public class DefaultNode implements Node {
       newSubscriber(GraphName topicName, String messageType) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
-        nodeConfiguration.getMessageDefinitionFactory().newFromString(messageType);
-    TopicDefinition topicDefinition = TopicDefinition.create(resolvedTopicName, messageDefinition);
+        nodeConfiguration.getMessageDefinitionFactory().newFromMessageType(messageType);
+    TopicDefinition topicDefinition = TopicDefinition.newFromTopicName(resolvedTopicName, messageDefinition);
     MessageDeserializer<MessageType> deserializer = newMessageDeserializer(messageType);
-    Subscriber<MessageType> subscriber = subscriberFactory.create(topicDefinition, deserializer);
+    Subscriber<MessageType> subscriber = subscriberFactory.newOrExisting(topicDefinition, deserializer);
     return subscriber;
   }
 
@@ -242,7 +242,7 @@ public class DefaultNode implements Node {
     // later on the fly.
     ServiceIdentifier identifier = new ServiceIdentifier(resolvedServiceName, null);
     ServiceMessageDefinition messageDefinition =
-        ServiceMessageDefinitionFactory.createFromString(serviceType);
+        ServiceMessageDefinitionFactory.newFromString(serviceType);
     ServiceDefinition definition = new ServiceDefinition(identifier, messageDefinition);
     MessageDeserializer<T> requestDeserializer = newServiceRequestDeserializer(serviceType);
     MessageSerializer<S> responseSerializer = newServiceResponseSerializer(serviceType);
@@ -266,7 +266,7 @@ public class DefaultNode implements Node {
           + serviceType);
     }
     ServiceMessageDefinition messageDefinition =
-        ServiceMessageDefinitionFactory.createFromString(serviceType);
+        ServiceMessageDefinitionFactory.newFromString(serviceType);
     ServiceIdentifier serviceIdentifier = new ServiceIdentifier(resolvedServiceName, uri);
     ServiceDefinition definition = new ServiceDefinition(serviceIdentifier, messageDefinition);
     MessageSerializer<RequestType> requestSerializer = newServiceRequestSerializer(serviceType);
@@ -370,7 +370,7 @@ public class DefaultNode implements Node {
 
   @Override
   public ParameterTree newParameterTree() {
-    return org.ros.internal.node.parameter.DefaultParameterTree.create(
+    return org.ros.internal.node.parameter.DefaultParameterTree.newFromSlaveIdentifier(
         slaveServer.toSlaveIdentifier(), masterClient.getRemoteUri(), resolver, parameterManager);
   }
 

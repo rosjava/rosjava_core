@@ -16,9 +16,9 @@
 
 package org.ros.internal.message.new_style;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
+
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -26,14 +26,14 @@ import com.google.common.collect.Maps;
 class DefaultedClassMap<T> {
 
   private final Map<String, Class<? extends T>> map;
-  private final Class<? extends T> defaultValue;
+  private final Class<? extends T> defaultClass;
   
-  public static <T> DefaultedClassMap<T> create(Class<? extends T> defaultValue) {
+  public static <T> DefaultedClassMap<T> newFromDefaultClass(Class<? extends T> defaultValue) {
     return new DefaultedClassMap<T>(defaultValue);
   }
 
-  public DefaultedClassMap(Class<? extends T> defaultValue) {
-    this.defaultValue = defaultValue;
+  private DefaultedClassMap(Class<? extends T> defaultClass) {
+    this.defaultClass = defaultClass;
     map = Maps.newConcurrentMap();
   }
 
@@ -43,9 +43,8 @@ class DefaultedClassMap<T> {
 
   public Class<? extends T> get(String key) {
     if (!map.containsKey(key)) {
-      return defaultValue;
+      return defaultClass;
     }
     return map.get(key);
   }
-
 }

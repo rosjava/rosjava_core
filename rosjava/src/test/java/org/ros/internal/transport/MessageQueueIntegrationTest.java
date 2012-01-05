@@ -166,7 +166,7 @@ public class MessageQueueIntegrationTest {
       final IncomingMessageQueue<org.ros.message.std_msgs.String> incomingMessageQueue,
       Channel serverChannel) throws InterruptedException {
     return tcpClientConnectionManager.connect("Foo", serverChannel.getLocalAddress(),
-        incomingMessageQueue.createChannelHandler(), "MessageHandler");
+        incomingMessageQueue.newChannelHandler(), "MessageHandler");
   }
 
   private CountDownLatch expectMessage(

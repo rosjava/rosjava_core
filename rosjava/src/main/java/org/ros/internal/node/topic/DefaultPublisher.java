@@ -118,7 +118,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   }
 
   public PublisherDefinition toDefinition(SlaveIdentifier slaveIdentifier) {
-    return PublisherDefinition.create(slaveIdentifier, getTopicDefinition());
+    return PublisherDefinition.newFromSlaveIdentifier(slaveIdentifier, getTopicDefinition());
   }
 
   @Override

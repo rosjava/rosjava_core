@@ -30,7 +30,7 @@ public class MessageDefinitionTest {
   public void testMd5Checksum() {
     org.ros.message.rosgraph_msgs.Log message = new org.ros.message.rosgraph_msgs.Log();
     MessageDefinition definition =
-        MessageDefinition.create(message.getDataType(), message.getMessageDefinition(),
+        MessageDefinition.newFromStrings(message.getDataType(), message.getMessageDefinition(),
             message.getMD5Sum());
     assertEquals(message.getMD5Sum(), definition.getMd5Checksum());
   }

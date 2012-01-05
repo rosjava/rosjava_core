@@ -103,7 +103,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
         definition.getMd5Checksum()));
   }
 
-  public ChannelHandler createRequestHandler() {
+  public ChannelHandler newRequestHandler() {
     return new ServiceRequestHandler<T, S>(deserializer, serializer, responseBuilder);
   }
 

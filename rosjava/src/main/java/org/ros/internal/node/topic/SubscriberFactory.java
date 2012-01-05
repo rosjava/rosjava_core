@@ -55,7 +55,7 @@ public class SubscriberFactory {
    * @return a new or cached {@link Subscriber} instance
    */
   @SuppressWarnings("unchecked")
-  public <T> Subscriber<T> create(TopicDefinition topicDefinition,
+  public <T> Subscriber<T> newOrExisting(TopicDefinition topicDefinition,
       MessageDeserializer<T> messageDeserializer) {
     String topicName = topicDefinition.getName().toString();
     DefaultSubscriber<T> subscriber;
@@ -66,7 +66,7 @@ public class SubscriberFactory {
         subscriber = (DefaultSubscriber<T>) topicManager.getSubscriber(topicName);
       } else {
         subscriber =
-            DefaultSubscriber.create(slaveServer.toSlaveIdentifier(), topicDefinition,
+            DefaultSubscriber.newDefault(slaveServer.toSlaveIdentifier(), topicDefinition,
                 executorService, messageDeserializer);
         subscriber.addSubscriberListener(new DefaultSubscriberListener<T>() {
           @Override

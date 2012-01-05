@@ -17,10 +17,9 @@
 package org.ros.message;
 
 /**
- * @author damonkohler
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public interface MessageDefinitionFactory {
   
-  MessageDefinition newFromString(String messageType);
-
+  MessageDefinition newFromMessageType(String messageType);
 }

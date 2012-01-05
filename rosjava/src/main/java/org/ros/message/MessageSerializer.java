@@ -20,9 +20,11 @@ import java.nio.ByteBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ *          the type of message that the {@link MessageSerializer} can serialize
  */
-public interface MessageSerializer<MessageType> {
-  
-  ByteBuffer serialize(MessageType message);
+public interface MessageSerializer<T> {
 
+  ByteBuffer serialize(T message);
 }

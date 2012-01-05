@@ -27,7 +27,7 @@ public class TopicIdentifier {
   
   private final GraphName name;
   
-  public static TopicIdentifier createFromString(String topicName) {
+  public static TopicIdentifier newFromString(String topicName) {
     return new TopicIdentifier(new GraphName(topicName));
   }
 
@@ -65,5 +65,4 @@ public class TopicIdentifier {
     } else if (!name.equals(other.name)) return false;
     return true;
   }
-
 }

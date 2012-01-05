@@ -49,7 +49,7 @@ public class PublisherFactory {
    * @return a new or cached {@link Publisher} instance
    */
   @SuppressWarnings("unchecked")
-  public <T> Publisher<T> create(TopicDefinition topicDefinition,
+  public <T> Publisher<T> newOrExisting(TopicDefinition topicDefinition,
       MessageSerializer<T> messageSerializer) {
     String topicName = topicDefinition.getName().toString();
     DefaultPublisher<T> publisher;

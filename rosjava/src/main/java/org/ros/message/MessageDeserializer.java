@@ -20,9 +20,12 @@ import java.nio.ByteBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ *          the type of message that this {@link MessageDeserializer} can
+ *          deserialize
  */
-public interface MessageDeserializer<MessageType> {
+public interface MessageDeserializer<T> {
   
-  MessageType deserialize(ByteBuffer buffer);
-
+  T deserialize(ByteBuffer buffer);
 }

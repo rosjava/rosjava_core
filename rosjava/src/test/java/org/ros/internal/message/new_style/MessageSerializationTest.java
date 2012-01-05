@@ -43,13 +43,13 @@ public class MessageSerializationTest {
     File searchPath = new File(resource.getPath());
     loader.addSearchPath(searchPath);
     loader.updateMessageDefinitions();
-    classes = DefaultedClassMap.create(Message.class);
+    classes = DefaultedClassMap.newFromDefaultClass(Message.class);
     factory = new MessageFactory(loader, classes);
   }
 
   @Test
   public void testInt32() {
-    Message message = factory.createMessage("std_msgs/Int32");
+    Message message = factory.newMessage("std_msgs/Int32");
     message.setInt32("data", 42);
     ByteBuffer buffer = message.serialize();
     assertEquals(message, factory.deserializeMessage("std_msgs/Int32", buffer));
@@ -57,7 +57,7 @@ public class MessageSerializationTest {
 
   @Test
   public void testString() {
-    Message message = factory.createMessage("std_msgs/String");
+    Message message = factory.newMessage("std_msgs/String");
     message.setString("data", "Hello, ROS!");
     ByteBuffer buffer = message.serialize();
     assertEquals(message, factory.deserializeMessage("std_msgs/String", buffer));
@@ -66,8 +66,8 @@ public class MessageSerializationTest {
   @Test
   public void testNestedMessage() {
     loader.addMessageDefinition("foo", "std_msgs/String data");
-    Message fooMessage = factory.createMessage("foo");
-    Message stringMessage = factory.createMessage("std_msgs/String");
+    Message fooMessage = factory.newMessage("foo");
+    Message stringMessage = factory.newMessage("std_msgs/String");
     stringMessage.setString("data", "Hello, ROS!");
     fooMessage.setMessage("data", stringMessage);
     ByteBuffer buffer = fooMessage.serialize();
@@ -77,10 +77,10 @@ public class MessageSerializationTest {
   @Test
   public void testNestedMessageArray() {
     loader.addMessageDefinition("foo", "std_msgs/String[] data");
-    Message fooMessage = factory.createMessage("foo");
-    Message stringMessageA = factory.createMessage("std_msgs/String");
+    Message fooMessage = factory.newMessage("foo");
+    Message stringMessageA = factory.newMessage("std_msgs/String");
     stringMessageA.setString("data", "Hello, ROS!");
-    Message stringMessageB = factory.createMessage("std_msgs/String");
+    Message stringMessageB = factory.newMessage("std_msgs/String");
     stringMessageB.setString("data", "Goodbye, ROS!");
     fooMessage.setMessageList("data", Lists.newArrayList(stringMessageA, stringMessageB));
     ByteBuffer buffer = fooMessage.serialize();
@@ -90,7 +90,7 @@ public class MessageSerializationTest {
   @Test
   public void testInt32Array() {
     loader.addMessageDefinition("foo", "int32[] data");
-    Message message = factory.createMessage("foo");
+    Message message = factory.newMessage("foo");
     message.setInt32List("data", Lists.newArrayList(1, 2, 3, 4, 5));
     ByteBuffer buffer = message.serialize();
     assertEquals(message, factory.deserializeMessage("foo", buffer));

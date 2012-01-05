@@ -21,6 +21,5 @@ package org.ros.address;
  */
 public interface AdvertiseAddressFactory {
 
-  AdvertiseAddress create();
-
+  AdvertiseAddress newDefault();
 }

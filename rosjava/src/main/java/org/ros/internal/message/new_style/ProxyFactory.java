@@ -25,16 +25,22 @@ import java.lang.reflect.Proxy;
  */
 class ProxyFactory {
 
+  /**
+   * @param interfaceClass
+   *          the interface class to provide
+   * @param implementation
+   *          the instance to proxy
+   * @return a new proxy for {@code implementation} that implements
+   *         {@code interfaceClass}
+   */
   @SuppressWarnings("unchecked")
-  public static <InterfaceType, ImplementationType> InterfaceType createProxy(
-      Class<InterfaceType> interfaceClass, final ImplementationType implementation) {
-    return (InterfaceType) Proxy.newProxyInstance(implementation.getClass().getClassLoader(),
-        new Class[] {interfaceClass, GetInstance.class}, new InvocationHandler() {
-          @Override
-          public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            return method.invoke(implementation, args);
-          }
-        });
+  public static <T, S> T newProxy(Class<T> interfaceClass, final S implementation) {
+    return (T) Proxy.newProxyInstance(implementation.getClass().getClassLoader(), new Class[] {
+        interfaceClass, GetInstance.class }, new InvocationHandler() {
+      @Override
+      public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        return method.invoke(implementation, args);
+      }
+    });
   }
-
 }

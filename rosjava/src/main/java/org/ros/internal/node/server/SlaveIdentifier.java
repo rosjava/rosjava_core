@@ -92,8 +92,9 @@ public class SlaveIdentifier {
   }
 
   public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.CALLER_ID,
-        name.toString()).build();
+    return new ImmutableMap.Builder<String, String>()
+        .put(ConnectionHeaderFields.CALLER_ID, name.toString())
+        .build();
   }
 
   @Override
@@ -126,5 +127,4 @@ public class SlaveIdentifier {
       return false;
     return true;
   }
-
 }

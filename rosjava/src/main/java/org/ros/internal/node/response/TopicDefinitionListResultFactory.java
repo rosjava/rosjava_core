@@ -31,16 +31,15 @@ import com.google.common.collect.Lists;
 public class TopicDefinitionListResultFactory implements ResultFactory<List<TopicDefinition>> {
 
   @Override
-  public List<TopicDefinition> create(Object value) {
+  public List<TopicDefinition> newFromValue(Object value) {
     List<TopicDefinition> descriptions = Lists.newArrayList();
     List<Object> topics = Arrays.asList((Object[]) value);
     for (Object topic : topics) {
       String name = (String) ((Object[]) topic)[0];
       String type = (String) ((Object[]) topic)[1];
-      descriptions.add(TopicDefinition.create(new GraphName(name), MessageDefinition
-          .createFromTypeName(type)));
+      descriptions.add(TopicDefinition.newFromTopicName(new GraphName(name), MessageDefinition
+          .newFromTypeName(type)));
     }
     return descriptions;
   }
-
 }

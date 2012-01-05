@@ -38,7 +38,7 @@ public class AnonymousParmeterTree implements ParameterTree {
   public AnonymousParmeterTree(URI masterUri) {
     SlaveIdentifier slaveIdentifier = new SlaveIdentifier(new GraphName("invalid"), null);
     parameterTree =
-        DefaultParameterTree.create(slaveIdentifier, masterUri, NameResolver.create(), null);
+        DefaultParameterTree.newFromSlaveIdentifier(slaveIdentifier, masterUri, NameResolver.newRoot(), null);
   }
 
   @Override

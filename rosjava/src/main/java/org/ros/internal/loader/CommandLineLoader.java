@@ -107,7 +107,7 @@ public class CommandLineLoader {
    * Create NodeConfiguration according to ROS command-line and environment
    * specification.
    */
-  public NodeConfiguration createConfiguration() {
+  public NodeConfiguration build() {
     parseRemappingArguments();
     // TODO(damonkohler): Add support for starting up a private node.
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(getHost());
@@ -237,5 +237,4 @@ public class CommandLineLoader {
     Class<?> clazz = getClass().getClassLoader().loadClass(name);
     return NodeMain.class.cast(clazz.newInstance());
   }
-
 }

@@ -16,13 +16,13 @@
 
 package org.ros.internal.message.new_style;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
+import com.google.common.base.Preconditions;
 
 import org.ros.exception.RosRuntimeException;
 
-import com.google.common.base.Preconditions;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -35,7 +35,7 @@ public class MessageContextFactory {
     this.messageFactory = messageFactory;
   }
 
-  public MessageContext create(String messageName, String messageDefinition) {
+  public MessageContext newFromStrings(String messageName, String messageDefinition) {
     MessageContext context = new MessageContext(messageName);
     BufferedReader reader = new BufferedReader(new StringReader(messageDefinition));
     String line;
@@ -44,7 +44,7 @@ public class MessageContextFactory {
       while (line != null) {
         line = line.trim();
         if (line.length() > 0 && !line.startsWith("#")) {
-          createFieldFromString(line, context);
+          newFieldFromString(line, context);
         }
         line = reader.readLine();
       }
@@ -54,7 +54,7 @@ public class MessageContextFactory {
     return context;
   }
 
-  private void createFieldFromString(String field, MessageContext context) {
+  private void newFieldFromString(String field, MessageContext context) {
     String[] typeAndName = field.split("\\s+", 2);
     String type = typeAndName[0];
     String name = typeAndName[1];
@@ -96,5 +96,4 @@ public class MessageContextFactory {
     }
     return new MessageFieldType(type, messageFactory);
   }
-
 }

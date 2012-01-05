@@ -151,19 +151,19 @@ public class DefaultNodeTest {
 
     RosoutLogger rosoutLogger = (RosoutLogger) node.getLog();
     CountDownPublisherListener<org.ros.message.rosgraph_msgs.Log> rosoutLoggerPublisherListener =
-        CountDownPublisherListener.create();
+        CountDownPublisherListener.newDefault();
     rosoutLogger.getPublisher().addListener(rosoutLoggerPublisherListener);
     assertTrue(rosoutLoggerPublisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     CountDownPublisherListener<org.ros.message.std_msgs.String> publisherListener =
-        CountDownPublisherListener.create();
+        CountDownPublisherListener.newDefault();
     Publisher<org.ros.message.std_msgs.String> publisher =
         node.newPublisher("/foo", "std_msgs/String");
     publisher.addListener(publisherListener);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     CountDownSubscriberListener<org.ros.message.std_msgs.String> subscriberListener =
-        CountDownSubscriberListener.create();
+        CountDownSubscriberListener.newDefault();
     Subscriber<org.ros.message.std_msgs.String> subscriber =
         node.newSubscriber("/foo", "std_msgs/String");
     subscriber.addSubscriberListener(subscriberListener);
@@ -185,7 +185,7 @@ public class DefaultNodeTest {
   @Test
   public void testResolveName() {
     NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate(masterUri);
-    nodeConfiguration.setParentResolver(NameResolver.create("/ns1"));
+    nodeConfiguration.setParentResolver(NameResolver.newFromNamespace("/ns1"));
     nodeConfiguration.setNodeName("test_resolver");
     Node node = nodeFactory.newNode(nodeConfiguration);
 
@@ -234,7 +234,7 @@ public class DefaultNodeTest {
     checkHostName(nodeUri.getHost());
 
     CountDownPublisherListener<org.ros.message.std_msgs.Int64> publisherListener =
-        CountDownPublisherListener.create();
+        CountDownPublisherListener.newDefault();
     Publisher<org.ros.message.std_msgs.Int64> publisher =
         node.newPublisher("test_addresses_pub", "std_msgs/Int64");
     publisher.addListener(publisherListener);

@@ -18,16 +18,16 @@ package org.ros.internal.message.new_style;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.collect.Lists;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import com.google.common.collect.Lists;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -51,7 +51,7 @@ public class MessageTest {
     File searchPath = new File(resource.getPath());
     loader.addSearchPath(searchPath);
     loader.updateMessageDefinitions();
-    classes = DefaultedClassMap.create(Message.class);
+    classes = DefaultedClassMap.newFromDefaultClass(Message.class);
     classes.put("foo", FooMessage.class);
     classes.put("bar", BarMessage.class);
     factory = new MessageFactory(loader, classes);
@@ -60,19 +60,19 @@ public class MessageTest {
   @Test
   public void testCreateEmptyMessage() {
     loader.addMessageDefinition("foo", "");
-    factory.createMessage("foo");
+    factory.newMessage("foo");
   }
 
   @Test
   public void testCreateEmptyMessageWithBlankLines() {
     loader.addMessageDefinition("foo", "\n\n\n\n\n");
-    factory.createMessage("foo");
+    factory.newMessage("foo");
   }
 
   @Test
   public void testString() {
     String data = "Hello, ROS!";
-    Message message = factory.createMessage("std_msgs/String");
+    Message message = factory.newMessage("std_msgs/String");
     message.setString("data", data);
     assertEquals(data, message.getString("data"));
   }
@@ -81,7 +81,7 @@ public class MessageTest {
   public void testStringWithComments() {
     loader.addMessageDefinition("foo", "# foo\nstring data\n    # string other data");
     String data = "Hello, ROS!";
-    FooMessage message = factory.createMessage("foo");
+    FooMessage message = factory.newMessage("foo");
     message.setString("data", data);
     assertEquals(data, message.getString("data"));
   }
@@ -89,7 +89,7 @@ public class MessageTest {
   @Test
   public void testInt8() {
     byte data = 42;
-    Message message = factory.createMessage("std_msgs/Int8");
+    Message message = factory.newMessage("std_msgs/Int8");
     message.setInt8("data", data);
     assertEquals(data, message.getInt8("data"));
   }
@@ -98,8 +98,8 @@ public class MessageTest {
   public void testNestedMessage() {
     loader.addMessageDefinition("foo", "bar data");
     loader.addMessageDefinition("bar", "int8 data");
-    FooMessage fooMessage = factory.createMessage("foo");
-    BarMessage barMessage = factory.createMessage("bar");
+    FooMessage fooMessage = factory.newMessage("foo");
+    BarMessage barMessage = factory.newMessage("bar");
     fooMessage.setMessage("data", barMessage);
     byte data = 42;
     barMessage.setInt8("data", data);
@@ -109,20 +109,20 @@ public class MessageTest {
   @Test
   public void testConstantInt8() {
     loader.addMessageDefinition("foo", "int8 data=42");
-    FooMessage message = factory.createMessage("foo");
+    FooMessage message = factory.newMessage("foo");
     assertEquals(42, message.getInt8("data"));
   }
 
   @Test
   public void testConstantString() {
     loader.addMessageDefinition("foo", "string data=Hello, ROS! # comment ");
-    FooMessage message = factory.createMessage("foo");
+    FooMessage message = factory.newMessage("foo");
     assertEquals("Hello, ROS! # comment", message.getString("data"));
   }
 
   public void testInt8List() {
     loader.addMessageDefinition("foo", "int8[] data");
-    FooMessage message = factory.createMessage("foo");
+    FooMessage message = factory.newMessage("foo");
     ArrayList<Byte> data = Lists.newArrayList((byte) 1, (byte) 2, (byte) 3);
     message.setInt8List("data", data);
     assertEquals(data, message.getInt8List("data"));
@@ -136,7 +136,7 @@ public class MessageTest {
     loader.updateMessageDefinitions();
     Map<String, String> definitions = loader.getMessageDefinitions();
     for (Entry<String, String> definition : definitions.entrySet()) {
-      factory.createMessage(definition.getKey());
+      factory.newMessage(definition.getKey());
     }
   }
 
@@ -151,8 +151,7 @@ public class MessageTest {
     loader.updateMessageDefinitions();
     Map<String, String> definitions = loader.getMessageDefinitions();
     for (Entry<String, String> definition : definitions.entrySet()) {
-      factory.createMessage(definition.getKey());
+      factory.newMessage(definition.getKey());
     }
   }
-
 }

@@ -44,10 +44,10 @@ public class MessageDefinitionFactory implements org.ros.message.MessageDefiniti
    *           No class representing that name or the class is not accessible.
    */
   @Override
-  public MessageDefinition newFromString(String messageType) {
+  public MessageDefinition newFromMessageType(String messageType) {
     try {
       Message message = messageFactory.newMessage(messageType);
-      return MessageDefinition.create(message.getDataType(), message.getMessageDefinition(),
+      return MessageDefinition.newFromStrings(message.getDataType(), message.getMessageDefinition(),
           message.getMD5Sum());
     } catch (Exception e) {
       throw new RosRuntimeException(e);

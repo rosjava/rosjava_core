@@ -32,8 +32,7 @@ public class PublicAdvertiseAddressFactory implements AdvertiseAddressFactory {
   }
 
   @Override
-  public AdvertiseAddress create() {
+  public AdvertiseAddress newDefault() {
     return new AdvertiseAddress(host);
   }
-
 }

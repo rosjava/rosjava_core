@@ -144,7 +144,7 @@ public class IncomingMessageQueue<MessageType> {
    * @return a new {@link ChannelHandler} that will receive messages and add
    *         them to the queue
    */
-  public ChannelHandler createChannelHandler() {
+  public ChannelHandler newChannelHandler() {
     return new Receiver();
   }
 }

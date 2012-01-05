@@ -16,36 +16,39 @@
 
 package org.ros.internal.message.new_style;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import java.nio.ByteBuffer;
+import java.util.List;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ *          the value type
  */
-public class ListField<ValueType> extends Field {
+public class ListField<T> extends Field {
 
-  private List<ValueType> value;
+  private List<T> value;
 
-  static <T> ListField<T> createConstant(String name, FieldType type, List<T> value) {
+  static <T> ListField<T> newConstant(String name, FieldType type, List<T> value) {
     return new ListField<T>(name, type, value, true);
   }
 
-  static <T> ListField<T> createValue(String name, FieldType type) {
+  static <T> ListField<T> newValue(String name, FieldType type) {
     // TODO(damonkohler): All values should have a default.
     return new ListField<T>(name, type, null, false);
   }
 
-  private ListField(String name, FieldType type, List<ValueType> value, boolean isConstant) {
+  private ListField(String name, FieldType type, List<T> value, boolean isConstant) {
     super(name, type, isConstant);
     this.value = value;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<ValueType> getValue() {
+  public List<T> getValue() {
     return value;
   }
 
@@ -53,13 +56,13 @@ public class ListField<ValueType> extends Field {
   @Override
   public void setValue(Object value) {
     Preconditions.checkState(!isConstant);
-    this.value = (List<ValueType>) value;
+    this.value = (List<T>) value;
   }
 
   @Override
   public void serialize(ByteBuffer buffer) {
     buffer.putInt(value.size());
-    for (ValueType v : value) {
+    for (T v : value) {
       type.serialize(v, buffer);
     }
   }
@@ -69,7 +72,7 @@ public class ListField<ValueType> extends Field {
     int size = buffer.getInt();
     value = Lists.newArrayList();
     for (int i = 0; i < size; i++) {
-      value.add(type.<ValueType>deserialize(buffer));
+      value.add(type.<T>deserialize(buffer));
     }
   }
 
@@ -128,5 +131,4 @@ public class ListField<ValueType> extends Field {
     } else if (!value.equals(other.value)) return false;
     return true;
   }
-
 }

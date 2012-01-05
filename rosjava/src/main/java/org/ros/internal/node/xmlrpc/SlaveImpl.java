@@ -60,7 +60,7 @@ public class SlaveImpl implements Slave {
   @Override
   public List<Object> getBusInfo(String callerId) {
     List<Object> busInfo = slave.getBusInfo(callerId);
-    return Response.createSuccess("bus info", busInfo).toList();
+    return Response.newSuccess("bus info", busInfo).toList();
   }
 
   @Override
@@ -75,16 +75,16 @@ public class SlaveImpl implements Slave {
     // TODO(damonkohler): It's possible that the callerId and message will be
     // useful to the slave in the future. For now, we can just ignore it.
     slave.shutdown();
-    return Response.createSuccess("Shutdown successful.", null).toList();
+    return Response.newSuccess("Shutdown successful.", null).toList();
   }
 
   @Override
   public List<Object> getPid(String callerId) {
     try {
       int pid = slave.getPid();
-      return Response.createSuccess("PID: " + pid, pid).toList();
+      return Response.newSuccess("PID: " + pid, pid).toList();
     } catch (UnsupportedOperationException e) {
-      return Response.createFailure("Cannot retrieve PID on this platform.", -1).toList();
+      return Response.newFailure("Cannot retrieve PID on this platform.", -1).toList();
     }
   }
 
@@ -95,7 +95,7 @@ public class SlaveImpl implements Slave {
     for (DefaultSubscriber<?> subscriber : subscribers) {
       subscriptions.add(subscriber.getTopicDefinitionAsList());
     }
-    return Response.createSuccess("Success", subscriptions).toList();
+    return Response.newSuccess("Success", subscriptions).toList();
   }
 
   @Override
@@ -105,15 +105,15 @@ public class SlaveImpl implements Slave {
     for (DefaultPublisher<?> publisher : publishers) {
       publications.add(publisher.getTopicDefinitionAsList());
     }
-    return Response.createSuccess("Success", publications).toList();
+    return Response.newSuccess("Success", publications).toList();
   }
 
   private List<Object> parameterUpdate(String parameterName, Object parameterValue) {
     if (slave.paramUpdate(new GraphName(parameterName), parameterValue) > 0) {
-      return Response.createSuccess("Success", null).toList();
+      return Response.newSuccess("Success", null).toList();
     }
     return Response
-        .createError("No subscribers for parameter key \"" + parameterName + "\".", null).toList();
+        .newError("No subscribers for parameter key \"" + parameterName + "\".", null).toList();
   }
 
   @Override
@@ -173,14 +173,14 @@ public class SlaveImpl implements Slave {
       for (Object publisher : publishers) {
         URI uri = new URI(publisher.toString());
         if (!uri.getScheme().equals("http") && !uri.getScheme().equals("https")) {
-          return Response.createError("Unknown URI scheme sent in update.", 0).toList();
+          return Response.newError("Unknown URI scheme sent in update.", 0).toList();
         }
         publisherUris.add(uri);
       }
       slave.publisherUpdate(callerId, topicName, publisherUris);
-      return Response.createSuccess("Publisher update received.", 0).toList();
+      return Response.newSuccess("Publisher update received.", 0).toList();
     } catch (URISyntaxException e) {
-      return Response.createError("Invalid URI sent in update.", 0).toList();
+      return Response.newError("Invalid URI sent in update.", 0).toList();
     }
   }
 
@@ -194,14 +194,13 @@ public class SlaveImpl implements Slave {
     try {
       protocol = slave.requestTopic(topic, requestedProtocols);
     } catch (ServerException e) {
-      return Response.createError(e.getMessage(), null).toList();
+      return Response.newError(e.getMessage(), null).toList();
     }
-    List<Object> response = Response.createSuccess(protocol.toString(), protocol.toList()).toList();
+    List<Object> response = Response.newSuccess(protocol.toString(), protocol.toList()).toList();
     if (DEBUG) {
       log.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
           + response.toString());
     }
     return response;
   }
-
 }

@@ -27,7 +27,7 @@ import com.google.common.collect.Lists;
 public class StringListResultFactory implements ResultFactory<List<String>> {
 
   @Override
-  public List<String> create(Object value) {
+  public List<String> newFromValue(Object value) {
     List<String> strings = Lists.newArrayList();
     List<Object> objects = Arrays.asList((Object[]) value);
     for (Object topic : objects) {
@@ -35,5 +35,4 @@ public class StringListResultFactory implements ResultFactory<List<String>> {
     }
     return strings;
   }
-
 }

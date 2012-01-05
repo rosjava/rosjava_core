@@ -32,20 +32,21 @@ public class MessageDefinition {
   private final String definition;
   private final String md5Checksum;
 
-  public static MessageDefinition createFromHeader(Map<String, String> header) {
+  public static MessageDefinition newFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TYPE));
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.MD5_CHECKSUM));
     return new MessageDefinition(header.get(ConnectionHeaderFields.TYPE), null,
         header.get(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 
-  public static MessageDefinition createFromTypeName(String type) {
+  public static MessageDefinition newFromTypeName(String type) {
     return new MessageDefinition(type, null, null);
   }
 
-  // TODO(damonkohler): Change this factory method to calculate the MD5 from the
-  // definition.
-  public static MessageDefinition create(String type, String definition, String md5Checksum) {
+  public static MessageDefinition
+      newFromStrings(String type, String definition, String md5Checksum) {
+    // TODO(damonkohler): Change this factory method to calculate the MD5 from
+    // the definition.
     return new MessageDefinition(type, definition, md5Checksum);
   }
 
@@ -95,16 +96,22 @@ public class MessageDefinition {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
     MessageDefinition other = (MessageDefinition) obj;
     if (type == null) {
-      if (other.type != null) return false;
-    } else if (!type.equals(other.type)) return false;
+      if (other.type != null)
+        return false;
+    } else if (!type.equals(other.type))
+      return false;
     if (md5Checksum == null || other.md5Checksum == null) {
       return true;
-    } else if (!md5Checksum.equals(other.md5Checksum)) return false;
+    } else if (!md5Checksum.equals(other.md5Checksum))
+      return false;
     return true;
   }
 }

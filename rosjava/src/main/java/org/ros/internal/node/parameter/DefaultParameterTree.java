@@ -47,8 +47,8 @@ public class DefaultParameterTree implements ParameterTree {
   private final NameResolver resolver;
   private final ParameterManager parameterManager;
 
-  public static DefaultParameterTree create(SlaveIdentifier slaveIdentifier, URI masterUri,
-      NameResolver resolver, ParameterManager parameterManager) {
+  public static DefaultParameterTree newFromSlaveIdentifier(SlaveIdentifier slaveIdentifier,
+      URI masterUri, NameResolver resolver, ParameterManager parameterManager) {
     ParameterClient client = new ParameterClient(slaveIdentifier, masterUri);
     return new DefaultParameterTree(client, parameterManager, resolver);
   }

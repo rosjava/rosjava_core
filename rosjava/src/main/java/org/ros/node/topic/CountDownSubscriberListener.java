@@ -34,7 +34,7 @@ public class CountDownSubscriberListener<T> extends CountDownRegistrantListener<
   /**
    * Construct a {@link CountDownSubscriberListener} with all counts set to 1.
    */
-  public static <T> CountDownSubscriberListener<T> create() {
+  public static <T> CountDownSubscriberListener<T> newDefault() {
     return newFromCounts(1, 1, 1, 1, 1, 1);
   }
 
