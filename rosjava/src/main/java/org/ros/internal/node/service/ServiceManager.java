@@ -16,16 +16,18 @@
 
 package org.ros.internal.node.service;
 
-import java.util.List;
-import java.util.Map;
-
-import org.ros.node.service.ServiceClient;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
+import org.ros.namespace.GraphName;
+import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceServer;
+
+import java.util.List;
+import java.util.Map;
+
 /**
- * A manager for ROS services.
+ * Manages a collection of {@link ServiceServer}s and {@link ServiceClient}s.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -34,60 +36,68 @@ public class ServiceManager {
   /**
    * A mapping from service name to the server for the service.
    */
-  private final Map<String, DefaultServiceServer<?, ?>> serviceServers;
+  private final Map<GraphName, DefaultServiceServer<?, ?>> serviceServers;
 
   /**
    * A mapping from service name to a client for the service.
    */
-  private final Map<String, ServiceClient<?, ?>> serviceClients;
+  private final Map<GraphName, DefaultServiceClient<?, ?>> serviceClients;
   
-  /**
-   * A listener for whoever cares about service registrations.
-   */
-  private ServiceListener listener;
+  // TODO(damonkohler): Change to ListenerCollection.
+  private ServiceManagerListener listener;
 
   public ServiceManager() {
     serviceServers = Maps.newConcurrentMap();
     serviceClients = Maps.newConcurrentMap();
   }
   
-  public void setListener(ServiceListener listener) {
+  public void setListener(ServiceManagerListener listener) {
     this.listener = listener;
   }
 
   public boolean hasServer(String serviceName) {
-    return serviceServers.containsKey(serviceName);
+    return serviceServers.containsKey(new GraphName(serviceName));
   }
 
-  public void putServer(String serviceName, DefaultServiceServer<?, ?> serviceServer) {
-    serviceServers.put(serviceName, serviceServer);
+  public void putServer(DefaultServiceServer<?, ?> serviceServer) {
+    serviceServers.put(serviceServer.getName(), serviceServer);
     if (listener != null) {
-      listener.serviceServerAdded(serviceServer);
+      listener.onServiceServerAdded(serviceServer);
+    }
+  }
+  
+  public void removeServer(DefaultServiceServer<?, ?> serviceServer) {
+    serviceServers.remove(serviceServer.getName());
+    if (listener != null) {
+      listener.onServiceServerRemoved(serviceServer);
     }
   }
 
   public DefaultServiceServer<?, ?> getServer(String serviceName) {
-    return serviceServers.get(serviceName);
+    return serviceServers.get(new GraphName(serviceName));
   }
 
   public boolean hasClient(String serviceName) {
-    return serviceClients.containsKey(serviceName);
+    return serviceClients.containsKey(new GraphName(serviceName));
   }
 
-  public void putClient(String serviceName, ServiceClient<?, ?> serviceClient) {
-    serviceClients.put(serviceName, serviceClient);
+  public void putClient(DefaultServiceClient<?, ?> serviceClient) {
+    serviceClients.put(serviceClient.getName(), serviceClient);
   }
 
-  public ServiceClient<?, ?> getClient(String serviceName) {
-    return serviceClients.get(serviceName);
+  public void removeClient(DefaultServiceClient<?, ?> serviceClient) {
+    serviceClients.remove(serviceClient.getName());
+  }
+
+  public DefaultServiceClient<?, ?> getClient(String serviceName) {
+    return serviceClients.get(new GraphName(serviceName));
   }
 
   public List<DefaultServiceServer<?, ?>> getServers() {
     return ImmutableList.copyOf(serviceServers.values());
   }
 
-  public List<ServiceClient<?, ?>> getClients() {
+  public List<DefaultServiceClient<?, ?>> getClients() {
     return ImmutableList.copyOf(serviceClients.values());
   }
-
 }

@@ -27,25 +27,32 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Stores internal {@link Publisher} and {@link Subscriber} instances.
+ * Manages a collection of {@link Publisher}s and {@link Subscriber}s.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TopicManager {
 
+  /**
+   * A mapping from topic name to {@link Subscriber}.
+   */
   private final Map<GraphName, DefaultSubscriber<?>> subscribers;
+  
+  /**
+   * A mapping from topic name to {@link Publisher}.
+   */
   private final Map<GraphName, DefaultPublisher<?>> publishers;
 
-  // TODO(damonkohler): Change to collection of listeners.
-  private TopicListener listener;
+  // TODO(damonkohler): Change to ListenerCollection.
+  private TopicManagerListener listener;
 
   public TopicManager() {
     publishers = Maps.newConcurrentMap();
     subscribers = Maps.newConcurrentMap();
   }
 
-  public void setListener(TopicListener listener) {
+  public void setListener(TopicManagerListener listener) {
     this.listener = listener;
   }
 
@@ -68,28 +75,28 @@ public class TopicManager {
   public void putPublisher(DefaultPublisher<?> publisher) {
     publishers.put(publisher.getTopicName(), publisher);
     if (listener != null) {
-      listener.publisherAdded(publisher);
+      listener.onPublisherAdded(publisher);
     }
   }
 
   public void removePublisher(DefaultPublisher<?> publisher) {
     publishers.remove(publisher.getTopicName());
     if (listener != null) {
-      listener.publisherRemoved(publisher);
+      listener.onPublisherRemoved(publisher);
     }
   }
 
   public void putSubscriber(DefaultSubscriber<?> subscriber) {
     subscribers.put(subscriber.getTopicName(), subscriber);
     if (listener != null) {
-      listener.subscriberAdded(subscriber);
+      listener.onSubscriberAdded(subscriber);
     }
   }
 
   public void removeSubscriber(DefaultSubscriber<?> subscriber) {
     subscribers.remove(subscriber.getTopicName());
     if (listener != null) {
-      listener.subscriberRemoved(subscriber);
+      listener.onSubscriberRemoved(subscriber);
     }
   }
 

@@ -14,30 +14,30 @@
  * the License.
  */
 
-package org.ros.node.topic;
+package org.ros.internal.node.service;
 
-import org.ros.internal.node.RegistrantListener;
+import org.ros.node.service.ServiceServer;
 
 /**
- * A lifecycle listener for {@link Publisher} instances.
+ * Listener {@link ServiceManager} events.
  * 
- * @author khughes@google.com (Keith M. Hughes)
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public interface PublisherListener<T> extends RegistrantListener<Publisher<T>> {
+public interface ServiceManagerListener {
 
   /**
-   * A {@link Subscriber} has connected to the {@link Publisher}.
+   * Called when a new {@link ServiceServer} is added.
    * 
-   * @param publisher
-   *          the {@link Publisher} that the {@link Subscriber} connected to
+   * @param server
+   *          the {@link ServiceServer} that was added
    */
-  void onNewSubscriber(Publisher<T> publisher);
-
+  void onServiceServerAdded(DefaultServiceServer<?, ?> server);
+  
   /**
-   * The {@link Publisher} has been shut down.
+   * Called when a new {@link ServiceServer} is added.
    * 
-   * @param publisher
-   *          the {@link Publisher} that was shut down
+   * @param server
+   *          the {@link ServiceServer} that was added
    */
-  void onShutdown(Publisher<T> publisher);
+  void onServiceServerRemoved(DefaultServiceServer<?, ?> server);
 }

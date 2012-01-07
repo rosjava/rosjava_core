@@ -16,6 +16,8 @@
 
 package org.ros.node.service;
 
+import org.ros.internal.node.CountDownRegistrantListener;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -25,67 +27,54 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class CountDownServiceServerListener<T, S> implements ServiceServerListener<T, S> {
+public class CountDownServiceServerListener<T, S> extends
+    CountDownRegistrantListener<ServiceServer<T, S>> implements ServiceServerListener<T, S> {
 
-  private CountDownLatch registrationLatch;
-  private CountDownLatch shutdownLatch;
+  private final CountDownLatch shutdownLatch;
 
   /**
    * Construct a {@link CountDownServiceServerListener} with all counts set to
    * 1.
    */
   public static <T, S> CountDownServiceServerListener<T, S> newDefault() {
-    return new CountDownServiceServerListener<T, S>(1, 1);
+    return newFromCounts(1, 1, 1, 1);
   }
 
   /**
-   * @param registerationCount
-   *          the number of counts to wait for for a registration
-   * @param shutdownCount
-   *          the number of counts to wait for for a shutdown
+   * @param masterRegistrationSuccessCount
+   *          the number of successful master registrations to wait for
+   * @param masterRegistrationFailureCount
+   *          the number of failing master registrations to wait for
+   * @param masterUnregistrationSuccessCount
+   *          the number of successful master unregistrations to wait for
+   * @param masterUnregistrationFailureCount
+   *          the number of failing master unregistrations to wait for
    */
-  private CountDownServiceServerListener(int registerationCount, int shutdownCount) {
-    registrationLatch = new CountDownLatch(registerationCount);
-    shutdownLatch = new CountDownLatch(shutdownCount);
+  public static <T, S> CountDownServiceServerListener<T, S> newFromCounts(
+      int masterRegistrationSuccessCount, int masterRegistrationFailureCount,
+      int masterUnregistrationSuccessCount, int masterUnregistrationFailureCount) {
+    return new CountDownServiceServerListener<T, S>(new CountDownLatch(
+        masterRegistrationSuccessCount), new CountDownLatch(masterRegistrationFailureCount),
+        new CountDownLatch(masterUnregistrationSuccessCount), new CountDownLatch(
+            masterUnregistrationFailureCount));
+  }
+
+  private CountDownServiceServerListener(CountDownLatch masterRegistrationSuccessLatch,
+      CountDownLatch masterRegistrationFailureLatch,
+      CountDownLatch masterUnregistrationSuccessLatch,
+      CountDownLatch masterUnregistrationFailureLatch) {
+    super(masterRegistrationSuccessLatch, masterRegistrationFailureLatch,
+        masterUnregistrationSuccessLatch, masterUnregistrationFailureLatch);
+    shutdownLatch = new CountDownLatch(1);
   }
 
   @Override
-  public void onServiceServerRegistration(ServiceServer<T, S> server) {
-    registrationLatch.countDown();
-  }
-
-  @Override
-  public void onServiceServerShutdown(ServiceServer<T, S> server) {
+  public void onShutdown(ServiceServer<T, S> server) {
     shutdownLatch.countDown();
   }
-  /**
-   * Await for the requested number of registrations.
-   * 
-   * @throws InterruptedException
-   */
-  public void awaitRegistration() throws InterruptedException {
-    registrationLatch.await();
-  }
 
   /**
-   * Await for the requested number of registrations for the given time period.
-   * 
-   * @param timeout
-   *          the maximum time to wait
-   * @param unit
-   *          the time unit of the {@code timeout} argument
-   * 
-   * @return {@code true} if the registration happened within the time period
-   *         {@code false} otherwise.
-   * 
-   * @throws InterruptedException
-   */
-  public boolean awaitRegistration(long timeout, TimeUnit unit) throws InterruptedException {
-    return registrationLatch.await(timeout, unit);
-  }
-
-  /**
-   * Await for the requested number of shutdowns.
+   * Wait for shutdown.
    * 
    * @throws InterruptedException
    */
@@ -94,16 +83,14 @@ public class CountDownServiceServerListener<T, S> implements ServiceServerListen
   }
 
   /**
-   * Await for the requested number of shutdowns for the given time period.
+   * Wait for shutdown within the given time period.
    * 
    * @param timeout
    *          the maximum time to wait
    * @param unit
    *          the time unit of the {@code timeout} argument
-   * 
-   * @return {@code true} if the shutdowns happened within the time period
-   *         {@code false} otherwise.
-   * 
+   * @return {@code true} if shutdown happened within the time period,
+   *         {@code false} otherwise
    * @throws InterruptedException
    */
   public boolean awaitShutdown(long timeout, TimeUnit unit) throws InterruptedException {

@@ -20,42 +20,42 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 /**
- * Listen to creation of new publisher and subscriber instances.
+ * Listener for {@link TopicManager} events.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface TopicListener {
+public interface TopicManagerListener {
 
   /**
-   * Called when a new {@link Publisher} has been added.
+   * Called when a new {@link Publisher} is added.
    * 
    * @param publisher
-   *          the {@link Publisher} which has been added
+   *          the {@link Publisher} that was added
    */
-  void publisherAdded(DefaultPublisher<?> publisher);
+  void onPublisherAdded(DefaultPublisher<?> publisher);
 
   /**
-   * Called when a new {@link Publisher} has been removed.
+   * Called when a new {@link Publisher} is removed.
    * 
    * @param publisher
-   *          the {@link Publisher} which has been removed
+   *          the {@link Publisher} that was removed
    */
-  void publisherRemoved(DefaultPublisher<?> publisher);
+  void onPublisherRemoved(DefaultPublisher<?> publisher);
 
   /**
-   * Called when a {@link Subscriber} has been added.
+   * Called when a {@link Subscriber} is added.
    * 
    * @param subscriber
-   *          the {@link Subscriber} which has been added
+   *          the {@link Subscriber} that was added
    */
-  void subscriberAdded(DefaultSubscriber<?> subscriber);
+  void onSubscriberAdded(DefaultSubscriber<?> subscriber);
 
   /**
-   * Called when a {@link Subscriber} has been removed.
+   * Called when a {@link Subscriber} is removed.
    * 
    * @param subscriber
-   *          the {@link Subscriber} which has been removed
+   *          the {@link Subscriber} that was removed
    */
-  void subscriberRemoved(DefaultSubscriber<?> subscriber);
+  void onSubscriberRemoved(DefaultSubscriber<?> subscriber);
 }

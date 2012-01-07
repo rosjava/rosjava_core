@@ -16,6 +16,8 @@
 
 package org.ros.node.service;
 
+import org.ros.namespace.GraphName;
+
 import java.net.URI;
 
 /**
@@ -23,12 +25,12 @@ import java.net.URI;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <RequestType>
+ * @param <T>
  *          the {@link ServiceServer} responds to requests of this type
- * @param <ResponseType>
+ * @param <S>
  *          the {@link ServiceServer} returns responses of this type
  */
-public interface ServiceClient<RequestType, ResponseType> {
+public interface ServiceClient<T, S> {
 
   /**
    * Connects to a {@link ServiceServer}.
@@ -47,8 +49,13 @@ public interface ServiceClient<RequestType, ResponseType> {
    *          the {@link ServiceResponseListener} that will handle the response
    *          to this request
    */
-  void call(RequestType request, ServiceResponseListener<ResponseType> listener);
+  void call(T request, ServiceResponseListener<S> listener);
 
+  /**
+   * @return the name of the service this {@link ServiceClient} is connected to
+   */
+  GraphName getName();
+  
   /**
    * Stops the client (e.g. disconnect a persistent service connection).
    */

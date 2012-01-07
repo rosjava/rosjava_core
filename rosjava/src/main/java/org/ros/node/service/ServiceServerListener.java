@@ -16,22 +16,23 @@
 
 package org.ros.node.service;
 
+import org.ros.internal.node.RegistrantListener;
+
 /**
- * A listener for events from a {@link ServiceServer}.
+ * A lifecycle listener for {@link ServiceServer} instances.
  * 
  * @author khughes@google.com (Keith M. Hughes)
+ * 
+ * @param <T>
+ *          the {@link ServiceServer} responds to requests of this type
+ * @param <S>
+ *          the {@link ServiceServer} returns responses of this type
  */
-public interface ServiceServerListener<T, S> {
-
-  /**
-   * @param serviceServer
-   *          the {@link ServiceServer} which has been registered
-   */
-  void onServiceServerRegistration(ServiceServer<T, S> serviceServer);
+public interface ServiceServerListener<T, S> extends RegistrantListener<ServiceServer<T, S>> {
 
   /**
    * @param serviceServer
    *          the {@link ServiceServer} which has been shut down
    */
-  void onServiceServerShutdown(ServiceServer<T, S> serviceServer);
+  void onShutdown(ServiceServer<T, S> serviceServer);
 }

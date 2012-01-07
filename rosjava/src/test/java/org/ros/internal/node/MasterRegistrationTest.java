@@ -89,7 +89,7 @@ public class MasterRegistrationTest {
 
   @Test
   public void testRegisterPublisher() throws InterruptedException {
-    masterRegistration.publisherAdded(publisher);
+    masterRegistration.onPublisherAdded(publisher);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
   }
 
@@ -97,7 +97,7 @@ public class MasterRegistrationTest {
   public void testRegisterPublisherRetries() throws InterruptedException {
     masterServer.shutdown();
     masterRegistration.setRetryDelay(100, TimeUnit.MILLISECONDS);
-    masterRegistration.publisherAdded(publisher);
+    masterRegistration.onPublisherAdded(publisher);
     // Restart the MasterServer on the same port (hopefully still available).
     masterServer =
         new MasterServer(BindAddress.newPrivate(masterServer.getAdvertiseAddress().getPort()),

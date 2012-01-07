@@ -91,14 +91,14 @@ public class RegistrarTest {
 
   @Test
   public void testRegisterAndUnregisterPublisher() throws InterruptedException {
-    registrar.publisherAdded(publisher);
+    registrar.onPublisherAdded(publisher);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
-    registrar.publisherRemoved(publisher);
+    registrar.onPublisherRemoved(publisher);
     assertTrue(publisherListener.awaitMasterUnregistrationSuccess(1, TimeUnit.SECONDS));
     registrar.shutdown();
-    registrar.publisherAdded(publisher);
+    registrar.onPublisherAdded(publisher);
     assertTrue(publisherListener.awaitMasterRegistrationFailure(1, TimeUnit.SECONDS));
-    registrar.publisherRemoved(publisher);
+    registrar.onPublisherRemoved(publisher);
     assertTrue(publisherListener.awaitMasterUnregistrationFailure(1, TimeUnit.SECONDS));
   }
 
@@ -106,7 +106,7 @@ public class RegistrarTest {
   public void testRegisterPublisherRetries() throws InterruptedException {
     masterServer.shutdown();
     registrar.setRetryDelay(100, TimeUnit.MILLISECONDS);
-    registrar.publisherAdded(publisher);
+    registrar.onPublisherAdded(publisher);
     assertTrue(publisherListener.awaitMasterRegistrationFailure(1, TimeUnit.SECONDS));
     // Restart the MasterServer on the same port (hopefully still available).
     masterServer =
@@ -119,7 +119,7 @@ public class RegistrarTest {
   @Test
   public void testRegisterAfterShutdownIgnored() throws InterruptedException {
     registrar.shutdown();
-    registrar.publisherAdded(publisher);
+    registrar.onPublisherAdded(publisher);
     assertTrue(publisherListener.awaitMasterRegistrationFailure(1, TimeUnit.SECONDS));
   }
 }

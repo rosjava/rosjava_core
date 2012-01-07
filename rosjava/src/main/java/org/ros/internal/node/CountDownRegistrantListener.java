@@ -14,7 +14,9 @@
  * the License.
  */
 
-package org.ros.node.topic;
+package org.ros.internal.node;
+
+import org.ros.node.topic.CountDownPublisherListener;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -22,13 +24,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class CountDownRegistrantListener<T> implements RegistrantListener<T> {
+public class CountDownRegistrantListener<T> implements RegistrantListener<T> {
 
-  private CountDownLatch masterRegistrationSuccessLatch;
-  private CountDownLatch masterRegistrationFailureLatch;
-  private CountDownLatch masterUnregistrationSuccessLatch;
-  private CountDownLatch masterUnregistrationFailureLatch;
-  
+  private final CountDownLatch masterRegistrationSuccessLatch;
+  private final CountDownLatch masterRegistrationFailureLatch;
+  private final CountDownLatch masterUnregistrationSuccessLatch;
+  private final CountDownLatch masterUnregistrationFailureLatch;
+
   /**
    * Construct a {@link CountDownPublisherListener} with all counts set to 1.
    */
@@ -38,14 +40,13 @@ class CountDownRegistrantListener<T> implements RegistrantListener<T> {
 
   /**
    * @param masterRegistrationSuccessCount
-   *          the number of counts to wait for for a successful master
-   *          registration
+   *          the number of successful master registrations to wait for
    * @param masterRegistrationFailureCount
-   *          the number of counts to wait for for a failing master registration
-   * @param shutdownCount
-   *          the number of counts to wait for for a shutdown
-   * @param newSubscriberCount
-   *          the number of counts to wait for for a new subscriber
+   *          the number of failing master registrations to wait for
+   * @param masterUnregistrationSuccessCount
+   *          the number of successful master unregistrations to wait for
+   * @param masterUnregistrationFailureCount
+   *          the number of failing master unregistrations to wait for
    */
   public CountDownRegistrantListener(int masterRegistrationSuccessCount,
       int masterRegistrationFailureCount, int masterUnregistrationSuccessCount,
@@ -55,14 +56,6 @@ class CountDownRegistrantListener<T> implements RegistrantListener<T> {
         new CountDownLatch(masterUnregistrationFailureCount));
   }
 
-  /**
-   * @param masterRegistrationSuccessLatch
-   *          the latch to use for a registration
-   * @param shutdownLatch
-   *          the latch to use for a shutdown
-   * @param newSubscriberLatch
-   *          the latch to use for a remote connection
-   */
   public CountDownRegistrantListener(CountDownLatch masterRegistrationSuccessLatch,
       CountDownLatch masterRegistrationFailureLatch,
       CountDownLatch masterUnregistrationSuccessLatch,
@@ -92,7 +85,7 @@ class CountDownRegistrantListener<T> implements RegistrantListener<T> {
   public void onMasterUnregistrationFailure(T registrant) {
     masterUnregistrationFailureLatch.countDown();
   }
-  
+
   /**
    * Wait for the requested number of successful registrations.
    * 
@@ -129,8 +122,8 @@ class CountDownRegistrantListener<T> implements RegistrantListener<T> {
   }
 
   /**
-   * Wait for the requested number of successful unregistrations within the given
-   * time period.
+   * Wait for the requested number of successful unregistrations within the
+   * given time period.
    * 
    * @param timeout
    *          the maximum time to wait
@@ -181,8 +174,8 @@ class CountDownRegistrantListener<T> implements RegistrantListener<T> {
   }
 
   /**
-   * Wait for the requested number of failed unregistrations within the given time
-   * period.
+   * Wait for the requested number of failed unregistrations within the given
+   * time period.
    * 
    * @param timeout
    *          the maximum time to wait

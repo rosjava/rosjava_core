@@ -62,7 +62,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
    * Queue of all messages being published by this {@link Publisher}.
    */
   private final OutgoingMessageQueue<T> outgoingMessageQueue;
-  private final ListenerCollection<PublisherListener<T>> publisherListeners;
+  private final ListenerCollection<PublisherListener<T>> listeners;
   private final SlaveIdentifier slaveIdentifier;
 
   public DefaultPublisher(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
@@ -70,8 +70,8 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
     super(topicDefinition);
     this.slaveIdentifier = slaveIdentifier;
     outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
-    publisherListeners = new ListenerCollection<PublisherListener<T>>(executorService);
-    publisherListeners.add(new DefaultPublisherListener<T>() {
+    listeners = new ListenerCollection<PublisherListener<T>>(executorService);
+    listeners.add(new DefaultPublisherListener<T>() {
       @Override
       public void onMasterRegistrationSuccess(Publisher<T> registrant) {
         log.info("Publisher registered: " + DefaultPublisher.this);
@@ -107,7 +107,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   @Override
   public void shutdown(long timeout, TimeUnit unit) {
     signalOnShutdown(timeout, unit);
-    publisherListeners.clear();
+    listeners.clear();
     outgoingMessageQueue.shutdown();
   }
 
@@ -190,16 +190,16 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
 
   @Override
   public void addListener(PublisherListener<T> listener) {
-    publisherListeners.add(listener);
+    listeners.add(listener);
   }
 
   @Override
   public void removeListener(PublisherListener<T> listener) {
-    publisherListeners.remove(listener);
+    listeners.remove(listener);
   }
 
   /**
-   * Signal all {@link PublisherListener}s that the {@link Publisher} has been
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has
    * successfully registered with the master.
    * 
    * <p>
@@ -208,7 +208,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   @Override
   public void signalOnMasterRegistrationSuccess() {
     final Publisher<T> publisher = this;
-    publisherListeners.signal(new SignalRunnable<PublisherListener<T>>() {
+    listeners.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onMasterRegistrationSuccess(publisher);
@@ -217,8 +217,8 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   }
 
   /**
-   * Signal all {@link PublisherListener}s that the {@link Publisher} has been
-   * successfully registered with the master.
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has failed
+   * to register with the master.
    * 
    * <p>
    * Each listener is called in a separate thread.
@@ -226,7 +226,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   @Override
   public void signalOnMasterRegistrationFailure() {
     final Publisher<T> publisher = this;
-    publisherListeners.signal(new SignalRunnable<PublisherListener<T>>() {
+    listeners.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onMasterRegistrationFailure(publisher);
@@ -235,7 +235,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   }
 
   /**
-   * Signal all {@link PublisherListener}s that the {@link Publisher} has been
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has 
    * successfully unregistered with the master.
    * 
    * <p>
@@ -244,7 +244,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   @Override
   public void signalOnMasterUnregistrationSuccess() {
     final Publisher<T> publisher = this;
-    publisherListeners.signal(new SignalRunnable<PublisherListener<T>>() {
+    listeners.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onMasterUnregistrationSuccess(publisher);
@@ -253,8 +253,8 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   }
 
   /**
-   * Signal all {@link PublisherListener}s that the {@link Publisher} has been
-   * successfully unregistered with the master.
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has failed
+   * to unregister with the master.
    * 
    * <p>
    * Each listener is called in a separate thread.
@@ -262,7 +262,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   @Override
   public void signalOnMasterUnregistrationFailure() {
     final Publisher<T> publisher = this;
-    publisherListeners.signal(new SignalRunnable<PublisherListener<T>>() {
+    listeners.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onMasterUnregistrationFailure(publisher);
@@ -279,7 +279,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
    */
   private void signalOnNewSubscriber() {
     final Publisher<T> publisher = this;
-    publisherListeners.signal(new SignalRunnable<PublisherListener<T>>() {
+    listeners.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onNewSubscriber(publisher);
@@ -297,7 +297,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   private void signalOnShutdown(long timeout, TimeUnit unit) {
     final Publisher<T> publisher = this;
     try {
-      publisherListeners.signal(new SignalRunnable<PublisherListener<T>>() {
+      listeners.signal(new SignalRunnable<PublisherListener<T>>() {
         @Override
         public void run(PublisherListener<T> listener) {
           listener.onShutdown(publisher);

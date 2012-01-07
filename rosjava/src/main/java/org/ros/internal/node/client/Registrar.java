@@ -28,11 +28,11 @@ import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.DefaultServiceServer;
-import org.ros.internal.node.service.ServiceListener;
+import org.ros.internal.node.service.ServiceManagerListener;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
-import org.ros.internal.node.topic.TopicListener;
+import org.ros.internal.node.topic.TopicManagerListener;
 
 import java.net.URI;
 import java.util.Collection;
@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Registrar implements TopicListener, ServiceListener {
+public class Registrar implements TopicManagerListener, ServiceManagerListener {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(Registrar.class);
@@ -125,7 +125,7 @@ public class Registrar implements TopicListener, ServiceListener {
   }
 
   @Override
-  public void publisherAdded(final DefaultPublisher<?> publisher) {
+  public void onPublisherAdded(final DefaultPublisher<?> publisher) {
     if (DEBUG) {
       log.info("Registering publisher: " + publisher);
     }
@@ -157,7 +157,7 @@ public class Registrar implements TopicListener, ServiceListener {
   }
 
   @Override
-  public void publisherRemoved(final DefaultPublisher<?> publisher) {
+  public void onPublisherRemoved(final DefaultPublisher<?> publisher) {
     if (DEBUG) {
       log.info("Unregistering publisher: " + publisher);
     }
@@ -189,7 +189,7 @@ public class Registrar implements TopicListener, ServiceListener {
   }
 
   @Override
-  public void subscriberAdded(final DefaultSubscriber<?> subscriber) {
+  public void onSubscriberAdded(final DefaultSubscriber<?> subscriber) {
     if (DEBUG) {
       log.info("Registering subscriber: " + subscriber);
     }
@@ -226,7 +226,7 @@ public class Registrar implements TopicListener, ServiceListener {
   }
 
   @Override
-  public void subscriberRemoved(final DefaultSubscriber<?> subscriber) {
+  public void onSubscriberRemoved(final DefaultSubscriber<?> subscriber) {
     if (DEBUG) {
       log.info("Unregistering subscriber: " + subscriber);
     }
@@ -258,7 +258,7 @@ public class Registrar implements TopicListener, ServiceListener {
   }
 
   @Override
-  public void serviceServerAdded(final DefaultServiceServer<?, ?> serviceServer) {
+  public void onServiceServerAdded(final DefaultServiceServer<?, ?> serviceServer) {
     if (DEBUG) {
       log.info("Registering service: " + serviceServer);
     }
@@ -272,10 +272,9 @@ public class Registrar implements TopicListener, ServiceListener {
           }
         });
         if (success) {
-          serviceServer.signalRegistrationDone();
+          serviceServer.signalOnMasterRegistrationSuccess();
         } else {
-          // TODO(damonkohler):
-          // serviceServer.signalOnMasterRegistrationFailure();
+          serviceServer.signalOnMasterRegistrationFailure();
         }
         return !success;
       }
@@ -284,8 +283,39 @@ public class Registrar implements TopicListener, ServiceListener {
       executorService.execute(new Runnable() {
         @Override
         public void run() {
-          // TODO(damonkohler):
-          // serviceServer.signalOnMasterRegistrationFailure();
+          serviceServer.signalOnMasterRegistrationFailure();
+        }
+      });
+    }
+  }
+
+  @Override
+  public void onServiceServerRemoved(final DefaultServiceServer<?, ?> serviceServer) {
+    if (DEBUG) {
+      log.info("Unregistering service: " + serviceServer);
+    }
+    boolean submitted = submit(new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        boolean success = callMaster(new Callable<Response<Integer>>() {
+          @Override
+          public Response<Integer> call() throws Exception {
+            return masterClient.unregisterService(slaveIdentifier, serviceServer);
+          }
+        });
+        if (success) {
+          serviceServer.signalOnMasterUnregistrationSuccess();
+        } else {
+          serviceServer.signalOnMasterUnregistrationFailure();
+        }
+        return !success;
+      }
+    });
+    if (!submitted) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          serviceServer.signalOnMasterUnregistrationFailure();
         }
       });
     }

@@ -91,7 +91,7 @@ public class SlaveServer extends NodeServer {
   }
 
   public void addService(DefaultServiceServer<?, ?> server) {
-    serviceManager.putServer(server.getName().toString(), server);
+    serviceManager.putServer(server);
   }
 
   public List<Object> getBusStats(String callerId) {

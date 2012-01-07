@@ -16,6 +16,8 @@
 
 package org.ros.node.topic;
 
+import org.ros.internal.node.RegistrantListener;
+
 /**
  * A lifecycle listener for {@link Subscriber} instances.
  * 

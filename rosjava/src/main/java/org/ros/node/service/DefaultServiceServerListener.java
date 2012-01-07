@@ -14,15 +14,30 @@
  * the License.
  */
 
-package org.ros.internal.node.service;
+package org.ros.node.service;
 
 /**
- * Listen to creation of new {@link DefaultServiceServer}s.
- * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ServiceListener {
-  
-  void serviceServerAdded(DefaultServiceServer<?, ?> server);
+public class DefaultServiceServerListener<T, S> implements ServiceServerListener<T, S> {
 
+  @Override
+  public void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {
+  }
+
+  @Override
+  public void onMasterRegistrationFailure(ServiceServer<T, S> registrant) {
+  }
+
+  @Override
+  public void onMasterUnregistrationSuccess(ServiceServer<T, S> registrant) {
+  }
+
+  @Override
+  public void onMasterUnregistrationFailure(ServiceServer<T, S> registrant) {
+  }
+
+  @Override
+  public void onShutdown(ServiceServer<T, S> serviceServer) {
+  }
 }

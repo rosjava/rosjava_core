@@ -74,7 +74,7 @@ public class ServiceIntegrationTest {
               }
             });
     serviceServer.addListener(serviceServerListener);
-    assertTrue(serviceServerListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(serviceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     nodeConfiguration.setNodeName("/client");
     Node clientNode = nodeFactory.newNode(nodeConfiguration);
@@ -120,7 +120,7 @@ public class ServiceIntegrationTest {
               }
             });
     serviceServer.addListener(serviceServerListener);
-    assertTrue(serviceServerListener.awaitRegistration(1, TimeUnit.SECONDS));
+    assertTrue(serviceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     nodeConfiguration.setNodeName("/client");
     Node clientNode = nodeFactory.newNode(nodeConfiguration);

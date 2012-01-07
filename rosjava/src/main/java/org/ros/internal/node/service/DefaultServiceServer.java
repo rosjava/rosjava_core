@@ -32,6 +32,7 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
+import org.ros.node.service.DefaultServiceServerListener;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.service.ServiceServerListener;
 
@@ -65,6 +66,27 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
     this.responseBuilder = responseBuilder;
     this.advertiseAddress = advertiseAddress;
     listeners = new ListenerCollection<ServiceServerListener<T, S>>(executorService);
+    listeners.add(new DefaultServiceServerListener<T, S>() {
+      @Override
+      public void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {
+        log.info("Service registered: " + DefaultServiceServer.this);
+      }
+
+      @Override
+      public void onMasterRegistrationFailure(ServiceServer<T, S> registrant) {
+        log.info("Service registration failed: " + DefaultServiceServer.this);
+      }
+
+      @Override
+      public void onMasterUnregistrationSuccess(ServiceServer<T, S> registrant) {
+        log.info("Service unregistered: " + DefaultServiceServer.this);
+      }
+
+      @Override
+      public void onMasterUnregistrationFailure(ServiceServer<T, S> registrant) {
+        log.info("Service unregistration failed: " + DefaultServiceServer.this);
+      }
+    });
   }
 
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
@@ -106,21 +128,75 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   public ChannelHandler newRequestHandler() {
     return new ServiceRequestHandler<T, S>(deserializer, serializer, responseBuilder);
   }
-
+ 
   /**
-   * Signal all registered {@link ServiceServerListener} instances that
-   * registration is complete.
+   * Signal all {@link ServiceServerListener}s that the {@link ServiceServer}
+   * has been successfully registered with the master.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
    */
-  public void signalRegistrationDone() {
+  public void signalOnMasterRegistrationSuccess() {
     final ServiceServer<T, S> serviceServer = this;
     listeners.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
       @Override
       public void run(ServiceServerListener<T, S> listener) {
-        listener.onServiceServerRegistration(serviceServer);
+        listener.onMasterRegistrationSuccess(serviceServer);
       }
     });
   }
 
+  /**
+   * Signal all {@link ServiceServerListener}s that the {@link ServiceServer}
+   * has failed to register with the master.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
+   */
+  public void signalOnMasterRegistrationFailure() {
+    final ServiceServer<T, S> serviceServer = this;
+    listeners.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+      @Override
+      public void run(ServiceServerListener<T, S> listener) {
+        listener.onMasterRegistrationFailure(serviceServer);
+      }
+    });
+  }
+  
+   /**
+   * Signal all {@link ServiceServerListener}s that the {@link ServiceServer}
+   * has been successfully unregistered with the master.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
+   */
+  public void signalOnMasterUnregistrationSuccess() {
+    final ServiceServer<T, S> serviceServer = this;
+    listeners.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+      @Override
+      public void run(ServiceServerListener<T, S> listener) {
+        listener.onMasterUnregistrationSuccess(serviceServer);
+      }
+    });
+  }
+
+  /**
+   * Signal all {@link ServiceServerListener}s that the {@link ServiceServer}
+   * has failed to unregister with the master.
+   * 
+   * <p>
+   * Each listener is called in a separate thread.
+   */
+  public void signalOnMasterUnregistrationFailure() {
+    final ServiceServer<T, S> serviceServer = this;
+    listeners.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+      @Override
+      public void run(ServiceServerListener<T, S> listener) {
+        listener.onMasterUnregistrationFailure(serviceServer);
+      }
+    });
+  }
+ 
   @Override
   public void shutdown() {
     throw new UnsupportedOperationException();

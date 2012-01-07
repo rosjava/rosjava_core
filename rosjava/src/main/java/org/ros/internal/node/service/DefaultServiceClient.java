@@ -106,6 +106,11 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
     responseListeners.add(listener);
     tcpClientConnection.write(wrappedBuffer).awaitUninterruptibly();
   }
+  
+  @Override
+  public GraphName getName() {
+    return serviceDefinition.getName();
+  }
 
   @Override
   public String toString() {

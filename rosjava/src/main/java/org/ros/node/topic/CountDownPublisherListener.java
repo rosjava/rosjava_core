@@ -16,6 +16,8 @@
 
 package org.ros.node.topic;
 
+import org.ros.internal.node.CountDownRegistrantListener;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -28,51 +30,43 @@ import java.util.concurrent.TimeUnit;
 public class CountDownPublisherListener<T> extends CountDownRegistrantListener<Publisher<T>>
     implements PublisherListener<T> {
 
-  private CountDownLatch shutdownLatch;
-  private CountDownLatch newSubscriberLatch;
+  private final CountDownLatch shutdownLatch;
+  private final CountDownLatch newSubscriberLatch;
 
   public static <T> CountDownPublisherListener<T> newDefault() {
-    return newFromCounts(1, 1, 1, 1, 1, 1);
+    return newFromCounts(1, 1, 1, 1, 1);
   }
 
   /**
    * @param masterRegistrationSuccessCount
-   *          the number of counts to wait for for a successful master
-   *          registration
+   *          the number of successful master registrations to wait for
    * @param masterRegistrationFailureCount
-   *          the number of counts to wait for for a failing master registration
-   * @param shutdownCount
-   *          the number of counts to wait for for a shutdown
+   *          the number of failing master registrations to wait for
+   * @param masterUnregistrationSuccessCount
+   *          the number of successful master unregistrations to wait for
+   * @param masterUnregistrationFailureCount
+   *          the number of failing master unregistrations to wait for
    * @param newSubscriberCount
-   *          the number of counts to wait for for a new subscriber
+   *          the number of new subscribers to wait for
    */
   public static <T> CountDownPublisherListener<T> newFromCounts(int masterRegistrationSuccessCount,
       int masterRegistrationFailureCount, int masterUnregistrationSuccessCount,
-      int masterUnregistrationFailureCount, int shutdownCount, int newSubscriberCount) {
+      int masterUnregistrationFailureCount, int newSubscriberCount) {
     return new CountDownPublisherListener<T>(new CountDownLatch(masterRegistrationSuccessCount),
         new CountDownLatch(masterRegistrationFailureCount), new CountDownLatch(
             masterUnregistrationSuccessCount),
-        new CountDownLatch(masterUnregistrationFailureCount), new CountDownLatch(shutdownCount),
+        new CountDownLatch(masterUnregistrationFailureCount),
         new CountDownLatch(newSubscriberCount));
   }
 
-  /**
-   * @param masterRegistrationSuccessLatch
-   *          the latch to use for a registration
-   * @param shutdownLatch
-   *          the latch to use for a shutdown
-   * @param newSubscriberLatch
-   *          the latch to use for a remote connection
-   */
   private CountDownPublisherListener(CountDownLatch masterRegistrationSuccessLatch,
       CountDownLatch masterRegistrationFailureLatch,
       CountDownLatch masterUnregistrationSuccessLatch,
-      CountDownLatch masterUnregistrationFailureLatch, CountDownLatch shutdownLatch,
-      CountDownLatch newSubscriberLatch) {
+      CountDownLatch masterUnregistrationFailureLatch, CountDownLatch newSubscriberLatch) {
     super(masterRegistrationSuccessLatch, masterRegistrationFailureLatch,
         masterUnregistrationSuccessLatch, masterUnregistrationFailureLatch);
-    this.shutdownLatch = shutdownLatch;
     this.newSubscriberLatch = newSubscriberLatch;
+    shutdownLatch = new CountDownLatch(1);
   }
 
   @Override
@@ -95,15 +89,15 @@ public class CountDownPublisherListener<T> extends CountDownRegistrantListener<P
   }
 
   /**
-   * Wait for the requested number of remote connections for the given time
+   * Wait for the requested number of new subscribers within the given time
    * period.
    * 
    * @param timeout
    *          the maximum time to wait
    * @param unit
    *          the {@link TimeUnit} of the {@code timeout} argument
-   * @return {@code true} if the remote connections happened within the time
-   *         period {@code false} otherwise.
+   * @return {@code true} if the requested number of new subscribers connect
+   *         within the time period {@code false} otherwise.
    * @throws InterruptedException
    */
   public boolean awaitNewSubscriber(long timeout, TimeUnit unit) throws InterruptedException {
@@ -111,7 +105,7 @@ public class CountDownPublisherListener<T> extends CountDownRegistrantListener<P
   }
 
   /**
-   * Wait for the requested number of shutdowns.
+   * Wait for for shutdown.
    * 
    * @throws InterruptedException
    */
@@ -120,13 +114,13 @@ public class CountDownPublisherListener<T> extends CountDownRegistrantListener<P
   }
 
   /**
-   * Wait for the requested number of shutdowns for the given time period.
+   * Wait for shutdown within the given time period.
    * 
    * @param timeout
    *          the maximum time to wait
    * @param unit
    *          the {@link TimeUnit} of the {@code timeout} argument
-   * @return {@code true} if the shutdowns happened within the time period,
+   * @return {@code true} if shutdown happened within the time period,
    *         {@code false} otherwise
    * @throws InterruptedException
    */
