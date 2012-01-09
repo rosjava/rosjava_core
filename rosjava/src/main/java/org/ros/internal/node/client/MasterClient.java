@@ -28,7 +28,7 @@ import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.topic.TopicDefinition;
-import org.ros.internal.node.xmlrpc.Master;
+import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpoint;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
@@ -41,7 +41,7 @@ import java.util.List;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterClient extends Client<Master> {
+public class MasterClient extends Client<MasterXmlRpcEndpoint> {
 
   /**
    * Create a new {@link MasterClient} connected to the specified
@@ -51,7 +51,7 @@ public class MasterClient extends Client<Master> {
    *          the {@link URI} of the {@link MasterServer} to connect to
    */
   public MasterClient(URI uri) {
-    super(uri, Master.class);
+    super(uri, MasterXmlRpcEndpoint.class);
   }
 
   /**
@@ -65,7 +65,7 @@ public class MasterClient extends Client<Master> {
    * @return a {@link Response} with a void result
    */
   public Response<Void> registerService(SlaveIdentifier slave, ServiceServer<?, ?> service) {
-    return Response.fromListChecked(node.registerService(slave.getName().toString(), service
+    return Response.fromListChecked(node.registerService(slave.getNodeName().toString(), service
         .getName().toString(), service.getUri().toString(), slave.getUri().toString()),
         new VoidResultFactory());
   }
@@ -82,7 +82,7 @@ public class MasterClient extends Client<Master> {
    *         result
    */
   public Response<Integer> unregisterService(SlaveIdentifier slave, ServiceServer<?, ?> service) {
-    return Response.fromListChecked(node.unregisterService(slave.getName().toString(), service
+    return Response.fromListChecked(node.unregisterService(slave.getNodeName().toString(), service
         .getName().toString(), service.getUri().toString()), new IntegerResultFactory());
   }
 
@@ -102,7 +102,7 @@ public class MasterClient extends Client<Master> {
    *         as the result
    */
   public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber) {
-    return Response.fromListChecked(node.registerSubscriber(slave.getName().toString(), subscriber
+    return Response.fromListChecked(node.registerSubscriber(slave.getNodeName().toString(), subscriber
         .getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri().toString()),
         new UriListResultFactory());
   }
@@ -118,7 +118,7 @@ public class MasterClient extends Client<Master> {
    *         the result
    */
   public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber) {
-    return Response.fromListChecked(node.unregisterSubscriber(slave.getName().toString(),
+    return Response.fromListChecked(node.unregisterSubscriber(slave.getNodeName().toString(),
         subscriber.getTopicName().toString(), slave.getUri().toString()),
         new IntegerResultFactory());
   }
@@ -171,7 +171,7 @@ public class MasterClient extends Client<Master> {
    *         as a result
    */
   public Response<URI> lookupNode(SlaveIdentifier slave, String nodeName) {
-    return Response.fromListChecked(node.lookupNode(slave.getName().toString(), nodeName),
+    return Response.fromListChecked(node.lookupNode(slave.getNodeName().toString(), nodeName),
         new UriResultFactory());
   }
 
@@ -184,7 +184,7 @@ public class MasterClient extends Client<Master> {
    */
   public Response<URI> getUri(SlaveIdentifier slave) {
     return Response
-        .fromListChecked(node.getUri(slave.getName().toString()), new UriResultFactory());
+        .fromListChecked(node.getUri(slave.getNodeName().toString()), new UriResultFactory());
   }
 
   /**
@@ -199,7 +199,7 @@ public class MasterClient extends Client<Master> {
    */
   public Response<URI> lookupService(SlaveIdentifier slave, String serviceName) {
     return Response.fromListCheckedFailure(
-        node.lookupService(slave.getName().toString(), serviceName), new UriResultFactory());
+        node.lookupService(slave.getNodeName().toString(), serviceName), new UriResultFactory());
   }
 
   public Response<List<TopicDefinition>> getPublishedTopics(SlaveIdentifier slave, String subgraph) {

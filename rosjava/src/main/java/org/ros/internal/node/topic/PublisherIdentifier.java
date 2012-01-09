@@ -71,7 +71,7 @@ public class PublisherIdentifier {
   }
   
   public GraphName getSlaveName() {
-    return slaveIdentifier.getName();
+    return slaveIdentifier.getNodeName();
   }
 
   public URI getSlaveUri() {

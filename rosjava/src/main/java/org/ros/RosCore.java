@@ -24,6 +24,10 @@ import org.ros.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 
 /**
+ * The ROS core is the node which handles the communication between ROS nodes. It provides
+ * a service for such tasks as locating all subscribers or publishers for a given topic
+ * in the ROS graph.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class RosCore {

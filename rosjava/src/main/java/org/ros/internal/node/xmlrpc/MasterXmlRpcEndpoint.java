@@ -19,9 +19,11 @@ package org.ros.internal.node.xmlrpc;
 import java.util.List;
 
 /**
+ * An XML-RPC endpoint description of a ROS master.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface Master extends XmlRpcEndpoint {
+public interface MasterXmlRpcEndpoint extends XmlRpcEndpoint {
 
   /**
    * Register the caller as a provider of the specified service.
@@ -35,8 +37,8 @@ public interface Master extends XmlRpcEndpoint {
    * @param callerApi
    * @return ignore
    */
-  public List<Object> registerService(String callerId, String service, String serviceApi,
-      String callerApi);
+  List<Object>
+      registerService(String callerId, String service, String serviceApi, String callerApi);
 
   /**
    * Unregister the caller as a provider of the specified service.
@@ -52,7 +54,7 @@ public interface Master extends XmlRpcEndpoint {
    *         that the caller was not registered as a service provider. The call
    *         still succeeds as the intended final state is reached.
    */
-  public List<Object> unregisterService(String callerId, String service, String serviceApi);
+  List<Object> unregisterService(String callerId, String service, String serviceApi);
 
   /**
    * Subscribe the caller to the specified topic. In addition to receiving a
@@ -72,7 +74,7 @@ public interface Master extends XmlRpcEndpoint {
    * @return publishers as a list of XMLRPC API URIs for nodes currently
    *         publishing the specified topic
    */
-  public List<Object> registerSubscriber(String callerId, String topicName, String topicType,
+  List<Object> registerSubscriber(String callerId, String topicName, String topicType,
       String callerApi);
 
   /**
@@ -89,7 +91,7 @@ public interface Master extends XmlRpcEndpoint {
    *         registered as a subscriber. The call still succeeds as the intended
    *         final state is reached.
    */
-  public List<Object> unregisterSubscriber(String callerId, String topicName, String callerApi);
+  List<Object> unregisterSubscriber(String callerId, String topicName, String callerApi);
 
   /**
    * Register the caller as a publisher the topic.
@@ -104,8 +106,9 @@ public interface Master extends XmlRpcEndpoint {
    *          API URI of publisher to register
    * @return list of current subscribers of topic in the form of XML-RPC URIs
    */
-  public List<Object> registerPublisher(String callerId, String topicName, String topicType,
+  List<Object> registerPublisher(String callerId, String topicName, String topicType,
       String callerApi);
+
   /**
    * Unregister the caller as a publisher of the topic.
    * 
@@ -120,7 +123,7 @@ public interface Master extends XmlRpcEndpoint {
    *         registered as a subscriber. The call still succeeds as the intended
    *         final state is reached.
    */
-  public List<Object> unregisterPublisher(String callerId, String topicName, String callerApi);
+  List<Object> unregisterPublisher(String callerId, String topicName, String callerApi);
 
   /**
    * Get the XML-RPC URI of the node with the associated name/caller_id. This
@@ -133,7 +136,7 @@ public interface Master extends XmlRpcEndpoint {
    *          Name of node to lookup
    * @return URI of the node
    */
-  public List<Object> lookupNode(String callerId, String nodeName);
+  List<Object> lookupNode(String callerId, String nodeName);
 
   /**
    * Get list of topics that can be subscribed to. This does not return topics
@@ -146,9 +149,12 @@ public interface Master extends XmlRpcEndpoint {
    *          Restrict topic names to match within the specified subgraph.
    *          Subgraph namespace is resolved relative to the caller's namespace.
    *          Use empty string to specify all names.
-   * @return
+   * @return Topics is in list representation [[topic, message type], [topic,
+   *         message type] ...]
    */
-  public List<Object> getPublishedTopics(String callerId, String subgraph);
+  List<Object> getPublishedTopics(String callerId, String subgraph);
+  
+  List<Object> getTopicTypes(String callerId);
 
   /**
    * Retrieve list representation of system state (i.e. publishers, subscribers,
@@ -163,7 +169,7 @@ public interface Master extends XmlRpcEndpoint {
    *         services is of the form [ [service1,
    *         [service1Provider1...service1ProviderN]] ... ]
    */
-  public List<Object> getSystemState(String callerId);
+  List<Object> getSystemState(String callerId);
 
   /**
    * Get the URI of the the master.
@@ -172,7 +178,7 @@ public interface Master extends XmlRpcEndpoint {
    *          ROS caller ID
    * @return URI of the the master
    */
-  public List<Object> getUri(String callerId);
+  List<Object> getUri(String callerId);
 
   /**
    * Lookup all provider of a particular service.
@@ -184,6 +190,6 @@ public interface Master extends XmlRpcEndpoint {
    * @return service URL is provides address and port of the service. Fails if
    *         there is no provider.
    */
-  public List<Object> lookupService(String callerId, String service);
+  List<Object> lookupService(String callerId, String service);
 
 }

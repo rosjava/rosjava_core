@@ -20,7 +20,7 @@ import org.apache.commons.logging.Log;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
-import org.ros.internal.node.xmlrpc.Master;
+import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpoint;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.message.Service;
@@ -91,7 +91,7 @@ public interface Node {
   void shutdown();
 
   /**
-   * @return {@link URI} of {@link Master} that this node is attached to.
+   * @return {@link URI} of {@link MasterXmlRpcEndpoint} that this node is attached to.
    */
   URI getMasterUri();
 

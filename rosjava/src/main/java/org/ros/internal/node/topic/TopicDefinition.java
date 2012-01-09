@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * The full definition of a topic in a ROS graph.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TopicDefinition {
@@ -35,6 +37,12 @@ public class TopicDefinition {
   private final TopicIdentifier topicIdentifier;
   private final MessageDefinition messageDefinition;
 
+  /**
+   * Get a topic definition from a set of headers.
+   * 
+   * @param header
+   * @return
+   */
   public static TopicDefinition newFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));
     GraphName name = new GraphName(header.get(ConnectionHeaderFields.TOPIC));

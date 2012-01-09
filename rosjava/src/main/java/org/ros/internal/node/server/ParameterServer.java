@@ -35,6 +35,8 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 
 /**
+ * A ROS parameter server.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ParameterServer {

@@ -35,6 +35,8 @@ import org.ros.address.BindAddress;
 import org.ros.exception.RosRuntimeException;
 
 /**
+ * Base class for an XML-RPC server.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class NodeServer {
@@ -59,8 +61,17 @@ public class NodeServer {
     startLatch = new CountDownLatch(1);
   }
 
-  public <T extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint> void
-      start(Class<T> instanceClass, T instance) {
+  /**
+   * Start up the remote calling server.
+   * 
+   * @param instanceClass
+   *          the class of the remoting server
+   * 
+   * @param instance
+   *          an instance of the remoting server class
+   */
+  public <T extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint> void start(Class<T> instanceClass,
+      T instance) {
     XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
     PropertyHandlerMapping phm = new PropertyHandlerMapping();
     phm.setRequestProcessorFactoryFactory(new NodeRequestProcessorFactoryFactory<T>(instance));
@@ -84,10 +95,18 @@ public class NodeServer {
     startLatch.countDown();
   }
 
+  /**
+   * Shut the remote call server down.
+   */
   public void shutdown() {
     server.shutdown();
   }
 
+  /**
+   * Get the URI of the serner.
+   * 
+   * @return
+   */
   public URI getUri() {
     return advertiseAddress.toUri("http");
   }

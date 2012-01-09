@@ -29,7 +29,7 @@ import org.ros.internal.node.response.StringListResultFactory;
 import org.ros.internal.node.response.StringResultFactory;
 import org.ros.internal.node.response.VoidResultFactory;
 import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.node.xmlrpc.ParameterServer;
+import org.ros.internal.node.xmlrpc.ParameterServerXmlRpcEndpoint;
 import org.ros.namespace.GraphName;
 
 import com.google.common.collect.Lists;
@@ -40,7 +40,7 @@ import com.google.common.collect.Lists;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ParameterClient extends Client<org.ros.internal.node.xmlrpc.ParameterServer> {
+public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
 
   private final SlaveIdentifier slaveIdentifier;
   private final String nodeName;
@@ -54,9 +54,9 @@ public class ParameterClient extends Client<org.ros.internal.node.xmlrpc.Paramet
    * @throws MalformedURLException
    */
   public ParameterClient(SlaveIdentifier slaveIdentifier, URI uri) {
-    super(uri, org.ros.internal.node.xmlrpc.ParameterServer.class);
+    super(uri, ParameterServerXmlRpcEndpoint.class);
     this.slaveIdentifier = slaveIdentifier;
-    nodeName = slaveIdentifier.getName().toString();
+    nodeName = slaveIdentifier.getNodeName().toString();
   }
 
   public Response<Object> getParam(GraphName parameterName) {

@@ -28,11 +28,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 /**
+ * Slave identifiers combine the node name of a node with the URI for contacting the
+ * node's XMLRPC server.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class SlaveIdentifier {
 
-  private final GraphName name;
+  private final GraphName nodeName;
   private final URI uri;
 
   public static SlaveIdentifier newFromStrings(String nodeName, String uri) {
@@ -46,26 +49,27 @@ public class SlaveIdentifier {
   /**
    * Constructs a new {@link SlaveIdentifier}.
    * 
-   * Note that either {@code name} or {@code uri} may be null but not both. This
+   * Note that either {@code nodeName} or {@code uri} may be null but not both. This
    * is necessary because either is enough to uniquely identify a
    * {@link SlaveServer} and because, depending on context, one or the other may
    * not be available.
    * 
    * Although either value may be {@code null}, we do not treat {@code null} as
-   * a wildcard with respect to equality. Even though it should be safe to do so,
-   * wildcards are unnecessary in this case and would likely lead to buggy code.
+   * a wildcard with respect to equality. Even though it should be safe to do
+   * so, wildcards are unnecessary in this case and would likely lead to buggy
+   * code.
    * 
-   * @param name
+   * @param nodeName
    *          the {@link GraphName} that the {@link SlaveServer} is known as
    * @param uri
    *          the {@link URI} of the {@link SlaveServer}'s XML-RPC server
    */
-  public SlaveIdentifier(GraphName name, URI uri) {
-    Preconditions.checkArgument(name != null || uri != null);
-    if (name != null) {
-      Preconditions.checkArgument(name.isGlobal());
+  public SlaveIdentifier(GraphName nodeName, URI uri) {
+    Preconditions.checkArgument(nodeName != null || uri != null);
+    if (nodeName != null) {
+      Preconditions.checkArgument(nodeName.isGlobal());
     }
-    this.name = name;
+    this.nodeName = nodeName;
     this.uri = uri;
   }
 
@@ -80,11 +84,11 @@ public class SlaveIdentifier {
 
   @Override
   public String toString() {
-    return "SlaveIdentifier<" + name + ", " + uri + ">";
+    return "SlaveIdentifier<" + nodeName + ", " + uri + ">";
   }
 
-  public GraphName getName() {
-    return name;
+  public GraphName getNodeName() {
+    return nodeName;
   }
 
   public URI getUri() {
@@ -92,16 +96,15 @@ public class SlaveIdentifier {
   }
 
   public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.CALLER_ID, name.toString())
-        .build();
+    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.CALLER_ID,
+        nodeName.toString()).build();
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((nodeName == null) ? 0 : nodeName.hashCode());
     result = prime * result + ((uri == null) ? 0 : uri.hashCode());
     return result;
   }
@@ -115,10 +118,10 @@ public class SlaveIdentifier {
     if (getClass() != obj.getClass())
       return false;
     SlaveIdentifier other = (SlaveIdentifier) obj;
-    if (name == null) {
-      if (other.name != null)
+    if (nodeName == null) {
+      if (other.nodeName != null)
         return false;
-    } else if (!name.equals(other.name))
+    } else if (!nodeName.equals(other.nodeName))
       return false;
     if (uri == null) {
       if (other.uri != null)

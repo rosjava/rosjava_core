@@ -21,9 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * XML-RPC endpoint for a parameter server.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ParameterServer extends XmlRpcEndpoint {
+public interface ParameterServerXmlRpcEndpoint extends XmlRpcEndpoint {
 
   /**
    * Deletes a parameter.

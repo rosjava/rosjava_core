@@ -25,6 +25,8 @@ import org.ros.namespace.GraphName;
 import java.util.Map;
 
 /**
+ * The identifier for a topic in a ROS graph.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TopicIdentifier {

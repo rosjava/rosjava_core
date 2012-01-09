@@ -16,16 +16,12 @@
 
 package org.ros.internal.node.xmlrpc;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.ParameterServer;
 import org.ros.internal.node.server.SlaveIdentifier;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
@@ -33,39 +29,59 @@ import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicIdentifier;
 import org.ros.namespace.GraphName;
 
-import com.google.common.collect.Lists;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
+ * A combined XML RPC endpoint for the master and parameter servers.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterImpl implements Master, ParameterServer {
+public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
+    ParameterServerXmlRpcEndpoint {
 
   private final MasterServer master;
-  private final org.ros.internal.node.server.ParameterServer parameterServer;
+  private final ParameterServer parameterServer;
 
-  public MasterImpl(MasterServer master) {
+  public MasterXmlRpcEndpointImpl(MasterServer master) {
     this.master = master;
-    parameterServer = new org.ros.internal.node.server.ParameterServer();
+    parameterServer = new ParameterServer();
   }
 
   @Override
   public List<Object> getPublishedTopics(String callerId, String subgraph) {
-    throw new UnsupportedOperationException();
+    return Response.newSuccess("current topics",
+        master.getPublishedTopics(new GraphName(callerId), new GraphName(subgraph))).toList();
+  }
+
+  @Override
+  public List<Object> getTopicTypes(String callerId) {
+    return Response.newSuccess("topic types", master.getTopicTypes(new GraphName(callerId)))
+        .toList();
   }
 
   @Override
   public List<Object> getSystemState(String callerId) {
-    throw new UnsupportedOperationException();
+    return Response.newSuccess("current system state", master.getSystemState()).toList();
   }
 
   @Override
   public List<Object> getUri(String callerId) {
-    throw new UnsupportedOperationException();
+    return Response.newSuccess("Success", master.getUri().toString()).toList();
   }
 
   @Override
   public List<Object> lookupNode(String callerId, String nodeName) {
-    throw new UnsupportedOperationException();
+    SlaveIdentifier identifier = master.lookupNode(new GraphName(nodeName));
+    if (identifier != null) {
+      return Response.newSuccess("Success", identifier.getUri().toString()).toList();
+    } else {
+      return Response.newError("No such node", null).toList();
+    }
   }
 
   @Override
@@ -83,7 +99,8 @@ public class MasterImpl implements Master, ParameterServer {
     SlaveIdentifier slaveIdentifier = SlaveIdentifier.newFromStrings(callerId, callerApi);
     PublisherIdentifier publisherIdentifier =
         new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(new GraphName(topic)));
-    List<SubscriberIdentifier> subscribers = master.registerPublisher(publisherIdentifier);
+    List<SubscriberIdentifier> subscribers =
+        master.registerPublisher(publisherIdentifier, topicType);
     List<String> urls = Lists.newArrayList();
     for (SubscriberIdentifier subscriberIdentifier : subscribers) {
       urls.add(subscriberIdentifier.getUri().toString());
@@ -95,7 +112,27 @@ public class MasterImpl implements Master, ParameterServer {
   public List<Object> unregisterPublisher(String callerId, String topicName, String callerApi) {
     PublisherIdentifier publisherIdentifier =
         PublisherIdentifier.newFromStrings(callerId, callerApi, topicName);
-    return Response.newSuccess("Success", master.unregisterPublisher(publisherIdentifier))
+    return Response.newSuccess("Success", master.unregisterPublisher(publisherIdentifier)).toList();
+  }
+
+  @Override
+  public List<Object> registerSubscriber(String callerId, String topicName, String topicType,
+      String callerApi) {
+    List<PublisherIdentifier> publishers =
+        master.registerSubscriber(
+            SubscriberIdentifier.newFromStrings(callerId, callerApi, topicName), topicType);
+    List<String> urls = Lists.newArrayList();
+    for (PublisherIdentifier publisherIdentifier : publishers) {
+      urls.add(publisherIdentifier.getSlaveUri().toString());
+    }
+    return Response.newSuccess("Success", urls).toList();
+  }
+
+  @Override
+  public List<Object> unregisterSubscriber(String callerId, String topicName, String callerApi) {
+    SubscriberIdentifier subscriberIdentifier =
+        SubscriberIdentifier.newFromStrings(callerId, callerApi, topicName);
+    return Response.newSuccess("Success", master.unregisterSubscriber(subscriberIdentifier))
         .toList();
   }
 
@@ -120,29 +157,8 @@ public class MasterImpl implements Master, ParameterServer {
     } catch (URISyntaxException e) {
       throw new RosRuntimeException(e);
     }
-    int result = master.unregisterService(serviceIdentifier);
+    int result = master.unregisterService(serviceIdentifier) ? 1 : 0;
     return Response.newSuccess("Success", result).toList();
-  }
-
-  @Override
-  public List<Object> registerSubscriber(String callerId, String topicName, String topicType,
-      String callerApi) {
-    List<PublisherIdentifier> publishers =
-        master.registerSubscriber(SubscriberIdentifier.newFromStrings(callerId, callerApi,
-            topicName));
-    List<String> urls = Lists.newArrayList();
-    for (PublisherIdentifier publisherIdentifier : publishers) {
-      urls.add(publisherIdentifier.getSlaveUri().toString());
-    }
-    return Response.newSuccess("Success", urls).toList();
-  }
-
-  @Override
-  public List<Object> unregisterSubscriber(String callerId, String topicName, String callerApi) {
-    SubscriberIdentifier subscriberIdentifier =
-        SubscriberIdentifier.newFromStrings(callerId, callerApi, topicName);
-    return Response.newSuccess("Success", master.unregisterSubscriber(subscriberIdentifier))
-        .toList();
   }
 
   @Override

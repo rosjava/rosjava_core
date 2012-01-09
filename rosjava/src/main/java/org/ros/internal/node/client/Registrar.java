@@ -77,7 +77,7 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
     slaveIdentifier = null;
     running = false;
     if (DEBUG) {
-      log.info("Master URI: " + masterClient.getRemoteUri());
+      log.info("MasterXmlRpcEndpoint URI: " + masterClient.getRemoteUri());
     }
   }
 
