@@ -262,7 +262,7 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public <RequestType, ResponseType> ServiceClient<RequestType, ResponseType> newServiceClient(
+  public <T, S> ServiceClient<T, S> newServiceClient(
       GraphName serviceName, String serviceType) throws ServiceNotFoundException {
     GraphName resolvedServiceName = resolveName(serviceName);
     URI uri = lookupService(resolvedServiceName);
@@ -274,8 +274,8 @@ public class DefaultNode implements Node {
         ServiceMessageDefinitionFactory.newFromString(serviceType);
     ServiceIdentifier serviceIdentifier = new ServiceIdentifier(resolvedServiceName, uri);
     ServiceDefinition definition = new ServiceDefinition(serviceIdentifier, messageDefinition);
-    MessageSerializer<RequestType> requestSerializer = newServiceRequestSerializer(serviceType);
-    MessageDeserializer<ResponseType> responseDeserializer =
+    MessageSerializer<T> requestSerializer = newServiceRequestSerializer(serviceType);
+    MessageDeserializer<S> responseDeserializer =
         newServiceResponseDeserializer(serviceType);
     return serviceFactory.newClient(definition, requestSerializer, responseDeserializer);
   }
