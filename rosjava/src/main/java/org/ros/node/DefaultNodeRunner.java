@@ -50,7 +50,24 @@ public class DefaultNodeRunner implements NodeRunner {
   private final Multimap<GraphName, Node> nodes;
   private final BiMap<Node, NodeMain> nodeMains;
 
+  private class RegistrationListener implements NodeListener {
+    @Override
+    public void onStart(Node node) {
+      registerNode(node);
+    }
+
+    @Override
+    public void onShutdown(Node node) {
+    }
+
+    @Override
+    public void onShutdownComplete(Node node) {
+      unregisterNode(node);
+    }
+  }
+  
   /**
+   * 
    * @return an instance of {@link DefaultNodeRunner} that uses a default
    *         {@link ExecutorService}
    */
@@ -86,7 +103,7 @@ public class DefaultNodeRunner implements NodeRunner {
     if (DEBUG) {
       log.info("Starting node: " + nodeConfiguration.getNodeName());
     }
-    // NOTE(damonkohler): To help avoid race conditions, we have to make a copy
+    // NOTE(damonkohler): To avoid a race condition, we have to make a copy
     // of the NodeConfiguration in the current thread.
     final NodeConfiguration nodeConfigurationCopy = NodeConfiguration.copyOf(nodeConfiguration);
     executorService.execute(new Runnable() {
@@ -176,21 +193,5 @@ public class DefaultNodeRunner implements NodeRunner {
   private void unregisterNode(Node node) {
     nodes.get(node.getName()).remove(node);
     nodeMains.remove(node);
-  }
-
-  private class RegistrationListener implements NodeListener {
-    @Override
-    public void onStart(Node node) {
-      registerNode(node);
-    }
-
-    @Override
-    public void onShutdown(Node node) {
-      unregisterNode(node);
-    }
-
-    @Override
-    public void onShutdownComplete(Node node) {
-    }
   }
 }

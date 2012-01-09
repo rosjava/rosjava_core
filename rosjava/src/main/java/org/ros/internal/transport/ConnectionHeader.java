@@ -16,17 +16,18 @@
 
 package org.ros.internal.transport;
 
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.Map.Entry;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import com.google.common.collect.Maps;
+import java.nio.ByteOrder;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -47,9 +48,11 @@ public class ConnectionHeader {
   }
 
   /**
-   * Decodes a header that came over the wire into a {@link Map} of fields and values.
+   * Decodes a header that came over the wire into a {@link Map} of fields and
+   * values.
    * 
-   * @param buffer the incoming {@link ChannelBuffer} containing the header
+   * @param buffer
+   *          the incoming {@link ChannelBuffer} containing the header
    * @return a {@link Map} of header fields and values
    */
   public static Map<String, String> decode(ChannelBuffer buffer) {
@@ -67,12 +70,10 @@ public class ConnectionHeader {
       }
       String field = decodeAsciiString(buffer, fieldSize);
       position += field.length();
-      if (field.indexOf("=") == -1) {
-        throw new IllegalStateException("Invalid line in handshake header: [" + field + "]");
-      }
+      Preconditions.checkState(field.indexOf("=") > 0,
+          String.format("Invalid field in handshake header: \"%s\"", field));
       String[] keyAndValue = field.split("=");
       if (keyAndValue.length == 1) {
-        // TODO(damonkohler): Is this the right behavior? Write a test.
         result.put(keyAndValue[0], "");
       } else {
         result.put(keyAndValue[0], keyAndValue[1]);
@@ -85,10 +86,13 @@ public class ConnectionHeader {
   }
 
   /**
-   * Encodes a header {@link Map} of fields and values for transmission over the wire.
+   * Encodes a header {@link Map} of fields and values for transmission over the
+   * wire.
    * 
-   * @param header a {@link Map} of header fields and values
-   * @return a {@link ChannelBuffer} containing the encoded header for wire transmission
+   * @param header
+   *          a {@link Map} of header fields and values
+   * @return a {@link ChannelBuffer} containing the encoded header for wire
+   *         transmission
    */
   public static ChannelBuffer encode(Map<String, String> header) {
     ChannelBuffer buffer =
@@ -100,5 +104,4 @@ public class ConnectionHeader {
     }
     return buffer;
   }
-
 }

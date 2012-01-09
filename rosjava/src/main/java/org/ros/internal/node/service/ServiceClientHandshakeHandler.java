@@ -19,6 +19,8 @@ package org.ros.internal.node.service;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -30,6 +32,7 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.service.ServiceResponseListener;
+import org.ros.node.service.ServiceServer;
 
 import java.util.Map;
 import java.util.Queue;
@@ -38,19 +41,24 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <RequestType>
- * @param <ResponseType>
+ * @param <T>
+ *          the connected {@link ServiceServer} responds to requests of this type
+ * @param <S>
+ *          the connected {@link ServiceServer} returns responses of this type
  */
-class ServiceClientHandshakeHandler<RequestType, ResponseType> extends SimpleChannelHandler {
+class ServiceClientHandshakeHandler<T, S> extends SimpleChannelHandler {
+
+  private static final boolean DEBUG = false;
+  private static final Log log = LogFactory.getLog(ServiceClientHandshakeHandler.class);
 
   private final ImmutableMap<String, String> header;
-  private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
-  private final MessageDeserializer<ResponseType> deserializer;
+  private final Queue<ServiceResponseListener<S>> responseListeners;
+  private final MessageDeserializer<S> deserializer;
   private final ExecutorService executorService;
 
   public ServiceClientHandshakeHandler(ImmutableMap<String, String> header,
-      Queue<ServiceResponseListener<ResponseType>> responseListeners,
-      MessageDeserializer<ResponseType> deserializer, ExecutorService executorService) {
+      Queue<ServiceResponseListener<S>> responseListeners,
+      MessageDeserializer<S> deserializer, ExecutorService executorService) {
     this.header = header;
     this.responseListeners = responseListeners;
     this.deserializer = deserializer;
@@ -71,17 +79,17 @@ class ServiceClientHandshakeHandler<RequestType, ResponseType> extends SimpleCha
     ChannelPipeline pipeline = e.getChannel().getPipeline();
     pipeline.remove(TcpClientPipelineFactory.LENGTH_FIELD_BASED_FRAME_DECODER);
     pipeline.remove(this);
-    pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<ResponseType>());
-    pipeline.addLast("ResponseHandler", new ServiceResponseHandler<ResponseType>(responseListeners,
+    pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<S>());
+    pipeline.addLast("ResponseHandler", new ServiceResponseHandler<S>(responseListeners,
         deserializer, executorService));
     super.messageReceived(ctx, e);
   }
 
   private void handshake(ChannelBuffer buffer) {
     Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
-    if (DefaultServiceClient.DEBUG) {
-      DefaultServiceClient.log.info("Incoming handshake header: " + incomingHeader);
-      DefaultServiceClient.log.info("Expected handshake header: " + header);
+    if (DEBUG) {
+      log.info("Incoming handshake header: " + incomingHeader);
+      log.info("Expected handshake header: " + header);
     }
     Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
         header.get(ConnectionHeaderFields.TYPE)));

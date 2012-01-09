@@ -28,9 +28,9 @@ import java.net.URI;
  * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <T>
- *          the {@link ServiceServer} responds to requests of this type
+ *          this {@link ServiceServer} responds to requests of this type
  * @param <S>
- *          the {@link ServiceServer} returns responses of this type
+ *          this {@link ServiceServer} returns responses of this type
  */
 public interface ServiceServer<T, S> {
 

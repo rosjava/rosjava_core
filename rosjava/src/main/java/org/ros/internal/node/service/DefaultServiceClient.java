@@ -20,8 +20,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -41,17 +39,13 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultServiceClient<RequestType, ResponseType> implements
-    ServiceClient<RequestType, ResponseType> {
-
-  static final boolean DEBUG = false;
-  static final Log log = LogFactory.getLog(DefaultServiceClient.class);
+public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   private final ServiceDefinition serviceDefinition;
   private final TcpClientConnectionManager tcpClientConnectionManager;
-  private final MessageSerializer<RequestType> serializer;
-  private final MessageDeserializer<ResponseType> deserializer;
-  private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
+  private final MessageSerializer<T> serializer;
+  private final MessageDeserializer<S> deserializer;
+  private final Queue<ServiceResponseListener<S>> responseListeners;
   private final ImmutableMap<String, String> header;
   private final ExecutorService executorService;
 
@@ -65,7 +59,7 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
   }
 
   private DefaultServiceClient(GraphName nodeName, ServiceDefinition serviceDefinition,
-      MessageSerializer<RequestType> serializer, MessageDeserializer<ResponseType> deserializer,
+      MessageSerializer<T> serializer, MessageDeserializer<S> deserializer,
       ExecutorService executorService) {
     this.serviceDefinition = serviceDefinition;
     this.serializer = serializer;
@@ -88,10 +82,12 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"), "Invalid service URI.");
     Preconditions.checkState(tcpClientConnection == null, "Already connected once.");
     InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
+    ServiceClientHandshakeHandler<T, S> handler =
+        new ServiceClientHandshakeHandler<T, S>(header, responseListeners, deserializer,
+            executorService);
     tcpClientConnection =
-        tcpClientConnectionManager.connect(toString(), address,
-            new ServiceClientHandshakeHandler<RequestType, ResponseType>(header, responseListeners,
-                deserializer, executorService), "ServiceClientHandshakeHandler");
+        tcpClientConnectionManager.connect(toString(), address, handler,
+            "ServiceClientHandshakeHandler");
   }
 
   @Override
@@ -101,12 +97,12 @@ public class DefaultServiceClient<RequestType, ResponseType> implements
   }
 
   @Override
-  public void call(RequestType request, ServiceResponseListener<ResponseType> listener) {
+  public void call(T request, ServiceResponseListener<S> listener) {
     ChannelBuffer wrappedBuffer = ChannelBuffers.wrappedBuffer(serializer.serialize(request));
     responseListeners.add(listener);
     tcpClientConnection.write(wrappedBuffer).awaitUninterruptibly();
   }
-  
+
   @Override
   public GraphName getName() {
     return serviceDefinition.getName();

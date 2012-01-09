@@ -60,6 +60,18 @@ public class TcpClientConnectionManager {
     tcpClientConnections = Lists.newArrayList();
   }
 
+  /**
+   * Connects to a server.
+   * 
+   * <p>
+   * This call blocks until the connection is established or fails.
+   * 
+   * @param connectionName
+   * @param address
+   * @param handler
+   * @param handlerName
+   * @return
+   */
   public TcpClientConnection connect(String connectionName, SocketAddress address,
       final ChannelHandler handler, final String handlerName) {
     ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);

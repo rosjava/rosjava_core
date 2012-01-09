@@ -21,7 +21,6 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -73,8 +72,7 @@ class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
     Map<String, String> handshakeHeader = handshake(incomingBuffer);
-    Channel channel = e.getChannel();
-    ChannelPipeline pipeline = channel.getPipeline();
+    ChannelPipeline pipeline = e.getChannel().getPipeline();
     pipeline.remove(this);
     pipeline.addLast("MessageHandler", incomingMessageQueue.newChannelHandler());
     String latching = handshakeHeader.get(ConnectionHeaderFields.LATCHING);
