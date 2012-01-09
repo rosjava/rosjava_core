@@ -106,19 +106,4 @@ public class TcpRosServerTest {
     }
     tcpRosServer.shutdown();
   }
-
-  @Test
-  public void testFailIfShutdownWhileNotRunning() {
-    TcpRosServer tcpRosServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null, executorService);
-    tcpRosServer.start();
-    tcpRosServer.shutdown();
-    try {
-      tcpRosServer.shutdown();
-      fail();
-    } catch (RuntimeException e) {
-      // Shutting down the server twice must fail.
-    }
-  }
-
 }

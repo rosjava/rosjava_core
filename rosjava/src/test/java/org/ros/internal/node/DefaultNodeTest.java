@@ -19,7 +19,6 @@ package org.ros.internal.node;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.ros.Assert.assertGraphNameEquals;
 
 import com.google.common.collect.Lists;
@@ -48,7 +47,6 @@ import org.ros.node.topic.Subscriber;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -84,18 +82,6 @@ public class DefaultNodeTest {
 
   public void shutdown() {
     executorService.shutdown();
-  }
-
-  @Test
-  public void testFailIfStoppedWhileNotRunning() throws UnknownHostException {
-    Node node = nodeFactory.newNode(privateNodeConfiguration);
-    node.shutdown();
-    try {
-      node.shutdown();
-      fail();
-    } catch (RuntimeException e) {
-      // Calling shutdown() while the node is not running must fail.
-    }
   }
 
   @Test
