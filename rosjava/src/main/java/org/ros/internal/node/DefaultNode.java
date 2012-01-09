@@ -165,77 +165,70 @@ public class DefaultNode implements Node {
     return registrar;
   }
 
-  private <MessageType> org.ros.message.MessageSerializer<MessageType> newMessageSerializer(
-      String messageType) {
+  private <T> org.ros.message.MessageSerializer<T> newMessageSerializer(String messageType) {
     return nodeConfiguration.getMessageSerializationFactory().newMessageSerializer(messageType);
   }
 
   @SuppressWarnings("unchecked")
-  private <MessageType> MessageDeserializer<MessageType> newMessageDeserializer(String messageType) {
-    return (MessageDeserializer<MessageType>) nodeConfiguration.getMessageSerializationFactory()
+  private <T> MessageDeserializer<T> newMessageDeserializer(String messageType) {
+    return (MessageDeserializer<T>) nodeConfiguration.getMessageSerializationFactory()
         .newMessageDeserializer(messageType);
   }
 
   @SuppressWarnings("unchecked")
-  private <ResponseType> MessageSerializer<ResponseType> newServiceResponseSerializer(
-      String serviceType) {
-    return (MessageSerializer<ResponseType>) nodeConfiguration.getMessageSerializationFactory()
+  private <T> MessageSerializer<T> newServiceResponseSerializer(String serviceType) {
+    return (MessageSerializer<T>) nodeConfiguration.getMessageSerializationFactory()
         .newServiceResponseSerializer(serviceType);
   }
 
   @SuppressWarnings("unchecked")
-  private <ResponseType> MessageDeserializer<ResponseType> newServiceResponseDeserializer(
-      String serviceType) {
-    return (MessageDeserializer<ResponseType>) nodeConfiguration.getMessageSerializationFactory()
+  private <T> MessageDeserializer<T> newServiceResponseDeserializer(String serviceType) {
+    return (MessageDeserializer<T>) nodeConfiguration.getMessageSerializationFactory()
         .newServiceResponseDeserializer(serviceType);
   }
 
   @SuppressWarnings("unchecked")
-  private <RequestType> MessageSerializer<RequestType> newServiceRequestSerializer(
-      String serviceType) {
-    return (MessageSerializer<RequestType>) nodeConfiguration.getMessageSerializationFactory()
+  private <T> MessageSerializer<T> newServiceRequestSerializer(String serviceType) {
+    return (MessageSerializer<T>) nodeConfiguration.getMessageSerializationFactory()
         .newServiceRequestSerializer(serviceType);
   }
 
   @SuppressWarnings("unchecked")
-  private <RequestType> MessageDeserializer<RequestType> newServiceRequestDeserializer(
-      String serviceType) {
-    return (MessageDeserializer<RequestType>) nodeConfiguration.getMessageSerializationFactory()
+  private <T> MessageDeserializer<T> newServiceRequestDeserializer(String serviceType) {
+    return (MessageDeserializer<T>) nodeConfiguration.getMessageSerializationFactory()
         .newServiceRequestDeserializer(serviceType);
   }
 
   @Override
-  public <MessageType> Publisher<MessageType> newPublisher(GraphName topicName, String messageType) {
+  public <T> Publisher<T> newPublisher(GraphName topicName, String messageType) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
         nodeConfiguration.getMessageDefinitionFactory().newFromMessageType(messageType);
     TopicDefinition topicDefinition =
         TopicDefinition.newFromTopicName(resolvedTopicName, messageDefinition);
-    org.ros.message.MessageSerializer<MessageType> serializer = newMessageSerializer(messageType);
+    org.ros.message.MessageSerializer<T> serializer = newMessageSerializer(messageType);
     return publisherFactory.newOrExisting(topicDefinition, serializer);
   }
 
   @Override
-  public <MessageType> Publisher<MessageType> newPublisher(String topicName, String messageType) {
+  public <T> Publisher<T> newPublisher(String topicName, String messageType) {
     return newPublisher(new GraphName(topicName), messageType);
   }
 
   @Override
-  public <MessageType> Subscriber<MessageType>
-      newSubscriber(GraphName topicName, String messageType) {
+  public <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType) {
     GraphName resolvedTopicName = resolveName(topicName);
     MessageDefinition messageDefinition =
         nodeConfiguration.getMessageDefinitionFactory().newFromMessageType(messageType);
     TopicDefinition topicDefinition =
         TopicDefinition.newFromTopicName(resolvedTopicName, messageDefinition);
-    MessageDeserializer<MessageType> deserializer = newMessageDeserializer(messageType);
-    Subscriber<MessageType> subscriber =
-        subscriberFactory.newOrExisting(topicDefinition, deserializer);
+    MessageDeserializer<T> deserializer = newMessageDeserializer(messageType);
+    Subscriber<T> subscriber = subscriberFactory.newOrExisting(topicDefinition, deserializer);
     return subscriber;
   }
 
   @Override
-  public <MessageType> Subscriber<MessageType> newSubscriber(String topicName, String messageType) {
+  public <T> Subscriber<T> newSubscriber(String topicName, String messageType) {
     return newSubscriber(new GraphName(topicName), messageType);
   }
 
@@ -262,8 +255,8 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public <T, S> ServiceClient<T, S> newServiceClient(
-      GraphName serviceName, String serviceType) throws ServiceNotFoundException {
+  public <T, S> ServiceClient<T, S> newServiceClient(GraphName serviceName, String serviceType)
+      throws ServiceNotFoundException {
     GraphName resolvedServiceName = resolveName(serviceName);
     URI uri = lookupService(resolvedServiceName);
     if (uri == null) {
@@ -275,8 +268,7 @@ public class DefaultNode implements Node {
     ServiceIdentifier serviceIdentifier = new ServiceIdentifier(resolvedServiceName, uri);
     ServiceDefinition definition = new ServiceDefinition(serviceIdentifier, messageDefinition);
     MessageSerializer<T> requestSerializer = newServiceRequestSerializer(serviceType);
-    MessageDeserializer<S> responseDeserializer =
-        newServiceResponseDeserializer(serviceType);
+    MessageDeserializer<S> responseDeserializer = newServiceResponseDeserializer(serviceType);
     return serviceFactory.newClient(definition, requestSerializer, responseDeserializer);
   }
 
@@ -463,7 +455,7 @@ public class DefaultNode implements Node {
   InetSocketAddress getAddress() {
     return slaveServer.getAddress();
   }
-  
+
   @Override
   public void execute(Runnable runnable) {
     executorService.execute(runnable);
