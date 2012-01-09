@@ -108,7 +108,7 @@ public class ParameterServerTestNode implements NodeMain {
     param.set(setResolver.resolve("composite"), composite_map);
     param.set(setResolver.resolve("list"), Arrays.asList(list));
 
-    node.execute(new CancellableLoop() {
+    node.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
         pub_tilde.publish(tilde_m);

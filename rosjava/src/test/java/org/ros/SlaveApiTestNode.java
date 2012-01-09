@@ -62,7 +62,7 @@ public class SlaveApiTestNode implements NodeMain {
 
     // Don't do any performance optimizations here. We want to make sure that
     // GC, etc. is working.
-    node.execute(new CancellableLoop() {
+    node.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
         org.ros.message.std_msgs.String chatter = new org.ros.message.std_msgs.String();

@@ -96,22 +96,31 @@ public class TcpRosServer {
     }
   }
 
+  /**
+   * Close all incoming connections and the server socket.
+   * 
+   * <p>
+   * Calling this method more than once has no effect.
+   */
   public void shutdown() {
-    Preconditions.checkNotNull(outgoingChannel);
     if (DEBUG) {
       log.info("Shutting down: " + getAddress());
     }
+    if (outgoingChannel != null) {
+      outgoingChannel.close().awaitUninterruptibly();
+    }
     incomingChannelGroup.close().awaitUninterruptibly();
-    outgoingChannel.close().awaitUninterruptibly();
-    
-    // Not calling channelFactory.releaseExternalResources() or 
-    // bootstrap.releaseExternalResources() since only external resources are the
-    // ExecutorService and control of that must remain with the overall application.
+    // NOTE(damonkohler): We are purposely not calling
+    // channelFactory.releaseExternalResources() or
+    // bootstrap.releaseExternalResources() since only external resources are
+    // the ExecutorService and control of that must remain with the overall
+    // application.
     outgoingChannel = null;
   }
 
   /**
-   * @return the advertise-able address of this {@link TcpRosServer}
+   * @return the advertise-able {@link InetSocketAddress} of this
+   *         {@link TcpRosServer}
    */
   public InetSocketAddress getAddress() {
     return advertiseAddress.toInetSocketAddress();

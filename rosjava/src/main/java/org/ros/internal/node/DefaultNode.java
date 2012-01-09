@@ -463,9 +463,14 @@ public class DefaultNode implements Node {
   InetSocketAddress getAddress() {
     return slaveServer.getAddress();
   }
+  
+  @Override
+  public void execute(Runnable runnable) {
+    executorService.execute(runnable);
+  }
 
   @Override
-  public void execute(final CancellableLoop cancellableLoop) {
+  public void executeCancellableLoop(final CancellableLoop cancellableLoop) {
     executorService.execute(cancellableLoop);
     addListener(new NodeListener() {
       @Override

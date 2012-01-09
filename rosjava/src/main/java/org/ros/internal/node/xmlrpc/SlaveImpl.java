@@ -16,13 +16,8 @@
 
 package org.ros.internal.node.xmlrpc;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,8 +30,13 @@ import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.namespace.GraphName;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -72,8 +72,6 @@ public class SlaveImpl implements Slave {
   @Override
   public List<Object> shutdown(String callerId, String message) {
     log.info("Shutdown requested by " + callerId + " with message \"" + message + "\"");
-    // TODO(damonkohler): It's possible that the callerId and message will be
-    // useful to the slave in the future. For now, we can just ignore it.
     slave.shutdown();
     return Response.newSuccess("Shutdown successful.", null).toList();
   }

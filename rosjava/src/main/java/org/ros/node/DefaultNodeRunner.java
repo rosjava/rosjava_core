@@ -65,7 +65,7 @@ public class DefaultNodeRunner implements NodeRunner {
       unregisterNode(node);
     }
   }
-  
+
   /**
    * 
    * @return an instance of {@link DefaultNodeRunner} that uses a default
@@ -128,6 +128,11 @@ public class DefaultNodeRunner implements NodeRunner {
   }
 
   @Override
+  public void execute(Runnable runnable) {
+    executorService.execute(runnable);
+  }
+
+  @Override
   public void shutdownNodeMain(NodeMain nodeMain) {
     Node node = nodeMains.inverse().get(nodeMain);
     if (node != null) {
@@ -156,8 +161,11 @@ public class DefaultNodeRunner implements NodeRunner {
       node.shutdown();
     } catch (Exception e) {
       // Ignore spurious errors during shutdown.
-      System.err.println("Exception thrown while shutting down NodeMain.");
+      System.err.println("Exception thrown while shutting down node.");
       e.printStackTrace();
+      // We don't expect any more callbacks from a node that throws an exception
+      // while shutting down. So, we unregister it immediately.
+      unregisterNode(node);
       success = false;
     }
     if (success) {
