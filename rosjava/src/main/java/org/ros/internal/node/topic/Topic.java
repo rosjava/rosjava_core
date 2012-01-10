@@ -17,6 +17,7 @@
 package org.ros.internal.node.topic;
 
 import org.ros.namespace.GraphName;
+import org.ros.node.topic.Subscriber;
 
 /**
  * Represents a ROS topic.
@@ -26,6 +27,12 @@ import org.ros.namespace.GraphName;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface Topic {
+
+  /**
+   * The message type given when a {@link Subscriber} chooses not to commit to a
+   * specific message type.
+   */
+  public static final String WILDCARD_MESSAGE_TYPE = "*";
 
   /**
    * @return the name of the subscribed topic

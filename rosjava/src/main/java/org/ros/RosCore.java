@@ -16,32 +16,36 @@
 
 package org.ros;
 
-import java.net.URI;
-import java.util.concurrent.TimeUnit;
-
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.server.MasterServer;
 
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
+
+// TODO(damonkohler): Add /rosout node.
 /**
- * The ROS core is the node which handles the communication between ROS nodes. It provides
- * a service for such tasks as locating all subscribers or publishers for a given topic
- * in the ROS graph.
+ * {@link RosCore} is a collection of nodes and programs that are pre-requisites
+ * of a ROS-based system. You must have a {@link RosCore} (either this
+ * implementation or the default Python implementation distributed with ROS)
+ * running in order for ROS nodes to communicate.
+ * 
+ * @see http://www.ros.org/wiki/roscore
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class RosCore {
 
   private final MasterServer masterServer;
-  
+
   public static RosCore newPublic(String host, int port) {
     return new RosCore(BindAddress.newPublic(port), new AdvertiseAddress(host));
   }
- 
+
   public static RosCore newPublic(int port) {
     return new RosCore(BindAddress.newPublic(port), AdvertiseAddress.newPublic());
   }
-  
+
   public static RosCore newPublic() {
     return new RosCore(BindAddress.newPublic(), AdvertiseAddress.newPublic());
   }
@@ -69,7 +73,7 @@ public class RosCore {
   public void awaitStart() throws InterruptedException {
     masterServer.awaitStart();
   }
-  
+
   public boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
     return masterServer.awaitStart(timeout, unit);
   }
@@ -77,5 +81,4 @@ public class RosCore {
   public void shutdown() {
     masterServer.shutdown();
   }
-
 }

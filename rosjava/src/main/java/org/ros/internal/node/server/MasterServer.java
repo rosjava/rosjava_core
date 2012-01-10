@@ -33,8 +33,13 @@ import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.SubscriberIdentifier;
+import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpointImpl;
 import org.ros.namespace.GraphName;
+import org.ros.node.Node;
+import org.ros.node.service.ServiceServer;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 import java.net.URI;
 import java.util.List;
@@ -43,64 +48,63 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * The master server in the ROS graph.
+ * The {@link MasterServer} provides naming and registration services to the
+ * rest of the {@link Node}s in the ROS system. It tracks {@link Publisher}s and
+ * {@link Subscriber}s to {@link Topic}s as well as {@link ServiceServer}s. The
+ * role of the {@link MasterServer} is to enable individual ROS {@link Node}s to
+ * locate one another. Once these {@link Node}s have located each other they
+ * communicate with each other peer-to-peer.
  * 
- * <p>
- * This server is used, for example,to maintain lists of publishers and
- * subscribers for topics.
+ * @see http://www.ros.org/wiki/Master
  * 
  * @author damonkohler@google.com (Damon Kohler)
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public class MasterServer extends NodeServer {
 
-  /**
-   * The subscriber message type given when the subscriber chooses not to commit
-   * upon registration.
-   */
-  private static final String PUBLISHER_MESSAGE_TYPE_NOT_GIVEN = "*";
-
   private static final boolean DEBUG = false;
-
-  private static final String MASTER_GRAPH_NAME = "/master";
-
   private static final Log log = LogFactory.getLog(MasterServer.class);
 
   /**
-   * A map from a node name to the slave identifier for the node.
+   * The node name (i.e. the callerId XML-RPC field) used when the
+   * {@link MasterServer} contacts a {@link SlaveServer}.
+   */
+  private static final GraphName MASTER_NODE_NAME = new GraphName("/master");
+
+  /**
+   * A {@link Map} from a node name to the {@link SlaveIdentifier} for the
+   * {@link Node}.
    */
   private final Map<GraphName, SlaveIdentifier> slaves;
 
   /**
-   * A map from the name of the service to the service identifier.
+   * A {@link Map} from the name of the {@link ServiceServer} to the
+   * {@link ServiceIdentifier}.
    */
   private final Map<GraphName, ServiceIdentifier> services;
 
   /**
-   * A map from topic name to publisher identifier.
+   * A {@link Map} from {@link Topic} name to {@link PublisherIdentifier}.
    */
   private final Multimap<GraphName, PublisherIdentifier> publishers;
 
   /**
-   * A map from topic name to subscriber identifier.
+   * A {@link Map} from {@link Topic} name to {@link SubscriberIdentifier}.
    */
   private final Multimap<GraphName, SubscriberIdentifier> subscribers;
 
   /**
-   * A map from topic name to its most recently registered message type.
+   * A {@link Map} from {@link Topic} name to its most recently registered
+   * message type.
    */
   private final Map<GraphName, String> topicMessageTypes;
 
   /**
-   * A map from topic name to whether a publisher registered the type. {code
-   * true} if a publisher did it, {@code false} if a subscriber did it,
-   * {@code null} if not registered yet.
+   * A {@link Map} from {@link Topic} name to whether a {@link Publisher}
+   * registered the type. {@code true} if a publisher did it, {@code false} if a
+   * subscriber did it, {@code null} if not registered yet.
    */
   private final Map<GraphName, Boolean> isPublisherTopicMessageTypes;
-
-  /**
-   * Name of the master in the graph.
-   */
-  private final GraphName masterName;
 
   public MasterServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
     super(bindAddress, advertiseAddress);
@@ -110,10 +114,7 @@ public class MasterServer extends NodeServer {
         Multimaps.synchronizedMultimap(HashMultimap.<GraphName, PublisherIdentifier>create());
     subscribers =
         Multimaps.synchronizedMultimap(HashMultimap.<GraphName, SubscriberIdentifier>create());
-    masterName = new GraphName(MASTER_GRAPH_NAME);
-
     topicMessageTypes = Maps.newConcurrentMap();
-
     // This map will always be protected by a lock on topicMessageTypes.
     isPublisherTopicMessageTypes = Maps.newHashMap();
   }
@@ -123,7 +124,7 @@ public class MasterServer extends NodeServer {
    */
   public void start() {
     if (DEBUG) {
-      log.info("Starting master server");
+      log.info("Starting master server.");
     }
     super.start(MasterXmlRpcEndpointImpl.class, new MasterXmlRpcEndpointImpl(this));
   }
@@ -160,7 +161,6 @@ public class MasterServer extends NodeServer {
    */
   private void addSlave(SlaveIdentifier slaveIdentifier) {
     Preconditions.checkNotNull(slaveIdentifier);
-
     GraphName slaveName = slaveIdentifier.getNodeName();
     Preconditions.checkState(
         slaves.get(slaveName) == null || slaves.get(slaveName).equals(slaveIdentifier),
@@ -186,7 +186,7 @@ public class MasterServer extends NodeServer {
       }
     }
     for (SlaveIdentifier slaveIdentifier : slaves.values()) {
-      SlaveClient client = new SlaveClient(masterName, slaveIdentifier.getUri());
+      SlaveClient client = new SlaveClient(MASTER_NODE_NAME, slaveIdentifier.getUri());
       client.publisherUpdate(topicName, publisherUris);
     }
   }
@@ -208,7 +208,6 @@ public class MasterServer extends NodeServer {
     if (DEBUG) {
       log.info("Registering subscriber: " + subscriberIdentifier);
     }
-
     registerTopicMessageType(subscriberIdentifier.getTopicName(), topicMessageType, false);
     subscribers.put(subscriberIdentifier.getTopicName(), subscriberIdentifier);
     addSlave(subscriberIdentifier.getSlaveIdentifier());
@@ -218,12 +217,13 @@ public class MasterServer extends NodeServer {
   }
 
   /**
-   * Unregister a subscriber from the master.
+   * Unregister a {@link Subscriber}.
    * 
    * @param subscriberIdentifier
-   *          the identifier for the subscriber to be unregistered
+   *          the identifier for the {@link Subscriber} to be unregistered
    * 
-   * @return {@code true} if the subscriber had been registered.
+   * @return {@code true} if the {@link Subscriber} had been registered,
+   *         {@code false} otherwise
    */
   public boolean unregisterSubscriber(SubscriberIdentifier subscriberIdentifier) {
     if (DEBUG) {
@@ -233,21 +233,22 @@ public class MasterServer extends NodeServer {
   }
 
   /**
-   * Register the caller as a publisher the topic.
+   * Register the caller as a {@link Publisher} the {@link Topic}.
    * 
    * @param publisherIdentifier
-   *          identifier for the publisher
+   *          identifier for the {@link Publisher}
    * @param topicMessageType
-   *          the message type of the topic
+   *          the message type of the {@link Topic}
    * 
-   * @return List of current subscribers of topic in the form of XML-RPC URIs.
+   * @return a {@link List} of the current {@link Subscriber}s to the
+   *         {@link Publisher}'s {@link Topic} in the form of XML-RPC
+   *         {@link URI}s for each {@link Subscriber}'s {@link SlaveServer}
    */
   public List<SubscriberIdentifier> registerPublisher(PublisherIdentifier publisherIdentifier,
       String topicMessageType) {
     if (DEBUG) {
       log.info("Registering publisher: " + publisherIdentifier);
     }
-
     registerTopicMessageType(publisherIdentifier.getTopicName(), topicMessageType, false);
     publishers.put(publisherIdentifier.getTopicName(), publisherIdentifier);
     addSlave(publisherIdentifier.getSlaveIdentifier());
@@ -258,12 +259,12 @@ public class MasterServer extends NodeServer {
   }
 
   /**
-   * Unregister a publisher from the master.
+   * Unregister a {@link Publisher}.
    * 
    * @param publisherIdentifier
-   *          the identifier for the publisher to be unregistered
-   * 
-   * @return {@code true} if the publisher had been registered.
+   *          the identifier for the {@link Publisher} to be unregistered
+   * @return {@code true} if the {@link Publisher} had been registered,
+   *         {@code false} otherwise
    */
   public boolean unregisterPublisher(PublisherIdentifier publisherIdentifier) {
     if (DEBUG) {
@@ -273,24 +274,25 @@ public class MasterServer extends NodeServer {
   }
 
   /**
-   * Returns a {@link SlaveIdentifier} for the node with the given name. This
-   * API is for looking information about publishers and subscribers. Use
-   * lookupService instead to lookup ROS-RPC URIs.
+   * Returns a {@link SlaveIdentifier} for the {@link Node} with the given name.
+   * This API is for looking information about {@link Publisher}s and
+   * {@link Subscriber}s. Use {@link #lookupService(GraphName)} instead to
+   * lookup ROS-RPC {@link URI}s for {@link ServiceServer}s.
    * 
-   * @param slaveName
-   *          name of node to lookup
-   * @return a {@link SlaveIdentifier} for the node with the given name, or
-   *         {@code null} if there is nn nameo slave with the give
+   * @param nodeName
+   *          name of {@link Node} to lookup
+   * @return a {@link SlaveIdentifier} for the {@link Node} with the given name,
+   *         or {@code null} if there is no {@link Node} with the given name
    */
-  public SlaveIdentifier lookupNode(GraphName slaveName) {
-    return slaves.get(slaveName);
+  public SlaveIdentifier lookupNode(GraphName nodeName) {
+    return slaves.get(nodeName);
   }
 
   /**
-   * Get all publishers which are currently registered with the master.
+   * Get all {@link Publisher}s which are currently registered.
    * 
-   * @return a list of {@link PublisherIdentifier} instances for each registered
-   *         publisher
+   * @return a {@link List} of {@link PublisherIdentifier} instances for each
+   *         registered {@link Publisher}
    */
   public List<PublisherIdentifier> getRegisteredPublishers() {
     synchronized (publishers) {
@@ -299,10 +301,10 @@ public class MasterServer extends NodeServer {
   }
 
   /**
-   * Get all subscribers which are currently registered with the master.
+   * Get all {@link Subscriber}s which are currently registered.
    * 
    * @return a list of {@link SubscriberIdentifier} instances for each
-   *         registered subscriber
+   *         registered {@link Subscriber}
    */
   public List<SubscriberIdentifier> getRegisteredSubscribers() {
     synchronized (subscribers) {
@@ -311,24 +313,21 @@ public class MasterServer extends NodeServer {
   }
 
   /**
-   * Get a list of all topic types.
+   * Get a {@link List} of all {@link Topic} message types.
    * 
    * @param calledId
-   *          ID of the caller
-   * 
-   * @return A list of the form [[topic 1 name, topic 1 message type], [topic 2
+   *          the {@link Node} name of the caller
+   * @return a list of the form [[topic 1 name, topic 1 message type], [topic 2
    *         name, topic 2 message type], ...]
    */
   public List<List<String>> getTopicTypes(GraphName calledId) {
-    List<List<String>> retval = Lists.newArrayList();
-
+    List<List<String>> result = Lists.newArrayList();
     synchronized (topicMessageTypes) {
       for (Entry<GraphName, String> entry : topicMessageTypes.entrySet()) {
-        retval.add(Lists.newArrayList(entry.getKey().toString(), entry.getValue()));
+        result.add(Lists.newArrayList(entry.getKey().toString(), entry.getValue()));
       }
     }
-
-    return retval;
+    return result;
   }
 
   /**
@@ -340,57 +339,50 @@ public class MasterServer extends NodeServer {
    * @return TODO(keith): Fill in.
    */
   public List<Object> getSystemState() {
-    List<Object> retval = Lists.newArrayList();
-
-    retval.add(getSystemStatePublishers());
-    retval.add(getSystemStateSubscribers());
-    retval.add(getSystemStateServices());
-
-    return retval;
+    List<Object> result = Lists.newArrayList();
+    result.add(getSystemStatePublishers());
+    result.add(getSystemStateSubscribers());
+    result.add(getSystemStateServices());
+    return result;
   }
 
   /**
-   * Get the system state for publishers.
+   * Get the system state for {@link Publisher}s.
    * 
-   * @return a list of the form [ [topic1,
+   * @return a {@link List} of the form [ [topic1,
    *         [topic1Publisher1...topic1PublisherN]] ... ] where the
-   *         topicPublisherI instances are node names
+   *         topicPublisherI instances are {@link Node} names
    */
   private List<Object> getSystemStatePublishers() {
-    List<Object> retval = Lists.newArrayList();
-
+    List<Object> result = Lists.newArrayList();
     synchronized (publishers) {
       for (GraphName name : publishers.keySet()) {
         List<Object> topicInfo = Lists.newArrayList();
-        retval.add(topicInfo);
-
+        result.add(topicInfo);
         topicInfo.add(name.toString());
         List<String> publist = Lists.newArrayList();
         topicInfo.add(publist);
-
         for (PublisherIdentifier identifier : publishers.get(name)) {
           publist.add(identifier.getSlaveIdentifier().getNodeName().toString());
         }
       }
     }
-
-    return retval;
+    return result;
   }
 
   /**
-   * Get the system state for subscribers.
+   * Get the system state for {@link Subscriber}s.
    * 
-   * @return a list of the form [ [topic1,
+   * @return a {@link List} of the form [ [topic1,
    *         [topic1Subscriber1...topic1SubscriberN]] ... ] where the
-   *         topicSubscriberI instances are node names
+   *         topicSubscriberI instances are {@link Node} names
    */
   private List<Object> getSystemStateSubscribers() {
-    List<Object> retval = Lists.newArrayList();
-
+    List<Object> result = Lists.newArrayList();
     synchronized (subscribers) {
       for (GraphName name : subscribers.keySet()) {
         List<Object> topicInfo = Lists.newArrayList();
-        retval.add(topicInfo);
+        result.add(topicInfo);
 
         topicInfo.add(name.toString());
         List<Object> sublist = Lists.newArrayList();
@@ -401,27 +393,24 @@ public class MasterServer extends NodeServer {
         }
       }
     }
-
-    return retval;
+    return result;
   }
 
   /**
-   * Get the system state for services.
+   * Get the system state for {@link Service}s.
    * 
-   * @return
+   * @return a {@link List} of the form [ [service1,
+   *         [serviceProvider1...serviceProviderN]] ... ] where the
+   *         serviceProviderI instances are {@link Node} names
    */
   private List<Object> getSystemStateServices() {
-    // services is of the form
-    // [ [service1, [serviceProvider1...serviceProviderN]] ... ]
-    // where the serviceProviderI instances are node names
-    List<Object> retval = Lists.newArrayList();
-
+    List<Object> result = Lists.newArrayList();
     synchronized (services) {
       // TODO(keith): Could just iterate over .entries(). Why isn't this a
       // Multimap?
       for (GraphName serviceName : services.keySet()) {
         List<Object> topicInfo = Lists.newArrayList();
-        retval.add(topicInfo);
+        result.add(topicInfo);
 
         topicInfo.add(serviceName.toString());
         List<Object> providerList = Lists.newArrayList();
@@ -431,20 +420,19 @@ public class MasterServer extends NodeServer {
         providerList.add(identifier.getName().toString());
       }
     }
-
-    return retval;
+    return result;
   }
 
   /**
    * Lookup the provider of a particular service.
    * 
-   * @param service
-   *          Fully-qualified name of service
-   * @return service URI that provides address and port of the service. Fails if
-   *         there is no provider.
+   * @param serviceName
+   *          fully-qualified name of service
+   * @return {@link ServiceIdentifier} of the {@link SlaveServer} with the
+   *         provided name
    */
-  public ServiceIdentifier lookupService(GraphName service) {
-    return services.get(service);
+  public ServiceIdentifier lookupService(GraphName serviceName) {
+    return services.get(serviceName);
   }
 
   /**
@@ -452,40 +440,34 @@ public class MasterServer extends NodeServer {
    * 
    * @param caller
    *          name of the caller
-   * 
    * @param subgraph
-   *          subgraph containing the requested topics, relative to caller
-   * 
-   * @return A list of lists, where the contained lists contain, in order, topic
-   *         name and topic type.
+   *          subgraph containing the requested {@link Topic}s, relative to
+   *          caller
+   * @return a {@link List} of {@link List}s where the nested {@link List}s
+   *         contain, in order, the {@link Topic} name and {@link Topic} message
+   *         type
    */
   public List<Object> getPublishedTopics(GraphName caller, GraphName subgraph) {
-
-    // TODO(keith): Use to filter topics.
-    GraphName resolvedSubgraph = caller.join(subgraph);
-
+    // TODO(keith): Filter topics according to subgraph.
     Set<GraphName> topicNames = Sets.newHashSet();
     for (PublisherIdentifier publisher : publishers.values()) {
       topicNames.add(publisher.getTopicName());
     }
-
-    List<Object> retval = Lists.newArrayList();
-
+    List<Object> result = Lists.newArrayList();
     for (GraphName topicName : topicNames) {
-      retval.add(Lists.newArrayList(topicName.toString(), topicMessageTypes.get(topicName)));
+      result.add(Lists.newArrayList(topicName.toString(), topicMessageTypes.get(topicName)));
     }
-
-    return retval;
+    return result;
   }
 
   /**
-   * Register the type of a topic.
+   * Register the message type of a {@link Topic}.
    * 
    * @param topicName
-   *          name of the topic
+   *          name of the {@link Topic}
    * @param topicMessageType
-   *          the message type of the topic, subscribers can give a message type
-   *          of {code *}.
+   *          the message type of the {@link Topic}, {@link Subscriber}s can
+   *          give a message type of {@value Topic#WILDCARD_MESSAGE_TYPE}
    * @param isPublisher
    *          {code true} is a publisher is doing the registration,
    *          {@code false} if a subscriber is doing the registration
@@ -497,21 +479,19 @@ public class MasterServer extends NodeServer {
     // associations.
     synchronized (topicMessageTypes) {
       if (isPublisher) {
-        // Publishers always trump
+        // Publishers always trump.
         topicMessageTypes.put(topicName, topicMessageType);
         isPublisherTopicMessageTypes.put(topicName, Boolean.TRUE);
       } else {
         // Is a subscriber.
-
-        if (!PUBLISHER_MESSAGE_TYPE_NOT_GIVEN.equals(topicMessageType)) {
+        if (!Topic.WILDCARD_MESSAGE_TYPE.equals(topicMessageType)) {
           if (topicMessageTypes.containsKey(topicName)) {
             // if has only been subscribers giving the type, register it.
             if (!isPublisherTopicMessageTypes.get(topicName)) {
               topicMessageTypes.put(topicName, topicMessageType);
             }
-
           } else {
-            // Not registered yet, so no worry about trumping
+            // Not registered yet, so no worry about trumping.
             topicMessageTypes.put(topicName, topicMessageType);
             isPublisherTopicMessageTypes.put(topicName, Boolean.FALSE);
           }
@@ -519,5 +499,4 @@ public class MasterServer extends NodeServer {
       }
     }
   }
-  
 }

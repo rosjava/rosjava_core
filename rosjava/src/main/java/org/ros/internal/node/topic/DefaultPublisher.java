@@ -156,16 +156,19 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
       log.info("Subscriber handshake header: " + incomingHeader);
       log.info("Publisher handshake header: " + topicDefinitionHeader);
     }
-    // TODO(damonkohler): Return error to the subscriber over the wire?
+    // TODO(damonkohler): Return errors to the subscriber over the wire.
     String incomingType = incomingHeader.get(ConnectionHeaderFields.TYPE);
     String expectedType = topicDefinitionHeader.get(ConnectionHeaderFields.TYPE);
-    Preconditions.checkState(incomingType.equals(expectedType) || incomingType.equals("*"),
-        "Unexpected message type " + incomingType + " != " + expectedType);
+    boolean messageTypeMatches =
+        incomingType.equals(expectedType) || incomingType.equals(WILDCARD_MESSAGE_TYPE);
+    Preconditions.checkState(messageTypeMatches, "Unexpected message type " + incomingType + " != "
+        + expectedType);
     String incomingChecksum = incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
     String expectedChecksum = topicDefinitionHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
-    Preconditions.checkState(
-        incomingChecksum.equals(expectedChecksum) || incomingChecksum.equals("*"),
-        "Unexpected message MD5 " + incomingChecksum + " != " + expectedChecksum);
+    boolean checksumMatches =
+        incomingChecksum.equals(expectedChecksum) || incomingChecksum.equals(WILDCARD_MESSAGE_TYPE);
+    Preconditions.checkState(checksumMatches, "Unexpected message MD5 " + incomingChecksum + " != "
+        + expectedChecksum);
     Map<String, String> header = Maps.newHashMap();
     header.putAll(toDefinition().toHeader());
     // TODO(damonkohler): Force latch mode to be consistent throughout the life
@@ -235,7 +238,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   }
 
   /**
-   * Signal all {@link PublisherListener}s that the {@link Publisher} has 
+   * Signal all {@link PublisherListener}s that the {@link Publisher} has
    * successfully unregistered with the master.
    * 
    * <p>

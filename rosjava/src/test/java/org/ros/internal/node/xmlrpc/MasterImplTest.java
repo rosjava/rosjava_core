@@ -72,7 +72,6 @@ public class MasterImplTest {
   @Test
   public void testLookupNodeNotExisting() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
-
     when(mockMaster.lookupNode(Matchers.<GraphName>any())).thenReturn(null);
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
     List<Object> response = master.lookupNode("/caller", "/foo");

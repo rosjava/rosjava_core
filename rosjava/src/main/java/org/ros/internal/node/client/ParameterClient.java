@@ -133,5 +133,4 @@ public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
     return new Response<List<GraphName>>(response.getStatusCode(), response.getStatusMessage(),
         graphNames);
   }
-
 }
