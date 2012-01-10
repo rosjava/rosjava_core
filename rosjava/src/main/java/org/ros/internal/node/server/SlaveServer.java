@@ -29,7 +29,7 @@ import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
-import org.ros.internal.node.xmlrpc.SlaveImpl;
+import org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
@@ -80,7 +80,7 @@ public class SlaveServer extends NodeServer {
    * correct information when topics are requested.
    */
   public void start() {
-    super.start(org.ros.internal.node.xmlrpc.SlaveImpl.class, new SlaveImpl(this));
+    super.start(org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl.class, new SlaveXmlRpcEndpointImpl(this));
     tcpRosServer.start();
   }
 

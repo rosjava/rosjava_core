@@ -28,7 +28,7 @@ import org.ros.internal.node.response.TopicDefinitionListResultFactory;
 import org.ros.internal.node.response.UriResultFactory;
 import org.ros.internal.node.response.VoidResultFactory;
 import org.ros.internal.node.topic.TopicDefinition;
-import org.ros.internal.node.xmlrpc.Slave;
+import org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpoint;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.namespace.GraphName;
 
@@ -37,12 +37,12 @@ import com.google.common.collect.Lists;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveClient extends Client<Slave> {
+public class SlaveClient extends Client<SlaveXmlRpcEndpoint> {
 
   private final GraphName nodeName;
 
   public SlaveClient(GraphName nodeName, URI uri) {
-    super(uri, Slave.class);
+    super(uri, SlaveXmlRpcEndpoint.class);
     this.nodeName = nodeName;
   }
 

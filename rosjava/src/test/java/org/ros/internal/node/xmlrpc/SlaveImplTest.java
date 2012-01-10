@@ -45,7 +45,7 @@ public class SlaveImplTest {
   public void testGetPublicationsEmptyList() {
     SlaveServer mockSlave = mock(SlaveServer.class);
     when(mockSlave.getPublications()).thenReturn(Lists.<DefaultPublisher<?>>newArrayList());
-    SlaveImpl slave = new SlaveImpl(mockSlave);
+    SlaveXmlRpcEndpointImpl slave = new SlaveXmlRpcEndpointImpl(mockSlave);
     List<Object> response = slave.getPublications("/foo");
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
     assertEquals(response.get(2), Lists.newArrayList());
@@ -59,7 +59,7 @@ public class SlaveImplTest {
     when(mockPublisher.getTopicName()).thenReturn(new GraphName("/bar"));
     when(mockPublisher.getTopicMessageType()).thenReturn("/baz");
     when(mockPublisher.getTopicDefinitionAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));
-    SlaveImpl slave = new SlaveImpl(mockSlave);
+    SlaveXmlRpcEndpointImpl slave = new SlaveXmlRpcEndpointImpl(mockSlave);
     List<Object> response = slave.getPublications("/foo");
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
     List<List<String>> protocols = Lists.newArrayList();
@@ -77,7 +77,7 @@ public class SlaveImplTest {
         mockSlave.requestTopic(Matchers.<String>any(),
             Matchers.eq(Sets.newHashSet(ProtocolNames.TCPROS, ProtocolNames.UDPROS)))).thenReturn(
         protocol);
-    SlaveImpl slave = new SlaveImpl(mockSlave);
+    SlaveXmlRpcEndpointImpl slave = new SlaveXmlRpcEndpointImpl(mockSlave);
     Object[][] protocols = new Object[][] { {ProtocolNames.TCPROS}, {ProtocolNames.UDPROS}};
     List<Object> response = slave.requestTopic("/foo", "/bar", protocols);
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
@@ -90,7 +90,7 @@ public class SlaveImplTest {
     AdvertiseAddress address = AdvertiseAddress.newPrivate();
     address.setStaticPort(1234);
     when(mockSlave.getPid()).thenReturn(1234);
-    SlaveImpl slave = new SlaveImpl(mockSlave);
+    SlaveXmlRpcEndpointImpl slave = new SlaveXmlRpcEndpointImpl(mockSlave);
     List<Object> response = slave.getPid("/foo");
     assertEquals(response.get(0), StatusCode.SUCCESS.toInt());
     assertEquals(response.get(2), 1234);
@@ -102,7 +102,7 @@ public class SlaveImplTest {
     AdvertiseAddress address = AdvertiseAddress.newPrivate();
     address.setStaticPort(1234);
     when(mockSlave.getPid()).thenThrow(new UnsupportedOperationException());
-    SlaveImpl slave = new SlaveImpl(mockSlave);
+    SlaveXmlRpcEndpointImpl slave = new SlaveXmlRpcEndpointImpl(mockSlave);
     List<Object> response = slave.getPid("/foo");
     assertEquals(response.get(0), StatusCode.FAILURE.toInt());
   }

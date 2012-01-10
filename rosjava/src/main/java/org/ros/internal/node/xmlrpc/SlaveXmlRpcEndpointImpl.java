@@ -41,14 +41,14 @@ import java.util.Vector;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveImpl implements Slave {
+public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(SlaveImpl.class);
+  private static final Log log = LogFactory.getLog(SlaveXmlRpcEndpointImpl.class);
 
   private final SlaveServer slave;
 
-  public SlaveImpl(SlaveServer slave) {
+  public SlaveXmlRpcEndpointImpl(SlaveServer slave) {
     this.slave = slave;
   }
 

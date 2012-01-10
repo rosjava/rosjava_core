@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface Slave extends XmlRpcEndpoint {
+public interface SlaveXmlRpcEndpoint extends XmlRpcEndpoint {
 
   /**
    * Retrieve transport/topic statistics.

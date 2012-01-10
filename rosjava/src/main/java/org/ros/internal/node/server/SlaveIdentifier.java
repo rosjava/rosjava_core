@@ -28,7 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * Slave identifiers combine the node name of a node with the URI for contacting the
+ * SlaveXmlRpcEndpoint identifiers combine the node name of a node with the URI for contacting the
  * node's XMLRPC server.
  * 
  * @author damonkohler@google.com (Damon Kohler)

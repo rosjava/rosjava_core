@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A combined XML RPC endpoint for the master and parameter servers.
+ * A combined XML-RPC endpoint for the master and parameter servers.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
