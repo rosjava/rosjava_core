@@ -22,5 +22,4 @@ package org.ros.internal.node.xmlrpc;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface XmlRpcEndpoint {
-
 }

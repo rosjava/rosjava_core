@@ -221,15 +221,14 @@ public class MasterServer extends NodeServer {
    * 
    * @param subscriberIdentifier
    *          the identifier for the {@link Subscriber} to be unregistered
-   * 
-   * @return {@code true} if the {@link Subscriber} had been registered,
-   *         {@code false} otherwise
+   * @return the number of {@link Subscriber}s that were successfully
+   *         unregistered
    */
-  public boolean unregisterSubscriber(SubscriberIdentifier subscriberIdentifier) {
+  public int unregisterSubscriber(SubscriberIdentifier subscriberIdentifier) {
     if (DEBUG) {
       log.info("Unregistering subscriber: " + subscriberIdentifier);
     }
-    return subscribers.remove(subscriberIdentifier.getTopicName(), subscriberIdentifier);
+    return subscribers.remove(subscriberIdentifier.getTopicName(), subscriberIdentifier) ? 1 : 0;
   }
 
   /**
@@ -263,14 +262,14 @@ public class MasterServer extends NodeServer {
    * 
    * @param publisherIdentifier
    *          the identifier for the {@link Publisher} to be unregistered
-   * @return {@code true} if the {@link Publisher} had been registered,
-   *         {@code false} otherwise
+   * @return the number of {@link Publisher}s that were successfully
+   *         unregistered
    */
-  public boolean unregisterPublisher(PublisherIdentifier publisherIdentifier) {
+  public int unregisterPublisher(PublisherIdentifier publisherIdentifier) {
     if (DEBUG) {
       log.info("Unregistering publisher: " + publisherIdentifier);
     }
-    return publishers.remove(publisherIdentifier.getTopicName(), publisherIdentifier);
+    return publishers.remove(publisherIdentifier.getTopicName(), publisherIdentifier) ? 1 : 0;
   }
 
   /**
