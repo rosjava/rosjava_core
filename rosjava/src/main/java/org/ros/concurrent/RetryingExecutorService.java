@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class RetryingExecutorService {
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(RetryingExecutorService.class);
 
   private static final long DEFAULT_RETRY_DELAY = 5;
