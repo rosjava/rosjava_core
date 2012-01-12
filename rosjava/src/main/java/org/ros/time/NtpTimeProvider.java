@@ -120,7 +120,12 @@ public class NtpTimeProvider implements TimeProvider {
   @Override
   public Time getCurrentTime() {
     Time currentTime = wallTimeProvider.getCurrentTime();
-    long offset = time.getOffset();
+    long offset = 0;
+    if (time == null) {
+      log.warn("NTP time not yet initialized.");
+    } else {
+      offset = time.getOffset();
+    }
     return currentTime.add(Duration.fromMillis(offset));
   }
 }
