@@ -216,6 +216,9 @@ def generate_msg_depends(package):
 def get_all_msg_dependencies(rospack, package):
     """gets all msg package dependencies"""
     depends = rospack.depends([package])[package]
+    # have to include std_msgs because of Header
+    if 'std_msgs' not in depends:
+        depends.append('std_msgs')
     return [pkg for pkg in depends if is_msg_pkg(pkg) or is_srv_pkg(pkg)]
         
 def get_msg_classpath(rospack, package):
