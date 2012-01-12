@@ -222,11 +222,10 @@ def get_all_msg_dependencies(rospack, package):
     return [pkg for pkg in depends if is_msg_pkg(pkg) or is_srv_pkg(pkg)]
         
 def get_msg_classpath(rospack, package):
-    depends = rospack.depends([package])[package]
+    depends = get_all_msg_dependencies(rospack, package)
     pathelements = [_bootstrap_jar]
     for pkg in depends:
-        if is_msg_pkg(pkg) or is_srv_pkg(pkg):
-            pathelements.append(msg_jar_file_path(pkg))
+        pathelements.append(msg_jar_file_path(pkg))
     return os.pathsep.join([os.path.abspath(p) for p in pathelements])
 
 
