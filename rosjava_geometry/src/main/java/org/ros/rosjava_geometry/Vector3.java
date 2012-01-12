@@ -17,12 +17,13 @@
 package org.ros.rosjava_geometry;
 
 /**
- * A simple 3 dimensional vector class.
+ * A three dimensional vector.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
  * 
  */
 public class Vector3 {
+
   private double x;
   private double y;
   private double z;
@@ -93,16 +94,20 @@ public class Vector3 {
     this.z = z;
   }
 
-  public static Vector3 makeFromVector3Message(org.ros.message.geometry_msgs.Vector3 message) {
+  public static Vector3 newFromVector3Message(org.ros.message.geometry_msgs.Vector3 message) {
     return new Vector3(message.x, message.y, message.z);
   }
 
-  public static Vector3 makeFromPointMessage(org.ros.message.geometry_msgs.Point message) {
+  public static Vector3 newFromPointMessage(org.ros.message.geometry_msgs.Point message) {
     return new Vector3(message.x, message.y, message.z);
   }
 
-  public static Vector3 makeIdentityVector3() {
+  public static Vector3 newIdentityVector3() {
     return new Vector3(0, 0, 0);
   }
 
+  @Override
+  public String toString() {
+    return String.format("Vector3<x: %.4f, y: %.4f, z: %.4f>", x, y, z);
+  }
 }

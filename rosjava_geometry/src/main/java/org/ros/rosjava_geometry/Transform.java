@@ -17,14 +17,15 @@
 package org.ros.rosjava_geometry;
 
 import org.ros.message.Time;
+import org.ros.namespace.GraphName;
 
 /**
- * Representation of a transform.
+ * A transformation in terms of translation and rotation.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
 public class Transform {
+
   private Vector3 translation;
   private Quaternion rotation;
 
@@ -58,13 +59,13 @@ public class Transform {
     return result;
   }
 
-  public org.ros.message.geometry_msgs.TransformStamped toTransformStampedMessage(String frameId,
-      String childFrameId, Time stamp) {
+  public org.ros.message.geometry_msgs.TransformStamped toTransformStampedMessage(GraphName frame,
+      GraphName childFrame, Time stamp) {
     org.ros.message.geometry_msgs.TransformStamped result =
         new org.ros.message.geometry_msgs.TransformStamped();
-    result.header.frame_id = frameId;
+    result.header.frame_id = frame.toString();
     result.header.stamp = stamp;
-    result.child_frame_id = childFrameId;
+    result.child_frame_id = childFrame.toString();
     result.transform.translation = translation.toVector3Message();
     result.transform.rotation = rotation.toQuaternionMessage();
     return result;
@@ -77,10 +78,11 @@ public class Transform {
     return result;
   }
 
-  public org.ros.message.geometry_msgs.PoseStamped toPoseStampedMessage(String frameId, Time stamp) {
+  public org.ros.message.geometry_msgs.PoseStamped
+      toPoseStampedMessage(GraphName frame, Time stamp) {
     org.ros.message.geometry_msgs.PoseStamped result =
         new org.ros.message.geometry_msgs.PoseStamped();
-    result.header.frame_id = frameId;
+    result.header.frame_id = frame.toString();
     result.header.stamp = stamp;
     result.pose.position = translation.toPointMessage();
     result.pose.orientation = rotation.toQuaternionMessage();
@@ -102,19 +104,23 @@ public class Transform {
   public void setRotation(Quaternion rotation) {
     this.rotation = rotation;
   }
-  
-  public static Transform makeFromTransformMessage(org.ros.message.geometry_msgs.Transform message) {
-    return new Transform(Vector3.makeFromVector3Message(message.translation),
-        Quaternion.makeFromQuaternionMessage(message.rotation));
+
+  public static Transform newFromTransformMessage(org.ros.message.geometry_msgs.Transform message) {
+    return new Transform(Vector3.newFromVector3Message(message.translation),
+        Quaternion.newFromQuaternionMessage(message.rotation));
   }
 
-  public static Transform makeFromPoseMessage(org.ros.message.geometry_msgs.Pose message) {
-    return new Transform(Vector3.makeFromPointMessage(message.position),
-        Quaternion.makeFromQuaternionMessage(message.orientation));
+  public static Transform newFromPoseMessage(org.ros.message.geometry_msgs.Pose message) {
+    return new Transform(Vector3.newFromPointMessage(message.position),
+        Quaternion.newFromQuaternionMessage(message.orientation));
   }
 
-  public static Transform makeIdentityTransform() {
-    return new Transform(Vector3.makeIdentityVector3(), Quaternion.makeIdentityQuaternion());
+  public static Transform newIdentityTransform() {
+    return new Transform(Vector3.newIdentityVector3(), Quaternion.newIdentityQuaternion());
   }
 
+  @Override
+  public String toString() {
+    return String.format("Transform<%s, %s>", translation, rotation);
+  }
 }

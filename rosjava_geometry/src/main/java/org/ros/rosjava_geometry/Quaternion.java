@@ -17,12 +17,12 @@
 package org.ros.rosjava_geometry;
 
 /**
- * Representation of a Quaternion.
+ * A quaternion.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
 public class Quaternion {
+
   private double x;
   private double y;
   private double z;
@@ -41,7 +41,6 @@ public class Quaternion {
 
   public Vector3 getAxis() {
     double length = Math.sqrt(1 - w * w);
-    
     if (length > 1e-9) {
       return new Vector3(x / length, y / length, z / length);
     }
@@ -59,13 +58,9 @@ public class Quaternion {
   }
 
   public Vector3 rotateVector(Vector3 vector) {
-    double vectorLength = vector.length();
-    Quaternion vectorQuaternion =
-        new Quaternion(vector.getX() / vectorLength, vector.getY() / vectorLength, vector.getZ()
-            / vectorLength, 0);
+    Quaternion vectorQuaternion = new Quaternion(vector.getX(), vector.getY(), vector.getZ(), 0);
     Quaternion rotatedQuaternion = multiply(vectorQuaternion.multiply(invert()));
-    return new Vector3(rotatedQuaternion.getX() * vectorLength, rotatedQuaternion.getY()
-        * vectorLength, rotatedQuaternion.getZ() * vectorLength);
+    return new Vector3(rotatedQuaternion.getX(), rotatedQuaternion.getY(), rotatedQuaternion.getZ());
   }
 
   public org.ros.message.geometry_msgs.Quaternion toQuaternionMessage() {
@@ -110,15 +105,15 @@ public class Quaternion {
     this.w = w;
   }
 
-  public static Quaternion makeFromAxisAngle(Vector3 axis, double angle) {
+  public static Quaternion newFromAxisAngle(Vector3 axis, double angle) {
     double sinFactor = Math.sin(angle / 2);
     double axisLength = axis.length();
     return new Quaternion(axis.getX() / axisLength * sinFactor, axis.getY() / axisLength
         * sinFactor, axis.getZ() / axisLength * sinFactor, Math.cos(angle / 2));
   }
 
-  public static Quaternion makeFromQuaternionMessage(
-      org.ros.message.geometry_msgs.Quaternion message) {
+  public static Quaternion
+      newFromQuaternionMessage(org.ros.message.geometry_msgs.Quaternion message) {
     return new Quaternion(message.x, message.y, message.z, message.w);
   }
 
@@ -129,14 +124,18 @@ public class Quaternion {
     double length1 = vector1.length();
     double length2 = vector2.length();
     if (length1 == 0.0 || length2 == 0.0) {
-      return makeFromAxisAngle(new Vector3(0, 0, 0), 0);
+      return newFromAxisAngle(new Vector3(0, 0, 0), 0);
     }
     double angle = Math.acos(vector1.dotProduct(vector2) / (length1 * length2));
-    return makeFromAxisAngle(new Vector3(axisX, axisY, axisZ), angle);
+    return newFromAxisAngle(new Vector3(axisX, axisY, axisZ), angle);
   }
 
-  public static Quaternion makeIdentityQuaternion() {
+  public static Quaternion newIdentityQuaternion() {
     return new Quaternion(0, 0, 0, 1);
   }
 
+  @Override
+  public String toString() {
+    return String.format("Quaternion<x: %.4f, y: %.4f, z: %.4f, w: %.4f>", x, y, z, w);
+  }
 }
