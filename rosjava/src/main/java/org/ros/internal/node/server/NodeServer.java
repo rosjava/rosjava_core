@@ -16,13 +16,6 @@
 
 package org.ros.internal.node.server;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.XmlRpcException;
@@ -33,6 +26,13 @@ import org.apache.xmlrpc.webserver.WebServer;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.exception.RosRuntimeException;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base class for an XML-RPC server.
@@ -126,5 +126,4 @@ public class NodeServer {
   public boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
     return startLatch.await(timeout, unit);
   }
-
 }

@@ -167,6 +167,8 @@ public class MasterServer extends NodeServer {
       log.warn(String.format("Existing slave %s will be shutdown.", existingSlaveIdentifier));
       SlaveClient client = new SlaveClient(MASTER_NODE_NAME, existingSlaveIdentifier.getUri());
       client.shutdown(String.format("Replaced by slave %s.", slaveIdentifier));
+      // TODO(damonkohler): Unregister everything that was associated with the
+      // shutdown slave.
     }
     slaves.put(slaveName, slaveIdentifier);
   }
