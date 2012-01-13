@@ -19,6 +19,7 @@ package org.ros.concurrent;
 import java.util.Timer;
 import java.util.TimerTask;
 
+// TODO(damonkohler): Change this to use a ScheduledExecutorService.
 /**
  * A {@link WatchdogTimer} expects to receive a {@link #pulse()} at least once
  * every {@link #period} milliseconds. If a {@link #pulse()} is not received, it
