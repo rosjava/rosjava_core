@@ -20,7 +20,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-// TODO(damonkohler): Change this to use a ScheduledExecutorService.
 /**
  * A {@link WatchdogTimer} expects to receive a {@link #pulse()} at least once
  * every {@link #period} {@link #unit}s. Once per every period in which a
