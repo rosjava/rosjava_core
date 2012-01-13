@@ -33,6 +33,7 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import org.ros.time.TimeProvider;
 
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
@@ -91,18 +92,24 @@ public interface Node {
   void shutdown();
 
   /**
-   * @return {@link URI} of {@link MasterXmlRpcEndpoint} that this node is attached to.
+   * @return {@link URI} of {@link MasterXmlRpcEndpoint} that this node is
+   *         attached to.
    */
   URI getMasterUri();
 
   /**
-   * Returns the current time. In ROS, time can be wallclock (actual) or
-   * simulated, so it is important to use {@code Node.getCurrentTime()} instead
+   * In ROS, time can be wallclock (actual) or simulated, so it is important to
+   * use {@link Node#getCurrentTime()} or {@link Node#getTimeProvider()} instead
    * of using the standard Java routines for determining the current time.
    * 
    * @return the current time
    */
   Time getCurrentTime();
+
+  /**
+   * @return this {@link Node}'s {@link TimeProvider}
+   */
+  TimeProvider getTimeProvider();
 
   /**
    * @return Logger for this node, which will also perform logging to /rosout.
@@ -240,7 +247,7 @@ public interface Node {
    * @see ExecutorService#execute(Runnable)
    */
   void execute(Runnable runnable);
- 
+
   /**
    * Executes a {@link CancellableLoop} using the {@link Node}'s
    * {@link ExecutorService}. The {@link CancellableLoop} will be canceled when

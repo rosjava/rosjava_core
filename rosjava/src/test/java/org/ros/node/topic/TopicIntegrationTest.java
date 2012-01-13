@@ -99,10 +99,60 @@ public class TopicIntegrationTest {
             executorService);
     repeatingPublisher.start();
 
-    assertTrue(messageReceived.await(5, TimeUnit.DAYS));
+    assertTrue(messageReceived.await(1, TimeUnit.SECONDS));
 
     repeatingPublisher.cancel();
     publisher.shutdown();
+    subscriber.shutdown();
+  }
+
+  /**
+   * This is a regression test.
+   * 
+   * @see <a href="http://answers.ros.org/question/3591/rosjava-subscriber-unreliable">bug report</a>
+   * 
+   * @throws InterruptedException
+   */
+  @Test
+  public void testSubscriberStartsBeforePublisher() throws InterruptedException {
+    final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
+    helloMessage.data = "Hello, ROS!";
+
+    final CountDownLatch messageReceived = new CountDownLatch(1);
+    nodeConfiguration.setNodeName("subscriber");
+    Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
+
+    CountDownSubscriberListener<org.ros.message.std_msgs.String> subscriberListener =
+        CountDownSubscriberListener.newDefault();
+    Subscriber<org.ros.message.std_msgs.String> subscriber =
+        subscriberNode.newSubscriber("foo", "std_msgs/String");
+    subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
+      @Override
+      public void onNewMessage(org.ros.message.std_msgs.String message) {
+        assertEquals(helloMessage, message);
+        messageReceived.countDown();
+      }
+    });
+    subscriber.addSubscriberListener(subscriberListener);
+    // Wait for subscriber to be registered.
+    assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
+
+    nodeConfiguration.setNodeName("publisher");
+    Node publisherNode = nodeFactory.newNode(nodeConfiguration);
+
+    CountDownPublisherListener<org.ros.message.std_msgs.String> publisherListener =
+        CountDownPublisherListener.newDefault();
+    Publisher<org.ros.message.std_msgs.String> publisher =
+        publisherNode.newPublisher("foo", "std_msgs/String");
+    publisher.addListener(publisherListener);
+    publisher.setLatchMode(true);
+    publisher.publish(helloMessage);
+    // Wait for publisher to be registered.
+    assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
+
+    assertTrue(messageReceived.await(1, TimeUnit.SECONDS));
+    publisher.shutdown();
+    subscriber.shutdown();
   }
 
   @Test

@@ -60,6 +60,7 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import org.ros.time.TimeProvider;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -298,6 +299,11 @@ public class DefaultNode implements Node {
   @Override
   public Time getCurrentTime() {
     return nodeConfiguration.getTimeProvider().getCurrentTime();
+  }
+
+  @Override
+  public TimeProvider getTimeProvider() {
+    return nodeConfiguration.getTimeProvider();
   }
 
   @Override
