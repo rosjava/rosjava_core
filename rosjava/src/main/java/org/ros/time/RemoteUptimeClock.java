@@ -180,20 +180,20 @@ public class RemoteUptimeClock {
   public static RemoteUptimeClock newDefault(final TimeProvider timeProvider,
       Callable<Double> callable, double driftSensitivity,
       double errorReductionCoefficientSensitivity, int latencyOutlierFilterSampleSize,
-      double latencyOutlierFilterPercentile) {
+      double latencyOutlierFilterThreshold) {
     return new RemoteUptimeClock(new LocalUptimeProvider() {
       @Override
       public double getSeconds() {
         return timeProvider.getCurrentTime().toSeconds();
       }
     }, callable, driftSensitivity, errorReductionCoefficientSensitivity,
-        latencyOutlierFilterSampleSize, latencyOutlierFilterPercentile);
+        latencyOutlierFilterSampleSize, latencyOutlierFilterThreshold);
   }
 
   @VisibleForTesting
   RemoteUptimeClock(LocalUptimeProvider localUptimeProvider, Callable<Double> callable,
       double driftSensitivity, double errorReductionCoefficientSensitivity,
-      int latencyOutlierFilterSampleSize, double latencyOutlierFilterPercentile) {
+      int latencyOutlierFilterSampleSize, double latencyOutlierFilterThreshold) {
     Preconditions.checkArgument(driftSensitivity >= 0 && driftSensitivity <= 1);
     Preconditions.checkArgument(errorReductionCoefficientSensitivity >= 0
         && errorReductionCoefficientSensitivity <= 1);
@@ -202,7 +202,7 @@ public class RemoteUptimeClock {
     this.driftSensitivity = driftSensitivity;
     this.errorReductionCoefficientSensitivity = errorReductionCoefficientSensitivity;
     latencyOutlierFilter =
-        new LatencyOutlierFilter(latencyOutlierFilterSampleSize, latencyOutlierFilterPercentile);
+        new LatencyOutlierFilter(latencyOutlierFilterSampleSize, latencyOutlierFilterThreshold);
     errorReductionCoefficient = 0;
   }
 
