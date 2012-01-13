@@ -16,10 +16,7 @@
 
 package org.ros.internal.node.client;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
 
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.ProtocolDescriptionResultFactory;
@@ -32,7 +29,10 @@ import org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpoint;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.namespace.GraphName;
 
-import com.google.common.collect.Lists;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -55,59 +55,59 @@ public class SlaveClient extends Client<SlaveXmlRpcEndpoint> {
   }
 
   public Response<URI> getMasterUri() {
-    return Response.fromListChecked(node.getMasterUri(nodeName.toString()), new UriResultFactory());
+    return Response.fromListChecked(xmlRpcEndpoint.getMasterUri(nodeName.toString()), new UriResultFactory());
   }
 
-  public List<Object> shutdown(String message) {
-    throw new UnsupportedOperationException();
+  public Response<Void> shutdown(String message) {
+    return Response.fromListChecked(xmlRpcEndpoint.shutdown("/master", message), new VoidResultFactory());
   }
 
   public Response<Integer> getPid() {
-    return Response.fromListChecked(node.getPid(nodeName.toString()), new IntegerResultFactory());
+    return Response.fromListChecked(xmlRpcEndpoint.getPid(nodeName.toString()), new IntegerResultFactory());
   }
 
   public Response<List<TopicDefinition>> getSubscriptions() {
-    return Response.fromListChecked(node.getSubscriptions(nodeName.toString()),
+    return Response.fromListChecked(xmlRpcEndpoint.getSubscriptions(nodeName.toString()),
         new TopicDefinitionListResultFactory());
   }
 
   public Response<List<TopicDefinition>> getPublications() {
-    return Response.fromListChecked(node.getPublications(nodeName.toString()),
+    return Response.fromListChecked(xmlRpcEndpoint.getPublications(nodeName.toString()),
         new TopicDefinitionListResultFactory());
   }
 
   public Response<Void> paramUpdate(GraphName name, boolean value) {
-    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
+    return Response.fromListChecked(xmlRpcEndpoint.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
   public Response<Void> paramUpdate(GraphName name, char value) {
-    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
+    return Response.fromListChecked(xmlRpcEndpoint.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
   public Response<Void> paramUpdate(GraphName name, int value) {
-    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
+    return Response.fromListChecked(xmlRpcEndpoint.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
   public Response<Void> paramUpdate(GraphName name, double value) {
-    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
+    return Response.fromListChecked(xmlRpcEndpoint.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
   public Response<Void> paramUpdate(GraphName name, String value) {
-    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
+    return Response.fromListChecked(xmlRpcEndpoint.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
   public Response<Void> paramUpdate(GraphName name, List<?> value) {
-    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
+    return Response.fromListChecked(xmlRpcEndpoint.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
   public Response<Void> paramUpdate(GraphName name, Map<?, ?> value) {
-    return Response.fromListChecked(node.paramUpdate(nodeName.toString(), name.toString(), value),
+    return Response.fromListChecked(xmlRpcEndpoint.paramUpdate(nodeName.toString(), name.toString(), value),
         new VoidResultFactory());
   }
 
@@ -117,14 +117,13 @@ public class SlaveClient extends Client<SlaveXmlRpcEndpoint> {
       publishers.add(uri.toString());
     }
     return Response.fromListChecked(
-        node.publisherUpdate(nodeName.toString(), topic.toString(), publishers.toArray()),
+        xmlRpcEndpoint.publisherUpdate(nodeName.toString(), topic.toString(), publishers.toArray()),
         new VoidResultFactory());
   }
 
   public Response<ProtocolDescription> requestTopic(GraphName topic,
       Collection<String> requestedProtocols) {
-    return Response.fromListChecked(node.requestTopic(nodeName.toString(), topic.toString(),
+    return Response.fromListChecked(xmlRpcEndpoint.requestTopic(nodeName.toString(), topic.toString(),
         new Object[][] { requestedProtocols.toArray() }), new ProtocolDescriptionResultFactory());
   }
-
 }

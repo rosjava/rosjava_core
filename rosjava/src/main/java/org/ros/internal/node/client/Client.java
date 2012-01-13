@@ -16,9 +16,6 @@
 
 package org.ros.internal.node.client;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
@@ -26,6 +23,9 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.server.NodeServer;
 import org.ros.internal.node.xmlrpc.XmlRpcClientFactory;
 import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
+
+import java.net.MalformedURLException;
+import java.net.URI;
 
 /**
  * Base class for XML-RPC clients (e.g. MasterClient and SlaveClient).
@@ -45,7 +45,7 @@ abstract class Client<T extends XmlRpcEndpoint> {
 
   private final URI uri;
 
-  protected final T node;
+  protected final T xmlRpcEndpoint;
 
   /**
    * @param uri
@@ -69,7 +69,7 @@ abstract class Client<T extends XmlRpcEndpoint> {
     client.setConfig(config);
 
     XmlRpcClientFactory<T> factory = new XmlRpcClientFactory<T>(client);
-    node =
+    xmlRpcEndpoint =
         interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, "",
             XMLRPC_TIMEOUT));
   }
@@ -80,5 +80,4 @@ abstract class Client<T extends XmlRpcEndpoint> {
   public URI getRemoteUri() {
     return uri;
   }
-
 }

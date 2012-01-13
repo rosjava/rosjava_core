@@ -67,7 +67,8 @@ public class RosRun {
       throw new RosRuntimeException("Unable to instantiate node: " + nodeClassName, e);
     }
 
+    Preconditions.checkState(nodeMain != null);
     NodeMainExecutor runner = DefaultNodeMainExecutor.newDefault();
-    runner.run(nodeMain, nodeConfiguration);
+    runner.executeNodeMain(nodeMain, nodeConfiguration);
   }
 }

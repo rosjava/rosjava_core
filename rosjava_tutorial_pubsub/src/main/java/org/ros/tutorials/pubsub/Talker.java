@@ -16,46 +16,47 @@
 
 package org.ros.tutorials.pubsub;
 
-import com.google.common.base.Preconditions;
-
+import org.ros.concurrent.CancellableLoop;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
 /**
- * This is a simple rosjava {@link Publisher} {@link Node}. It assumes an
- * external roscore is already running.
+ * A simple {@link Publisher} {@link Node}.
  * 
- * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Talker implements NodeMain {
 
-  private Node node;
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("rosjava_tutorial_pubsub/talker");
+  }
 
   @Override
-  public void onStart(Node node) {
-    Preconditions.checkState(this.node == null);
-    this.node = node;
-    try {
-      Publisher<org.ros.message.std_msgs.String> publisher =
-          node.newPublisher("chatter", "std_msgs/String");
-      int seq = 0;
-      while (true) {
+  public void onStart(final Node node) {
+    final Publisher<org.ros.message.std_msgs.String> publisher =
+        node.newPublisher("chatter", "std_msgs/String");
+    // This CancellableLoop will be canceled automatically when the Node shuts
+    // down.
+    node.executeCancellableLoop(new CancellableLoop() {
+      private int sequenceNumber;
+
+      @Override
+      protected void setup() {
+        sequenceNumber = 0;
+      }
+
+      @Override
+      protected void loop() throws InterruptedException {
         org.ros.message.std_msgs.String str = new org.ros.message.std_msgs.String();
-        str.data = "Hello world! " + seq;
+        str.data = "Hello world! " + sequenceNumber;
         publisher.publish(str);
-        node.getLog().info("Hello, world! " + seq);
-        seq++;
+        sequenceNumber++;
         Thread.sleep(1000);
       }
-    } catch (Exception e) {
-      if (node != null) {
-        node.getLog().fatal(e);
-      } else {
-        e.printStackTrace();
-      }
-    }
+    });
   }
 
   @Override

@@ -10,6 +10,7 @@ import org.ros.message.actionlib_tutorials.FibonacciActionResult;
 import org.ros.message.actionlib_tutorials.FibonacciFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciGoal;
 import org.ros.message.actionlib_tutorials.FibonacciResult;
+import org.ros.namespace.GraphName;
 import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
@@ -38,7 +39,7 @@ public class RunFibonacciSimpleActionClient {
       FibonacciActionSpec spec = new FibonacciActionSpec();
       final FibonacciSimpleActionClient sac = spec.buildSimpleActionClient("fibonacci_client");
 
-      runner.run(new NodeMain() {
+      runner.executeNodeMain(new NodeMain() {
 
         @Override
         public void onStart(Node node) {
@@ -53,6 +54,10 @@ public class RunFibonacciSimpleActionClient {
         public void onShutdownComplete(Node node) {
         }
 
+        @Override
+        public GraphName getDefaultNodeName() {
+          return new GraphName("actionlib_java/fibonacci_client");
+        }
       }, configuration);
 
       System.out.println("[Test] Waiting for action server to start");
@@ -117,7 +122,7 @@ public class RunFibonacciSimpleActionClient {
 
       final SimpleActionClient<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> sac =
           spec.buildSimpleActionClient("fibonacci");
-      runner.run(new NodeMain() {
+      runner.executeNodeMain(new NodeMain() {
 
         @Override
         public void onStart(Node node) {
@@ -132,6 +137,10 @@ public class RunFibonacciSimpleActionClient {
         public void onShutdownComplete(Node node) {
         }
 
+        @Override
+        public GraphName getDefaultNodeName() {
+          return new GraphName("actionlib_java/fibonacci_client");
+        }
       }, configuration);
 
       System.out.println("[Test] Waiting for action server to start");

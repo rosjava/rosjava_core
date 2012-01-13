@@ -97,15 +97,16 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
   }
 
   @Override
-  public void run(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration,
+  public void executeNodeMain(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration,
       final Collection<NodeListener> nodeListeners) {
-    Preconditions.checkNotNull(nodeConfiguration.getNodeName(), "Node name not specified.");
-    if (DEBUG) {
-      log.info("Starting node: " + nodeConfiguration.getNodeName());
-    }
-    // NOTE(damonkohler): To avoid a race condition, we have to make a copy
+    // NOTE(damonkohler): To avoid a race condition, we have to make our copy
     // of the NodeConfiguration in the current thread.
     final NodeConfiguration nodeConfigurationCopy = NodeConfiguration.copyOf(nodeConfiguration);
+    nodeConfigurationCopy.setDefaultNodeName(nodeMain.getDefaultNodeName());
+    Preconditions.checkNotNull(nodeConfigurationCopy.getNodeName(), "Node name not specified.");
+    if (DEBUG) {
+      log.info("Starting node: " + nodeConfigurationCopy.getNodeName());
+    }
     executorService.execute(new Runnable() {
       @Override
       public void run() {
@@ -123,8 +124,8 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
   }
 
   @Override
-  public void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
-    run(nodeMain, nodeConfiguration, null);
+  public void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
+    executeNodeMain(nodeMain, nodeConfiguration, null);
   }
 
   @Override

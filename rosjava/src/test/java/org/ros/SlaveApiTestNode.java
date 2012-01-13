@@ -19,6 +19,7 @@ package org.ros;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.message.MessageListener;
 import org.ros.message.std_msgs.Int64;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
@@ -30,6 +31,11 @@ import org.ros.node.topic.Subscriber;
  * @author kwc@willowgarage.com (Ken Conley)
  */
 public class SlaveApiTestNode implements NodeMain {
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("rosjava/slave_api_test_node");
+  }
 
   @Override
   public void onStart(Node node) {

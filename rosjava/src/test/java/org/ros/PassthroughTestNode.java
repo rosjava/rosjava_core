@@ -17,6 +17,7 @@
 package org.ros;
 
 import org.ros.message.MessageListener;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
@@ -29,6 +30,11 @@ import org.ros.node.topic.Subscriber;
  * @author kwc@willowgarage.com (Ken Conley)
  */
 public class PassthroughTestNode implements NodeMain {
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("rosjava/passthrough_test_node");
+  }
 
   @Override
   public void onStart(final Node node) {

@@ -41,6 +41,11 @@ import java.util.Map;
  */
 public class ParameterServerTestNode implements NodeMain {
 
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("rosjava/parameter_server_test_node");
+  }
+
   @SuppressWarnings("rawtypes")
   @Override
   public void onStart(Node node) {

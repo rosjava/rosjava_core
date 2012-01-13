@@ -80,10 +80,12 @@ public class SlaveServer extends NodeServer {
    * correct information when topics are requested.
    */
   public void start() {
-    super.start(org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl.class, new SlaveXmlRpcEndpointImpl(this));
+    super.start(org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl.class,
+        new SlaveXmlRpcEndpointImpl(this));
     tcpRosServer.start();
   }
 
+  // TODO(damonkohler): This should also shut down the Node.
   @Override
   public void shutdown() {
     super.shutdown();

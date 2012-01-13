@@ -162,9 +162,12 @@ public class MasterServer extends NodeServer {
   private void addSlave(SlaveIdentifier slaveIdentifier) {
     Preconditions.checkNotNull(slaveIdentifier);
     GraphName slaveName = slaveIdentifier.getNodeName();
-    Preconditions.checkState(
-        slaves.get(slaveName) == null || slaves.get(slaveName).equals(slaveIdentifier),
-        "Failed to add slave: " + slaveIdentifier + "\nExisting slave: " + slaves.get(slaveName));
+    SlaveIdentifier existingSlaveIdentifier = slaves.get(slaveName);
+    if (existingSlaveIdentifier != null && !existingSlaveIdentifier.equals(slaveIdentifier)) {
+      log.warn(String.format("Existing slave %s will be shutdown.", existingSlaveIdentifier));
+      SlaveClient client = new SlaveClient(MASTER_NODE_NAME, existingSlaveIdentifier.getUri());
+      client.shutdown(String.format("Replaced by slave %s.", slaveIdentifier));
+    }
     slaves.put(slaveName, slaveIdentifier);
   }
 

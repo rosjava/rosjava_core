@@ -18,6 +18,7 @@ package org.ros.tutorials.pubsub;
 
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
+import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Subscriber;
@@ -29,6 +30,11 @@ import org.ros.node.topic.Subscriber;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Listener implements NodeMain {
+
+  @Override
+  public GraphName getDefaultNodeName() {
+    return new GraphName("rosjava_tutorial_pubsub/listener");
+  }
 
   @Override
   public void onStart(Node node) {

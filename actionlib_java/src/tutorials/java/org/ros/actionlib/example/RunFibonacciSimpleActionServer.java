@@ -1,5 +1,6 @@
 package org.ros.actionlib.example;
 
+import org.ros.namespace.GraphName;
 import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
@@ -28,7 +29,7 @@ public class RunFibonacciSimpleActionServer {
 
       NodeMainExecutor runner = DefaultNodeMainExecutor.newDefault();
 
-      runner.run(new NodeMain() {
+      runner.executeNodeMain(new NodeMain() {
 
         @Override
         public void onStart(Node node) {
@@ -43,6 +44,10 @@ public class RunFibonacciSimpleActionServer {
         public void onShutdownComplete(Node node) {
         }
 
+        @Override
+        public GraphName getDefaultNodeName() {
+          throw new UnsupportedOperationException();
+        }
       }, configuration);
     } catch (Exception e) {
       // TODO Auto-generated catch block

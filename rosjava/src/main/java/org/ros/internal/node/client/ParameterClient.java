@@ -60,72 +60,72 @@ public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
   }
 
   public Response<Object> getParam(GraphName parameterName) {
-    return Response.fromListCheckedFailure(node.getParam(nodeName, parameterName.toString()),
+    return Response.fromListCheckedFailure(xmlRpcEndpoint.getParam(nodeName, parameterName.toString()),
         new ObjectResultFactory());
   }
 
   public Response<Void> setParam(GraphName parameterName, Boolean parameterValue) {
     return Response.fromListChecked(
-        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
+        xmlRpcEndpoint.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
   }
 
   public Response<Void> setParam(GraphName parameterName, Integer parameterValue) {
     return Response.fromListChecked(
-        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
+        xmlRpcEndpoint.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
   }
 
   public Response<Void> setParam(GraphName parameterName, Double parameterValue) {
     return Response.fromListChecked(
-        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
+        xmlRpcEndpoint.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
   }
 
   public Response<Void> setParam(GraphName parameterName, String parameterValue) {
     return Response.fromListChecked(
-        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
+        xmlRpcEndpoint.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
   }
 
   public Response<Void> setParam(GraphName parameterName, List<?> parameterValue) {
     return Response.fromListChecked(
-        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
+        xmlRpcEndpoint.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
   }
 
   public Response<Void> setParam(GraphName parameterName, Map<?, ?> parameterValue) {
     return Response.fromListChecked(
-        node.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
+        xmlRpcEndpoint.setParam(nodeName, parameterName.toString(), parameterValue), new VoidResultFactory());
   }
 
   public Response<GraphName> searchParam(GraphName parameterName) {
     Response<String> response =
-        Response.fromListCheckedFailure(node.searchParam(nodeName, parameterName.toString()),
+        Response.fromListCheckedFailure(xmlRpcEndpoint.searchParam(nodeName, parameterName.toString()),
             new StringResultFactory());
     return new Response<GraphName>(response.getStatusCode(), response.getStatusMessage(),
         new GraphName(response.getResult()));
   }
 
   public Response<Object> subscribeParam(GraphName parameterName) {
-    return Response.fromListChecked(node.subscribeParam(nodeName, slaveIdentifier.getUri()
+    return Response.fromListChecked(xmlRpcEndpoint.subscribeParam(nodeName, slaveIdentifier.getUri()
         .toString(), parameterName.toString()), new ObjectResultFactory());
   }
 
   public Response<Integer> unsubscribeParam(GraphName parameterName) {
     return Response.fromListChecked(
-        node.unsubscribeParam(nodeName, slaveIdentifier.getUri().toString(),
+        xmlRpcEndpoint.unsubscribeParam(nodeName, slaveIdentifier.getUri().toString(),
             parameterName.toString()), new IntegerResultFactory());
   }
 
   public Response<Boolean> hasParam(GraphName parameterName) {
-    return Response.fromListChecked(node.hasParam(nodeName, parameterName.toString()),
+    return Response.fromListChecked(xmlRpcEndpoint.hasParam(nodeName, parameterName.toString()),
         new BooleanResultFactory());
   }
 
   public Response<Void> deleteParam(GraphName parameterName) {
-    return Response.fromListChecked(node.deleteParam(nodeName, parameterName.toString()),
+    return Response.fromListChecked(xmlRpcEndpoint.deleteParam(nodeName, parameterName.toString()),
         new VoidResultFactory());
   }
 
   public Response<List<GraphName>> getParamNames() {
     Response<List<String>> response =
-        Response.fromListChecked(node.getParamNames(nodeName), new StringListResultFactory());
+        Response.fromListChecked(xmlRpcEndpoint.getParamNames(nodeName), new StringListResultFactory());
     List<GraphName> graphNames = Lists.newArrayList();
     for (String name : response.getResult()) {
       graphNames.add(new GraphName(name));

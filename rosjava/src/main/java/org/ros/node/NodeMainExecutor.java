@@ -20,7 +20,8 @@ import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Executes {@link NodeMain}s.
+ * Executes {@link NodeMain}s and allows shutting down individual
+ * {@link NodeMain}s or all currently running {@link NodeMain}s as a group.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -37,9 +38,9 @@ public interface NodeMainExecutor {
    *          {@link Node}
    * @param nodeListeners
    *          a {@link Collection} of {@link NodeListener}s to be added to the
-   *          {@link Node} before it starts (can be {@code null})
+   *          {@link Node} before it starts, can be {@code null}
    */
-  void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
+  void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
       Collection<NodeListener> nodeListeners);
 
   /**
@@ -52,7 +53,7 @@ public interface NodeMainExecutor {
    *          the {@link NodeConfiguration} that will be used to create the
    *          {@link Node}
    */
-  void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration);
+  void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration);
 
   /**
    * Executes a {@link Runnable} using this {@link NodeMainExecutor}'s

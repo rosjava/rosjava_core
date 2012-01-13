@@ -65,7 +65,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    * @return a {@link Response} with a void result
    */
   public Response<Void> registerService(SlaveIdentifier slave, ServiceServer<?, ?> service) {
-    return Response.fromListChecked(node.registerService(slave.getNodeName().toString(), service
+    return Response.fromListChecked(xmlRpcEndpoint.registerService(slave.getNodeName().toString(), service
         .getName().toString(), service.getUri().toString(), slave.getUri().toString()),
         new VoidResultFactory());
   }
@@ -82,7 +82,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    *         result
    */
   public Response<Integer> unregisterService(SlaveIdentifier slave, ServiceServer<?, ?> service) {
-    return Response.fromListChecked(node.unregisterService(slave.getNodeName().toString(), service
+    return Response.fromListChecked(xmlRpcEndpoint.unregisterService(slave.getNodeName().toString(), service
         .getName().toString(), service.getUri().toString()), new IntegerResultFactory());
   }
 
@@ -102,7 +102,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    *         as the result
    */
   public Response<List<URI>> registerSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber) {
-    return Response.fromListChecked(node.registerSubscriber(slave.getNodeName().toString(), subscriber
+    return Response.fromListChecked(xmlRpcEndpoint.registerSubscriber(slave.getNodeName().toString(), subscriber
         .getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri().toString()),
         new UriListResultFactory());
   }
@@ -118,7 +118,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    *         the result
    */
   public Response<Integer> unregisterSubscriber(SlaveIdentifier slave, Subscriber<?> subscriber) {
-    return Response.fromListChecked(node.unregisterSubscriber(slave.getNodeName().toString(),
+    return Response.fromListChecked(xmlRpcEndpoint.unregisterSubscriber(slave.getNodeName().toString(),
         subscriber.getTopicName().toString(), slave.getUri().toString()),
         new IntegerResultFactory());
   }
@@ -139,7 +139,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
     String topicName = publisherDefinition.getTopicName().toString();
     String messageType = publisherDefinition.getTopicMessageType();
     return Response.fromListChecked(
-        node.registerPublisher(slaveName, topicName, messageType, slaveUri),
+        xmlRpcEndpoint.registerPublisher(slaveName, topicName, messageType, slaveUri),
         new UriListResultFactory());
   }
 
@@ -156,7 +156,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
     String slaveName = publisherIdentifier.getSlaveName().toString();
     String slaveUri = publisherIdentifier.getSlaveUri().toString();
     String topicName = publisherIdentifier.getTopicName().toString();
-    return Response.fromListChecked(node.unregisterPublisher(slaveName, topicName, slaveUri),
+    return Response.fromListChecked(xmlRpcEndpoint.unregisterPublisher(slaveName, topicName, slaveUri),
         new IntegerResultFactory());
   }
 
@@ -171,7 +171,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    *         as a result
    */
   public Response<URI> lookupNode(SlaveIdentifier slave, String nodeName) {
-    return Response.fromListChecked(node.lookupNode(slave.getNodeName().toString(), nodeName),
+    return Response.fromListChecked(xmlRpcEndpoint.lookupNode(slave.getNodeName().toString(), nodeName),
         new UriResultFactory());
   }
 
@@ -184,7 +184,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    */
   public Response<URI> getUri(SlaveIdentifier slave) {
     return Response
-        .fromListChecked(node.getUri(slave.getNodeName().toString()), new UriResultFactory());
+        .fromListChecked(xmlRpcEndpoint.getUri(slave.getNodeName().toString()), new UriResultFactory());
   }
 
   /**
@@ -199,7 +199,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    */
   public Response<URI> lookupService(SlaveIdentifier slave, String serviceName) {
     return Response.fromListCheckedFailure(
-        node.lookupService(slave.getNodeName().toString(), serviceName), new UriResultFactory());
+        xmlRpcEndpoint.lookupService(slave.getNodeName().toString(), serviceName), new UriResultFactory());
   }
 
   public Response<List<TopicDefinition>> getPublishedTopics(SlaveIdentifier slave, String subgraph) {
