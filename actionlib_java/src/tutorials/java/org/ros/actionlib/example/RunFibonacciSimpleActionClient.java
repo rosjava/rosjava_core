@@ -10,11 +10,11 @@ import org.ros.message.actionlib_tutorials.FibonacciActionResult;
 import org.ros.message.actionlib_tutorials.FibonacciFeedback;
 import org.ros.message.actionlib_tutorials.FibonacciGoal;
 import org.ros.message.actionlib_tutorials.FibonacciResult;
-import org.ros.node.DefaultNodeRunner;
+import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,13 +22,13 @@ public class RunFibonacciSimpleActionClient {
 
   public static void main(String[] args) {
     NodeConfiguration configuration = NodeConfiguration.newPrivate();
-    NodeRunner runner = DefaultNodeRunner.newDefault();
+    NodeMainExecutor runner = DefaultNodeMainExecutor.newDefault();
 
     run(runner, configuration);
 
   }
 
-  public static void run(NodeRunner runner, NodeConfiguration configuration) {
+  public static void run(NodeMainExecutor runner, NodeConfiguration configuration) {
     try {
       int length = 10;
 
@@ -108,7 +108,7 @@ public class RunFibonacciSimpleActionClient {
     }
   }
 
-  public static void run2(NodeRunner runner, NodeConfiguration configuration) {
+  public static void run2(NodeMainExecutor runner, NodeConfiguration configuration) {
 
     try {
       int order = 4;

@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutorService;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface NodeRunner {
+public interface NodeMainExecutor {
 
   /**
    * Executes the supplied {@link NodeMain} using the supplied
@@ -55,7 +55,7 @@ public interface NodeRunner {
   void run(NodeMain nodeMain, NodeConfiguration nodeConfiguration);
 
   /**
-   * Executes a {@link Runnable} using this {@link NodeRunner}'s
+   * Executes a {@link Runnable} using this {@link NodeMainExecutor}'s
    * {@link ExecutorService}.
    * 
    * @see ExecutorService#execute(Runnable)

@@ -1,10 +1,10 @@
 package org.ros.actionlib.example;
 
-import org.ros.node.DefaultNodeRunner;
+import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 
 /**
  * A main for running the Fibonacci simple action server.
@@ -26,7 +26,7 @@ public class RunFibonacciSimpleActionServer {
 
       NodeConfiguration configuration = NodeConfiguration.newPrivate();
 
-      NodeRunner runner = DefaultNodeRunner.newDefault();
+      NodeMainExecutor runner = DefaultNodeMainExecutor.newDefault();
 
       runner.run(new NodeMain() {
 

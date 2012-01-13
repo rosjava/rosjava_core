@@ -18,10 +18,10 @@ package org.ros;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.loader.CommandLineLoader;
-import org.ros.node.DefaultNodeRunner;
+import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
-import org.ros.node.NodeRunner;
+import org.ros.node.NodeMainExecutor;
 
 import com.google.common.collect.Lists;
 
@@ -67,7 +67,7 @@ public class RosRun {
       throw new RosRuntimeException("Unable to instantiate node: " + nodeClassName, e);
     }
 
-    NodeRunner runner = DefaultNodeRunner.newDefault();
+    NodeMainExecutor runner = DefaultNodeMainExecutor.newDefault();
     runner.run(nodeMain, nodeConfiguration);
   }
 }

@@ -40,10 +40,10 @@ import java.util.concurrent.Executors;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultNodeRunner implements NodeRunner {
+public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(DefaultNodeRunner.class);
+  private static final Log log = LogFactory.getLog(DefaultNodeMainExecutor.class);
 
   private final NodeFactory nodeFactory;
   private final ExecutorService executorService;
@@ -68,19 +68,19 @@ public class DefaultNodeRunner implements NodeRunner {
 
   /**
    * 
-   * @return an instance of {@link DefaultNodeRunner} that uses a default
+   * @return an instance of {@link DefaultNodeMainExecutor} that uses a default
    *         {@link ExecutorService}
    */
-  public static NodeRunner newDefault() {
+  public static NodeMainExecutor newDefault() {
     return newDefault(Executors.newCachedThreadPool());
   }
 
   /**
-   * @return an instance of {@link DefaultNodeRunner} that uses the supplied
+   * @return an instance of {@link DefaultNodeMainExecutor} that uses the supplied
    *         {@link ExecutorService}
    */
-  public static NodeRunner newDefault(ExecutorService executorService) {
-    return new DefaultNodeRunner(new DefaultNodeFactory(), executorService);
+  public static NodeMainExecutor newDefault(ExecutorService executorService) {
+    return new DefaultNodeMainExecutor(new DefaultNodeFactory(), executorService);
   }
 
   /**
@@ -89,7 +89,7 @@ public class DefaultNodeRunner implements NodeRunner {
    * @param executorService
    *          {@link NodeMain}s will be executed using this
    */
-  private DefaultNodeRunner(NodeFactory nodeFactory, ExecutorService executorService) {
+  private DefaultNodeMainExecutor(NodeFactory nodeFactory, ExecutorService executorService) {
     this.nodeFactory = nodeFactory;
     this.executorService = executorService;
     nodes = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, Node>create());
@@ -174,7 +174,7 @@ public class DefaultNodeRunner implements NodeRunner {
   }
 
   /**
-   * Register a {@link Node} with the {@link NodeRunner}.
+   * Register a {@link Node} with the {@link NodeMainExecutor}.
    * 
    * @param nodeMain
    *          the {@link NodeMain} associated with the {@link Node}
@@ -193,7 +193,7 @@ public class DefaultNodeRunner implements NodeRunner {
   }
 
   /**
-   * Unregister a {@link Node} with the {@link NodeRunner}.
+   * Unregister a {@link Node} with the {@link NodeMainExecutor}.
    * 
    * @param node
    *          the {@link Node} to unregister
