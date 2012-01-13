@@ -16,30 +16,35 @@
 
 package org.ros.concurrent;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 // TODO(damonkohler): Change this to use a ScheduledExecutorService.
 /**
  * A {@link WatchdogTimer} expects to receive a {@link #pulse()} at least once
- * every {@link #period} milliseconds. If a {@link #pulse()} is not received, it
- * will execute the provided {@link Runnable}
+ * every {@link #period} {@link #unit}s. Once per every period in which a
+ * {@link #pulse()} is not received, the provided {@link Runnable} will be
+ * executed.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class WatchdogTimer {
 
+  private final ScheduledExecutorService scheduledExecutorService;
   private final long period;
-  private final Timer timer;
-  private final TimerTask task;
+  private final TimeUnit unit;
+  private final Runnable runnable;
 
   private boolean pulsed;
+  private ScheduledFuture<?> scheduledFuture;
 
-  public WatchdogTimer(long period, final Runnable runnable) {
+  public WatchdogTimer(ScheduledExecutorService scheduledExecutorService, long period,
+      TimeUnit unit, final Runnable runnable) {
+    this.scheduledExecutorService = scheduledExecutorService;
     this.period = period;
-    pulsed = false;
-    timer = new Timer();
-    task = new TimerTask() {
+    this.unit = unit;
+    this.runnable = new Runnable() {
       @Override
       public void run() {
         if (!pulsed) {
@@ -48,10 +53,11 @@ public class WatchdogTimer {
         pulsed = false;
       }
     };
+    pulsed = false;
   }
 
   public void start() {
-    timer.scheduleAtFixedRate(task, period, period);
+    scheduledFuture = scheduledExecutorService.scheduleAtFixedRate(runnable, period, period, unit);
   }
 
   public void pulse() {
@@ -59,7 +65,6 @@ public class WatchdogTimer {
   }
 
   public void cancel() {
-    task.cancel();
-    timer.cancel();
+    scheduledFuture.cancel(true);
   }
 }
