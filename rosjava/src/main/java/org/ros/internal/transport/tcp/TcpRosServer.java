@@ -35,7 +35,7 @@ import org.ros.internal.node.topic.TopicManager;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * The TCP server which is used for data communication between publishers and
@@ -56,7 +56,7 @@ public class TcpRosServer {
   private final AdvertiseAddress advertiseAddress;
   private final TopicManager topicManager;
   private final ServiceManager serviceManager;
-  private final ExecutorService executorService;
+  private final ScheduledExecutorService executorService;
 
   private ChannelFactory channelFactory;
   private ServerBootstrap bootstrap;
@@ -64,7 +64,8 @@ public class TcpRosServer {
   private ChannelGroup incomingChannelGroup;
 
   public TcpRosServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress,
-      TopicManager topicManager, ServiceManager serviceManager, ExecutorService executorService) {
+      TopicManager topicManager, ServiceManager serviceManager,
+      ScheduledExecutorService executorService) {
     this.bindAddress = bindAddress;
     this.advertiseAddress = advertiseAddress;
     this.topicManager = topicManager;

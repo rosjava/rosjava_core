@@ -24,6 +24,8 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import java.util.Map;
 
 /**
+ * The definition of a ROS message.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MessageDefinition {
@@ -39,10 +41,31 @@ public class MessageDefinition {
         header.get(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 
+  /**
+   * Create a new message definition, which consists only of the message type.
+   * 
+   * <p>
+   * The {@code definition} and {@code md5checksum} will be {@code null}.
+   * 
+   * @param type
+   * @return
+   */
   public static MessageDefinition newFromTypeName(String type) {
     return new MessageDefinition(type, null, null);
   }
 
+  /**
+   * Create a new message definition.
+   * 
+   * @param type
+   *          the type of the message
+   * @param definition
+   *          the definition of the message, can be {@code null}
+   * @param md5Checksum
+   *          the MD5 checksum of the message, can be {@code null}
+   * 
+   * @return
+   */
   public static MessageDefinition
       newFromStrings(String type, String definition, String md5Checksum) {
     // TODO(damonkohler): Change this factory method to calculate the MD5 from
@@ -73,11 +96,9 @@ public class MessageDefinition {
 
   public Map<String, String> toHeader() {
     Preconditions.checkNotNull(md5Checksum);
-    return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.TYPE, type)
+    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.TYPE, type)
         .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum)
-        .put(ConnectionHeaderFields.MESSAGE_DEFINITION, definition)
-        .build();
+        .put(ConnectionHeaderFields.MESSAGE_DEFINITION, definition).build();
   }
 
   @Override

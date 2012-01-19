@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RemoteException;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.ProtocolDescription;
@@ -42,18 +42,18 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
 
   private final DefaultSubscriber<MessageType> subscriber;
   private final PublisherIdentifier publisherIdentifier;
-  private final SlaveIdentifier slaveIdentifier;
+  private final NodeSlaveIdentifier slaveIdentifier;
 
   /**
    * @param subscriber
    * @param slaveIdentifier
-   *          {@link SlaveIdentifier} of the {@link Subscriber}'s
+   *          {@link NodeSlaveIdentifier} of the {@link Subscriber}'s
    *          {@link SlaveServer}
    * @param publisherIdentifier
    *          {@link PublisherIdentifier} of the new {@link Publisher}
    */
   public UpdatePublisherRunnable(DefaultSubscriber<MessageType> subscriber,
-      SlaveIdentifier slaveIdentifier, PublisherIdentifier publisherIdentifier) {
+      NodeSlaveIdentifier slaveIdentifier, PublisherIdentifier publisherIdentifier) {
     this.subscriber = subscriber;
     this.slaveIdentifier = slaveIdentifier;
     this.publisherIdentifier = publisherIdentifier;
@@ -63,7 +63,7 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
   public void run() {
     SlaveClient slaveClient;
     try {
-      slaveClient = new SlaveClient(slaveIdentifier.getNodeName(), publisherIdentifier.getSlaveUri());
+      slaveClient = new SlaveClient(slaveIdentifier.getNodeName(), publisherIdentifier.getNodeSlaveUri());
       Response<ProtocolDescription> response =
           slaveClient.requestTopic(subscriber.getTopicName(), ProtocolNames.SUPPORTED);
       // TODO(kwc): all of this logic really belongs in a protocol handler

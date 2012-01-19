@@ -26,6 +26,7 @@ import org.apache.xmlrpc.webserver.WebServer;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.system.Process;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -126,4 +127,13 @@ public class NodeServer {
   public boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
     return startLatch.await(timeout, unit);
   }
+
+  /**
+   * @return PID of node process if available, throws
+   *         {@link UnsupportedOperationException} otherwise.
+   */
+  public int getPid() {
+    return Process.getPid();
+  }
+
 }

@@ -29,7 +29,7 @@ import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -42,7 +42,7 @@ public class IncomingMessageQueue<MessageType> {
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
   private final MessageDeserializer<MessageType> deserializer;
-  private final ExecutorService executorService;
+  private final ScheduledExecutorService executorService;
   private final CircularBlockingQueue<MessageType> messages;
   private final ListenerCollection<MessageListener<MessageType>> listeners;
   private final Dispatcher dispatcher;
@@ -81,7 +81,7 @@ public class IncomingMessageQueue<MessageType> {
   }
 
   public IncomingMessageQueue(MessageDeserializer<MessageType> deserializer,
-      ExecutorService executorService) {
+      ScheduledExecutorService executorService) {
     this.deserializer = deserializer;
     this.executorService = executorService;
     messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);

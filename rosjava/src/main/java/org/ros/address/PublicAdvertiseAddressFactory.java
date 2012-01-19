@@ -17,6 +17,8 @@
 package org.ros.address;
 
 /**
+ * An {@link AdvertiseAddressFactory} which gets a public (non-loopback) address.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class PublicAdvertiseAddressFactory implements AdvertiseAddressFactory {

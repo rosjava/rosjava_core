@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.ros.internal.node.server.master.MasterServer;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -27,7 +29,6 @@ import org.ros.address.BindAddress;
 import org.ros.exception.RemoteException;
 import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.internal.node.NodeFactory;
-import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.service.ServiceException;
 import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.node.Node;

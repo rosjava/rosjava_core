@@ -46,10 +46,13 @@ public class WatchdogTimer {
     this.runnable = new Runnable() {
       @Override
       public void run() {
-        if (!pulsed) {
-          runnable.run();
+        try {
+          if (!pulsed) {
+            runnable.run();
+          }
+        } finally {
+          pulsed = false;
         }
-        pulsed = false;
       }
     };
     pulsed = false;

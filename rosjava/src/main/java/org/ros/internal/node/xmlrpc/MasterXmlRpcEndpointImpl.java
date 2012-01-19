@@ -20,13 +20,9 @@ import com.google.common.collect.Lists;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
-import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.internal.node.server.ParameterServer;
-import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.node.service.ServiceIdentifier;
-import org.ros.internal.node.topic.PublisherIdentifier;
-import org.ros.internal.node.topic.SubscriberIdentifier;
-import org.ros.internal.node.topic.TopicIdentifier;
+import org.ros.internal.node.server.master.MasterServer;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
@@ -53,6 +49,11 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
   }
 
   @Override
+  public List<Object> getPid(String callerId) {
+    return Response.newSuccess("server pid", master.getPid()).toList();
+  }
+
+  @Override
   public List<Object> getPublishedTopics(String callerId, String subgraph) {
     return Response.newSuccess("current topics",
         master.getPublishedTopics(new GraphName(callerId), new GraphName(subgraph))).toList();
@@ -76,89 +77,108 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
 
   @Override
   public List<Object> lookupNode(String callerId, String nodeName) {
-    SlaveIdentifier identifier = master.lookupNode(new GraphName(nodeName));
-    if (identifier != null) {
-      return Response.newSuccess("Success", identifier.getUri().toString()).toList();
+    URI nodeSlaveUri = master.lookupNode(new GraphName(nodeName));
+    if (nodeSlaveUri != null) {
+      return Response.newSuccess("Success", nodeSlaveUri.toString()).toList();
     } else {
       return Response.newError("No such node", null).toList();
     }
   }
 
   @Override
-  public List<Object> lookupService(String callerId, String service) {
-    ServiceIdentifier identifier = master.lookupService(new GraphName(service));
-    if (identifier != null) {
-      return Response.newSuccess("Success", identifier.getUri().toString()).toList();
+  public List<Object> registerPublisher(String callerId, String topicName, String topicMessageType,
+      String callerSlaveUri) {
+    try {
+      List<URI> subscribers =
+          master.registerPublisher(new GraphName(callerId), new URI(callerSlaveUri), new GraphName(
+              topicName), topicMessageType);
+      List<String> urls = Lists.newArrayList();
+      for (URI uri : subscribers) {
+        urls.add(uri.toString());
+      }
+      return Response.newSuccess("Success", urls).toList();
+    } catch (URISyntaxException e) {
+      throw new RosRuntimeException(String.format("Improperly formatted URI %s for publisher",
+          callerSlaveUri), e);
+    }
+  }
+
+  @Override
+  public List<Object> unregisterPublisher(String callerId, String topicName, String callerSlaveUri) {
+    try {
+      boolean result =
+          master.unregisterPublisher(new GraphName(callerId), new URI(callerSlaveUri),
+              new GraphName(topicName));
+      return Response.newSuccess("Success", result ? 1 : 0).toList();
+    } catch (URISyntaxException e) {
+      throw new RosRuntimeException(String.format("Improperly formatted URI %s for subscriber",
+          callerSlaveUri), e);
+    }
+  }
+
+  @Override
+  public List<Object> registerSubscriber(String callerId, String topicName,
+      String topicMessageType, String callerSlaveUri) {
+    try {
+      List<URI> publishers =
+          master.registerSubscriber(new GraphName(callerId), new URI(callerSlaveUri),
+              new GraphName(topicName), topicMessageType);
+      List<String> urls = Lists.newArrayList();
+      for (URI uri : publishers) {
+        urls.add(uri.toString());
+      }
+      return Response.newSuccess("Success", urls).toList();
+    } catch (URISyntaxException e) {
+      throw new RosRuntimeException(String.format("Improperly formatted URI %s for subscriber",
+          callerSlaveUri), e);
+    }
+  }
+
+  @Override
+  public List<Object>
+      unregisterSubscriber(String callerId, String topicName, String callerSlaveUri) {
+    try {
+      boolean result =
+          master.unregisterSubscriber(new GraphName(callerId), new URI(callerSlaveUri),
+              new GraphName(topicName));
+      return Response.newSuccess("Success", result ? 1 : 0).toList();
+    } catch (URISyntaxException e) {
+      throw new RosRuntimeException(String.format("Improperly formatted URI %s for subscriber",
+          callerSlaveUri), e);
+    }
+  }
+
+  @Override
+  public List<Object> lookupService(String callerId, String serviceName) {
+    URI slaveUri = master.lookupService(new GraphName(serviceName));
+    if (slaveUri != null) {
+      return Response.newSuccess("Success", slaveUri.toString()).toList();
     }
     return Response.newError("No such service.", null).toList();
   }
 
   @Override
-  public List<Object> registerPublisher(String callerId, String topic, String topicType,
-      String callerApi) {
-    SlaveIdentifier slaveIdentifier = SlaveIdentifier.newFromStrings(callerId, callerApi);
-    PublisherIdentifier publisherIdentifier =
-        new PublisherIdentifier(slaveIdentifier, new TopicIdentifier(new GraphName(topic)));
-    List<SubscriberIdentifier> subscribers =
-        master.registerPublisher(publisherIdentifier, topicType);
-    List<String> urls = Lists.newArrayList();
-    for (SubscriberIdentifier subscriberIdentifier : subscribers) {
-      urls.add(subscriberIdentifier.getUri().toString());
-    }
-    return Response.newSuccess("Success", urls).toList();
-  }
-
-  @Override
-  public List<Object> unregisterPublisher(String callerId, String topicName, String callerApi) {
-    PublisherIdentifier publisherIdentifier =
-        PublisherIdentifier.newFromStrings(callerId, callerApi, topicName);
-    return Response.newSuccess("Success", master.unregisterPublisher(publisherIdentifier)).toList();
-  }
-
-  @Override
-  public List<Object> registerSubscriber(String callerId, String topicName, String topicType,
-      String callerApi) {
-    List<PublisherIdentifier> publishers =
-        master.registerSubscriber(
-            SubscriberIdentifier.newFromStrings(callerId, callerApi, topicName), topicType);
-    List<String> urls = Lists.newArrayList();
-    for (PublisherIdentifier publisherIdentifier : publishers) {
-      urls.add(publisherIdentifier.getSlaveUri().toString());
-    }
-    return Response.newSuccess("Success", urls).toList();
-  }
-
-  @Override
-  public List<Object> unregisterSubscriber(String callerId, String topicName, String callerApi) {
-    SubscriberIdentifier subscriberIdentifier =
-        SubscriberIdentifier.newFromStrings(callerId, callerApi, topicName);
-    return Response.newSuccess("Success", master.unregisterSubscriber(subscriberIdentifier))
-        .toList();
-  }
-
-  @Override
-  public List<Object> registerService(String callerId, String serviceName, String serviceApi,
-      String callerApi) {
-    ServiceIdentifier serviceIdentifier;
+  public List<Object> registerService(String callerId, String serviceName, String serviceUri,
+      String callerSlaveUri) {
     try {
-      serviceIdentifier = new ServiceIdentifier(new GraphName(serviceName), new URI(serviceApi));
+      master.registerService(new GraphName(callerId), new URI(callerSlaveUri), new GraphName(
+          serviceName), new URI(serviceUri));
+      return Response.newSuccess("Success", 0).toList();
     } catch (URISyntaxException e) {
       throw new RosRuntimeException(e);
     }
-    master.registerService(serviceIdentifier);
-    return Response.newSuccess("Success", 0).toList();
   }
 
   @Override
-  public List<Object> unregisterService(String callerId, String serviceName, String serviceApi) {
-    ServiceIdentifier serviceIdentifier;
+  public List<Object> unregisterService(String callerId, String serviceName, String serviceUri) {
     try {
-      serviceIdentifier = new ServiceIdentifier(new GraphName(serviceName), new URI(serviceApi));
+      boolean result =
+          master.unregisterService(new GraphName(callerId), new GraphName(serviceName), new URI(
+              serviceUri));
+      return Response.newSuccess("Success", result ? 1 : 0).toList();
     } catch (URISyntaxException e) {
       throw new RosRuntimeException(e);
     }
-    int result = master.unregisterService(serviceIdentifier) ? 1 : 0;
-    return Response.newSuccess("Success", result).toList();
   }
 
   @Override
@@ -212,9 +232,9 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
   }
 
   @Override
-  public List<Object> subscribeParam(String callerId, String callerApi, String key) {
+  public List<Object> subscribeParam(String callerId, String callerSlaveUri, String key) {
     parameterServer.subscribe(new GraphName(key),
-        SlaveIdentifier.newFromStrings(callerId, callerApi));
+        NodeSlaveIdentifier.newFromStrings(callerId, callerSlaveUri));
     Object value = parameterServer.get(new GraphName(key));
     if (value == null) {
       // Must return an empty map as the value of an unset parameter.
@@ -224,7 +244,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
   }
 
   @Override
-  public List<Object> unsubscribeParam(String callerId, String callerApi, String key) {
+  public List<Object> unsubscribeParam(String callerId, String callerSlaveUri, String key) {
     throw new UnsupportedOperationException();
   }
 

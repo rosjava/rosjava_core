@@ -50,8 +50,8 @@ import org.ros.message.MessageListener;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -62,7 +62,7 @@ public class MessageQueueIntegrationTest {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(MessageQueueIntegrationTest.class);
 
-  private ExecutorService executorService;
+  private ScheduledExecutorService executorService;
   private TcpClientConnectionManager tcpClientConnectionManager;
   private OutgoingMessageQueue<org.ros.message.std_msgs.String> outgoingMessageQueue;
   private IncomingMessageQueue<org.ros.message.std_msgs.String> firstIncomingMessageQueue;
@@ -101,7 +101,7 @@ public class MessageQueueIntegrationTest {
 
   @Before
   public void setup() {
-    executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newScheduledThreadPool(10);
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
     expectedMessage = new org.ros.message.std_msgs.String();
     expectedMessage.data = "Would you like to play a game?";

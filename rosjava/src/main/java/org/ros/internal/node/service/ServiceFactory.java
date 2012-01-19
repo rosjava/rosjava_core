@@ -18,8 +18,9 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.node.server.master.MasterServer;
+
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
-import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
@@ -28,7 +29,7 @@ import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.service.ServiceServerListener;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * A factory for {@link ServiceServer}s and {@link ServiceClient}s.
@@ -40,10 +41,10 @@ public class ServiceFactory {
   private final GraphName nodeName;
   private final SlaveServer slaveServer;
   private final ServiceManager serviceManager;
-  private final ExecutorService executorService;
+  private final ScheduledExecutorService executorService;
 
   public ServiceFactory(GraphName nodeName, SlaveServer slaveServer, ServiceManager serviceManager,
-      ExecutorService executorService) {
+      ScheduledExecutorService executorService) {
     this.nodeName = nodeName;
     this.slaveServer = slaveServer;
     this.serviceManager = serviceManager;

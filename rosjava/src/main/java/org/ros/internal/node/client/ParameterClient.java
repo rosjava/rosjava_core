@@ -28,7 +28,7 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StringListResultFactory;
 import org.ros.internal.node.response.StringResultFactory;
 import org.ros.internal.node.response.VoidResultFactory;
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.internal.node.xmlrpc.ParameterServerXmlRpcEndpoint;
 import org.ros.namespace.GraphName;
 
@@ -42,7 +42,7 @@ import com.google.common.collect.Lists;
  */
 public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
 
-  private final SlaveIdentifier slaveIdentifier;
+  private final NodeSlaveIdentifier slaveIdentifier;
   private final String nodeName;
 
   /**
@@ -53,7 +53,7 @@ public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
    *          the {@link URI} of the {@link ParameterServer} to connect to
    * @throws MalformedURLException
    */
-  public ParameterClient(SlaveIdentifier slaveIdentifier, URI uri) {
+  public ParameterClient(NodeSlaveIdentifier slaveIdentifier, URI uri) {
     super(uri, ParameterServerXmlRpcEndpoint.class);
     this.slaveIdentifier = slaveIdentifier;
     nodeName = slaveIdentifier.getNodeName().toString();

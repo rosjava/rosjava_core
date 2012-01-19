@@ -26,6 +26,15 @@ import java.util.List;
 public interface MasterXmlRpcEndpoint extends XmlRpcEndpoint {
 
   /**
+   * Get the PID for the master process.
+   * 
+   * @param callerId
+   *          ROS caller ID
+   * @return The pid of the process.
+   */
+  List<Object> getPid(String callerId);
+
+  /**
    * Register the caller as a provider of the specified service.
    * 
    * @param callerId
@@ -153,7 +162,15 @@ public interface MasterXmlRpcEndpoint extends XmlRpcEndpoint {
    *         message type] ...]
    */
   List<Object> getPublishedTopics(String callerId, String subgraph);
-  
+
+  /**
+   * Get a list of all topic types.
+   * 
+   * @param callerId
+   *          ROS caller ID
+   * @return The types are in the list representation [[topic, message type],
+   *         [topic, message type] ...]
+   */
   List<Object> getTopicTypes(String callerId);
 
   /**

@@ -19,7 +19,7 @@ package org.ros.internal.node.topic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
@@ -30,15 +30,15 @@ import java.util.Map;
  */
 public class SubscriberIdentifier {
 
-  private final SlaveIdentifier slaveIdentifier;
+  private final NodeSlaveIdentifier slaveIdentifier;
   private final TopicIdentifier topicIdentifier;
 
   public static SubscriberIdentifier newFromStrings(String nodeName, String uri, String topicName) {
-    return new SubscriberIdentifier(SlaveIdentifier.newFromStrings(nodeName, uri),
+    return new SubscriberIdentifier(NodeSlaveIdentifier.newFromStrings(nodeName, uri),
         TopicIdentifier.newFromString(topicName));
   }
 
-  public SubscriberIdentifier(SlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
+  public SubscriberIdentifier(NodeSlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
     Preconditions.checkNotNull(slaveIdentifier);
     Preconditions.checkNotNull(topicIdentifier);
     this.slaveIdentifier = slaveIdentifier;
@@ -52,7 +52,7 @@ public class SubscriberIdentifier {
         .build();
   }
 
-  public SlaveIdentifier getSlaveIdentifier() {
+  public NodeSlaveIdentifier getSlaveIdentifier() {
     return slaveIdentifier;
   }
 

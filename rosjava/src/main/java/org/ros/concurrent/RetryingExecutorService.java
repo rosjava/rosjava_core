@@ -29,14 +29,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Wraps an {@link ExecutorService} to execute {@link Callable}s with retries.
+ * Wraps an {@link ScheduledExecutorService} to execute {@link Callable}s with retries.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -52,7 +51,7 @@ public class RetryingExecutorService {
   private final Map<Future<Boolean>, Callable<Boolean>> callables;
   private final CompletionService<Boolean> completionService;
   private final RetryLoop retryLoop;
-  private final ScheduledExecutorService retryExecutor;
+  private final ScheduledExecutorService executorService;
 
   private long retryDelay;
   private TimeUnit retryTimeUnit;
@@ -73,7 +72,7 @@ public class RetryingExecutorService {
         if (DEBUG) {
           log.info("Retry requested.");
         }
-        retryExecutor.schedule(new Runnable() {
+        executorService.schedule(new Runnable() {
           @Override
           public void run() {
             submit(callable);
@@ -89,9 +88,9 @@ public class RetryingExecutorService {
    * @param executorService
    *          the {@link ExecutorService} to wrap
    */
-  public RetryingExecutorService(ExecutorService executorService) {
+  public RetryingExecutorService(ScheduledExecutorService executorService) {
+    this.executorService = executorService;
     retryLoop = new RetryLoop();
-    retryExecutor = Executors.newSingleThreadScheduledExecutor();
     latches = Maps.newConcurrentMap();
     callables = Maps.newConcurrentMap();
     completionService = new ExecutorCompletionService<Boolean>(executorService);
@@ -148,7 +147,6 @@ public class RetryingExecutorService {
     for (CountDownLatch latch : latches.values()) {
       latch.await(timeout, unit);
     }
-    retryExecutor.shutdownNow();
     retryLoop.cancel();
   }
 }

@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
@@ -38,7 +38,7 @@ import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -58,8 +58,8 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
   private static final int DEFAULT_SHUTDOWN_TIMEOUT = 5;
   private static final TimeUnit DEFAULT_SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
-  private final SlaveIdentifier slaveIdentifier;
-  private final ExecutorService executorService;
+  private final NodeSlaveIdentifier slaveIdentifier;
+  private final ScheduledExecutorService executorService;
   private final IncomingMessageQueue<T> incomingMessageQueue;
   private final Set<PublisherIdentifier> knownPublishers;
   private final TcpClientConnectionManager tcpClientConnectionManager;
@@ -69,14 +69,14 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
    */
   private final ListenerCollection<SubscriberListener<T>> subscriberListeners;
 
-  public static <S> DefaultSubscriber<S> newDefault(SlaveIdentifier slaveIdentifier,
-      TopicDefinition description, ExecutorService executorService,
+  public static <S> DefaultSubscriber<S> newDefault(NodeSlaveIdentifier slaveIdentifier,
+      TopicDefinition description, ScheduledExecutorService executorService,
       MessageDeserializer<S> deserializer) {
     return new DefaultSubscriber<S>(slaveIdentifier, description, deserializer, executorService);
   }
 
-  private DefaultSubscriber(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
-      MessageDeserializer<T> deserializer, ExecutorService executorService) {
+  private DefaultSubscriber(NodeSlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
+      MessageDeserializer<T> deserializer, ScheduledExecutorService executorService) {
     super(topicDefinition);
     this.slaveIdentifier = slaveIdentifier;
     this.executorService = executorService;

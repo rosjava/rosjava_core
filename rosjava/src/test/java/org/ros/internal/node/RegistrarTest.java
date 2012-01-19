@@ -4,6 +4,8 @@ package org.ros.internal.node;
 
 import static org.junit.Assert.assertTrue;
 
+import org.ros.internal.node.server.master.MasterServer;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,8 +15,7 @@ import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.Registrar;
 import org.ros.internal.node.parameter.ParameterManager;
-import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
@@ -24,8 +25,8 @@ import org.ros.message.MessageDefinition;
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.CountDownPublisherListener;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,7 +39,7 @@ public class RegistrarTest {
   private final TopicDefinition topicDefinition;
   private final MessageSerializer<org.ros.message.std_msgs.String> messageSerializer;
 
-  private ExecutorService executorService;
+  private ScheduledExecutorService executorService;
   private MasterServer masterServer;
   private MasterClient masterClient;
   private Registrar registrar;
@@ -60,7 +61,7 @@ public class RegistrarTest {
 
   @Before
   public void setup() {
-    executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newScheduledThreadPool(10);
     masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
@@ -73,7 +74,7 @@ public class RegistrarTest {
             AdvertiseAddress.newPrivate(), BindAddress.newPrivate(), AdvertiseAddress.newPrivate(),
             masterClient, topicManager, serviceManager, parameterManager, executorService);
     slaveServer.start();
-    SlaveIdentifier slaveIdentifier = slaveServer.toSlaveIdentifier();
+    NodeSlaveIdentifier slaveIdentifier = slaveServer.toSlaveIdentifier();
     registrar.start(slaveIdentifier);
     publisher =
         new DefaultPublisher<org.ros.message.std_msgs.String>(slaveIdentifier, topicDefinition,

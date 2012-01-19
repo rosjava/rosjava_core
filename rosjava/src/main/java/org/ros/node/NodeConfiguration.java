@@ -34,8 +34,8 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Stores configuration information (e.g. ROS master URI) for {@link Node}s.
@@ -101,7 +101,7 @@ public class NodeConfiguration {
    * Executor service which should be used for all thread creation in the ROS
    * app.
    */
-  private ExecutorService executorService;
+  private ScheduledExecutorService executorService;
 
   /**
    * Creates a new {@link NodeConfiguration} for a publicly accessible
@@ -173,7 +173,7 @@ public class NodeConfiguration {
     setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
     setParentResolver(NameResolver.newRoot());
     setTimeProvider(new WallTimeProvider());
-    setExecutorService(Executors.newCachedThreadPool());
+    setExecutorService(Executors.newScheduledThreadPool(50));
   }
 
   /**
@@ -485,22 +485,22 @@ public class NodeConfiguration {
   }
 
   /**
-   * Get the {@link ExecutorService} which should be used for all thread
+   * Get the {@link ScheduledExecutorService} which should be used for all thread
    * creation within the {@link Node}.
    * 
-   * @return the configured {@link ExecutorService}
+   * @return the configured {@link ScheduledExecutorService}
    */
-  public ExecutorService getExecutorService() {
+  public ScheduledExecutorService getExecutorService() {
     return executorService;
   }
 
   /**
-   * Sets the {@link ExecutorService} that {@link Node}s will use.
+   * Sets the {@link ScheduledExecutorService} that {@link Node}s will use.
    * 
    * @param executorService
-   *          the {@link ExecutorService} that {@link Node}s will use
+   *          the {@link ScheduledExecutorService} that {@link Node}s will use
    */
-  public NodeConfiguration setExecutorService(ExecutorService executorService) {
+  public NodeConfiguration setExecutorService(ScheduledExecutorService executorService) {
     this.executorService = executorService;
     return this;
   }

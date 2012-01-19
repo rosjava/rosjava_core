@@ -18,14 +18,15 @@ package org.ros.internal.node.client;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.node.server.master.MasterServer;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.Holder;
 import org.ros.concurrent.RetryingExecutorService;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
-import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.service.ServiceManagerListener;
@@ -38,7 +39,7 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,20 +58,20 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
   private static final TimeUnit SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
   private final MasterClient masterClient;
-  private final ExecutorService executorService;
+  private final ScheduledExecutorService executorService;
   private final RetryingExecutorService retryingExecutorService;
 
-  private SlaveIdentifier slaveIdentifier;
+  private NodeSlaveIdentifier slaveIdentifier;
   private boolean running;
 
   /**
    * @param masterClient
    *          a {@link MasterClient} for communicating with the ROS master
    * @param executorService
-   *          an {@link ExecutorService} to be used for all asynchronous
+   *          a {@link ScheduledExecutorService} to be used for all asynchronous
    *          operations
    */
-  public Registrar(MasterClient masterClient, ExecutorService executorService) {
+  public Registrar(MasterClient masterClient, ScheduledExecutorService executorService) {
     this.masterClient = masterClient;
     this.executorService = executorService;
     retryingExecutorService = new RetryingExecutorService(executorService);
@@ -323,13 +324,13 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
 
   /**
    * Starts the {@link Registrar} for the {@link SlaveServer} identified by the
-   * given {@link SlaveIdentifier}.
+   * given {@link NodeSlaveIdentifier}.
    * 
    * @param slaveIdentifier
-   *          the {@link SlaveIdentifier} for the {@link SlaveServer} this
+   *          the {@link NodeSlaveIdentifier} for the {@link SlaveServer} this
    *          {@link Registrar} is responsible for
    */
-  public void start(SlaveIdentifier slaveIdentifier) {
+  public void start(NodeSlaveIdentifier slaveIdentifier) {
     Preconditions.checkNotNull(slaveIdentifier);
     Preconditions.checkState(this.slaveIdentifier == null, "Registrar already started.");
     this.slaveIdentifier = slaveIdentifier;

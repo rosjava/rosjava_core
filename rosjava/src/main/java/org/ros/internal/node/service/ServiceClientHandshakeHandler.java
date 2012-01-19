@@ -36,9 +36,11 @@ import org.ros.node.service.ServiceServer;
 
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
+ * A Netty {@link SimpleChannelHandler} which handles the service client handshake.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <T>
@@ -54,11 +56,11 @@ class ServiceClientHandshakeHandler<T, S> extends SimpleChannelHandler {
   private final ImmutableMap<String, String> header;
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final MessageDeserializer<S> deserializer;
-  private final ExecutorService executorService;
+  private final ScheduledExecutorService executorService;
 
   public ServiceClientHandshakeHandler(ImmutableMap<String, String> header,
       Queue<ServiceResponseListener<S>> responseListeners,
-      MessageDeserializer<S> deserializer, ExecutorService executorService) {
+      MessageDeserializer<S> deserializer, ScheduledExecutorService executorService) {
     this.header = header;
     this.responseListeners = responseListeners;
     this.deserializer = deserializer;

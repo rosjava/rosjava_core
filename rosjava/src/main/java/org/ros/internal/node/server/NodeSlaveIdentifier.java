@@ -28,29 +28,29 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * SlaveXmlRpcEndpoint identifiers combine the node name of a node with the URI for contacting the
- * node's XMLRPC server.
+ * A node slave identifier which combines the node name of a node with the URI
+ * for contacting the node's XMLRPC server.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveIdentifier {
+public class NodeSlaveIdentifier {
 
   private final GraphName nodeName;
   private final URI uri;
 
-  public static SlaveIdentifier newFromStrings(String nodeName, String uri) {
+  public static NodeSlaveIdentifier newFromStrings(String nodeName, String uri) {
     try {
-      return new SlaveIdentifier(new GraphName(nodeName), new URI(uri));
+      return new NodeSlaveIdentifier(new GraphName(nodeName), new URI(uri));
     } catch (URISyntaxException e) {
       throw new RosRuntimeException(e);
     }
   }
 
   /**
-   * Constructs a new {@link SlaveIdentifier}.
+   * Constructs a new {@link NodeSlaveIdentifier}.
    * 
-   * Note that either {@code nodeName} or {@code uri} may be null but not both. This
-   * is necessary because either is enough to uniquely identify a
+   * Note that either {@code nodeName} or {@code uri} may be null but not both.
+   * This is necessary because either is enough to uniquely identify a
    * {@link SlaveServer} and because, depending on context, one or the other may
    * not be available.
    * 
@@ -64,7 +64,7 @@ public class SlaveIdentifier {
    * @param uri
    *          the {@link URI} of the {@link SlaveServer}'s XML-RPC server
    */
-  public SlaveIdentifier(GraphName nodeName, URI uri) {
+  public NodeSlaveIdentifier(GraphName nodeName, URI uri) {
     Preconditions.checkArgument(nodeName != null || uri != null);
     if (nodeName != null) {
       Preconditions.checkArgument(nodeName.isGlobal());
@@ -76,15 +76,16 @@ public class SlaveIdentifier {
   /**
    * @param uri
    *          the {@link URI} of the {@link SlaveServer}
-   * @return an anonymous {@link SlaveIdentifier} with the specified {@link URI}
+   * @return an anonymous {@link NodeSlaveIdentifier} with the specified
+   *         {@link URI}
    */
-  static SlaveIdentifier newAnonymous(URI uri) {
-    return new SlaveIdentifier(GraphName.newAnonymous(), uri);
+  static NodeSlaveIdentifier newAnonymous(URI uri) {
+    return new NodeSlaveIdentifier(GraphName.newAnonymous(), uri);
   }
 
   @Override
   public String toString() {
-    return "SlaveIdentifier<" + nodeName + ", " + uri + ">";
+    return "NodeSlaveIdentifier<" + nodeName + ", " + uri + ">";
   }
 
   public GraphName getNodeName() {
@@ -117,7 +118,7 @@ public class SlaveIdentifier {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    SlaveIdentifier other = (SlaveIdentifier) obj;
+    NodeSlaveIdentifier other = (NodeSlaveIdentifier) obj;
     if (nodeName == null) {
       if (other.nodeName != null)
         return false;

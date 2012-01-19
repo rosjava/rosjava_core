@@ -24,6 +24,8 @@ import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.ros.internal.node.server.master.MasterServer;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +35,6 @@ import org.ros.exception.ParameterClassCastException;
 import org.ros.exception.ParameterNotFoundException;
 import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.internal.node.NodeFactory;
-import org.ros.internal.node.server.MasterServer;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
@@ -57,7 +58,7 @@ public class ParameterTreeIntegrationTest {
 
   @Before
   public void setup() {
-    masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
+    masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
     masterServer.start();
     nodeFactory = new DefaultNodeFactory();
     nodeConfiguration = NodeConfiguration.newPrivate(masterServer.getUri());

@@ -35,6 +35,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -47,20 +48,20 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   private final MessageDeserializer<S> deserializer;
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final ImmutableMap<String, String> header;
-  private final ExecutorService executorService;
+  private final ScheduledExecutorService executorService;
 
   private TcpClientConnection tcpClientConnection;
 
   public static <S, T> DefaultServiceClient<S, T> newDefault(GraphName nodeName,
       ServiceDefinition serviceDefinition, MessageSerializer<S> serializer,
-      MessageDeserializer<T> deserializer, ExecutorService executorService) {
+      MessageDeserializer<T> deserializer, ScheduledExecutorService executorService) {
     return new DefaultServiceClient<S, T>(nodeName, serviceDefinition, serializer, deserializer,
         executorService);
   }
 
   private DefaultServiceClient(GraphName nodeName, ServiceDefinition serviceDefinition,
       MessageSerializer<T> serializer, MessageDeserializer<S> deserializer,
-      ExecutorService executorService) {
+      ScheduledExecutorService executorService) {
     this.serviceDefinition = serviceDefinition;
     this.serializer = serializer;
     this.deserializer = deserializer;
@@ -70,8 +71,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
             // TODO(damonkohler): Support non-persistent connections.
-            .put(ConnectionHeaderFields.PERSISTENT, "1")
-            .putAll(serviceDefinition.toHeader())
+            .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceDefinition.toHeader())
             .build();
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
   }

@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
@@ -29,74 +29,93 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * All information needed to identify a publisher.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class PublisherIdentifier {
 
-  private final SlaveIdentifier slaveIdentifier;
+  private final NodeSlaveIdentifier nodeSlaveIdentifier;
   private final TopicIdentifier topicIdentifier;
 
   public static Collection<PublisherIdentifier> newCollectionFromUris(
       Collection<URI> publisherUris, TopicDefinition topicDefinition) {
     Set<PublisherIdentifier> publishers = Sets.newHashSet();
     for (URI uri : publisherUris) {
-      SlaveIdentifier slaveIdentifier = new SlaveIdentifier(null, uri);
+      NodeSlaveIdentifier slaveIdentifier = new NodeSlaveIdentifier(null, uri);
       publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition.toIdentifier()));
     }
     return publishers;
   }
 
-  public static PublisherIdentifier
-      newFromStrings(String nodeName, String uri, String topicName) {
-    return new PublisherIdentifier(SlaveIdentifier.newFromStrings(nodeName, uri),
+  public static PublisherIdentifier newFromStrings(String nodeName, String uri, String topicName) {
+    return new PublisherIdentifier(NodeSlaveIdentifier.newFromStrings(nodeName, uri),
         TopicIdentifier.newFromString(topicName));
   }
 
-  public PublisherIdentifier(SlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
+  public PublisherIdentifier(NodeSlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
     Preconditions.checkNotNull(slaveIdentifier);
     Preconditions.checkNotNull(topicIdentifier);
-    this.slaveIdentifier = slaveIdentifier;
+    this.nodeSlaveIdentifier = slaveIdentifier;
     this.topicIdentifier = topicIdentifier;
   }
 
   public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>()
-        .putAll(slaveIdentifier.toHeader())
-        .putAll(topicIdentifier.toHeader())
-        .build();
-  }
-  
-  public SlaveIdentifier getSlaveIdentifier() {
-    return slaveIdentifier;
-  }
-  
-  public GraphName getSlaveName() {
-    return slaveIdentifier.getNodeName();
+    return new ImmutableMap.Builder<String, String>().putAll(nodeSlaveIdentifier.toHeader())
+        .putAll(topicIdentifier.toHeader()).build();
   }
 
-  public URI getSlaveUri() {
-    return slaveIdentifier.getUri();
+  public NodeSlaveIdentifier getNodeSlaveIdentifier() {
+    return nodeSlaveIdentifier;
   }
 
+  /**
+   * Get the name of the node where the slave for this publisher lives.
+   * 
+   * @return
+   */
+  public GraphName getNodeSlaveName() {
+    return nodeSlaveIdentifier.getNodeName();
+  }
+
+  /**
+   * Get the URL for the slave server on the node which contains this publisher.
+   * 
+   * @return
+   */
+  public URI getNodeSlaveUri() {
+    return nodeSlaveIdentifier.getUri();
+  }
+
+  /**
+   * Get the {@link TopicIdentifier} for the publisher's topic.
+   * 
+   * @return
+   */
   public TopicIdentifier getTopicIdentifier() {
     return topicIdentifier;
   }
 
+  /**
+   * Get the name of the topic for the publisher.
+   * 
+   * @return
+   */
   public GraphName getTopicName() {
     return topicIdentifier.getName();
   }
 
   @Override
   public String toString() {
-    return "PublisherIdentifier<" + slaveIdentifier + ", " + topicIdentifier + ">";
+    return "PublisherIdentifier<" + nodeSlaveIdentifier + ", " + topicIdentifier + ">";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((slaveIdentifier == null) ? 0 : slaveIdentifier.hashCode());
-    result = prime * result + ((topicIdentifier == null) ? 0 : topicIdentifier.hashCode());
+    result = prime * result + nodeSlaveIdentifier.hashCode();
+    result = prime * result + topicIdentifier.hashCode();
     return result;
   }
 
@@ -109,15 +128,9 @@ public class PublisherIdentifier {
     if (getClass() != obj.getClass())
       return false;
     PublisherIdentifier other = (PublisherIdentifier) obj;
-    if (slaveIdentifier == null) {
-      if (other.slaveIdentifier != null)
-        return false;
-    } else if (!slaveIdentifier.equals(other.slaveIdentifier))
+    if (!nodeSlaveIdentifier.equals(other.nodeSlaveIdentifier))
       return false;
-    if (topicIdentifier == null) {
-      if (other.topicIdentifier != null)
-        return false;
-    } else if (!topicIdentifier.equals(other.topicIdentifier))
+    if (!topicIdentifier.equals(other.topicIdentifier))
       return false;
     return true;
   }

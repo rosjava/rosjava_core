@@ -16,9 +16,10 @@
 
 package org.ros;
 
+import org.ros.internal.node.server.master.MasterServer;
+
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
-import org.ros.internal.node.server.MasterServer;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;

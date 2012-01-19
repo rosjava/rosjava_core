@@ -56,14 +56,6 @@ public interface NodeMainExecutor {
   void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration);
 
   /**
-   * Executes a {@link Runnable} using this {@link NodeMainExecutor}'s
-   * {@link ExecutorService}.
-   * 
-   * @see ExecutorService#execute(Runnable)
-   */
-  void execute(Runnable runnable);
-
-  /**
    * Shuts down the supplied {@link NodeMain} (i.e.
    * {@link NodeMain#onShutdown(Node)} will be called). This does not
    * necessarily shut down the {@link Node} that is associated with the

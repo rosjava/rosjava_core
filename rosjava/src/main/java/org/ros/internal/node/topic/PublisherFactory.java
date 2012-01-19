@@ -16,24 +16,26 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
+ * A factory for {@link Publisher} instances.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class PublisherFactory {
 
   private final TopicManager topicManager;
-  private final ExecutorService executorService;
-  private final SlaveIdentifier slaveIdentifier;
+  private final ScheduledExecutorService executorService;
+  private final NodeSlaveIdentifier slaveIdentifier;
 
-  public PublisherFactory(SlaveIdentifier slaveIdentifier, TopicManager topicManager,
-      ExecutorService executorService) {
+  public PublisherFactory(NodeSlaveIdentifier slaveIdentifier, TopicManager topicManager,
+      ScheduledExecutorService executorService) {
     this.slaveIdentifier = slaveIdentifier;
     this.topicManager = topicManager;
     this.executorService = executorService;

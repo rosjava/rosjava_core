@@ -16,12 +16,12 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.topic.DefaultSubscriberListener;
 import org.ros.node.topic.Subscriber;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * A factory for {@link Subscriber} instances.
@@ -30,12 +30,12 @@ import java.util.concurrent.ExecutorService;
  */
 public class SubscriberFactory {
 
-  private final SlaveIdentifier slaveIdentifier;
+  private final NodeSlaveIdentifier slaveIdentifier;
   private final TopicManager topicManager;
-  private final ExecutorService executorService;
+  private final ScheduledExecutorService executorService;
 
-  public SubscriberFactory(SlaveIdentifier slaveIdentifier, TopicManager topicManager,
-      ExecutorService executorService) {
+  public SubscriberFactory(NodeSlaveIdentifier slaveIdentifier, TopicManager topicManager,
+      ScheduledExecutorService executorService) {
     this.slaveIdentifier = slaveIdentifier;
     this.topicManager = topicManager;
     this.executorService = executorService;

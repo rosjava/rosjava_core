@@ -20,6 +20,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.ros.internal.node.server.master.MasterServer;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -27,7 +30,6 @@ import org.ros.address.BindAddress;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.internal.node.NodeFactory;
-import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.RepeatingPublisher;
 import org.ros.message.MessageListener;
@@ -36,11 +38,13 @@ import org.ros.node.NodeConfiguration;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Make sure publishers can talk with subscribers over a network connection.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TopicIntegrationTest {
@@ -48,16 +52,22 @@ public class TopicIntegrationTest {
   private MasterServer masterServer;
   private NodeFactory nodeFactory;
   private NodeConfiguration nodeConfiguration;
-  private ExecutorService executorService;
+  private ScheduledExecutorService executorService;
 
   @Before
   public void setUp() {
-    executorService = Executors.newCachedThreadPool();
-    masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
+    executorService = Executors.newScheduledThreadPool(50);
+    masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
     masterServer.start();
     nodeConfiguration =
         NodeConfiguration.newPrivate(masterServer.getUri()).setExecutorService(executorService);
     nodeFactory = new DefaultNodeFactory();
+  }
+
+  @After
+  public void teardown() {
+    executorService.shutdown();
+    masterServer.shutdown();
   }
 
   @Test
@@ -99,7 +109,7 @@ public class TopicIntegrationTest {
             executorService);
     repeatingPublisher.start();
 
-    assertTrue(messageReceived.await(1, TimeUnit.SECONDS));
+    assertTrue(messageReceived.await(10, TimeUnit.SECONDS));
 
     repeatingPublisher.cancel();
     publisher.shutdown();
@@ -109,7 +119,9 @@ public class TopicIntegrationTest {
   /**
    * This is a regression test.
    * 
-   * @see <a href="http://answers.ros.org/question/3591/rosjava-subscriber-unreliable">bug report</a>
+   * @see <a
+   *      href="http://answers.ros.org/question/3591/rosjava-subscriber-unreliable">bug
+   *      report</a>
    * 
    * @throws InterruptedException
    */
@@ -231,7 +243,7 @@ public class TopicIntegrationTest {
       }
     };
     executorService.execute(publisherLoop);
-    assertTrue(listener.await(1, TimeUnit.SECONDS));
+    assertTrue(listener.await(10, TimeUnit.SECONDS));
     publisherLoop.cancel();
 
     publisherNode.shutdown();

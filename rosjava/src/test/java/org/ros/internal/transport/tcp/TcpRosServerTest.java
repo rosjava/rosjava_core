@@ -29,19 +29,19 @@ import org.ros.address.InetAddressFactory;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class TcpRosServerTest {
-  private ExecutorService executorService;
+  private ScheduledExecutorService executorService;
 	
   @Before
   public void setup() {
-	executorService = Executors.newCachedThreadPool();
+	executorService = Executors.newScheduledThreadPool(10);
   }
 
   @After

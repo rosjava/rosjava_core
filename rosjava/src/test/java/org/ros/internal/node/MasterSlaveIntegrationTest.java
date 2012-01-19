@@ -19,9 +19,7 @@ package org.ros.internal.node;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.net.URI;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import org.ros.internal.node.server.master.MasterServer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,11 +30,14 @@ import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.response.Response;
-import org.ros.internal.node.server.MasterServer;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.namespace.GraphName;
+
+import java.net.URI;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -47,11 +48,11 @@ public class MasterSlaveIntegrationTest {
   private MasterClient masterClient;
   private SlaveServer slaveServer;
   private SlaveClient slaveClient;
-  private ExecutorService executorService;
+  private ScheduledExecutorService executorService;
 
   @Before
   public void setUp() {
-    executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newScheduledThreadPool(10);
     masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());

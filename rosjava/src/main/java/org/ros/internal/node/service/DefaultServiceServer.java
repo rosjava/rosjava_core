@@ -38,7 +38,7 @@ import org.ros.node.service.ServiceServerListener;
 
 import java.net.URI;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Default implementation of a {@link ServiceServer}.
@@ -59,7 +59,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
 
   public DefaultServiceServer(ServiceDefinition definition, MessageDeserializer<T> deserializer,
       MessageSerializer<S> serializer, ServiceResponseBuilder<T, S> responseBuilder,
-      AdvertiseAddress advertiseAddress, ExecutorService executorService) {
+      AdvertiseAddress advertiseAddress, ScheduledExecutorService executorService) {
     this.definition = definition;
     this.deserializer = deserializer;
     this.serializer = serializer;
@@ -128,7 +128,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   public ChannelHandler newRequestHandler() {
     return new ServiceRequestHandler<T, S>(deserializer, serializer, responseBuilder);
   }
- 
+
   /**
    * Signal all {@link ServiceServerListener}s that the {@link ServiceServer}
    * has been successfully registered with the master.
@@ -162,8 +162,8 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
       }
     });
   }
-  
-   /**
+
+  /**
    * Signal all {@link ServiceServerListener}s that the {@link ServiceServer}
    * has been successfully unregistered with the master.
    * 
@@ -196,7 +196,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
       }
     });
   }
- 
+
   @Override
   public void shutdown() {
     throw new UnsupportedOperationException();

@@ -37,6 +37,7 @@ import org.ros.time.TimeProvider;
 
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * A node in the ROS graph.
@@ -242,15 +243,15 @@ public interface Node {
 
   /**
    * Executes a {@link Runnable} using this {@link Node}'s
-   * {@link ExecutorService}.
+   * {@link ScheduledExecutorService}.
    * 
-   * @see ExecutorService#execute(Runnable)
+   * @see ScheduledExecutorService#execute(Runnable)
    */
   void execute(Runnable runnable);
 
   /**
    * Executes a {@link CancellableLoop} using the {@link Node}'s
-   * {@link ExecutorService}. The {@link CancellableLoop} will be canceled when
+   * {@link ScheduledExecutorService}. The {@link CancellableLoop} will be canceled when
    * the {@link Node} starts shutting down.
    * 
    * <p>

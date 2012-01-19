@@ -129,11 +129,6 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
   }
 
   @Override
-  public void execute(Runnable runnable) {
-    executorService.execute(runnable);
-  }
-
-  @Override
   public void shutdownNodeMain(NodeMain nodeMain) {
     Node node = nodeMains.inverse().get(nodeMain);
     if (node != null) {

@@ -44,16 +44,16 @@ public class ParameterServer {
   private static final Log log = LogFactory.getLog(ParameterServer.class);
 
   private final Map<String, Object> tree;
-  private final Multimap<GraphName, SlaveIdentifier> subscribers;
+  private final Multimap<GraphName, NodeSlaveIdentifier> subscribers;
   private final GraphName masterName;
 
   public ParameterServer() {
     tree = Maps.newConcurrentMap();
-    subscribers = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, SlaveIdentifier>create());
+    subscribers = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, NodeSlaveIdentifier>create());
     masterName = new GraphName("/master");
   }
 
-  public void subscribe(GraphName name, SlaveIdentifier slaveIdentifier) {
+  public void subscribe(GraphName name, NodeSlaveIdentifier slaveIdentifier) {
     subscribers.put(name, slaveIdentifier);
   }
 
@@ -107,7 +107,7 @@ public class ParameterServer {
   private <T> void update(GraphName name, T value, Updater updater) {
     setValue(name, value);
     synchronized (subscribers) {
-      for (SlaveIdentifier slaveIdentifier : subscribers.get(name)) {
+      for (NodeSlaveIdentifier slaveIdentifier : subscribers.get(name)) {
         SlaveClient client = new SlaveClient(masterName, slaveIdentifier.getUri());
         try {
           updater.update(client);

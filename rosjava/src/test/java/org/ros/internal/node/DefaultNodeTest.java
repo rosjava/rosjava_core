@@ -30,7 +30,7 @@ import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
-import org.ros.internal.node.server.MasterServer;
+import org.ros.internal.node.server.master.MasterServer;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.MessageListener;
@@ -47,11 +47,14 @@ import org.ros.node.topic.Subscriber;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.concurrent.ExecutorService;
+import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Tests for the {@link DefaultNode}.
+ * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
 public class DefaultNodeTest {
@@ -60,7 +63,7 @@ public class DefaultNodeTest {
   private NodeConfiguration privateNodeConfiguration;
   private NodeFactory nodeFactory;
   private URI masterUri;
-  private ExecutorService executorService;
+  private ScheduledExecutorService executorService;
 
   void checkHostName(String hostName) {
     assertTrue(!hostName.equals("0.0.0.0"));
@@ -69,7 +72,7 @@ public class DefaultNodeTest {
 
   @Before
   public void setUp() throws Exception {
-    executorService = Executors.newCachedThreadPool();
+    executorService = Executors.newScheduledThreadPool(10);
     masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
     masterUri = masterServer.getUri();
@@ -156,16 +159,18 @@ public class DefaultNodeTest {
     assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     // There are now two registered publishers /rosout and /foo.
-    assertEquals(2, masterServer.getRegisteredPublishers().size());
-    assertEquals(1, masterServer.getRegisteredSubscribers().size());
+    List<Object> systemState = masterServer.getSystemState();
+    assertEquals(2, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_PUBLISHERS)).size());
+    assertEquals(1, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_SUBSCRIBERS)).size());
 
     node.shutdown();
 
     assertTrue(publisherListener.awaitShutdown(1, TimeUnit.SECONDS));
     assertTrue(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
 
-    assertEquals(0, masterServer.getRegisteredPublishers().size());
-    assertEquals(0, masterServer.getRegisteredSubscribers().size());
+    systemState = masterServer.getSystemState();
+    assertEquals(0, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_PUBLISHERS)).size());
+    assertEquals(0, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_SUBSCRIBERS)).size());
   }
 
   @Test

@@ -33,6 +33,12 @@ import java.util.concurrent.TimeUnit;
 public interface Subscriber<T> extends Topic {
 
   /**
+   * The message type given when a {@link Subscriber} chooses not to commit to a
+   * specific message type.
+   */
+  public static final String TOPIC_MESSAGE_TYPE_WILDCARD = "*";
+
+  /**
    * @param listener
    *          this {@link MessageListener} will be called for every new message
    *          received

@@ -17,7 +17,7 @@
 package org.ros.node;
 
 import org.ros.internal.node.parameter.DefaultParameterTree;
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.parameter.ParameterListener;
@@ -36,7 +36,7 @@ public class AnonymousParmeterTree implements ParameterTree {
   private ParameterTree parameterTree;
 
   public AnonymousParmeterTree(URI masterUri) {
-    SlaveIdentifier slaveIdentifier = new SlaveIdentifier(new GraphName("invalid"), null);
+    NodeSlaveIdentifier slaveIdentifier = new NodeSlaveIdentifier(new GraphName("invalid"), null);
     parameterTree =
         DefaultParameterTree.newFromSlaveIdentifier(slaveIdentifier, masterUri, NameResolver.newRoot(), null);
   }

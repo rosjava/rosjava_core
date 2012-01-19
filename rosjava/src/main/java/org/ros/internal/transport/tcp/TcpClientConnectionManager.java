@@ -36,7 +36,7 @@ import org.ros.exception.RosRuntimeException;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -53,7 +53,7 @@ public class TcpClientConnectionManager {
   private final ChannelBufferFactory channelBufferFactory;
   private final Collection<TcpClientConnection> tcpClientConnections;
 
-  public TcpClientConnectionManager(ExecutorService executorService) {
+  public TcpClientConnectionManager(ScheduledExecutorService executorService) {
     channelFactory = new NioClientSocketChannelFactory(executorService, executorService);
     channelGroup = new DefaultChannelGroup();
     channelBufferFactory = new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN);

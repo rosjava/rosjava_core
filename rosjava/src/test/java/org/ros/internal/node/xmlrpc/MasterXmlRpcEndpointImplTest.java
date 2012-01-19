@@ -18,6 +18,7 @@ package org.ros.internal.node.xmlrpc;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,19 +28,18 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 import org.ros.internal.node.response.StatusCode;
-import org.ros.internal.node.server.MasterServer;
-import org.ros.internal.node.server.SlaveIdentifier;
-import org.ros.internal.node.topic.PublisherIdentifier;
-import org.ros.internal.node.topic.SubscriberIdentifier;
+import org.ros.internal.node.server.master.MasterServer;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
 import java.util.List;
 
 /**
+ * Tests for the {@link MasterXmlRpcEndpointImpl}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterImplTest {
+public class MasterXmlRpcEndpointImplTest {
 
   @Test
   public void testGetUri() throws Exception {
@@ -55,18 +55,13 @@ public class MasterImplTest {
   @Test
   public void testLookupNodeExisting() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
-    final SlaveIdentifier slaveIdentifier = SlaveIdentifier.newFromStrings("/foo", "http://bar");
-    when(mockMaster.lookupNode(argThat(new ArgumentMatcher<GraphName>() {
-      @Override
-      public boolean matches(Object argument) {
-        GraphName graphName = (GraphName) argument;
-        return graphName.equals(slaveIdentifier.getNodeName());
-      }
-    }))).thenReturn(slaveIdentifier);
+    final GraphName nodeName = new GraphName("/foo");
+    final URI nodeSlaveUri = new URI("http://bar");
+    when(mockMaster.lookupNode(eq(nodeName))).thenReturn(nodeSlaveUri);
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
-    List<Object> response = master.lookupNode("/caller", slaveIdentifier.getNodeName().toString());
+    List<Object> response = master.lookupNode("/caller", nodeName.toString());
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
-    assertEquals(slaveIdentifier.getUri().toString(), response.get(2));
+    assertEquals(nodeSlaveUri.toString(), response.get(2));
   }
 
   @Test
@@ -82,8 +77,10 @@ public class MasterImplTest {
   @Test
   public void testRegisterPublisherWithNoSubscribers() {
     MasterServer mockMaster = mock(MasterServer.class);
-    when(mockMaster.registerPublisher(Matchers.<PublisherIdentifier>any(), Matchers.<String>any()))
-        .thenReturn(Lists.<SubscriberIdentifier>newArrayList());
+    when(
+        mockMaster.registerPublisher(Matchers.<GraphName>any(), Matchers.<URI>any(),
+            Matchers.<GraphName>any(), Matchers.<String>any())).thenReturn(
+        Lists.<URI>newArrayList());
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
     List<Object> response = master.registerPublisher("/caller", "/foo", "/bar", "http://baz");
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
@@ -91,40 +88,31 @@ public class MasterImplTest {
   }
 
   @Test
-  public void testRegisterPublisher() {
+  public void testRegisterPublisher() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
+    final GraphName nodeName = new GraphName("/slave");
+    final URI nodeSlaveUri = new URI("http://api");
+    final GraphName topicName = new GraphName("/topic");
     final String messageType = "/topicType";
-    final SubscriberIdentifier subscriberIdentifier =
-        SubscriberIdentifier.newFromStrings("/slave", "http://api", "/topic");
-    when(mockMaster.registerPublisher(argThat(new ArgumentMatcher<PublisherIdentifier>() {
-      @Override
-      public boolean matches(Object argument) {
-        PublisherIdentifier publisherIdentifier = (PublisherIdentifier) argument;
-        return publisherIdentifier.getTopicIdentifier().equals(
-            subscriberIdentifier.getTopicIdentifier())
-            && publisherIdentifier.getSlaveIdentifier().equals(
-                subscriberIdentifier.getSlaveIdentifier());
-      }
-    }), argThat(new ArgumentMatcher<String>() {
-      @Override
-      public boolean matches(Object argument) {
-        String messageTypeArg = (String) argument;
-        return messageType.equals(messageTypeArg);
-      }
-    }))).thenReturn(Lists.<SubscriberIdentifier>newArrayList(subscriberIdentifier));
+    when(
+        mockMaster
+            .registerPublisher(eq(nodeName), eq(nodeSlaveUri), eq(topicName), eq(messageType)))
+        .thenReturn(Lists.<URI>newArrayList(nodeSlaveUri));
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
     List<Object> response =
-        master.registerPublisher("/slave", "/topic", messageType, "http://api");
+        master.registerPublisher(nodeName.toString(), topicName.toString(), messageType,
+            nodeSlaveUri.toString());
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
-    assertEquals(Lists.newArrayList(subscriberIdentifier.getUri().toString()), response.get(2));
+    assertEquals(Lists.newArrayList(nodeSlaveUri.toString()), response.get(2));
   }
 
   @Test
   public void testRegisterSubscriberWithNoSubscribers() {
     MasterServer mockMaster = mock(MasterServer.class);
     when(
-        mockMaster.registerSubscriber(Matchers.<SubscriberIdentifier>any(), Matchers.<String>any()))
-        .thenReturn(Lists.<PublisherIdentifier>newArrayList());
+        mockMaster.registerSubscriber(Matchers.<GraphName>any(), Matchers.<URI>any(),
+            Matchers.<GraphName>any(), Matchers.<String>any())).thenReturn(
+        Lists.<URI>newArrayList());
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
     List<Object> response = master.registerSubscriber("/caller", "/foo", "/bar", "http://baz");
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
@@ -132,30 +120,21 @@ public class MasterImplTest {
   }
 
   @Test
-  public void testRegisterSubscriber() {
+  public void testRegisterSubscriber() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
-    final String topicType = "/topicType";
-    final PublisherIdentifier publisherIdentifier =
-        PublisherIdentifier.newFromStrings("/slave", "http://api", "/topic");
-    when(mockMaster.registerSubscriber(argThat(new ArgumentMatcher<SubscriberIdentifier>() {
-      @Override
-      public boolean matches(Object argument) {
-        SubscriberIdentifier subscriberIdentifier = (SubscriberIdentifier) argument;
-        return subscriberIdentifier.getTopicIdentifier().equals(
-            subscriberIdentifier.getTopicIdentifier())
-            && subscriberIdentifier.getSlaveIdentifier().equals(
-                subscriberIdentifier.getSlaveIdentifier());
-      }
-    }), argThat(new ArgumentMatcher<String>() {
-      @Override
-      public boolean matches(Object argument) {
-        String topicTypeArg = (String) argument;
-        return topicType.equals(topicTypeArg);
-      }
-    }))).thenReturn(Lists.<PublisherIdentifier>newArrayList(publisherIdentifier));
+    final GraphName nodeName = new GraphName("/slave");
+    final URI nodeSlaveUri = new URI("http://api");
+    final GraphName topicName = new GraphName("/topic");
+    final String topicMessageType = "/topicType";
+
+    when(
+        mockMaster.registerSubscriber(eq(nodeName), eq(nodeSlaveUri), eq(topicName),
+            eq(topicMessageType))).thenReturn(Lists.<URI>newArrayList(nodeSlaveUri));
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
-    List<Object> response = master.registerSubscriber("/slave", "/topic", topicType, "http://api");
+    List<Object> response =
+        master.registerSubscriber(nodeName.toString(), topicName.toString(), topicMessageType,
+            nodeSlaveUri.toString());
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));
-    assertEquals(Lists.newArrayList(publisherIdentifier.getSlaveUri().toString()), response.get(2));
+    assertEquals(Lists.newArrayList(nodeSlaveUri.toString()), response.get(2));
   }
 }

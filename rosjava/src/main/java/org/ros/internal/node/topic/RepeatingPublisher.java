@@ -23,10 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.node.topic.Publisher;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
+ * Repeatedly send a message out on a given {@link Publisher}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class RepeatingPublisher<MessageType> {
@@ -38,18 +39,18 @@ public class RepeatingPublisher<MessageType> {
   private final MessageType message;
   private final int frequency;
   private final RepeatingPublisherLoop runnable;
-  
+
   /**
    * Executor used to run the {@link RepeatingPublisherLoop}.
    */
-  private final Executor executorService;
+  private final ScheduledExecutorService executorService;
 
   private final class RepeatingPublisherLoop extends CancellableLoop {
     @Override
     public void loop() throws InterruptedException {
       publisher.publish(message);
       if (DEBUG) {
-        log.info("Published message: " + message);
+        log.info(String.format("Published message %s to publisher %s ", message, publisher));
       }
       Thread.sleep((long) (1000.0d / frequency));
     }
@@ -62,7 +63,7 @@ public class RepeatingPublisher<MessageType> {
    *          the frequency of publication in Hz
    */
   public RepeatingPublisher(Publisher<MessageType> publisher, MessageType message, int frequency,
-	  ExecutorService executorService) {
+      ScheduledExecutorService executorService) {
     this.publisher = publisher;
     this.message = message;
     this.frequency = frequency;

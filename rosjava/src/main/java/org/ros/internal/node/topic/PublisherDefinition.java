@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
@@ -34,7 +34,7 @@ public class PublisherDefinition {
   private final PublisherIdentifier publisherIdentifier;
   private final TopicDefinition topicDefinition;
 
-  public static PublisherDefinition newFromSlaveIdentifier(SlaveIdentifier slaveIdentifier,
+  public static PublisherDefinition newFromSlaveIdentifier(NodeSlaveIdentifier slaveIdentifier,
       TopicDefinition topicDefinition) {
     return new PublisherDefinition(new PublisherIdentifier(slaveIdentifier,
         topicDefinition.toIdentifier()), topicDefinition);
@@ -59,16 +59,16 @@ public class PublisherDefinition {
     return ImmutableMap.copyOf(header);
   }
 
-  public SlaveIdentifier getSlaveIdentifier() {
-    return publisherIdentifier.getSlaveIdentifier();
+  public NodeSlaveIdentifier getSlaveIdentifier() {
+    return publisherIdentifier.getNodeSlaveIdentifier();
   }
 
   public GraphName getSlaveName() {
-    return publisherIdentifier.getSlaveIdentifier().getNodeName();
+    return publisherIdentifier.getNodeSlaveIdentifier().getNodeName();
   }
 
   public URI getSlaveUri() {
-    return publisherIdentifier.getSlaveUri();
+    return publisherIdentifier.getNodeSlaveUri();
   }
 
   public GraphName getTopicName() {

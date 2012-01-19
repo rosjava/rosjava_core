@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2012 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,26 +14,25 @@
  * the License.
  */
 
-package org.ros.internal.node.topic;
-
-import org.ros.namespace.GraphName;
+package org.ros.internal.node.server.master;
 
 /**
- * Represents a ROS topic.
+ * Listen for master registration events from the
+ * {@link MasterRegistrationManagerImpl}.
  * 
- * @see http://www.ros.org/wiki/Topics
- * 
- * @author damonkohler@google.com (Damon Kohler)
+ * @author Keith M. Hughes
  */
-public interface Topic {
-
+public interface MasterRegistrationListener {
+  
   /**
-   * @return the name of the subscribed topic
+   * A node is being replaced.
+   * 
+   * <p>
+   * The information object is about to be trashed, so it should not be hung
+   * onto.
+   * 
+   * @param nodeInfo
+   *          the node being replaced
    */
-  GraphName getTopicName();
-
-  /**
-   * @return the message type (e.g. "std_msgs/String")
-   */
-  String getTopicMessageType();
+  void onNodeReplacement(NodeRegistrationInfo nodeInfo);
 }

@@ -26,7 +26,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
-import org.ros.internal.node.server.SlaveIdentifier;
+import org.ros.internal.node.server.NodeSlaveIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.OutgoingMessageQueue;
@@ -37,7 +37,7 @@ import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
 
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -63,10 +63,10 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
    */
   private final OutgoingMessageQueue<T> outgoingMessageQueue;
   private final ListenerCollection<PublisherListener<T>> listeners;
-  private final SlaveIdentifier slaveIdentifier;
+  private final NodeSlaveIdentifier slaveIdentifier;
 
-  public DefaultPublisher(SlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
-      MessageSerializer<T> serializer, ExecutorService executorService) {
+  public DefaultPublisher(NodeSlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
+      MessageSerializer<T> serializer, ScheduledExecutorService executorService) {
     super(topicDefinition);
     this.slaveIdentifier = slaveIdentifier;
     outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
@@ -160,13 +160,13 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
     String incomingType = incomingHeader.get(ConnectionHeaderFields.TYPE);
     String expectedType = topicDefinitionHeader.get(ConnectionHeaderFields.TYPE);
     boolean messageTypeMatches =
-        incomingType.equals(expectedType) || incomingType.equals(WILDCARD_MESSAGE_TYPE);
+        incomingType.equals(expectedType) || incomingType.equals(Subscriber.TOPIC_MESSAGE_TYPE_WILDCARD);
     Preconditions.checkState(messageTypeMatches, "Unexpected message type " + incomingType + " != "
         + expectedType);
     String incomingChecksum = incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
     String expectedChecksum = topicDefinitionHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
     boolean checksumMatches =
-        incomingChecksum.equals(expectedChecksum) || incomingChecksum.equals(WILDCARD_MESSAGE_TYPE);
+        incomingChecksum.equals(expectedChecksum) || incomingChecksum.equals(Subscriber.TOPIC_MESSAGE_TYPE_WILDCARD);
     Preconditions.checkState(checksumMatches, "Unexpected message MD5 " + incomingChecksum + " != "
         + expectedChecksum);
     Map<String, String> header = Maps.newHashMap();

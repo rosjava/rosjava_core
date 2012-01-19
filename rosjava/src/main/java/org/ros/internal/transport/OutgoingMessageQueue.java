@@ -30,7 +30,7 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageSerializer;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -58,7 +58,7 @@ public class OutgoingMessageQueue<MessageType> {
   }
 
   public OutgoingMessageQueue(MessageSerializer<MessageType> serializer,
-      ExecutorService executorService) {
+      ScheduledExecutorService executorService) {
     this.serializer = serializer;
     messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
     channelGroup = new DefaultChannelGroup();

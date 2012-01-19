@@ -30,17 +30,17 @@ import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl;
+import org.ros.internal.system.Process;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpRosProtocolDescription;
 import org.ros.internal.transport.tcp.TcpRosServer;
 import org.ros.namespace.GraphName;
 
-import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -58,7 +58,7 @@ public class SlaveServer extends NodeServer {
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
       AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master, TopicManager topicManager,
       ServiceManager serviceManager, ParameterManager parameterManager,
-      ExecutorService executorService) {
+      ScheduledExecutorService executorService) {
     super(xmlRpcBindAddress, xmlRpcAdvertiseAddress);
     this.nodeName = nodeName;
     this.masterClient = master;
@@ -117,29 +117,7 @@ public class SlaveServer extends NodeServer {
    *         {@link UnsupportedOperationException} otherwise.
    */
   public int getPid() {
-    // NOTE(kwc): Java has no standard way of getting PID. MF.getName()
-    // returns '1234@localhost'.
-    try {
-      String mxName = ManagementFactory.getRuntimeMXBean().getName();
-      int idx = mxName.indexOf('@');
-      if (idx > 0) {
-        try {
-          return Integer.parseInt(mxName.substring(0, idx));
-        } catch (NumberFormatException e) {
-          return 0;
-        }
-      }
-    } catch (NoClassDefFoundError unused) {
-      // Android does not support ManagementFactory. Try to get the PID on
-      // Android.
-      try {
-        return (Integer) Class.forName("android.os.Process").getMethod("myPid").invoke(null);
-      } catch (Exception unused1) {
-        // Ignore this exception and fall through to the
-        // UnsupportedOperationException.
-      }
-    }
-    throw new UnsupportedOperationException();
+    return Process.getPid();
   }
 
   public List<DefaultSubscriber<?>> getSubscriptions() {
@@ -189,9 +167,9 @@ public class SlaveServer extends NodeServer {
   }
 
   /**
-   * @return a {@link SlaveIdentifier} for this {@link SlaveServer}
+   * @return a {@link NodeSlaveIdentifier} for this {@link SlaveServer}
    */
-  public SlaveIdentifier toSlaveIdentifier() {
-    return new SlaveIdentifier(nodeName, getUri());
+  public NodeSlaveIdentifier toSlaveIdentifier() {
+    return new NodeSlaveIdentifier(nodeName, getUri());
   }
 }
