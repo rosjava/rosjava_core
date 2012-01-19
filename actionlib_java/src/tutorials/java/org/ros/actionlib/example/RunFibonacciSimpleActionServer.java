@@ -22,8 +22,9 @@ public class RunFibonacciSimpleActionServer {
       FibonacciSimpleActionServerCallbacks impl = new FibonacciSimpleActionServerCallbacks();
 
       FibonacciActionSpec spec = new FibonacciActionSpec();
+      final String nodeName = "fibonacci_server";
       final FibonacciSimpleActionServer sas =
-          spec.buildSimpleActionServer("fibonacci_server", impl, true);
+          spec.buildSimpleActionServer(nodeName, impl, true);
 
       NodeConfiguration configuration = NodeConfiguration.newPrivate();
 
@@ -46,7 +47,7 @@ public class RunFibonacciSimpleActionServer {
 
         @Override
         public GraphName getDefaultNodeName() {
-          throw new UnsupportedOperationException();
+          return new GraphName(nodeName);
         }
       }, configuration);
     } catch (Exception e) {
