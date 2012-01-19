@@ -145,10 +145,14 @@ public class GoalManager<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extend
    * @param goalHandle
    *          The GoalHandle that is to be removed
    */
-  public void deleteGoalHandle(
-      ClientGoalHandle<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> goalHandle) {
+  public
+      void
+      deleteGoalHandle(
+          ClientGoalHandle<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT> goalHandle) {
     actionClient.getNode().getLog().debug("[GoalManager] Deleting goal handle");
-    listOfGoalHandles.remove(goalHandle);
+    synchronized (listOfGoalHandles) {
+      listOfGoalHandles.remove(goalHandle);
+    }
   }
 
   /**
@@ -158,10 +162,14 @@ public class GoalManager<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extend
    * @param c
    *          A collection of GoalHandles which shall be removed
    */
-  public void deleteGoalHandles(
-      Collection<ClientGoalHandle<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>> c) {
+  public
+      void
+      deleteGoalHandles(
+          Collection<ClientGoalHandle<T_ACTION_FEEDBACK, T_ACTION_GOAL, T_ACTION_RESULT, T_FEEDBACK, T_GOAL, T_RESULT>> c) {
     actionClient.getNode().getLog().debug("[GoalManager] Deleting goal handles");
-    listOfGoalHandles.removeAll(c);
+    synchronized (listOfGoalHandles) {
+      listOfGoalHandles.removeAll(c);
+    }
   }
 
   /**
