@@ -16,33 +16,41 @@
 
 package org.ros;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.parameter.ParameterTree;
 
+import java.util.concurrent.TimeUnit;
+
 /**
+ * This is a base class for tests that sets up and tears down a {@link RosCore} and a
+ * {@link NodeMainExecutor}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosTest {
+@Ignore
+public abstract class RosTest {
 
   protected RosCore rosCore;
   protected ParameterTree parameters;
   protected NodeConfiguration nodeConfiguration;
   protected NodeMainExecutor nodeMainExecutor;
-  
+
   @Before
   public void setUp() throws InterruptedException {
     rosCore = RosCore.newPrivate();
     rosCore.start();
-    rosCore.awaitStart();
-
+    assertTrue(rosCore.awaitStart(1, TimeUnit.SECONDS));
     nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
     nodeConfiguration = NodeConfiguration.newPrivate(rosCore.getUri());
   }
-  
+
   @After
   public void tearDown() {
     nodeMainExecutor.shutdown();
