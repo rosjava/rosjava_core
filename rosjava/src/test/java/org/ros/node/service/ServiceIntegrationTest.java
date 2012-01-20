@@ -48,7 +48,7 @@ public class ServiceIntegrationTest extends RosTest {
   public void testPesistentServiceConnection() throws Exception {
     final CountDownServiceServerListener<AddTwoInts.Request, AddTwoInts.Response> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         ServiceServer<AddTwoInts.Request, AddTwoInts.Response> serviceServer =
@@ -81,7 +81,7 @@ public class ServiceIntegrationTest extends RosTest {
     countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS);
 
     final Holder<ServiceClient<AddTwoInts.Request, AddTwoInts.Response>> holder = Holder.newEmpty();
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         ServiceClient<AddTwoInts.Request, AddTwoInts.Response> serviceClient;
@@ -137,7 +137,7 @@ public class ServiceIntegrationTest extends RosTest {
     final String errorMessage = "Error!";
     final CountDownServiceServerListener<AddTwoInts.Request, AddTwoInts.Response> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         ServiceServer<AddTwoInts.Request, AddTwoInts.Response> serviceServer =
@@ -169,7 +169,7 @@ public class ServiceIntegrationTest extends RosTest {
     countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS);
 
     final Holder<ServiceClient<AddTwoInts.Request, AddTwoInts.Response>> holder = Holder.newEmpty();
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         ServiceClient<AddTwoInts.Request, AddTwoInts.Response> serviceClient;

@@ -47,7 +47,7 @@ public interface NodeMainExecutor {
    *          a {@link Collection} of {@link NodeListener}s to be added to the
    *          {@link Node} before it starts, can be {@code null}
    */
-  void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
+  void execute(NodeMain nodeMain, NodeConfiguration nodeConfiguration,
       Collection<NodeListener> nodeListeners);
 
   /**
@@ -60,7 +60,7 @@ public interface NodeMainExecutor {
    *          the {@link NodeConfiguration} that will be used to create the
    *          {@link Node}
    */
-  void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration);
+  void execute(NodeMain nodeMain, NodeConfiguration nodeConfiguration);
 
   /**
    * Shuts down the supplied {@link NodeMain} (i.e.

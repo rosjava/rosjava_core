@@ -108,7 +108,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
   }
 
   @Override
-  public void executeNodeMain(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration,
+  public void execute(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration,
       final Collection<NodeListener> nodeListeners) {
     // NOTE(damonkohler): To avoid a race condition, we have to make our copy
     // of the NodeConfiguration in the current thread.
@@ -135,8 +135,8 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
   }
 
   @Override
-  public void executeNodeMain(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
-    executeNodeMain(nodeMain, nodeConfiguration, null);
+  public void execute(NodeMain nodeMain, NodeConfiguration nodeConfiguration) {
+    execute(nodeMain, nodeConfiguration, null);
   }
 
   @Override

@@ -46,7 +46,7 @@ public class TopicIntegrationTest extends RosTest {
     final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
     helloMessage.data = "Hello, ROS!";
 
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         Publisher<org.ros.message.std_msgs.String> publisher =
@@ -70,7 +70,7 @@ public class TopicIntegrationTest extends RosTest {
     }, nodeConfiguration);
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         Subscriber<org.ros.message.std_msgs.String> subscriber =
@@ -118,7 +118,7 @@ public class TopicIntegrationTest extends RosTest {
     final CountDownSubscriberListener<org.ros.message.std_msgs.String> subscriberListener =
         CountDownSubscriberListener.newDefault();
     final CountDownLatch messageReceived = new CountDownLatch(1);
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         Subscriber<org.ros.message.std_msgs.String> subscriber =
@@ -149,7 +149,7 @@ public class TopicIntegrationTest extends RosTest {
 
     subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS);
 
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         Publisher<org.ros.message.std_msgs.String> publisher =
@@ -177,7 +177,7 @@ public class TopicIntegrationTest extends RosTest {
 
   @Test
   public void testAddDisconnectedPublisher() {
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         DefaultSubscriber<org.ros.message.std_msgs.String> subscriber =
@@ -231,7 +231,7 @@ public class TopicIntegrationTest extends RosTest {
 
   @Test
   public void testHeader() throws InterruptedException {
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(final Node node) {
         final Publisher<org.ros.message.test_ros.TestHeader> publisher =
@@ -267,7 +267,7 @@ public class TopicIntegrationTest extends RosTest {
     }, nodeConfiguration);
 
     final Listener listener = new Listener();
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         Subscriber<org.ros.message.test_ros.TestHeader> subscriber =

@@ -49,7 +49,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
   @Before
   public void setup() throws InterruptedException {
     final CountDownLatch latch = new CountDownLatch(1);
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         parameters = node.newParameterTree();
@@ -167,7 +167,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
   public void testParameterPubSub() throws InterruptedException {
     final CountDownLatch nodeLatch = new CountDownLatch(1);
     final CountDownLatch parameterLatch = new CountDownLatch(1);
-    nodeMainExecutor.executeNodeMain(new NodeMain() {
+    nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
         ParameterTree subscriberParameters = node.newParameterTree();
