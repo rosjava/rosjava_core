@@ -24,7 +24,7 @@ import org.ros.internal.node.client.ParameterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.ParameterServer;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.parameter.ParameterListener;
@@ -47,9 +47,9 @@ public class DefaultParameterTree implements ParameterTree {
   private final NameResolver resolver;
   private final ParameterManager parameterManager;
 
-  public static DefaultParameterTree newFromSlaveIdentifier(NodeSlaveIdentifier slaveIdentifier,
+  public static DefaultParameterTree newFromSlaveIdentifier(NodeIdentifier nodeIdentifier,
       URI masterUri, NameResolver resolver, ParameterManager parameterManager) {
-    ParameterClient client = new ParameterClient(slaveIdentifier, masterUri);
+    ParameterClient client = new ParameterClient(nodeIdentifier, masterUri);
     return new DefaultParameterTree(client, parameterManager, resolver);
   }
 

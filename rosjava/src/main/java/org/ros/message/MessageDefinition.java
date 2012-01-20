@@ -96,9 +96,11 @@ public class MessageDefinition {
 
   public Map<String, String> toHeader() {
     Preconditions.checkNotNull(md5Checksum);
-    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.TYPE, type)
+    return new ImmutableMap.Builder<String, String>()
+        .put(ConnectionHeaderFields.TYPE, type)
         .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum)
-        .put(ConnectionHeaderFields.MESSAGE_DEFINITION, definition).build();
+        .put(ConnectionHeaderFields.MESSAGE_DEFINITION, definition)
+        .build();
   }
 
   @Override

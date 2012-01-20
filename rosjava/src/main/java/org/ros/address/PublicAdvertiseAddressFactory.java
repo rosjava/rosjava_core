@@ -17,7 +17,7 @@
 package org.ros.address;
 
 /**
- * An {@link AdvertiseAddressFactory} which gets a public (non-loopback) address.
+ * An {@link AdvertiseAddressFactory} which creates public (non-loopback) addresses.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */

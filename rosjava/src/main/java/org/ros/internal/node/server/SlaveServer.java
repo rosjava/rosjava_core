@@ -45,7 +45,7 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveServer extends NodeServer {
+public class SlaveServer extends XmlRpcServer {
 
   private final GraphName nodeName;
   private final MasterClient masterClient;
@@ -167,9 +167,9 @@ public class SlaveServer extends NodeServer {
   }
 
   /**
-   * @return a {@link NodeSlaveIdentifier} for this {@link SlaveServer}
+   * @return a {@link NodeIdentifier} for this {@link SlaveServer}
    */
-  public NodeSlaveIdentifier toSlaveIdentifier() {
-    return new NodeSlaveIdentifier(nodeName, getUri());
+  public NodeIdentifier toSlaveIdentifier() {
+    return new NodeIdentifier(nodeName, getUri());
   }
 }

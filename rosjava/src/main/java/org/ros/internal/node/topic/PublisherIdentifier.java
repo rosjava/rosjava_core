@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
@@ -35,28 +35,28 @@ import java.util.Set;
  */
 public class PublisherIdentifier {
 
-  private final NodeSlaveIdentifier nodeSlaveIdentifier;
+  private final NodeIdentifier nodeSlaveIdentifier;
   private final TopicIdentifier topicIdentifier;
 
   public static Collection<PublisherIdentifier> newCollectionFromUris(
       Collection<URI> publisherUris, TopicDefinition topicDefinition) {
     Set<PublisherIdentifier> publishers = Sets.newHashSet();
     for (URI uri : publisherUris) {
-      NodeSlaveIdentifier slaveIdentifier = new NodeSlaveIdentifier(null, uri);
-      publishers.add(new PublisherIdentifier(slaveIdentifier, topicDefinition.toIdentifier()));
+      NodeIdentifier nodeIdentifier = new NodeIdentifier(null, uri);
+      publishers.add(new PublisherIdentifier(nodeIdentifier, topicDefinition.toIdentifier()));
     }
     return publishers;
   }
 
   public static PublisherIdentifier newFromStrings(String nodeName, String uri, String topicName) {
-    return new PublisherIdentifier(NodeSlaveIdentifier.newFromStrings(nodeName, uri),
+    return new PublisherIdentifier(NodeIdentifier.newFromStrings(nodeName, uri),
         TopicIdentifier.newFromString(topicName));
   }
 
-  public PublisherIdentifier(NodeSlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
-    Preconditions.checkNotNull(slaveIdentifier);
+  public PublisherIdentifier(NodeIdentifier nodeIdentifier, TopicIdentifier topicIdentifier) {
+    Preconditions.checkNotNull(nodeIdentifier);
     Preconditions.checkNotNull(topicIdentifier);
-    this.nodeSlaveIdentifier = slaveIdentifier;
+    this.nodeSlaveIdentifier = nodeIdentifier;
     this.topicIdentifier = topicIdentifier;
   }
 
@@ -65,7 +65,7 @@ public class PublisherIdentifier {
         .putAll(topicIdentifier.toHeader()).build();
   }
 
-  public NodeSlaveIdentifier getNodeSlaveIdentifier() {
+  public NodeIdentifier getNodeSlaveIdentifier() {
     return nodeSlaveIdentifier;
   }
 

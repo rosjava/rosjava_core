@@ -26,7 +26,7 @@ import org.ros.concurrent.Holder;
 import org.ros.concurrent.RetryingExecutorService;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.service.ServiceManagerListener;
@@ -61,7 +61,7 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
   private final ScheduledExecutorService executorService;
   private final RetryingExecutorService retryingExecutorService;
 
-  private NodeSlaveIdentifier slaveIdentifier;
+  private NodeIdentifier nodeIdentifier;
   private boolean running;
 
   /**
@@ -75,7 +75,7 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
     this.masterClient = masterClient;
     this.executorService = executorService;
     retryingExecutorService = new RetryingExecutorService(executorService);
-    slaveIdentifier = null;
+    nodeIdentifier = null;
     running = false;
     if (DEBUG) {
       log.info("MasterXmlRpcEndpoint URI: " + masterClient.getRemoteUri());
@@ -106,7 +106,7 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
   }
 
   private <T> boolean callMaster(Callable<Response<T>> callable) {
-    Preconditions.checkNotNull(slaveIdentifier, "Registrar not started.");
+    Preconditions.checkNotNull(nodeIdentifier, "Registrar not started.");
     boolean success;
     try {
       Response<T> response = callable.call();
@@ -201,7 +201,7 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
         boolean success = callMaster(new Callable<Response<List<URI>>>() {
           @Override
           public Response<List<URI>> call() throws Exception {
-            return holder.set(masterClient.registerSubscriber(slaveIdentifier, subscriber));
+            return holder.set(masterClient.registerSubscriber(nodeIdentifier, subscriber));
           }
         });
         if (success) {
@@ -237,7 +237,7 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
         boolean success = callMaster(new Callable<Response<Integer>>() {
           @Override
           public Response<Integer> call() throws Exception {
-            return masterClient.unregisterSubscriber(slaveIdentifier, subscriber);
+            return masterClient.unregisterSubscriber(nodeIdentifier, subscriber);
           }
         });
         if (success) {
@@ -269,7 +269,7 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
         boolean success = callMaster(new Callable<Response<Void>>() {
           @Override
           public Response<Void> call() throws Exception {
-            return masterClient.registerService(slaveIdentifier, serviceServer);
+            return masterClient.registerService(nodeIdentifier, serviceServer);
           }
         });
         if (success) {
@@ -301,7 +301,7 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
         boolean success = callMaster(new Callable<Response<Integer>>() {
           @Override
           public Response<Integer> call() throws Exception {
-            return masterClient.unregisterService(slaveIdentifier, serviceServer);
+            return masterClient.unregisterService(nodeIdentifier, serviceServer);
           }
         });
         if (success) {
@@ -324,16 +324,16 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
 
   /**
    * Starts the {@link Registrar} for the {@link SlaveServer} identified by the
-   * given {@link NodeSlaveIdentifier}.
+   * given {@link NodeIdentifier}.
    * 
-   * @param slaveIdentifier
-   *          the {@link NodeSlaveIdentifier} for the {@link SlaveServer} this
+   * @param nodeIdentifier
+   *          the {@link NodeIdentifier} for the {@link SlaveServer} this
    *          {@link Registrar} is responsible for
    */
-  public void start(NodeSlaveIdentifier slaveIdentifier) {
-    Preconditions.checkNotNull(slaveIdentifier);
-    Preconditions.checkState(this.slaveIdentifier == null, "Registrar already started.");
-    this.slaveIdentifier = slaveIdentifier;
+  public void start(NodeIdentifier nodeIdentifier) {
+    Preconditions.checkNotNull(nodeIdentifier);
+    Preconditions.checkState(this.nodeIdentifier == null, "Registrar already started.");
+    this.nodeIdentifier = nodeIdentifier;
     running = true;
   }
 

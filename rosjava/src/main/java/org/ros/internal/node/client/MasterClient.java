@@ -23,7 +23,7 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.UriListResultFactory;
 import org.ros.internal.node.response.UriResultFactory;
 import org.ros.internal.node.response.VoidResultFactory;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.topic.PublisherDefinition;
 import org.ros.internal.node.topic.PublisherIdentifier;
@@ -59,13 +59,13 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    * Registers the given {@link ServiceServer}.
    * 
    * @param slave
-   *          the {@link NodeSlaveIdentifier} where the {@link ServiceServer} is
+   *          the {@link NodeIdentifier} where the {@link ServiceServer} is
    *          running
    * @param service
    *          the {@link ServiceServer} to register
    * @return a {@link Response} with a void result
    */
-  public Response<Void> registerService(NodeSlaveIdentifier slave, ServiceServer<?, ?> service) {
+  public Response<Void> registerService(NodeIdentifier slave, ServiceServer<?, ?> service) {
     return Response.fromListChecked(xmlRpcEndpoint.registerService(slave.getNodeName().toString(), service
         .getName().toString(), service.getUri().toString(), slave.getUri().toString()),
         new VoidResultFactory());
@@ -75,14 +75,14 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    * Unregisters the specified {@link ServiceServer}.
    * 
    * @param slave
-   *          the {@link NodeSlaveIdentifier} where the {@link ServiceServer} is
+   *          the {@link NodeIdentifier} where the {@link ServiceServer} is
    *          running
    * @param service
    *          the {@link ServiceServer} to unregister
    * @return a {@link Response} with the number of unregistered services as the
    *         result
    */
-  public Response<Integer> unregisterService(NodeSlaveIdentifier slave, ServiceServer<?, ?> service) {
+  public Response<Integer> unregisterService(NodeIdentifier slave, ServiceServer<?, ?> service) {
     return Response.fromListChecked(xmlRpcEndpoint.unregisterService(slave.getNodeName().toString(), service
         .getName().toString(), service.getUri().toString()), new IntegerResultFactory());
   }
@@ -94,7 +94,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    * publisherUpdate API.
    * 
    * @param slave
-   *          the {@link NodeSlaveIdentifier} that the {@link Subscriber} is running
+   *          the {@link NodeIdentifier} that the {@link Subscriber} is running
    *          on
    * @param subscriber
    *          the {@link Subscriber} to register
@@ -102,7 +102,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    *         XML-RPC API URIs for nodes currently publishing the specified topic
    *         as the result
    */
-  public Response<List<URI>> registerSubscriber(NodeSlaveIdentifier slave, Subscriber<?> subscriber) {
+  public Response<List<URI>> registerSubscriber(NodeIdentifier slave, Subscriber<?> subscriber) {
     return Response.fromListChecked(xmlRpcEndpoint.registerSubscriber(slave.getNodeName().toString(), subscriber
         .getTopicName().toString(), subscriber.getTopicMessageType(), slave.getUri().toString()),
         new UriListResultFactory());
@@ -112,13 +112,13 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    * Unregisters the specified {@link Subscriber}.
    * 
    * @param slave
-   *          the {@link NodeSlaveIdentifier} where the subscriber is running
+   *          the {@link NodeIdentifier} where the subscriber is running
    * @param subscriber
    *          the {@link Subscriber} to unregister
    * @return a {@link Response} with the number of unregistered subscribers as
    *         the result
    */
-  public Response<Integer> unregisterSubscriber(NodeSlaveIdentifier slave, Subscriber<?> subscriber) {
+  public Response<Integer> unregisterSubscriber(NodeIdentifier slave, Subscriber<?> subscriber) {
     return Response.fromListChecked(xmlRpcEndpoint.unregisterSubscriber(slave.getNodeName().toString(),
         subscriber.getTopicName().toString(), slave.getUri().toString()),
         new IntegerResultFactory());
@@ -165,13 +165,13 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    * Returns the {@link URI} of the {@link SlaveServer} with the given name.
    * 
    * @param slave
-   *          the {@link NodeSlaveIdentifier} of the caller
+   *          the {@link NodeIdentifier} of the caller
    * @param nodeName
    *          the name of the {@link SlaveServer} to lookup
    * @return a {@link Response} with the {@link URI} of the {@link SlaveServer}
    *         as a result
    */
-  public Response<URI> lookupNode(NodeSlaveIdentifier slave, String nodeName) {
+  public Response<URI> lookupNode(NodeIdentifier slave, String nodeName) {
     return Response.fromListChecked(xmlRpcEndpoint.lookupNode(slave.getNodeName().toString(), nodeName),
         new UriResultFactory());
   }
@@ -180,10 +180,10 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    * Returns the {@link URI} of the {@link MasterServer}.
    * 
    * @param slave
-   *          the {@link NodeSlaveIdentifier} of the caller
+   *          the {@link NodeIdentifier} of the caller
    * @return the {@link URI} of the {@link MasterServer}
    */
-  public Response<URI> getUri(NodeSlaveIdentifier slave) {
+  public Response<URI> getUri(NodeIdentifier slave) {
     return Response
         .fromListChecked(xmlRpcEndpoint.getUri(slave.getNodeName().toString()), new UriResultFactory());
   }
@@ -192,22 +192,22 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    * Returns the {@link URI} of the {@link ServiceServer} with the given name.
    * 
    * @param slave
-   *          the {@link NodeSlaveIdentifier} of the caller
+   *          the {@link NodeIdentifier} of the caller
    * @param serviceName
    *          the name of the {@link ServiceServer} to look up
    * @return a {@link Response} with the {@link URI} of the
    *         {@link ServiceServer} as a result
    */
-  public Response<URI> lookupService(NodeSlaveIdentifier slave, String serviceName) {
+  public Response<URI> lookupService(NodeIdentifier slave, String serviceName) {
     return Response.fromListCheckedFailure(
         xmlRpcEndpoint.lookupService(slave.getNodeName().toString(), serviceName), new UriResultFactory());
   }
 
-  public Response<List<TopicDefinition>> getPublishedTopics(NodeSlaveIdentifier slave, String subgraph) {
+  public Response<List<TopicDefinition>> getPublishedTopics(NodeIdentifier slave, String subgraph) {
     throw new UnsupportedOperationException();
   }
 
-  public Response<Object> getSystemState(NodeSlaveIdentifier slave) {
+  public Response<Object> getSystemState(NodeIdentifier slave) {
     throw new UnsupportedOperationException();
   }
 }

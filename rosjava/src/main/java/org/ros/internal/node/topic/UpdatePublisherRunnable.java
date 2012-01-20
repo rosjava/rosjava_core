@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RemoteException;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.xmlrpc.XmlRpcTimeoutException;
 import org.ros.internal.transport.ProtocolDescription;
@@ -42,20 +42,20 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
 
   private final DefaultSubscriber<MessageType> subscriber;
   private final PublisherIdentifier publisherIdentifier;
-  private final NodeSlaveIdentifier slaveIdentifier;
+  private final NodeIdentifier nodeIdentifier;
 
   /**
    * @param subscriber
-   * @param slaveIdentifier
-   *          {@link NodeSlaveIdentifier} of the {@link Subscriber}'s
+   * @param nodeIdentifier
+   *          {@link NodeIdentifier} of the {@link Subscriber}'s
    *          {@link SlaveServer}
    * @param publisherIdentifier
    *          {@link PublisherIdentifier} of the new {@link Publisher}
    */
   public UpdatePublisherRunnable(DefaultSubscriber<MessageType> subscriber,
-      NodeSlaveIdentifier slaveIdentifier, PublisherIdentifier publisherIdentifier) {
+      NodeIdentifier nodeIdentifier, PublisherIdentifier publisherIdentifier) {
     this.subscriber = subscriber;
-    this.slaveIdentifier = slaveIdentifier;
+    this.nodeIdentifier = nodeIdentifier;
     this.publisherIdentifier = publisherIdentifier;
   }
 
@@ -63,7 +63,7 @@ class UpdatePublisherRunnable<MessageType> implements Runnable {
   public void run() {
     SlaveClient slaveClient;
     try {
-      slaveClient = new SlaveClient(slaveIdentifier.getNodeName(), publisherIdentifier.getNodeSlaveUri());
+      slaveClient = new SlaveClient(nodeIdentifier.getNodeName(), publisherIdentifier.getNodeSlaveUri());
       Response<ProtocolDescription> response =
           slaveClient.requestTopic(subscriber.getTopicName(), ProtocolNames.SUPPORTED);
       // TODO(kwc): all of this logic really belongs in a protocol handler

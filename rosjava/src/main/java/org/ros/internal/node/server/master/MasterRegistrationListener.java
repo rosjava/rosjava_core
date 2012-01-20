@@ -20,7 +20,7 @@ package org.ros.internal.node.server.master;
  * Listen for master registration events from the
  * {@link MasterRegistrationManagerImpl}.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public interface MasterRegistrationListener {
   

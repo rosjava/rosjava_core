@@ -19,7 +19,7 @@ package org.ros.actionlib;
 /**
  * Constants used by the actionlib clients and servers.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public class ActionConstants {
   

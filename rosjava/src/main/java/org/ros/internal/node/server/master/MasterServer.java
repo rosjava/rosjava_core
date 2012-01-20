@@ -24,9 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.client.SlaveClient;
-import org.ros.internal.node.server.NodeServer;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.server.XmlRpcServer;
 import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpointImpl;
 import org.ros.message.Service;
@@ -53,7 +53,10 @@ import java.util.List;
  * @author damonkohler@google.com (Damon Kohler)
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class MasterServer extends NodeServer implements MasterRegistrationListener {
+public class MasterServer extends XmlRpcServer implements MasterRegistrationListener {
+
+  private static final boolean DEBUG = false;
+  private static final Log log = LogFactory.getLog(MasterServer.class);
 
   /**
    * Position in the {@link #getSystemState()} for publisher information.
@@ -70,9 +73,6 @@ public class MasterServer extends NodeServer implements MasterRegistrationListen
    */
   public static final int SYSTEM_STATE_SERVICES = 2;
 
-  private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(MasterServer.class);
-
   /**
    * The node name (i.e. the callerId XML-RPC field) used when the
    * {@link MasterServer} contacts a {@link SlaveServer}.
@@ -86,12 +86,11 @@ public class MasterServer extends NodeServer implements MasterRegistrationListen
 
   public MasterServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
     super(bindAddress, advertiseAddress);
-
     masterRegistrationManager = new MasterRegistrationManagerImpl(this);
   }
 
   /**
-   * Start the master server.
+   * Start the {@link MasterServer}.
    */
   public void start() {
     if (DEBUG) {
@@ -276,7 +275,7 @@ public class MasterServer extends NodeServer implements MasterRegistrationListen
   }
 
   /**
-   * Returns a {@link NodeSlaveIdentifier} for the {@link Node} with the given
+   * Returns a {@link NodeIdentifier} for the {@link Node} with the given
    * name. This API is for looking information about {@link Publisher}s and
    * {@link Subscriber}s. Use {@link #lookupService(GraphName)} instead to
    * lookup ROS-RPC {@link URI}s for {@link ServiceServer}s.

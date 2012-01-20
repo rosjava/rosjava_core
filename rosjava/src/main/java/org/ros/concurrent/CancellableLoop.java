@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * An interruptable loop that can be run by an {@link ExecutorService}.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public abstract class CancellableLoop implements Runnable {
   /**

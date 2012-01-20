@@ -16,7 +16,7 @@
 
 package org.ros.internal.node.topic;
 
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
@@ -32,11 +32,11 @@ public class PublisherFactory {
 
   private final TopicManager topicManager;
   private final ScheduledExecutorService executorService;
-  private final NodeSlaveIdentifier slaveIdentifier;
+  private final NodeIdentifier nodeIdentifier;
 
-  public PublisherFactory(NodeSlaveIdentifier slaveIdentifier, TopicManager topicManager,
+  public PublisherFactory(NodeIdentifier nodeIdentifier, TopicManager topicManager,
       ScheduledExecutorService executorService) {
-    this.slaveIdentifier = slaveIdentifier;
+    this.nodeIdentifier = nodeIdentifier;
     this.topicManager = topicManager;
     this.executorService = executorService;
   }
@@ -66,7 +66,7 @@ public class PublisherFactory {
         publisher = (DefaultPublisher<T>) topicManager.getPublisher(topicName);
       } else {
         publisher =
-            new DefaultPublisher<T>(slaveIdentifier, topicDefinition, messageSerializer,
+            new DefaultPublisher<T>(nodeIdentifier, topicDefinition, messageSerializer,
                 executorService);
         publisher.addListener(new DefaultPublisherListener<T>() {
           @Override

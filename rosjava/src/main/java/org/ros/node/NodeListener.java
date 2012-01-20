@@ -19,7 +19,7 @@ package org.ros.node;
 /**
  * A listener for lifecycle events on a {@link Node}.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public interface NodeListener {
 

@@ -39,37 +39,37 @@ public class NodeServerTest {
   @Test
   public void testGetPublicUri() {
     BindAddress bindAddress = BindAddress.newPublic();
-    NodeServer nodeServer = new NodeServer(bindAddress, new AdvertiseAddress("override"));
+    XmlRpcServer xmlRpcServer = new XmlRpcServer(bindAddress, new AdvertiseAddress("override"));
     try {
-      nodeServer.getUri();
+      xmlRpcServer.getUri();
       fail("Should not have succeeded before startup.");
     } catch (RuntimeException e) {
     }
 
-    nodeServer.start(FakeNode.class, new FakeNode());
-    URI uri = nodeServer.getUri();
+    xmlRpcServer.start(FakeNode.class, new FakeNode());
+    URI uri = xmlRpcServer.getUri();
     assertEquals("override", uri.getHost());
     assertTrue(uri.getPort() > 0);
 
-    nodeServer.shutdown();
+    xmlRpcServer.shutdown();
   }
   
   @Test
   public void testGetPrivateUri() {
     BindAddress bindAddress = BindAddress.newPrivate();
-    NodeServer nodeServer = new NodeServer(bindAddress, AdvertiseAddress.newPrivate());
+    XmlRpcServer xmlRpcServer = new XmlRpcServer(bindAddress, AdvertiseAddress.newPrivate());
     try {
-      nodeServer.getUri();
+      xmlRpcServer.getUri();
       fail("Should not have succeeded before startup.");
     } catch (RuntimeException e) {
     }
 
-    nodeServer.start(FakeNode.class, new FakeNode());
-    URI uri = nodeServer.getUri();
+    xmlRpcServer.start(FakeNode.class, new FakeNode());
+    URI uri = xmlRpcServer.getUri();
     assertEquals(Address.LOOPBACK, uri.getHost());
     assertTrue(uri.getPort() > 0);
 
-    nodeServer.shutdown();
+    xmlRpcServer.shutdown();
   }
   
 }

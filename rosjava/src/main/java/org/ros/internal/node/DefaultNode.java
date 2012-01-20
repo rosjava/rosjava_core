@@ -33,7 +33,7 @@ import org.ros.internal.node.client.Registrar;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceDefinition;
 import org.ros.internal.node.service.ServiceFactory;
@@ -150,18 +150,18 @@ public class DefaultNode implements Node {
             serviceManager, parameterManager, executorService);
     slaveServer.start();
 
-    NodeSlaveIdentifier slaveIdentifier = slaveServer.toSlaveIdentifier();
-    publisherFactory = new PublisherFactory(slaveIdentifier, topicManager, executorService);
-    subscriberFactory = new SubscriberFactory(slaveIdentifier, topicManager, executorService);
+    NodeIdentifier nodeIdentifier = slaveServer.toSlaveIdentifier();
+    publisherFactory = new PublisherFactory(nodeIdentifier, topicManager, executorService);
+    subscriberFactory = new SubscriberFactory(nodeIdentifier, topicManager, executorService);
     serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager, executorService);
 
     registrar = new Registrar(masterClient, executorService);
     topicManager.setListener(registrar);
     serviceManager.setListener(registrar);
-    registrar.start(slaveIdentifier);
+    registrar.start(nodeIdentifier);
 
     // NOTE(damonkohler): This must be created after the Registrar has been
-    // initialized with the SlaveServer's NodeSlaveIdentifier so that it can
+    // initialized with the SlaveServer's NodeIdentifier so that it can
     // register the /rosout Publisher.
     log = new RosoutLogger(this);
     signalOnStart();
@@ -500,7 +500,7 @@ public class DefaultNode implements Node {
    * A {@link ScheduledExecutorService} which doesn't allow shutdowns. This can
    * be safely handed to nodes.
    * 
-   * @author Keith M. Hughes
+   * @author khughes@google.com (Keith M. Hughes)
    * @since Jan 13, 2012
    */
   private static class NodeScheduledExecutorService implements ScheduledExecutorService {

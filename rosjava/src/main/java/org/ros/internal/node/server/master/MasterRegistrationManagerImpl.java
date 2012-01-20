@@ -31,18 +31,15 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Manage all registration logic for the master server.
+ * Manages all registration logic for the {@link MasterServer}.
  * 
  * <p>
- * This class is NOT thread-safe. Protect access from the outside.
+ * This class is not thread-safe.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public class MasterRegistrationManagerImpl {
 
-  /**
-   * Logger for this class.
-   */
   private static final Log log = LogFactory.getLog(MasterRegistrationManagerImpl.class);
 
   /**
@@ -204,9 +201,7 @@ public class MasterRegistrationManagerImpl {
       if (node != null) {
         node.removeSubscriber(topic);
         topic.removeSubscriber(node);
-
         potentiallyDeleteNode(node);
-
         return true;
       } else {
         // never was a node with that name
@@ -214,7 +209,6 @@ public class MasterRegistrationManagerImpl {
           log.warn(String.format("Received unregister subscriber for topic %s on unknown node %s",
               topicName, nodeName));
         }
-
         return false;
       }
     } else {
@@ -223,7 +217,6 @@ public class MasterRegistrationManagerImpl {
         log.warn(String.format("Received unregister subscriber for unknown topic %s on node %s",
             topicName, nodeName));
       }
-
       return false;
     }
   }

@@ -33,21 +33,21 @@ import com.google.common.collect.ImmutableMap;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class NodeSlaveIdentifier {
+public class NodeIdentifier {
 
   private final GraphName nodeName;
   private final URI uri;
 
-  public static NodeSlaveIdentifier newFromStrings(String nodeName, String uri) {
+  public static NodeIdentifier newFromStrings(String nodeName, String uri) {
     try {
-      return new NodeSlaveIdentifier(new GraphName(nodeName), new URI(uri));
+      return new NodeIdentifier(new GraphName(nodeName), new URI(uri));
     } catch (URISyntaxException e) {
       throw new RosRuntimeException(e);
     }
   }
 
   /**
-   * Constructs a new {@link NodeSlaveIdentifier}.
+   * Constructs a new {@link NodeIdentifier}.
    * 
    * Note that either {@code nodeName} or {@code uri} may be null but not both.
    * This is necessary because either is enough to uniquely identify a
@@ -64,7 +64,7 @@ public class NodeSlaveIdentifier {
    * @param uri
    *          the {@link URI} of the {@link SlaveServer}'s XML-RPC server
    */
-  public NodeSlaveIdentifier(GraphName nodeName, URI uri) {
+  public NodeIdentifier(GraphName nodeName, URI uri) {
     Preconditions.checkArgument(nodeName != null || uri != null);
     if (nodeName != null) {
       Preconditions.checkArgument(nodeName.isGlobal());
@@ -76,11 +76,11 @@ public class NodeSlaveIdentifier {
   /**
    * @param uri
    *          the {@link URI} of the {@link SlaveServer}
-   * @return an anonymous {@link NodeSlaveIdentifier} with the specified
+   * @return an anonymous {@link NodeIdentifier} with the specified
    *         {@link URI}
    */
-  static NodeSlaveIdentifier newAnonymous(URI uri) {
-    return new NodeSlaveIdentifier(GraphName.newAnonymous(), uri);
+  static NodeIdentifier newAnonymous(URI uri) {
+    return new NodeIdentifier(GraphName.newAnonymous(), uri);
   }
 
   @Override
@@ -118,7 +118,7 @@ public class NodeSlaveIdentifier {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    NodeSlaveIdentifier other = (NodeSlaveIdentifier) obj;
+    NodeIdentifier other = (NodeIdentifier) obj;
     if (nodeName == null) {
       if (other.nodeName != null)
         return false;

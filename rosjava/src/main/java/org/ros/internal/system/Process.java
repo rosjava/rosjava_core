@@ -19,11 +19,15 @@ package org.ros.internal.system;
 import java.lang.management.ManagementFactory;
 
 /**
- * Process interfaces for ROS.
+ * Process-related utility methods.
  *
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public class Process {
+  
+  private Process() {
+    // Utility class.
+  }
   
   /**
    * @return PID of node process if available, throws

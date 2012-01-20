@@ -19,7 +19,7 @@ package org.ros.internal.node.topic;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
@@ -30,34 +30,34 @@ import java.util.Map;
  */
 public class SubscriberIdentifier {
 
-  private final NodeSlaveIdentifier slaveIdentifier;
+  private final NodeIdentifier nodeIdentifier;
   private final TopicIdentifier topicIdentifier;
 
   public static SubscriberIdentifier newFromStrings(String nodeName, String uri, String topicName) {
-    return new SubscriberIdentifier(NodeSlaveIdentifier.newFromStrings(nodeName, uri),
+    return new SubscriberIdentifier(NodeIdentifier.newFromStrings(nodeName, uri),
         TopicIdentifier.newFromString(topicName));
   }
 
-  public SubscriberIdentifier(NodeSlaveIdentifier slaveIdentifier, TopicIdentifier topicIdentifier) {
-    Preconditions.checkNotNull(slaveIdentifier);
+  public SubscriberIdentifier(NodeIdentifier nodeIdentifier, TopicIdentifier topicIdentifier) {
+    Preconditions.checkNotNull(nodeIdentifier);
     Preconditions.checkNotNull(topicIdentifier);
-    this.slaveIdentifier = slaveIdentifier;
+    this.nodeIdentifier = nodeIdentifier;
     this.topicIdentifier = topicIdentifier;
   }
 
   public Map<String, String> toHeader() {
     return new ImmutableMap.Builder<String, String>()
-        .putAll(slaveIdentifier.toHeader())
+        .putAll(nodeIdentifier.toHeader())
         .putAll(topicIdentifier.toHeader())
         .build();
   }
 
-  public NodeSlaveIdentifier getSlaveIdentifier() {
-    return slaveIdentifier;
+  public NodeIdentifier getSlaveIdentifier() {
+    return nodeIdentifier;
   }
 
   public URI getUri() {
-    return slaveIdentifier.getUri();
+    return nodeIdentifier.getUri();
   }
 
   public TopicIdentifier getTopicIdentifier() {
@@ -70,14 +70,14 @@ public class SubscriberIdentifier {
 
   @Override
   public String toString() {
-    return "SubscriberIdentifier<" + slaveIdentifier + ", " + topicIdentifier + ">";
+    return "SubscriberIdentifier<" + nodeIdentifier + ", " + topicIdentifier + ">";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((slaveIdentifier == null) ? 0 : slaveIdentifier.hashCode());
+    result = prime * result + ((nodeIdentifier == null) ? 0 : nodeIdentifier.hashCode());
     result = prime * result + ((topicIdentifier == null) ? 0 : topicIdentifier.hashCode());
     return result;
   }
@@ -88,9 +88,9 @@ public class SubscriberIdentifier {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     SubscriberIdentifier other = (SubscriberIdentifier) obj;
-    if (slaveIdentifier == null) {
-      if (other.slaveIdentifier != null) return false;
-    } else if (!slaveIdentifier.equals(other.slaveIdentifier)) return false;
+    if (nodeIdentifier == null) {
+      if (other.nodeIdentifier != null) return false;
+    } else if (!nodeIdentifier.equals(other.nodeIdentifier)) return false;
     if (topicIdentifier == null) {
       if (other.topicIdentifier != null) return false;
     } else if (!topicIdentifier.equals(other.topicIdentifier)) return false;

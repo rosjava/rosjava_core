@@ -15,7 +15,7 @@ import org.ros.internal.message.old_style.MessageSerializer;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.Registrar;
 import org.ros.internal.node.parameter.ParameterManager;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
@@ -74,10 +74,10 @@ public class RegistrarTest {
             AdvertiseAddress.newPrivate(), BindAddress.newPrivate(), AdvertiseAddress.newPrivate(),
             masterClient, topicManager, serviceManager, parameterManager, executorService);
     slaveServer.start();
-    NodeSlaveIdentifier slaveIdentifier = slaveServer.toSlaveIdentifier();
-    registrar.start(slaveIdentifier);
+    NodeIdentifier nodeIdentifier = slaveServer.toSlaveIdentifier();
+    registrar.start(nodeIdentifier);
     publisher =
-        new DefaultPublisher<org.ros.message.std_msgs.String>(slaveIdentifier, topicDefinition,
+        new DefaultPublisher<org.ros.message.std_msgs.String>(nodeIdentifier, topicDefinition,
             messageSerializer, executorService);
     publisherListener = CountDownPublisherListener.newDefault();
     publisher.addListener(publisherListener);

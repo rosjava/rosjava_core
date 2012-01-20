@@ -24,7 +24,7 @@ import java.net.URI;
 /**
  * Tests for the {@link MasterRegistrationManagerImpl}.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public class MasterRegistrationManagerImplTest {
 

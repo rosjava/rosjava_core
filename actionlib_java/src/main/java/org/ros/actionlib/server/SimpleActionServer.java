@@ -23,7 +23,7 @@ import org.ros.message.Message;
  * An action server which simplifies much of the complexity of a full
  * {@link DefaultActionServer}.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  * @since Jun 16, 2011
  */
 public interface SimpleActionServer<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL extends Message, T_ACTION_RESULT extends Message, T_FEEDBACK extends Message, T_GOAL extends Message, T_RESULT extends Message> {

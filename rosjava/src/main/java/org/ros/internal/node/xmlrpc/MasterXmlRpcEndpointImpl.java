@@ -20,7 +20,7 @@ import com.google.common.collect.Lists;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.ParameterServer;
 import org.ros.internal.node.server.master.MasterServer;
 import org.ros.namespace.GraphName;
@@ -143,8 +143,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
               new GraphName(topicName));
       return Response.newSuccess("Success", result ? 1 : 0).toList();
     } catch (URISyntaxException e) {
-      throw new RosRuntimeException(String.format("Improperly formatted URI %s for subscriber",
-          callerSlaveUri), e);
+      throw new RosRuntimeException(String.format("Invalid URI: %s", callerSlaveUri), e);
     }
   }
 
@@ -234,7 +233,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
   @Override
   public List<Object> subscribeParam(String callerId, String callerSlaveUri, String key) {
     parameterServer.subscribe(new GraphName(key),
-        NodeSlaveIdentifier.newFromStrings(callerId, callerSlaveUri));
+        NodeIdentifier.newFromStrings(callerId, callerSlaveUri));
     Object value = parameterServer.get(new GraphName(key));
     if (value == null) {
       // Must return an empty map as the value of an unset parameter.

@@ -30,7 +30,7 @@ import java.util.Set;
 /**
  * All information known to the manager about a topic.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public class TopicRegistrationInfo {
 
@@ -64,10 +64,8 @@ public class TopicRegistrationInfo {
 
   public TopicRegistrationInfo(GraphName topicName) {
     this.topicName = topicName;
-
     publishers = Sets.newHashSet();
     subscribers = Sets.newHashSet();
-
     isPublisherDefinedMessageType = false;
   }
 

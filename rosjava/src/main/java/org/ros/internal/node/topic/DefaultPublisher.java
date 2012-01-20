@@ -26,7 +26,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.OutgoingMessageQueue;
@@ -63,12 +63,12 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
    */
   private final OutgoingMessageQueue<T> outgoingMessageQueue;
   private final ListenerCollection<PublisherListener<T>> listeners;
-  private final NodeSlaveIdentifier slaveIdentifier;
+  private final NodeIdentifier nodeIdentifier;
 
-  public DefaultPublisher(NodeSlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
+  public DefaultPublisher(NodeIdentifier nodeIdentifier, TopicDefinition topicDefinition,
       MessageSerializer<T> serializer, ScheduledExecutorService executorService) {
     super(topicDefinition);
-    this.slaveIdentifier = slaveIdentifier;
+    this.nodeIdentifier = nodeIdentifier;
     outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
     listeners = new ListenerCollection<PublisherListener<T>>(executorService);
     listeners.add(new DefaultPublisherListener<T>() {
@@ -117,11 +117,11 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   }
 
   public PublisherIdentifier toIdentifier() {
-    return new PublisherIdentifier(slaveIdentifier, getTopicDefinition().toIdentifier());
+    return new PublisherIdentifier(nodeIdentifier, getTopicDefinition().toIdentifier());
   }
 
   public PublisherDefinition toDefinition() {
-    return PublisherDefinition.newFromSlaveIdentifier(slaveIdentifier, getTopicDefinition());
+    return PublisherDefinition.newFromSlaveIdentifier(nodeIdentifier, getTopicDefinition());
   }
 
   @Override

@@ -20,7 +20,7 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
 import org.ros.exception.RosRuntimeException;
-import org.ros.internal.node.server.NodeServer;
+import org.ros.internal.node.server.XmlRpcServer;
 import org.ros.internal.node.xmlrpc.XmlRpcClientFactory;
 import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
 
@@ -75,7 +75,7 @@ abstract class Client<T extends XmlRpcEndpoint> {
   }
 
   /**
-   * @return the {@link URI} of the remote {@link NodeServer}
+   * @return the {@link URI} of the remote {@link XmlRpcServer}
    */
   public URI getRemoteUri() {
     return uri;

@@ -19,7 +19,7 @@ package org.ros.internal.node.topic;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
@@ -42,10 +42,10 @@ public class SubscriberDefinition {
    * @return The subscriber definition from the header data.
    */
   public static SubscriberDefinition newFromHeader(Map<String, String> header) {
-    NodeSlaveIdentifier slaveIdentifier =
-        new NodeSlaveIdentifier(new GraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
+    NodeIdentifier nodeIdentifier =
+        new NodeIdentifier(new GraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
     TopicDefinition topicDefinition = TopicDefinition.newFromHeader(header);
-    return new SubscriberDefinition(new SubscriberIdentifier(slaveIdentifier,
+    return new SubscriberDefinition(new SubscriberIdentifier(nodeIdentifier,
         topicDefinition.toIdentifier()), topicDefinition);
   }
 
@@ -55,7 +55,7 @@ public class SubscriberDefinition {
     this.topicDefinition = topicDefinition;
   }
 
-  public NodeSlaveIdentifier getSlaveIdentifier() {
+  public NodeIdentifier getSlaveIdentifier() {
     return subscriberIdentifier.getSlaveIdentifier();
   }
 

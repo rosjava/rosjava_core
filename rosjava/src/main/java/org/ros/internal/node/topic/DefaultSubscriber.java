@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
@@ -58,7 +58,7 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
   private static final int DEFAULT_SHUTDOWN_TIMEOUT = 5;
   private static final TimeUnit DEFAULT_SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
-  private final NodeSlaveIdentifier slaveIdentifier;
+  private final NodeIdentifier nodeIdentifier;
   private final ScheduledExecutorService executorService;
   private final IncomingMessageQueue<T> incomingMessageQueue;
   private final Set<PublisherIdentifier> knownPublishers;
@@ -69,16 +69,16 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
    */
   private final ListenerCollection<SubscriberListener<T>> subscriberListeners;
 
-  public static <S> DefaultSubscriber<S> newDefault(NodeSlaveIdentifier slaveIdentifier,
+  public static <S> DefaultSubscriber<S> newDefault(NodeIdentifier nodeIdentifier,
       TopicDefinition description, ScheduledExecutorService executorService,
       MessageDeserializer<S> deserializer) {
-    return new DefaultSubscriber<S>(slaveIdentifier, description, deserializer, executorService);
+    return new DefaultSubscriber<S>(nodeIdentifier, description, deserializer, executorService);
   }
 
-  private DefaultSubscriber(NodeSlaveIdentifier slaveIdentifier, TopicDefinition topicDefinition,
+  private DefaultSubscriber(NodeIdentifier nodeIdentifier, TopicDefinition topicDefinition,
       MessageDeserializer<T> deserializer, ScheduledExecutorService executorService) {
     super(topicDefinition);
-    this.slaveIdentifier = slaveIdentifier;
+    this.nodeIdentifier = nodeIdentifier;
     this.executorService = executorService;
     incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
     knownPublishers = Sets.newHashSet();
@@ -108,7 +108,7 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
   }
 
   public SubscriberIdentifier toIdentifier() {
-    return new SubscriberIdentifier(slaveIdentifier, getTopicDefinition().toIdentifier());
+    return new SubscriberIdentifier(nodeIdentifier, getTopicDefinition().toIdentifier());
   }
 
   public SubscriberDefinition toDefinition() {
@@ -159,7 +159,7 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
   public void updatePublishers(Collection<PublisherIdentifier> publishers) {
     for (final PublisherIdentifier publisher : publishers) {
       executorService
-          .execute(new UpdatePublisherRunnable<T>(this, this.slaveIdentifier, publisher));
+          .execute(new UpdatePublisherRunnable<T>(this, this.nodeIdentifier, publisher));
     }
   }
 

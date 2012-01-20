@@ -23,7 +23,7 @@ import java.net.URI;
 /**
  * Information a master needs about a service.
  * 
- * @author Keith M. Hughes
+ * @author khughes@google.com (Keith M. Hughes)
  */
 public class ServiceRegistrationInfo {
 

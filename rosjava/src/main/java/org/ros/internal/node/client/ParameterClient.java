@@ -28,7 +28,7 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StringListResultFactory;
 import org.ros.internal.node.response.StringResultFactory;
 import org.ros.internal.node.response.VoidResultFactory;
-import org.ros.internal.node.server.NodeSlaveIdentifier;
+import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.xmlrpc.ParameterServerXmlRpcEndpoint;
 import org.ros.namespace.GraphName;
 
@@ -42,7 +42,7 @@ import com.google.common.collect.Lists;
  */
 public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
 
-  private final NodeSlaveIdentifier slaveIdentifier;
+  private final NodeIdentifier nodeIdentifier;
   private final String nodeName;
 
   /**
@@ -53,10 +53,10 @@ public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
    *          the {@link URI} of the {@link ParameterServer} to connect to
    * @throws MalformedURLException
    */
-  public ParameterClient(NodeSlaveIdentifier slaveIdentifier, URI uri) {
+  public ParameterClient(NodeIdentifier nodeIdentifier, URI uri) {
     super(uri, ParameterServerXmlRpcEndpoint.class);
-    this.slaveIdentifier = slaveIdentifier;
-    nodeName = slaveIdentifier.getNodeName().toString();
+    this.nodeIdentifier = nodeIdentifier;
+    nodeName = nodeIdentifier.getNodeName().toString();
   }
 
   public Response<Object> getParam(GraphName parameterName) {
@@ -103,13 +103,13 @@ public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
   }
 
   public Response<Object> subscribeParam(GraphName parameterName) {
-    return Response.fromListChecked(xmlRpcEndpoint.subscribeParam(nodeName, slaveIdentifier.getUri()
+    return Response.fromListChecked(xmlRpcEndpoint.subscribeParam(nodeName, nodeIdentifier.getUri()
         .toString(), parameterName.toString()), new ObjectResultFactory());
   }
 
   public Response<Integer> unsubscribeParam(GraphName parameterName) {
     return Response.fromListChecked(
-        xmlRpcEndpoint.unsubscribeParam(nodeName, slaveIdentifier.getUri().toString(),
+        xmlRpcEndpoint.unsubscribeParam(nodeName, nodeIdentifier.getUri().toString(),
             parameterName.toString()), new IntegerResultFactory());
   }
 
