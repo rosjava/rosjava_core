@@ -36,7 +36,6 @@ import org.ros.node.topic.Subscriber;
 import org.ros.time.TimeProvider;
 
 import java.net.URI;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -242,12 +241,9 @@ public interface Node {
   void removeListener(NodeListener listener);
 
   /**
-   * Executes a {@link Runnable} using this {@link Node}'s
-   * {@link ScheduledExecutorService}.
-   * 
-   * @see ScheduledExecutorService#execute(Runnable)
+   * @return the {@link ScheduledExecutorService} that this {@link Node} uses
    */
-  void execute(Runnable runnable);
+  ScheduledExecutorService getScheduledExecutorService();
 
   /**
    * Executes a {@link CancellableLoop} using the {@link Node}'s

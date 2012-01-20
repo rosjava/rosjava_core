@@ -63,7 +63,7 @@ public class DefaultNodeTest {
   private NodeConfiguration privateNodeConfiguration;
   private NodeFactory nodeFactory;
   private URI masterUri;
-  private ScheduledExecutorService executorService;
+  private ScheduledExecutorService scheduledExecutorService;
 
   void checkHostName(String hostName) {
     assertTrue(!hostName.equals("0.0.0.0"));
@@ -72,19 +72,18 @@ public class DefaultNodeTest {
 
   @Before
   public void setUp() throws Exception {
-    executorService = Executors.newScheduledThreadPool(10);
+    scheduledExecutorService = Executors.newScheduledThreadPool(10);
     masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
     masterUri = masterServer.getUri();
     checkHostName(masterUri.getHost());
     privateNodeConfiguration = NodeConfiguration.newPrivate(masterUri);
     privateNodeConfiguration.setNodeName("node_name");
-    privateNodeConfiguration.setExecutorService(executorService);
-    nodeFactory = new DefaultNodeFactory();
+    nodeFactory = new DefaultNodeFactory(scheduledExecutorService);
   }
 
   public void shutdown() {
-    executorService.shutdown();
+    scheduledExecutorService.shutdown();
   }
 
   @Test
@@ -133,6 +132,7 @@ public class DefaultNodeTest {
     node.shutdown();
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testPubSubRegistration() throws InterruptedException {
     Node node = nodeFactory.newNode(privateNodeConfiguration);

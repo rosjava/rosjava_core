@@ -33,7 +33,9 @@ import org.ros.namespace.GraphName;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Executes {@link NodeMain}s in separate threads.
@@ -46,7 +48,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
   private static final Log log = LogFactory.getLog(DefaultNodeMainExecutor.class);
 
   private final NodeFactory nodeFactory;
-  private final ExecutorService executorService;
+  private final ScheduledExecutorService scheduledExecutorService;
   private final Multimap<GraphName, Node> nodes;
   private final BiMap<Node, NodeMain> nodeMains;
 
@@ -72,28 +74,37 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
    *         {@link ExecutorService}
    */
   public static NodeMainExecutor newDefault() {
-    return newDefault(Executors.newCachedThreadPool());
+    ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
+        new ScheduledThreadPoolExecutor(Integer.MAX_VALUE);
+    scheduledThreadPoolExecutor.setKeepAliveTime(60L, TimeUnit.SECONDS);
+    return newDefault(scheduledThreadPoolExecutor);
   }
 
   /**
-   * @return an instance of {@link DefaultNodeMainExecutor} that uses the supplied
-   *         {@link ExecutorService}
+   * @return an instance of {@link DefaultNodeMainExecutor} that uses the
+   *         supplied {@link ExecutorService}
    */
-  public static NodeMainExecutor newDefault(ExecutorService executorService) {
-    return new DefaultNodeMainExecutor(new DefaultNodeFactory(), executorService);
+  public static NodeMainExecutor newDefault(ScheduledExecutorService executorService) {
+    return new DefaultNodeMainExecutor(new DefaultNodeFactory(executorService), executorService);
   }
 
   /**
    * @param nodeFactory
    *          {@link NodeFactory} to use for node creation.
-   * @param executorService
+   * @param scheduledExecutorService
    *          {@link NodeMain}s will be executed using this
    */
-  private DefaultNodeMainExecutor(NodeFactory nodeFactory, ExecutorService executorService) {
+  private DefaultNodeMainExecutor(NodeFactory nodeFactory,
+      ScheduledExecutorService scheduledExecutorService) {
     this.nodeFactory = nodeFactory;
-    this.executorService = executorService;
+    this.scheduledExecutorService = scheduledExecutorService;
     nodes = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, Node>create());
     nodeMains = Maps.synchronizedBiMap(HashBiMap.<Node, NodeMain>create());
+  }
+  
+  @Override
+  public ScheduledExecutorService getScheduledExecutorService() {
+    return scheduledExecutorService;
   }
 
   @Override
@@ -107,7 +118,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
     if (DEBUG) {
       log.info("Starting node: " + nodeConfigurationCopy.getNodeName());
     }
-    executorService.execute(new Runnable() {
+    scheduledExecutorService.execute(new Runnable() {
       @Override
       public void run() {
         Collection<NodeListener> nodeListenersCopy = Lists.newArrayList();

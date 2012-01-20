@@ -34,7 +34,6 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -173,7 +172,6 @@ public class NodeConfiguration {
     setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
     setParentResolver(NameResolver.newRoot());
     setTimeProvider(new WallTimeProvider());
-    setExecutorService(Executors.newScheduledThreadPool(50));
   }
 
   /**
@@ -481,27 +479,6 @@ public class NodeConfiguration {
    */
   public NodeConfiguration setTimeProvider(TimeProvider timeProvider) {
     this.timeProvider = timeProvider;
-    return this;
-  }
-
-  /**
-   * Get the {@link ScheduledExecutorService} which should be used for all thread
-   * creation within the {@link Node}.
-   * 
-   * @return the configured {@link ScheduledExecutorService}
-   */
-  public ScheduledExecutorService getExecutorService() {
-    return executorService;
-  }
-
-  /**
-   * Sets the {@link ScheduledExecutorService} that {@link Node}s will use.
-   * 
-   * @param executorService
-   *          the {@link ScheduledExecutorService} that {@link Node}s will use
-   */
-  public NodeConfiguration setExecutorService(ScheduledExecutorService executorService) {
-    this.executorService = executorService;
     return this;
   }
 }

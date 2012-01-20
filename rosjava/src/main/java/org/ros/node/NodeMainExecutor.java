@@ -18,6 +18,7 @@ package org.ros.node;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Executes {@link NodeMain}s and allows shutting down individual
@@ -26,6 +27,12 @@ import java.util.concurrent.ExecutorService;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public interface NodeMainExecutor {
+
+  /**
+   * @return the {@link ScheduledExecutorService} that this
+   *         {@link NodeMainExecutor} uses
+   */
+  ScheduledExecutorService getScheduledExecutorService();
 
   /**
    * Executes the supplied {@link NodeMain} using the supplied

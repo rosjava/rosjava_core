@@ -65,14 +65,8 @@ import org.ros.time.TimeProvider;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * The default implementation of a {@link Node}.
@@ -111,7 +105,7 @@ public class DefaultNode implements Node {
   /**
    * Used for all thread creation.
    */
-  private final ScheduledExecutorService executorService;
+  private final ScheduledExecutorService scheduledExecutorService;
 
   /**
    * All {@link NodeListener} instances registered with the node.
@@ -128,10 +122,12 @@ public class DefaultNode implements Node {
    *          a {@link Collection} of {@link NodeListener}s that will be added
    *          to this {@link Node} before it starts
    */
-  public DefaultNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> nodeListeners) {
+  public DefaultNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> nodeListeners,
+      ScheduledExecutorService scheduledExecutorService) {
     this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
-    executorService = new NodeScheduledExecutorService(nodeConfiguration.getExecutorService());
-    this.nodeListeners = new ListenerCollection<NodeListener>(nodeListeners, executorService);
+    this.nodeListeners =
+        new ListenerCollection<NodeListener>(nodeListeners, scheduledExecutorService);
+    this.scheduledExecutorService = scheduledExecutorService;
     masterUri = nodeConfiguration.getMasterUri();
     masterClient = new MasterClient(masterUri);
     topicManager = new TopicManager();
@@ -147,15 +143,17 @@ public class DefaultNode implements Node {
             nodeConfiguration.getTcpRosAdvertiseAddress(),
             nodeConfiguration.getXmlRpcBindAddress(),
             nodeConfiguration.getXmlRpcAdvertiseAddress(), masterClient, topicManager,
-            serviceManager, parameterManager, executorService);
+            serviceManager, parameterManager, scheduledExecutorService);
     slaveServer.start();
 
     NodeIdentifier nodeIdentifier = slaveServer.toSlaveIdentifier();
-    publisherFactory = new PublisherFactory(nodeIdentifier, topicManager, executorService);
-    subscriberFactory = new SubscriberFactory(nodeIdentifier, topicManager, executorService);
-    serviceFactory = new ServiceFactory(nodeName, slaveServer, serviceManager, executorService);
+    publisherFactory = new PublisherFactory(nodeIdentifier, topicManager, scheduledExecutorService);
+    subscriberFactory =
+        new SubscriberFactory(nodeIdentifier, topicManager, scheduledExecutorService);
+    serviceFactory =
+        new ServiceFactory(nodeName, slaveServer, serviceManager, scheduledExecutorService);
 
-    registrar = new Registrar(masterClient, executorService);
+    registrar = new Registrar(masterClient, scheduledExecutorService);
     topicManager.setListener(registrar);
     serviceManager.setListener(registrar);
     registrar.start(nodeIdentifier);
@@ -473,13 +471,13 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public void execute(Runnable runnable) {
-    executorService.execute(runnable);
+  public ScheduledExecutorService getScheduledExecutorService() {
+    return scheduledExecutorService;
   }
 
   @Override
   public void executeCancellableLoop(final CancellableLoop cancellableLoop) {
-    executorService.execute(cancellableLoop);
+    scheduledExecutorService.execute(cancellableLoop);
     addListener(new NodeListener() {
       @Override
       public void onStart(Node node) {
@@ -494,210 +492,5 @@ public class DefaultNode implements Node {
       public void onShutdownComplete(Node node) {
       }
     });
-  }
-
-  /**
-   * A {@link ScheduledExecutorService} which doesn't allow shutdowns. This can
-   * be safely handed to nodes.
-   * 
-   * @author khughes@google.com (Keith M. Hughes)
-   * @since Jan 13, 2012
-   */
-  private static class NodeScheduledExecutorService implements ScheduledExecutorService {
-
-    /**
-     * The service which provides the executor.
-     */
-    private ScheduledExecutorService wrapped;
-
-    public NodeScheduledExecutorService(ScheduledExecutorService wrapped) {
-      this.wrapped = wrapped;
-    }
-
-    /**
-     * @param timeout
-     * @param unit
-     * @return
-     * @throws InterruptedException
-     * @see java.util.concurrent.ExecutorService#awaitTermination(long,
-     *      java.util.concurrent.TimeUnit)
-     */
-    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-      return wrapped.awaitTermination(timeout, unit);
-    }
-
-    /**
-     * @param command
-     * @see java.util.concurrent.Executor#execute(java.lang.Runnable)
-     */
-    public void execute(Runnable command) {
-      wrapped.execute(command);
-    }
-
-    /**
-     * @param tasks
-     * @param timeout
-     * @param unit
-     * @return
-     * @throws InterruptedException
-     * @see java.util.concurrent.ExecutorService#invokeAll(java.util.Collection,
-     *      long, java.util.concurrent.TimeUnit)
-     */
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout,
-        TimeUnit unit) throws InterruptedException {
-      return wrapped.invokeAll(tasks, timeout, unit);
-    }
-
-    /**
-     * @param tasks
-     * @return
-     * @throws InterruptedException
-     * @see java.util.concurrent.ExecutorService#invokeAll(java.util.Collection)
-     */
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
-        throws InterruptedException {
-      return wrapped.invokeAll(tasks);
-    }
-
-    /**
-     * @param tasks
-     * @param timeout
-     * @param unit
-     * @return
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws TimeoutException
-     * @see java.util.concurrent.ExecutorService#invokeAny(java.util.Collection,
-     *      long, java.util.concurrent.TimeUnit)
-     */
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
-        throws InterruptedException, ExecutionException, TimeoutException {
-      return wrapped.invokeAny(tasks, timeout, unit);
-    }
-
-    /**
-     * @param tasks
-     * @return
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @see java.util.concurrent.ExecutorService#invokeAny(java.util.Collection)
-     */
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException,
-        ExecutionException {
-      return wrapped.invokeAny(tasks);
-    }
-
-    /**
-     * @return
-     * @see java.util.concurrent.ExecutorService#isShutdown()
-     */
-    public boolean isShutdown() {
-      return wrapped.isShutdown();
-    }
-
-    /**
-     * @return
-     * @see java.util.concurrent.ExecutorService#isTerminated()
-     */
-    public boolean isTerminated() {
-      return wrapped.isTerminated();
-    }
-
-    /**
-     * @param callable
-     * @param delay
-     * @param unit
-     * @return
-     * @see java.util.concurrent.ScheduledExecutorService#schedule(java.util.concurrent.Callable,
-     *      long, java.util.concurrent.TimeUnit)
-     */
-    public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
-      return wrapped.schedule(callable, delay, unit);
-    }
-
-    /**
-     * @param command
-     * @param delay
-     * @param unit
-     * @return
-     * @see java.util.concurrent.ScheduledExecutorService#schedule(java.lang.Runnable,
-     *      long, java.util.concurrent.TimeUnit)
-     */
-    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-      return wrapped.schedule(command, delay, unit);
-    }
-
-    /**
-     * @param command
-     * @param initialDelay
-     * @param period
-     * @param unit
-     * @return
-     * @see java.util.concurrent.ScheduledExecutorService#scheduleAtFixedRate(java.lang.Runnable,
-     *      long, long, java.util.concurrent.TimeUnit)
-     */
-    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period,
-        TimeUnit unit) {
-      return wrapped.scheduleAtFixedRate(command, initialDelay, period, unit);
-    }
-
-    /**
-     * @param command
-     * @param initialDelay
-     * @param delay
-     * @param unit
-     * @return
-     * @see java.util.concurrent.ScheduledExecutorService#scheduleWithFixedDelay(java.lang.Runnable,
-     *      long, long, java.util.concurrent.TimeUnit)
-     */
-    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay,
-        long delay, TimeUnit unit) {
-      return wrapped.scheduleWithFixedDelay(command, initialDelay, delay, unit);
-    }
-
-    /**
-     * 
-     * @see java.util.concurrent.ExecutorService#shutdown()
-     */
-    public void shutdown() {
-      throw new UnsupportedOperationException("Cannot shut down service");
-    }
-
-    /**
-     * @return
-     * @see java.util.concurrent.ExecutorService#shutdownNow()
-     */
-    public List<Runnable> shutdownNow() {
-      throw new UnsupportedOperationException("Cannot shut down service");
-    }
-
-    /**
-     * @param task
-     * @return
-     * @see java.util.concurrent.ExecutorService#submit(java.util.concurrent.Callable)
-     */
-    public <T> Future<T> submit(Callable<T> task) {
-      return wrapped.submit(task);
-    }
-
-    /**
-     * @param task
-     * @param result
-     * @return
-     * @see java.util.concurrent.ExecutorService#submit(java.lang.Runnable,
-     *      java.lang.Object)
-     */
-    public <T> Future<T> submit(Runnable task, T result) {
-      return wrapped.submit(task, result);
-    }
-
-    /**
-     * @param task
-     * @return
-     * @see java.util.concurrent.ExecutorService#submit(java.lang.Runnable)
-     */
-    public Future<?> submit(Runnable task) {
-      return wrapped.submit(task);
-    }
   }
 }

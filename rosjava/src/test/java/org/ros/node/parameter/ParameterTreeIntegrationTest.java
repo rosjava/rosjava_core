@@ -24,20 +24,14 @@ import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.ros.internal.node.server.master.MasterServer;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.address.AdvertiseAddress;
-import org.ros.address.BindAddress;
+import org.ros.RosTest;
 import org.ros.exception.ParameterClassCastException;
 import org.ros.exception.ParameterNotFoundException;
-import org.ros.internal.node.DefaultNodeFactory;
-import org.ros.internal.node.NodeFactory;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
 
 import java.util.Collection;
 import java.util.List;
@@ -48,29 +42,34 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ParameterTreeIntegrationTest {
+public class ParameterTreeIntegrationTest extends RosTest {
 
-  private MasterServer masterServer;
-  private Node node;
   private ParameterTree parameters;
-  private NodeFactory nodeFactory;
-  private NodeConfiguration nodeConfiguration;
 
   @Before
-  public void setup() {
-    masterServer = new MasterServer(BindAddress.newPrivate(), AdvertiseAddress.newPrivate());
-    masterServer.start();
-    nodeFactory = new DefaultNodeFactory();
-    nodeConfiguration = NodeConfiguration.newPrivate(masterServer.getUri());
-    nodeConfiguration.setNodeName("node_name");
-    node = nodeFactory.newNode(nodeConfiguration);
-    parameters = node.newParameterTree();
-  }
+  public void setup() throws InterruptedException {
+    final CountDownLatch latch = new CountDownLatch(1);
+    nodeMainExecutor.executeNodeMain(new NodeMain() {
+      @Override
+      public void onStart(Node node) {
+        parameters = node.newParameterTree();
+        latch.countDown();
+      }
 
-  @After
-  public void tearDown() {
-    node.shutdown();
-    masterServer.shutdown();
+      @Override
+      public void onShutdownComplete(Node node) {
+      }
+
+      @Override
+      public void onShutdown(Node node) {
+      }
+
+      @Override
+      public GraphName getDefaultNodeName() {
+        return new GraphName("node_name");
+      }
+    }, nodeConfiguration);
+    latch.await(1, TimeUnit.SECONDS);
   }
 
   @Test
@@ -166,27 +165,37 @@ public class ParameterTreeIntegrationTest {
 
   @Test
   public void testParameterPubSub() throws InterruptedException {
-    nodeConfiguration.setNodeName("subscriber");
-    Node subscriberNode = nodeFactory.newNode(nodeConfiguration);
-    nodeConfiguration.setNodeName("publisher");
-    Node publisherNode = nodeFactory.newNode(nodeConfiguration);
-
-    ParameterTree subscriberParameters = subscriberNode.newParameterTree();
-    final CountDownLatch latch = new CountDownLatch(1);
-    subscriberParameters.addParameterListener("/foo/bar", new ParameterListener() {
+    final CountDownLatch nodeLatch = new CountDownLatch(1);
+    final CountDownLatch parameterLatch = new CountDownLatch(1);
+    nodeMainExecutor.executeNodeMain(new NodeMain() {
       @Override
-      public void onNewValue(Object value) {
-        assertEquals(42, value);
-        latch.countDown();
+      public void onStart(Node node) {
+        ParameterTree subscriberParameters = node.newParameterTree();
+        subscriberParameters.addParameterListener("/foo/bar", new ParameterListener() {
+          @Override
+          public void onNewValue(Object value) {
+            assertEquals(42, value);
+            parameterLatch.countDown();
+          }
+        });
+        nodeLatch.countDown();
       }
-    });
 
-    ParameterTree publisherParameters = publisherNode.newParameterTree();
-    publisherParameters.set("/foo/bar", 42);
+      @Override
+      public void onShutdownComplete(Node node) {
+      }
 
-    assertTrue(latch.await(1, TimeUnit.SECONDS));
+      @Override
+      public void onShutdown(Node node) {
+      }
 
-    subscriberNode.shutdown();
-    publisherNode.shutdown();
+      @Override
+      public GraphName getDefaultNodeName() {
+        return new GraphName("subscriber");
+      }
+    }, nodeConfiguration);
+    nodeLatch.await(1, TimeUnit.SECONDS);
+    parameters.set("/foo/bar", 42);
+    assertTrue(parameterLatch.await(1, TimeUnit.SECONDS));
   }
 }

@@ -18,6 +18,8 @@ package org.ros.concurrent;
 
 import com.google.common.base.Preconditions;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -36,6 +38,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Holder<T> {
 
+  private final CountDownLatch latch;
+
   private T value;
 
   public static <T> Holder<T> newEmpty() {
@@ -43,6 +47,7 @@ public class Holder<T> {
   }
 
   private Holder() {
+    latch = new CountDownLatch(1);
     value = null;
   }
 
@@ -55,6 +60,14 @@ public class Holder<T> {
   public T get() {
     Preconditions.checkNotNull(value);
     return value;
+  }
+  
+  public void await() throws InterruptedException {
+    latch.await();
+  }
+
+  public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
+    return latch.await(timeout, unit);
   }
 
   @Override
