@@ -17,7 +17,6 @@
 package org.ros.internal.node.xmlrpc;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,7 +24,6 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.Lists;
 
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 import org.ros.internal.node.response.StatusCode;
 import org.ros.internal.node.server.master.MasterServer;

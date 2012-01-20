@@ -34,7 +34,6 @@ import org.ros.node.service.ServiceResponseListener;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Queue;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**

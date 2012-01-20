@@ -113,9 +113,10 @@ public class SlaveServer extends XmlRpcServer {
   }
 
   /**
-   * @return PID of node process if available, throws
+   * @return PID of this process if available, throws
    *         {@link UnsupportedOperationException} otherwise.
    */
+  @Override
   public int getPid() {
     return Process.getPid();
   }
