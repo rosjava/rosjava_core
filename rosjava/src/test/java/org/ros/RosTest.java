@@ -29,8 +29,8 @@ import org.ros.node.parameter.ParameterTree;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This is a base class for tests that sets up and tears down a {@link RosCore} and a
- * {@link NodeMainExecutor}.
+ * This is a base class for tests that sets up and tears down a {@link RosCore}
+ * and a {@link NodeMainExecutor}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
