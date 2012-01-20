@@ -103,7 +103,8 @@ public class TcpClientConnectionManager {
     return tcpClientConnection;
   }
 
-  private TcpClientConnection newTcpClient(String name, ClientBootstrap bootstrap, SocketAddress address) {
+  private TcpClientConnection newTcpClient(String name, ClientBootstrap bootstrap,
+      SocketAddress address) {
     TcpClientConnection tcpClientConnection = new TcpClientConnection(name, bootstrap, address);
     tcpClientConnections.add(tcpClientConnection);
     return tcpClientConnection;

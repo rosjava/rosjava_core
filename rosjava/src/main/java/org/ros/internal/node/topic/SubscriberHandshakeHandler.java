@@ -16,8 +16,6 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.base.Preconditions;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -29,55 +27,55 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 import java.util.Map;
 
 /**
+ * Performs a handshake with the connected {@link Publisher} and connects the
+ * {@link Publisher} to the {@link IncomingMessageQueue} on success.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ *          the {@link Subscriber} may only subscribe to messages of this type
  */
-class SubscriberHandshakeHandler<MessageType> extends SimpleChannelHandler {
+class SubscriberHandshakeHandler<T> extends SimpleChannelHandler {
 
-  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(SubscriberHandshakeHandler.class);
 
-  private final Map<String, String> header;
-  private final IncomingMessageQueue<MessageType> incomingMessageQueue;
+  private final IncomingMessageQueue<T> incomingMessageQueue;
+  private final SubscriberHandshake subscriberHandshake;
 
-  public SubscriberHandshakeHandler(Map<String, String> header,
-      IncomingMessageQueue<MessageType> incomingMessageQueue) {
-    this.header = header;
+  public SubscriberHandshakeHandler(Map<String, String> outgoingHeader,
+      IncomingMessageQueue<T> incomingMessageQueue) {
+    subscriberHandshake = new SubscriberHandshake(outgoingHeader);
     this.incomingMessageQueue = incomingMessageQueue;
-  }
-
-  private Map<String, String> handshake(ChannelBuffer buffer) {
-    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
-    if (DEBUG) {
-      log.info("Outgoing handshake header: " + header);
-      log.info("Incoming handshake header: " + incomingHeader);
-    }
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
-        header.get(ConnectionHeaderFields.TYPE)));
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
-        header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
-    return incomingHeader;
   }
 
   @Override
   public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    e.getChannel().write(ConnectionHeader.encode(header));
+    e.getChannel().write(ConnectionHeader.encode(subscriberHandshake.getOutgoingHeader()));
     super.channelConnected(ctx, e);
   }
 
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-    ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
-    Map<String, String> handshakeHeader = handshake(incomingBuffer);
-    ChannelPipeline pipeline = e.getChannel().getPipeline();
-    pipeline.remove(this);
-    pipeline.addLast("MessageHandler", incomingMessageQueue.newChannelHandler());
-    String latching = handshakeHeader.get(ConnectionHeaderFields.LATCHING);
-    if (latching != null && latching.equals("1")) {
-      incomingMessageQueue.setLatchMode(true);
+    ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
+    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
+    if (subscriberHandshake.handshake(incomingHeader)) {
+      ChannelPipeline pipeline = e.getChannel().getPipeline();
+      pipeline.remove(this);
+      pipeline.addLast("MessageHandler", incomingMessageQueue.newChannelHandler());
+      String latching = incomingHeader.get(ConnectionHeaderFields.LATCHING);
+      if (latching != null && latching.equals("1")) {
+        incomingMessageQueue.setLatchMode(true);
+      }
+    } else {
+      // TODO(damonkohler): Call listener that connection failed.
+      log.error("Subscriber handshake failed: " + subscriberHandshake.getErrorMessage());
+      e.getChannel().close();
     }
     super.messageReceived(ctx, e);
   }
