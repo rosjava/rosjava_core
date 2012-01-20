@@ -30,7 +30,7 @@ public class RunFibonacciSimpleActionServer {
 
       NodeMainExecutor runner = DefaultNodeMainExecutor.newDefault();
 
-      runner.executeNodeMain(new NodeMain() {
+      runner.execute(new NodeMain() {
 
         @Override
         public void onStart(Node node) {

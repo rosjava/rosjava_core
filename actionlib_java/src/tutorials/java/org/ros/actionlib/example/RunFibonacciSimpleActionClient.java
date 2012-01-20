@@ -55,7 +55,7 @@ public class RunFibonacciSimpleActionClient {
       FibonacciActionSpec spec = new FibonacciActionSpec();
       final FibonacciSimpleActionClient sac = spec.buildSimpleActionClient("fibonacci_client");
 
-      runner.executeNodeMain(new NodeMain() {
+      runner.execute(new NodeMain() {
 
         @Override
         public void onStart(Node node) {
@@ -138,7 +138,7 @@ public class RunFibonacciSimpleActionClient {
 
       final SimpleActionClient<FibonacciActionFeedback, FibonacciActionGoal, FibonacciActionResult, FibonacciFeedback, FibonacciGoal, FibonacciResult> sac =
           spec.buildSimpleActionClient("fibonacci");
-      runner.executeNodeMain(new NodeMain() {
+      runner.execute(new NodeMain() {
 
         @Override
         public void onStart(Node node) {
