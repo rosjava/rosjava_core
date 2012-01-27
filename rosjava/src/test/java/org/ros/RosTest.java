@@ -24,7 +24,6 @@ import org.junit.Ignore;
 import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
-import org.ros.node.parameter.ParameterTree;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 public abstract class RosTest {
 
   protected RosCore rosCore;
-  protected ParameterTree parameters;
   protected NodeConfiguration nodeConfiguration;
   protected NodeMainExecutor nodeMainExecutor;
 

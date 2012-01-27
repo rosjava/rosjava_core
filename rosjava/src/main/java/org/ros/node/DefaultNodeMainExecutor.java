@@ -27,6 +27,7 @@ import com.google.common.collect.Multimaps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ros.concurrent.DefaultScheduledExecutorService;
 import org.ros.internal.node.DefaultNodeFactory;
 import org.ros.internal.node.NodeFactory;
 import org.ros.namespace.GraphName;
@@ -34,8 +35,6 @@ import org.ros.namespace.GraphName;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Executes {@link NodeMain}s in separate threads.
@@ -69,15 +68,13 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
   }
 
   /**
-   * 
-   * @return an instance of {@link DefaultNodeMainExecutor} that uses a default
-   *         {@link ExecutorService}
+   * @return an instance of {@link DefaultNodeMainExecutor} that uses a
+   *         {@link ScheduledExecutorService} that is suitable for both
+   *         executing tasks immediately and scheduling tasks to execute in the
+   *         future
    */
   public static NodeMainExecutor newDefault() {
-    ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
-        new ScheduledThreadPoolExecutor(Integer.MAX_VALUE);
-    scheduledThreadPoolExecutor.setKeepAliveTime(60L, TimeUnit.SECONDS);
-    return newDefault(scheduledThreadPoolExecutor);
+    return newDefault(new DefaultScheduledExecutorService());
   }
 
   /**
@@ -101,7 +98,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
     nodes = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, Node>create());
     nodeMains = Maps.synchronizedBiMap(HashBiMap.<Node, NodeMain>create());
   }
-  
+
   @Override
   public ScheduledExecutorService getScheduledExecutorService() {
     return scheduledExecutorService;

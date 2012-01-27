@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.ros.address.InetAddressFactory;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -30,11 +31,11 @@ public class NtpTimeProviderTest {
   public void testNtpTime() throws IOException {
     // TODO(damonkohler): This is only a simple sanity check.
     NtpTimeProvider ntpTimeProvider =
-        new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"));
+        new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"),
+            Executors.newScheduledThreadPool(Integer.MAX_VALUE));
     ntpTimeProvider.updateTime();
     ntpTimeProvider.getCurrentTime();
     System.out.println("System time: " + System.currentTimeMillis());
     System.out.println("NTP time: " + ntpTimeProvider.getCurrentTime().totalNsecs() / 1000000);
   }
-
 }

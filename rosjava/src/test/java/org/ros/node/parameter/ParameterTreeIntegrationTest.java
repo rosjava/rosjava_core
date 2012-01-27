@@ -69,7 +69,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
         return new GraphName("node_name");
       }
     }, nodeConfiguration);
-    latch.await(1, TimeUnit.SECONDS);
+    assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 
   @Test

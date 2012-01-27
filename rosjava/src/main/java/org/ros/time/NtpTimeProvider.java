@@ -17,18 +17,21 @@
 package org.ros.time;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
+import org.ros.math.CollectionMath;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,21 +44,27 @@ public class NtpTimeProvider implements TimeProvider {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(NtpTimeProvider.class);
 
+  private static final int SAMPLE_SIZE = 11;
+  
   private final InetAddress host;
-  private final NTPUDPClient ntpClient;
+  private final ScheduledExecutorService scheduledExecutorService;
   private final WallTimeProvider wallTimeProvider;
+  private final NTPUDPClient ntpClient;
 
-  private TimeInfo time;
-  private Timer timer;
+  private long offset;
+  private ScheduledFuture<?> scheduledFuture;
 
   /**
    * @param host
    *          the NTP host to use
    */
-  public NtpTimeProvider(InetAddress host) {
+  public NtpTimeProvider(InetAddress host, ScheduledExecutorService scheduledExecutorService) {
     this.host = host;
-    this.wallTimeProvider = new WallTimeProvider();
+    this.scheduledExecutorService = scheduledExecutorService;
+    wallTimeProvider = new WallTimeProvider();
     ntpClient = new NTPUDPClient();
+    offset = 0;
+    scheduledFuture = null;
   }
 
   /**
@@ -64,9 +73,19 @@ public class NtpTimeProvider implements TimeProvider {
    * @throws IOException
    */
   public void updateTime() throws IOException {
+    List<Long> offsets = Lists.newArrayList();
+    for (int i = 0; i < SAMPLE_SIZE; i++) {
+      offsets.add(computeOffset());
+    }
+    offset = CollectionMath.median(offsets);
+    log.info(String.format("NTP time offset: %d ms", offset));
+  }
+
+  private long computeOffset() throws IOException {
     if (DEBUG) {
       log.info("Updating time offset from NTP server: " + host.getHostName());
     }
+    TimeInfo time;
     try {
       time = ntpClient.getTime(host);
     } catch (IOException e) {
@@ -74,7 +93,7 @@ public class NtpTimeProvider implements TimeProvider {
       throw e;
     }
     time.computeDetails();
-    log.info(String.format("NTP time offset: %d ms", time.getOffset()));
+    return time.getOffset();
   }
 
   /**
@@ -93,39 +112,31 @@ public class NtpTimeProvider implements TimeProvider {
    *          unit of period
    */
   public void startPeriodicUpdates(long period, TimeUnit unit) {
-    Preconditions.checkState(timer == null);
-    timer = new Timer();
-    long periodInMilliseconds = TimeUnit.MILLISECONDS.convert(period, unit);
-    timer.scheduleAtFixedRate(new TimerTask() {
-      @Override
-      public void run() {
-        try {
-          updateTime();
-        } catch (IOException e) {
-          log.error("Periodic NTP update failed.", e);
-        }
-      }
-    }, 0, periodInMilliseconds);
+    scheduledFuture =
+        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              updateTime();
+            } catch (IOException e) {
+              log.error("Periodic NTP update failed.", e);
+            }
+          }
+        }, 0, period, unit);
   }
 
   /**
    * Stops periodically updating the current time offset.
    */
   public void stopPeriodicUpdates() {
-    Preconditions.checkNotNull(timer);
-    timer.cancel();
-    timer = null;
+    Preconditions.checkNotNull(scheduledFuture);
+    scheduledFuture.cancel(true);
+    scheduledFuture = null;
   }
 
   @Override
   public Time getCurrentTime() {
     Time currentTime = wallTimeProvider.getCurrentTime();
-    long offset = 0;
-    if (time == null) {
-      log.warn("NTP time not yet initialized.");
-    } else {
-      offset = time.getOffset();
-    }
     return currentTime.add(Duration.fromMillis(offset));
   }
 }
