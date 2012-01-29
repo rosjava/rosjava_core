@@ -22,6 +22,8 @@ import org.ros.message.Message;
 import com.google.common.base.Preconditions;
 
 /**
+ * A {@link org.ros.message.MessageFactory} for old style messages.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MessageFactory implements org.ros.message.MessageFactory {

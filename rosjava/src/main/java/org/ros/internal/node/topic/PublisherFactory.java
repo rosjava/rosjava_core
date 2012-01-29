@@ -17,6 +17,7 @@
 package org.ros.internal.node.topic;
 
 import org.ros.internal.node.server.NodeIdentifier;
+import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
@@ -31,13 +32,15 @@ import java.util.concurrent.ScheduledExecutorService;
 public class PublisherFactory {
 
   private final TopicManager topicManager;
+  private final MessageFactory messageFactory;
   private final ScheduledExecutorService executorService;
   private final NodeIdentifier nodeIdentifier;
 
   public PublisherFactory(NodeIdentifier nodeIdentifier, TopicManager topicManager,
-      ScheduledExecutorService executorService) {
+      MessageFactory messageFactory, ScheduledExecutorService executorService) {
     this.nodeIdentifier = nodeIdentifier;
     this.topicManager = topicManager;
+    this.messageFactory = messageFactory;
     this.executorService = executorService;
   }
 
@@ -58,29 +61,23 @@ public class PublisherFactory {
   public <T> Publisher<T> newOrExisting(TopicDefinition topicDefinition,
       MessageSerializer<T> messageSerializer) {
     String topicName = topicDefinition.getName().toString();
-    DefaultPublisher<T> publisher;
-    boolean createdNewPublisher = false;
 
     synchronized (topicManager) {
       if (topicManager.hasPublisher(topicName)) {
-        publisher = (DefaultPublisher<T>) topicManager.getPublisher(topicName);
+        return (DefaultPublisher<T>) topicManager.getPublisher(topicName);
       } else {
-        publisher =
+        DefaultPublisher<T> publisher =
             new DefaultPublisher<T>(nodeIdentifier, topicDefinition, messageSerializer,
-                executorService);
+                messageFactory, executorService);
         publisher.addListener(new DefaultPublisherListener<T>() {
           @Override
           public void onShutdown(Publisher<T> publisher) {
             topicManager.removePublisher((DefaultPublisher<T>) publisher);
           }
         });
-        createdNewPublisher = true;
+        topicManager.putPublisher(publisher);
+        return publisher;
       }
     }
-
-    if (createdNewPublisher) {
-      topicManager.putPublisher(publisher);
-    }
-    return publisher;
   }
 }

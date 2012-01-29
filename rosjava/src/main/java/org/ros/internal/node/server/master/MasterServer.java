@@ -55,7 +55,7 @@ import java.util.List;
  */
 public class MasterServer extends XmlRpcServer implements MasterRegistrationListener {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(MasterServer.class);
 
   /**

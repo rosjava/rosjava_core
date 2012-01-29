@@ -30,6 +30,7 @@ import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.OutgoingMessageQueue;
+import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
@@ -59,16 +60,20 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   private static final TimeUnit DEFAULT_SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
   /**
-   * Queue of all messages being published by this {@link Publisher}.
+   * Queue of all messages being published by this {@link Publisher}
+   * .org.ros.message.MessageFactory
    */
   private final OutgoingMessageQueue<T> outgoingMessageQueue;
   private final ListenerCollection<PublisherListener<T>> listeners;
   private final NodeIdentifier nodeIdentifier;
+  private final MessageFactory messageFactory;
 
   public DefaultPublisher(NodeIdentifier nodeIdentifier, TopicDefinition topicDefinition,
-      MessageSerializer<T> serializer, ScheduledExecutorService executorService) {
+      MessageSerializer<T> serializer, MessageFactory messageFactory,
+      ScheduledExecutorService executorService) {
     super(topicDefinition);
     this.nodeIdentifier = nodeIdentifier;
+    this.messageFactory = messageFactory;
     outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
     listeners = new ListenerCollection<PublisherListener<T>>(executorService);
     listeners.add(new DefaultPublisherListener<T>() {
@@ -134,6 +139,11 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
     return outgoingMessageQueue.getNumberOfChannels();
   }
 
+  @Override
+  public T newMessage() {
+    return messageFactory.newMessage(getTopicDefinition().getMessageType());
+  }
+
   // TODO(damonkohler): Recycle Message objects to avoid GC.
   @Override
   public void publish(T message) {
@@ -160,13 +170,15 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
     String incomingType = incomingHeader.get(ConnectionHeaderFields.TYPE);
     String expectedType = topicDefinitionHeader.get(ConnectionHeaderFields.TYPE);
     boolean messageTypeMatches =
-        incomingType.equals(expectedType) || incomingType.equals(Subscriber.TOPIC_MESSAGE_TYPE_WILDCARD);
+        incomingType.equals(expectedType)
+            || incomingType.equals(Subscriber.TOPIC_MESSAGE_TYPE_WILDCARD);
     Preconditions.checkState(messageTypeMatches, "Unexpected message type " + incomingType + " != "
         + expectedType);
     String incomingChecksum = incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
     String expectedChecksum = topicDefinitionHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
     boolean checksumMatches =
-        incomingChecksum.equals(expectedChecksum) || incomingChecksum.equals(Subscriber.TOPIC_MESSAGE_TYPE_WILDCARD);
+        incomingChecksum.equals(expectedChecksum)
+            || incomingChecksum.equals(Subscriber.TOPIC_MESSAGE_TYPE_WILDCARD);
     Preconditions.checkState(checksumMatches, "Unexpected message MD5 " + incomingChecksum + " != "
         + expectedChecksum);
     Map<String, String> header = Maps.newHashMap();

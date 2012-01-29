@@ -3,8 +3,7 @@
 package org.ros.internal.node;
 
 import static org.junit.Assert.assertTrue;
-
-import org.ros.internal.node.server.master.MasterServer;
+import static org.mockito.Mockito.mock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,11 +16,13 @@ import org.ros.internal.node.client.Registrar;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.server.master.MasterServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.message.MessageDefinition;
+import org.ros.message.MessageFactory;
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.CountDownPublisherListener;
 
@@ -42,6 +43,7 @@ public class MasterRegistrationTest {
   private MasterClient masterClient;
   private Registrar masterRegistration;
   private TopicManager topicManager;
+  private MessageFactory messageFactory;
   private ServiceManager serviceManager;
   private ParameterManager parameterManager;
   private SlaveServer slaveServer;
@@ -65,6 +67,7 @@ public class MasterRegistrationTest {
     masterClient = new MasterClient(masterServer.getUri());
     masterRegistration = new Registrar(masterClient, executorService);
     topicManager = new TopicManager();
+    messageFactory = mock(MessageFactory.class);
     serviceManager = new ServiceManager();
     parameterManager = new ParameterManager();
     slaveServer =
@@ -76,7 +79,7 @@ public class MasterRegistrationTest {
     masterRegistration.start(nodeIdentifier);
     publisher =
         new DefaultPublisher<org.ros.message.std_msgs.String>(nodeIdentifier, topicDefinition,
-            messageSerializer, executorService);
+            messageSerializer, messageFactory, executorService);
     publisherListener = CountDownPublisherListener.newDefault();
     publisher.addListener(publisherListener);
   }

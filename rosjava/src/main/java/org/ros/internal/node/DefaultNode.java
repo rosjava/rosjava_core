@@ -147,7 +147,9 @@ public class DefaultNode implements Node {
     slaveServer.start();
 
     NodeIdentifier nodeIdentifier = slaveServer.toSlaveIdentifier();
-    publisherFactory = new PublisherFactory(nodeIdentifier, topicManager, scheduledExecutorService);
+    publisherFactory =
+        new PublisherFactory(nodeIdentifier, topicManager, nodeConfiguration.getMessageFactory(),
+            scheduledExecutorService);
     subscriberFactory =
         new SubscriberFactory(nodeIdentifier, topicManager, scheduledExecutorService);
     serviceFactory =

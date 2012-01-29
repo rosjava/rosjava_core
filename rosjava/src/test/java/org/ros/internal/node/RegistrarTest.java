@@ -3,8 +3,7 @@
 package org.ros.internal.node;
 
 import static org.junit.Assert.assertTrue;
-
-import org.ros.internal.node.server.master.MasterServer;
+import static org.mockito.Mockito.mock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,11 +16,13 @@ import org.ros.internal.node.client.Registrar;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.server.master.MasterServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.TopicDefinition;
 import org.ros.internal.node.topic.TopicManager;
 import org.ros.message.MessageDefinition;
+import org.ros.message.MessageFactory;
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.CountDownPublisherListener;
 
@@ -49,6 +50,7 @@ public class RegistrarTest {
   private SlaveServer slaveServer;
   private DefaultPublisher<org.ros.message.std_msgs.String> publisher;
   private CountDownPublisherListener<org.ros.message.std_msgs.String> publisherListener;
+  private MessageFactory messageFactory;
 
   public RegistrarTest() {
     topicDefinition =
@@ -76,9 +78,10 @@ public class RegistrarTest {
     slaveServer.start();
     NodeIdentifier nodeIdentifier = slaveServer.toSlaveIdentifier();
     registrar.start(nodeIdentifier);
+    messageFactory = mock(MessageFactory.class);
     publisher =
         new DefaultPublisher<org.ros.message.std_msgs.String>(nodeIdentifier, topicDefinition,
-            messageSerializer, executorService);
+            messageSerializer, messageFactory, executorService);
     publisherListener = CountDownPublisherListener.newDefault();
     publisher.addListener(publisherListener);
   }
