@@ -53,6 +53,10 @@ public class Vector3 {
   public double length() {
     return Math.sqrt(x * x + y * y + z * z);
   }
+  
+  public Vector3 normalized() {
+    return new Vector3(x / length(), y / length(), z / length());
+  }
 
   public org.ros.message.geometry_msgs.Vector3 toVector3Message() {
     org.ros.message.geometry_msgs.Vector3 result = new org.ros.message.geometry_msgs.Vector3();
@@ -109,5 +113,37 @@ public class Vector3 {
   @Override
   public String toString() {
     return String.format("Vector3<x: %.4f, y: %.4f, z: %.4f>", x, y, z);
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    long temp;
+    temp = Double.doubleToLongBits(x);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(y);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(z);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Vector3 other = (Vector3) obj;
+    if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
+      return false;
+    if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
+      return false;
+    if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
+      return false;
+    return true;
   }
 }

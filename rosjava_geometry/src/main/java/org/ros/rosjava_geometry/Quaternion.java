@@ -16,6 +16,8 @@
 
 package org.ros.rosjava_geometry;
 
+import com.google.common.base.Preconditions;
+
 /**
  * A quaternion.
  * 
@@ -27,6 +29,38 @@ public class Quaternion {
   private double y;
   private double z;
   private double w;
+
+  public static Quaternion newFromAxisAngle(Vector3 axis, double angle) {
+    Vector3 normalized = axis.normalized();
+    double sin = Math.sin(angle / 2.0d);
+    double cos = Math.cos(angle / 2.0d);
+    return new Quaternion(normalized.getX() * sin, normalized.getY() * sin,
+        normalized.getZ() * sin, cos);
+  }
+
+  public static Quaternion
+      newFromQuaternionMessage(org.ros.message.geometry_msgs.Quaternion message) {
+    return new Quaternion(message.x, message.y, message.z, message.w);
+  }
+
+  public static Quaternion rotationBetweenVectors(Vector3 vector1, Vector3 vector2) {
+    Preconditions.checkArgument(vector1.length() > 0,
+        "Cannot calculate rotation between zero-length vectors.");
+    Preconditions.checkArgument(vector2.length() > 0,
+        "Cannot calculate rotation between zero-length vectors.");
+    if (vector1.normalized().equals(vector2.normalized())) {
+      return newIdentityQuaternion();
+    }
+    double angle = Math.acos(vector1.dotProduct(vector2) / (vector1.length() * vector2.length()));
+    double axisX = vector1.getY() * vector2.getZ() - vector1.getZ() * vector2.getY();
+    double axisY = vector1.getZ() * vector2.getX() - vector1.getX() * vector2.getZ();
+    double axisZ = vector1.getX() * vector2.getY() - vector1.getY() * vector2.getX();
+    return newFromAxisAngle(new Vector3(axisX, axisY, axisZ), angle);
+  }
+
+  public static Quaternion newIdentityQuaternion() {
+    return new Quaternion(0, 0, 0, 1);
+  }
 
   public Quaternion(double x, double y, double z, double w) {
     this.x = x;
@@ -105,33 +139,40 @@ public class Quaternion {
     this.w = w;
   }
 
-  public static Quaternion newFromAxisAngle(Vector3 axis, double angle) {
-    double sinFactor = Math.sin(angle / 2);
-    double axisLength = axis.length();
-    return new Quaternion(axis.getX() / axisLength * sinFactor, axis.getY() / axisLength
-        * sinFactor, axis.getZ() / axisLength * sinFactor, Math.cos(angle / 2));
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    long temp;
+    temp = Double.doubleToLongBits(w);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(x);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(y);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(z);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    return result;
   }
 
-  public static Quaternion
-      newFromQuaternionMessage(org.ros.message.geometry_msgs.Quaternion message) {
-    return new Quaternion(message.x, message.y, message.z, message.w);
-  }
-
-  public static Quaternion rotationBetweenVectors(Vector3 vector1, Vector3 vector2) {
-    double axisX = vector1.getY() * vector2.getZ() - vector1.getZ() * vector2.getY();
-    double axisY = vector1.getZ() * vector2.getX() - vector1.getX() * vector2.getZ();
-    double axisZ = vector1.getX() * vector2.getY() - vector1.getY() * vector2.getX();
-    double length1 = vector1.length();
-    double length2 = vector2.length();
-    if (length1 == 0.0 || length2 == 0.0) {
-      return newFromAxisAngle(new Vector3(0, 0, 0), 0);
-    }
-    double angle = Math.acos(vector1.dotProduct(vector2) / (length1 * length2));
-    return newFromAxisAngle(new Vector3(axisX, axisY, axisZ), angle);
-  }
-
-  public static Quaternion newIdentityQuaternion() {
-    return new Quaternion(0, 0, 0, 1);
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Quaternion other = (Quaternion) obj;
+    if (Double.doubleToLongBits(w) != Double.doubleToLongBits(other.w))
+      return false;
+    if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
+      return false;
+    if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
+      return false;
+    if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
+      return false;
+    return true;
   }
 
   @Override
