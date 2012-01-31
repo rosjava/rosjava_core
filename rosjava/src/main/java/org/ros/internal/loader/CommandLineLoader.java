@@ -16,12 +16,9 @@
 
 package org.ros.internal.loader;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.ros.address.InetAddressFactory;
 import org.ros.exception.RosRuntimeException;
@@ -30,9 +27,12 @@ import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Create {@link NodeConfiguration} instances using a ROS command-line and
@@ -166,7 +166,7 @@ public class CommandLineLoader {
    * </ol>
    */
   private String getHost() {
-    String host = InetAddressFactory.newLoopback().getHostName();
+    String host = InetAddressFactory.newLoopback().getHostAddress();
     if (specialRemappings.containsKey(CommandLineVariables.ROS_IP)) {
       host = specialRemappings.get(CommandLineVariables.ROS_IP);
     } else if (environment.containsKey(EnvironmentVariables.ROS_IP)) {
