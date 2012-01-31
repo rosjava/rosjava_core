@@ -54,6 +54,7 @@ public class Holder<T> {
   public T set(T value) {
     Preconditions.checkState(this.value == null);
     this.value = value;
+    latch.countDown();
     return value;
   }
 
