@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientConnection;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
@@ -87,6 +88,12 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     tcpClientConnection =
         tcpClientConnectionManager.connect(toString(), address, handler,
             "ServiceClientHandshakeHandler");
+    // TODO(damonkohler): Remove this once blocking on handshakes is supported. See issue 75.
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      throw new RosRuntimeException(e);
+    }
   }
 
   @Override
