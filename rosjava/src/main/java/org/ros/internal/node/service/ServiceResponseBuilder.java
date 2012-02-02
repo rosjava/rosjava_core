@@ -16,10 +16,27 @@
 
 package org.ros.internal.node.service;
 
+import org.ros.node.service.ServiceServer;
+
 /**
+ * Builds a service response given a service request.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ *          the {@link ServiceServer} responds to requests of this type
+ * @param <S>
+ *          the {@link ServiceServer} returns responses of this type
  */
 public interface ServiceResponseBuilder<T, S> {
 
+  /**
+   * Builds a service response given a service request.
+   * 
+   * @param request
+   *          the received request
+   * @return the new response
+   * @throws ServiceException
+   */
   S build(T request) throws ServiceException;
 }
