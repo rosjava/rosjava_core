@@ -1,60 +1,62 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project default="default" name="java">
+<project xmlns:artifact="antlib:org.apache.maven.artifact.ant" default="default" name="java">
 
-  <property file="ros.properties" />
+	<property file="ros.properties" />
 
-  <include file="dependencies.xml" />
+	<include file="dependencies.xml" />
 
-  <property name="build" location="target/classes" />
-  <property name="dist" location="target" />
-  <property name="javac-source" value="1.6" />
-  <property name="javac-target" value="1.6" />
-  <property name="debuglevel" value="source,lines,vars" />
+    <property name="ros.artifact.name" value="org.ros.rosjava.actionlib_java" />
+	<property name="ros.artifact.version" value="0.0.0" />
+	
+	<property name="build" location="target/classes" />
+	<property name="dist" location="target" />
+	<property name="javac-source" value="1.6" />
+	<property name="javac-target" value="1.6" />
+	<property name="debuglevel" value="source,lines,vars" />
 
-  <property name="jar" location="${ros.artifact.built}" />
+	<property name="jar" location="${ros.artifact.built}" />
 
-  <path id="classpath">
-    <pathelement location="${build}" />
-    <pathelement path="${ros.compile.classpath}" />
-  </path>
+	<path id="classpath">
+		<pathelement location="${build}" />
+		<pathelement path="${ros.compile.classpath}" />
+	</path>
 
-  <target name="default" depends="init, compile, jar" />
+	<target name="default" depends="init, compile, jar" />
 
-  <target name="init">
-    <mkdir dir="${build}" />
-    <mkdir dir="${dist}" />
-  </target>
+	<target name="init">
+		<mkdir dir="${build}" />
+		<mkdir dir="${dist}" />
+	</target>
 
-  <target name="clean">
-    <delete dir="${build}" />
-    <delete dir="${dist}" />
-  </target>
+	<target name="clean">
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+	</target>
 
-  <target name="compile" depends="init">
-    <!-- copy all assets -->
-    <copy todir="${build}">
-      <fileset dir="src/main/java">
-        <exclude name="**/*.java" />
-      </fileset>
-      <fileset dir="src/tutorials/java">
-        <exclude name="**/*.java" />
-      </fileset>
-    </copy>
+	<target name="compile" depends="init">
+		<!-- copy all assets -->
+		<copy todir="${build}">
+			<fileset dir="src/main/java">
+				<exclude name="**/*.java" />
+			</fileset>
+			<fileset dir="src/tutorials/java">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
 
-    <javac debug="true" debuglevel="${debuglevel}" destdir="${build}" source="${javac-source}"
-        target="${javac-target}" includeantruntime="false">
-      <classpath refid="classpath" />
-      <src path="src/main/java" />
-      <!-- TODO(keith): Spin off tutorial stack -->
-      <src path="src/tutorials/java" />
-    </javac>
-  </target>
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${build}" source="${javac-source}" target="${javac-target}" includeantruntime="false">
+			<classpath refid="classpath" />
+			<src path="src/main/java" />
+			<!-- TODO(keith): Spin off tutorial stack -->
+			<src path="src/tutorials/java" />
+		</javac>
+	</target>
 
-  <target name="test" depends="compile" />
+	<target name="test" depends="compile" />
 
-  <target name="jar" depends="init, compile">
-    <bnd classpath="${build}" files="src/main/osgi/actionlib_java.bnd" />
-<!--
+	<target name="jar" depends="init, compile">
+		<bnd classpath="${build}" files="src/main/osgi/actionlib_java.bnd" />
+		<!--
     <jar destfile="${jar}">
       <fileset dir="${build}">
       	<exclude name="org/ros/message/actionlib_tutorials/**" />
@@ -62,5 +64,17 @@
       </fileset>
     </jar>
 -->
-  </target>
+	</target>
+
+	<target name="install" depends="jar">
+		<copy todir="${dist}" file="pom.xml">
+			<filterchain>
+				<filterreader classname="org.apache.tools.ant.filters.ExpandProperties" />
+			</filterchain>
+		</copy>
+		<artifact:pom id="mypom" file="${dist}/pom.xml" />
+		<artifact:install file="${dist}/${ros.artifact.name}-${ros.artifact.version}.jar">
+			<pom refid="mypom" />
+		</artifact:install>
+	</target>
 </project>

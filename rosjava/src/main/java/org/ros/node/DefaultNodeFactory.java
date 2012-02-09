@@ -14,12 +14,11 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.node;
+
+import org.ros.internal.node.DefaultNode;
 
 import org.ros.concurrent.SharedScheduledExecutorService;
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeListener;
 
 import java.util.Collection;
 import java.util.concurrent.ScheduledExecutorService;

@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project default="jar" name="rosjava_bootstrap">
+<project xmlns:artifact="antlib:org.apache.maven.artifact.ant" default="jar" name="rosjava_bootstrap">
   <property file="ros.properties" />
 
   <include file="dependencies.xml" />
+
+  <property name="ros.artifact.name" value="org.ros.rosjava.rosjava_bootstrap" />
+  <property name="ros.artifact.version" value="0.0.0" />
 
   <property name="build" location="target/classes" />
   <property name="dist" location="target" />
@@ -43,6 +46,18 @@
       </manifest>
 
     </jar>
+  </target>
+
+  <target name="install" depends="jar">
+    <copy todir="${dist}" file="pom.xml">
+      <filterchain>
+        <filterreader classname="org.apache.tools.ant.filters.ExpandProperties" />
+      </filterchain>
+    </copy>
+    <artifact:pom id="mypom" file="${dist}/pom.xml" />
+    <artifact:install file="${dist}/${ros.artifact.name}-${ros.artifact.version}.jar">
+      <pom refid="mypom" />
+    </artifact:install>
   </target>
 
   <target name="test" />

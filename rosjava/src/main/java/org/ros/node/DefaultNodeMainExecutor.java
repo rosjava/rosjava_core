@@ -28,8 +28,6 @@ import com.google.common.collect.Multimaps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.DefaultScheduledExecutorService;
-import org.ros.internal.node.DefaultNodeFactory;
-import org.ros.internal.node.NodeFactory;
 import org.ros.namespace.GraphName;
 
 import java.util.Collection;

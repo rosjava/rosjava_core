@@ -18,6 +18,8 @@ package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import org.ros.node.DefaultNodeFactory;
+
 import org.apache.commons.logging.Log;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerCollection;

@@ -14,11 +14,8 @@
  * the License.
  */
 
-package org.ros.internal.node;
+package org.ros.node;
 
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeListener;
 
 import java.util.Collection;
 

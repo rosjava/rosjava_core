@@ -24,6 +24,9 @@ import static org.ros.Assert.assertGraphNameEquals;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 
+import org.ros.node.DefaultNodeFactory;
+import org.ros.node.NodeFactory;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
