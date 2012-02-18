@@ -50,8 +50,29 @@ public class DefaultScheduledExecutorService implements ScheduledExecutorService
   private final ScheduledExecutorService scheduledExecutorService;
 
   public DefaultScheduledExecutorService() {
-    executorService = Executors.newCachedThreadPool();
-    scheduledExecutorService = Executors.newScheduledThreadPool(CORE_POOL_SIZE);
+    this(Executors.newCachedThreadPool());
+  }
+
+  /**
+   * This instance will take over the lifecycle of the services.
+   * 
+   * @param executorService
+   * @param scheduledExecutorService
+   */
+  public DefaultScheduledExecutorService(ExecutorService executorService) {
+    this(executorService, Executors.newScheduledThreadPool(CORE_POOL_SIZE));
+  }
+
+  /**
+   * This instance will take over the lifecycle of the services.
+   * 
+   * @param executorService
+   * @param scheduledExecutorService
+   */
+  public DefaultScheduledExecutorService(ExecutorService executorService,
+      ScheduledExecutorService scheduledExecutorService) {
+    this.executorService = executorService;
+    this.scheduledExecutorService = scheduledExecutorService;
   }
 
   @Override
