@@ -8,9 +8,40 @@
   <artifactId>org.ros.rosjava.rosjava_bootstrap</artifactId>
   <version>0.0.0</version>
   <packaging>jar</packaging>
-
   <name>rosjava_bootstrap</name>
-
   <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+            <Bundle-SymbolicName>org.ros.rosjava.bootstrap</Bundle-SymbolicName>
+            <Bundle-Version>0.0.0</Bundle-Version>
+            <Export-Package>org.ros.message</Export-Package>
+            <Fragment-Host>org.ros.rosjava; bundle-version="[0.0.0,1.0.0)"</Fragment-Host>
+          </instructions>
+        </configuration>
+        <executions>
+          <execution>
+            <id>bundle-manifest</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 </project>
