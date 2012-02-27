@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
   distributed with this work for additional information
@@ -16,22 +15,19 @@
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
   KIND, either express or implied.  See the License for the
   specific language governing permissions and limitations
-  under the License.    
-
+  under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.ros</groupId>
-    <artifactId>rosjava.parent</artifactId>
-    <version>0.0.0</version>
-  </parent>
   <groupId>org.apache.xmlrpc</groupId>
   <artifactId>org.ros.org.apache.xmlrpc</artifactId>
   <name>Apache XML-RPC</name>
   <version>3.1.3</version>
   <description>
-    A ROS Java modification to Apache XML-RPC.
+    A rosjava modification to Apache XML-RPC.
   </description>
   <packaging>pom</packaging>
   <inceptionYear>2001</inceptionYear>
@@ -41,15 +37,6 @@
     <module>client</module>
     <module>server</module>
   </modules>
-
-  <build>
-  	<resources>
-  		<resource>
-  			<filtering>true</filtering>
-  			<directory>src/main/filtered-resources</directory>
-  		</resource>
-  	</resources>
-  </build>
 
   <dependencyManagement>
     <dependencies>
@@ -64,9 +51,9 @@
         <version>1.1.1</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>org.ros.org.apache.commons.util</artifactId>
-        <version>1.0.2</version>
+        <groupId>ws-commons-util</groupId>
+        <artifactId>ws-commons-util</artifactId>
+        <version>1.0.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
