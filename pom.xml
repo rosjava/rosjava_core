@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
   distributed with this work for additional information
@@ -16,21 +15,26 @@
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
   KIND, either express or implied.  See the License for the
   specific language governing permissions and limitations
-  under the License.    
-
+  under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.ros.rosjava</groupId>
-  <artifactId>rosjava.parent</artifactId>
-  <name>ROSJava parent</name>
+  <groupId>org.ros</groupId>
+  <artifactId>rosjava_core</artifactId>
   <version>0.0.0</version>
-  <description>
-ROS Java is a pure Java implementation of the Robot Operating System (ROS)
-  </description>
   <packaging>pom</packaging>
-  <url>http://www.ros.org/rosjava</url>
-  <inceptionYear>2011</inceptionYear>
+  <name>rosjava_core</name>
+  <url>http://www.ros.org/rosjava_core</url>
+
+  <repositories>
+    <repository>
+      <id>org.ros.release</id>
+      <url>https://robotbrains.hideho.org/nexus/content/groups/ros-public</url>
+    </repository>
+  </repositories>
 
   <modules>
     <module>apache_commons_util</module>
@@ -50,7 +54,6 @@ ROS Java is a pure Java implementation of the Robot Operating System (ROS)
         </configuration>
       </plugin>
     </plugins>
-
     <pluginManagement>
       <plugins>
         <plugin>
@@ -61,7 +64,6 @@ ROS Java is a pure Java implementation of the Robot Operating System (ROS)
             <target>1.6</target>
           </configuration>
         </plugin>
-
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -70,29 +72,6 @@ ROS Java is a pure Java implementation of the Robot Operating System (ROS)
           </configuration>
         </plugin>
       </plugins>
-    </pluginManagement> 
+    </pluginManagement>
   </build>
-
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.8.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>1.8.5</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-  <repositories>
-    <repository>
-      <id>org.ros.release</id>
-      <name>ROS Repository - Releases</name>
-      <url>https://robotbrains.hideho.org/nexus/content/groups/ros-public/</url>
-    </repository>
-  </repositories>
 </project>
