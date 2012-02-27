@@ -37,11 +37,13 @@
   </repositories>
 
   <modules>
-    <module>apache_commons_util</module>
     <module>apache_xmlrpc</module>
     <module>rosjava_bootstrap</module>
     <module>rosjava</module>
-    <module>actionlib_java</module>
+    <module>rosjava_geometry</module>
+    <module>rosjava_tutorial_pubsub</module>
+    <module>rosjava_actionlib</module>
+    <module>rosjava_actionlib_tutorial</module>
   </modules>
 
   <build>

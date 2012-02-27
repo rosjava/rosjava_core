@@ -23,11 +23,11 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ros</groupId>
-  <artifactId>org.ros.rosjava_geometry</artifactId>
+  <artifactId>org.ros.rosjava_tutorial_pubsub</artifactId>
   <version>0.0.0</version>
   <packaging>jar</packaging>
-  <name>rosjava_geometry</name>
-  <url>http://www.ros.org/rosjava_geometry</url>
+  <name>rosjava_tutorial_pubsub</name>
+  <url>http://www.ros.org/rosjava_tutorial_pubsub</url>
 
   <repositories>
     <repository>
@@ -40,11 +40,6 @@
     <dependency>
       <groupId>org.ros</groupId>
       <artifactId>org.ros.rosjava</artifactId>
-      <version>0.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.ros</groupId>
-      <artifactId>org.ros.message.std_msgs</artifactId>
       <version>0.0.0</version>
     </dependency>
   </dependencies>
