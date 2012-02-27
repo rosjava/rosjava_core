@@ -26,7 +26,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ros</groupId>
   <artifactId>org.ros.rosjava_bootstrap</artifactId>
-  <version>0.0.0</version>
+  <version>0.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>rosjava_bootstrap</name>
   <build>

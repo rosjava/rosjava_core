@@ -24,7 +24,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.ros</groupId>
   <artifactId>rosjava_core</artifactId>
-  <version>0.0.0</version>
+  <version>0.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>rosjava_core</name>
   <url>http://www.ros.org/rosjava_core</url>
