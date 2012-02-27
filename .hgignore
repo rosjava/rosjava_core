@@ -13,11 +13,9 @@ syntax: glob
 .settings
 .classpath
 .project
-apache_commons_util/bin
-apache_xmlrpc/bin
-dependencies.xml
-ros.properties
-default.properties
-
-syntax: regexp
-(target|build|dist|msg_gen|srv_gen|gen|test_output)/.*
+target
+build
+dist
+msg_gen
+srv_gen
+gen

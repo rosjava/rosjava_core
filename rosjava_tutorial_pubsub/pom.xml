@@ -36,6 +36,25 @@
     </repository>
   </repositories>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>${settings.localRepository}</classpathPrefix>
+              <classpathLayoutType>repository</classpathLayoutType>
+              <mainClass>org.ros.RosRun</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>org.ros</groupId>
