@@ -67,15 +67,17 @@ def _is_srv_package(package):
 
 
 def _build_dependency_tags(rospack, package):
-  dependency_tags = []
+  dependency_tags = set()
+  # Everything implicitly depends on std_msgs.
+  dependency_tags.add(_DEPENDENCY_TAG % (_MESSAGE, 'std_msgs'))
   for dependency in rospack.depends([package])[package]:
     if _is_msg_package(dependency):
-      dependency_tags.append(_DEPENDENCY_TAG % (_MESSAGE, dependency))
+      dependency_tags.add(_DEPENDENCY_TAG % (_MESSAGE, dependency))
     if _is_srv_package(dependency):
-      dependency_tags.append(_DEPENDENCY_TAG % (_SERVICE, dependency))
+      dependency_tags.add(_DEPENDENCY_TAG % (_SERVICE, dependency))
   # Services implicitly depend upon the package's messages if they exist.
   if _is_srv_package(package) and _is_msg_package(package):
-    dependency_tags.append(_DEPENDENCY_TAG % (_MESSAGE, package))
+    dependency_tags.add(_DEPENDENCY_TAG % (_MESSAGE, package))
   return dependency_tags
 
 
