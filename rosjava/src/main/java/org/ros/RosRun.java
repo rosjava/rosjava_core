@@ -27,25 +27,17 @@ import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 
 /**
- * This is a rosrun-compatible loader for rosjava-based nodes.
+ * This is a main class entry point for executing {@link NodeMain}s.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
 public class RosRun {
 
   public static void printUsage() {
-    System.err
-        .println("Usage: rosrun rosjava_bootstrap run.py org.foo.MyNode [args] __name:=<node name>");
+    System.err.println("Usage: java -jar my_package.jar com.example.MyNodeMain [args]");
   }
 
-  /**
-   * Usage:
-   * 
-   * rosrun rosjava_bootstrap run.py org.foo.Node [args] __name:=<node name>
-   * 
-   * @param argv
-   * @throws Exception
-   */
   public static void main(String[] argv) throws Exception {
     if (argv.length == 0) {
       printUsage();

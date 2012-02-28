@@ -1,21 +1,12 @@
 <package>
-  <description brief="Pure Java ROS actionlib library.">
-    An implementation of actionlib in pure-Java ROS.
+  <description brief="rosjava_actionlib">
+    An implementation of actionlib in pure-Java.
   </description>
   <author>Keith Hughes/khughes@google.com</author>
   <license>Apache License 2.0</license>
-  <review status="unreviewed" notes=""/>
-  <url>http://rosjava.googlecode.com/</url>
-  <depend package="rosjava"/>
-  <depend package="actionlib_msgs"/>
-  <depend package="actionlib_tutorials"/>
-  
-  <export>
-    <rosjava-src location="src/main/java" />
-    <rosjava-src location="src/tutorials/java" />
-    
-    <rosjava-pathelement location="target" groupId="org.ros" artifactId="org.ros.rosjava.actionlib_java" version="0.0.0" built="true" />
-  </export>
+  <review status="unreviewed" notes="" />
+  <url>http://ros.org/wiki/rosjava_actionlib</url>
 
+  <depend package="actionlib_msgs"/>
 </package>
 

@@ -1,9 +1,0 @@
-bundle.version=0.0.0
--output: target/org.ros.rosjava.actionlib_java-${bundle.version}.jar
-
-Bundle-Name: org.ros.rosjava.actionlib_java
-Bundle-SymbolicName: org.ros.rosjava.actionlib_java
-Bundle-Version: ${bundle.version}
-
-Export-Package: org.ros.actionlib.*
-Import-Package: *

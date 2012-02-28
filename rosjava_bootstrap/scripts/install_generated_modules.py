@@ -29,24 +29,24 @@ from rosjava_bootstrap import java_srvs
 
 _DEPENDENCY_TAG = """
       <dependency>
-        <groupId>org.ros</groupId>
-        <artifactId>org.ros.%s.%s</artifactId>
-        <version>0.0.0</version>
+        <groupId>ros</groupId>
+        <artifactId>%s.%s</artifactId>
+        <version>0.0.0-SNAPSHOT</version>
       </dependency>"""
 _POM = """<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.ros</groupId>
+  <groupId>ros</groupId>
   <artifactId>%(artifact_id)s</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.0</version>
+  <version>0.0.0-SNAPSHOT</version>
   <name>%(artifact_id)s</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
-      <groupId>org.ros</groupId>
-      <artifactId>org.ros.rosjava_bootstrap</artifactId>
-      <version>0.0.0</version>
+      <groupId>ros.rosjava_core</groupId>
+      <artifactId>rosjava_bootstrap</artifactId>
+      <version>0.0.0-SNAPSHOT</version>
     </dependency>%(dependency_tags)s
   </dependencies>
 </project>"""
@@ -66,26 +66,27 @@ def _is_srv_package(package):
   return bool(d and os.path.isdir(d))
 
 
-def _build_dependency_tags(rospack, package):
+def _build_dependency_tags(rospack, package, artifact_type):
   dependency_tags = set()
   # Everything implicitly depends on std_msgs.
-  dependency_tags.add(_DEPENDENCY_TAG % (_MESSAGE, 'std_msgs'))
+  if package != 'std_msgs':
+    dependency_tags.add(_DEPENDENCY_TAG % (_MESSAGE, 'std_msgs'))
   for dependency in rospack.depends([package])[package]:
     if _is_msg_package(dependency):
       dependency_tags.add(_DEPENDENCY_TAG % (_MESSAGE, dependency))
     if _is_srv_package(dependency):
       dependency_tags.add(_DEPENDENCY_TAG % (_SERVICE, dependency))
   # Services implicitly depend upon the package's messages if they exist.
-  if _is_srv_package(package) and _is_msg_package(package):
+  if artifact_type == _SERVICE and _is_srv_package(package) and _is_msg_package(package):
     dependency_tags.add(_DEPENDENCY_TAG % (_MESSAGE, package))
   return dependency_tags
 
 
 def _write_pom(rospack, package, artifact_type, directory):
-  dependency_tags = _build_dependency_tags(rospack, package)
+  dependency_tags = _build_dependency_tags(rospack, package, artifact_type)
   with open(os.path.join(directory, 'pom.xml'), 'w') as pom:
     pom.write(_POM % {
-        'artifact_id': 'org.ros.%s.%s' % (artifact_type, package),
+        'artifact_id': '%s.%s' % (artifact_type, package),
         'dependency_tags': ''.join(dependency_tags),
         })
 
@@ -93,7 +94,7 @@ def _write_pom(rospack, package, artifact_type, directory):
 def _install_package(rospack, package, artifact_type):
   if (package, artifact_type) in _installed_packages:
     return
-  sys.stdout.write('\nInstalling: org.ros.%s.%s\n' % (artifact_type, package))
+  sys.stdout.write('\nInstalling: %s.%s\n' % (artifact_type, package))
   directory = tempfile.mkdtemp()
   _write_pom(rospack, package, artifact_type, directory)
   message_directory = os.path.join(directory, 'src/main/java')

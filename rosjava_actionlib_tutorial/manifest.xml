@@ -6,5 +6,7 @@
   <license>Apache License 2.0</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/rosjava_actionlib_tutorial</url>
+
+  <depend package="actionlib_tutorials" />
 </package>
 
