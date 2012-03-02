@@ -2,24 +2,9 @@
   <description brief="ROS build system integration for rosjava.">
     Provide ROS build system integration and bootstrap data classes (Time and
     Message representation) for rosjava.
-
-    This package includes
-    <a href="http://code.google.com/p/which/">which.py by Trent Mick</a>, which
-    is provided separately under an MIT License.
   </description>
   <author>Ken Conley, Damon Kohler (damonkohler@google.com)</author>
   <license>Apache License 2.0</license>
   <review status="unreviewed" notes="" />
   <url>http://ros.org/wiki/rosjava_bootstrap</url>
-
-  <rosdep name="java" />
-
-  <!-- TODO(damonkohler): Remove the export section once rosjava no longer uses
-       it for dependency information. -->
-  <export>
-    <rosjava-src location="src/main/java" />
-    <rosjava-pathelement location="target/" groupId="org.ros"
-      artifactId="org.ros.rosjava.rosjava_bootstrap" version="0.0.0"
-      built="true" />
-  </export>
 </package>
