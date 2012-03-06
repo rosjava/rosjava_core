@@ -16,5 +16,7 @@
 
 dependencies {
   compile project(':rosjava_actionlib')
-  compile 'ros:message.actionlib_tutorials:0.0.0-SNAPSHOT'
+  compile('ros:message.actionlib_tutorials:0.0.0-SNAPSHOT') {
+    exclude module: 'rosjava_bootstrap'
+  }
 }

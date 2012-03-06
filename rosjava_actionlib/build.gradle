@@ -16,5 +16,7 @@
 
 dependencies {
   compile project(':rosjava')
-  compile 'ros:message.actionlib_msgs:0.0.0-SNAPSHOT'
+  compile('ros:message.actionlib_msgs:0.0.0-SNAPSHOT') {
+    exclude module: 'rosjava_bootstrap'
+  }
 }

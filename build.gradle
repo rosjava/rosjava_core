@@ -16,8 +16,8 @@
 
 subprojects {
   apply plugin: 'java'
-  apply plugin: 'osgi'
   apply plugin: 'maven'
+  apply plugin: 'osgi'
   apply plugin: 'eclipse'
 
   group = 'ros.rosjava_core'
@@ -30,5 +30,7 @@ subprojects {
       url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
     }
   }
+
+  install.dependsOn build
 }
 

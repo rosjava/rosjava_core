@@ -13,9 +13,13 @@ syntax: glob
 .settings
 .classpath
 .project
+.gradle
 target
 build
 dist
 msg_gen
 srv_gen
 gen
+libs
+bin
+local.properties
