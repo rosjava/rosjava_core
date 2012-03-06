@@ -16,8 +16,9 @@
 
 package org.ros.internal.node.server.master;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,8 +28,8 @@ import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.server.XmlRpcServer;
-import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpointImpl;
+import org.ros.master.client.TopicSystemState;
 import org.ros.message.Service;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -36,14 +37,13 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 
 /**
  * The {@link MasterServer} provides naming and registration services to the
  * rest of the {@link Node}s in the ROS system. It tracks {@link Publisher}s and
- * {@link Subscriber}s to {@link Topic}s as well as {@link ServiceServer}s. The
+ * {@link Subscriber}s to {@link TopicSystemState}s as well as {@link ServiceServer}s. The
  * role of the {@link MasterServer} is to enable individual ROS {@link Node}s to
  * locate one another. Once these {@link Node}s have located each other they
  * communicate with each other peer-to-peer.
@@ -180,15 +180,15 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   }
 
   /**
-   * Register the caller as a {@link Publisher} the {@link Topic}.
+   * Register the caller as a {@link Publisher} the {@link TopicSystemState}.
    * 
    * @param publisherIdentifier
    *          identifier for the {@link Publisher}
    * @param topicMessageType
-   *          the message type of the {@link Topic}
+   *          the message type of the {@link TopicSystemState}
    * 
    * @return a {@link List} of the current {@link Subscriber}s to the
-   *         {@link Publisher}'s {@link Topic} in the form of XML-RPC
+   *         {@link Publisher}'s {@link TopicSystemState} in the form of XML-RPC
    *         {@link URI}s for each {@link Subscriber}'s {@link SlaveServer}
    */
   public List<URI> registerPublisher(GraphName nodeName, URI nodeSlaveUri, GraphName topicName,
@@ -298,7 +298,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   }
 
   /**
-   * Get a {@link List} of all {@link Topic} message types.
+   * Get a {@link List} of all {@link TopicSystemState} message types.
    * 
    * @param calledId
    *          the {@link Node} name of the caller
@@ -440,10 +440,10 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    * @param caller
    *          name of the caller
    * @param subgraph
-   *          subgraph containing the requested {@link Topic}s, relative to
+   *          subgraph containing the requested {@link TopicSystemState}s, relative to
    *          caller
    * @return a {@link List} of {@link List}s where the nested {@link List}s
-   *         contain, in order, the {@link Topic} name and {@link Topic} message
+   *         contain, in order, the {@link TopicSystemState} name and {@link TopicSystemState} message
    *         type
    */
   public List<Object> getPublishedTopics(GraphName caller, GraphName subgraph) {

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Base definition of a {@link Topic}.
+ * Base definition of a {@link TopicSystemState}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -56,29 +56,29 @@ public abstract class DefaultTopic implements Topic {
   }
 
   /**
-   * @return the connection header for the {@link Topic}
+   * @return the connection header for the {@link TopicSystemState}
    */
   public Map<String, String> getTopicDefinitionHeader() {
     return topicDefinition.toHeader();
   }
 
   /**
-   * Signal that the {@link Topic} successfully registered with the master.
+   * Signal that the {@link TopicSystemState} successfully registered with the master.
    */
   public abstract void signalOnMasterRegistrationSuccess();
 
   /**
-   * Signal that the {@link Topic} failed to register with the master.
+   * Signal that the {@link TopicSystemState} failed to register with the master.
    */
   public abstract void signalOnMasterRegistrationFailure();
 
   /**
-   * Signal that the {@link Topic} successfully unregistered with the master.
+   * Signal that the {@link TopicSystemState} successfully unregistered with the master.
    */
   public abstract void signalOnMasterUnregistrationSuccess();
 
   /**
-   * Signal that the {@link Topic} failed to unregister with the master.
+   * Signal that the {@link TopicSystemState} failed to unregister with the master.
    */
   public abstract void signalOnMasterUnregistrationFailure();
 }

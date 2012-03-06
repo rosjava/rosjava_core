@@ -16,16 +16,16 @@
 
 package org.ros.internal.node.server.master;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
 
-import org.ros.internal.node.topic.Topic;
+import org.ros.master.client.TopicSystemState;
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.Subscriber;
 
-import java.util.List;
-import java.util.Set;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 
 /**
  * All information known to the manager about a topic.
@@ -185,11 +185,11 @@ public class TopicRegistrationInfo {
   }
 
   /**
-   * Register the message type of a {@link Topic}.
+   * Register the message type of a {@link TopicSystemState}.
    * 
    * @param topicMessageType
-   *          the message type of the {@link Topic}, {@link Subscriber}s can
-   *          give a message type of {@value Topic#TOPIC_MESSAGE_TYPE_WILDCARD}
+   *          the message type of the {@link TopicSystemState}, {@link Subscriber}s can
+   *          give a message type of {@value TopicSystemState#TOPIC_MESSAGE_TYPE_WILDCARD}
    * @param isPublisher
    *          {code true} is a publisher is doing the registration,
    *          {@code false} if a subscriber is doing the registration

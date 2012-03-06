@@ -26,20 +26,24 @@ import org.ros.namespace.GraphName;
 import com.google.common.collect.Lists;
 
 /**
+ * A {@link ResultFactory} to take an object and turn it into a list of
+ * {@link TopicDefinition} instances.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TopicDefinitionListResultFactory implements ResultFactory<List<TopicDefinition>> {
+public class TopicDefinitionListResultFactory implements
+		ResultFactory<List<TopicDefinition>> {
 
-  @Override
-  public List<TopicDefinition> newFromValue(Object value) {
-    List<TopicDefinition> descriptions = Lists.newArrayList();
-    List<Object> topics = Arrays.asList((Object[]) value);
-    for (Object topic : topics) {
-      String name = (String) ((Object[]) topic)[0];
-      String type = (String) ((Object[]) topic)[1];
-      descriptions.add(TopicDefinition.newFromTopicName(new GraphName(name), MessageDefinition
-          .newFromTypeName(type)));
-    }
-    return descriptions;
-  }
+	@Override
+	public List<TopicDefinition> newFromValue(Object value) {
+		List<TopicDefinition> descriptions = Lists.newArrayList();
+		List<Object> topics = Arrays.asList((Object[]) value);
+		for (Object topic : topics) {
+			String name = (String) ((Object[]) topic)[0];
+			String type = (String) ((Object[]) topic)[1];
+			descriptions.add(TopicDefinition.newFromTopicName(new GraphName(
+					name), MessageDefinition.newFromTypeName(type)));
+		}
+		return descriptions;
+	}
 }

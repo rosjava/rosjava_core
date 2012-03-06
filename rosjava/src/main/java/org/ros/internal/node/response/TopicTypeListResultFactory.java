@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2012 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,33 +16,31 @@
 
 package org.ros.internal.node.response;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
 
-import org.ros.exception.RosRuntimeException;
+import org.ros.master.client.TopicType;
 
 import com.google.common.collect.Lists;
 
 /**
- * A {@link ResultFactory} to take an object and turn it into a list of URLIs.
+ * A {@link ResultFactory} to take an object and turn it into a list of
+ * {@link TopicType} instances.
  * 
- * @author damonkohler@google.com (Damon Kohler)
+ * @author Keith M. Hughes
  */
-public class UriListResultFactory implements ResultFactory<List<URI>> {
+public class TopicTypeListResultFactory implements
+		ResultFactory<List<TopicType>> {
 
 	@Override
-	public List<URI> newFromValue(Object value) {
-		List<Object> values = Arrays.asList((Object[]) value);
-		List<URI> uris = Lists.newArrayList();
-		for (Object uri : values) {
-			try {
-				uris.add(new URI((String) uri));
-			} catch (URISyntaxException e) {
-				throw new RosRuntimeException(e);
-			}
+	public List<TopicType> newFromValue(Object value) {
+		List<TopicType> topics = Lists.newArrayList();
+
+		for (Object pair : (Object[]) value) {
+			topics.add(new TopicType((String) ((Object[]) pair)[0],
+					(String) ((Object[]) pair)[1]));
 		}
-		return uris;
+
+		return topics;
 	}
+
 }

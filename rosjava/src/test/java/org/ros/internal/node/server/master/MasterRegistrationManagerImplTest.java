@@ -104,7 +104,7 @@ public class MasterRegistrationManagerImplTest {
   }
 
   /**
-   * Register only a subscriber and no publishers. Topic message type will be
+   * Register only a subscriber and no publishers. TopicSystemState message type will be
    * the wildcard, there should be no topic type.
    * 
    * @throws Exception
@@ -430,7 +430,7 @@ public class MasterRegistrationManagerImplTest {
     // message type.
     assertEquals(topicMessageType2, topic2.getMessageType());
 
-    // Topic one should have no publishers at all
+    // TopicSystemState one should have no publishers at all
     assertTrue(topic1.getPublishers().isEmpty());
 
     // Node 2 is fully there.
@@ -457,7 +457,7 @@ public class MasterRegistrationManagerImplTest {
 
     masterRegistrationManager.unregisterPublisher(nodeName, topicName);
 
-    // Topic should have no publishers at all
+    // TopicSystemState should have no publishers at all
     assertTrue(topic.getPublishers().isEmpty());
 
     // Node should have been deleted.
@@ -493,7 +493,7 @@ public class MasterRegistrationManagerImplTest {
     // Delete the first
     masterRegistrationManager.unregisterPublisher(nodeName, topicName1);
 
-    // Topic 1 should have no publishers at all. Topic 2 will have 1 publisher,
+    // TopicSystemState 1 should have no publishers at all. TopicSystemState 2 will have 1 publisher,
     // and the node will show this published topic.
     assertTrue(topic1.getPublishers().isEmpty());
     assertEquals(Sets.newHashSet(topic2), node.getPublishers());
@@ -518,7 +518,7 @@ public class MasterRegistrationManagerImplTest {
 
     masterRegistrationManager.unregisterSubscriber(nodeName, topicName);
 
-    // Topic one should have no subscribers at all
+    // TopicSystemState one should have no subscribers at all
     assertTrue(topic.getSubscribers().isEmpty());
 
     // Node should have been deleted.
@@ -554,7 +554,7 @@ public class MasterRegistrationManagerImplTest {
     // Delete the first
     masterRegistrationManager.unregisterSubscriber(nodeName, topicName1);
 
-    // Topic 1 should have no subscribers at all. Topic 2 will have 1
+    // TopicSystemState 1 should have no subscribers at all. TopicSystemState 2 will have 1
     // subscriber,
     // and the node will show this subscribed topic.
     assertTrue(topic1.getSubscribers().isEmpty());

@@ -16,19 +16,19 @@
 
 package org.ros.internal.node.server.master;
 
-import com.google.common.collect.Maps;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.ros.internal.node.service.ServiceIdentifier;
-import org.ros.internal.node.topic.Topic;
-import org.ros.namespace.GraphName;
-import org.ros.node.service.ServiceServer;
-
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.ros.internal.node.service.ServiceIdentifier;
+import org.ros.master.client.TopicSystemState;
+import org.ros.namespace.GraphName;
+import org.ros.node.service.ServiceServer;
+
+import com.google.common.collect.Maps;
 
 /**
  * Manages all registration logic for the {@link MasterServer}.
@@ -54,7 +54,7 @@ public class MasterRegistrationManagerImpl {
   private final Map<GraphName, ServiceRegistrationInfo> services;
 
   /**
-   * A {@link Map} from {@link Topic} name to the {@link TopicRegistrationInfo}
+   * A {@link Map} from {@link TopicSystemState} name to the {@link TopicRegistrationInfo}
    * about the topic.
    */
   private final Map<GraphName, TopicRegistrationInfo> topics;
