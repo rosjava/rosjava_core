@@ -14,6 +14,10 @@
  * the License.
  */
 
+task wrapper(type: Wrapper) {
+  gradleVersion = '1.0-milestone-8a'
+}
+
 subprojects {
   apply plugin: 'java'
   apply plugin: 'maven'
@@ -33,4 +37,6 @@ subprojects {
 
   install.dependsOn build
 }
+
+defaultTasks 'clean', 'install'
 
