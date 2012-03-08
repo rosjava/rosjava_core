@@ -17,4 +17,4 @@
 include 'rosjava_bootstrap', 'apache_xmlrpc_common', 'apache_xmlrpc_client',
         'apache_xmlrpc_server', 'rosjava', 'rosjava_geometry',
         'rosjava_tutorial_pubsub', 'rosjava_actionlib',
-        'rosjava_actionlib_tutorial', 'doc'
+        'rosjava_actionlib_tutorial', 'docs'

@@ -16,24 +16,31 @@
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
-task deployConf(type: Copy) {
-  from('source/conf.py.in') {
-    filter(ReplaceTokens, tokens: ['version': version])
+task deploySphinxConf(type: Copy) {
+  from('src/main/sphinx/conf.py.in') {
+    filter(ReplaceTokens, tokens: ['version': rootProject.version])
   }
-  into 'source'
+  into 'src/main/sphinx'
   rename 'conf.py.in', 'conf.py'
 }
 
-task html(type: Exec) {
+task sphinxHtml(type: Exec) {
   commandLine 'make', 'html'
 }
 
-task install {
-  dependsOn deployConf, html
+task javadoc(type: Javadoc) {
+  javaProjects = rootProject.subprojects.findResults { (it.name != 'docs') ? it : null }
+  source javaProjects.collect { it.sourceSets.main.allJava }
+  classpath = files(javaProjects.collect { it.sourceSets.main.compileClasspath })
+  destinationDir = new File(buildDir, 'api')
+}
+
+task build {
+  dependsOn javadoc, deploySphinxConf, sphinxHtml
 }
 
 task clean << {
   ant.delete dir: 'build'
-  ant.delete file: 'source/conf.py'
+  ant.delete file: 'src/main/sphinx/conf.py'
 }
 

@@ -18,17 +18,20 @@ task wrapper(type: Wrapper) {
   gradleVersion = '1.0-milestone-8a'
 }
 
-subprojects {
-  group = 'ros.rosjava_core'
+allprojects {
+  group 'ros.rosjava_core'
   version = '0.0.0-SNAPSHOT'
+}
 
-  if (name != 'doc') {
+subprojects {
+  if (name != 'docs') {
     apply plugin: 'java'
     apply plugin: 'maven'
     apply plugin: 'osgi'
     apply plugin: 'eclipse'
 
     sourceCompatibility = 1.6
+    targetCompatibility = 1.6
 
     repositories {
       mavenLocal()

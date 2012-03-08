@@ -23,4 +23,4 @@ gen
 libs
 bin
 local.properties
-doc/source/conf.py
+docs/src/main/sphinx/conf.py
