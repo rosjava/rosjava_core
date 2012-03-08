@@ -38,5 +38,5 @@ subprojects {
   install.dependsOn build
 }
 
-defaultTasks 'clean', 'install'
+defaultTasks 'install'
 
