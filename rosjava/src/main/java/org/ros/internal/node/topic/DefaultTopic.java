@@ -16,6 +16,7 @@
 
 package org.ros.internal.node.topic;
 
+import org.ros.master.client.TopicSystemState;
 import org.ros.namespace.GraphName;
 
 import java.util.List;
