@@ -19,23 +19,26 @@ task wrapper(type: Wrapper) {
 }
 
 subprojects {
-  apply plugin: 'java'
-  apply plugin: 'maven'
-  apply plugin: 'osgi'
-  apply plugin: 'eclipse'
-
   group = 'ros.rosjava_core'
   version = '0.0.0-SNAPSHOT'
-  sourceCompatibility = 1.6
 
-  repositories {
-    mavenLocal()
-    maven {
-      url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
+  if (name != 'doc') {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'osgi'
+    apply plugin: 'eclipse'
+
+    sourceCompatibility = 1.6
+
+    repositories {
+      mavenLocal()
+      maven {
+        url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
+      }
     }
-  }
 
-  install.dependsOn build
+    install.dependsOn build
+  }
 }
 
 defaultTasks 'install'

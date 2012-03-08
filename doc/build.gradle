@@ -14,7 +14,26 @@
  * the License.
  */
 
-include 'rosjava_bootstrap', 'apache_xmlrpc_common', 'apache_xmlrpc_client',
-        'apache_xmlrpc_server', 'rosjava', 'rosjava_geometry',
-        'rosjava_tutorial_pubsub', 'rosjava_actionlib',
-        'rosjava_actionlib_tutorial', 'doc'
+import org.apache.tools.ant.filters.ReplaceTokens
+
+task deployConf(type: Copy) {
+  from('source/conf.py.in') {
+    filter(ReplaceTokens, tokens: ['version': version])
+  }
+  into 'source'
+  rename 'conf.py.in', 'conf.py'
+}
+
+task html(type: Exec) {
+  commandLine 'make', 'html'
+}
+
+task install {
+  dependsOn deployConf, html
+}
+
+task clean << {
+  ant.delete dir: 'build'
+  ant.delete file: 'source/conf.py'
+}
+
