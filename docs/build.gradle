@@ -16,18 +16,6 @@
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
-task deploySphinxConf(type: Copy) {
-  from('src/main/sphinx/conf.py.in') {
-    filter(ReplaceTokens, tokens: ['version': rootProject.version])
-  }
-  into 'src/main/sphinx'
-  rename 'conf.py.in', 'conf.py'
-}
-
-task sphinxHtml(type: Exec) {
-  commandLine 'make', 'html'
-}
-
 task javadoc(type: Javadoc) {
   javaProjects = rootProject.subprojects.findResults { (it.name != 'docs') ? it : null }
   source javaProjects.collect { it.sourceSets.main.allJava }
@@ -35,8 +23,16 @@ task javadoc(type: Javadoc) {
   destinationDir = new File(buildDir, 'api')
 }
 
-task install {
-  dependsOn javadoc, deploySphinxConf, sphinxHtml
+task copySphinxConf(type: Copy) {
+  from('src/main/sphinx/conf.py.in') {
+    filter(ReplaceTokens, tokens: ['version': rootProject.version])
+  }
+  into 'src/main/sphinx'
+  rename 'conf.py.in', 'conf.py'
+}
+
+task install(type: Exec, dependsOn: [copySphinxConf, javadoc]) {
+  commandLine 'make', 'html'
 }
 
 task clean << {

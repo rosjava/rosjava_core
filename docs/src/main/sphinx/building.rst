@@ -8,3 +8,4 @@ rosjava_core uses the `Gradle`_ build system. To build rosjava_core, execute the
 
 #. roscd rosjava_core
 #. ./gradlew
+
