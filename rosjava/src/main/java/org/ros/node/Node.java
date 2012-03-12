@@ -192,7 +192,7 @@ public interface Node {
   /**
    * @param serviceName
    *          the name of the service to lookup
-   * @return {@link URI} of the {@Service} provider or null if the
+   * @return {@link URI} of the {@link Service} provider or null if the
    *         {@link Service} does not exist
    */
   URI lookupService(GraphName serviceName);
