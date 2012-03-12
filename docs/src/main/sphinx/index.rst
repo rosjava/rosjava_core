@@ -1,22 +1,32 @@
-.. rosjava_core documentation master file, created by
-   sphinx-quickstart on Thu Mar  8 15:07:47 2012.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+rosjava_core
+============
 
-Welcome to rosjava_core's documentation!
-========================================
+rosjava is a pure Java implementation of ROS. It provides a client library that
+enables Java programmers to quickly interface with ROS Topics, Services, and
+Parameters. It also provides a Java implementation of `roscore`_. Using rosjava
+is ideal when you need to:
+
+- interact with prior Java programs or libraries
+- write Android apps that work with ROS
+
+Please see the :doc:`overview` page for documentation on how to use rosjava in your
+projects.
+
+Support is best found on http://answers.ros.org/.
+
+Please file bugs and feature requests on the rosjava `issues`_ page. Starring
+issues that are important to you will help developers prioritize their work.
+
+.. _roscore:  http://ros.org/wiki/roscore
+.. _issues: http://code.google.com/p/rosjava/issues/list
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
+   overview
    building
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   best_practices
+   getting_started
 
