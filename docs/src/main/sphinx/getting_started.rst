@@ -4,6 +4,64 @@ Getting started
 Creating a new Java package
 ---------------------------
 
+The following steps will be wrapped up in package creation script in the near
+future.
+
+#. Use ``roscreate-pkg`` to create a new package. See
+   :roswiki:`ROS/Tutorials/CreatingPackage`.
+#. Remove the generated ``Makefile`` and ``CMakeLists.txt`` files.
+#. Add a new build.gradle file (see :ref:`build-gradle-example`).
+#. Put your your Java sources in ``src/main/java`` and your tests in ``src/test/java``.
+#. Assuming you have already completed :doc:`building`, you can now call
+   ``gradle build`` to build and test your package.
+
+.. _minimal-example:
+
+build.gradle example
+~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: groovy
+
+  apply plugin: 'java'
+
+  // The Maven plugin is only required if your package is used as a library.
+  apply plugin: 'maven'
+
+  // The Application plugin and mainClassName attribute are only required if
+  // your package is used as a binary.
+  apply plugin: 'application'
+  mainClassName = 'org.ros.RosRun'
+
+  sourceCompatibility = 1.6
+  targetCompatibility = 1.6
+
+  repositories {
+    mavenLocal()
+    maven {
+      url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
+    }
+  }
+
+  version = 0.0.0-SNAPSHOT
+  group = ros.my_stack
+
+  dependencies {
+    compile 'ros.rosjava_core:rosjava:0.0.0-SNAPSHOT'
+  }
+
+If you use the `Maven plugin`_, you may use ``gradle install`` to install your
+package to your local .m2 cache and make it available to other rosjava packages
+on your system.
+
+If you use the `Application plugin`_, you may use ``gradle installApp`` to create
+an executable wrapper for your package.
+
+See the Gradle `Java tutorial`_ for more details.
+
+.. _Maven plugin: http://gradle.org/docs/current/userguide/maven_plugin.html
+.. _Application plugin: http://gradle.org/docs/current/userguide/application_plugin.html
+.. _Java tutorial: http://gradle.org/docs/current/userguide/tutorial_java_projects.html
+
 Creating nodes
 --------------
 
