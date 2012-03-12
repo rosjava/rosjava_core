@@ -36,7 +36,8 @@ import java.util.Map;
  * globally viewable so that tools can easily inspect the configuration state of
  * the system and modify if necessary.
  * 
- * @see "http://www.ros.org/wiki/Parameter%20Server"
+ * @see <a href="http://www.ros.org/wiki/Parameter%20Server">Parameter server
+ *      documentation</a>
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */

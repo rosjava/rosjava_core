@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * ROS graph resource name.
  * 
- * @see "http://www.ros.org/wiki/Names"
+ * @see <a href="http://www.ros.org/wiki/Names">Names documentation</a>
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  */

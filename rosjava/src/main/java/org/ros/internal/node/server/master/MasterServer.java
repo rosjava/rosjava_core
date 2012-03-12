@@ -49,7 +49,7 @@ import java.util.List;
  * individual ROS {@link Node}s to locate one another. Once these {@link Node}s
  * have located each other they communicate with each other peer-to-peer.
  * 
- * @see "http://www.ros.org/wiki/Master"
+ * @see <a href="http://www.ros.org/wiki/Master">Master documentation</a>
  * 
  * @author damonkohler@google.com (Damon Kohler)
  * @author khughes@google.com (Keith M. Hughes)

@@ -32,7 +32,9 @@ import java.util.concurrent.TimeUnit;
 public interface Publisher<T> extends Topic {
 
   /**
-   * @see "http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options"
+   * @see <a
+   *      href="http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options">Publisher
+   *      options documentation</a>
    * @param enabled
    *          {@code true} if published messages should be latched,
    *          {@code false} otherwise
@@ -40,7 +42,9 @@ public interface Publisher<T> extends Topic {
   void setLatchMode(boolean enabled);
 
   /**
-   * @see "http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options"
+   * @see <a
+   *      href="http://www.ros.org/wiki/roscpp/Overview/Publishers%20and%20Subscribers#Publisher_Options">Publisher
+   *      options documentation</a>
    * @return {@code true} if published messages will be latched, {@code false}
    *         otherwise
    */
