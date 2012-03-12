@@ -15,7 +15,7 @@ future.
 #. Assuming you have already completed :doc:`building`, you can now call
    ``gradle build`` to build and test your package.
 
-.. _minimal-example:
+.. _build-gradle-example:
 
 build.gradle example
 ~~~~~~~~~~~~~~~~~~~~
