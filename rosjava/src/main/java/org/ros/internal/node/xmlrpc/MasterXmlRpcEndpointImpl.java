@@ -105,15 +105,8 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
 
   @Override
   public List<Object> unregisterPublisher(String callerId, String topicName, String callerSlaveUri) {
-    try {
-      boolean result =
-          master.unregisterPublisher(new GraphName(callerId), new URI(callerSlaveUri),
-              new GraphName(topicName));
-      return Response.newSuccess("Success", result ? 1 : 0).toList();
-    } catch (URISyntaxException e) {
-      throw new RosRuntimeException(String.format("Improperly formatted URI %s for subscriber",
-          callerSlaveUri), e);
-    }
+    boolean result = master.unregisterPublisher(new GraphName(callerId), new GraphName(topicName));
+    return Response.newSuccess("Success", result ? 1 : 0).toList();
   }
 
   @Override
@@ -137,14 +130,8 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
   @Override
   public List<Object>
       unregisterSubscriber(String callerId, String topicName, String callerSlaveUri) {
-    try {
-      boolean result =
-          master.unregisterSubscriber(new GraphName(callerId), new URI(callerSlaveUri),
-              new GraphName(topicName));
-      return Response.newSuccess("Success", result ? 1 : 0).toList();
-    } catch (URISyntaxException e) {
-      throw new RosRuntimeException(String.format("Invalid URI: %s", callerSlaveUri), e);
-    }
+    boolean result = master.unregisterSubscriber(new GraphName(callerId), new GraphName(topicName));
+    return Response.newSuccess("Success", result ? 1 : 0).toList();
   }
 
   @Override

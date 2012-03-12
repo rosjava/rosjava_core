@@ -42,13 +42,14 @@ public class MessageDefinition {
   }
 
   /**
-   * Create a new message definition, which consists only of the message type.
+   * Create a new {@link MessageDefinition}, which consists only of the
+   * specified message type.
    * 
    * <p>
    * The {@code definition} and {@code md5checksum} will be {@code null}.
    * 
    * @param type
-   * @return
+   * @return a new {@link MessageDefinition}
    */
   public static MessageDefinition newFromTypeName(String type) {
     return new MessageDefinition(type, null, null);
@@ -63,8 +64,7 @@ public class MessageDefinition {
    *          the definition of the message, can be {@code null}
    * @param md5Checksum
    *          the MD5 checksum of the message, can be {@code null}
-   * 
-   * @return
+   * @return a new {@link MessageDefinition}
    */
   public static MessageDefinition
       newFromStrings(String type, String definition, String md5Checksum) {
@@ -96,11 +96,9 @@ public class MessageDefinition {
 
   public Map<String, String> toHeader() {
     Preconditions.checkNotNull(md5Checksum);
-    return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.TYPE, type)
+    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.TYPE, type)
         .put(ConnectionHeaderFields.MD5_CHECKSUM, md5Checksum)
-        .put(ConnectionHeaderFields.MESSAGE_DEFINITION, definition)
-        .build();
+        .put(ConnectionHeaderFields.MESSAGE_DEFINITION, definition).build();
   }
 
   @Override

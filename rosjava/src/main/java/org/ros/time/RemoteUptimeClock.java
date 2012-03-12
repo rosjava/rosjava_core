@@ -175,7 +175,7 @@ public class RemoteUptimeClock {
    * @param errorReductionCoefficientSensitivity
    *          the sensitivity to error reduction coefficient adjustments, must
    *          be in the range [0, 1]
-   * @return
+   * @return a new {@link RemoteUptimeClock}
    */
   public static RemoteUptimeClock newDefault(final TimeProvider timeProvider,
       Callable<Double> callable, double driftSensitivity,

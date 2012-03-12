@@ -57,7 +57,6 @@ public class DefaultScheduledExecutorService implements ScheduledExecutorService
    * This instance will take over the lifecycle of the services.
    * 
    * @param executorService
-   * @param scheduledExecutorService
    */
   public DefaultScheduledExecutorService(ExecutorService executorService) {
     this(executorService, Executors.newScheduledThreadPool(CORE_POOL_SIZE));

@@ -108,14 +108,14 @@ public class OutgoingMessageQueue<MessageType> {
   }
 
   /**
-   * @see {@link CircularBlockingQueue#setLimit(int)}
+   * @see CircularBlockingQueue#setLimit(int)
    */
   public void setLimit(int limit) {
     messages.setLimit(limit);
   }
 
   /**
-   * @see {@link CircularBlockingQueue#getLimit()}
+   * @see CircularBlockingQueue#getLimit
    */
   public int getLimit() {
     return messages.getLimit();

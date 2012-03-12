@@ -51,7 +51,6 @@ public class TcpClientConnection {
    */
   private Channel channel;
 
-
   /**
    * @param bootstrap
    *          the {@link ClientBootstrap} instance to use when reconnecting
@@ -98,7 +97,7 @@ public class TcpClientConnection {
   }
 
   /**
-   * @see {@link Channel#write(ChannelBuffer)}
+   * @see Channel#write
    */
   public ChannelFuture write(ChannelBuffer buffer) {
     Preconditions.checkNotNull(channel, "Not connected.");

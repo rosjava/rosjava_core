@@ -49,7 +49,7 @@ public class CountDownSubscriberListener<T> extends CountDownRegistrantListener<
    *          the number of successful master unregistrations to wait for
    * @param masterUnregistrationFailureCount
    *          the number of failing master unregistrations to wait for
-   * @param newPublisherCount
+   * @param newSubscriberCount
    *          the number of counts to wait for for a new publisher
    */
   public static <T> CountDownSubscriberListener<T> newFromCounts(

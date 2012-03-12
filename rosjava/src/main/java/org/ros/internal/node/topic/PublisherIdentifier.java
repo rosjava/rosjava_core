@@ -22,6 +22,8 @@ import com.google.common.collect.Sets;
 
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.namespace.GraphName;
+import org.ros.node.Node;
+import org.ros.node.topic.Publisher;
 
 import java.net.URI;
 import java.util.Collection;
@@ -35,7 +37,7 @@ import java.util.Set;
  */
 public class PublisherIdentifier {
 
-  private final NodeIdentifier nodeSlaveIdentifier;
+  private final NodeIdentifier nodeIdentifier;
   private final TopicIdentifier topicIdentifier;
 
   public static Collection<PublisherIdentifier> newCollectionFromUris(
@@ -56,50 +58,43 @@ public class PublisherIdentifier {
   public PublisherIdentifier(NodeIdentifier nodeIdentifier, TopicIdentifier topicIdentifier) {
     Preconditions.checkNotNull(nodeIdentifier);
     Preconditions.checkNotNull(topicIdentifier);
-    this.nodeSlaveIdentifier = nodeIdentifier;
+    this.nodeIdentifier = nodeIdentifier;
     this.topicIdentifier = topicIdentifier;
   }
 
   public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>().putAll(nodeSlaveIdentifier.toHeader())
+    return new ImmutableMap.Builder<String, String>().putAll(nodeIdentifier.toHeader())
         .putAll(topicIdentifier.toHeader()).build();
   }
 
   public NodeIdentifier getNodeSlaveIdentifier() {
-    return nodeSlaveIdentifier;
+    return nodeIdentifier;
   }
 
   /**
-   * Get the name of the node where the slave for this publisher lives.
-   * 
-   * @return
+   * @return the {@link GraphName} of the {@link Node} hosting this
+   *         {@link Publisher}
    */
-  public GraphName getNodeSlaveName() {
-    return nodeSlaveIdentifier.getNodeName();
+  public GraphName getNodeName() {
+    return nodeIdentifier.getNodeName();
   }
 
   /**
-   * Get the URL for the slave server on the node which contains this publisher.
-   * 
-   * @return
+   * @return the {@link URI} of the {@link Node} hosting this {@link Publisher}
    */
-  public URI getNodeSlaveUri() {
-    return nodeSlaveIdentifier.getUri();
+  public URI getNodeUri() {
+    return nodeIdentifier.getUri();
   }
 
   /**
-   * Get the {@link TopicIdentifier} for the publisher's topic.
-   * 
-   * @return
+   * @return the {@link TopicIdentifier} for the {@link Publisher}'s topic
    */
   public TopicIdentifier getTopicIdentifier() {
     return topicIdentifier;
   }
 
   /**
-   * Get the name of the topic for the publisher.
-   * 
-   * @return
+   * @return the {@link GraphName} of this {@link Publisher}'s topic
    */
   public GraphName getTopicName() {
     return topicIdentifier.getName();
@@ -107,14 +102,14 @@ public class PublisherIdentifier {
 
   @Override
   public String toString() {
-    return "PublisherIdentifier<" + nodeSlaveIdentifier + ", " + topicIdentifier + ">";
+    return "PublisherIdentifier<" + nodeIdentifier + ", " + topicIdentifier + ">";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + nodeSlaveIdentifier.hashCode();
+    result = prime * result + nodeIdentifier.hashCode();
     result = prime * result + topicIdentifier.hashCode();
     return result;
   }
@@ -128,7 +123,7 @@ public class PublisherIdentifier {
     if (getClass() != obj.getClass())
       return false;
     PublisherIdentifier other = (PublisherIdentifier) obj;
-    if (!nodeSlaveIdentifier.equals(other.nodeSlaveIdentifier))
+    if (!nodeIdentifier.equals(other.nodeIdentifier))
       return false;
     if (!topicIdentifier.equals(other.topicIdentifier))
       return false;

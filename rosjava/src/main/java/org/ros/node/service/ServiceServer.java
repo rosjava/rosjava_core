@@ -23,7 +23,7 @@ import java.net.URI;
 /**
  * Provides a ROS service.
  * 
- * @see http://www.ros.org/wiki/Services
+ * @see "http://www.ros.org/wiki/Services"
  * 
  * @author damonkohler@google.com (Damon Kohler)
  * 

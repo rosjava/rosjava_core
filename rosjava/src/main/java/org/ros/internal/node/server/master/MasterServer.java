@@ -16,9 +16,8 @@
 
 package org.ros.internal.node.server.master;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +27,7 @@ import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.server.XmlRpcServer;
+import org.ros.internal.node.topic.Topic;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpointImpl;
 import org.ros.master.client.TopicSystemState;
 import org.ros.message.Service;
@@ -37,18 +37,19 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * The {@link MasterServer} provides naming and registration services to the
  * rest of the {@link Node}s in the ROS system. It tracks {@link Publisher}s and
- * {@link Subscriber}s to {@link TopicSystemState}s as well as {@link ServiceServer}s. The
- * role of the {@link MasterServer} is to enable individual ROS {@link Node}s to
- * locate one another. Once these {@link Node}s have located each other they
- * communicate with each other peer-to-peer.
+ * {@link Subscriber}s to {@link TopicSystemState}s as well as
+ * {@link ServiceServer}s. The role of the {@link MasterServer} is to enable
+ * individual ROS {@link Node}s to locate one another. Once these {@link Node}s
+ * have located each other they communicate with each other peer-to-peer.
  * 
- * @see http://www.ros.org/wiki/Master
+ * @see "http://www.ros.org/wiki/Master"
  * 
  * @author damonkohler@google.com (Damon Kohler)
  * @author khughes@google.com (Keith M. Hughes)
@@ -102,9 +103,14 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   /**
    * Register a service with the master.
    * 
-   * @param serviceIdentifier
-   *          the identifier of the service
-   * 
+   * @param nodeName
+   *          the {@link GraphName} of the {@link Node} offering the service
+   * @param nodeSlaveUri
+   *          the {@link URI} of the {@link Node}'s {@link SlaveServer}
+   * @param serviceName
+   *          the {@link GraphName} of the service
+   * @param serviceUri
+   *          the {@link URI} of the service
    */
   public void registerService(GraphName nodeName, URI nodeSlaveUri, GraphName serviceName,
       URI serviceUri) {
@@ -116,10 +122,13 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   /**
    * Unregister a service from the master.
    * 
-   * @param serviceIdentifier
-   *          the identifier of the service
-   * 
-   * @return {@code true} if the server had been registered
+   * @param nodeName
+   *          the {@link GraphName} of the {@link Node} offering the service
+   * @param serviceName
+   *          the {@link GraphName} of the service
+   * @param serviceUri
+   *          the {@link URI} of the service
+   * @return {@code true} if the service was registered
    */
   public boolean unregisterService(GraphName nodeName, GraphName serviceName, URI serviceUri) {
     synchronized (masterRegistrationManager) {
@@ -132,12 +141,16 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    * list of current publishers, the subscriber will also receive notifications
    * of new publishers via the publisherUpdate API.
    * 
-   * @param subscriberIdentifier
-   *          the identifier for the subscriber
+   * @param nodeName
+   *          the {@link GraphName} of the {@link Node} offering the service
+   * @param nodeSlaveUri
+   *          the {@link URI} of the {@link Node}'s {@link SlaveServer}
+   * @param topicName
+   *          the {@link GraphName} of the subscribed {@link Topic}
    * @param topicMessageType
    *          the message type of the topic
-   * @return A list of XMLRPC API URIs for nodes currently publishing the
-   *         specified topic.
+   * @return A {@link List} of XMLRPC API {@link URI}s for nodes currently
+   *         publishing the specified topic
    */
   public List<URI> registerSubscriber(GraphName nodeName, URI nodeSlaveUri, GraphName topicName,
       String topicMessageType) {
@@ -151,12 +164,10 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
       TopicRegistrationInfo topicInfo =
           masterRegistrationManager.registerSubscriber(nodeName, nodeSlaveUri, topicName,
               topicMessageType);
-
       List<URI> publisherUris = Lists.newArrayList();
       for (NodeRegistrationInfo publisherNodeInfo : topicInfo.getPublishers()) {
         publisherUris.add(publisherNodeInfo.getNodeSlaveUri());
       }
-
       return publisherUris;
     }
   }
@@ -164,15 +175,15 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   /**
    * Unregister a {@link Subscriber}.
    * 
-   * @param subscriberIdentifier
-   *          the identifier for the {@link Subscriber} to be unregistered
-   * @return the number of {@link Subscriber}s that were successfully
-   *         unregistered
+   * @param nodeName
+   *          the {@link GraphName} of the {@link Node} offering the service
+   * @param topicName
+   *          the {@link GraphName} of the subscribed {@link Topic}
+   * @return {@code true} if the {@link Subscriber} was registered
    */
-  public boolean unregisterSubscriber(GraphName nodeName, URI subscriberSlaveUri,
-      GraphName topicName) {
+  public boolean unregisterSubscriber(GraphName nodeName, GraphName topicName) {
     if (DEBUG) {
-      // log.info("Unregistering subscriber: " + subscriberIdentifier);
+      log.info(String.format("Unregistering subscriber for %s on node %s.", topicName, nodeName));
     }
     synchronized (masterRegistrationManager) {
       return masterRegistrationManager.unregisterSubscriber(nodeName, topicName);
@@ -180,13 +191,16 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   }
 
   /**
-   * Register the caller as a {@link Publisher} the {@link TopicSystemState}.
+   * Register the caller as a {@link Publisher} of the specified topic.
    * 
-   * @param publisherIdentifier
-   *          identifier for the {@link Publisher}
+   * @param nodeName
+   *          the {@link GraphName} of the {@link Node} offering the service
+   * @param nodeSlaveUri
+   *          the {@link URI} of the {@link Node}'s {@link SlaveServer}
+   * @param topicName
+   *          the {@link GraphName} of the subscribed {@link Topic}
    * @param topicMessageType
-   *          the message type of the {@link TopicSystemState}
-   * 
+   *          the message type of the topic
    * @return a {@link List} of the current {@link Subscriber}s to the
    *         {@link Publisher}'s {@link TopicSystemState} in the form of XML-RPC
    *         {@link URI}s for each {@link Subscriber}'s {@link SlaveServer}
@@ -195,7 +209,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
       String topicMessageType) {
     if (DEBUG) {
       log.info(String.format(
-          "Registering publisher %s with message type %s on node %s with URI %s", topicName,
+          "Registering publisher %s with message type %s on node %s with URI %s.", topicName,
           topicMessageType, nodeName, nodeSlaveUri));
     }
 
@@ -259,15 +273,15 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   /**
    * Unregister a {@link Publisher}.
    * 
-   * @param publisherIdentifier
-   *          the identifier for the {@link Publisher} to be unregistered
-   * @return the number of {@link Publisher}s that were successfully
-   *         unregistered
+   * @param nodeName
+   *          the {@link GraphName} of the {@link Node} offering the service
+   * @param topicName
+   *          the {@link GraphName} of the subscribed {@link Topic}
+   * @return {@code true} if the {@link Publisher} was unregistered
    */
-  public boolean
-      unregisterPublisher(GraphName nodeName, URI subscriberSlaveUri, GraphName topicName) {
+  public boolean unregisterPublisher(GraphName nodeName, GraphName topicName) {
     if (DEBUG) {
-      // log.info("Unregistering publisher: " + publisherIdentifier);
+      log.info(String.format("Unregistering publisher for %s on %s.", topicName, nodeName));
     }
     synchronized (masterRegistrationManager) {
       return masterRegistrationManager.unregisterPublisher(nodeName, topicName);
@@ -275,8 +289,8 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   }
 
   /**
-   * Returns a {@link NodeIdentifier} for the {@link Node} with the given
-   * name. This API is for looking information about {@link Publisher}s and
+   * Returns a {@link NodeIdentifier} for the {@link Node} with the given name.
+   * This API is for looking information about {@link Publisher}s and
    * {@link Subscriber}s. Use {@link #lookupService(GraphName)} instead to
    * lookup ROS-RPC {@link URI}s for {@link ServiceServer}s.
    * 
@@ -440,11 +454,11 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    * @param caller
    *          name of the caller
    * @param subgraph
-   *          subgraph containing the requested {@link TopicSystemState}s, relative to
-   *          caller
+   *          subgraph containing the requested {@link TopicSystemState}s,
+   *          relative to caller
    * @return a {@link List} of {@link List}s where the nested {@link List}s
-   *         contain, in order, the {@link TopicSystemState} name and {@link TopicSystemState} message
-   *         type
+   *         contain, in order, the {@link TopicSystemState} name and
+   *         {@link TopicSystemState} message type
    */
   public List<Object> getPublishedTopics(GraphName caller, GraphName subgraph) {
     synchronized (masterRegistrationManager) {

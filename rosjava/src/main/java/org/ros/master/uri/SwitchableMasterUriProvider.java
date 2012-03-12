@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * A proxying {@link MasterUriProvider} which can be switched between providers.
  * 
  * <p>
- * This class is thread-safe
+ * This class is thread-safe.
  * 
  * @author Keith M. Hughes
  */
@@ -66,7 +66,7 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
         pending.add(requestToUse);
       }
     }
-    
+
     if (providerToUse != null) {
       return providerToUse.getMasterUri();
     } else {
@@ -78,14 +78,14 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
   public URI getMasterUri(long timeout, TimeUnit unit) {
     // We can't really switch providers, but people are willing to wait. It
     // seems appropriate to wait rather than to return immediately.
-    
+
     MasterUriProvider providerToUse = null;
     synchronized (this) {
       if (provider != null) {
         providerToUse = provider;
       }
     }
-    
+
     if (providerToUse != null) {
       return providerToUse.getMasterUri(timeout, unit);
     } else {
@@ -123,8 +123,6 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
    * 
    * <p>
    * This class permits the use of atomic provider switches.
-   * 
-   * @author Keith M. Hughes
    */
   public interface MasterUriProviderSwitcher {
 
@@ -141,8 +139,6 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
 
   /**
    * A request for a URI which is blocked until it is available.
-   * 
-   * @author Keith M. Hughes
    */
   private static class ProviderRequest {
 
@@ -160,14 +156,13 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
      * Get a service.
      * 
      * <p>
-     * This call will block indefinitely.
+     * This call can block indefinitely.
      * 
-     * @return
+     * @return the master {@link URI}
      */
     public URI getMasterUri() {
       try {
         latch.await();
-
         return provider.getMasterUri();
       } catch (InterruptedException e) {
         throw new RosRuntimeException("URI provider interrupted", e);
@@ -177,11 +172,11 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
     /**
      * Set the provider who will finally process the request.
      * 
-     * @param service
+     * @param provider
+     *          the {@link MasterUriProvider} to use
      */
     public void setProvider(MasterUriProvider provider) {
       this.provider = provider;
-
       latch.countDown();
     }
   }

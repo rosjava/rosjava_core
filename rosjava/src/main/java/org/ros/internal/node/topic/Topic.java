@@ -21,7 +21,7 @@ import org.ros.namespace.GraphName;
 /**
  * Represents a ROS topic.
  * 
- * @see http://www.ros.org/wiki/Topics
+ * @see "http://www.ros.org/wiki/Topics"
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */

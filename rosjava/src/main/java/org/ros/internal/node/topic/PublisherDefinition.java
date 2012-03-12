@@ -68,7 +68,7 @@ public class PublisherDefinition {
   }
 
   public URI getSlaveUri() {
-    return publisherIdentifier.getNodeSlaveUri();
+    return publisherIdentifier.getNodeUri();
   }
 
   public GraphName getTopicName() {

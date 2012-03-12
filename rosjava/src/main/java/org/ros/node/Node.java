@@ -77,7 +77,7 @@ public interface Node {
   GraphName resolveName(String name);
 
   /**
-   * @return {@link DefaultNameResolver} for this namespace.
+   * @return {@link NodeNameResolver} for this namespace
    */
   NodeNameResolver getResolver();
 
@@ -145,8 +145,7 @@ public interface Node {
   <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType);
 
   /**
-   * @see #newSubscriber(GraphName, String, MessageListener,
-   *      Collection<SubscriberListener>)
+   * @see #newSubscriber(GraphName, String)
    */
   <T> Subscriber<T> newSubscriber(String topicName, String messageType);
 
@@ -247,8 +246,8 @@ public interface Node {
 
   /**
    * Executes a {@link CancellableLoop} using the {@link Node}'s
-   * {@link ScheduledExecutorService}. The {@link CancellableLoop} will be canceled when
-   * the {@link Node} starts shutting down.
+   * {@link ScheduledExecutorService}. The {@link CancellableLoop} will be
+   * canceled when the {@link Node} starts shutting down.
    * 
    * <p>
    * Any blocking calls executed in the provided {@link CancellableLoop} can

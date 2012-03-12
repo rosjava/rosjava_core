@@ -70,7 +70,7 @@ public class TcpClientConnectionManager {
    * @param address
    * @param handler
    * @param handlerName
-   * @return
+   * @return a new {@link TcpClientConnection}
    */
   public TcpClientConnection connect(String connectionName, SocketAddress address,
       final ChannelHandler handler, final String handlerName) {

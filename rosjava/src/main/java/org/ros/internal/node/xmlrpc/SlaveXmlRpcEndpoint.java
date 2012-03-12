@@ -93,10 +93,10 @@ public interface SlaveXmlRpcEndpoint extends XmlRpcEndpoint {
    * 
    * @param callerId
    *          ROS caller ID.
-   * @param parameterKey
-   *          Parameter name, globally resolved.
-   * @param parameterValue
-   *          New parameter value.
+   * @param key
+   *          parameter name, globally resolved
+   * @param value
+   *          new parameter value
    * @return ignore
    */
   public List<Object> paramUpdate(String callerId, String key, boolean value);

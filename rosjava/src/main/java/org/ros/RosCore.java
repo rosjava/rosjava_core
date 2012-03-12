@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * implementation or the default Python implementation distributed with ROS)
  * running in order for ROS nodes to communicate.
  * 
- * @see http://www.ros.org/wiki/roscore
+ * @see "http://www.ros.org/wiki/roscore"
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */

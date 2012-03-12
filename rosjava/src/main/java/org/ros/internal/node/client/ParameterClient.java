@@ -16,10 +16,7 @@
 
 package org.ros.internal.node.client;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
 
 import org.ros.internal.node.response.BooleanResultFactory;
 import org.ros.internal.node.response.IntegerResultFactory;
@@ -29,10 +26,13 @@ import org.ros.internal.node.response.StringListResultFactory;
 import org.ros.internal.node.response.StringResultFactory;
 import org.ros.internal.node.response.VoidResultFactory;
 import org.ros.internal.node.server.NodeIdentifier;
+import org.ros.internal.node.server.ParameterServer;
 import org.ros.internal.node.xmlrpc.ParameterServerXmlRpcEndpoint;
 import org.ros.namespace.GraphName;
 
-import com.google.common.collect.Lists;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provide access to the XML-RPC API for a ROS {@link ParameterServer}.
@@ -51,7 +51,6 @@ public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
    * 
    * @param uri
    *          the {@link URI} of the {@link ParameterServer} to connect to
-   * @throws MalformedURLException
    */
   public ParameterClient(NodeIdentifier nodeIdentifier, URI uri) {
     super(uri, ParameterServerXmlRpcEndpoint.class);

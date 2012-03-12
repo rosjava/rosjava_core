@@ -103,9 +103,7 @@ public class XmlRpcServer {
   }
 
   /**
-   * Get the URI of the serner.
-   * 
-   * @return
+   * @return the {@link URI} of the server
    */
   public URI getUri() {
     return advertiseAddress.toUri("http");

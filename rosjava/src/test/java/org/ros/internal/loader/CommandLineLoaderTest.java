@@ -20,13 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.ros.Assert.assertGraphNameEquals;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,8 +30,12 @@ import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.NodeConfiguration;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Test CommandLineLoader.
@@ -90,11 +89,6 @@ public class CommandLineLoaderTest {
   /**
    * Test createConfiguration() with respect to reading of the environment
    * configuration, including command-line overrides.
-   * {@link DefaultNameResolver} is tested separately.
-   * 
-   * @throws RosInitException
-   * @throws URISyntaxException
-   * @throws UnknownHostException
    */
   @Test
   public void testcreateConfigurationEnvironment() {
@@ -156,8 +150,7 @@ public class CommandLineLoaderTest {
     Map<String, String> env = getDefaultEnv();
 
     // Test __name override
-    NodeConfiguration nodeConfiguration =
-        new CommandLineLoader(emptyArgv, env).build();
+    NodeConfiguration nodeConfiguration = new CommandLineLoader(emptyArgv, env).build();
     assertEquals(null, nodeConfiguration.getNodeName());
     List<String> args = Lists.newArrayList("Foo", "__name:=newname");
     nodeConfiguration = new CommandLineLoader(args, env).build();
@@ -212,7 +205,7 @@ public class CommandLineLoaderTest {
   }
 
   /**
-   * Test the {@link DefaultNameResolver} created by createConfiguration().
+   * Test the {@link NameResolver} created by createConfiguration().
    */
   @Test
   public void testcreateConfigurationResolver() {

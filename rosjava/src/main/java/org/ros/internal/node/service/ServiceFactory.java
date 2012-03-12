@@ -18,16 +18,14 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.node.server.master.MasterServer;
-
 import org.ros.internal.message.new_style.ServiceMessageDefinition;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.server.master.MasterServer;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceServer;
-import org.ros.node.service.ServiceServerListener;
 
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -59,18 +57,17 @@ public class ServiceFactory {
    * 
    * @param serviceDefinition
    *          the {@link ServiceMessageDefinition} that is being served
+   * @param deserializer
+   *          a {@link MessageDeserializer} to be used for incoming messages
+   * @param serializer
+   *          a {@link MessageSerializer} to be used for outgoing messages
    * @param responseBuilder
    *          the {@link ServiceResponseBuilder} that is used to build responses
-   * @param serverListeners
-   *          a collection of {@link ServiceServerListener} instances to be
-   *          added to the server (can be {@code null}
-   * 
    * @return a {@link DefaultServiceServer} instance
    */
   @SuppressWarnings("unchecked")
-  public <T, S> DefaultServiceServer<T, S> newServer(
-      ServiceDefinition serviceDefinition, MessageDeserializer<T> deserializer,
-      MessageSerializer<S> serializer,
+  public <T, S> DefaultServiceServer<T, S> newServer(ServiceDefinition serviceDefinition,
+      MessageDeserializer<T> deserializer, MessageSerializer<S> serializer,
       ServiceResponseBuilder<T, S> responseBuilder) {
     DefaultServiceServer<T, S> serviceServer;
     String name = serviceDefinition.getName().toString();
@@ -78,13 +75,11 @@ public class ServiceFactory {
 
     synchronized (serviceManager) {
       if (serviceManager.hasServer(name)) {
-        serviceServer =
-            (DefaultServiceServer<T, S>) serviceManager.getServer(name);
+        serviceServer = (DefaultServiceServer<T, S>) serviceManager.getServer(name);
       } else {
         serviceServer =
-            new DefaultServiceServer<T, S>(serviceDefinition, deserializer,
-                serializer, responseBuilder, slaveServer.getTcpRosAdvertiseAddress(),
-                executorService);
+            new DefaultServiceServer<T, S>(serviceDefinition, deserializer, serializer,
+                responseBuilder, slaveServer.getTcpRosAdvertiseAddress(), executorService);
         createdNewService = true;
       }
     }

@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.xmlrpc;
 
+import org.ros.internal.node.server.ParameterServer;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -133,16 +135,16 @@ public interface ParameterServerXmlRpcEndpoint extends XmlRpcEndpoint {
    * Node API.
    * 
    * <p>
-   * If numUnsubscribed is zero it means that the caller was not subscribed to
-   * the parameter.
+   * A return value of zero means that the caller was not subscribed to the
+   * parameter.
    * 
    * @param callerId
-   *          ROS caller ID.
+   *          ROS caller ID
    * @param callerApi
-   *          Node API URI of subscriber.
+   *          Node API URI of subscriber
    * @param key
-   *          Parameter name.
-   * @return
+   *          Parameter name
+   * @return the number of parameters that were unsubscribed
    */
   public List<Object> unsubscribeParam(String callerId, String callerApi, String key);
 

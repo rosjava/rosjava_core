@@ -38,10 +38,9 @@ public class TopicDefinition {
   private final MessageDefinition messageDefinition;
 
   /**
-   * Get a topic definition from a set of headers.
-   * 
    * @param header
-   * @return
+   *          a {@link Map} of header fields
+   * @return a new {@link TopicDefinition} from the given header
    */
   public static TopicDefinition newFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));

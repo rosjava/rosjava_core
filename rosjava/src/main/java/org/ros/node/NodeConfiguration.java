@@ -39,7 +39,7 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * Stores configuration information (e.g. ROS master URI) for {@link Node}s.
  * 
- * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+ * @see "http://www.ros.org/wiki/ROS/Technical%20Overview#Node"
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author kwc@willowgarage.com (Ken Conley)
@@ -192,7 +192,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_MASTER_URI
+   * @see "http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_MASTER_URI"
    * @return the {@link URI} of the master that the {@link Node} will register
    *         with
    */
@@ -201,7 +201,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_MASTER_URI
+   * @see "http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_MASTER_URI"
    * @param masterUri
    *          the {@link URI} of the master that the {@link Node} will register
    *          with
@@ -213,7 +213,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_ROOT
+   * @see "http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_ROOT"
    * @return the location where the ROS core packages are installed
    */
   public File getRosRoot() {
@@ -221,7 +221,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_ROOT
+   * @see "http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_ROOT"
    * @param rosRoot
    *          the location where the ROS core packages are installed
    * @return this {@link NodeConfiguration}
@@ -236,7 +236,7 @@ public class NodeConfiguration {
    * packages. If there are multiple packages of the same name, ROS will choose
    * the one that appears in the {@link List} first.
    * 
-   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_PACKAGE_PATH
+   * @see "http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_PACKAGE_PATH"
    * @return the {@link List} of paths where the system will look for ROS
    *         packages
    */
@@ -249,7 +249,7 @@ public class NodeConfiguration {
    * packages. If there are multiple packages of the same name, ROS will choose
    * the one that appears in the {@link List} first.
    * 
-   * @see http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_PACKAGE_PATH
+   * @see "http://www.ros.org/wiki/ROS/EnvironmentVariables#ROS_PACKAGE_PATH"
    * @param rosPackagePath
    *          the {@link List} of paths where the system will look for ROS
    *          packages
@@ -359,7 +359,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/TCPROS
+   * @see "http://www.ros.org/wiki/ROS/TCPROS"
    * 
    * @return the {@link BindAddress} for the {@link Node}'s TCPROS server
    */
@@ -368,7 +368,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/TCPROS
+   * @see "http://www.ros.org/wiki/ROS/TCPROS"
    * 
    * @param tcpRosBindAddress
    *          the {@link BindAddress} for the {@link Node}'s TCPROS server
@@ -379,7 +379,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/TCPROS
+   * @see "http://www.ros.org/wiki/ROS/TCPROS"
    * 
    * @return the {@link AdvertiseAddressFactory} for the {@link Node}'s TCPROS
    *         server
@@ -389,7 +389,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/TCPROS
+   * @see "http://www.ros.org/wiki/ROS/TCPROS"
    * 
    * @param tcpRosAdvertiseAddressFactory
    *          the {@link AdvertiseAddressFactory} for the {@link Node}'s TCPROS
@@ -403,7 +403,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/TCPROS
+   * @see "http://www.ros.org/wiki/ROS/TCPROS"
    * 
    * @return the {@link AdvertiseAddress} for the {@link Node}'s TCPROS server
    */
@@ -412,7 +412,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * @see "http://www.ros.org/wiki/ROS/Technical%20Overview#Node"
    * 
    * @return the {@link BindAddress} for the {@link Node}'s XML-RPC server
    */
@@ -421,7 +421,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * @see "http://www.ros.org/wiki/ROS/Technical%20Overview#Node"
    * 
    * @param xmlRpcBindAddress
    *          the {@link BindAddress} for the {@link Node}'s XML-RPC server
@@ -432,7 +432,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * @see "http://www.ros.org/wiki/ROS/Technical%20Overview#Node"
    * 
    * @return the {@link AdvertiseAddress} for the {@link Node}'s XML-RPC server
    */
@@ -441,7 +441,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * @see "http://www.ros.org/wiki/ROS/Technical%20Overview#Node"
    * 
    * @return the {@link AdvertiseAddressFactory} for the {@link Node}'s XML-RPC
    *         server
@@ -451,7 +451,7 @@ public class NodeConfiguration {
   }
 
   /**
-   * @see http://www.ros.org/wiki/ROS/Technical%20Overview#Node
+   * @see "http://www.ros.org/wiki/ROS/Technical%20Overview#Node"
    * 
    * @param xmlRpcAdvertiseAddressFactory
    *          the {@link AdvertiseAddressFactory} for the {@link Node}'s XML-RPC
