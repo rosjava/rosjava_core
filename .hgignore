@@ -24,4 +24,3 @@ libs
 bin
 local.properties
 docs/src/main/sphinx/conf.py
-docs/Makefile
