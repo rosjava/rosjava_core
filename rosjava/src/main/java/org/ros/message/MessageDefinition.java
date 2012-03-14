@@ -72,7 +72,7 @@ public class MessageDefinition {
     // the definition.
     return new MessageDefinition(type, definition, md5Checksum);
   }
-
+  
   private MessageDefinition(String type, String definition, String md5Checksum) {
     Preconditions.checkNotNull(type);
     this.type = type;

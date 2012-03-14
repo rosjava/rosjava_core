@@ -21,8 +21,16 @@ package org.ros.internal.message.new_style;
  */
 public interface MessageDefinitionProvider {
 
+  /**
+   * @param messageName
+   * @return the definition of the message with the specified name
+   */
   String get(String messageName);
 
+  /**
+   * @param messageName
+   * @return {@code true} if a definition for the message with the specified
+   *         name can be provided, {@code false} otherwise
+   */
   boolean has(String messageName);
-
 }

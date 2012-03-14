@@ -18,10 +18,10 @@ package org.ros.internal.message.new_style;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
+
 import java.io.File;
 import java.net.URL;
-
-import org.junit.Test;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -38,5 +38,4 @@ public class MessageLoaderTest {
     assertEquals("string data", loader.get("std_msgs/String"));
     assertEquals("int8 data", loader.get("std_msgs/Int8"));
   }
-
 }

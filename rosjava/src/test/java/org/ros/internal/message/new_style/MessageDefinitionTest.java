@@ -34,5 +34,4 @@ public class MessageDefinitionTest {
             message.getMD5Sum());
     assertEquals(message.getMD5Sum(), definition.getMd5Checksum());
   }
-
 }
