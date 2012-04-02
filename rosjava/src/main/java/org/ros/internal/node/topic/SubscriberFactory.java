@@ -31,13 +31,13 @@ import java.util.concurrent.ScheduledExecutorService;
 public class SubscriberFactory {
 
   private final NodeIdentifier nodeIdentifier;
-  private final TopicManager topicManager;
+  private final TopicParticipantManager topicParticipantManager;
   private final ScheduledExecutorService executorService;
 
-  public SubscriberFactory(NodeIdentifier nodeIdentifier, TopicManager topicManager,
+  public SubscriberFactory(NodeIdentifier nodeIdentifier, TopicParticipantManager topicParticipantManager,
       ScheduledExecutorService executorService) {
     this.nodeIdentifier = nodeIdentifier;
-    this.topicManager = topicManager;
+    this.topicParticipantManager = topicParticipantManager;
     this.executorService = executorService;
   }
 
@@ -48,30 +48,30 @@ public class SubscriberFactory {
    * 
    * @param <T>
    *          the message type associated with the new {@link Subscriber}
-   * @param topicDefinition
-   *          {@link TopicDefinition} that is subscribed to
+   * @param topicDeclaration
+   *          {@link TopicDeclaration} that is subscribed to
    * @param messageDeserializer
    *          the {@link MessageDeserializer} to use for incoming messages
    * @return a new or cached {@link Subscriber} instance
    */
   @SuppressWarnings("unchecked")
-  public <T> Subscriber<T> newOrExisting(TopicDefinition topicDefinition,
+  public <T> Subscriber<T> newOrExisting(TopicDeclaration topicDeclaration,
       MessageDeserializer<T> messageDeserializer) {
-    String topicName = topicDefinition.getName().toString();
+    String topicName = topicDeclaration.getName().toString();
     DefaultSubscriber<T> subscriber;
     boolean createdNewSubscriber = false;
 
-    synchronized (topicManager) {
-      if (topicManager.hasSubscriber(topicName)) {
-        subscriber = (DefaultSubscriber<T>) topicManager.getSubscriber(topicName);
+    synchronized (topicParticipantManager) {
+      if (topicParticipantManager.hasSubscriber(topicName)) {
+        subscriber = (DefaultSubscriber<T>) topicParticipantManager.getSubscriber(topicName);
       } else {
         subscriber =
-            DefaultSubscriber.newDefault(nodeIdentifier, topicDefinition,
+            DefaultSubscriber.newDefault(nodeIdentifier, topicDeclaration,
                 executorService, messageDeserializer);
         subscriber.addSubscriberListener(new DefaultSubscriberListener<T>() {
           @Override
           public void onShutdown(Subscriber<T> subscriber) {
-            topicManager.removeSubscriber((DefaultSubscriber<T>) subscriber);
+            topicParticipantManager.removeSubscriber((DefaultSubscriber<T>) subscriber);
           }
         });
         createdNewSubscriber = true;
@@ -79,7 +79,7 @@ public class SubscriberFactory {
     }
 
     if (createdNewSubscriber) {
-      topicManager.putSubscriber(subscriber);
+      topicParticipantManager.putSubscriber(subscriber);
     }
     return subscriber;
   }

@@ -23,8 +23,11 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.ros.RosTest;
 import org.ros.concurrent.CancellableLoop;
+import org.ros.internal.message.MessageDefinitionReflectionProvider;
+import org.ros.internal.message.topic.TopicMessageFactory;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
+import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
@@ -41,18 +44,23 @@ import java.util.concurrent.TimeUnit;
  */
 public class TopicIntegrationTest extends RosTest {
 
+  private final std_msgs.String expectedMessage;
+
+  public TopicIntegrationTest() {
+    MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
+    TopicMessageFactory topicMessageFactory = new TopicMessageFactory(messageDefinitionProvider);
+    expectedMessage = topicMessageFactory.newFromType(std_msgs.String._TYPE);
+    expectedMessage.data("Would you like to play a game?");
+  }
+
   @Test
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
-    final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
-    helloMessage.data = "Hello, ROS!";
-
     nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
-        Publisher<org.ros.message.std_msgs.String> publisher =
-            node.newPublisher("foo", "std_msgs/String");
+        Publisher<std_msgs.String> publisher = node.newPublisher("foo", std_msgs.String._TYPE);
         publisher.setLatchMode(true);
-        publisher.publish(helloMessage);
+        publisher.publish(expectedMessage);
       }
 
       @Override
@@ -73,12 +81,11 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
-        Subscriber<org.ros.message.std_msgs.String> subscriber =
-            node.newSubscriber("foo", "std_msgs/String");
-        subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
+        Subscriber<std_msgs.String> subscriber = node.newSubscriber("foo", std_msgs.String._TYPE);
+        subscriber.addMessageListener(new MessageListener<std_msgs.String>() {
           @Override
-          public void onNewMessage(org.ros.message.std_msgs.String message) {
-            assertEquals(helloMessage, message);
+          public void onNewMessage(std_msgs.String message) {
+            assertEquals(expectedMessage, message);
             messageReceived.countDown();
           }
         });
@@ -112,22 +119,18 @@ public class TopicIntegrationTest extends RosTest {
    */
   @Test
   public void testSubscriberStartsBeforePublisher() throws InterruptedException {
-    final org.ros.message.std_msgs.String helloMessage = new org.ros.message.std_msgs.String();
-    helloMessage.data = "Hello, ROS!";
-
-    final CountDownSubscriberListener<org.ros.message.std_msgs.String> subscriberListener =
+    final CountDownSubscriberListener<std_msgs.String> subscriberListener =
         CountDownSubscriberListener.newDefault();
     final CountDownLatch messageReceived = new CountDownLatch(1);
     nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
-        Subscriber<org.ros.message.std_msgs.String> subscriber =
-            node.newSubscriber("foo", "std_msgs/String");
+        Subscriber<std_msgs.String> subscriber = node.newSubscriber("foo", std_msgs.String._TYPE);
         subscriber.addSubscriberListener(subscriberListener);
-        subscriber.addMessageListener(new MessageListener<org.ros.message.std_msgs.String>() {
+        subscriber.addMessageListener(new MessageListener<std_msgs.String>() {
           @Override
-          public void onNewMessage(org.ros.message.std_msgs.String message) {
-            assertEquals(helloMessage, message);
+          public void onNewMessage(std_msgs.String message) {
+            assertEquals(expectedMessage, message);
             messageReceived.countDown();
           }
         });
@@ -152,10 +155,9 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
-        Publisher<org.ros.message.std_msgs.String> publisher =
-            node.newPublisher("foo", "std_msgs/String");
+        Publisher<std_msgs.String> publisher = node.newPublisher("foo", std_msgs.String._TYPE);
         publisher.setLatchMode(true);
-        publisher.publish(helloMessage);
+        publisher.publish(expectedMessage);
       }
 
       @Override
@@ -180,9 +182,9 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
-        DefaultSubscriber<org.ros.message.std_msgs.String> subscriber =
-            (DefaultSubscriber<org.ros.message.std_msgs.String>) node
-                .<org.ros.message.std_msgs.String>newSubscriber("foo", "std_msgs/String");
+        DefaultSubscriber<std_msgs.String> subscriber =
+            (DefaultSubscriber<std_msgs.String>) node.<std_msgs.String>newSubscriber("foo",
+                std_msgs.String._TYPE);
         try {
           subscriber.addPublisher(PublisherIdentifier.newFromStrings("foo", "http://foo", "foo"),
               new InetSocketAddress(1234));
@@ -207,18 +209,18 @@ public class TopicIntegrationTest extends RosTest {
     }, nodeConfiguration);
   }
 
-  private class Listener implements MessageListener<org.ros.message.test_ros.TestHeader> {
+  private class Listener implements MessageListener<test_ros.TestHeader> {
 
     private final CountDownLatch latch = new CountDownLatch(10);
 
-    private org.ros.message.test_ros.TestHeader lastMessage;
+    private test_ros.TestHeader lastMessage;
 
     @Override
-    public void onNewMessage(org.ros.message.test_ros.TestHeader message) {
+    public void onNewMessage(test_ros.TestHeader message) {
       if (lastMessage != null) {
-        assertTrue(String.format("message seq %d <= previous seq %d", message.header.seq,
-            lastMessage.header.seq), message.header.seq > lastMessage.header.seq);
-        assertTrue(message.header.stamp.compareTo(lastMessage.header.stamp) > 0);
+        assertTrue(String.format("message seq %d <= previous seq %d", message.header().seq(),
+            lastMessage.header().seq()), message.header().seq() > lastMessage.header().seq());
+        assertTrue(message.header().stamp().compareTo(lastMessage.header().stamp()) > 0);
       }
       lastMessage = message;
       latch.countDown();
@@ -234,16 +236,16 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(final Node node) {
-        final Publisher<org.ros.message.test_ros.TestHeader> publisher =
-            node.newPublisher("foo", "test_ros/TestHeader");
+        final Publisher<test_ros.TestHeader> publisher =
+            node.newPublisher("foo", test_ros.TestHeader._TYPE);
         CancellableLoop cancellableLoop = new CancellableLoop() {
           @Override
           public void loop() throws InterruptedException {
-            org.ros.message.test_ros.TestHeader headerMessage =
-                node.getMessageFactory().newMessage("test_ros/TestHeader");
-            headerMessage.header.frame_id = "frame";
-            headerMessage.header.stamp = node.getCurrentTime();
-            publisher.publish(headerMessage);
+            test_ros.TestHeader testHeader =
+                node.getTopicMessageFactory().newFromType(test_ros.TestHeader._TYPE);
+            testHeader.header().frame_id("frame");
+            testHeader.header().stamp(node.getCurrentTime());
+            publisher.publish(testHeader);
             // There needs to be some time between messages in order to
             // guarantee that the timestamp increases.
             Thread.sleep(1);
@@ -270,8 +272,8 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
-        Subscriber<org.ros.message.test_ros.TestHeader> subscriber =
-            node.newSubscriber("foo", "test_ros/TestHeader");
+        Subscriber<test_ros.TestHeader> subscriber =
+            node.newSubscriber("foo", test_ros.TestHeader._TYPE);
         subscriber.addMessageListener(listener);
       }
 

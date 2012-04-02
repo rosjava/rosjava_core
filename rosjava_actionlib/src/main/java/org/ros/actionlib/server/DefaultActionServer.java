@@ -16,17 +16,17 @@
 
 package org.ros.actionlib.server;
 
+import actionlib_msgs.GoalID;
+import actionlib_msgs.GoalStatus;
+import actionlib_msgs.GoalStatusArray;
 import org.ros.actionlib.ActionConstants;
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.util.GoalIDGenerator;
 import org.ros.exception.RosException;
+import org.ros.internal.message.Message;
 import org.ros.message.Duration;
-import org.ros.message.Message;
 import org.ros.message.MessageListener;
 import org.ros.message.Time;
-import org.ros.message.actionlib_msgs.GoalID;
-import org.ros.message.actionlib_msgs.GoalStatus;
-import org.ros.message.actionlib_msgs.GoalStatusArray;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.parameter.ParameterTree;

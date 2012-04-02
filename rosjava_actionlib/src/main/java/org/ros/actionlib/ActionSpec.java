@@ -16,6 +16,8 @@
 
 package org.ros.actionlib;
 
+import actionlib_msgs.GoalID;
+import actionlib_msgs.GoalStatus;
 import org.ros.actionlib.client.ActionClient;
 import org.ros.actionlib.client.SimpleActionClient;
 import org.ros.actionlib.server.ActionServerCallbacks;
@@ -24,11 +26,9 @@ import org.ros.actionlib.server.DefaultSimpleActionServer;
 import org.ros.actionlib.server.SimpleActionServer;
 import org.ros.actionlib.server.SimpleActionServerCallbacks;
 import org.ros.exception.RosException;
-import org.ros.message.Message;
+import org.ros.internal.message.Message;
 import org.ros.message.Time;
-import org.ros.message.actionlib_msgs.GoalID;
-import org.ros.message.actionlib_msgs.GoalStatus;
-import org.ros.message.std_msgs.Header;
+import std_msgs.Header;
 
 import java.lang.reflect.Field;
 

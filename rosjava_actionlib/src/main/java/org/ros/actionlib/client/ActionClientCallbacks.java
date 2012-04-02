@@ -17,7 +17,7 @@
 package org.ros.actionlib.client;
 
 import org.ros.exception.RosException;
-import org.ros.message.Message;
+import org.ros.internal.message.Message;
 
 /**
  * 

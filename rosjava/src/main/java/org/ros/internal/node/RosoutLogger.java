@@ -16,16 +16,16 @@
 
 package org.ros.internal.node;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
 
 /**
  * Logger that logs to both an underlying Apache Commons Log as well as /rosout.
@@ -37,7 +37,7 @@ public class RosoutLogger implements Log {
   private static final String ROSOUT_TOPIC = "/rosout";
 
   private final Node node;
-  private final Publisher<org.ros.message.rosgraph_msgs.Log> publisher;
+  private final Publisher<rosgraph_msgs.Log> publisher;
   private final Log log;
 
   RosoutLogger(Node node) {
@@ -47,7 +47,7 @@ public class RosoutLogger implements Log {
   }
 
   @VisibleForTesting
-  Publisher<org.ros.message.rosgraph_msgs.Log> getPublisher() {
+  Publisher<rosgraph_msgs.Log> getPublisher() {
     return publisher;
   }
 
@@ -59,16 +59,17 @@ public class RosoutLogger implements Log {
   }
 
   private void publish(byte level, Object message) {
-    org.ros.message.rosgraph_msgs.Log m = new org.ros.message.rosgraph_msgs.Log();
-    m.header.stamp = node.getCurrentTime();
-    m.level = level;
-    m.name = node.getName().toString();
-    m.msg = message.toString();
+    rosgraph_msgs.Log logMessage =
+        node.getTopicMessageFactory().newFromType(rosgraph_msgs.Log._TYPE);
+    logMessage.getMessage("header").setTime("stamp", node.getCurrentTime());
+    logMessage.level(level);
+    logMessage.name(node.getName().toString());
+    logMessage.msg(message.toString());
     // TODO(damonkohler): Should return list of all published and subscribed
     // topics for the node that created this logger. This helps filter the
     // rosoutconsole.
-    m.topics = Lists.newArrayList();
-    publisher.publish(m);
+    logMessage.topics(new ArrayList<String>());
+    publisher.publish(logMessage);
   }
 
   @Override
@@ -105,7 +106,7 @@ public class RosoutLogger implements Log {
   public void trace(Object message) {
     log.trace(message);
     if (log.isTraceEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.DEBUG, message);
+      publish(rosgraph_msgs.Log.DEBUG, message);
     }
   }
 
@@ -113,7 +114,7 @@ public class RosoutLogger implements Log {
   public void trace(Object message, Throwable t) {
     log.trace(message, t);
     if (log.isTraceEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.DEBUG, message, t);
+      publish(rosgraph_msgs.Log.DEBUG, message, t);
     }
   }
 
@@ -121,7 +122,7 @@ public class RosoutLogger implements Log {
   public void debug(Object message) {
     log.debug(message);
     if (log.isDebugEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.DEBUG, message);
+      publish(rosgraph_msgs.Log.DEBUG, message);
     }
   }
 
@@ -129,7 +130,7 @@ public class RosoutLogger implements Log {
   public void debug(Object message, Throwable t) {
     log.debug(message, t);
     if (log.isDebugEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.DEBUG, message, t);
+      publish(rosgraph_msgs.Log.DEBUG, message, t);
     }
   }
 
@@ -137,7 +138,7 @@ public class RosoutLogger implements Log {
   public void info(Object message) {
     log.info(message);
     if (log.isInfoEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.INFO, message);
+      publish(rosgraph_msgs.Log.INFO, message);
     }
   }
 
@@ -145,7 +146,7 @@ public class RosoutLogger implements Log {
   public void info(Object message, Throwable t) {
     log.info(message, t);
     if (log.isInfoEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.INFO, message, t);
+      publish(rosgraph_msgs.Log.INFO, message, t);
     }
   }
 
@@ -153,7 +154,7 @@ public class RosoutLogger implements Log {
   public void warn(Object message) {
     log.warn(message);
     if (log.isWarnEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.WARN, message);
+      publish(rosgraph_msgs.Log.WARN, message);
     }
   }
 
@@ -161,7 +162,7 @@ public class RosoutLogger implements Log {
   public void warn(Object message, Throwable t) {
     log.warn(message, t);
     if (log.isWarnEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.WARN, message, t);
+      publish(rosgraph_msgs.Log.WARN, message, t);
     }
   }
 
@@ -169,7 +170,7 @@ public class RosoutLogger implements Log {
   public void error(Object message) {
     log.error(message);
     if (log.isErrorEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.ERROR, message);
+      publish(rosgraph_msgs.Log.ERROR, message);
     }
   }
 
@@ -177,7 +178,7 @@ public class RosoutLogger implements Log {
   public void error(Object message, Throwable t) {
     log.error(message, t);
     if (log.isErrorEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.ERROR, message, t);
+      publish(rosgraph_msgs.Log.ERROR, message, t);
     }
   }
 
@@ -185,7 +186,7 @@ public class RosoutLogger implements Log {
   public void fatal(Object message) {
     log.fatal(message);
     if (log.isFatalEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.FATAL, message);
+      publish(rosgraph_msgs.Log.FATAL, message);
     }
   }
 
@@ -193,7 +194,7 @@ public class RosoutLogger implements Log {
   public void fatal(Object message, Throwable t) {
     log.fatal(message, t);
     if (log.isFatalEnabled() && publisher != null) {
-      publish(org.ros.message.rosgraph_msgs.Log.FATAL, message, t);
+      publish(rosgraph_msgs.Log.FATAL, message, t);
     }
   }
 }

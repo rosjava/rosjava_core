@@ -18,8 +18,6 @@ package org.ros.internal.node.client;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.node.server.master.MasterServer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.Holder;
@@ -28,12 +26,13 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.server.master.MasterServer;
 import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.service.ServiceManagerListener;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
-import org.ros.internal.node.topic.TopicManagerListener;
+import org.ros.internal.node.topic.TopicParticipantManagerListener;
 
 import java.net.URI;
 import java.util.Collection;
@@ -49,9 +48,9 @@ import java.util.concurrent.TimeUnit;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Registrar implements TopicManagerListener, ServiceManagerListener {
+public class Registrar implements TopicParticipantManagerListener, ServiceManagerListener {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(Registrar.class);
 
   private static final int SHUTDOWN_TIMEOUT = 5;
@@ -136,7 +135,7 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
         boolean success = callMaster(new Callable<Response<List<URI>>>() {
           @Override
           public Response<List<URI>> call() throws Exception {
-            return masterClient.registerPublisher(publisher.toDefinition());
+            return masterClient.registerPublisher(publisher.toDeclaration());
           }
         });
         if (success) {
@@ -207,7 +206,7 @@ public class Registrar implements TopicManagerListener, ServiceManagerListener {
         if (success) {
           Collection<PublisherIdentifier> publishers =
               PublisherIdentifier.newCollectionFromUris(holder.get().getResult(),
-                  subscriber.getTopicDefinition());
+                  subscriber.getTopicDeclaration());
           subscriber.updatePublishers(publishers);
           subscriber.signalOnMasterRegistrationSuccess();
         } else {

@@ -42,7 +42,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
-  private final ServiceDefinition serviceDefinition;
+  private final ServiceDeclaration serviceDeclaration;
   private final TcpClientConnectionManager tcpClientConnectionManager;
   private final MessageSerializer<T> serializer;
   private final MessageDeserializer<S> deserializer;
@@ -53,16 +53,16 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   private TcpClientConnection tcpClientConnection;
 
   public static <S, T> DefaultServiceClient<S, T> newDefault(GraphName nodeName,
-      ServiceDefinition serviceDefinition, MessageSerializer<S> serializer,
+      ServiceDeclaration serviceDeclaration, MessageSerializer<S> serializer,
       MessageDeserializer<T> deserializer, ScheduledExecutorService executorService) {
-    return new DefaultServiceClient<S, T>(nodeName, serviceDefinition, serializer, deserializer,
+    return new DefaultServiceClient<S, T>(nodeName, serviceDeclaration, serializer, deserializer,
         executorService);
   }
 
-  private DefaultServiceClient(GraphName nodeName, ServiceDefinition serviceDefinition,
+  private DefaultServiceClient(GraphName nodeName, ServiceDeclaration serviceDeclaration,
       MessageSerializer<T> serializer, MessageDeserializer<S> deserializer,
       ScheduledExecutorService executorService) {
-    this.serviceDefinition = serviceDefinition;
+    this.serviceDeclaration = serviceDeclaration;
     this.serializer = serializer;
     this.deserializer = deserializer;
     this.executorService = executorService;
@@ -71,7 +71,8 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
             // TODO(damonkohler): Support non-persistent connections.
-            .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceDefinition.toHeader())
+            .put(ConnectionHeaderFields.PERSISTENT, "1")
+            .putAll(serviceDeclaration.toHeader())
             .build();
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
   }
@@ -111,11 +112,11 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   @Override
   public GraphName getName() {
-    return serviceDefinition.getName();
+    return serviceDeclaration.getName();
   }
 
   @Override
   public String toString() {
-    return "ServiceClient<" + serviceDefinition + ">";
+    return "ServiceClient<" + serviceDeclaration + ">";
   }
 }

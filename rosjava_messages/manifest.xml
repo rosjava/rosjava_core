@@ -1,0 +1,14 @@
+<package>
+  <description brief="rosjava_messages">
+
+     rosjava_messages
+
+  </description>
+  <author>Damon Kohler</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rosjava_messages</url>
+
+</package>
+
+

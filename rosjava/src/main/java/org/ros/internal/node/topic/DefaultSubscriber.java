@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> {
+public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Subscriber<T> {
 
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
@@ -70,14 +70,14 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
   private final ListenerCollection<SubscriberListener<T>> subscriberListeners;
 
   public static <S> DefaultSubscriber<S> newDefault(NodeIdentifier nodeIdentifier,
-      TopicDefinition description, ScheduledExecutorService executorService,
+      TopicDeclaration description, ScheduledExecutorService executorService,
       MessageDeserializer<S> deserializer) {
     return new DefaultSubscriber<S>(nodeIdentifier, description, deserializer, executorService);
   }
 
-  private DefaultSubscriber(NodeIdentifier nodeIdentifier, TopicDefinition topicDefinition,
+  private DefaultSubscriber(NodeIdentifier nodeIdentifier, TopicDeclaration topicDeclaration,
       MessageDeserializer<T> deserializer, ScheduledExecutorService executorService) {
-    super(topicDefinition);
+    super(topicDeclaration);
     this.nodeIdentifier = nodeIdentifier;
     this.executorService = executorService;
     incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
@@ -108,11 +108,11 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
   }
 
   public SubscriberIdentifier toIdentifier() {
-    return new SubscriberIdentifier(nodeIdentifier, getTopicDefinition().toIdentifier());
+    return new SubscriberIdentifier(nodeIdentifier, getTopicDeclaration().toIdentifier());
   }
 
-  public SubscriberDefinition toDefinition() {
-    return new SubscriberDefinition(toIdentifier(), getTopicDefinition());
+  public SubscriberDeclaration toDefinition() {
+    return new SubscriberDeclaration(toIdentifier(), getTopicDeclaration());
   }
 
   public Collection<String> getSupportedProtocols() {
@@ -165,7 +165,7 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
 
   @Override
   public void shutdown(long timeout, TimeUnit unit) {
-    signalShutdown();
+    signalOnShutdown(timeout, unit);
     incomingMessageQueue.shutdown();
     tcpClientConnectionManager.shutdown();
   }
@@ -281,7 +281,7 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
    * <p>
    * Each listener is called in a separate thread.
    */
-  private void signalShutdown() {
+  private void signalOnShutdown(long timeout, TimeUnit unit) {
     final Subscriber<T> subscriber = this;
     try {
       subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
@@ -289,7 +289,7 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
         public void run(SubscriberListener<T> listener) {
           listener.onShutdown(subscriber);
         }
-      }, DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEOUT_UNITS);
+      }, timeout, unit);
     } catch (InterruptedException e) {
       // Ignored since we do not guarantee that all listeners will finish before
       // shutdown begins.
@@ -298,7 +298,7 @@ public class DefaultSubscriber<T> extends DefaultTopic implements Subscriber<T> 
 
   @Override
   public String toString() {
-    return "Subscriber<" + getTopicDefinition() + ">";
+    return "Subscriber<" + getTopicDeclaration() + ">";
   }
 
   @Override

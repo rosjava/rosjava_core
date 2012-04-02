@@ -16,13 +16,13 @@
 
 package org.ros.actionlib.server;
 
+import actionlib_msgs.GoalID;
+import actionlib_msgs.GoalStatus;
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.util.GoalIDGenerator;
 import org.ros.exception.RosException;
-import org.ros.message.Message;
+import org.ros.internal.message.Message;
 import org.ros.message.Time;
-import org.ros.message.actionlib_msgs.GoalID;
-import org.ros.message.actionlib_msgs.GoalStatus;
 
 /**
  * Track the status of a goal.

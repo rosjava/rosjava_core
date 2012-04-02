@@ -27,8 +27,8 @@ import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
-import org.ros.internal.node.topic.TopicDefinition;
-import org.ros.internal.node.topic.TopicManager;
+import org.ros.internal.node.topic.TopicDeclaration;
+import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl;
 import org.ros.internal.system.Process;
 import org.ros.internal.transport.ProtocolDescription;
@@ -49,24 +49,24 @@ public class SlaveServer extends XmlRpcServer {
 
   private final GraphName nodeName;
   private final MasterClient masterClient;
-  private final TopicManager topicManager;
+  private final TopicParticipantManager topicParticipantManager;
   private final ServiceManager serviceManager;
   private final ParameterManager parameterManager;
   private final TcpRosServer tcpRosServer;
 
   public SlaveServer(GraphName nodeName, BindAddress tcpRosBindAddress,
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
-      AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master, TopicManager topicManager,
+      AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master, TopicParticipantManager topicParticipantManager,
       ServiceManager serviceManager, ParameterManager parameterManager,
       ScheduledExecutorService executorService) {
     super(xmlRpcBindAddress, xmlRpcAdvertiseAddress);
     this.nodeName = nodeName;
     this.masterClient = master;
-    this.topicManager = topicManager;
+    this.topicParticipantManager = topicParticipantManager;
     this.serviceManager = serviceManager;
     this.parameterManager = parameterManager;
     this.tcpRosServer =
-        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicManager, serviceManager,
+        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicParticipantManager, serviceManager,
             executorService);
   }
 
@@ -122,11 +122,11 @@ public class SlaveServer extends XmlRpcServer {
   }
 
   public List<DefaultSubscriber<?>> getSubscriptions() {
-    return topicManager.getSubscribers();
+    return topicParticipantManager.getSubscribers();
   }
 
   public List<DefaultPublisher<?>> getPublications() {
-    return topicManager.getPublishers();
+    return topicParticipantManager.getPublishers();
   }
 
   /**
@@ -139,11 +139,11 @@ public class SlaveServer extends XmlRpcServer {
   }
 
   public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
-    if (topicManager.hasSubscriber(topicName)) {
-      DefaultSubscriber<?> subscriber = topicManager.getSubscriber(topicName);
-      TopicDefinition topicDefinition = subscriber.getTopicDefinition();
+    if (topicParticipantManager.hasSubscriber(topicName)) {
+      DefaultSubscriber<?> subscriber = topicParticipantManager.getSubscriber(topicName);
+      TopicDeclaration topicDeclaration = subscriber.getTopicDeclaration();
       Collection<PublisherIdentifier> identifiers =
-          PublisherIdentifier.newCollectionFromUris(publisherUris, topicDefinition);
+          PublisherIdentifier.newCollectionFromUris(publisherUris, topicDeclaration);
       subscriber.updatePublishers(identifiers);
     }
   }
@@ -152,7 +152,7 @@ public class SlaveServer extends XmlRpcServer {
       throws ServerException {
     // Canonicalize topic name.
     topicName = new GraphName(topicName).toGlobal().toString();
-    if (!topicManager.hasPublisher(topicName)) {
+    if (!topicParticipantManager.hasPublisher(topicName)) {
       throw new ServerException("No publishers for topic: " + topicName);
     }
     for (String protocol : protocols) {
@@ -170,7 +170,7 @@ public class SlaveServer extends XmlRpcServer {
   /**
    * @return a {@link NodeIdentifier} for this {@link SlaveServer}
    */
-  public NodeIdentifier toSlaveIdentifier() {
+  public NodeIdentifier toNodeIdentifier() {
     return new NodeIdentifier(nodeName, getUri());
   }
 }

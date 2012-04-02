@@ -25,7 +25,7 @@ import org.jboss.netty.channel.ChannelHandler;
 import org.ros.address.AdvertiseAddress;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
-import org.ros.internal.message.new_style.ServiceMessageDefinition;
+import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -50,23 +50,25 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
-  private final ServiceDefinition definition;
-  private final MessageDeserializer<T> deserializer;
-  private final MessageSerializer<S> serializer;
+  private final ServiceDeclaration serviceDeclaration;
+  private final MessageDeserializer<T> messageDeserializer;
+  private final MessageSerializer<S> messageSerializer;
   private final AdvertiseAddress advertiseAddress;
-  private final ServiceResponseBuilder<T, S> responseBuilder;
-  private final ListenerCollection<ServiceServerListener<T, S>> listeners;
+  private final ServiceResponseBuilder<T, S> serviceResponseBuilder;
+  private final ListenerCollection<ServiceServerListener<T, S>> listenerCollection;
 
-  public DefaultServiceServer(ServiceDefinition definition, MessageDeserializer<T> deserializer,
-      MessageSerializer<S> serializer, ServiceResponseBuilder<T, S> responseBuilder,
-      AdvertiseAddress advertiseAddress, ScheduledExecutorService executorService) {
-    this.definition = definition;
-    this.deserializer = deserializer;
-    this.serializer = serializer;
-    this.responseBuilder = responseBuilder;
+  public DefaultServiceServer(ServiceDeclaration serviceDeclaration,
+      MessageDeserializer<T> messageDeserializer, MessageSerializer<S> messageSerializer,
+      ServiceResponseBuilder<T, S> serviceResponseBuilder, AdvertiseAddress advertiseAddress,
+      ScheduledExecutorService scheduledExecutorService) {
+    this.serviceDeclaration = serviceDeclaration;
+    this.messageDeserializer = messageDeserializer;
+    this.messageSerializer = messageSerializer;
+    this.serviceResponseBuilder = serviceResponseBuilder;
     this.advertiseAddress = advertiseAddress;
-    listeners = new ListenerCollection<ServiceServerListener<T, S>>(executorService);
-    listeners.add(new DefaultServiceServerListener<T, S>() {
+    listenerCollection =
+        new ListenerCollection<ServiceServerListener<T, S>>(scheduledExecutorService);
+    listenerCollection.add(new DefaultServiceServerListener<T, S>() {
       @Override
       public void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {
         log.info("Service registered: " + DefaultServiceServer.this);
@@ -90,7 +92,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   }
 
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
-    Map<String, String> header = getDefinition().toHeader();
+    Map<String, String> header = getDeclaration().toHeader();
     if (DEBUG) {
       log.info("Outgoing handshake header: " + header);
     }
@@ -112,21 +114,22 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
 
   @Override
   public GraphName getName() {
-    return definition.getName();
+    return serviceDeclaration.getName();
   }
 
   /**
-   * @return a new {@link ServiceMessageDefinition} with this
+   * @return a new {@link ServiceDeclaration} with this
    *         {@link DefaultServiceServer}'s {@link URI}
    */
-  ServiceDefinition getDefinition() {
-    ServiceIdentifier identifier = new ServiceIdentifier(definition.getName(), getUri());
-    return new ServiceDefinition(identifier, new ServiceMessageDefinition(definition.getType(),
-        definition.getMd5Checksum()));
+  ServiceDeclaration getDeclaration() {
+    ServiceIdentifier identifier = new ServiceIdentifier(serviceDeclaration.getName(), getUri());
+    return new ServiceDeclaration(identifier, new ServiceDescription(serviceDeclaration.getType(),
+        serviceDeclaration.getDefinition(), serviceDeclaration.getMd5Checksum()));
   }
 
   public ChannelHandler newRequestHandler() {
-    return new ServiceRequestHandler<T, S>(deserializer, serializer, responseBuilder);
+    return new ServiceRequestHandler<T, S>(messageDeserializer, messageSerializer,
+        serviceResponseBuilder);
   }
 
   /**
@@ -138,7 +141,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
    */
   public void signalOnMasterRegistrationSuccess() {
     final ServiceServer<T, S> serviceServer = this;
-    listeners.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+    listenerCollection.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
       @Override
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterRegistrationSuccess(serviceServer);
@@ -155,7 +158,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
    */
   public void signalOnMasterRegistrationFailure() {
     final ServiceServer<T, S> serviceServer = this;
-    listeners.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+    listenerCollection.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
       @Override
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterRegistrationFailure(serviceServer);
@@ -172,7 +175,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
    */
   public void signalOnMasterUnregistrationSuccess() {
     final ServiceServer<T, S> serviceServer = this;
-    listeners.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+    listenerCollection.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
       @Override
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterUnregistrationSuccess(serviceServer);
@@ -189,7 +192,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
    */
   public void signalOnMasterUnregistrationFailure() {
     final ServiceServer<T, S> serviceServer = this;
-    listeners.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+    listenerCollection.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
       @Override
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterUnregistrationFailure(serviceServer);
@@ -204,11 +207,11 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
 
   @Override
   public void addListener(ServiceServerListener<T, S> listener) {
-    listeners.add(listener);
+    listenerCollection.add(listener);
   }
 
   @Override
   public void removeListener(ServiceServerListener<T, S> listener) {
-    listeners.remove(listener);
+    listenerCollection.remove(listener);
   }
 }

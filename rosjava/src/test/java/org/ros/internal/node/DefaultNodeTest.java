@@ -24,9 +24,6 @@ import static org.ros.Assert.assertGraphNameEquals;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 
-import org.ros.node.DefaultNodeFactory;
-import org.ros.node.NodeFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.address.AdvertiseAddress;
@@ -37,11 +34,12 @@ import org.ros.internal.node.server.master.MasterServer;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.message.MessageListener;
-import org.ros.message.std_msgs.Int64;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
+import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeFactory;
 import org.ros.node.topic.CountDownPublisherListener;
 import org.ros.node.topic.CountDownSubscriberListener;
 import org.ros.node.topic.Publisher;
@@ -142,22 +140,20 @@ public class DefaultNodeTest {
     ((DefaultNode) node).getRegistrar().setRetryDelay(1, TimeUnit.MILLISECONDS);
 
     RosoutLogger rosoutLogger = (RosoutLogger) node.getLog();
-    CountDownPublisherListener<org.ros.message.rosgraph_msgs.Log> rosoutLoggerPublisherListener =
+    CountDownPublisherListener<rosgraph_msgs.Log> rosoutLoggerPublisherListener =
         CountDownPublisherListener.newDefault();
     rosoutLogger.getPublisher().addListener(rosoutLoggerPublisherListener);
     assertTrue(rosoutLoggerPublisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
-    CountDownPublisherListener<org.ros.message.std_msgs.String> publisherListener =
+    CountDownPublisherListener<std_msgs.String> publisherListener =
         CountDownPublisherListener.newDefault();
-    Publisher<org.ros.message.std_msgs.String> publisher =
-        node.newPublisher("/foo", "std_msgs/String");
+    Publisher<std_msgs.String> publisher = node.newPublisher("/foo", std_msgs.String._TYPE);
     publisher.addListener(publisherListener);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
-    CountDownSubscriberListener<org.ros.message.std_msgs.String> subscriberListener =
+    CountDownSubscriberListener<std_msgs.String> subscriberListener =
         CountDownSubscriberListener.newDefault();
-    Subscriber<org.ros.message.std_msgs.String> subscriber =
-        node.newSubscriber("/foo", "std_msgs/String");
+    Subscriber<std_msgs.String> subscriber = node.newSubscriber("/foo", std_msgs.String._TYPE);
     subscriber.addSubscriberListener(subscriberListener);
     assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
@@ -187,26 +183,26 @@ public class DefaultNodeTest {
     assertGraphNameEquals("/ns1/foo", node.resolveName("foo"));
     assertGraphNameEquals("/ns1/test_resolver/foo", node.resolveName("~foo"));
 
-    Publisher<Int64> pub = node.newPublisher("pub", "std_msgs/Int64");
+    Publisher<std_msgs.Int64> pub = node.newPublisher("pub", std_msgs.Int64._TYPE);
     assertGraphNameEquals("/ns1/pub", pub.getTopicName());
-    pub = node.newPublisher("/pub", "std_msgs/Int64");
+    pub = node.newPublisher("/pub", std_msgs.Int64._TYPE);
     assertGraphNameEquals("/pub", pub.getTopicName());
-    pub = node.newPublisher("~pub", "std_msgs/Int64");
+    pub = node.newPublisher("~pub", std_msgs.Int64._TYPE);
     assertGraphNameEquals("/ns1/test_resolver/pub", pub.getTopicName());
 
-    MessageListener<Int64> callback = new MessageListener<Int64>() {
+    MessageListener<std_msgs.Int64> callback = new MessageListener<std_msgs.Int64>() {
       @Override
-      public void onNewMessage(Int64 message) {
+      public void onNewMessage(std_msgs.Int64 message) {
       }
     };
 
-    Subscriber<Int64> sub = node.newSubscriber("sub", "std_msgs/Int64");
+    Subscriber<std_msgs.Int64> sub = node.newSubscriber("sub", std_msgs.Int64._TYPE);
     sub.addMessageListener(callback);
     assertGraphNameEquals("/ns1/sub", sub.getTopicName());
-    sub = node.newSubscriber("/sub", "std_msgs/Int64");
+    sub = node.newSubscriber("/sub", std_msgs.Int64._TYPE);
     sub.addMessageListener(callback);
     assertGraphNameEquals("/sub", sub.getTopicName());
-    sub = node.newSubscriber("~sub", "std_msgs/Int64");
+    sub = node.newSubscriber("~sub", std_msgs.Int64._TYPE);
     sub.addMessageListener(callback);
     assertGraphNameEquals("/ns1/test_resolver/sub", sub.getTopicName());
   }
@@ -227,10 +223,10 @@ public class DefaultNodeTest {
     assertTrue(nodeUri.getPort() > 0);
     checkHostName(nodeUri.getHost());
 
-    CountDownPublisherListener<org.ros.message.std_msgs.Int64> publisherListener =
+    CountDownPublisherListener<std_msgs.Int64> publisherListener =
         CountDownPublisherListener.newDefault();
-    Publisher<org.ros.message.std_msgs.Int64> publisher =
-        node.newPublisher("test_addresses_pub", "std_msgs/Int64");
+    Publisher<std_msgs.Int64> publisher =
+        node.newPublisher("test_addresses_pub", std_msgs.Int64._TYPE);
     publisher.addListener(publisherListener);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 

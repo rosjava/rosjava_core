@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
+public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publisher<T> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
@@ -68,10 +68,10 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   private final NodeIdentifier nodeIdentifier;
   private final MessageFactory messageFactory;
 
-  public DefaultPublisher(NodeIdentifier nodeIdentifier, TopicDefinition topicDefinition,
+  public DefaultPublisher(NodeIdentifier nodeIdentifier, TopicDeclaration topicDeclaration,
       MessageSerializer<T> serializer, MessageFactory messageFactory,
       ScheduledExecutorService executorService) {
-    super(topicDefinition);
+    super(topicDeclaration);
     this.nodeIdentifier = nodeIdentifier;
     this.messageFactory = messageFactory;
     outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
@@ -112,7 +112,6 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   @Override
   public void shutdown(long timeout, TimeUnit unit) {
     signalOnShutdown(timeout, unit);
-    listeners.clear();
     outgoingMessageQueue.shutdown();
   }
 
@@ -122,11 +121,11 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
   }
 
   public PublisherIdentifier toIdentifier() {
-    return new PublisherIdentifier(nodeIdentifier, getTopicDefinition().toIdentifier());
+    return new PublisherIdentifier(nodeIdentifier, getTopicDeclaration().toIdentifier());
   }
 
-  public PublisherDefinition toDefinition() {
-    return PublisherDefinition.newFromSlaveIdentifier(nodeIdentifier, getTopicDefinition());
+  public PublisherDeclaration toDeclaration() {
+    return PublisherDeclaration.newFromSlaveIdentifier(nodeIdentifier, getTopicDeclaration());
   }
 
   @Override
@@ -141,10 +140,9 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
 
   @Override
   public T newMessage() {
-    return messageFactory.newMessage(getTopicDefinition().getMessageType());
+    return messageFactory.newFromType(getTopicDeclaration().getMessageType());
   }
 
-  // TODO(damonkohler): Recycle Message objects to avoid GC.
   @Override
   public void publish(T message) {
     if (DEBUG) {
@@ -161,7 +159,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
    * @return encoded connection header from subscriber
    */
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
-    Map<String, String> topicDefinitionHeader = getTopicDefinitionHeader();
+    Map<String, String> topicDefinitionHeader = getTopicDeclarationHeader();
     if (DEBUG) {
       log.info("Subscriber handshake header: " + incomingHeader);
       log.info("Publisher handshake header: " + topicDefinitionHeader);
@@ -182,7 +180,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
     Preconditions.checkState(checksumMatches, "Unexpected message MD5 " + incomingChecksum + " != "
         + expectedChecksum);
     Map<String, String> header = Maps.newHashMap();
-    header.putAll(toDefinition().toHeader());
+    header.putAll(toDeclaration().toHeader());
     // TODO(damonkohler): Force latch mode to be consistent throughout the life
     // of the publisher.
     header.put(ConnectionHeaderFields.LATCHING, getLatchMode() ? "1" : "0");
@@ -326,7 +324,7 @@ public class DefaultPublisher<T> extends DefaultTopic implements Publisher<T> {
 
   @Override
   public String toString() {
-    return "Publisher<" + toDefinition() + ">";
+    return "Publisher<" + toDeclaration() + ">";
   }
 
   @Override

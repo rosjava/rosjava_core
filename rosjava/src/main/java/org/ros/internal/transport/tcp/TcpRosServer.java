@@ -30,7 +30,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.service.ServiceManager;
-import org.ros.internal.node.topic.TopicManager;
+import org.ros.internal.node.topic.TopicParticipantManager;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
@@ -54,7 +54,7 @@ public class TcpRosServer {
 
   private final BindAddress bindAddress;
   private final AdvertiseAddress advertiseAddress;
-  private final TopicManager topicManager;
+  private final TopicParticipantManager topicParticipantManager;
   private final ServiceManager serviceManager;
   private final ScheduledExecutorService executorService;
 
@@ -64,11 +64,11 @@ public class TcpRosServer {
   private ChannelGroup incomingChannelGroup;
 
   public TcpRosServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress,
-      TopicManager topicManager, ServiceManager serviceManager,
+      TopicParticipantManager topicParticipantManager, ServiceManager serviceManager,
       ScheduledExecutorService executorService) {
     this.bindAddress = bindAddress;
     this.advertiseAddress = advertiseAddress;
-    this.topicManager = topicManager;
+    this.topicParticipantManager = topicParticipantManager;
     this.serviceManager = serviceManager;
     this.executorService = executorService;
   }
@@ -81,7 +81,7 @@ public class TcpRosServer {
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     bootstrap.setOption("child.keepAlive", true);
     incomingChannelGroup = new DefaultChannelGroup();
-    bootstrap.setPipelineFactory(new TcpServerPipelineFactory(incomingChannelGroup, topicManager,
+    bootstrap.setPipelineFactory(new TcpServerPipelineFactory(incomingChannelGroup, topicParticipantManager,
         serviceManager));
 
     outgoingChannel = bootstrap.bind(bindAddress.toInetSocketAddress());

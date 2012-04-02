@@ -16,7 +16,7 @@
 
 package org.ros.actionlib.server;
 
-import org.ros.message.Message;
+import org.ros.internal.message.Message;
 
 /**
  * Callbacks to the {@link SimpleActionServer}.

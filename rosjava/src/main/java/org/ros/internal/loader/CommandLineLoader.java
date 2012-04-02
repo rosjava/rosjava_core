@@ -20,6 +20,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import org.ros.CommandLineVariables;
+import org.ros.EnvironmentVariables;
 import org.ros.address.InetAddressFactory;
 import org.ros.exception.RosRuntimeException;
 import org.ros.namespace.GraphName;

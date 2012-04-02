@@ -31,7 +31,7 @@ import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceResponseEncoder;
 import org.ros.internal.node.topic.DefaultPublisher;
-import org.ros.internal.node.topic.TopicManager;
+import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
@@ -45,11 +45,11 @@ import com.google.common.base.Preconditions;
  */
 public class TcpServerHandshakeHandler extends SimpleChannelHandler {
 
-  private final TopicManager topicManager;
+  private final TopicParticipantManager topicParticipantManager;
   private final ServiceManager serviceManager;
 
-  public TcpServerHandshakeHandler(TopicManager topicManager, ServiceManager serviceManager) {
-    this.topicManager = topicManager;
+  public TcpServerHandshakeHandler(TopicParticipantManager topicParticipantManager, ServiceManager serviceManager) {
+    this.topicParticipantManager = topicParticipantManager;
     this.serviceManager = serviceManager;
   }
 
@@ -80,9 +80,9 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
       Preconditions.checkState(incomingHeader.containsKey(ConnectionHeaderFields.TOPIC),
           "Handshake header missing field: " + ConnectionHeaderFields.TOPIC);
       String topicName = incomingHeader.get(ConnectionHeaderFields.TOPIC);
-      Preconditions.checkState(topicManager.hasPublisher(topicName), "No publisher for topic: "
+      Preconditions.checkState(topicParticipantManager.hasPublisher(topicName), "No publisher for topic: "
           + topicName);
-      DefaultPublisher<?> publisher = topicManager.getPublisher(topicName);
+      DefaultPublisher<?> publisher = topicParticipantManager.getPublisher(topicName);
       ChannelBuffer outgoingBuffer = publisher.finishHandshake(incomingHeader);
       Channel channel = ctx.getChannel();
       ChannelFuture future = channel.write(outgoingBuffer).await();

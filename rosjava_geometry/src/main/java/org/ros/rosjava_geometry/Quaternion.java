@@ -18,6 +18,8 @@ package org.ros.rosjava_geometry;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.message.MessageFactory;
+
 /**
  * A quaternion.
  * 
@@ -38,9 +40,8 @@ public class Quaternion {
         normalized.getZ() * sin, cos);
   }
 
-  public static Quaternion
-      newFromQuaternionMessage(org.ros.message.geometry_msgs.Quaternion message) {
-    return new Quaternion(message.x, message.y, message.z, message.w);
+  public static Quaternion newFromQuaternionMessage(geometry_msgs.Quaternion message) {
+    return new Quaternion(message.x(), message.y(), message.z(), message.w());
   }
 
   public static Quaternion rotationBetweenVectors(Vector3 vector1, Vector3 vector2) {
@@ -97,13 +98,12 @@ public class Quaternion {
     return new Vector3(rotatedQuaternion.getX(), rotatedQuaternion.getY(), rotatedQuaternion.getZ());
   }
 
-  public org.ros.message.geometry_msgs.Quaternion toQuaternionMessage() {
-    org.ros.message.geometry_msgs.Quaternion result =
-        new org.ros.message.geometry_msgs.Quaternion();
-    result.x = x;
-    result.y = y;
-    result.z = z;
-    result.w = w;
+  public geometry_msgs.Quaternion toQuaternionMessage(MessageFactory messageFactory) {
+    geometry_msgs.Quaternion result = messageFactory.newFromType(geometry_msgs.Quaternion._TYPE);
+    result.x(x);
+    result.y(y);
+    result.z(z);
+    result.w(w);
     return result;
   }
 

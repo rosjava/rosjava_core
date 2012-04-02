@@ -16,13 +16,13 @@
 
 package org.ros.actionlib.client;
 
+import actionlib_msgs.GoalID;
+import actionlib_msgs.GoalStatus;
 import org.ros.actionlib.state.CommState;
 import org.ros.actionlib.state.TerminalState;
 import org.ros.exception.RosException;
-import org.ros.message.Message;
+import org.ros.internal.message.Message;
 import org.ros.message.Time;
-import org.ros.message.actionlib_msgs.GoalID;
-import org.ros.message.actionlib_msgs.GoalStatus;
 
 /**
  * A GoalHandle is linked with a specific goal message and provides means to

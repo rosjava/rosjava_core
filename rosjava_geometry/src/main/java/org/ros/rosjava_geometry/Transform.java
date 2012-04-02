@@ -16,6 +16,7 @@
 
 package org.ros.rosjava_geometry;
 
+import org.ros.message.MessageFactory;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 
@@ -52,40 +53,37 @@ public class Transform {
     return rotation.multiply(quaternion);
   }
 
-  public org.ros.message.geometry_msgs.Transform toTransformMessage() {
-    org.ros.message.geometry_msgs.Transform result = new org.ros.message.geometry_msgs.Transform();
-    result.translation = translation.toVector3Message();
-    result.rotation = rotation.toQuaternionMessage();
+  public geometry_msgs.Transform toTransformMessage(MessageFactory messageFactory) {
+    geometry_msgs.Transform result = messageFactory.newFromType(geometry_msgs.Transform._TYPE);
+    result.translation(translation.toVector3Message(messageFactory));
+    result.rotation(rotation.toQuaternionMessage(messageFactory));
     return result;
   }
 
-  public org.ros.message.geometry_msgs.TransformStamped toTransformStampedMessage(GraphName frame,
-      GraphName childFrame, Time stamp) {
-    org.ros.message.geometry_msgs.TransformStamped result =
-        new org.ros.message.geometry_msgs.TransformStamped();
-    result.header.frame_id = frame.toString();
-    result.header.stamp = stamp;
-    result.child_frame_id = childFrame.toString();
-    result.transform.translation = translation.toVector3Message();
-    result.transform.rotation = rotation.toQuaternionMessage();
+  public geometry_msgs.TransformStamped toTransformStampedMessage(GraphName frame,
+      GraphName childFrame, Time stamp, MessageFactory messageFactory) {
+    geometry_msgs.TransformStamped result =
+        messageFactory.newFromType(geometry_msgs.TransformStamped._TYPE);
+    result.header().frame_id(frame.toString());
+    result.header().stamp(stamp);
+    result.child_frame_id(childFrame.toString());
+    result.transform(toTransformMessage(messageFactory));
     return result;
   }
 
-  public org.ros.message.geometry_msgs.Pose toPoseMessage() {
-    org.ros.message.geometry_msgs.Pose result = new org.ros.message.geometry_msgs.Pose();
-    result.position = translation.toPointMessage();
-    result.orientation = rotation.toQuaternionMessage();
+  public geometry_msgs.Pose toPoseMessage(MessageFactory messageFactory) {
+    geometry_msgs.Pose result = messageFactory.newFromType(geometry_msgs.Pose._TYPE);
+    result.position(translation.toPointMessage(messageFactory));
+    result.orientation(rotation.toQuaternionMessage(messageFactory));
     return result;
   }
 
-  public org.ros.message.geometry_msgs.PoseStamped
-      toPoseStampedMessage(GraphName frame, Time stamp) {
-    org.ros.message.geometry_msgs.PoseStamped result =
-        new org.ros.message.geometry_msgs.PoseStamped();
-    result.header.frame_id = frame.toString();
-    result.header.stamp = stamp;
-    result.pose.position = translation.toPointMessage();
-    result.pose.orientation = rotation.toQuaternionMessage();
+  public geometry_msgs.PoseStamped toPoseStampedMessage(GraphName frame, Time stamp,
+      MessageFactory messageFactory) {
+    geometry_msgs.PoseStamped result = messageFactory.newFromType(geometry_msgs.PoseStamped._TYPE);
+    result.header().frame_id(frame.toString());
+    result.header().stamp(stamp);
+    result.pose(toPoseMessage(messageFactory));
     return result;
   }
 
@@ -105,14 +103,14 @@ public class Transform {
     this.rotation = rotation;
   }
 
-  public static Transform newFromTransformMessage(org.ros.message.geometry_msgs.Transform message) {
-    return new Transform(Vector3.newFromVector3Message(message.translation),
-        Quaternion.newFromQuaternionMessage(message.rotation));
+  public static Transform newFromTransformMessage(geometry_msgs.Transform message) {
+    return new Transform(Vector3.newFromVector3Message(message.translation()),
+        Quaternion.newFromQuaternionMessage(message.rotation()));
   }
 
-  public static Transform newFromPoseMessage(org.ros.message.geometry_msgs.Pose message) {
-    return new Transform(Vector3.newFromPointMessage(message.position),
-        Quaternion.newFromQuaternionMessage(message.orientation));
+  public static Transform newFromPoseMessage(geometry_msgs.Pose message) {
+    return new Transform(Vector3.newFromPointMessage(message.position()),
+        Quaternion.newFromQuaternionMessage(message.orientation()));
   }
 
   public static Transform newIdentityTransform() {

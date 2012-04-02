@@ -27,10 +27,9 @@ import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.server.XmlRpcServer;
-import org.ros.internal.node.topic.Topic;
+import org.ros.internal.node.topic.TopicParticipant;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpointImpl;
 import org.ros.master.client.TopicSystemState;
-import org.ros.message.Service;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.service.ServiceServer;
@@ -146,7 +145,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    * @param nodeSlaveUri
    *          the {@link URI} of the {@link Node}'s {@link SlaveServer}
    * @param topicName
-   *          the {@link GraphName} of the subscribed {@link Topic}
+   *          the {@link GraphName} of the subscribed {@link TopicParticipant}
    * @param topicMessageType
    *          the message type of the topic
    * @return A {@link List} of XMLRPC API {@link URI}s for nodes currently
@@ -178,7 +177,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    * @param nodeName
    *          the {@link GraphName} of the {@link Node} offering the service
    * @param topicName
-   *          the {@link GraphName} of the subscribed {@link Topic}
+   *          the {@link GraphName} of the subscribed {@link TopicParticipant}
    * @return {@code true} if the {@link Subscriber} was registered
    */
   public boolean unregisterSubscriber(GraphName nodeName, GraphName topicName) {
@@ -198,7 +197,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    * @param nodeSlaveUri
    *          the {@link URI} of the {@link Node}'s {@link SlaveServer}
    * @param topicName
-   *          the {@link GraphName} of the subscribed {@link Topic}
+   *          the {@link GraphName} of the subscribed {@link TopicParticipant}
    * @param topicMessageType
    *          the message type of the topic
    * @return a {@link List} of the current {@link Subscriber}s to the
@@ -276,7 +275,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    * @param nodeName
    *          the {@link GraphName} of the {@link Node} offering the service
    * @param topicName
-   *          the {@link GraphName} of the subscribed {@link Topic}
+   *          the {@link GraphName} of the subscribed {@link TopicParticipant}
    * @return {@code true} if the {@link Publisher} was unregistered
    */
   public boolean unregisterPublisher(GraphName nodeName, GraphName topicName) {
@@ -408,7 +407,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
   }
 
   /**
-   * Get the system state for {@link Service}s.
+   * Get the system state for {@link ServiceServer}s.
    * 
    * @return a {@link List} of the form [ [service1,
    *         [serviceProvider1...serviceProviderN]] ... ] where the

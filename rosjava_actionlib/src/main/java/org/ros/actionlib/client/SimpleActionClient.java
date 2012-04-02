@@ -22,8 +22,8 @@ import org.ros.actionlib.state.SimpleClientGoalState;
 import org.ros.actionlib.state.SimpleGoalState;
 import org.ros.actionlib.state.TerminalState;
 import org.ros.exception.RosException;
+import org.ros.internal.message.Message;
 import org.ros.message.Duration;
-import org.ros.message.Message;
 import org.ros.message.Time;
 import org.ros.node.Node;
 

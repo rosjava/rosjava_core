@@ -32,7 +32,7 @@ import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.service.ServiceManager;
-import org.ros.internal.node.topic.TopicManager;
+import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
@@ -56,13 +56,13 @@ public class MasterSlaveIntegrationTest {
     masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
     masterServer.start();
     masterClient = new MasterClient(masterServer.getUri());
-    TopicManager topicManager = new TopicManager();
+    TopicParticipantManager topicParticipantManager = new TopicParticipantManager();
     ServiceManager serviceManager = new ServiceManager();
     ParameterManager parameterManager = new ParameterManager();
     slaveServer =
         new SlaveServer(new GraphName("/foo"), BindAddress.newPublic(),
             AdvertiseAddress.newPublic(), BindAddress.newPublic(), AdvertiseAddress.newPublic(),
-            masterClient, topicManager, serviceManager, parameterManager, executorService);
+            masterClient, topicParticipantManager, serviceManager, parameterManager, executorService);
     slaveServer.start();
     slaveClient = new SlaveClient(new GraphName("/bar"), slaveServer.getUri());
   }

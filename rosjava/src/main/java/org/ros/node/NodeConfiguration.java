@@ -22,7 +22,14 @@ import org.ros.address.BindAddress;
 import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.address.PublicAdvertiseAddressFactory;
 import org.ros.exception.RosRuntimeException;
-import org.ros.message.MessageDefinitionFactory;
+import org.ros.internal.message.DefaultMessageFactory;
+import org.ros.internal.message.DefaultMessageSerializationFactory;
+import org.ros.internal.message.MessageDefinitionReflectionProvider;
+import org.ros.internal.message.service.ServiceDescriptionFactory;
+import org.ros.internal.message.service.ServiceRequestMessageFactory;
+import org.ros.internal.message.service.ServiceResponseMessageFactory;
+import org.ros.internal.message.topic.TopicDescriptionFactory;
+import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.GraphName;
@@ -73,12 +80,17 @@ public class NodeConfiguration {
     copy.rosRoot = nodeConfiguration.rosRoot;
     copy.rosPackagePath = nodeConfiguration.rosPackagePath;
     copy.nodeName = nodeConfiguration.nodeName;
+    copy.topicDescriptionFactory = nodeConfiguration.topicDescriptionFactory;
+    copy.topicMessageFactory = nodeConfiguration.topicMessageFactory;
+    copy.serviceDescriptionFactory = nodeConfiguration.serviceDescriptionFactory;
+    copy.serviceRequestMessageFactory = nodeConfiguration.serviceRequestMessageFactory;
+    copy.serviceResponseMessageFactory = nodeConfiguration.serviceResponseMessageFactory;
     copy.messageSerializationFactory = nodeConfiguration.messageSerializationFactory;
     copy.tcpRosBindAddress = nodeConfiguration.tcpRosBindAddress;
     copy.tcpRosAdvertiseAddressFactory = nodeConfiguration.tcpRosAdvertiseAddressFactory;
-    copy.timeProvider = nodeConfiguration.timeProvider;
     copy.xmlRpcBindAddress = nodeConfiguration.xmlRpcBindAddress;
     copy.xmlRpcAdvertiseAddressFactory = nodeConfiguration.xmlRpcAdvertiseAddressFactory;
+    copy.timeProvider = nodeConfiguration.timeProvider;
     copy.executorService = nodeConfiguration.executorService;
     return copy;
   }
@@ -88,8 +100,11 @@ public class NodeConfiguration {
   private File rosRoot;
   private List<File> rosPackagePath;
   private GraphName nodeName;
-  private MessageFactory messageFactory;
-  private MessageDefinitionFactory messageDefinitionFactory;
+  private TopicDescriptionFactory topicDescriptionFactory;
+  private MessageFactory topicMessageFactory;
+  private ServiceDescriptionFactory serviceDescriptionFactory;
+  private MessageFactory serviceRequestMessageFactory;
+  private MessageFactory serviceResponseMessageFactory;
   private MessageSerializationFactory messageSerializationFactory;
   private BindAddress tcpRosBindAddress;
   private AdvertiseAddressFactory tcpRosAdvertiseAddressFactory;
@@ -168,9 +183,13 @@ public class NodeConfiguration {
   }
 
   private NodeConfiguration() {
-    setMessageFactory(new org.ros.internal.message.old_style.MessageFactory());
-    setMessageDefinitionFactory(new org.ros.internal.message.old_style.MessageDefinitionFactory());
-    setMessageSerializationFactory(new org.ros.internal.message.old_style.MessageSerializationFactory());
+    MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
+    setTopicDescriptionFactory(new TopicDescriptionFactory(messageDefinitionProvider));
+    setTopicMessageFactory(new DefaultMessageFactory(messageDefinitionProvider));
+    setServiceDescriptionFactory(new ServiceDescriptionFactory(messageDefinitionProvider));
+    setServiceRequestMessageFactory(new ServiceRequestMessageFactory(messageDefinitionProvider));
+    setServiceResponseMessageFactory(new ServiceResponseMessageFactory(messageDefinitionProvider));
+    setMessageSerializationFactory(new DefaultMessageSerializationFactory(messageDefinitionProvider));
     setParentResolver(NameResolver.newRoot());
     setTimeProvider(new WallTimeProvider());
   }
@@ -343,32 +362,77 @@ public class NodeConfiguration {
   }
 
   /**
-   * @param messageFactory
+   * @param topicMessageFactory
    *          the {@link MessageFactory} for the {@link Node}
    * @return this {@link NodeConfiguration}
    */
-  public NodeConfiguration setMessageFactory(MessageFactory messageFactory) {
-    this.messageFactory = messageFactory;
+  public NodeConfiguration setTopicMessageFactory(MessageFactory topicMessageFactory) {
+    this.topicMessageFactory = topicMessageFactory;
     return this;
   }
 
-  public MessageFactory getMessageFactory() {
-    return messageFactory;
+  public MessageFactory getTopicMessageFactory() {
+    return topicMessageFactory;
   }
 
   /**
-   * @param messageDefinitionFactory
-   *          the {@link MessageDefinitionFactory} for the {@link Node}
+   * @param serviceRequestMessageFactory
+   *          the {@link ServiceRequestMessageFactory} for the {@link Node}
    * @return this {@link NodeConfiguration}
    */
-  public NodeConfiguration setMessageDefinitionFactory(
-      MessageDefinitionFactory messageDefinitionFactory) {
-    this.messageDefinitionFactory = messageDefinitionFactory;
+  public NodeConfiguration setServiceRequestMessageFactory(
+      ServiceRequestMessageFactory serviceRequestMessageFactory) {
+    this.serviceRequestMessageFactory = serviceRequestMessageFactory;
     return this;
   }
 
-  public MessageDefinitionFactory getMessageDefinitionFactory() {
-    return messageDefinitionFactory;
+  public MessageFactory getServiceRequestMessageFactory() {
+    return serviceRequestMessageFactory;
+  }
+
+  /**
+   * @param serviceResponseMessageFactory
+   *          the {@link ServiceResponseMessageFactory} for the {@link Node}
+   * @return this {@link NodeConfiguration}
+   */
+  public NodeConfiguration setServiceResponseMessageFactory(
+      ServiceResponseMessageFactory serviceResponseMessageFactory) {
+    this.serviceResponseMessageFactory = serviceResponseMessageFactory;
+    return this;
+  }
+
+  public MessageFactory getServiceResponseMessageFactory() {
+    return serviceResponseMessageFactory;
+  }
+
+  /**
+   * @param topicDescriptionFactory
+   *          the {@link TopicDescriptionFactory} for the {@link Node}
+   * @return this {@link NodeConfiguration}
+   */
+  public NodeConfiguration setTopicDescriptionFactory(
+      TopicDescriptionFactory topicDescriptionFactory) {
+    this.topicDescriptionFactory = topicDescriptionFactory;
+    return this;
+  }
+
+  public TopicDescriptionFactory getTopicDescriptionFactory() {
+    return topicDescriptionFactory;
+  }
+
+  /**
+   * @param serviceDescriptionFactory
+   *          the {@link ServiceDescriptionFactory} for the {@link Node}
+   * @return this {@link NodeConfiguration}
+   */
+  public NodeConfiguration setServiceDescriptionFactory(
+      ServiceDescriptionFactory serviceDescriptionFactory) {
+    this.serviceDescriptionFactory = serviceDescriptionFactory;
+    return this;
+  }
+
+  public ServiceDescriptionFactory getServiceDescriptionFactory() {
+    return serviceDescriptionFactory;
   }
 
   /**

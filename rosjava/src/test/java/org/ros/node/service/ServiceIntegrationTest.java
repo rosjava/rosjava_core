@@ -22,7 +22,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.ros.RosTest;
-import org.ros.concurrent.Holder;
 import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceNotFoundException;
@@ -31,7 +30,6 @@ import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
-import org.ros.service.test_ros.AddTwoInts;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -42,22 +40,25 @@ import java.util.concurrent.TimeUnit;
 public class ServiceIntegrationTest extends RosTest {
 
   private static final String SERVICE_NAME = "/add_two_ints";
-  private static final String SERVICE_TYPE = "test_ros/AddTwoInts";
 
   @Test
   public void testPesistentServiceConnection() throws Exception {
-    final CountDownServiceServerListener<AddTwoInts.Request, AddTwoInts.Response> countDownServiceServerListener =
+    final CountDownServiceServerListener<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
     nodeMainExecutor.execute(new NodeMain() {
       @Override
-      public void onStart(Node node) {
-        ServiceServer<AddTwoInts.Request, AddTwoInts.Response> serviceServer =
-            node.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
-                new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
+      public void onStart(final Node node) {
+        ServiceServer<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceServer =
+            node.newServiceServer(
+                SERVICE_NAME,
+                test_ros.AddTwoInts._TYPE,
+                new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
                   @Override
-                  public AddTwoInts.Response build(AddTwoInts.Request request) {
-                    AddTwoInts.Response response = new AddTwoInts.Response();
-                    response.sum = request.a + request.b;
+                  public test_ros.AddTwoInts.Response build(test_ros.AddTwoInts.Request request) {
+                    test_ros.AddTwoInts.Response response =
+                        node.getServiceResponseMessageFactory().newFromType(
+                            test_ros.AddTwoInts.Response._TYPE);
+                    response.setInt64("sum", request.getInt64("a") + request.getInt64("b"));
                     return response;
                   }
                 });
@@ -80,17 +81,32 @@ public class ServiceIntegrationTest extends RosTest {
 
     countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS);
 
-    final Holder<ServiceClient<AddTwoInts.Request, AddTwoInts.Response>> holder = Holder.newEmpty();
+    final CountDownLatch latch = new CountDownLatch(1);
     nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
-        ServiceClient<AddTwoInts.Request, AddTwoInts.Response> serviceClient;
+        ServiceClient<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceClient;
         try {
-          serviceClient = node.newServiceClient(SERVICE_NAME, SERVICE_TYPE);
+          serviceClient = node.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
         } catch (ServiceNotFoundException e) {
           throw new RosRuntimeException(e);
         }
-        holder.set(serviceClient);
+        test_ros.AddTwoInts.Request request =
+            node.getServiceRequestMessageFactory().newFromType(test_ros.AddTwoInts._TYPE);
+        request.a(2);
+        request.b(2);
+        serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoInts.Response>() {
+          @Override
+          public void onSuccess(test_ros.AddTwoInts.Response message) {
+            assertEquals(message.sum(), 4);
+            latch.countDown();
+          }
+
+          @Override
+          public void onFailure(RemoteException e) {
+            throw new RuntimeException(e);
+          }
+        });
       }
 
       @Override
@@ -107,44 +123,24 @@ public class ServiceIntegrationTest extends RosTest {
       }
     }, nodeConfiguration);
 
-    holder.await(1, TimeUnit.SECONDS);
-
-    // TODO(damonkohler): This is a hack that we should remove once it's
-    // possible to block on a connection being established.
-    Thread.sleep(100);
-
-    AddTwoInts.Request request = new AddTwoInts.Request();
-    request.a = 2;
-    request.b = 2;
-    final CountDownLatch latch = new CountDownLatch(1);
-    holder.get().call(request, new ServiceResponseListener<AddTwoInts.Response>() {
-      @Override
-      public void onSuccess(AddTwoInts.Response message) {
-        assertEquals(message.sum, 4);
-        latch.countDown();
-      }
-
-      @Override
-      public void onFailure(RemoteException e) {
-        throw new RuntimeException(e);
-      }
-    });
     assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 
   @Test
   public void testRequestFailure() throws Exception {
     final String errorMessage = "Error!";
-    final CountDownServiceServerListener<AddTwoInts.Request, AddTwoInts.Response> countDownServiceServerListener =
+    final CountDownServiceServerListener<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
     nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
-        ServiceServer<AddTwoInts.Request, AddTwoInts.Response> serviceServer =
-            node.newServiceServer(SERVICE_NAME, SERVICE_TYPE,
-                new ServiceResponseBuilder<AddTwoInts.Request, AddTwoInts.Response>() {
+        ServiceServer<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceServer =
+            node.newServiceServer(
+                SERVICE_NAME,
+                test_ros.AddTwoInts._TYPE,
+                new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
                   @Override
-                  public AddTwoInts.Response build(AddTwoInts.Request request)
+                  public test_ros.AddTwoInts.Response build(test_ros.AddTwoInts.Request request)
                       throws ServiceException {
                     throw new ServiceException(errorMessage);
                   }
@@ -168,17 +164,32 @@ public class ServiceIntegrationTest extends RosTest {
 
     countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS);
 
-    final Holder<ServiceClient<AddTwoInts.Request, AddTwoInts.Response>> holder = Holder.newEmpty();
+    final CountDownLatch latch = new CountDownLatch(1);
     nodeMainExecutor.execute(new NodeMain() {
       @Override
       public void onStart(Node node) {
-        ServiceClient<AddTwoInts.Request, AddTwoInts.Response> serviceClient;
+        ServiceClient<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceClient;
         try {
-          serviceClient = node.newServiceClient(SERVICE_NAME, SERVICE_TYPE);
+          serviceClient = node.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
         } catch (ServiceNotFoundException e) {
           throw new RosRuntimeException(e);
         }
-        holder.set(serviceClient);
+        test_ros.AddTwoInts.Request request =
+            node.getServiceRequestMessageFactory().newFromType(test_ros.AddTwoInts._TYPE);
+        request.a(0);
+        request.b(0);
+        serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoInts.Response>() {
+          @Override
+          public void onSuccess(test_ros.AddTwoInts.Response message) {
+            fail();
+          }
+
+          @Override
+          public void onFailure(RemoteException e) {
+            assertEquals(e.getMessage(), errorMessage);
+            latch.countDown();
+          }
+        });
       }
 
       @Override
@@ -195,26 +206,6 @@ public class ServiceIntegrationTest extends RosTest {
       }
     }, nodeConfiguration);
 
-    holder.await(1, TimeUnit.SECONDS);
-
-    // TODO(damonkohler): This is a hack that we should remove once it's
-    // possible to block on a connection being established.
-    Thread.sleep(100);
-
-    AddTwoInts.Request request = new AddTwoInts.Request();
-    final CountDownLatch latch = new CountDownLatch(1);
-    holder.get().call(request, new ServiceResponseListener<AddTwoInts.Response>() {
-      @Override
-      public void onSuccess(AddTwoInts.Response message) {
-        fail();
-      }
-
-      @Override
-      public void onFailure(RemoteException e) {
-        assertEquals(e.getMessage(), errorMessage);
-        latch.countDown();
-      }
-    });
     assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 }

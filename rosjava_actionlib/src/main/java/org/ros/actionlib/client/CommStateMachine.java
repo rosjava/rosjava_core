@@ -16,12 +16,12 @@
 
 package org.ros.actionlib.client;
 
+import actionlib_msgs.GoalStatus;
+import actionlib_msgs.GoalStatusArray;
 import org.ros.actionlib.ActionSpec;
 import org.ros.actionlib.state.CommState;
 import org.ros.exception.RosException;
-import org.ros.message.Message;
-import org.ros.message.actionlib_msgs.GoalStatus;
-import org.ros.message.actionlib_msgs.GoalStatusArray;
+import org.ros.internal.message.Message;
 
 import java.util.ArrayList;
 

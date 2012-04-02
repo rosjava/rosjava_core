@@ -43,60 +43,54 @@ public class PassthroughTestNode implements NodeMain {
     // with multiple publishers, multiple subscribers, etc...
 
     // String pass through
-    final Publisher<org.ros.message.std_msgs.String> pub_string =
+    final Publisher<std_msgs.String> pub_string =
         node.newPublisher("string_out", "std_msgs/String");
-    MessageListener<org.ros.message.std_msgs.String> string_cb =
-        new MessageListener<org.ros.message.std_msgs.String>() {
-          @Override
-          public void onNewMessage(org.ros.message.std_msgs.String m) {
-            pub_string.publish(m);
-          }
-        };
-    Subscriber<org.ros.message.std_msgs.String> stringSubscriber =
+    MessageListener<std_msgs.String> string_cb = new MessageListener<std_msgs.String>() {
+      @Override
+      public void onNewMessage(std_msgs.String m) {
+        pub_string.publish(m);
+      }
+    };
+    Subscriber<std_msgs.String> stringSubscriber =
         node.newSubscriber("string_in", "std_msgs/String");
     stringSubscriber.addMessageListener(string_cb);
 
     // Int64 pass through
-    final Publisher<org.ros.message.std_msgs.Int64> pub_int64 =
-        node.newPublisher("int64_out", "std_msgs/Int64");
-    MessageListener<org.ros.message.std_msgs.Int64> int64_cb =
-        new MessageListener<org.ros.message.std_msgs.Int64>() {
-          @Override
-          public void onNewMessage(org.ros.message.std_msgs.Int64 m) {
-            pub_int64.publish(m);
-          }
-        };
-    Subscriber<org.ros.message.std_msgs.Int64> int64Subscriber =
-        node.newSubscriber("int64_in", "std_msgs/Int64");
+    final Publisher<std_msgs.Int64> pub_int64 = node.newPublisher("int64_out", "std_msgs/Int64");
+    MessageListener<std_msgs.Int64> int64_cb = new MessageListener<std_msgs.Int64>() {
+      @Override
+      public void onNewMessage(std_msgs.Int64 m) {
+        pub_int64.publish(m);
+      }
+    };
+    Subscriber<std_msgs.Int64> int64Subscriber = node.newSubscriber("int64_in", "std_msgs/Int64");
     int64Subscriber.addMessageListener(int64_cb);
 
     // TestHeader pass through
-    final Publisher<org.ros.message.test_ros.TestHeader> pub_header =
+    final Publisher<test_ros.TestHeader> pub_header =
         node.newPublisher("test_header_out", "test_ros/TestHeader");
-    MessageListener<org.ros.message.test_ros.TestHeader> header_cb =
-        new MessageListener<org.ros.message.test_ros.TestHeader>() {
-          @Override
-          public void onNewMessage(org.ros.message.test_ros.TestHeader m) {
-            m.orig_caller_id = m.caller_id;
-            m.caller_id = node.getName().toString();
-            pub_header.publish(m);
-          }
-        };
-    Subscriber<org.ros.message.test_ros.TestHeader> testHeaderSubscriber =
+    MessageListener<test_ros.TestHeader> header_cb = new MessageListener<test_ros.TestHeader>() {
+      @Override
+      public void onNewMessage(test_ros.TestHeader m) {
+        m.orig_caller_id(m.caller_id());
+        m.caller_id(node.getName().toString());
+        pub_header.publish(m);
+      }
+    };
+    Subscriber<test_ros.TestHeader> testHeaderSubscriber =
         node.newSubscriber("test_header_in", "test_ros/TestHeader");
     testHeaderSubscriber.addMessageListener(header_cb);
 
     // TestComposite pass through
-    final Publisher<org.ros.message.test_ros.Composite> pub_composite =
+    final Publisher<test_ros.Composite> pub_composite =
         node.newPublisher("composite_out", "test_ros/Composite");
-    MessageListener<org.ros.message.test_ros.Composite> composite_cb =
-        new MessageListener<org.ros.message.test_ros.Composite>() {
-          @Override
-          public void onNewMessage(org.ros.message.test_ros.Composite m) {
-            pub_composite.publish(m);
-          }
-        };
-    Subscriber<org.ros.message.test_ros.Composite> compositeSubscriber =
+    MessageListener<test_ros.Composite> composite_cb = new MessageListener<test_ros.Composite>() {
+      @Override
+      public void onNewMessage(test_ros.Composite m) {
+        pub_composite.publish(m);
+      }
+    };
+    Subscriber<test_ros.Composite> compositeSubscriber =
         node.newSubscriber("composite_in", "test_ros/Composite");
     compositeSubscriber.addMessageListener(composite_cb);
   }

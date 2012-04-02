@@ -23,7 +23,6 @@ import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpoint;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;
-import org.ros.message.Service;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
@@ -191,9 +190,9 @@ public interface Node {
 
   /**
    * @param serviceName
-   *          the name of the service to lookup
-   * @return {@link URI} of the {@link Service} provider or null if the
-   *         {@link Service} does not exist
+   *          the {@link GraphName} of the service to lookup
+   * @return {@link URI} of the service or {@code null} if the service does not
+   *         exist
    */
   URI lookupService(GraphName serviceName);
 
@@ -218,7 +217,17 @@ public interface Node {
   /**
    * @return the {@link MessageFactory} used by this node
    */
-  MessageFactory getMessageFactory();
+  MessageFactory getTopicMessageFactory();
+
+  /**
+   * @return the {@link MessageFactory} used by this node for service responses
+   */
+  MessageFactory getServiceResponseMessageFactory();
+
+  /**
+   * @return the {@link MessageFactory} used by this node for service requests
+   */
+  MessageFactory getServiceRequestMessageFactory();
 
   /**
    * Add a new {@link NodeListener} to the {@link Node}.

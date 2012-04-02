@@ -35,20 +35,20 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class OutgoingMessageQueue<MessageType> {
+public class OutgoingMessageQueue<T> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
-  private final MessageSerializer<MessageType> serializer;
-  private final CircularBlockingQueue<MessageType> messages;
+  private final MessageSerializer<T> serializer;
+  private final CircularBlockingQueue<T> messages;
   private final ChannelGroup channelGroup;
   private final Writer writer;
 
   private boolean latchMode;
-  private MessageType latchedMessage;
+  private T latchedMessage;
 
   private final class Writer extends CancellableLoop {
     @Override
@@ -57,10 +57,10 @@ public class OutgoingMessageQueue<MessageType> {
     }
   }
 
-  public OutgoingMessageQueue(MessageSerializer<MessageType> serializer,
+  public OutgoingMessageQueue(MessageSerializer<T> serializer,
       ScheduledExecutorService executorService) {
     this.serializer = serializer;
-    messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
+    messages = new CircularBlockingQueue<T>(MESSAGE_BUFFER_CAPACITY);
     channelGroup = new DefaultChannelGroup();
     writer = new Writer();
     latchMode = false;
@@ -75,7 +75,7 @@ public class OutgoingMessageQueue<MessageType> {
     return latchMode;
   }
 
-  private void writeMessageToChannel(MessageType message) {
+  private void writeMessageToChannel(T message) {
     ByteBuffer serializedMessage = serializer.serialize(message);
     ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(serializedMessage);
     if (DEBUG) {
@@ -90,7 +90,7 @@ public class OutgoingMessageQueue<MessageType> {
    * @param message
    *          the message to add to the queue
    */
-  public void put(MessageType message) {
+  public void put(T message) {
     try {
       messages.put(message);
     } catch (InterruptedException e) {

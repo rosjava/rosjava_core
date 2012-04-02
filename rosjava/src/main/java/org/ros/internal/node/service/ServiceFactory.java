@@ -18,7 +18,9 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.message.new_style.ServiceMessageDefinition;
+import org.ros.internal.message.service.ServiceDescription;
+
+
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.server.master.MasterServer;
 import org.ros.message.MessageDeserializer;
@@ -55,8 +57,8 @@ public class ServiceFactory {
    * {@link DefaultServiceServer} is generated, it is registered with the
    * {@link MasterServer}.
    * 
-   * @param serviceDefinition
-   *          the {@link ServiceMessageDefinition} that is being served
+   * @param serviceDeclaration
+   *          the {@link ServiceDescription} that is being served
    * @param deserializer
    *          a {@link MessageDeserializer} to be used for incoming messages
    * @param serializer
@@ -66,11 +68,11 @@ public class ServiceFactory {
    * @return a {@link DefaultServiceServer} instance
    */
   @SuppressWarnings("unchecked")
-  public <T, S> DefaultServiceServer<T, S> newServer(ServiceDefinition serviceDefinition,
+  public <T, S> DefaultServiceServer<T, S> newServer(ServiceDeclaration serviceDeclaration,
       MessageDeserializer<T> deserializer, MessageSerializer<S> serializer,
       ServiceResponseBuilder<T, S> responseBuilder) {
     DefaultServiceServer<T, S> serviceServer;
-    String name = serviceDefinition.getName().toString();
+    String name = serviceDeclaration.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
@@ -78,7 +80,7 @@ public class ServiceFactory {
         serviceServer = (DefaultServiceServer<T, S>) serviceManager.getServer(name);
       } else {
         serviceServer =
-            new DefaultServiceServer<T, S>(serviceDefinition, deserializer, serializer,
+            new DefaultServiceServer<T, S>(serviceDeclaration, deserializer, serializer,
                 responseBuilder, slaveServer.getTcpRosAdvertiseAddress(), executorService);
         createdNewService = true;
       }
@@ -97,17 +99,17 @@ public class ServiceFactory {
    * {@link DefaultServiceServer}.
    * 
    * @param <ResponseType>
-   * @param serviceDefinition
+   * @param serviceDeclaration
    *          the {@link ServiceIdentifier} of the server
    * @return a {@link DefaultServiceClient} instance
    */
   @SuppressWarnings("unchecked")
   public <RequestType, ResponseType> DefaultServiceClient<RequestType, ResponseType> newClient(
-      ServiceDefinition serviceDefinition, MessageSerializer<RequestType> serializer,
+      ServiceDeclaration serviceDeclaration, MessageSerializer<RequestType> serializer,
       MessageDeserializer<ResponseType> deserializer) {
-    Preconditions.checkNotNull(serviceDefinition.getUri());
+    Preconditions.checkNotNull(serviceDeclaration.getUri());
     DefaultServiceClient<RequestType, ResponseType> serviceClient;
-    String name = serviceDefinition.getName().toString();
+    String name = serviceDeclaration.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
@@ -116,14 +118,14 @@ public class ServiceFactory {
             (DefaultServiceClient<RequestType, ResponseType>) serviceManager.getClient(name);
       } else {
         serviceClient =
-            DefaultServiceClient.newDefault(nodeName, serviceDefinition, serializer, deserializer,
+            DefaultServiceClient.newDefault(nodeName, serviceDeclaration, serializer, deserializer,
                 executorService);
         createdNewService = true;
       }
     }
 
     if (createdNewService) {
-      serviceClient.connect(serviceDefinition.getUri());
+      serviceClient.connect(serviceDeclaration.getUri());
     }
     return serviceClient;
   }

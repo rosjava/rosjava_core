@@ -91,7 +91,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
     List<DefaultSubscriber<?>> subscribers = slave.getSubscriptions();
     List<List<String>> subscriptions = Lists.newArrayList();
     for (DefaultSubscriber<?> subscriber : subscribers) {
-      subscriptions.add(subscriber.getTopicDefinitionAsList());
+      subscriptions.add(subscriber.getTopicDeclarationAsList());
     }
     return Response.newSuccess("Success", subscriptions).toList();
   }
@@ -101,7 +101,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
     List<DefaultPublisher<?>> publishers = slave.getPublications();
     List<List<String>> publications = Lists.newArrayList();
     for (DefaultPublisher<?> publisher : publishers) {
-      publications.add(publisher.getTopicDefinitionAsList());
+      publications.add(publisher.getTopicDeclarationAsList());
     }
     return Response.newSuccess("Success", publications).toList();
   }

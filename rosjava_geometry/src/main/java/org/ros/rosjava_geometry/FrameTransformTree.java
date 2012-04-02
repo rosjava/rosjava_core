@@ -19,7 +19,7 @@ package org.ros.rosjava_geometry;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
-import org.ros.message.geometry_msgs.TransformStamped;
+import geometry_msgs.TransformStamped;
 import org.ros.namespace.GraphName;
 
 import java.util.Map;
@@ -40,7 +40,7 @@ public class FrameTransformTree {
    * A {@link Map} from child frame ID to the child frame's most recent
    * transform.
    */
-  private final Map<GraphName, TransformStamped> transforms;
+  private final Map<GraphName, geometry_msgs.TransformStamped> transforms;
 
   // TODO(damonkohler): Use NameResolver?
   private GraphName prefix;
@@ -56,12 +56,12 @@ public class FrameTransformTree {
    * @param transform
    *          the transform to add
    */
-  public void updateTransform(TransformStamped transform) {
-    GraphName frame = new GraphName(transform.child_frame_id);
+  public void updateTransform(geometry_msgs.TransformStamped transform) {
+    GraphName frame = new GraphName(transform.child_frame_id());
     transforms.put(frame, transform);
   }
 
-  private TransformStamped getLatestTransform(GraphName frame) {
+  private geometry_msgs.TransformStamped getLatestTransform(GraphName frame) {
     GraphName fullyQualifiedFrame = makeFullyQualified(frame);
     return transforms.get(fullyQualifiedFrame);
   }
@@ -113,8 +113,8 @@ public class FrameTransformTree {
       if (transformStamped == null) {
         return new FrameTransform(result, sourceFrame, targetFrame);
       }
-      result = Transform.newFromTransformMessage(transformStamped.transform).multiply(result);
-      targetFrame = makeFullyQualified(new GraphName(transformStamped.header.frame_id));
+      result = Transform.newFromTransformMessage(transformStamped.transform()).multiply(result);
+      targetFrame = makeFullyQualified(new GraphName(transformStamped.header().frame_id()));
     }
   }
 

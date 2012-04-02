@@ -58,7 +58,7 @@ public class SlaveImplTest {
     when(mockSlave.getPublications()).thenReturn(Lists.<DefaultPublisher<?>>newArrayList(mockPublisher));
     when(mockPublisher.getTopicName()).thenReturn(new GraphName("/bar"));
     when(mockPublisher.getTopicMessageType()).thenReturn("/baz");
-    when(mockPublisher.getTopicDefinitionAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));
+    when(mockPublisher.getTopicDeclarationAsList()).thenReturn(Lists.newArrayList("/bar", "/baz"));
     SlaveXmlRpcEndpointImpl slave = new SlaveXmlRpcEndpointImpl(mockSlave);
     List<Object> response = slave.getPublications("/foo");
     assertEquals(StatusCode.SUCCESS.toInt(), response.get(0));

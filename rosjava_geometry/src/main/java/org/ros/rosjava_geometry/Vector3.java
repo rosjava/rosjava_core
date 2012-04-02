@@ -16,6 +16,8 @@
 
 package org.ros.rosjava_geometry;
 
+import org.ros.message.MessageFactory;
+
 /**
  * A three dimensional vector.
  * 
@@ -58,19 +60,19 @@ public class Vector3 {
     return new Vector3(x / length(), y / length(), z / length());
   }
 
-  public org.ros.message.geometry_msgs.Vector3 toVector3Message() {
-    org.ros.message.geometry_msgs.Vector3 result = new org.ros.message.geometry_msgs.Vector3();
-    result.x = x;
-    result.y = y;
-    result.z = z;
+  public geometry_msgs.Vector3 toVector3Message(MessageFactory messageFactory) {
+    geometry_msgs.Vector3 result = messageFactory.newFromType(geometry_msgs.Vector3._TYPE);
+    result.x(x);
+    result.y(y);
+    result.z(z);
     return result;
   }
 
-  public org.ros.message.geometry_msgs.Point toPointMessage() {
-    org.ros.message.geometry_msgs.Point result = new org.ros.message.geometry_msgs.Point();
-    result.x = x;
-    result.y = y;
-    result.z = z;
+  public geometry_msgs.Point toPointMessage(MessageFactory messageFactory) {
+    geometry_msgs.Point result = messageFactory.newFromType(geometry_msgs.Point._TYPE);
+    result.x(x);
+    result.y(y);
+    result.z(z);
     return result;
   }
 
@@ -98,12 +100,12 @@ public class Vector3 {
     this.z = z;
   }
 
-  public static Vector3 newFromVector3Message(org.ros.message.geometry_msgs.Vector3 message) {
-    return new Vector3(message.x, message.y, message.z);
+  public static Vector3 newFromVector3Message(geometry_msgs.Vector3 message) {
+    return new Vector3(message.x(), message.y(), message.z());
   }
 
-  public static Vector3 newFromPointMessage(org.ros.message.geometry_msgs.Point message) {
-    return new Vector3(message.x, message.y, message.z);
+  public static Vector3 newFromPointMessage(geometry_msgs.Point message) {
+    return new Vector3(message.x(), message.y(), message.z());
   }
 
   public static Vector3 newIdentityVector3() {

@@ -19,7 +19,7 @@ package org.ros.internal.node.client;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.SystemStateResultFactory;
-import org.ros.internal.node.response.TopicDefinitionListResultFactory;
+import org.ros.internal.node.response.TopicListResultFactory;
 import org.ros.internal.node.response.TopicTypeListResultFactory;
 import org.ros.internal.node.response.UriListResultFactory;
 import org.ros.internal.node.response.UriResultFactory;
@@ -27,9 +27,9 @@ import org.ros.internal.node.response.VoidResultFactory;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.server.master.MasterServer;
-import org.ros.internal.node.topic.PublisherDefinition;
+import org.ros.internal.node.topic.PublisherDeclaration;
 import org.ros.internal.node.topic.PublisherIdentifier;
-import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.topic.TopicDeclaration;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpoint;
 import org.ros.master.client.SystemState;
 import org.ros.master.client.TopicSystemState;
@@ -128,26 +128,26 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
   }
 
   /**
-   * Registers the specified {@link PublisherDefinition}.
+   * Registers the specified {@link PublisherDeclaration}.
    * 
-   * @param publisherDefinition
-   *          the {@link PublisherDefinition} of the {@link Publisher} to
+   * @param publisherDeclaration
+   *          the {@link PublisherDeclaration} of the {@link Publisher} to
    *          register
    * @return a {@link List} of the current {@link SlaveServer} URIs which have
    *         {@link Subscriber}s for the published {@link TopicSystemState}
    */
-  public Response<List<URI>> registerPublisher(PublisherDefinition publisherDefinition) {
-    String slaveName = publisherDefinition.getSlaveName().toString();
-    String slaveUri = publisherDefinition.getSlaveUri().toString();
-    String topicName = publisherDefinition.getTopicName().toString();
-    String messageType = publisherDefinition.getTopicMessageType();
+  public Response<List<URI>> registerPublisher(PublisherDeclaration publisherDeclaration) {
+    String slaveName = publisherDeclaration.getSlaveName().toString();
+    String slaveUri = publisherDeclaration.getSlaveUri().toString();
+    String topicName = publisherDeclaration.getTopicName().toString();
+    String messageType = publisherDeclaration.getTopicMessageType();
     return Response.fromListChecked(
         xmlRpcEndpoint.registerPublisher(slaveName, topicName, messageType, slaveUri),
         new UriListResultFactory());
   }
 
   /**
-   * Unregisters the specified {@link PublisherDefinition}.
+   * Unregisters the specified {@link PublisherDeclaration}.
    * 
    * @param publisherIdentifier
    *          the {@link PublisherIdentifier} of the {@link Publisher} to
@@ -203,12 +203,12 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    *          the {@link GraphName} of the caller
    * @param subgraph
    *          the subgraph of the topics
-   * @return the list of published {@link TopicDefinition}s
+   * @return the list of published {@link TopicDeclaration}s
    */
-  public Response<List<TopicDefinition>> getPublishedTopics(GraphName callerName, String subgraph) {
+  public Response<List<TopicDeclaration>> getPublishedTopics(GraphName callerName, String subgraph) {
     return Response.fromListChecked(
         xmlRpcEndpoint.getPublishedTopics(callerName.toString(), subgraph),
-        new TopicDefinitionListResultFactory());
+        new TopicListResultFactory());
   }
 
   /**

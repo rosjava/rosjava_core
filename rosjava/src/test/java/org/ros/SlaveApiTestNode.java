@@ -17,8 +17,8 @@
 package org.ros;
 
 import org.ros.concurrent.CancellableLoop;
+import org.ros.message.MessageFactory;
 import org.ros.message.MessageListener;
-import org.ros.message.std_msgs.Int64;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
@@ -38,32 +38,32 @@ public class SlaveApiTestNode implements NodeMain {
   }
 
   @Override
-  public void onStart(Node node) {
+  public void onStart(final Node node) {
     // Basic chatter in/out test.
-    final Publisher<org.ros.message.std_msgs.String> pub_string =
-        node.newPublisher("chatter_out", "std_msgs/String");
-    MessageListener<org.ros.message.std_msgs.String> chatter_cb =
-        new MessageListener<org.ros.message.std_msgs.String>() {
-          @Override
-          public void onNewMessage(org.ros.message.std_msgs.String m) {
-            System.out.println("String: " + m.data);
-          }
-        };
-
-    Subscriber<org.ros.message.std_msgs.String> stringSubscriber =
-        node.newSubscriber("chatter_in", "std_msgs/String");
-    stringSubscriber.addMessageListener(chatter_cb);
-
-    // Have at least one case of dual pub/sub on the same topic.
-    final Publisher<Int64> pub_int64_pubsub = node.newPublisher("int64", "std_msgs/Int64");
-    MessageListener<Int64> int64_cb = new MessageListener<Int64>() {
+    final Publisher<std_msgs.String> pub_string =
+        node.newPublisher("chatter_out", std_msgs.String._TYPE);
+    MessageListener<std_msgs.String> chatter_cb = new MessageListener<std_msgs.String>() {
       @Override
-      public void onNewMessage(Int64 m) {
+      public void onNewMessage(std_msgs.String m) {
+        System.out.println("String: " + m.data());
       }
     };
 
-    Subscriber<org.ros.message.std_msgs.Int64> int64Subscriber =
-        node.newSubscriber("int64", "std_msgs/Int64");
+    Subscriber<std_msgs.String> stringSubscriber =
+        node.newSubscriber("chatter_in", std_msgs.String._TYPE);
+    stringSubscriber.addMessageListener(chatter_cb);
+
+    // Have at least one case of dual pub/sub on the same topic.
+    final Publisher<std_msgs.Int64> pub_int64_pubsub =
+        node.newPublisher("int64", std_msgs.Int64._TYPE);
+    MessageListener<std_msgs.Int64> int64_cb = new MessageListener<std_msgs.Int64>() {
+      @Override
+      public void onNewMessage(std_msgs.Int64 m) {
+      }
+    };
+
+    Subscriber<std_msgs.Int64> int64Subscriber =
+        node.newSubscriber("int64", "std_msgs/std_msgs.Int64");
     int64Subscriber.addMessageListener(int64_cb);
 
     // Don't do any performance optimizations here. We want to make sure that
@@ -71,12 +71,13 @@ public class SlaveApiTestNode implements NodeMain {
     node.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
-        org.ros.message.std_msgs.String chatter = new org.ros.message.std_msgs.String();
-        chatter.data = "hello " + System.currentTimeMillis();
+        MessageFactory topicMessageFactory = node.getTopicMessageFactory();
+        std_msgs.String chatter = topicMessageFactory.newFromType(std_msgs.String._TYPE);
+        chatter.data("hello " + System.currentTimeMillis());
         pub_string.publish(chatter);
 
-        Int64 num = new Int64();
-        num.data = 1;
+        std_msgs.Int64 num = topicMessageFactory.newFromType(std_msgs.Int64._TYPE);
+        num.data(1);
         pub_int64_pubsub.publish(num);
         Thread.sleep(100);
       }

@@ -14,11 +14,18 @@
  * the License.
  */
 
+dependencies {
+  compile 'org.apache.commons:com.springsource.org.apache.commons.codec:1.3.0'
+  compile 'org.apache.commons:com.springsource.org.apache.commons.lang:2.4.0'
+  compile 'org.apache.commons:com.springsource.org.apache.commons.io:1.4.0'
+  compile 'com.google.guava:guava:r07'
+  testCompile 'junit:junit:4.8.2'
+}
+
 jar {
   manifest {
     version = '0.0.0-SNAPSHOT'
     symbolicName = 'org.ros.rosjava_bootstrap'
-    instruction 'Export-Package', 'org.ros.message'
   }
 }
 

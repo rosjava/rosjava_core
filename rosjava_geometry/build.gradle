@@ -16,8 +16,5 @@
 
 dependencies {
   compile project(':rosjava')
-  compile('ros:message.geometry_msgs:0.0.0-SNAPSHOT') {
-    exclude module: 'rosjava_bootstrap'
-  }
   testCompile 'junit:junit:4.8.2'
 }

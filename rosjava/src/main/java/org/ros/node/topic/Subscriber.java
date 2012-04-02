@@ -16,7 +16,7 @@
 
 package org.ros.node.topic;
 
-import org.ros.internal.node.topic.Topic;
+import org.ros.internal.node.topic.TopicParticipant;
 import org.ros.message.MessageListener;
 
 import java.util.concurrent.TimeUnit;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T>
  *          the {@link Subscriber} may only subscribe to messages of this type
  */
-public interface Subscriber<T> extends Topic {
+public interface Subscriber<T> extends TopicParticipant {
 
   /**
    * The message type given when a {@link Subscriber} chooses not to commit to a

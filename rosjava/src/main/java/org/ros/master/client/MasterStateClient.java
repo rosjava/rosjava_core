@@ -19,7 +19,7 @@ package org.ros.master.client;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.master.MasterServer;
-import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.topic.TopicDeclaration;
 import org.ros.node.Node;
 import org.ros.node.service.ServiceServer;
 
@@ -79,9 +79,9 @@ public class MasterStateClient {
   /**
    * @param subgraph
    *          the subgraph of the topics
-   * @return a {@link List} of {@link TopicDefinition}s for published topics
+   * @return a {@link List} of {@link TopicDeclaration}s for published topics
    */
-  public List<TopicDefinition> getPublishedTopics(String subgraph) {
+  public List<TopicDeclaration> getPublishedTopics(String subgraph) {
     // TODO(keith): Figure out what to turn the topic definition into.
     throw new UnsupportedOperationException();
   }

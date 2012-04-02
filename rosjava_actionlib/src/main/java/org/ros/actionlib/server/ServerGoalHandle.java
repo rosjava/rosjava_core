@@ -16,10 +16,10 @@
 
 package org.ros.actionlib.server;
 
+import actionlib_msgs.GoalID;
+import actionlib_msgs.GoalStatus;
 import org.ros.exception.RosException;
-import org.ros.message.Message;
-import org.ros.message.actionlib_msgs.GoalID;
-import org.ros.message.actionlib_msgs.GoalStatus;
+import org.ros.internal.message.Message;
 
 /**
  * A goal on the server.

@@ -41,11 +41,11 @@ public class PublisherIdentifier {
   private final TopicIdentifier topicIdentifier;
 
   public static Collection<PublisherIdentifier> newCollectionFromUris(
-      Collection<URI> publisherUris, TopicDefinition topicDefinition) {
+      Collection<URI> publisherUris, TopicDeclaration topicDeclaration) {
     Set<PublisherIdentifier> publishers = Sets.newHashSet();
     for (URI uri : publisherUris) {
       NodeIdentifier nodeIdentifier = new NodeIdentifier(null, uri);
-      publishers.add(new PublisherIdentifier(nodeIdentifier, topicDefinition.toIdentifier()));
+      publishers.add(new PublisherIdentifier(nodeIdentifier, topicDeclaration.toIdentifier()));
     }
     return publishers;
   }

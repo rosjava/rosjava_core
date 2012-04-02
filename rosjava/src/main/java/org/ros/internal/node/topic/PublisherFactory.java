@@ -31,15 +31,15 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class PublisherFactory {
 
-  private final TopicManager topicManager;
+  private final TopicParticipantManager topicParticipantManager;
   private final MessageFactory messageFactory;
   private final ScheduledExecutorService executorService;
   private final NodeIdentifier nodeIdentifier;
 
-  public PublisherFactory(NodeIdentifier nodeIdentifier, TopicManager topicManager,
+  public PublisherFactory(NodeIdentifier nodeIdentifier, TopicParticipantManager topicParticipantManager,
       MessageFactory messageFactory, ScheduledExecutorService executorService) {
     this.nodeIdentifier = nodeIdentifier;
-    this.topicManager = topicManager;
+    this.topicParticipantManager = topicParticipantManager;
     this.messageFactory = messageFactory;
     this.executorService = executorService;
   }
@@ -51,31 +51,31 @@ public class PublisherFactory {
    * 
    * @param <T>
    *          the message type associated with the {@link Publisher}
-   * @param topicDefinition
-   *          {@link TopicDefinition} that is being published
+   * @param topicDeclaration
+   *          {@link TopicDeclaration} that is being published
    * @param messageSerializer
    *          the {@link MessageSerializer} used for published messages
    * @return a new or cached {@link Publisher} instance
    */
   @SuppressWarnings("unchecked")
-  public <T> Publisher<T> newOrExisting(TopicDefinition topicDefinition,
+  public <T> Publisher<T> newOrExisting(TopicDeclaration topicDeclaration,
       MessageSerializer<T> messageSerializer) {
-    String topicName = topicDefinition.getName().toString();
+    String topicName = topicDeclaration.getName().toString();
 
-    synchronized (topicManager) {
-      if (topicManager.hasPublisher(topicName)) {
-        return (DefaultPublisher<T>) topicManager.getPublisher(topicName);
+    synchronized (topicParticipantManager) {
+      if (topicParticipantManager.hasPublisher(topicName)) {
+        return (DefaultPublisher<T>) topicParticipantManager.getPublisher(topicName);
       } else {
         DefaultPublisher<T> publisher =
-            new DefaultPublisher<T>(nodeIdentifier, topicDefinition, messageSerializer,
+            new DefaultPublisher<T>(nodeIdentifier, topicDeclaration, messageSerializer,
                 messageFactory, executorService);
         publisher.addListener(new DefaultPublisherListener<T>() {
           @Override
           public void onShutdown(Publisher<T> publisher) {
-            topicManager.removePublisher((DefaultPublisher<T>) publisher);
+            topicParticipantManager.removePublisher((DefaultPublisher<T>) publisher);
           }
         });
-        topicManager.putPublisher(publisher);
+        topicParticipantManager.putPublisher(publisher);
         return publisher;
       }
     }

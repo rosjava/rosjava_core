@@ -16,14 +16,14 @@
 
 package org.ros.actionlib.client;
 
+import actionlib_msgs.GoalID;
+import actionlib_msgs.GoalStatusArray;
 import org.ros.actionlib.ActionConstants;
 import org.ros.actionlib.ActionSpec;
 import org.ros.exception.RosException;
-import org.ros.message.Message;
+import org.ros.internal.message.Message;
 import org.ros.message.MessageListener;
 import org.ros.message.Time;
-import org.ros.message.actionlib_msgs.GoalID;
-import org.ros.message.actionlib_msgs.GoalStatusArray;
 import org.ros.node.Node;
 import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
@@ -107,7 +107,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
   /**
    * A Publisher for cancel messages using the cancel topic.
    */
-  protected Publisher<GoalID> pubCancelGoal;
+  protected Publisher<actionlib_msgs.GoalID> pubCancelGoal;
 
   /**
    * A flag indicating whether or not a first status message was already
@@ -136,7 +136,7 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
    */
   private CountDownLatch readyLatch;
   private PublisherListener<T_ACTION_GOAL> goalPublisherListener;
-  private PublisherListener<GoalID> cancelPublisherListener;
+  private PublisherListener<actionlib_msgs.GoalID> cancelPublisherListener;
 
   /**
    * Constructor used to create an ActionClient that will be a child node of the
@@ -164,9 +164,9 @@ public class ActionClient<T_ACTION_FEEDBACK extends Message, T_ACTION_GOAL exten
         readyLatch.countDown();
       }
     };
-    this.cancelPublisherListener = new DefaultPublisherListener<GoalID>() {
+    this.cancelPublisherListener = new DefaultPublisherListener<actionlib_msgs.GoalID>() {
       @Override
-      public void onNewSubscriber(Publisher<GoalID> publisher) {
+      public void onNewSubscriber(Publisher<actionlib_msgs.GoalID> publisher) {
         readyLatch.countDown();
       }
     };

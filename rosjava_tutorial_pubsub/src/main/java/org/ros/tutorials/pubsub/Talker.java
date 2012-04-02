@@ -36,8 +36,8 @@ public class Talker implements NodeMain {
 
   @Override
   public void onStart(final Node node) {
-    final Publisher<org.ros.message.std_msgs.String> publisher =
-        node.newPublisher("chatter", "std_msgs/String");
+    final Publisher<std_msgs.String> publisher =
+        node.newPublisher("chatter", std_msgs.String._TYPE);
     // This CancellableLoop will be canceled automatically when the Node shuts
     // down.
     node.executeCancellableLoop(new CancellableLoop() {
@@ -50,8 +50,8 @@ public class Talker implements NodeMain {
 
       @Override
       protected void loop() throws InterruptedException {
-        org.ros.message.std_msgs.String str = new org.ros.message.std_msgs.String();
-        str.data = "Hello world! " + sequenceNumber;
+        std_msgs.String str = publisher.newMessage();
+        str.data("Hello world! " + sequenceNumber);
         publisher.publish(str);
         sequenceNumber++;
         Thread.sleep(1000);

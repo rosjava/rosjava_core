@@ -21,10 +21,10 @@ import com.google.common.collect.Lists;
 import org.ros.internal.node.response.IntegerResultFactory;
 import org.ros.internal.node.response.ProtocolDescriptionResultFactory;
 import org.ros.internal.node.response.Response;
-import org.ros.internal.node.response.TopicDefinitionListResultFactory;
+import org.ros.internal.node.response.TopicListResultFactory;
 import org.ros.internal.node.response.UriResultFactory;
 import org.ros.internal.node.response.VoidResultFactory;
-import org.ros.internal.node.topic.TopicDefinition;
+import org.ros.internal.node.topic.TopicDeclaration;
 import org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpoint;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.namespace.GraphName;
@@ -66,14 +66,14 @@ public class SlaveClient extends Client<SlaveXmlRpcEndpoint> {
     return Response.fromListChecked(xmlRpcEndpoint.getPid(nodeName.toString()), new IntegerResultFactory());
   }
 
-  public Response<List<TopicDefinition>> getSubscriptions() {
+  public Response<List<TopicDeclaration>> getSubscriptions() {
     return Response.fromListChecked(xmlRpcEndpoint.getSubscriptions(nodeName.toString()),
-        new TopicDefinitionListResultFactory());
+        new TopicListResultFactory());
   }
 
-  public Response<List<TopicDefinition>> getPublications() {
+  public Response<List<TopicDeclaration>> getPublications() {
     return Response.fromListChecked(xmlRpcEndpoint.getPublications(nodeName.toString()),
-        new TopicDefinitionListResultFactory());
+        new TopicListResultFactory());
   }
 
   public Response<Void> paramUpdate(GraphName name, boolean value) {

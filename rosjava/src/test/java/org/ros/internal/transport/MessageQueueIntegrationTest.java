@@ -38,13 +38,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.concurrent.CancellableLoop;
-import org.ros.internal.message.old_style.MessageDeserializer;
-import org.ros.internal.message.old_style.MessageSerializer;
+import org.ros.internal.message.DefaultMessageDeserializer;
+import org.ros.internal.message.DefaultMessageSerializer;
+import org.ros.internal.message.Message;
+import org.ros.internal.message.MessageDefinitionReflectionProvider;
+import org.ros.internal.message.topic.TopicMessageFactory;
 import org.ros.internal.node.service.ServiceManager;
-import org.ros.internal.node.topic.TopicManager;
+import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.internal.transport.tcp.TcpClientConnection;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
+import org.ros.message.MessageDefinitionProvider;
+import org.ros.message.MessageIdentifier;
 import org.ros.message.MessageListener;
 
 import java.net.InetSocketAddress;
@@ -64,10 +69,10 @@ public class MessageQueueIntegrationTest {
 
   private ScheduledExecutorService executorService;
   private TcpClientConnectionManager tcpClientConnectionManager;
-  private OutgoingMessageQueue<org.ros.message.std_msgs.String> outgoingMessageQueue;
-  private IncomingMessageQueue<org.ros.message.std_msgs.String> firstIncomingMessageQueue;
-  private IncomingMessageQueue<org.ros.message.std_msgs.String> secondIncomingMessageQueue;
-  private org.ros.message.std_msgs.String expectedMessage;
+  private OutgoingMessageQueue<Message> outgoingMessageQueue;
+  private IncomingMessageQueue<std_msgs.String> firstIncomingMessageQueue;
+  private IncomingMessageQueue<std_msgs.String> secondIncomingMessageQueue;
+  private std_msgs.String expectedMessage;
 
   private class ServerHandler extends SimpleChannelHandler {
     @Override
@@ -103,19 +108,20 @@ public class MessageQueueIntegrationTest {
   public void setup() {
     executorService = Executors.newScheduledThreadPool(10);
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
-    expectedMessage = new org.ros.message.std_msgs.String();
-    expectedMessage.data = "Would you like to play a game?";
+    MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
+    TopicMessageFactory topicMessageFactory = new TopicMessageFactory(messageDefinitionProvider);
+    expectedMessage = topicMessageFactory.newFromType(std_msgs.String._TYPE);
+    expectedMessage.data("Would you like to play a game?");
     outgoingMessageQueue =
-        new OutgoingMessageQueue<org.ros.message.std_msgs.String>(
-            new MessageSerializer<org.ros.message.std_msgs.String>(), executorService);
+        new OutgoingMessageQueue<Message>(new DefaultMessageSerializer(), executorService);
     firstIncomingMessageQueue =
-        new IncomingMessageQueue<org.ros.message.std_msgs.String>(
-            new MessageDeserializer<org.ros.message.std_msgs.String>(
-                org.ros.message.std_msgs.String.class), executorService);
+        new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
+            MessageIdentifier.newFromType(std_msgs.String._TYPE), topicMessageFactory),
+            executorService);
     secondIncomingMessageQueue =
-        new IncomingMessageQueue<org.ros.message.std_msgs.String>(
-            new MessageDeserializer<org.ros.message.std_msgs.String>(
-                org.ros.message.std_msgs.String.class), executorService);
+        new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
+            MessageIdentifier.newFromType(std_msgs.String._TYPE), topicMessageFactory),
+            executorService);
   }
 
   @After
@@ -135,7 +141,7 @@ public class MessageQueueIntegrationTest {
   }
 
   private Channel buildServerChannel() {
-    TopicManager topicManager = new TopicManager();
+    TopicParticipantManager topicParticipantManager = new TopicParticipantManager();
     ServiceManager serviceManager = new ServiceManager();
     NioServerSocketChannelFactory channelFactory =
         new NioServerSocketChannelFactory(executorService, executorService);
@@ -145,7 +151,7 @@ public class MessageQueueIntegrationTest {
     bootstrap.setOption("child.keepAlive", true);
     ChannelGroup serverChannelGroup = new DefaultChannelGroup();
     TcpServerPipelineFactory serverPipelineFactory =
-        new TcpServerPipelineFactory(serverChannelGroup, topicManager, serviceManager) {
+        new TcpServerPipelineFactory(serverChannelGroup, topicParticipantManager, serviceManager) {
           @Override
           public ChannelPipeline getPipeline() {
             ChannelPipeline pipeline = super.getPipeline();
@@ -163,19 +169,18 @@ public class MessageQueueIntegrationTest {
   }
 
   private TcpClientConnection connectIncomingMessageQueue(
-      final IncomingMessageQueue<org.ros.message.std_msgs.String> incomingMessageQueue,
-      Channel serverChannel) throws InterruptedException {
+      final IncomingMessageQueue<std_msgs.String> incomingMessageQueue, Channel serverChannel)
+      throws InterruptedException {
     return tcpClientConnectionManager.connect("Foo", serverChannel.getLocalAddress(),
         incomingMessageQueue.newChannelHandler(), "MessageHandler");
   }
 
-  private CountDownLatch expectMessage(
-      IncomingMessageQueue<org.ros.message.std_msgs.String> incomingMessageQueue)
+  private CountDownLatch expectMessage(IncomingMessageQueue<std_msgs.String> incomingMessageQueue)
       throws InterruptedException {
     final CountDownLatch latch = new CountDownLatch(1);
-    incomingMessageQueue.addListener(new MessageListener<org.ros.message.std_msgs.String>() {
+    incomingMessageQueue.addListener(new MessageListener<std_msgs.String>() {
       @Override
-      public void onNewMessage(org.ros.message.std_msgs.String message) {
+      public void onNewMessage(std_msgs.String message) {
         assertEquals(message, expectedMessage);
         latch.countDown();
       }
