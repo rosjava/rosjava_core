@@ -16,5 +16,6 @@
 
 include 'rosjava_bootstrap', 'rosjava_messages', 'apache_xmlrpc_common',
         'apache_xmlrpc_client', 'apache_xmlrpc_server', 'rosjava',
-        'rosjava_geometry', 'rosjava_tutorial_pubsub', 'rosjava_actionlib',
-        'rosjava_actionlib_tutorial', 'docs'
+        'rosjava_geometry', 'rosjava_tutorial_pubsub', 'docs'
+        // TODO(damonkohler): Enable these once actionlib is working again.
+        // 'rosjava_actionlib', 'rosjava_actionlib_tutorial'
