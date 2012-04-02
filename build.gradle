@@ -26,7 +26,6 @@ allprojects {
 subprojects {
   if (name != 'docs') {
     apply plugin: 'java'
-    apply plugin: 'maven'
     apply plugin: 'osgi'
     apply plugin: 'eclipse'
 
@@ -34,13 +33,19 @@ subprojects {
     targetCompatibility = 1.6
 
     repositories {
-      mavenLocal()
+      ivy {
+        name = 'local'
+        artifactPattern "${gradle.gradleUserHomeDir}/local-repo/[organisation]/[module]/[revision]/[artifact]-[revision].[ext]"
+      }
       maven {
         url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
       }
     }
 
-    install.dependsOn build
+    task install(type: Upload, dependsOn: build) {
+      repositories.add(project.repositories.local)
+      configuration = configurations.archives
+    }
   }
 }
 
