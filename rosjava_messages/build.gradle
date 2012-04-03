@@ -20,7 +20,7 @@ dependencies {
 
 
 task generateSources(type: JavaExec) {
-  def outputDir = "${buildDir}/generated-srcs"
+  def outputDir = "${buildDir}/generated-src"
   outputs.dir file(outputDir)
   args outputDir
   classpath = configurations.runtime
@@ -33,6 +33,6 @@ eclipse.classpath.file {
   withXml {
     // TODO(damonkohler): Avoid repetition of build directory. This is
     // necessary because Eclipse wants a project relative path.
-    it.asNode().appendNode('classpathentry', [kind: 'src', path: 'build/generated-srcs'])
+    it.asNode().appendNode('classpathentry', [kind: 'src', path: 'build/generated-src'])
   }
 }
