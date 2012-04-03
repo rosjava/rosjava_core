@@ -16,7 +16,6 @@
 
 package org.ros.rosjava_geometry;
 
-import org.ros.message.MessageFactory;
 
 /**
  * A three dimensional vector.
@@ -60,16 +59,14 @@ public class Vector3 {
     return new Vector3(x / length(), y / length(), z / length());
   }
 
-  public geometry_msgs.Vector3 toVector3Message(MessageFactory messageFactory) {
-    geometry_msgs.Vector3 result = messageFactory.newFromType(geometry_msgs.Vector3._TYPE);
+  public geometry_msgs.Vector3 toVector3Message(geometry_msgs.Vector3 result) {
     result.x(x);
     result.y(y);
     result.z(z);
     return result;
   }
 
-  public geometry_msgs.Point toPointMessage(MessageFactory messageFactory) {
-    geometry_msgs.Point result = messageFactory.newFromType(geometry_msgs.Point._TYPE);
+  public geometry_msgs.Point toPointMessage(geometry_msgs.Point result) {
     result.x(x);
     result.y(y);
     result.z(z);

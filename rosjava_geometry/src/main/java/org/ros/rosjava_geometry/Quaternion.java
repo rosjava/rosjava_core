@@ -18,8 +18,6 @@ package org.ros.rosjava_geometry;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.message.MessageFactory;
-
 /**
  * A quaternion.
  * 
@@ -98,8 +96,7 @@ public class Quaternion {
     return new Vector3(rotatedQuaternion.getX(), rotatedQuaternion.getY(), rotatedQuaternion.getZ());
   }
 
-  public geometry_msgs.Quaternion toQuaternionMessage(MessageFactory messageFactory) {
-    geometry_msgs.Quaternion result = messageFactory.newFromType(geometry_msgs.Quaternion._TYPE);
+  public geometry_msgs.Quaternion toQuaternionMessage(geometry_msgs.Quaternion result) {
     result.x(x);
     result.y(y);
     result.z(z);
