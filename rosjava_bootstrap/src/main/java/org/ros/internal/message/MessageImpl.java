@@ -390,43 +390,51 @@ public class MessageImpl implements Message, GetInstance {
     setFieldValue(PrimitiveFieldType.UINT8, name, value);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public byte getByte(String name) {
     return this.<Byte>getFieldValue(PrimitiveFieldType.BYTE, name);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
-  public char getChar(String name) {
-    return this.<Character>getFieldValue(PrimitiveFieldType.CHAR, name);
+  public short getChar(String name) {
+    return this.<Short>getFieldValue(PrimitiveFieldType.CHAR, name);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public void setByte(String name, byte value) {
     setFieldValue(PrimitiveFieldType.BYTE, name, value);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
-  public void setChar(String name, char value) {
+  public void setChar(String name, short value) {
     setFieldValue(PrimitiveFieldType.CHAR, name, value);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public void setByteList(String name, List<Byte> value) {
     setFieldValue(PrimitiveFieldType.BYTE, name, value);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
-  public void setCharList(String name, List<Character> value) {
+  public void setCharList(String name, List<Short> value) {
     setFieldValue(PrimitiveFieldType.CHAR, name, value);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public List<Byte> getByteList(String name) {
     return getFieldValue(PrimitiveFieldType.BYTE, name);
   }
 
+  @SuppressWarnings("deprecation")
   @Override
-  public List<Character> getCharList(String name) {
+  public List<Short> getCharList(String name) {
     return getFieldValue(PrimitiveFieldType.CHAR, name);
   }
 

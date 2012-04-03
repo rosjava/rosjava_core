@@ -16,9 +16,8 @@
 
 package org.ros.internal.message;
 
-import org.ros.message.MessageIdentifier;
-
 import org.ros.message.Duration;
+import org.ros.message.MessageIdentifier;
 import org.ros.message.Time;
 
 import java.nio.ByteBuffer;
@@ -41,9 +40,15 @@ public interface Message {
 
   boolean getBool(String name);
 
+  /**
+   * @deprecated replaced by {@link #getInt8(String)}
+   */
   byte getByte(String name);
 
-  char getChar(String name);
+  /**
+   * @deprecated replaced by {@link #getUint8(String)}
+   */
+  short getChar(String name);
 
   Duration getDuration(String name);
 
@@ -75,9 +80,15 @@ public interface Message {
 
   void setBool(String name, boolean value);
 
+  /**
+   * @deprecated replaced by {@link #setInt8(String, byte)}
+   */
   void setByte(String name, byte value);
 
-  void setChar(String name, char value);
+  /**
+   * @deprecated replaced by {@link #setUint8(String, short)}
+   */
+  void setChar(String name, short value);
 
   void setDuration(String name, Duration value);
 
@@ -119,9 +130,15 @@ public interface Message {
 
   void setBoolList(String name, List<Boolean> value);
 
+  /**
+   * @deprecated replaced by {@link #setInt8List(String, List)}
+   */
   void setByteList(String name, List<Byte> value);
 
-  void setCharList(String name, List<Character> value);
+  /**
+   * @deprecated replaced by {@link #setUint8List(String, List)}
+   */
+  void setCharList(String name, List<Short> value);
 
   void setFloat64List(String name, List<Double> value);
 
@@ -149,9 +166,15 @@ public interface Message {
 
   List<Boolean> getBoolList(String name);
 
+  /**
+   * @deprecated replaced by {@link #getInt8List(String)}
+   */
   List<Byte> getByteList(String name);
 
-  List<Character> getCharList(String name);
+  /**
+   * @deprecated replaced by {@link #getUint8List(String)}
+   */
+  List<Short> getCharList(String name);
 
   List<Double> getFloat64List(String name);
 

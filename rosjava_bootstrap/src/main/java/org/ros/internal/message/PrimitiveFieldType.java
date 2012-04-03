@@ -60,67 +60,6 @@ public enum PrimitiveFieldType implements FieldType {
       return value.equals("1");
     }
   },
-  BYTE {
-    @SuppressWarnings("unchecked")
-    @Override
-    public Byte getDefaultValue() {
-      return Byte.valueOf((byte) 0);
-    }
-
-    @Override
-    public int getSerializedSize() {
-      return 1;
-    }
-
-    @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
-      Preconditions.checkArgument(value instanceof Byte);
-      buffer.put((Byte) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Byte deserialize(ByteBuffer buffer) {
-      return (byte) (buffer.get() & 0xff);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Byte parseFromString(String value) {
-      return Byte.parseByte(value);
-    }
-  },
-  CHAR {
-    @SuppressWarnings("unchecked")
-    @Override
-    public Character getDefaultValue() {
-      return Character.valueOf((char) 0);
-    }
-
-    @Override
-    public int getSerializedSize() {
-      return 1;
-    }
-
-    @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
-      Preconditions.checkArgument(value instanceof Character);
-      buffer.put((Byte) value);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Character deserialize(ByteBuffer buffer) {
-      return Character.valueOf((char) (buffer.get() & 0xff));
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Character parseFromString(String value) {
-      Preconditions.checkArgument(value.length() == 1);
-      return Character.valueOf(value.charAt(0));
-    }
-  },
   INT8 {
     @SuppressWarnings("unchecked")
     @Override
@@ -151,6 +90,38 @@ public enum PrimitiveFieldType implements FieldType {
       return Byte.parseByte(value);
     }
   },
+  /**
+   * @deprecated replaced by {@link PrimitiveFieldType#INT8}
+   */
+  BYTE {
+    @SuppressWarnings("unchecked")
+    @Override
+    public Byte getDefaultValue() {
+      return INT8.getDefaultValue();
+    }
+
+    @Override
+    public int getSerializedSize() {
+      return INT8.getSerializedSize();
+    }
+
+    @Override
+    public <T> void serialize(T value, ByteBuffer buffer) {
+      INT8.serialize(value, buffer);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Byte deserialize(ByteBuffer buffer) {
+      return INT8.deserialize(buffer);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Byte parseFromString(String value) {
+      return INT8.parseFromString(value);
+    }
+  },
   UINT8 {
     @SuppressWarnings("unchecked")
     @Override
@@ -172,13 +143,45 @@ public enum PrimitiveFieldType implements FieldType {
     @SuppressWarnings("unchecked")
     @Override
     public Short deserialize(ByteBuffer buffer) {
-      return (short) (buffer.get() & 0xff);
+      return Short.valueOf(buffer.get());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Short parseFromString(String value) {
       return Short.parseShort(value);
+    }
+  },
+  /**
+   * @deprecated replaced by {@link PrimitiveFieldType#UINT8}
+   */
+  CHAR {
+    @SuppressWarnings("unchecked")
+    @Override
+    public Short getDefaultValue() {
+      return UINT8.getDefaultValue();
+    }
+
+    @Override
+    public int getSerializedSize() {
+      return UINT8.getSerializedSize();
+    }
+
+    @Override
+    public <T> void serialize(T value, ByteBuffer buffer) {
+      UINT8.serialize(value, buffer);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Short deserialize(ByteBuffer buffer) {
+      return UINT8.deserialize(buffer);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Short parseFromString(String value) {
+      return UINT8.parseFromString(value);
     }
   },
   INT16 {
