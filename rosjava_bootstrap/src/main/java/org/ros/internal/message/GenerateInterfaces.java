@@ -14,16 +14,15 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.internal.message;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import org.ros.EnvironmentVariables;
+
 import org.apache.commons.io.FileUtils;
 import org.ros.exception.RosRuntimeException;
-import org.ros.internal.message.DefaultMessageFactory;
-import org.ros.internal.message.MessageDefinitionProviderChain;
-import org.ros.internal.message.MessageDefinitionTupleParser;
 import org.ros.internal.message.service.ServiceDefinitionFileProvider;
 import org.ros.internal.message.topic.TopicDefinitionFileProvider;
 import org.ros.message.MessageDeclaration;

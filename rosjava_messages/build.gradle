@@ -24,7 +24,7 @@ task generateSources(type: JavaExec) {
   outputs.dir file(outputDir)
   args outputDir
   classpath = configurations.runtime
-  main = 'org.ros.GenerateInterfaces'
+  main = 'org.ros.internal.message.GenerateInterfaces'
 }
 
 compileJava.source generateSources.outputs.files

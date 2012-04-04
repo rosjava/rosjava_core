@@ -14,18 +14,12 @@
  * the License.
  */
 
-package org.ros;
+package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.ros.exception.RosRuntimeException;
-import org.ros.internal.message.Field;
-import org.ros.internal.message.ListField;
-import org.ros.internal.message.MessageContext;
-import org.ros.internal.message.MessageContextFactory;
-import org.ros.internal.message.MessageFieldType;
-import org.ros.internal.message.PrimitiveFieldType;
 import org.ros.message.Duration;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
