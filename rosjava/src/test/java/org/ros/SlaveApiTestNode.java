@@ -45,7 +45,7 @@ public class SlaveApiTestNode implements NodeMain {
     MessageListener<std_msgs.String> chatter_cb = new MessageListener<std_msgs.String>() {
       @Override
       public void onNewMessage(std_msgs.String m) {
-        System.out.println("String: " + m.data());
+        System.out.println("String: " + m.getData());
       }
     };
 
@@ -73,11 +73,11 @@ public class SlaveApiTestNode implements NodeMain {
       protected void loop() throws InterruptedException {
         MessageFactory topicMessageFactory = node.getTopicMessageFactory();
         std_msgs.String chatter = topicMessageFactory.newFromType(std_msgs.String._TYPE);
-        chatter.data("hello " + System.currentTimeMillis());
+        chatter.setData("hello " + System.currentTimeMillis());
         pub_string.publish(chatter);
 
         std_msgs.Int64 num = topicMessageFactory.newFromType(std_msgs.Int64._TYPE);
-        num.data(1);
+        num.setData(1);
         pub_int64_pubsub.publish(num);
         Thread.sleep(100);
       }

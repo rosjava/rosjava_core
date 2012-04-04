@@ -39,7 +39,7 @@ public class Quaternion {
   }
 
   public static Quaternion newFromQuaternionMessage(geometry_msgs.Quaternion message) {
-    return new Quaternion(message.x(), message.y(), message.z(), message.w());
+    return new Quaternion(message.getX(), message.getY(), message.getZ(), message.getW());
   }
 
   public static Quaternion rotationBetweenVectors(Vector3 vector1, Vector3 vector2) {
@@ -97,10 +97,10 @@ public class Quaternion {
   }
 
   public geometry_msgs.Quaternion toQuaternionMessage(geometry_msgs.Quaternion result) {
-    result.x(x);
-    result.y(y);
-    result.z(z);
-    result.w(w);
+    result.setX(x);
+    result.setY(y);
+    result.setZ(z);
+    result.setW(w);
     return result;
   }
 

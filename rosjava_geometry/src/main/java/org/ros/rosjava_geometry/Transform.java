@@ -53,31 +53,31 @@ public class Transform {
   }
 
   public geometry_msgs.Transform toTransformMessage(geometry_msgs.Transform result) {
-    result.translation(translation.toVector3Message(result.translation()));
-    result.rotation(rotation.toQuaternionMessage(result.rotation()));
+    result.setTranslation(translation.toVector3Message(result.getTranslation()));
+    result.setRotation(rotation.toQuaternionMessage(result.getRotation()));
     return result;
   }
 
   public geometry_msgs.TransformStamped toTransformStampedMessage(GraphName frame,
       GraphName childFrame, Time stamp, geometry_msgs.TransformStamped result) {
-    result.header().frame_id(frame.toString());
-    result.header().stamp(stamp);
-    result.child_frame_id(childFrame.toString());
-    result.transform(toTransformMessage(result.transform()));
+    result.getHeader().setFrameId(frame.toString());
+    result.getHeader().setStamp(stamp);
+    result.setChildFrameId(childFrame.toString());
+    result.setTransform(toTransformMessage(result.getTransform()));
     return result;
   }
 
   public geometry_msgs.Pose toPoseMessage(geometry_msgs.Pose result) {
-    result.position(translation.toPointMessage(result.position()));
-    result.orientation(rotation.toQuaternionMessage(result.orientation()));
+    result.setPosition(translation.toPointMessage(result.getPosition()));
+    result.setOrientation(rotation.toQuaternionMessage(result.getOrientation()));
     return result;
   }
 
   public geometry_msgs.PoseStamped toPoseStampedMessage(GraphName frame, Time stamp,
       geometry_msgs.PoseStamped result) {
-    result.header().frame_id(frame.toString());
-    result.header().stamp(stamp);
-    result.pose(toPoseMessage(result.pose()));
+    result.getHeader().setFrameId(frame.toString());
+    result.getHeader().setStamp(stamp);
+    result.setPose(toPoseMessage(result.getPose()));
     return result;
   }
 
@@ -98,13 +98,13 @@ public class Transform {
   }
 
   public static Transform newFromTransformMessage(geometry_msgs.Transform message) {
-    return new Transform(Vector3.newFromVector3Message(message.translation()),
-        Quaternion.newFromQuaternionMessage(message.rotation()));
+    return new Transform(Vector3.newFromVector3Message(message.getTranslation()),
+        Quaternion.newFromQuaternionMessage(message.getRotation()));
   }
 
   public static Transform newFromPoseMessage(geometry_msgs.Pose message) {
-    return new Transform(Vector3.newFromPointMessage(message.position()),
-        Quaternion.newFromQuaternionMessage(message.orientation()));
+    return new Transform(Vector3.newFromPointMessage(message.getPosition()),
+        Quaternion.newFromQuaternionMessage(message.getOrientation()));
   }
 
   public static Transform newIdentityTransform() {

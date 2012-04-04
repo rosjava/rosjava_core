@@ -54,6 +54,23 @@ public abstract class Field {
     return isConstant;
   }
 
+  private String getJavaName() {
+    String[] parts = name.split("_");
+    StringBuilder fieldName = new StringBuilder();
+    for (String part : parts) {
+      fieldName.append(part.substring(0, 1).toUpperCase() + part.substring(1));
+    }
+    return fieldName.toString();
+  }
+
+  public String getGetterName() {
+    return "get" + getJavaName();
+  }
+
+  public String getSetterName() {
+    return "set" + getJavaName();
+  }
+
   /**
    * @return the textual representation of this field used for computing the MD5
    *         of a message definition

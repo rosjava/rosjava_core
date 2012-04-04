@@ -58,7 +58,7 @@ public class ServiceIntegrationTest extends RosTest {
                     test_ros.AddTwoInts.Response response =
                         node.getServiceResponseMessageFactory().newFromType(
                             test_ros.AddTwoInts.Response._TYPE);
-                    response.setInt64("sum", request.getInt64("a") + request.getInt64("b"));
+                    response.setSum(request.getA() + request.getB());
                     return response;
                   }
                 });
@@ -93,12 +93,12 @@ public class ServiceIntegrationTest extends RosTest {
         }
         test_ros.AddTwoInts.Request request =
             node.getServiceRequestMessageFactory().newFromType(test_ros.AddTwoInts._TYPE);
-        request.a(2);
-        request.b(2);
+        request.setA(2);
+        request.setB(2);
         serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoInts.Response>() {
           @Override
-          public void onSuccess(test_ros.AddTwoInts.Response message) {
-            assertEquals(message.sum(), 4);
+          public void onSuccess(test_ros.AddTwoInts.Response response) {
+            assertEquals(response.getSum(), 4);
             latch.countDown();
           }
 
@@ -176,8 +176,6 @@ public class ServiceIntegrationTest extends RosTest {
         }
         test_ros.AddTwoInts.Request request =
             node.getServiceRequestMessageFactory().newFromType(test_ros.AddTwoInts._TYPE);
-        request.a(0);
-        request.b(0);
         serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoInts.Response>() {
           @Override
           public void onSuccess(test_ros.AddTwoInts.Response message) {

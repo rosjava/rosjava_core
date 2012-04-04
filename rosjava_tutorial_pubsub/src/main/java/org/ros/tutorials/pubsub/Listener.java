@@ -43,7 +43,7 @@ public class Listener implements NodeMain {
     subscriber.addMessageListener(new MessageListener<std_msgs.String>() {
       @Override
       public void onNewMessage(std_msgs.String message) {
-        log.info("I heard: \"" + message.data() + "\"");
+        log.info("I heard: \"" + message.getData() + "\"");
       }
     });
   }

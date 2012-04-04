@@ -25,7 +25,6 @@ import org.ros.node.topic.Publisher;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 
 /**
  * Logger that logs to both an underlying Apache Commons Log as well as /rosout.
@@ -61,14 +60,13 @@ public class RosoutLogger implements Log {
   private void publish(byte level, Object message) {
     rosgraph_msgs.Log logMessage =
         node.getTopicMessageFactory().newFromType(rosgraph_msgs.Log._TYPE);
-    logMessage.getMessage("header").setTime("stamp", node.getCurrentTime());
-    logMessage.level(level);
-    logMessage.name(node.getName().toString());
-    logMessage.msg(message.toString());
-    // TODO(damonkohler): Should return list of all published and subscribed
-    // topics for the node that created this logger. This helps filter the
-    // rosoutconsole.
-    logMessage.topics(new ArrayList<String>());
+    logMessage.getHeader().setStamp(node.getCurrentTime());
+    logMessage.setLevel(level);
+    logMessage.setName(node.getName().toString());
+    logMessage.setMsg(message.toString());
+    // TODO(damonkohler): Should update the topics field with a list of all
+    // published and subscribed topics for the node that created this logger.
+    // This helps filter the rosoutconsole.
     publisher.publish(logMessage);
   }
 

@@ -43,8 +43,8 @@ public class ServiceTest {
 
   @Test
   public void testCreateEchoService() {
-    Message request = serviceRequestMessageFactory.newFromType("foo/Echo");
-    Message response = serviceResponseMessageFactory.newFromType("foo/Echo");
+    RuntimeMessage request = serviceRequestMessageFactory.newFromType("foo/Echo");
+    RuntimeMessage response = serviceResponseMessageFactory.newFromType("foo/Echo");
     request.setString("data", "Hello, ROS!");
     response.setString("data", "Hello, ROS!");
   }

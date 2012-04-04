@@ -27,6 +27,6 @@ public class DefaultMessageSerializer implements MessageSerializer<Message> {
 
   @Override
   public ByteBuffer serialize(Message message) {
-    return message.serialize();
+    return message.toRuntimeMessage().serialize();
   }
 }

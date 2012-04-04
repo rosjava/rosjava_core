@@ -16,12 +16,10 @@
 
 package org.ros.rosjava_geometry;
 
-
 /**
  * A three dimensional vector.
  * 
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
 public class Vector3 {
 
@@ -60,16 +58,16 @@ public class Vector3 {
   }
 
   public geometry_msgs.Vector3 toVector3Message(geometry_msgs.Vector3 result) {
-    result.x(x);
-    result.y(y);
-    result.z(z);
+    result.setX(x);
+    result.setY(y);
+    result.setZ(z);
     return result;
   }
 
   public geometry_msgs.Point toPointMessage(geometry_msgs.Point result) {
-    result.x(x);
-    result.y(y);
-    result.z(z);
+    result.setX(x);
+    result.setY(y);
+    result.setZ(z);
     return result;
   }
 
@@ -98,11 +96,11 @@ public class Vector3 {
   }
 
   public static Vector3 newFromVector3Message(geometry_msgs.Vector3 message) {
-    return new Vector3(message.x(), message.y(), message.z());
+    return new Vector3(message.getX(), message.getY(), message.getZ());
   }
 
   public static Vector3 newFromPointMessage(geometry_msgs.Point message) {
-    return new Vector3(message.x(), message.y(), message.z());
+    return new Vector3(message.getX(), message.getY(), message.getZ());
   }
 
   public static Vector3 newIdentityVector3() {

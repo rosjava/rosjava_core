@@ -88,8 +88,8 @@ public class ListField<T> extends Field {
     // Reserve 4 bytes for the length.
     int size = 4;
     if (type instanceof MessageFieldType) {
-      for (Message message : (List<Message>) value) {
-        size += message.getSerializedSize();
+      for (RuntimeMessage runtimeMessage : (List<RuntimeMessage>) value) {
+        size += runtimeMessage.getSerializedSize();
       }
     } else if (type == PrimitiveFieldType.STRING) {
       for (String string : (List<String>) value) {

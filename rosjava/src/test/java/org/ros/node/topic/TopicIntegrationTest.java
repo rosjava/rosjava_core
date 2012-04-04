@@ -50,7 +50,7 @@ public class TopicIntegrationTest extends RosTest {
     MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
     TopicMessageFactory topicMessageFactory = new TopicMessageFactory(messageDefinitionProvider);
     expectedMessage = topicMessageFactory.newFromType(std_msgs.String._TYPE);
-    expectedMessage.data("Would you like to play a game?");
+    expectedMessage.setData("Would you like to play a game?");
   }
 
   @Test
@@ -218,9 +218,10 @@ public class TopicIntegrationTest extends RosTest {
     @Override
     public void onNewMessage(test_ros.TestHeader message) {
       if (lastMessage != null) {
-        assertTrue(String.format("message seq %d <= previous seq %d", message.header().seq(),
-            lastMessage.header().seq()), message.header().seq() > lastMessage.header().seq());
-        assertTrue(message.header().stamp().compareTo(lastMessage.header().stamp()) > 0);
+        assertTrue(String.format("message seq %d <= previous seq %d", message.getHeader().getSeq(),
+            lastMessage.getHeader().getSeq()), message.getHeader().getSeq() > lastMessage
+            .getHeader().getSeq());
+        assertTrue(message.getHeader().getStamp().compareTo(lastMessage.getHeader().getStamp()) > 0);
       }
       lastMessage = message;
       latch.countDown();
@@ -243,8 +244,8 @@ public class TopicIntegrationTest extends RosTest {
           public void loop() throws InterruptedException {
             test_ros.TestHeader testHeader =
                 node.getTopicMessageFactory().newFromType(test_ros.TestHeader._TYPE);
-            testHeader.header().frame_id("frame");
-            testHeader.header().stamp(node.getCurrentTime());
+            testHeader.getHeader().setFrameId("frame");
+            testHeader.getHeader().setStamp(node.getCurrentTime());
             publisher.publish(testHeader);
             // There needs to be some time between messages in order to
             // guarantee that the timestamp increases.

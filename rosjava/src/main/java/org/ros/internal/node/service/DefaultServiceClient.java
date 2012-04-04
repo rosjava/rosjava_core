@@ -71,8 +71,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
             // TODO(damonkohler): Support non-persistent connections.
-            .put(ConnectionHeaderFields.PERSISTENT, "1")
-            .putAll(serviceDeclaration.toHeader())
+            .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceDeclaration.toHeader())
             .build();
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
   }
@@ -89,7 +88,8 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     tcpClientConnection =
         tcpClientConnectionManager.connect(toString(), address, handler,
             "ServiceClientHandshakeHandler");
-    // TODO(damonkohler): Remove this once blocking on handshakes is supported. See issue 75.
+    // TODO(damonkohler): Remove this once blocking on handshakes is supported.
+    // See issue 75.
     try {
       Thread.sleep(500);
     } catch (InterruptedException e) {

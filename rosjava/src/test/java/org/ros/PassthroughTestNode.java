@@ -44,7 +44,7 @@ public class PassthroughTestNode implements NodeMain {
 
     // String pass through
     final Publisher<std_msgs.String> pub_string =
-        node.newPublisher("string_out", "std_msgs/String");
+        node.newPublisher("string_out", std_msgs.String._TYPE);
     MessageListener<std_msgs.String> string_cb = new MessageListener<std_msgs.String>() {
       @Override
       public void onNewMessage(std_msgs.String m) {
@@ -68,12 +68,12 @@ public class PassthroughTestNode implements NodeMain {
 
     // TestHeader pass through
     final Publisher<test_ros.TestHeader> pub_header =
-        node.newPublisher("test_header_out", "test_ros/TestHeader");
+        node.newPublisher("test_header_out", test_ros.TestHeader._TYPE);
     MessageListener<test_ros.TestHeader> header_cb = new MessageListener<test_ros.TestHeader>() {
       @Override
       public void onNewMessage(test_ros.TestHeader m) {
-        m.orig_caller_id(m.caller_id());
-        m.caller_id(node.getName().toString());
+        m.setOrigCallerId(m.getCallerId());
+        m.setCallerId(node.getName().toString());
         pub_header.publish(m);
       }
     };

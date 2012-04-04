@@ -229,26 +229,28 @@ public class MessageInterfaceBuilder {
 
   private void appendSettersAndGetters(MessageContext messageContext, StringBuilder builder) {
     for (Field field : messageContext.getFields()) {
-      if (!field.isConstant()) {
-        String type = null;
-        if (field.getType() instanceof PrimitiveFieldType) {
-          PrimitiveFieldType primitiveFieldType = (PrimitiveFieldType) field.getType();
-          if (field instanceof ListField) {
-            type = String.format("java.util.List<%s>", getJavaBoxedType(primitiveFieldType));
-          } else {
-            type = getJavaType(primitiveFieldType);
-          }
-        }
-        if (field.getType() instanceof MessageFieldType) {
-          type = field.getType().getName().replace("/", ".");
-          if (field instanceof ListField) {
-            type = String.format("java.util.List<%s>", type);
-          }
-        }
-        Preconditions.checkNotNull(type, "Unsupported FieldType: " + field.getType());
-        builder.append(String.format("  %s %s();\n", type, field.getName()));
-        builder.append(String.format("  void %s(%s value);\n", field.getName(), type));
+      if (field.isConstant()) {
+        continue;
       }
+      String type = null;
+      if (field.getType() instanceof PrimitiveFieldType) {
+        PrimitiveFieldType primitiveFieldType = (PrimitiveFieldType) field.getType();
+        if (field instanceof ListField) {
+          type = String.format("java.util.List<%s>", getJavaBoxedType(primitiveFieldType));
+        } else {
+          type = getJavaType(primitiveFieldType);
+        }
+      }
+      if (field.getType() instanceof MessageFieldType) {
+        type = field.getType().getName().replace("/", ".");
+        if (field instanceof ListField) {
+          type = String.format("java.util.List<%s>", type);
+        }
+      }
+      Preconditions.checkNotNull(type, "Unsupported FieldType: " + field.getType());
+      builder.append(String.format("  %s %s();\n", type, field.getGetterName()));
+      builder.append(String.format("  void %s(%s value);\n", field.getSetterName(), type));
     }
   }
+
 }

@@ -28,12 +28,12 @@ public class MessageFieldType implements FieldType {
 
   private final MessageIdentifier messageIdentifier;
   private final MessageFactory messageFactory;
-  private final org.ros.message.MessageDeserializer<Message> deserializer;
+  private final org.ros.message.MessageDeserializer<RuntimeMessage> deserializer;
 
   public MessageFieldType(MessageIdentifier messageIdentifier, MessageFactory messageFactory) {
     this.messageIdentifier = messageIdentifier;
     this.messageFactory = messageFactory;
-    deserializer = new DefaultMessageDeserializer<Message>(messageIdentifier, messageFactory);
+    deserializer = new DefaultMessageDeserializer<RuntimeMessage>(messageIdentifier, messageFactory);
   }
 
   @Override
@@ -58,7 +58,7 @@ public class MessageFieldType implements FieldType {
 
   @Override
   public <T> void serialize(T value, ByteBuffer buffer) {
-    buffer.put(((Message) value).serialize());
+    buffer.put(((Message) value).toRuntimeMessage().serialize());
   }
 
   @SuppressWarnings("unchecked")

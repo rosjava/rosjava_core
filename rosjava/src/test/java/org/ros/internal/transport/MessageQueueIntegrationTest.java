@@ -111,7 +111,7 @@ public class MessageQueueIntegrationTest {
     MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
     TopicMessageFactory topicMessageFactory = new TopicMessageFactory(messageDefinitionProvider);
     expectedMessage = topicMessageFactory.newFromType(std_msgs.String._TYPE);
-    expectedMessage.data("Would you like to play a game?");
+    expectedMessage.setData("Would you like to play a game?");
     outgoingMessageQueue =
         new OutgoingMessageQueue<Message>(new DefaultMessageSerializer(), executorService);
     firstIncomingMessageQueue =

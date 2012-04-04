@@ -51,7 +51,7 @@ public class Talker implements NodeMain {
       @Override
       protected void loop() throws InterruptedException {
         std_msgs.String str = publisher.newMessage();
-        str.data("Hello world! " + sequenceNumber);
+        str.setData("Hello world! " + sequenceNumber);
         publisher.publish(str);
         sequenceNumber++;
         Thread.sleep(1000);

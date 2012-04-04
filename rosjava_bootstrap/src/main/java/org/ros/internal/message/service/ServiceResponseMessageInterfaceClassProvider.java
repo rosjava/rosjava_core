@@ -16,8 +16,8 @@
 
 package org.ros.internal.message.service;
 
-import org.ros.internal.message.Message;
 import org.ros.internal.message.MessageInterfaceClassProvider;
+import org.ros.internal.message.RuntimeMessage;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -31,7 +31,7 @@ public class ServiceResponseMessageInterfaceClassProvider implements MessageInte
       String className = messageType.replace("/", ".") + "$Response";
       return (Class<T>) getClass().getClassLoader().loadClass(className);
     } catch (ClassNotFoundException e) {
-      return (Class<T>) Message.class;
+      return (Class<T>) RuntimeMessage.class;
     }
   }
 }

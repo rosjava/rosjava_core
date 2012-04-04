@@ -20,11 +20,8 @@ import com.google.common.base.Preconditions;
 
 import org.ros.message.MessageFactory;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -33,34 +30,10 @@ public class MessageProxyFactory {
 
   private static final String HEADER_MESSAGE_TYPE = "std_msgs/Header";
   private static final String SEQUENCE_FIELD_NAME = "seq";
-  private static final AtomicInteger SEQUENCE_NUMBER = new AtomicInteger(0);
+  private static final AtomicLong SEQUENCE_NUMBER = new AtomicLong(0);
 
   private final MessageInterfaceClassProvider messageInterfaceClassProvider;
   private final MessageContextFactory messageContextFactory;
-
-  private final class MessageProxyInvocationHandler implements InvocationHandler {
-    private final MessageImpl implementation;
-
-    private MessageProxyInvocationHandler(MessageImpl implementation) {
-      this.implementation = implementation;
-    }
-
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-      List<Field> fields = implementation.getFields();
-      String methodName = method.getName();
-      for (Field field : fields) {
-        if (field.getName().equals(methodName)) {
-          if (method.getParameterTypes().length > 0) {
-            field.setValue(args[0]);
-            return null;
-          }
-          return field.getValue();
-        }
-      }
-      return method.invoke(implementation, args);
-    }
-  }
 
   public MessageProxyFactory(MessageInterfaceClassProvider messageInterfaceClassProvider,
       MessageFactory messageFactory) {

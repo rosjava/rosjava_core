@@ -16,17 +16,17 @@
 
 package org.ros.internal.node.service;
 
-import org.ros.internal.message.Message;
+import org.ros.internal.message.RuntimeMessage;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Service {
 
-  public interface Request extends Message {
+  public interface Request extends RuntimeMessage {
   }
 
-  public interface Response extends Message {
+  public interface Response extends RuntimeMessage {
   }
 
   private final Request request;

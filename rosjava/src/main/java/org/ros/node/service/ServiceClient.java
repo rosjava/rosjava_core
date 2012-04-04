@@ -55,7 +55,7 @@ public interface ServiceClient<T, S> {
    * @return the name of the service this {@link ServiceClient} is connected to
    */
   GraphName getName();
-  
+
   /**
    * Stops the client (e.g. disconnect a persistent service connection).
    */

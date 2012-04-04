@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageImpl implements Message, GetInstance {
+public class MessageImpl implements RuntimeMessage, GetInstance {
 
   private final MessageContext context;
 
@@ -50,6 +50,11 @@ public class MessageImpl implements Message, GetInstance {
       throw new RosRuntimeException("Unable to set field value: " + type + " " + name + " = "
           + value);
     }
+  }
+
+  @Override
+  public RuntimeMessage toRuntimeMessage() {
+    return (RuntimeMessage) this;
   }
 
   @Override
@@ -163,7 +168,7 @@ public class MessageImpl implements Message, GetInstance {
   }
 
   @Override
-  public <T extends Message> T getMessage(String name) {
+  public <T extends RuntimeMessage> T getMessage(String name) {
     if (context.getField(name).getType() instanceof MessageFieldType) {
       return context.getField(name).<T>getValue();
     }
@@ -319,7 +324,7 @@ public class MessageImpl implements Message, GetInstance {
   }
 
   @Override
-  public void setMessage(String name, Message value) {
+  public void setMessage(String name, RuntimeMessage value) {
     // TODO(damonkohler): Verify the type of the provided Message?
     context.getField(name).setValue(value);
   }
@@ -478,8 +483,6 @@ public class MessageImpl implements Message, GetInstance {
     if (this == obj)
       return true;
     if (obj == null)
-      return false;
-    if (!(obj instanceof Message))
       return false;
     if (!(obj instanceof GetInstance))
       return false;

@@ -56,9 +56,9 @@ public class MessageTest {
   @Test
   public void testString() {
     String data = "Hello, ROS!";
-    Message message = messageFactory.newFromType("std_msgs/String");
-    message.setString("data", data);
-    assertEquals(data, message.getString("data"));
+    RuntimeMessage runtimeMessage = messageFactory.newFromType("std_msgs/String");
+    runtimeMessage.setString("data", data);
+    assertEquals(data, runtimeMessage.getString("data"));
   }
 
   @Test
@@ -66,25 +66,25 @@ public class MessageTest {
     topicDefinitionResourceProvider.add("foo/foo",
         "# foo\nstring data\n    # string other data");
     String data = "Hello, ROS!";
-    Message message = messageFactory.newFromType("foo/foo");
-    message.setString("data", data);
-    assertEquals(data, message.getString("data"));
+    RuntimeMessage runtimeMessage = messageFactory.newFromType("foo/foo");
+    runtimeMessage.setString("data", data);
+    assertEquals(data, runtimeMessage.getString("data"));
   }
 
   @Test
   public void testInt8() {
     byte data = 42;
-    Message message = messageFactory.newFromType("std_msgs/Int8");
-    message.setInt8("data", data);
-    assertEquals(data, message.getInt8("data"));
+    RuntimeMessage runtimeMessage = messageFactory.newFromType("std_msgs/Int8");
+    runtimeMessage.setInt8("data", data);
+    assertEquals(data, runtimeMessage.getInt8("data"));
   }
 
   @Test
   public void testNestedMessage() {
     topicDefinitionResourceProvider.add("foo/foo", "bar data");
     topicDefinitionResourceProvider.add("foo/bar", "int8 data");
-    Message fooMessage = messageFactory.newFromType("foo/foo");
-    Message barMessage = messageFactory.newFromType("foo/bar");
+    RuntimeMessage fooMessage = messageFactory.newFromType("foo/foo");
+    RuntimeMessage barMessage = messageFactory.newFromType("foo/bar");
     fooMessage.setMessage("data", barMessage);
     byte data = 42;
     barMessage.setInt8("data", data);
@@ -94,22 +94,22 @@ public class MessageTest {
   @Test
   public void testConstantInt8() {
     topicDefinitionResourceProvider.add("foo/foo", "int8 data=42");
-    Message message = messageFactory.newFromType("foo/foo");
-    assertEquals(42, message.getInt8("data"));
+    RuntimeMessage runtimeMessage = messageFactory.newFromType("foo/foo");
+    assertEquals(42, runtimeMessage.getInt8("data"));
   }
 
   @Test
   public void testConstantString() {
     topicDefinitionResourceProvider.add("foo/foo", "string data=Hello, ROS! # comment ");
-    Message message = messageFactory.newFromType("foo/foo");
-    assertEquals("Hello, ROS! # comment", message.getString("data"));
+    RuntimeMessage runtimeMessage = messageFactory.newFromType("foo/foo");
+    assertEquals("Hello, ROS! # comment", runtimeMessage.getString("data"));
   }
 
   public void testInt8List() {
     topicDefinitionResourceProvider.add("foo/foo", "int8[] data");
-    Message message = messageFactory.newFromType("foo/foo");
+    RuntimeMessage runtimeMessage = messageFactory.newFromType("foo/foo");
     ArrayList<Byte> data = Lists.newArrayList((byte) 1, (byte) 2, (byte) 3);
-    message.setInt8List("data", data);
-    assertEquals(data, message.getInt8List("data"));
+    runtimeMessage.setInt8List("data", data);
+    assertEquals(data, runtimeMessage.getInt8List("data"));
   }
 }
