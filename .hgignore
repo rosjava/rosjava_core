@@ -22,5 +22,4 @@ srv_gen
 gen
 libs
 bin
-local.properties
 docs/src/main/sphinx/conf.py
