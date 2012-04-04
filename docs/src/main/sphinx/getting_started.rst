@@ -65,37 +65,120 @@ See the Gradle `Java tutorial`_ for more details.
 Creating nodes
 --------------
 
+Typically ROS nodes are synonymous with processes. In rosjava, however, nodes
+are more like :roswiki:`nodelets` in that many nodes can run in a single
+process, the Java VM.
+
+Users, like yourself, do not create :javadoc:`org.ros.node.Node`\s. Instead,
+programs are defined as implementations of :javadoc:`org.ros.node.NodeMain`
+which are executed by the aptly named :javadoc:`org.ros.node.NodeMainExecutor`.
+
+Let's consider the following simple :javadoc:`org.ros.node.NodeMain`
+implementation::
+
+  :linenos:
+
+  package org.ros.tutorials.pubsub;
+
+  import org.ros.concurrent.CancellableLoop;
+  import org.ros.namespace.GraphName;
+  import org.ros.node.Node;
+  import org.ros.node.NodeMain;
+  import org.ros.node.topic.Publisher;
+
+  public class Talker implements NodeMain {
+
+    @Override
+    public GraphName getDefaultNodeName() {
+      return new GraphName("rosjava_tutorial_pubsub/talker");
+    }
+
+    @Override
+    public void onStart(final Node node) {
+      final Publisher<std_msgs.String> publisher =
+          node.newPublisher("chatter", std_msgs.String._TYPE);
+      // This CancellableLoop will be canceled automatically when the Node shuts
+      // down.
+      node.executeCancellableLoop(new CancellableLoop() {
+        private int sequenceNumber;
+
+        @Override
+        protected void setup() {
+          sequenceNumber = 0;
+        }
+
+        @Override
+        protected void loop() throws InterruptedException {
+          std_msgs.String str = publisher.newMessage();
+          str.setData("Hello world! " + sequenceNumber);
+          publisher.publish(str);
+          sequenceNumber++;
+          Thread.sleep(1000);
+        }
+      });
+    }
+
+    @Override
+    public void onShutdown(Node node) {
+    }
+
+    @Override
+    public void onShutdownComplete(Node node) {
+    }
+  }
+
+The :javadoc:`org.ros.node.NodeListener#onStart(org.ros.node.Node)` method
+begins on line number 17.  As the name suggests, this is the entry point for
+your program. The :javadoc:`org.ros.node.Node` parameter is the factory we use
+to build things like :javadoc:`org.ros.topic.Publisher`\s and
+:javadoc:`org.ros.topic.Subscriber`\s.
+
+In this example, we create a publisher for the chatter topic. That should feel
+relatively familiar if you're a ROS veteran. The
+:javadoc:`org.ros.topic.Publisher` publishes ``std_msgs.String`` messages to
+the ``chatter`` topic.
+
+Line 22 will probably feel unfamailiar even to ROS veterans. This is one
+example of rosjava's asynchornous API. The intent of our Talker class is to
+publish a hello world message to anyone who will listen once per second. One
+way to accomplish this is to publish the message and sleep in a loop. However,
+we don't want to block the
+:javadoc:`org.ros.node.NodeListener#onStart(org.ros.node.Node)` method. So, we
+create a :javadoc:`org.ros.concurrent.CancellableLoop` and ask the
+:javadoc:`org.ros.node.Node` to execute it. The loop will be interrupted
+automatically when the :javadoc:`org.ros.node.Node` exits.
+
+Executing nodes
+---------------
+
+As with all ROS nodes, rosjava nodes must connect to a :roswiki:`Master` in
+order to function. However, unlike other client library implementations,
+rosjava also provides its own :javadoc:`org.ros.RosCore` implementation. This
+enables ROS to function in a pure Java installation. For example, you can
+operate a complete ROS graph on a stock (i.e. non-rooted) Android phone.
+
+See :javadoc:`org.ros.RosRun` and the ``rosjava_tutorial_pubsub`` package.
+
 Messages
 --------
 
-To import a specific message, you must first declare a dependency on that
-message's package in your :roswiki:`Manifest` file and your build.gradle file.
-
-Note that this redundancy will be removed in the near future.
-
-This will add the message's jar file to your classpath.
-
-Next, to use a message such as :rosmsg:`sensor_msgs/PointCloud2`, simply add an
-import.  Rather than instantiate the message directly, however, it's preferred
-that you use a :javadoc:`org.ros.message.MessageFactory` instead. This helps
-allow the underlying message implementation to change in the future. ::
-
-  import  org.ros.message.sensor_msgs.PointCloud;
-
-  ...
+Messages are defined as interfaces. Since this makes it impossible to
+instantiate the message directly, it's necessary to use a
+:javadoc:`org.ros.message.MessageFactory`. This indirection allows the
+underlying message implementation to change in the future. ::
 
   Node node;
 
   ...
 
-  PointCloud2 msg = node.getMessageFactory()
-      .newMessage("sensor_msgs/PointCloud");
+  PointCloud2 msg = node.getTopicMessageFactory()
+      .newMessage(sensor_msgs.PointCloud._TYPE);
 
 If you want to use messages that you define:
 
 - create a new package for those messages (e.g. my_msgs)
-- add a dependency on the new package as described above
-- ``rosrun rosjava_bootstrap install_generated_messages.py my_package``
+- ensure that my_msgs is in your ROS_PACKAGE_PATH (see :roswiki:`EnvironmentVariables`)
+- reinstall rosjava_messages (see :doc:`building`)
 
 Messages as BLOBs (Advanced)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -113,7 +196,7 @@ little endian. ::
   ByteBuffer buffer = ByteBuffer.wrap(messageData);
   buffer.order(ByteOrder.LITTLE_ENDIAN);
   PointCloud2 msg = node.getMessageSerializationFactory()
-      .newMessageDeserializer("sensor_msgs/PointCloud")
+      .newMessageDeserializer(sensor_msgs.PointCloud._TYPE)
           .deserialize(buffer);
 
 Publishers and subscribers

@@ -24,7 +24,9 @@ def make_javadoc_link(name, rawtext, text, lineno, inliner, options={}, content=
   javadoc_root = env.config.javadoc_root
   class_part, method_part = (text.split('#', 1) + [''])[:2]
   refuri = os.path.join(javadoc_root, '%s.html#%s' % (class_part.replace('.', '/'), method_part))
-  label = text.rsplit('.', 1)[-1].replace('#', '.')
+  label = class_part.rsplit('.', 1)[-1]
+  if method_part:
+    label += '.' + method_part.split('(')[0]
   node = nodes.reference(rawtext, label, refuri=refuri, **options)
   return [node], []
 
