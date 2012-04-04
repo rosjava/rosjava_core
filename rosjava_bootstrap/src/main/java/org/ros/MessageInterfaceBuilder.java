@@ -127,6 +127,7 @@ public class MessageInterfaceBuilder {
     return builder.toString();
   }
 
+  @SuppressWarnings("deprecation")
   private String getJavaType(PrimitiveFieldType primitiveFieldType) {
     switch (primitiveFieldType) {
     case BOOL:
@@ -135,7 +136,6 @@ public class MessageInterfaceBuilder {
     case INT8:
       return "byte";
     case CHAR:
-      return "char";
     case UINT8:
     case INT16:
       return "short";
@@ -161,6 +161,7 @@ public class MessageInterfaceBuilder {
     }
   }
 
+  @SuppressWarnings("deprecation")
   private String getJavaBoxedType(PrimitiveFieldType primitiveFieldType) {
     switch (primitiveFieldType) {
     case BOOL:
@@ -169,7 +170,6 @@ public class MessageInterfaceBuilder {
     case INT8:
       return "Byte";
     case CHAR:
-      return "Character";
     case UINT8:
     case INT16:
       return "Short";
@@ -195,17 +195,17 @@ public class MessageInterfaceBuilder {
     }
   }
 
+  @SuppressWarnings("deprecation")
   private String getJavaValue(PrimitiveFieldType primitiveFieldType, String value) {
     switch (primitiveFieldType) {
     case BOOL:
       return Boolean.valueOf(!value.equals("0") && !value.equals("false")).toString();
-    case CHAR:
-      return "'" + escapeJava(value) + "'";
     case FLOAT32:
       return value + "f";
     case STRING:
       return "\"" + escapeJava(value) + "\"";
     case BYTE:
+    case CHAR:
     case INT8:
     case UINT8:
     case INT16:
