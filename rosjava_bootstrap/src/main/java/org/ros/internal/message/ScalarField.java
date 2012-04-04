@@ -73,7 +73,7 @@ class ScalarField<T> extends Field {
   public int getSerializedSize() {
     Preconditions.checkNotNull(value, "Cannot serialize null field: " + this);
     if (type instanceof MessageFieldType) {
-      return ((Message) value).toRuntimeMessage().getSerializedSize();
+      return ((Message) value).toRawMessage().getSerializedSize();
     } else if (type == PrimitiveFieldType.STRING) {
       // We only support ASCII strings and reserve 4 bytes for the length.
       return ((String) value).length() + 4;

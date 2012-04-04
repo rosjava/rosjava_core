@@ -42,7 +42,7 @@ public class DefaultMessageDeserializer<T> implements MessageDeserializer<T> {
   public T deserialize(ByteBuffer buffer) {
     buffer.order(ByteOrder.LITTLE_ENDIAN);
     Message message = messageFactory.newFromType(messageIdentifier.getType());
-    for (Field field : message.toRuntimeMessage().getFields()) {
+    for (Field field : message.toRawMessage().getFields()) {
       if (!field.isConstant()) {
         field.deserialize(buffer);
       }

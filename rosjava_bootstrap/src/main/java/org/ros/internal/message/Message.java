@@ -22,7 +22,7 @@ package org.ros.internal.message;
 public interface Message {
 
   /**
-   * @return returns this {@link Message} as a {@link RuntimeMessage}
+   * @return returns this {@link Message} as a {@link RawMessage}
    */
-  RuntimeMessage toRuntimeMessage();
+  RawMessage toRawMessage();
 }

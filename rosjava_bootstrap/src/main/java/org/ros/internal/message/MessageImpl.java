@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageImpl implements RuntimeMessage, GetInstance {
+public class MessageImpl implements RawMessage, GetInstance {
 
   private final MessageContext context;
 
@@ -53,8 +53,8 @@ public class MessageImpl implements RuntimeMessage, GetInstance {
   }
 
   @Override
-  public RuntimeMessage toRuntimeMessage() {
-    return (RuntimeMessage) this;
+  public RawMessage toRawMessage() {
+    return (RawMessage) this;
   }
 
   @Override
@@ -168,7 +168,7 @@ public class MessageImpl implements RuntimeMessage, GetInstance {
   }
 
   @Override
-  public <T extends RuntimeMessage> T getMessage(String name) {
+  public <T extends RawMessage> T getMessage(String name) {
     if (context.getField(name).getType() instanceof MessageFieldType) {
       return context.getField(name).<T>getValue();
     }
@@ -324,7 +324,7 @@ public class MessageImpl implements RuntimeMessage, GetInstance {
   }
 
   @Override
-  public void setMessage(String name, RuntimeMessage value) {
+  public void setMessage(String name, RawMessage value) {
     // TODO(damonkohler): Verify the type of the provided Message?
     context.getField(name).setValue(value);
   }

@@ -41,32 +41,32 @@ public class MessageSerializationTest {
     messageFactory = new DefaultMessageFactory(topicDefinitionResourceProvider);
   }
 
-  private void checkSerializeAndDeserialize(RuntimeMessage runtimeMessage) {
-    ByteBuffer buffer = runtimeMessage.serialize();
-    DefaultMessageDeserializer<RuntimeMessage> deserializer =
-        new DefaultMessageDeserializer<RuntimeMessage>(runtimeMessage.getIdentifier(), messageFactory);
-    assertEquals(runtimeMessage, deserializer.deserialize(buffer));
+  private void checkSerializeAndDeserialize(RawMessage rawMessage) {
+    ByteBuffer buffer = rawMessage.serialize();
+    DefaultMessageDeserializer<RawMessage> deserializer =
+        new DefaultMessageDeserializer<RawMessage>(rawMessage.getIdentifier(), messageFactory);
+    assertEquals(rawMessage, deserializer.deserialize(buffer));
   }
 
   @Test
   public void testInt32() {
-    RuntimeMessage runtimeMessage = messageFactory.newFromType("std_msgs/Int32");
-    runtimeMessage.setInt32("data", 42);
-    checkSerializeAndDeserialize(runtimeMessage);
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/Int32");
+    rawMessage.setInt32("data", 42);
+    checkSerializeAndDeserialize(rawMessage);
   }
 
   @Test
   public void testString() {
-    RuntimeMessage runtimeMessage = messageFactory.newFromType("std_msgs/String");
-    runtimeMessage.setString("data", "Hello, ROS!");
-    checkSerializeAndDeserialize(runtimeMessage);
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/String");
+    rawMessage.setString("data", "Hello, ROS!");
+    checkSerializeAndDeserialize(rawMessage);
   }
 
   @Test
   public void testNestedMessage() {
     topicDefinitionResourceProvider.add("foo/foo", "std_msgs/String data");
-    RuntimeMessage fooMessage = messageFactory.newFromType("foo/foo");
-    RuntimeMessage stringMessage = messageFactory.newFromType("std_msgs/String");
+    RawMessage fooMessage = messageFactory.newFromType("foo/foo");
+    RawMessage stringMessage = messageFactory.newFromType("std_msgs/String");
     stringMessage.setString("data", "Hello, ROS!");
     fooMessage.setMessage("data", stringMessage);
     checkSerializeAndDeserialize(fooMessage);
@@ -75,10 +75,10 @@ public class MessageSerializationTest {
   @Test
   public void testNestedMessageArray() {
     topicDefinitionResourceProvider.add("foo/foo", "std_msgs/String[] data");
-    RuntimeMessage fooMessage = messageFactory.newFromType("foo/foo");
-    RuntimeMessage stringMessageA = messageFactory.newFromType("std_msgs/String");
+    RawMessage fooMessage = messageFactory.newFromType("foo/foo");
+    RawMessage stringMessageA = messageFactory.newFromType("std_msgs/String");
     stringMessageA.setString("data", "Hello, ROS!");
-    RuntimeMessage stringMessageB = messageFactory.newFromType("std_msgs/String");
+    RawMessage stringMessageB = messageFactory.newFromType("std_msgs/String");
     stringMessageB.setString("data", "Goodbye, ROS!");
     fooMessage.setMessageList("data", Lists.<Message>newArrayList(stringMessageA, stringMessageB));
     checkSerializeAndDeserialize(fooMessage);
@@ -87,8 +87,8 @@ public class MessageSerializationTest {
   @Test
   public void testInt32Array() {
     topicDefinitionResourceProvider.add("foo/foo", "int32[] data");
-    RuntimeMessage runtimeMessage = messageFactory.newFromType("foo/foo");
-    runtimeMessage.setInt32List("data", Lists.newArrayList(1, 2, 3, 4, 5));
-    checkSerializeAndDeserialize(runtimeMessage);
+    RawMessage rawMessage = messageFactory.newFromType("foo/foo");
+    rawMessage.setInt32List("data", Lists.newArrayList(1, 2, 3, 4, 5));
+    checkSerializeAndDeserialize(rawMessage);
   }
 }

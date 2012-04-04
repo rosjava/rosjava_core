@@ -26,7 +26,7 @@ import java.util.List;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface RuntimeMessage extends Message {
+public interface RawMessage extends Message {
 
   MessageIdentifier getIdentifier();
 
@@ -68,7 +68,7 @@ public interface RuntimeMessage extends Message {
 
   byte getInt8(String name);
 
-  <T extends RuntimeMessage> T getMessage(String name);
+  <T extends RawMessage> T getMessage(String name);
 
   String getString(String name);
 
@@ -108,7 +108,7 @@ public interface RuntimeMessage extends Message {
 
   void setInt8(String name, byte value);
 
-  void setMessage(String name, RuntimeMessage value);
+  void setMessage(String name, RawMessage value);
 
   void setString(String name, String value);
 

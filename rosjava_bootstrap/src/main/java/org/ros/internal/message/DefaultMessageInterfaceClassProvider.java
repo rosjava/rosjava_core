@@ -29,7 +29,7 @@ public class DefaultMessageInterfaceClassProvider implements MessageInterfaceCla
       String className = messageType.replace("/", ".");
       return (Class<T>) getClass().getClassLoader().loadClass(className);
     } catch (ClassNotFoundException e) {
-      return (Class<T>) RuntimeMessage.class;
+      return (Class<T>) RawMessage.class;
     }
   }
 }
