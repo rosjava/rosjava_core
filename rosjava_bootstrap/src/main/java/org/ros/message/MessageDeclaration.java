@@ -67,6 +67,11 @@ public class MessageDeclaration {
     Preconditions.checkNotNull(definition);
     return definition;
   }
+  
+  @Override
+  public String toString() {
+    return String.format("MessageDeclaration<%s>", messageIdentifier.toString());
+  }
 
   @Override
   public int hashCode() {

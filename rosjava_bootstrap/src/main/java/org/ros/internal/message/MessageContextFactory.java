@@ -35,10 +35,12 @@ public class MessageContextFactory {
     this.messageFactory = messageFactory;
   }
 
-  public MessageContext newFromMessageDeclaration(MessageDeclaration messageDeclaration) {
+  public MessageContext newFromMessageDeclaration(final MessageDeclaration messageDeclaration) {
     final MessageContext context = new MessageContext(messageDeclaration);
     MessageDefinitionVisitor visitor = new MessageDefinitionVisitor() {
       private FieldType getFieldType(String type) {
+        Preconditions.checkArgument(!type.equals(messageDeclaration.getType()),
+            "Message definitions may not be self-referential: " + messageDeclaration);
         FieldType fieldType;
         if (PrimitiveFieldType.existsFor(type)) {
           fieldType = PrimitiveFieldType.valueOf(type.toUpperCase());
@@ -61,7 +63,7 @@ public class MessageContextFactory {
       @Override
       public void constant(String type, String name, String value) {
         Preconditions.checkArgument(PrimitiveFieldType.existsFor(type),
-            "Only primitive field types may be constant.");
+            "Only primitive field types may be constant: " + messageDeclaration);
         PrimitiveFieldType primitiveFieldType = PrimitiveFieldType.valueOf(type.toUpperCase());
         context.addConstantField(primitiveFieldType, name,
             primitiveFieldType.parseFromString(value));
