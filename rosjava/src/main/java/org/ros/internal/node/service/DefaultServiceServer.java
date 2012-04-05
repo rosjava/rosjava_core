@@ -30,6 +30,7 @@ import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.DefaultServiceServerListener;
@@ -51,21 +52,23 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
   private final ServiceDeclaration serviceDeclaration;
+  private final ServiceResponseBuilder<T, S> serviceResponseBuilder;
+  private final AdvertiseAddress advertiseAddress;
   private final MessageDeserializer<T> messageDeserializer;
   private final MessageSerializer<S> messageSerializer;
-  private final AdvertiseAddress advertiseAddress;
-  private final ServiceResponseBuilder<T, S> serviceResponseBuilder;
+  private final MessageFactory messageFactory;
   private final ListenerCollection<ServiceServerListener<T, S>> listenerCollection;
 
   public DefaultServiceServer(ServiceDeclaration serviceDeclaration,
-      MessageDeserializer<T> messageDeserializer, MessageSerializer<S> messageSerializer,
       ServiceResponseBuilder<T, S> serviceResponseBuilder, AdvertiseAddress advertiseAddress,
-      ScheduledExecutorService scheduledExecutorService) {
+      MessageDeserializer<T> messageDeserializer, MessageSerializer<S> messageSerializer,
+      MessageFactory messageFactory, ScheduledExecutorService scheduledExecutorService) {
     this.serviceDeclaration = serviceDeclaration;
-    this.messageDeserializer = messageDeserializer;
-    this.messageSerializer = messageSerializer;
     this.serviceResponseBuilder = serviceResponseBuilder;
     this.advertiseAddress = advertiseAddress;
+    this.messageDeserializer = messageDeserializer;
+    this.messageSerializer = messageSerializer;
+    this.messageFactory = messageFactory;
     listenerCollection =
         new ListenerCollection<ServiceServerListener<T, S>>(scheduledExecutorService);
     listenerCollection.add(new DefaultServiceServerListener<T, S>() {
@@ -92,7 +95,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   }
 
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
-    Map<String, String> header = getDeclaration().toHeader();
+    Map<String, String> header = getDeclaration().toConnectionHeader();
     if (DEBUG) {
       log.info("Outgoing handshake header: " + header);
     }
@@ -128,8 +131,8 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   }
 
   public ChannelHandler newRequestHandler() {
-    return new ServiceRequestHandler<T, S>(messageDeserializer, messageSerializer,
-        serviceResponseBuilder);
+    return new ServiceRequestHandler<T, S>(serviceDeclaration, serviceResponseBuilder,
+        messageDeserializer, messageSerializer, messageFactory);
   }
 
   /**

@@ -45,7 +45,7 @@ public class PublisherIdentifier {
     Set<PublisherIdentifier> publishers = Sets.newHashSet();
     for (URI uri : publisherUris) {
       NodeIdentifier nodeIdentifier = new NodeIdentifier(null, uri);
-      publishers.add(new PublisherIdentifier(nodeIdentifier, topicDeclaration.toIdentifier()));
+      publishers.add(new PublisherIdentifier(nodeIdentifier, topicDeclaration.getIdentifier()));
     }
     return publishers;
   }
@@ -62,9 +62,11 @@ public class PublisherIdentifier {
     this.topicIdentifier = topicIdentifier;
   }
 
-  public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>().putAll(nodeIdentifier.toHeader())
-        .putAll(topicIdentifier.toHeader()).build();
+  public Map<String, String> toConnectionHeader() {
+    return new ImmutableMap.Builder<String, String>()
+        .putAll(nodeIdentifier.toConnectionHeader())
+        .putAll(topicIdentifier.toConnectionHeader())
+        .build();
   }
 
   public NodeIdentifier getNodeSlaveIdentifier() {

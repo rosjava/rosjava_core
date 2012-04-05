@@ -45,10 +45,10 @@ public class SubscriberIdentifier {
     this.topicIdentifier = topicIdentifier;
   }
 
-  public Map<String, String> toHeader() {
+  public Map<String, String> toConnectionHeader() {
     return new ImmutableMap.Builder<String, String>()
-        .putAll(nodeIdentifier.toHeader())
-        .putAll(topicIdentifier.toHeader())
+        .putAll(nodeIdentifier.toConnectionHeader())
+        .putAll(topicIdentifier.toConnectionHeader())
         .build();
   }
 

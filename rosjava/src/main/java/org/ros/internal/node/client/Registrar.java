@@ -135,7 +135,7 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
         boolean success = callMaster(new Callable<Response<List<URI>>>() {
           @Override
           public Response<List<URI>> call() throws Exception {
-            return masterClient.registerPublisher(publisher.toDeclaration());
+            return masterClient.registerPublisher(publisher.getDeclaration());
           }
         });
         if (success) {
@@ -167,7 +167,7 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
         boolean success = callMaster(new Callable<Response<Integer>>() {
           @Override
           public Response<Integer> call() throws Exception {
-            return masterClient.unregisterPublisher(publisher.toIdentifier());
+            return masterClient.unregisterPublisher(publisher.getIdentifier());
           }
         });
         if (success) {

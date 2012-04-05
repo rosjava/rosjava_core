@@ -16,16 +16,16 @@
 
 package org.ros.internal.node.server;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
 
 /**
  * A node slave identifier which combines the node name of a node with the URI
@@ -96,9 +96,10 @@ public class NodeIdentifier {
     return uri;
   }
 
-  public Map<String, String> toHeader() {
-    return new ImmutableMap.Builder<String, String>().put(ConnectionHeaderFields.CALLER_ID,
-        nodeName.toString()).build();
+  public Map<String, String> toConnectionHeader() {
+    return new ImmutableMap.Builder<String, String>()
+        .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
+        .build();
   }
 
   @Override

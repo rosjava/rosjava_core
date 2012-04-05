@@ -108,7 +108,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   }
 
   public SubscriberIdentifier toIdentifier() {
-    return new SubscriberIdentifier(nodeIdentifier, getTopicDeclaration().toIdentifier());
+    return new SubscriberIdentifier(nodeIdentifier, getTopicDeclaration().getIdentifier());
   }
 
   public SubscriberDeclaration toDefinition() {
@@ -143,7 +143,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
       return;
     }
     tcpClientConnectionManager.connect(toString(), address, new SubscriberHandshakeHandler<T>(
-        toDefinition().toHeader(), incomingMessageQueue), "SubscriberHandshakeHandler");
+        toDefinition().toConnectionHeader(), incomingMessageQueue), "SubscriberHandshakeHandler");
     knownPublishers.add(publisherIdentifier);
     signalOnNewPublisher();
   }

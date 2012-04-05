@@ -19,11 +19,10 @@ package org.ros.internal.node.service;
 import com.google.common.base.Preconditions;
 
 import org.ros.internal.message.service.ServiceDescription;
-
-
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.server.master.MasterServer;
 import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceClient;
@@ -59,18 +58,20 @@ public class ServiceFactory {
    * 
    * @param serviceDeclaration
    *          the {@link ServiceDescription} that is being served
+   * @param responseBuilder
+   *          the {@link ServiceResponseBuilder} that is used to build responses
    * @param deserializer
    *          a {@link MessageDeserializer} to be used for incoming messages
    * @param serializer
    *          a {@link MessageSerializer} to be used for outgoing messages
-   * @param responseBuilder
-   *          the {@link ServiceResponseBuilder} that is used to build responses
+   * @param messageFactory
+   *          TODO
    * @return a {@link DefaultServiceServer} instance
    */
   @SuppressWarnings("unchecked")
   public <T, S> DefaultServiceServer<T, S> newServer(ServiceDeclaration serviceDeclaration,
-      MessageDeserializer<T> deserializer, MessageSerializer<S> serializer,
-      ServiceResponseBuilder<T, S> responseBuilder) {
+      ServiceResponseBuilder<T, S> responseBuilder, MessageDeserializer<T> deserializer,
+      MessageSerializer<S> serializer, MessageFactory messageFactory) {
     DefaultServiceServer<T, S> serviceServer;
     String name = serviceDeclaration.getName().toString();
     boolean createdNewService = false;
@@ -80,8 +81,9 @@ public class ServiceFactory {
         serviceServer = (DefaultServiceServer<T, S>) serviceManager.getServer(name);
       } else {
         serviceServer =
-            new DefaultServiceServer<T, S>(serviceDeclaration, deserializer, serializer,
-                responseBuilder, slaveServer.getTcpRosAdvertiseAddress(), executorService);
+            new DefaultServiceServer<T, S>(serviceDeclaration, responseBuilder,
+                slaveServer.getTcpRosAdvertiseAddress(), deserializer, serializer, messageFactory,
+                executorService);
         createdNewService = true;
       }
     }
@@ -98,28 +100,27 @@ public class ServiceFactory {
    * {@link DefaultServiceClient} is created, it is connected to the
    * {@link DefaultServiceServer}.
    * 
-   * @param <ResponseType>
-   * @param serviceDeclaration
-   *          the {@link ServiceIdentifier} of the server
+   * @param messageFactory
+   *          TODO
+   * 
    * @return a {@link DefaultServiceClient} instance
    */
   @SuppressWarnings("unchecked")
-  public <RequestType, ResponseType> DefaultServiceClient<RequestType, ResponseType> newClient(
-      ServiceDeclaration serviceDeclaration, MessageSerializer<RequestType> serializer,
-      MessageDeserializer<ResponseType> deserializer) {
+  public <T, S> DefaultServiceClient<T, S> newClient(ServiceDeclaration serviceDeclaration,
+      MessageSerializer<T> serializer, MessageDeserializer<S> deserializer,
+      MessageFactory messageFactory) {
     Preconditions.checkNotNull(serviceDeclaration.getUri());
-    DefaultServiceClient<RequestType, ResponseType> serviceClient;
+    DefaultServiceClient<T, S> serviceClient;
     String name = serviceDeclaration.getName().toString();
     boolean createdNewService = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasClient(name)) {
-        serviceClient =
-            (DefaultServiceClient<RequestType, ResponseType>) serviceManager.getClient(name);
+        serviceClient = (DefaultServiceClient<T, S>) serviceManager.getClient(name);
       } else {
         serviceClient =
             DefaultServiceClient.newDefault(nodeName, serviceDeclaration, serializer, deserializer,
-                executorService);
+                messageFactory, executorService);
         createdNewService = true;
       }
     }

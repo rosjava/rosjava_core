@@ -34,12 +34,12 @@ public class PublisherDeclaration {
   private final PublisherIdentifier publisherIdentifier;
   private final TopicDeclaration topicDeclaration;
 
-  public static PublisherDeclaration newFromSlaveIdentifier(NodeIdentifier nodeIdentifier,
+  public static PublisherDeclaration newFromNodeIdentifier(NodeIdentifier nodeIdentifier,
       TopicDeclaration topicDeclaration) {
     Preconditions.checkNotNull(nodeIdentifier);
     Preconditions.checkNotNull(topicDeclaration);
     return new PublisherDeclaration(new PublisherIdentifier(nodeIdentifier,
-        topicDeclaration.toIdentifier()), topicDeclaration);
+        topicDeclaration.getIdentifier()), topicDeclaration);
   }
 
   public PublisherDeclaration(PublisherIdentifier publisherIdentifier,
@@ -47,17 +47,17 @@ public class PublisherDeclaration {
     Preconditions.checkNotNull(publisherIdentifier);
     Preconditions.checkNotNull(topicDeclaration);
     Preconditions.checkArgument(publisherIdentifier.getTopicIdentifier().equals(
-        topicDeclaration.toIdentifier()));
+        topicDeclaration.getIdentifier()));
     this.publisherIdentifier = publisherIdentifier;
     this.topicDeclaration = topicDeclaration;
   }
   
-  public Map<String, String> toHeader() {
+  public Map<String, String> toConnectionHeader() {
     // NOTE(damonkohler): ImmutableMap.Builder does not allow duplicate fields
     // while building.
     Map<String, String> header = Maps.newHashMap();
-    header.putAll(publisherIdentifier.toHeader());
-    header.putAll(topicDeclaration.toHeader());
+    header.putAll(publisherIdentifier.toConnectionHeader());
+    header.putAll(topicDeclaration.toConnectionHeader());
     return ImmutableMap.copyOf(header);
   }
 

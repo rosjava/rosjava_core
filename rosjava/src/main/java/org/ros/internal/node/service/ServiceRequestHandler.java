@@ -16,36 +16,42 @@
 
 package org.ros.internal.node.service;
 
-import java.nio.ByteBuffer;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
+
+import java.nio.ByteBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class ServiceRequestHandler<RequestType, ResponseType> extends SimpleChannelHandler {
+class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
 
-  private final MessageDeserializer<RequestType> deserializer;
-  private final MessageSerializer<ResponseType> serializer;
-  private final ServiceResponseBuilder<RequestType, ResponseType> responseBuilder;
+  private final ServiceDeclaration serviceDeclaration;
+  private final ServiceResponseBuilder<T, S> responseBuilder;
+  private final MessageDeserializer<T> deserializer;
+  private final MessageSerializer<S> serializer;
+  private final MessageFactory messageFactory;
 
-  ServiceRequestHandler(MessageDeserializer<RequestType> deserializer,
-      MessageSerializer<ResponseType> serializer,
-      ServiceResponseBuilder<RequestType, ResponseType> responseBuilder) {
+  public ServiceRequestHandler(ServiceDeclaration serviceDeclaration,
+      ServiceResponseBuilder<T, S> responseBuilder, MessageDeserializer<T> deserializer,
+      MessageSerializer<S> serializer, MessageFactory messageFactory) {
+    this.serviceDeclaration = serviceDeclaration;
     this.deserializer = deserializer;
     this.serializer = serializer;
     this.responseBuilder = responseBuilder;
+    this.messageFactory = messageFactory;
   }
 
   private ByteBuffer handleRequest(ByteBuffer buffer) throws ServiceException {
-    RequestType request = deserializer.deserialize(buffer);
-    ResponseType response = responseBuilder.build(request);
+    T request = deserializer.deserialize(buffer);
+    S response = messageFactory.newFromType(serviceDeclaration.getType());
+    responseBuilder.build(request, response);
     return serializer.serialize(response);
   }
 
@@ -55,8 +61,7 @@ class ServiceRequestHandler<RequestType, ResponseType> extends SimpleChannelHand
     ServiceServerResponse response = new ServiceServerResponse();
     ChannelBuffer responseBuffer;
     try {
-      responseBuffer =
-          ChannelBuffers.wrappedBuffer(handleRequest(requestBuffer.toByteBuffer()));
+      responseBuffer = ChannelBuffers.wrappedBuffer(handleRequest(requestBuffer.toByteBuffer()));
     } catch (ServiceException ex) {
       response.setErrorCode(0);
       response.setMessageLength(ex.getMessage().length());

@@ -60,4 +60,9 @@ public interface ServiceClient<T, S> {
    * Stops the client (e.g. disconnect a persistent service connection).
    */
   void shutdown();
+  
+  /**
+   * @return a new request message
+   */
+  T newMessage();
 }

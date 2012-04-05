@@ -43,7 +43,7 @@ public class TopicIdentifier {
     this.name = name;
   }
   
-  public Map<String, String> toHeader() {
+  public Map<String, String> toConnectionHeader() {
     return new ImmutableMap.Builder<String, String>()
         .put(ConnectionHeaderFields.TOPIC, name.toString())
         .build();

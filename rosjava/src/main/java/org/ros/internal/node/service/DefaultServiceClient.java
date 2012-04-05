@@ -27,6 +27,7 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientConnection;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
 import org.ros.message.MessageDeserializer;
+import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceClient;
@@ -43,35 +44,38 @@ import java.util.concurrent.ScheduledExecutorService;
 public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   private final ServiceDeclaration serviceDeclaration;
-  private final TcpClientConnectionManager tcpClientConnectionManager;
   private final MessageSerializer<T> serializer;
   private final MessageDeserializer<S> deserializer;
+  private final MessageFactory messageFactory;
+  private final ScheduledExecutorService executorService;
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final ImmutableMap<String, String> header;
-  private final ScheduledExecutorService executorService;
+  private final TcpClientConnectionManager tcpClientConnectionManager;
 
   private TcpClientConnection tcpClientConnection;
 
   public static <S, T> DefaultServiceClient<S, T> newDefault(GraphName nodeName,
       ServiceDeclaration serviceDeclaration, MessageSerializer<S> serializer,
-      MessageDeserializer<T> deserializer, ScheduledExecutorService executorService) {
+      MessageDeserializer<T> deserializer, MessageFactory messageFactory, ScheduledExecutorService executorService) {
     return new DefaultServiceClient<S, T>(nodeName, serviceDeclaration, serializer, deserializer,
-        executorService);
+        messageFactory, executorService);
   }
 
   private DefaultServiceClient(GraphName nodeName, ServiceDeclaration serviceDeclaration,
       MessageSerializer<T> serializer, MessageDeserializer<S> deserializer,
-      ScheduledExecutorService executorService) {
+      MessageFactory messageFactory, ScheduledExecutorService executorService) {
     this.serviceDeclaration = serviceDeclaration;
     this.serializer = serializer;
     this.deserializer = deserializer;
+    this.messageFactory = messageFactory;
     this.executorService = executorService;
     responseListeners = Lists.newLinkedList();
     header =
         ImmutableMap.<String, String>builder()
             .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
             // TODO(damonkohler): Support non-persistent connections.
-            .put(ConnectionHeaderFields.PERSISTENT, "1").putAll(serviceDeclaration.toHeader())
+            .put(ConnectionHeaderFields.PERSISTENT, "1")
+            .putAll(serviceDeclaration.toConnectionHeader())
             .build();
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
   }
@@ -118,5 +122,10 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   @Override
   public String toString() {
     return "ServiceClient<" + serviceDeclaration + ">";
+  }
+  
+  @Override
+  public T newMessage() {
+    return messageFactory.newFromType(serviceDeclaration.getType());
   }
 }

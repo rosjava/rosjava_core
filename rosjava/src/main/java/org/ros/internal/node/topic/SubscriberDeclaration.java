@@ -46,7 +46,7 @@ public class SubscriberDeclaration {
         new NodeIdentifier(new GraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
     TopicDeclaration topicDeclaration = TopicDeclaration.newFromHeader(header);
     return new SubscriberDeclaration(new SubscriberIdentifier(nodeIdentifier,
-        topicDeclaration.toIdentifier()), topicDeclaration);
+        topicDeclaration.getIdentifier()), topicDeclaration);
   }
 
   public SubscriberDeclaration(SubscriberIdentifier subscriberIdentifier,
@@ -67,12 +67,12 @@ public class SubscriberDeclaration {
     return topicDeclaration.getName();
   }
 
-  public Map<String, String> toHeader() {
+  public Map<String, String> toConnectionHeader() {
     // NOTE(damonkohler): ImmutableMap.Builder does not allow duplicate fields
     // while building.
     Map<String, String> header = Maps.newHashMap();
-    header.putAll(subscriberIdentifier.toHeader());
-    header.putAll(topicDeclaration.toHeader());
+    header.putAll(subscriberIdentifier.toConnectionHeader());
+    header.putAll(topicDeclaration.toConnectionHeader());
     return ImmutableMap.copyOf(header);
   }
 

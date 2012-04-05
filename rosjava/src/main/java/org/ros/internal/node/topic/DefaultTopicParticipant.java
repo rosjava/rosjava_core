@@ -60,7 +60,7 @@ public abstract class DefaultTopicParticipant implements TopicParticipant {
    * @return the connection header for the {@link TopicSystemState}
    */
   public Map<String, String> getTopicDeclarationHeader() {
-    return topicDeclaration.toHeader();
+    return topicDeclaration.toConnectionHeader();
   }
 
   /**

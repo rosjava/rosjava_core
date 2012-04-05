@@ -54,12 +54,9 @@ public class ServiceIntegrationTest extends RosTest {
                 test_ros.AddTwoInts._TYPE,
                 new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
                   @Override
-                  public test_ros.AddTwoInts.Response build(test_ros.AddTwoInts.Request request) {
-                    test_ros.AddTwoInts.Response response =
-                        node.getServiceResponseMessageFactory().newFromType(
-                            test_ros.AddTwoInts.Response._TYPE);
+                  public void build(test_ros.AddTwoInts.Request request,
+                      test_ros.AddTwoInts.Response response) {
                     response.setSum(request.getA() + request.getB());
-                    return response;
                   }
                 });
         serviceServer.addListener(countDownServiceServerListener);
@@ -91,8 +88,7 @@ public class ServiceIntegrationTest extends RosTest {
         } catch (ServiceNotFoundException e) {
           throw new RosRuntimeException(e);
         }
-        test_ros.AddTwoInts.Request request =
-            node.getServiceRequestMessageFactory().newFromType(test_ros.AddTwoInts._TYPE);
+        test_ros.AddTwoInts.Request request = serviceClient.newMessage();
         request.setA(2);
         request.setB(2);
         serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoInts.Response>() {
@@ -140,8 +136,8 @@ public class ServiceIntegrationTest extends RosTest {
                 test_ros.AddTwoInts._TYPE,
                 new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
                   @Override
-                  public test_ros.AddTwoInts.Response build(test_ros.AddTwoInts.Request request)
-                      throws ServiceException {
+                  public void build(test_ros.AddTwoInts.Request request,
+                      test_ros.AddTwoInts.Response response) throws ServiceException {
                     throw new ServiceException(errorMessage);
                   }
                 });
@@ -174,8 +170,7 @@ public class ServiceIntegrationTest extends RosTest {
         } catch (ServiceNotFoundException e) {
           throw new RosRuntimeException(e);
         }
-        test_ros.AddTwoInts.Request request =
-            node.getServiceRequestMessageFactory().newFromType(test_ros.AddTwoInts._TYPE);
+        test_ros.AddTwoInts.Request request = serviceClient.newMessage();
         serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoInts.Response>() {
           @Override
           public void onSuccess(test_ros.AddTwoInts.Response message) {

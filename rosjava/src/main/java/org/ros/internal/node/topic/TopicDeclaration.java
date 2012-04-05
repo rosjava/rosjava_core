@@ -63,7 +63,7 @@ public class TopicDeclaration {
     this.topicDescription = topicDescription;
   }
 
-  public TopicIdentifier toIdentifier() {
+  public TopicIdentifier getIdentifier() {
     return topicIdentifier;
   }
 
@@ -75,9 +75,9 @@ public class TopicDeclaration {
     return topicDescription.getType();
   }
 
-  public Map<String, String> toHeader() {
+  public Map<String, String> toConnectionHeader() {
     return new ImmutableMap.Builder<String, String>()
-        .putAll(topicIdentifier.toHeader())
+        .putAll(topicIdentifier.toConnectionHeader())
         .put(ConnectionHeaderFields.TYPE, topicDescription.getType())
         .put(ConnectionHeaderFields.MESSAGE_DEFINITION, topicDescription.getDefinition())
         .put(ConnectionHeaderFields.MD5_CHECKSUM, topicDescription.getMd5Checksum())

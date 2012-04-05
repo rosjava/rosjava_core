@@ -120,12 +120,12 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     shutdown(DEFAULT_SHUTDOWN_TIMEOUT, DEFAULT_SHUTDOWN_TIMEOUT_UNITS);
   }
 
-  public PublisherIdentifier toIdentifier() {
-    return new PublisherIdentifier(nodeIdentifier, getTopicDeclaration().toIdentifier());
+  public PublisherIdentifier getIdentifier() {
+    return new PublisherIdentifier(nodeIdentifier, getTopicDeclaration().getIdentifier());
   }
 
-  public PublisherDeclaration toDeclaration() {
-    return PublisherDeclaration.newFromSlaveIdentifier(nodeIdentifier, getTopicDeclaration());
+  public PublisherDeclaration getDeclaration() {
+    return PublisherDeclaration.newFromNodeIdentifier(nodeIdentifier, getTopicDeclaration());
   }
 
   @Override
@@ -180,7 +180,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     Preconditions.checkState(checksumMatches, "Unexpected message MD5 " + incomingChecksum + " != "
         + expectedChecksum);
     Map<String, String> header = Maps.newHashMap();
-    header.putAll(toDeclaration().toHeader());
+    header.putAll(getDeclaration().toConnectionHeader());
     // TODO(damonkohler): Force latch mode to be consistent throughout the life
     // of the publisher.
     header.put(ConnectionHeaderFields.LATCHING, getLatchMode() ? "1" : "0");
@@ -324,7 +324,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
 
   @Override
   public String toString() {
-    return "Publisher<" + toDeclaration() + ">";
+    return "Publisher<" + getDeclaration() + ">";
   }
 
   @Override

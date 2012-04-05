@@ -251,8 +251,8 @@ public class DefaultNode implements Node {
     ServiceDeclaration definition = new ServiceDeclaration(identifier, serviceDescription);
     MessageDeserializer<T> requestDeserializer = newServiceRequestDeserializer(serviceType);
     MessageSerializer<S> responseSerializer = newServiceResponseSerializer(serviceType);
-    return serviceFactory.newServer(definition, requestDeserializer, responseSerializer,
-        responseBuilder);
+    return serviceFactory.newServer(definition, responseBuilder, requestDeserializer,
+        responseSerializer, nodeConfiguration.getServiceResponseMessageFactory());
   }
 
   @Override
@@ -276,7 +276,8 @@ public class DefaultNode implements Node {
     ServiceDeclaration definition = new ServiceDeclaration(serviceIdentifier, serviceDescription);
     MessageSerializer<T> requestSerializer = newServiceRequestSerializer(serviceType);
     MessageDeserializer<S> responseDeserializer = newServiceResponseDeserializer(serviceType);
-    return serviceFactory.newClient(definition, requestSerializer, responseDeserializer);
+    return serviceFactory.newClient(definition, requestSerializer, responseDeserializer,
+        nodeConfiguration.getServiceRequestMessageFactory());
   }
 
   @Override

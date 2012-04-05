@@ -41,7 +41,7 @@ public class ServiceDeclaration {
     this.description = description;
   }
 
-  public Map<String, String> toHeader() {
+  public Map<String, String> toConnectionHeader() {
     return new ImmutableMap.Builder<String, String>()
         .put(ConnectionHeaderFields.SERVICE, getName().toString())
         .put(ConnectionHeaderFields.TYPE, description.getType())

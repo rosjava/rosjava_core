@@ -35,8 +35,9 @@ public interface ServiceResponseBuilder<T, S> {
    * 
    * @param request
    *          the received request
-   * @return the new response
+   * @param response
+   *          the response that will be sent
    * @throws ServiceException
    */
-  S build(T request) throws ServiceException;
+  void build(T request, S response) throws ServiceException;
 }
