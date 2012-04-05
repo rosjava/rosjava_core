@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import org.apache.commons.io.DirectoryWalker;
 import org.apache.commons.io.FileUtils;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -44,12 +46,27 @@ public class StringFileProvider {
   private final StringFileDirectoryWalker stringFileDirectoryWalker;
 
   private final class StringFileDirectoryWalker extends DirectoryWalker {
+    
+    private final Set<File> directories;
 
     private StringFileDirectoryWalker(FileFilter filter, int depthLimit) {
       super(filter, depthLimit);
+      directories = Sets.newHashSet();
+    }
+    
+    // TODO(damonkohler): Update Apache Commons IO to the latest version.
+    @SuppressWarnings("rawtypes")
+    @Override
+    protected boolean handleDirectory(File directory, int depth, Collection results)
+        throws IOException {
+      File canonicalDirectory = directory.getCanonicalFile();
+      if (directories.contains(canonicalDirectory)) {
+        return false;
+      }
+      directories.add(canonicalDirectory);
+      return true;
     }
 
-    // TODO(damonkohler): Update Apache Commons IO to the latest version.
     @SuppressWarnings("rawtypes")
     @Override
     protected void handleFile(File file, int depth, Collection results) {
