@@ -57,6 +57,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   private final MessageDeserializer<T> messageDeserializer;
   private final MessageSerializer<S> messageSerializer;
   private final MessageFactory messageFactory;
+  private final ScheduledExecutorService scheduledExecutorService;
   private final ListenerCollection<ServiceServerListener<T, S>> listenerCollection;
 
   public DefaultServiceServer(ServiceDeclaration serviceDeclaration,
@@ -69,6 +70,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
     this.messageDeserializer = messageDeserializer;
     this.messageSerializer = messageSerializer;
     this.messageFactory = messageFactory;
+    this.scheduledExecutorService = scheduledExecutorService;
     listenerCollection =
         new ListenerCollection<ServiceServerListener<T, S>>(scheduledExecutorService);
     listenerCollection.add(new DefaultServiceServerListener<T, S>() {
@@ -132,7 +134,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
 
   public ChannelHandler newRequestHandler() {
     return new ServiceRequestHandler<T, S>(serviceDeclaration, serviceResponseBuilder,
-        messageDeserializer, messageSerializer, messageFactory);
+        messageDeserializer, messageSerializer, messageFactory, scheduledExecutorService);
   }
 
   /**

@@ -26,6 +26,7 @@ import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -37,15 +38,18 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
   private final MessageDeserializer<T> deserializer;
   private final MessageSerializer<S> serializer;
   private final MessageFactory messageFactory;
+  private final ExecutorService executorService;
 
   public ServiceRequestHandler(ServiceDeclaration serviceDeclaration,
       ServiceResponseBuilder<T, S> responseBuilder, MessageDeserializer<T> deserializer,
-      MessageSerializer<S> serializer, MessageFactory messageFactory) {
+      MessageSerializer<S> serializer, MessageFactory messageFactory,
+      ExecutorService executorService) {
     this.serviceDeclaration = serviceDeclaration;
     this.deserializer = deserializer;
     this.serializer = serializer;
     this.responseBuilder = responseBuilder;
     this.messageFactory = messageFactory;
+    this.executorService = executorService;
   }
 
   private ByteBuffer handleRequest(ByteBuffer buffer) throws ServiceException {
@@ -55,25 +59,43 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
     return serializer.serialize(response);
   }
 
-  @Override
-  public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-    ChannelBuffer requestBuffer = (ChannelBuffer) e.getMessage();
-    ServiceServerResponse response = new ServiceServerResponse();
-    ChannelBuffer responseBuffer;
-    try {
-      responseBuffer = ChannelBuffers.wrappedBuffer(handleRequest(requestBuffer.toByteBuffer()));
-    } catch (ServiceException ex) {
-      response.setErrorCode(0);
-      response.setMessageLength(ex.getMessage().length());
-      response.setMessage(ex.getMessageAsChannelBuffer());
-      ctx.getChannel().write(response);
-      return;
-    }
+  private void handleSuccess(final ChannelHandlerContext ctx, ServiceServerResponse response,
+      ChannelBuffer responseBuffer) {
     response.setErrorCode(1);
     response.setMessageLength(responseBuffer.readableBytes());
     response.setMessage(responseBuffer);
     ctx.getChannel().write(response);
-    super.messageReceived(ctx, e);
   }
 
+  private void handleError(final ChannelHandlerContext ctx, ServiceServerResponse response,
+      ServiceException ex) {
+    response.setErrorCode(0);
+    response.setMessageLength(ex.getMessage().length());
+    response.setMessage(ex.getMessageAsChannelBuffer());
+    ctx.getChannel().write(response);
+  }
+
+  @Override
+  public void messageReceived(final ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+    // Although the ChannelHandlerContext is explicitly documented as being safe
+    // to keep for later use, the MessageEvent is not. So, we make a defensive
+    // copy of the ChannelBuffer.
+    final ChannelBuffer requestBuffer = ((ChannelBuffer) e.getMessage()).copy();
+    executorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        ServiceServerResponse response = new ServiceServerResponse();
+        ChannelBuffer responseBuffer;
+        try {
+          responseBuffer =
+              ChannelBuffers.wrappedBuffer(handleRequest(requestBuffer.toByteBuffer()));
+        } catch (ServiceException ex) {
+          handleError(ctx, response, ex);
+          return;
+        }
+        handleSuccess(ctx, response, responseBuffer);
+      }
+    });
+    super.messageReceived(ctx, e);
+  }
 }

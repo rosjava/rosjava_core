@@ -50,5 +50,4 @@ class ServiceServerResponse {
   public int getMessageLength() {
     return messageLength;
   }
-
 }
