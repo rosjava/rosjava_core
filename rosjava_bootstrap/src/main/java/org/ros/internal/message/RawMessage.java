@@ -50,7 +50,7 @@ public interface RawMessage extends Message {
   byte getByte(String name);
 
   /**
-   * @deprecated replaced by {@link #getUint8(String)}
+   * @deprecated replaced by {@link #getUInt8(String)}
    */
   short getChar(String name);
 
@@ -74,13 +74,13 @@ public interface RawMessage extends Message {
 
   Time getTime(String name);
 
-  int getUint16(String name);
+  int getUInt16(String name);
 
-  long getUint32(String name);
+  long getUInt32(String name);
 
-  long getUint64(String name);
+  long getUInt64(String name);
 
-  short getUint8(String name);
+  short getUInt8(String name);
 
   void setBool(String name, boolean value);
 
@@ -90,7 +90,7 @@ public interface RawMessage extends Message {
   void setByte(String name, byte value);
 
   /**
-   * @deprecated replaced by {@link #setUint8(String, short)}
+   * @deprecated replaced by {@link #setUInt8(String, short)}
    */
   void setChar(String name, short value);
 
@@ -100,27 +100,27 @@ public interface RawMessage extends Message {
 
   void setFloat64(String name, double value);
 
+  void setInt8(String name, byte value);
+
   void setInt16(String name, short value);
 
   void setInt32(String name, int value);
 
   void setInt64(String name, long value);
 
-  void setInt8(String name, byte value);
+  void setUInt8(String name, short value);
+
+  void setUInt16(String name, int value);
+
+  void setUInt32(String name, long value);
+
+  void setUInt64(String name, long value);
 
   void setMessage(String name, RawMessage value);
 
   void setString(String name, String value);
 
   void setTime(String name, Time value);
-
-  void setUint16(String name, int value);
-
-  void setUint32(String name, long value);
-
-  void setUint64(String name, long value);
-
-  void setUint8(String name, short value);
 
   void setStringList(String name, List<String> value);
 

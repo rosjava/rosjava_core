@@ -23,7 +23,9 @@ import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.message.topic.TopicDefinitionResourceProvider;
+import org.ros.message.Duration;
 import org.ros.message.MessageFactory;
+import org.ros.message.Time;
 
 import java.nio.ByteBuffer;
 
@@ -49,6 +51,43 @@ public class MessageSerializationTest {
   }
 
   @Test
+  public void testBool() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/Bool");
+    rawMessage.setBool("data", true);
+    checkSerializeAndDeserialize(rawMessage);
+    rawMessage.setBool("data", false);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
+  public void testInt8() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/Int8");
+    rawMessage.setInt8("data", (byte) 42);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
+  public void testUint8() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/UInt8");
+    rawMessage.setUInt8("data", (short) 42);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
+  public void testInt16() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/Int16");
+    rawMessage.setInt16("data", (short) 42);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
+  public void testUInt16() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/UInt16");
+    rawMessage.setUInt16("data", (short) 42);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
   public void testInt32() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/Int32");
     rawMessage.setInt32("data", 42);
@@ -56,9 +95,58 @@ public class MessageSerializationTest {
   }
 
   @Test
+  public void testUInt32() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/UInt32");
+    rawMessage.setUInt32("data", 42);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
+  public void testInt64() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/Int64");
+    rawMessage.setInt64("data", 42);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
+  public void testUInt64() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/UInt64");
+    rawMessage.setUInt64("data", 42);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
+  public void testFloat32() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/Float32");
+    rawMessage.setFloat32("data", 42);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
+  public void testFloat64() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/Float64");
+    rawMessage.setFloat64("data", 42);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
   public void testString() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/String");
     rawMessage.setString("data", "Hello, ROS!");
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
+  public void testTime() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/Time");
+    rawMessage.setTime("data", new Time());
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
+  public void testDuration() {
+    RawMessage rawMessage = messageFactory.newFromType("std_msgs/Duration");
+    rawMessage.setDuration("data", new Duration());
     checkSerializeAndDeserialize(rawMessage);
   }
 

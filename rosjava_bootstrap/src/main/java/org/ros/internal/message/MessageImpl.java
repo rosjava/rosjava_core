@@ -204,7 +204,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public int getUint16(String name) {
+  public int getUInt16(String name) {
     return this.<Integer>getFieldValue(PrimitiveFieldType.UINT16, name);
   }
 
@@ -214,7 +214,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public long getUint32(String name) {
+  public long getUInt32(String name) {
     return this.<Long>getFieldValue(PrimitiveFieldType.UINT32, name);
   }
 
@@ -224,7 +224,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public long getUint64(String name) {
+  public long getUInt64(String name) {
     return this.<Long>getFieldValue(PrimitiveFieldType.UINT64, name);
   }
 
@@ -234,7 +234,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public short getUint8(String name) {
+  public short getUInt8(String name) {
     return this.<Short>getFieldValue(PrimitiveFieldType.UINT8, name);
   }
 
@@ -356,7 +356,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setUint16(String name, int value) {
+  public void setUInt16(String name, int value) {
     setFieldValue(PrimitiveFieldType.UINT16, name, value);
   }
 
@@ -366,7 +366,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setUint32(String name, long value) {
+  public void setUInt32(String name, long value) {
     setFieldValue(PrimitiveFieldType.UINT32, name, value);
   }
 
@@ -376,7 +376,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setUint64(String name, long value) {
+  public void setUInt64(String name, long value) {
     setFieldValue(PrimitiveFieldType.UINT64, name, value);
   }
 
@@ -386,7 +386,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setUint8(String name, short value) {
+  public void setUInt8(String name, short value) {
     setFieldValue(PrimitiveFieldType.UINT8, name, value);
   }
 

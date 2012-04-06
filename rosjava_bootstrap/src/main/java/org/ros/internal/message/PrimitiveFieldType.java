@@ -136,8 +136,8 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public <T> void serialize(T value, ByteBuffer buffer) {
-      Preconditions.checkArgument(value instanceof Byte);
-      buffer.put((Byte) value);
+      Preconditions.checkArgument(value instanceof Short);
+      buffer.put(((Short) value).byteValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -229,13 +229,13 @@ public enum PrimitiveFieldType implements FieldType {
     @Override
     public <T> void serialize(T value, ByteBuffer buffer) {
       Preconditions.checkArgument(value instanceof Integer);
-      buffer.putShort((Short) value);
+      buffer.putShort(((Integer) value).shortValue());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Integer deserialize(ByteBuffer buffer) {
-      return buffer.getShort() & 0xffff;
+      return Integer.valueOf(buffer.getShort());
     }
 
     @SuppressWarnings("unchecked")

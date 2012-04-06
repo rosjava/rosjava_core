@@ -55,7 +55,7 @@ public class MessageProxyFactory {
   private MessageImpl newMessageProxyImplementation(MessageContext context) {
     MessageImpl implementation = new MessageImpl(context);
     if (implementation.getType().equals(HEADER_MESSAGE_TYPE)) {
-      implementation.setUint32(SEQUENCE_FIELD_NAME, SEQUENCE_NUMBER.incrementAndGet());
+      implementation.setUInt32(SEQUENCE_FIELD_NAME, SEQUENCE_NUMBER.incrementAndGet());
     }
     return implementation;
   }
