@@ -34,27 +34,27 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class IncomingMessageQueue<MessageType> {
+public class IncomingMessageQueue<T> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
-  private final MessageDeserializer<MessageType> deserializer;
+  private final MessageDeserializer<T> deserializer;
   private final ScheduledExecutorService executorService;
-  private final CircularBlockingQueue<MessageType> messages;
-  private final ListenerCollection<MessageListener<MessageType>> listeners;
+  private final CircularBlockingQueue<T> messages;
+  private final ListenerCollection<MessageListener<T>> listeners;
   private final Dispatcher dispatcher;
 
   private boolean latchMode;
-  private MessageType latchedMessage;
+  private T latchedMessage;
 
   private final class Receiver extends SimpleChannelHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
       ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
-      MessageType message = deserializer.deserialize(buffer.toByteBuffer());
+      T message = deserializer.deserialize(buffer.toByteBuffer());
       messages.put(message);
       if (DEBUG) {
         log.info("Received message: " + message);
@@ -66,26 +66,26 @@ public class IncomingMessageQueue<MessageType> {
   private final class Dispatcher extends CancellableLoop {
     @Override
     public void loop() throws InterruptedException {
-      final MessageType message = messages.take();
+      final T message = messages.take();
       latchedMessage = message;
       if (DEBUG) {
         log.info("Dispatched message: " + message);
       }
-      listeners.signal(new SignalRunnable<MessageListener<MessageType>>() {
+      listeners.signal(new SignalRunnable<MessageListener<T>>() {
         @Override
-        public void run(MessageListener<MessageType> listener) {
+        public void run(MessageListener<T> listener) {
           listener.onNewMessage(message);
         }
       });
     }
   }
 
-  public IncomingMessageQueue(MessageDeserializer<MessageType> deserializer,
+  public IncomingMessageQueue(MessageDeserializer<T> deserializer,
       ScheduledExecutorService executorService) {
     this.deserializer = deserializer;
     this.executorService = executorService;
-    messages = new CircularBlockingQueue<MessageType>(MESSAGE_BUFFER_CAPACITY);
-    listeners = new ListenerCollection<MessageListener<MessageType>>(executorService);
+    messages = new CircularBlockingQueue<T>(MESSAGE_BUFFER_CAPACITY);
+    listeners = new ListenerCollection<MessageListener<T>>(executorService);
     dispatcher = new Dispatcher();
     latchMode = false;
     latchedMessage = null;
@@ -100,7 +100,7 @@ public class IncomingMessageQueue<MessageType> {
     return latchMode;
   }
 
-  public void addListener(final MessageListener<MessageType> listener) {
+  public void addListener(final MessageListener<T> listener) {
     if (DEBUG) {
       log.info("Adding listener.");
     }
@@ -118,7 +118,7 @@ public class IncomingMessageQueue<MessageType> {
     }
   }
 
-  public void removeListener(MessageListener<MessageType> listener) {
+  public void removeListener(MessageListener<T> listener) {
     listeners.remove(listener);
   }
 
