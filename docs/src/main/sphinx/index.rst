@@ -26,6 +26,7 @@ Contents:
    :maxdepth: 2
 
    overview
+   installing
    building
    best_practices
    getting_started
