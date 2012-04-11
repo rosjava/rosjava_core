@@ -17,8 +17,13 @@ Support is best found on http://answers.ros.org/.
 Please file bugs and feature requests on the rosjava `issues`_ page. Starring
 issues that are important to you will help developers prioritize their work.
 
+In addition to the following documentation, rosjava makes liberal use of
+`Javadoc`_. Links to the appropriate Javadoc are used throughout this
+documentation.
+
 .. _roscore:  http://ros.org/wiki/roscore
 .. _issues: http://code.google.com/p/rosjava/issues/list
+.. _Javadoc: javadoc/index.html
 
 Contents:
 
