@@ -151,13 +151,39 @@ automatically when the :javadoc:`org.ros.node.Node` exits.
 Executing nodes
 ---------------
 
+When packaging your application into jar, you can use :javadoc:`org.ros.RosRun`
+as the main class. :javadoc:`org.ros.RosRun` provides a
+:javadoc:`org.ros.node.NodeMainExecutor` and a command line interface that will
+be familiar to ROS veterans. For example, the following steps will build and
+execute the :javadoc:`org.ros.rosjava_tutorial_pubsub.Talker` and
+:javadoc:`org.ros.rosjava_tutorial_pubsub.Listener` nodes in separate
+processes:
+
+#. roscd rosjava_tutorial_pubsub
+#. ../gradlew installApp
+#. roscore &
+#. ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker &
+#. ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener
+
+.. note:: The above example launches roscore and the Talker node in the background. You could instead launch each in a separate terminal.
+
+.. note:: You may notice that rosrun cannot find the installed executable. This is a known issue that will be addressed in the future.
+
+At this point, you should see the familiar "Hello, world!" messages start
+appearing in your terminal. You can configure the executed nodes from the
+command line in the same way you would any other ROS executable. For example,
+the following commands will remap the default topic /chatter to /foo.
+
+#. ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker chatter:=/foo &
+#. ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener chatter:=/foo
+
+See :roswiki:`Remapping%20Arguments` for more information.
+
 As with all ROS nodes, rosjava nodes must connect to a :roswiki:`Master` in
 order to function. However, unlike other client library implementations,
 rosjava also provides its own :javadoc:`org.ros.RosCore` implementation. This
 enables ROS to function in a pure Java installation. For example, you can
 operate a complete ROS graph on a stock (i.e. non-rooted) Android phone.
-
-See :javadoc:`org.ros.RosRun` and the ``rosjava_tutorial_pubsub`` package.
 
 Messages
 --------

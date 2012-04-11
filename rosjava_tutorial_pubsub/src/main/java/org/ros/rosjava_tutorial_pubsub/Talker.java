@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.tutorials.pubsub;
+package org.ros.rosjava_tutorial_pubsub;
 
 import org.ros.concurrent.CancellableLoop;
 import org.ros.namespace.GraphName;

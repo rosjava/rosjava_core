@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.tutorials.pubsub;
+package org.ros.rosjava_tutorial_pubsub;
 
 import org.apache.commons.logging.Log;
 import org.ros.message.MessageListener;
