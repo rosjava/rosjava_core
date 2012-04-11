@@ -74,8 +74,9 @@ programs are defined as implementations of :javadoc:`org.ros.node.NodeMain`
 which are executed by the aptly named :javadoc:`org.ros.node.NodeMainExecutor`.
 
 Let's consider the following simple :javadoc:`org.ros.node.NodeMain`
-implementation::
+implementation:
 
+.. code-block:: java
   :linenos:
 
   package org.ros.tutorials.pubsub;
