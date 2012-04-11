@@ -15,8 +15,6 @@
  */
 
 /**
- * Provides the classes for creating and communicating with nodes in the ROS graph.
- * 
- * @see <a href="http://ros.org/wiki/Nodes">nodes documentation</a>
+ * Provides utility classes for common collection operations.
  */
-package org.ros.node;
+package org.ros.collections;

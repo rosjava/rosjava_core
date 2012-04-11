@@ -15,8 +15,8 @@
  */
 
 /**
- * Provides the classes for creating and communicating with nodes in the ROS graph.
+ * Provides the classes for representing messages.
  * 
- * @see <a href="http://ros.org/wiki/Nodes">nodes documentation</a>
+ * @see <a href="http://ros.org/wiki/Messages">messages documentation</a>
  */
-package org.ros.node;
+package org.ros.message;

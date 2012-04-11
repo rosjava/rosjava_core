@@ -15,8 +15,8 @@
  */
 
 /**
- * Provides the classes for creating and communicating with nodes in the ROS graph.
- * 
- * @see <a href="http://ros.org/wiki/Nodes">nodes documentation</a>
+ * Provides internal classes for representing service messages.
+ * <p>
+ * These classes should _not_ be used directly outside of the org.ros package.
  */
-package org.ros.node;
+package org.ros.internal.message.service;
