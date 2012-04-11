@@ -1,13 +1,11 @@
 <package>
   <description brief="rosjava_tutorial_pubsub">
-     rosjava_tutorial_pubsub
+     rosjava_tutorial_pubsub is a simple example project.
   </description>
   <author>Damon Kohler</author>
-  <license>Apache License 2.0</license>
+  <license>Apache 2.0</license>
   <review status="unreviewed" notes="" />
   <url>http://ros.org/wiki/rosjava_tutorial_pubsub</url>
-
-  <depend package="std_msgs" />
 </package>
 
 

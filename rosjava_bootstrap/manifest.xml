@@ -1,10 +1,9 @@
 <package>
-  <description brief="ROS build system integration for rosjava.">
-    Provide ROS build system integration and bootstrap data classes (Time and
-    Message representation) for rosjava.
+  <description brief="rosjava_bootstrap">
+    rosjava_bootstrap provides classes required for message generation.
   </description>
   <author>Ken Conley, Damon Kohler (damonkohler@google.com)</author>
-  <license>Apache License 2.0</license>
+  <license>Apache 2.0</license>
   <review status="unreviewed" notes="" />
   <url>http://ros.org/wiki/rosjava_bootstrap</url>
 </package>

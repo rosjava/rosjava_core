@@ -2,11 +2,9 @@
   <description brief="rosjava_actionlib_tutorial">
      rosjava_actionlib_tutorial
   </description>
-  <author>Keith Hughes</author>
-  <license>Apache License 2.0</license>
+  <author>Keith Hughes (khughes@google.com)</author>
+  <license>Apache 2.0</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/rosjava_actionlib_tutorial</url>
-
-  <depend package="actionlib_tutorials" />
 </package>
 

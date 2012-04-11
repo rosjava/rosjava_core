@@ -1,12 +1,10 @@
 <package>
   <description brief="rosjava_actionlib">
-    An implementation of actionlib in pure-Java.
+    rosjava_actionlib is the Java implementation of actionlib.
   </description>
-  <author>Keith Hughes/khughes@google.com</author>
-  <license>Apache License 2.0</license>
+  <author>Keith Hughes (khughes@google.com)</author>
+  <license>Apache 2.0</license>
   <review status="unreviewed" notes="" />
   <url>http://ros.org/wiki/rosjava_actionlib</url>
-
-  <depend package="actionlib_msgs"/>
 </package>
 
