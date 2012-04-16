@@ -1,3 +1,5 @@
+.. _building:
+
 Building rosjava_core
 =====================
 

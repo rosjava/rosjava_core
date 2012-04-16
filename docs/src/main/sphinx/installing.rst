@@ -1,3 +1,5 @@
+.. _installing:
+
 Installing rosjava_core
 =======================
 
