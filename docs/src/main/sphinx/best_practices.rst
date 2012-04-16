@@ -15,6 +15,6 @@ example:
 - org.ros.rosjava
 - org.ros.rosjava_geometry
 
-Only core packages (e.g. those in rosjava_core and android_core) should being
+Only core packages (e.g. those in rosjava_core and android_core) should begin
 with org.ros.
 
