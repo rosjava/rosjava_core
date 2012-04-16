@@ -42,8 +42,8 @@ build.gradle example
     }
   }
 
-  version = 0.0.0-SNAPSHOT
-  group = ros.my_stack
+  version = '0.0.0-SNAPSHOT'
+  group = 'ros.my_stack'
 
   dependencies {
     compile 'ros.rosjava_core:rosjava:0.0.0-SNAPSHOT'
