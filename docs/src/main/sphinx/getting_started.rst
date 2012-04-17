@@ -194,9 +194,16 @@ processes:
   issue that will be addressed in the future.
 
 At this point, you should see the familiar "Hello, world!" messages start
-appearing in your terminal. You can configure the executed nodes from the
-command line in the same way you would any other ROS executable. For example,
-the following commands will remap the default topic /chatter to /foo.
+appearing in your terminal. You can also echo the topic using the
+:roswiki:`rostopic` command line tool:
+
+.. code-block:: bash
+
+  rostopic echo chatter
+
+You can configure the executed nodes from the command line in the same way you
+would any other ROS executable. For example, the following commands will remap
+the default topic /chatter to /foo.
 
 .. code-block:: bash
 
@@ -205,6 +212,10 @@ the following commands will remap the default topic /chatter to /foo.
 
 See :roswiki:`Remapping%20Arguments` for more information on passing arguments
 to ROS executables.
+
+.. note:: Only the arguments described in :roswiki:`Remapping%20Arguments` are
+  supported. Support for arbitrary command line arguments (i.e. argv) will be
+  added in the future.
 
 Services
 --------
@@ -254,7 +265,12 @@ Building and executing these nodes works in the same manner as described above:
   ./build/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Client
 
 At this point, you should see the log message "2 + 2 = 4" appear in your
-terminal.
+terminal. You can also access the service using the :roswiki:`rosservice`
+command line tool:
+
+.. code-block:: bash
+
+  rosservice add_two_ints 2 2
 
 Just as before, you can configure the executed nodes from the command line in
 the same way you would any other ROS executable. See
