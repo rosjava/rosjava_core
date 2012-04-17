@@ -18,8 +18,6 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.node.service.ServiceResponseBuilder;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -36,6 +34,7 @@ import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.DefaultServiceServerListener;
+import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.service.ServiceServerListener;
 
@@ -99,19 +98,19 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   }
 
   public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
-    Map<String, String> header = getDeclaration().toConnectionHeader();
     if (DEBUG) {
-      log.info("Outgoing handshake header: " + header);
+      log.info("Client handshake header: " + incomingHeader);
     }
-    if (incomingHeader.containsKey(ConnectionHeaderFields.PROBE)) {
-      // TODO(damonkohler): This is kind of a lousy way to pass back the
-      // information that this is a probe.
-      return null;
-    } else {
-      Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
-          header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
-      return ConnectionHeader.encode(header);
+    Map<String, String> header = getDeclaration().toConnectionHeader();
+    String expectedChecksum = header.get(ConnectionHeaderFields.MD5_CHECKSUM);
+    String incomingChecksum = incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
+    // TODO(damonkohler): Pull out header field comparison logic.
+    Preconditions.checkState(incomingChecksum.equals(expectedChecksum)
+        || incomingChecksum.equals("*"));
+    if (DEBUG) {
+      log.info("Server handshake header: " + header);
     }
+    return ConnectionHeader.encode(header);
   }
 
   @Override

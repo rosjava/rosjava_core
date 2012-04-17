@@ -16,7 +16,7 @@
 
 package org.ros.internal.transport.tcp;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
@@ -35,7 +35,7 @@ import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
-import com.google.common.base.Preconditions;
+import java.util.Map;
 
 /**
  * A {@link ChannelHandler} which will process the TCP server handshake.
@@ -48,7 +48,8 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
   private final TopicParticipantManager topicParticipantManager;
   private final ServiceManager serviceManager;
 
-  public TcpServerHandshakeHandler(TopicParticipantManager topicParticipantManager, ServiceManager serviceManager) {
+  public TcpServerHandshakeHandler(TopicParticipantManager topicParticipantManager,
+      ServiceManager serviceManager) {
     this.topicParticipantManager = topicParticipantManager;
     this.serviceManager = serviceManager;
   }
@@ -66,12 +67,11 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
       String serviceName = incomingHeader.get(ConnectionHeaderFields.SERVICE);
       Preconditions.checkState(serviceManager.hasServer(serviceName));
       DefaultServiceServer<?, ?> serviceServer = serviceManager.getServer(serviceName);
-      ChannelBuffer outgoingBuffer = serviceServer.finishHandshake(incomingHeader);
-      if (outgoingBuffer == null) {
-        // This is just a probe.
+      e.getChannel().write(serviceServer.finishHandshake(incomingHeader));
+      String probe = incomingHeader.get(ConnectionHeaderFields.PROBE);
+      if (probe != null && probe.equals("1")) {
         e.getChannel().close();
       } else {
-        e.getChannel().write(outgoingBuffer);
         pipeline.replace(TcpServerPipelineFactory.LENGTH_FIELD_PREPENDER, "ServiceResponseEncoder",
             new ServiceResponseEncoder());
         pipeline.replace(this, "ServiceRequestHandler", serviceServer.newRequestHandler());
@@ -80,8 +80,8 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
       Preconditions.checkState(incomingHeader.containsKey(ConnectionHeaderFields.TOPIC),
           "Handshake header missing field: " + ConnectionHeaderFields.TOPIC);
       String topicName = incomingHeader.get(ConnectionHeaderFields.TOPIC);
-      Preconditions.checkState(topicParticipantManager.hasPublisher(topicName), "No publisher for topic: "
-          + topicName);
+      Preconditions.checkState(topicParticipantManager.hasPublisher(topicName),
+          "No publisher for topic: " + topicName);
       DefaultPublisher<?> publisher = topicParticipantManager.getPublisher(topicName);
       ChannelBuffer outgoingBuffer = publisher.finishHandshake(incomingHeader);
       Channel channel = ctx.getChannel();
