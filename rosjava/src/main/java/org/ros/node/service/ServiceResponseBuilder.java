@@ -14,9 +14,9 @@
  * the License.
  */
 
-package org.ros.internal.node.service;
+package org.ros.node.service;
 
-import org.ros.node.service.ServiceServer;
+import org.ros.exception.ServiceException;
 
 /**
  * Builds a service response given a service request.

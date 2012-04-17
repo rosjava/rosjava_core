@@ -16,10 +16,11 @@
 
 package org.ros.node;
 
+import org.ros.node.service.ServiceResponseBuilder;
+
 import org.apache.commons.logging.Log;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.exception.ServiceNotFoundException;
-import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpoint;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;

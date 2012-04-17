@@ -34,5 +34,4 @@ public class ParameterNotFoundException extends RosRuntimeException {
   public ParameterNotFoundException(Throwable throwable) {
     super(throwable);
   }
-
 }

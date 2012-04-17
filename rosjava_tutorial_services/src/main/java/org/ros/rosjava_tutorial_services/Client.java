@@ -24,7 +24,6 @@ import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
-import test_ros.AddTwoInts.Response;
 
 /**
  * A simple {@link ServiceClient} {@link NodeMain}.
@@ -51,7 +50,7 @@ public class Client implements NodeMain {
     request.setB(2);
     serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoInts.Response>() {
       @Override
-      public void onSuccess(Response response) {
+      public void onSuccess(test_ros.AddTwoInts.Response response) {
         node.getLog().info(
             String.format("%d + %d = %d", request.getA(), request.getB(), response.getSum()));
       }

@@ -55,7 +55,7 @@ public class ServiceDescription extends MessageDeclaration {
 
   @Override
   public String toString() {
-    return "ServiceDescription<" + getType() + "," + md5Checksum + ">";
+    return "ServiceDescription<" + getType() + ", " + md5Checksum + ">";
   }
 
   @Override

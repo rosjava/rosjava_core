@@ -21,11 +21,14 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.ros.exception.ServiceException;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
+import org.ros.node.service.ServiceResponseBuilder;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -68,10 +71,11 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
   }
 
   private void handleError(final ChannelHandlerContext ctx, ServiceServerResponse response,
-      ServiceException ex) {
+      String message) {
     response.setErrorCode(0);
-    response.setMessageLength(ex.getMessage().length());
-    response.setMessage(ex.getMessageAsChannelBuffer());
+    ByteBuffer encodedMessage = Charset.forName("US-ASCII").encode(message);
+    response.setMessageLength(encodedMessage.limit());
+    response.setMessage(ChannelBuffers.wrappedBuffer(encodedMessage));
     ctx.getChannel().write(response);
   }
 
@@ -90,7 +94,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
           responseBuffer =
               ChannelBuffers.wrappedBuffer(handleRequest(requestBuffer.toByteBuffer()));
         } catch (ServiceException ex) {
-          handleError(ctx, response, ex);
+          handleError(ctx, response, ex.getMessage());
           return;
         }
         handleSuccess(ctx, response, responseBuffer);

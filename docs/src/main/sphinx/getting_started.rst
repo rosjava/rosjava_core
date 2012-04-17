@@ -68,7 +68,7 @@ Creating nodes
 --------------
 
 Typically ROS nodes are synonymous with processes. In rosjava, however, nodes
-are more like :roswiki:`nodelets` in that many nodes can run in a single
+are more like :roswiki:`nodelet`\s in that many nodes can run in a single
 process, the Java VM.
 
 Users, like yourself, do not create :javadoc:`org.ros.node.Node`\s. Instead,
@@ -131,11 +131,11 @@ to handle clean up since it will not delay shutdown.
 Publishers and subscribers
 --------------------------
 
-The following code is available from the rosjava_tutorial_pubsub package. In
-this example, we create a publisher for the chatter topic. That should feel
-relatively familiar if you're a ROS veteran. The
-:javadoc:`org.ros.topic.Publisher` publishes ``std_msgs.String`` messages to
-the ``/chatter`` topic.
+The following class (:javadoc:`org.ros.rosjava_tutorial_pubsub.Talker`) is
+available from the rosjava_tutorial_pubsub package. In this example, we create
+a publisher for the chatter topic. This should feel relatively familiar if
+you're a ROS veteran. The :javadoc:`org.ros.topic.Publisher` publishes
+``std_msgs.String`` messages to the ``/chatter`` topic.
 
 .. literalinclude:: ../../../../rosjava_tutorial_pubsub/src/main/java/org/ros/rosjava_tutorial_pubsub/Talker.java
   :language: java
@@ -162,7 +162,7 @@ class.
   :language: java
   :linenos:
 
-In line 43 we see another example of rosjava's asynchornous API. We can add as
+In line 42 we see another example of rosjava's asynchornous API. We can add as
 many :javadoc:`org.ros.message.MessageListener`\s to our
 :javadoc:`org.ros.node.topic.Subscriber` as we like. When a new message is
 received, all of our :javadoc:`org.ros.message.MessageListener`\s will be
@@ -206,6 +206,61 @@ the following commands will remap the default topic /chatter to /foo.
 See :roswiki:`Remapping%20Arguments` for more information on passing arguments
 to ROS executables.
 
+Services
+--------
+
+The following class (:javadoc:`org.ros.rosjava_tutorial_services.Server`) is
+available from the rosjava_tutorial_services package. In this example, we
+create a :javadoc:`org.ros.node.service.ServiceServer` for the
+``test_ros.AddTwoInts`` service. This should feel relatively familiar if you're
+a ROS veteran.
+
+.. literalinclude:: ../../../../rosjava_tutorial_services/src/main/java/org/ros/rosjava_tutorial_services/Server.java
+  :language: java
+  :linenos:
+
+The :javadoc:`org.ros.node.service.ServiceResponseBuilder` is called
+asynchronously for each incoming request. On line 44 we modify the response
+output parameter to contain the sum of the two integers in the request. The
+response will be sent once the
+:javadoc:`org.ros.node.service.ServiceResponseBuilder#build(T, S)` returns.
+
+Now lets take a look at the :javadoc:`org.ros.rosjava_tutorial_services.Client`
+class.
+
+.. literalinclude:: ../../../../rosjava_tutorial_services/src/main/java/org/ros/rosjava_tutorial_services/Client.java
+  :language: java
+  :linenos:
+
+In line 51 we see another example of rosjava's asynchornous API. When the response is
+received, our :javadoc:`org.ros.node.service.ServiceResponseListener` will be
+called with the incoming response as an argument to
+:javadoc:`org.ros.node.service.ServiceResponseListener#onSuccess(T)`.
+
+In the event that the server thows a
+:javadoc:`org.ros.exception.ServiceException` while building the response,
+:javadoc:`org.ros.node.service.ServiceResponseListener#onFailure(RemoteException)`
+will be called. The :javadoc:`org.ros.exception.RemoteException` will contain
+the error message from the server.
+
+Building and executing these nodes works in the same manner as described above:
+
+.. code-block:: bash
+
+  roscd rosjava_tutorial_services
+  ../gradlew installApp
+  roscore &
+  ./build/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Server &
+  ./build/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Client
+
+At this point, you should see the log message "2 + 2 = 4" appear in your
+terminal.
+
+Just as before, you can configure the executed nodes from the command line in
+the same way you would any other ROS executable. See
+:roswiki:`Remapping%20Arguments` for more information on passing arguments to
+ROS executables.
+
 Messages
 --------
 
@@ -227,11 +282,6 @@ If you want to use messages that you define:
 - create a new package for those messages (e.g. my_msgs)
 - ensure that my_msgs is in your ROS_PACKAGE_PATH (see :roswiki:`EnvironmentVariables`)
 - reinstall rosjava_messages (see :doc:`building`)
-
-Services
---------
-
-TODO
 
 Parameters
 ----------

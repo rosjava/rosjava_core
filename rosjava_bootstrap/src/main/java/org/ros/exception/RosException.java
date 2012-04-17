@@ -32,5 +32,4 @@ public class RosException extends Exception {
   public RosException(final String message) {
     super(message);
   }
-  
 }

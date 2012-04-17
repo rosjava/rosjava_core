@@ -18,6 +18,8 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.node.service.ServiceResponseBuilder;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;

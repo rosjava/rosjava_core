@@ -32,5 +32,4 @@ public class ServiceNotFoundException extends RosException {
   public ServiceNotFoundException(final String message) {
     super(message);
   }
-
 }

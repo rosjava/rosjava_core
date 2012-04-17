@@ -64,7 +64,7 @@ public class ServiceDeclaration {
 
   @Override
   public String toString() {
-    return "ServiceDeclaration<" + getName().toString() + "," + description.toString() + ">";
+    return "ServiceDeclaration<" + getName().toString() + ", " + description.toString() + ">";
   }
 
   public String getMd5Checksum() {

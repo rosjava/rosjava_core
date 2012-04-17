@@ -16,11 +16,11 @@
 
 package org.ros.internal.node.service;
 
-import java.net.URI;
+import com.google.common.base.Preconditions;
 
 import org.ros.namespace.GraphName;
 
-import com.google.common.base.Preconditions;
+import java.net.URI;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -47,7 +47,7 @@ public class ServiceIdentifier {
 
   @Override
   public String toString() {
-    return "ServiceIdentifier<" + name + "," + uri + ">";
+    return "ServiceIdentifier<" + name + ", " + uri + ">";
   }
 
   @Override

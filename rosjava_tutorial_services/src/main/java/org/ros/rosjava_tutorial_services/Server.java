@@ -16,14 +16,11 @@
 
 package org.ros.rosjava_tutorial_services;
 
-import org.ros.internal.node.service.ServiceException;
-import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
+import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
-import test_ros.AddTwoInts.Request;
-import test_ros.AddTwoInts.Response;
 
 /**
  * This is a simple {@link ServiceServer} {@link NodeMain}.
@@ -42,7 +39,8 @@ public class Server implements NodeMain {
     node.newServiceServer("add_two_ints", test_ros.AddTwoInts._TYPE,
         new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
           @Override
-          public void build(Request request, Response response) throws ServiceException {
+          public void build(test_ros.AddTwoInts.Request request,
+              test_ros.AddTwoInts.Response response) {
             response.setSum(request.getA() + request.getB());
           }
         });

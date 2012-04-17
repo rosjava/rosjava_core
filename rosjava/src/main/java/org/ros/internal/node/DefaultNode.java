@@ -18,6 +18,8 @@ package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import org.ros.node.service.ServiceResponseBuilder;
+
 import org.apache.commons.logging.Log;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerCollection;
@@ -37,7 +39,6 @@ import org.ros.internal.node.service.ServiceDeclaration;
 import org.ros.internal.node.service.ServiceFactory;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceManager;
-import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.internal.node.topic.PublisherFactory;
 import org.ros.internal.node.topic.SubscriberFactory;
 import org.ros.internal.node.topic.TopicDeclaration;

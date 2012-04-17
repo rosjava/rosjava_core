@@ -36,5 +36,4 @@ public class RemoteException extends RosRuntimeException {
   public StatusCode getStatusCode() {
     return statusCode;
   }
-
 }

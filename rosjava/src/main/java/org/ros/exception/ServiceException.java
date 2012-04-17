@@ -14,26 +14,22 @@
  * the License.
  */
 
-package org.ros.internal.node.service;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
+package org.ros.exception;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ServiceException extends Exception {
 
-  public ServiceException(String message) {
+  public ServiceException(final Throwable throwable) {
+    super(throwable);
+  }
+
+  public ServiceException(final String message, final Throwable throwable) {
+    super(message, throwable);
+  }
+
+  public ServiceException(final String message) {
     super(message);
   }
-
-  public ChannelBuffer getMessageAsChannelBuffer() {
-    ByteBuffer encodedMessage = Charset.forName("US-ASCII").encode(getMessage());
-    return ChannelBuffers.wrappedBuffer(encodedMessage);
-  }
-
 }
