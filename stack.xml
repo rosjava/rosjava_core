@@ -1,6 +1,7 @@
 <stack>
   <description brief="rosjava core">
-    rosjava_core is a pure-Java implementation of ROS with Android support.
+    The rosjava_core stack contains a pure-Java implementation of ROS and a
+    collection of examples for developing ROS applications in Java.
   </description>
   <author>Maintained by Damon Kohler (damonkohler@google.com)</author>
   <license>Apache 2.0</license>
