@@ -14,37 +14,38 @@
  * the License.
  */
 
-package org.ros.rosjava_tutorial_pubsub;
+package org.ros.rosjava_tutorial_services;
 
-import org.apache.commons.logging.Log;
-import org.ros.message.MessageListener;
+import org.ros.internal.node.service.ServiceException;
+import org.ros.internal.node.service.ServiceResponseBuilder;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
-import org.ros.node.topic.Subscriber;
+import org.ros.node.service.ServiceServer;
+import test_ros.AddTwoInts.Request;
+import test_ros.AddTwoInts.Response;
 
 /**
- * A simple {@link Subscriber} {@link NodeMain}.
+ * This is a simple {@link ServiceServer} {@link NodeMain}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Listener implements NodeMain {
+public class Server implements NodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("rosjava_tutorial_pubsub/listener");
+    return new GraphName("rosjava_tutorial_services/server");
   }
 
   @Override
   public void onStart(Node node) {
-    final Log log = node.getLog();
-    Subscriber<std_msgs.String> subscriber = node.newSubscriber("chatter", std_msgs.String._TYPE);
-    subscriber.addMessageListener(new MessageListener<std_msgs.String>() {
-      @Override
-      public void onNewMessage(std_msgs.String message) {
-        log.info("I heard: \"" + message.getData() + "\"");
-      }
-    });
+    node.newServiceServer("add_two_ints", test_ros.AddTwoInts._TYPE,
+        new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
+          @Override
+          public void build(Request request, Response response) throws ServiceException {
+            response.setSum(request.getA() + request.getB());
+          }
+        });
   }
 
   @Override

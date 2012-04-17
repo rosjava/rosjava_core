@@ -219,4 +219,9 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   public void removeListener(ServiceServerListener<T, S> listener) {
     listenerCollection.remove(listener);
   }
+
+  @Override
+  public String toString() {
+    return "ServiceServer<" + getDeclaration() + ">";
+  }
 }

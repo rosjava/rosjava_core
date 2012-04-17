@@ -39,7 +39,7 @@ public class TopicDescription extends MessageDeclaration {
 
   @Override
   public String toString() {
-    return "TopicDescription<" + getType() + "," + md5Checksum + ">";
+    return "TopicDescription<" + getType() + ", " + md5Checksum + ">";
   }
 
   @Override

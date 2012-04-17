@@ -23,7 +23,7 @@ import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
 
 /**
- * A simple {@link Publisher} {@link Node}.
+ * A simple {@link Publisher} {@link NodeMain}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
