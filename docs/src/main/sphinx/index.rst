@@ -27,4 +27,5 @@ Contents:
    building
    best_practices
    getting_started
+   advanced
 

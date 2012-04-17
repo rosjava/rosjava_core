@@ -75,50 +75,24 @@ Users, like yourself, do not create :javadoc:`org.ros.node.Node`\s. Instead,
 programs are defined as implementations of :javadoc:`org.ros.node.NodeMain`
 which are executed by the aptly named :javadoc:`org.ros.node.NodeMainExecutor`.
 
-Let's consider the following simple :javadoc:`org.ros.node.NodeMain`
+Let's consider the following mostly empty :javadoc:`org.ros.node.NodeMain`
 implementation:
 
 .. code-block:: java
-  :linenos:
 
-  package org.ros.tutorials.pubsub;
-
-  import org.ros.concurrent.CancellableLoop;
   import org.ros.namespace.GraphName;
   import org.ros.node.Node;
   import org.ros.node.NodeMain;
-  import org.ros.node.topic.Publisher;
 
-  public class Talker implements NodeMain {
+  public class MyNode implements NodeMain {
 
     @Override
     public GraphName getDefaultNodeName() {
-      return new GraphName("rosjava_tutorial_pubsub/talker");
+      return new GraphName("my_node");
     }
 
     @Override
-    public void onStart(final Node node) {
-      final Publisher<std_msgs.String> publisher =
-          node.newPublisher("chatter", std_msgs.String._TYPE);
-      // This CancellableLoop will be canceled automatically when the Node shuts
-      // down.
-      node.executeCancellableLoop(new CancellableLoop() {
-        private int sequenceNumber;
-
-        @Override
-        protected void setup() {
-          sequenceNumber = 0;
-        }
-
-        @Override
-        protected void loop() throws InterruptedException {
-          std_msgs.String str = publisher.newMessage();
-          str.setData("Hello world! " + sequenceNumber);
-          publisher.publish(str);
-          sequenceNumber++;
-          Thread.sleep(1000);
-        }
-      });
+    public void onStart(Node node) {
     }
 
     @Override
@@ -130,26 +104,70 @@ implementation:
     }
   }
 
-The :javadoc:`org.ros.node.NodeListener#onStart(org.ros.node.Node)` method
-begins on line number 17.  As the name suggests, this is the entry point for
-your program. The :javadoc:`org.ros.node.Node` parameter is the factory we use
-to build things like :javadoc:`org.ros.topic.Publisher`\s and
-:javadoc:`org.ros.topic.Subscriber`\s.
+The :javadoc:`org.ros.node.NodeMain#getDefaultNodeName()` method returns the
+default name of the node. This name will be used unless a node name is
+specified in the :javadoc:`org.ros.node.NodeConfiguration` (more on that
+later). :javadoc:`org.ros.namespace.GraphName`\s are used throughout rosjava
+when refering to nodes, topics, and parameters. Most methods which accept a
+:javadoc:`org.ros.namespace.GraphName` will also accept a string for
+convenience.
 
-In this example, we create a publisher for the chatter topic. That should feel
+The :javadoc:`org.ros.node.NodeListener#onStart(org.ros.node.Node)` method is
+the entry point for your program (or node). The :javadoc:`org.ros.node.Node`
+parameter is the factory we use to build things like
+:javadoc:`org.ros.topic.Publisher`\s and :javadoc:`org.ros.topic.Subscriber`\s.
+
+The :javadoc:`org.ros.node.NodeListener#onShutdown(org.ros.node.Node)` method is
+the first exit point for your program. It will be executed as soon as shutdown
+is started (i.e. before all publishers, subscribers, etc. have been shutdown).
+The shutdown of all created publishers, subscribers, etc. will be delayed until
+this method returns or the shutdown timeout expires.
+
+The :javadoc:`org.ros.node.NodeListener#onShutdownComplete(org.ros.node.Node)`
+method is the final exit point for your program. It will be executed after all
+publishers, subscribers, etc. have been shutdown. This is the preferred place
+to handle clean up since it will not delay shutdown.
+
+Publishers and subscribers
+--------------------------
+
+The following code is available from the rosjava_tutorial_pubsub package. In
+this example, we create a publisher for the chatter topic. That should feel
 relatively familiar if you're a ROS veteran. The
 :javadoc:`org.ros.topic.Publisher` publishes ``std_msgs.String`` messages to
-the ``chatter`` topic.
+the ``/chatter`` topic.
 
-Line 22 will probably feel unfamailiar even to ROS veterans. This is one
-example of rosjava's asynchornous API. The intent of our Talker class is to
-publish a hello world message to anyone who will listen once per second. One
-way to accomplish this is to publish the message and sleep in a loop. However,
-we don't want to block the
-:javadoc:`org.ros.node.NodeListener#onStart(org.ros.node.Node)` method. So, we
-create a :javadoc:`org.ros.concurrent.CancellableLoop` and ask the
-:javadoc:`org.ros.node.Node` to execute it. The loop will be interrupted
+.. literalinclude:: ../../../../rosjava_tutorial_pubsub/src/main/java/org/ros/rosjava_tutorial_pubsub/Talker.java
+  :language: java
+  :linenos:
+
+Line 43 will probably feel unfamailiar even to ROS veterans. This is one
+example of rosjava's asynchornous API. The intent of our
+:javadoc:`org.ros.rosjava_tutorial_pubsub.Talker` class is to publish a hello
+world message to anyone who will listen once per second. One way to accomplish
+this is to publish the message and sleep in a loop. However, we don't want to
+block the :javadoc:`org.ros.node.NodeListener#onStart(org.ros.node.Node)`
+method. So, we create a :javadoc:`org.ros.concurrent.CancellableLoop` and ask
+the :javadoc:`org.ros.node.Node` to execute it. The loop will be interrupted
 automatically when the :javadoc:`org.ros.node.Node` exits.
+
+On line 53 we create a new ``std_msgs.String`` message to publish using the
+:javadoc:`org.ros.node.topic.Publisher#newMessage()` method. Messages in
+rosjava cannot be instantiated directly. More on that later.
+
+Now lets take a look at the :javadoc:`org.ros.rosjava_tutorial_pubsub.Listener`
+class.
+
+.. literalinclude:: ../../../../rosjava_tutorial_pubsub/src/main/java/org/ros/rosjava_tutorial_pubsub/Listener.java
+  :language: java
+  :linenos:
+
+In line 43 we see another example of rosjava's asynchornous API. We can add as
+many :javadoc:`org.ros.message.MessageListener`\s to our
+:javadoc:`org.ros.node.topic.Subscriber` as we like. When a new message is
+received, all of our :javadoc:`org.ros.message.MessageListener`\s will be
+called with the incoming message as an argument to
+:javadoc:`org.ros.message.MessageListener#onNewMessage(T)`.
 
 Executing nodes
 ---------------
@@ -162,39 +180,40 @@ execute the :javadoc:`org.ros.rosjava_tutorial_pubsub.Talker` and
 :javadoc:`org.ros.rosjava_tutorial_pubsub.Listener` nodes in separate
 processes:
 
-#. roscd rosjava_tutorial_pubsub
-#. ../gradlew installApp
-#. roscore &
-#. ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker &
-#. ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener
+.. code-block:: bash
 
-.. note:: The above example launches roscore and the Talker node in the background. You could instead launch each in a separate terminal.
+  roscd rosjava_tutorial_pubsub
+  ../gradlew installApp
+  roscore &
+  ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker &
+  ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener
 
-.. note:: You may notice that rosrun cannot find the installed executable. This is a known issue that will be addressed in the future.
+.. note:: The above example launches roscore and the Talker node in the
+  background. You could instead launch each in a separate terminal. Also, you
+  may notice that rosrun cannot find the installed executable. This is a known
+  issue that will be addressed in the future.
 
 At this point, you should see the familiar "Hello, world!" messages start
 appearing in your terminal. You can configure the executed nodes from the
 command line in the same way you would any other ROS executable. For example,
 the following commands will remap the default topic /chatter to /foo.
 
-#. ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker chatter:=/foo &
-#. ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener chatter:=/foo
+.. code-block:: bash
 
-See :roswiki:`Remapping%20Arguments` for more information.
+  ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker chatter:=/foo &
+  ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener chatter:=/foo
 
-As with all ROS nodes, rosjava nodes must connect to a :roswiki:`Master` in
-order to function. However, unlike other client library implementations,
-rosjava also provides its own :javadoc:`org.ros.RosCore` implementation. This
-enables ROS to function in a pure Java installation. For example, you can
-operate a complete ROS graph on a stock (i.e. non-rooted) Android phone.
+See :roswiki:`Remapping%20Arguments` for more information on passing arguments
+to ROS executables.
 
 Messages
 --------
 
 Messages are defined as interfaces. Since this makes it impossible to
 instantiate the message directly, it's necessary to use a
-:javadoc:`org.ros.message.MessageFactory`. This indirection allows the
-underlying message implementation to change in the future. ::
+:javadoc:`org.ros.message.MessageFactory` or helper methods such as
+:javadoc:`org.ros.node.topic.Publisher#newMessage()`. This indirection allows
+the underlying message implementation to change in the future. ::
 
   Node node;
 
@@ -209,30 +228,10 @@ If you want to use messages that you define:
 - ensure that my_msgs is in your ROS_PACKAGE_PATH (see :roswiki:`EnvironmentVariables`)
 - reinstall rosjava_messages (see :doc:`building`)
 
-Messages as BLOBs (Advanced)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If you need to deserialize a ROS message BLOB, it is important to remember that
-Java is a big endian virtual machine. When supplying the ``ByteBuffer`` to the
-:javadoc:`org.ros.message.MessageDeserializer`, make sure that order is set to
-little endian. ::
-
-  Node node;
-  byte[] messageData;
-
-  ...
-
-  ByteBuffer buffer = ByteBuffer.wrap(messageData);
-  buffer.order(ByteOrder.LITTLE_ENDIAN);
-  PointCloud2 msg = node.getMessageSerializationFactory()
-      .newMessageDeserializer(sensor_msgs.PointCloud._TYPE)
-          .deserialize(buffer);
-
-Publishers and subscribers
---------------------------
-
 Services
 --------
+
+TODO
 
 Parameters
 ----------
@@ -287,7 +286,8 @@ work for parameter subtrees. ::
     }
   });
 
-Currently, ParameterListeners are not generic. Instead, you are responsible for casting value appropriately.
+Currently, ParameterListeners are not generic. Instead, you are responsible for
+casting the value appropriately.
 
 Logging
 -------
@@ -303,20 +303,14 @@ logging outputs for ROS. ::
 
   node.getLog.warn("warning message");
 
-  //report an error message
+  // report an error message
   node.getLog.error("error message");
 
-  //error message with an exception
-  //so that it can print the stack trace
+  // error message with an exception
+  // so that it can print the stack trace
   node.getLog.error("error message", e);
 
   node.fatal("message informing user of a fatal occurrence");
 
 .. _Apache Commons Log: http://commons.apache.org/logging/commons-logging-1.1.1/apidocs/index.html
-
-Exceptions
-----------
-
-Running nodes
--------------
 
