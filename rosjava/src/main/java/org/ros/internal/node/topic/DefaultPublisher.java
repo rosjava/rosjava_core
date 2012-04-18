@@ -200,7 +200,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
       log.info("Adding subscriber: " + subscriberIdentifer);
     }
     outgoingMessageQueue.addChannel(channel);
-    signalOnNewSubscriber(subscriberIdentifier);
+    signalOnNewSubscriber(subscriberIdentifer);
   }
 
   @Override
