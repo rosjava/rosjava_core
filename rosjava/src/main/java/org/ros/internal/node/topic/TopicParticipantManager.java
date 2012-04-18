@@ -72,7 +72,7 @@ public class TopicParticipantManager {
     return subscribers.get(new GraphName(topicName));
   }
 
-  public void putPublisher(DefaultPublisher<?> publisher) {
+  public void addPublisher(DefaultPublisher<?> publisher) {
     publishers.put(publisher.getTopicName(), publisher);
     if (listener != null) {
       listener.onPublisherAdded(publisher);
@@ -86,7 +86,7 @@ public class TopicParticipantManager {
     }
   }
 
-  public void putSubscriber(DefaultSubscriber<?> subscriber) {
+  public void addSubscriber(DefaultSubscriber<?> subscriber) {
     subscribers.put(subscriber.getTopicName(), subscriber);
     if (listener != null) {
       listener.onSubscriberAdded(subscriber);

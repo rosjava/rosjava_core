@@ -79,7 +79,7 @@ public class SubscriberFactory {
     }
 
     if (createdNewSubscriber) {
-      topicParticipantManager.putSubscriber(subscriber);
+      topicParticipantManager.addSubscriber(subscriber);
     }
     return subscriber;
   }

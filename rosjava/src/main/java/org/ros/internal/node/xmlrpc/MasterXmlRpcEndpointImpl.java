@@ -220,7 +220,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
   @Override
   public List<Object> subscribeParam(String callerId, String callerSlaveUri, String key) {
     parameterServer.subscribe(new GraphName(key),
-        NodeIdentifier.newFromStrings(callerId, callerSlaveUri));
+        NodeIdentifier.forNameAndUri(callerId, callerSlaveUri));
     Object value = parameterServer.get(new GraphName(key));
     if (value == null) {
       // Must return an empty map as the value of an unset parameter.

@@ -56,9 +56,9 @@ public class SlaveServer extends XmlRpcServer {
 
   public SlaveServer(GraphName nodeName, BindAddress tcpRosBindAddress,
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
-      AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master, TopicParticipantManager topicParticipantManager,
-      ServiceManager serviceManager, ParameterManager parameterManager,
-      ScheduledExecutorService executorService) {
+      AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master,
+      TopicParticipantManager topicParticipantManager, ServiceManager serviceManager,
+      ParameterManager parameterManager, ScheduledExecutorService executorService) {
     super(xmlRpcBindAddress, xmlRpcAdvertiseAddress);
     this.nodeName = nodeName;
     this.masterClient = master;
@@ -66,8 +66,8 @@ public class SlaveServer extends XmlRpcServer {
     this.serviceManager = serviceManager;
     this.parameterManager = parameterManager;
     this.tcpRosServer =
-        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicParticipantManager, serviceManager,
-            executorService);
+        new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicParticipantManager,
+            serviceManager, executorService);
   }
 
   public AdvertiseAddress getTcpRosAdvertiseAddress() {

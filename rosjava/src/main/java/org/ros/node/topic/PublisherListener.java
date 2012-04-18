@@ -17,6 +17,7 @@
 package org.ros.node.topic;
 
 import org.ros.internal.node.RegistrantListener;
+import org.ros.internal.node.topic.SubscriberIdentifier;
 
 /**
  * A lifecycle listener for {@link Publisher} instances.
@@ -30,8 +31,10 @@ public interface PublisherListener<T> extends RegistrantListener<Publisher<T>> {
    * 
    * @param publisher
    *          the {@link Publisher} that the {@link Subscriber} connected to
+   * @param subscriberIdentifier
+   *          the {@link SubscriberIdentifier} of the new {@link Subscriber}
    */
-  void onNewSubscriber(Publisher<T> publisher);
+  void onNewSubscriber(Publisher<T> publisher, SubscriberIdentifier subscriberIdentifier);
 
   /**
    * The {@link Publisher} has been shut down.

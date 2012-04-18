@@ -28,24 +28,24 @@ import java.util.List;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
- * @param <ResultType>
+ * @param <T>
  */
-public class Response<ResultType> {
+public class Response<T> {
 
   private final StatusCode statusCode;
   private final String statusMessage;
-  private final ResultType result;
+  private final T result;
 
-  public static <ResultType> Response<ResultType> newError(String message, ResultType value) {
-    return new Response<ResultType>(StatusCode.ERROR, message, value);
+  public static <T> Response<T> newError(String message, T value) {
+    return new Response<T>(StatusCode.ERROR, message, value);
   }
 
-  public static <ResultType> Response<ResultType> newFailure(String message, ResultType value) {
-    return new Response<ResultType>(StatusCode.FAILURE, message, value);
+  public static <T> Response<T> newFailure(String message, T value) {
+    return new Response<T>(StatusCode.FAILURE, message, value);
   }
 
-  public static <ResultType> Response<ResultType> newSuccess(String message, ResultType value) {
-    return new Response<ResultType>(StatusCode.SUCCESS, message, value);
+  public static <T> Response<T> newSuccess(String message, T value) {
+    return new Response<T>(StatusCode.SUCCESS, message, value);
   }
 
   /**
@@ -53,7 +53,7 @@ public class Response<ResultType> {
    * returned from an XML-RPC call. Throws {@link RemoteException} if the
    * {@link StatusCode} is StatusCode.FAILURE.
    * 
-   * @param <ResultType>
+   * @param <T>
    * @param response
    *          the {@link List} of {@link Object}s returned from the XML-RPC call
    * @param resultFactory
@@ -65,8 +65,8 @@ public class Response<ResultType> {
    *           if the {@link Response}'s {@link StatusCode} indicates
    *           StatusCode.FAILURE.
    */
-  public static <ResultType> Response<ResultType> fromListCheckedFailure(List<Object> response,
-      ResultFactory<ResultType> resultFactory) throws RemoteException {
+  public static <T> Response<T> fromListCheckedFailure(List<Object> response,
+      ResultFactory<T> resultFactory) throws RemoteException {
     StatusCode statusCode;
     String message;
     try {
@@ -81,7 +81,7 @@ public class Response<ResultType> {
           "Remote side did not return correct type (status code/message).", e);
     }
     try {
-      return new Response<ResultType>(statusCode, message, resultFactory.newFromValue(response.get(2)));
+      return new Response<T>(statusCode, message, resultFactory.newFromValue(response.get(2)));
     } catch (ClassCastException e) {
       throw new RosRuntimeException("Remote side did not return correct value type.", e);
     }
@@ -92,7 +92,7 @@ public class Response<ResultType> {
    * returned from an XML-RPC call. Throws {@link RemoteException} if the
    * {@link StatusCode} is not a success.
    * 
-   * @param <ResultType>
+   * @param <T>
    * @param response
    *          the {@link List} of {@link Object}s returned from the XML-RPC call
    * @param resultFactory
@@ -104,8 +104,8 @@ public class Response<ResultType> {
    *           if the {@link Response}'s {@link StatusCode} does not indicate
    *           success
    */
-  public static <ResultType> Response<ResultType> fromListChecked(List<Object> response,
-      ResultFactory<ResultType> resultFactory) throws RemoteException {
+  public static <T> Response<T> fromListChecked(List<Object> response,
+      ResultFactory<T> resultFactory) throws RemoteException {
     StatusCode statusCode;
     String message;
     try {
@@ -119,17 +119,17 @@ public class Response<ResultType> {
           "Remote side did not return correct type (status code/message).", e);
     }
     try {
-      return new Response<ResultType>(statusCode, message, resultFactory.newFromValue(response.get(2)));
+      return new Response<T>(statusCode, message, resultFactory.newFromValue(response.get(2)));
     } catch (ClassCastException e) {
       throw new RosRuntimeException("Remote side did not return correct value type.", e);
     }
   }
 
-  public Response(int statusCode, String statusMessage, ResultType value) {
+  public Response(int statusCode, String statusMessage, T value) {
     this(StatusCode.fromInt(statusCode), statusMessage, value);
   }
 
-  public Response(StatusCode statusCode, String statusMessage, ResultType value) {
+  public Response(StatusCode statusCode, String statusMessage, T value) {
     this.statusCode = statusCode;
     this.statusMessage = statusMessage;
     this.result = value;
@@ -147,7 +147,7 @@ public class Response<ResultType> {
     return statusMessage;
   }
 
-  public ResultType getResult() {
+  public T getResult() {
     return result;
   }
 

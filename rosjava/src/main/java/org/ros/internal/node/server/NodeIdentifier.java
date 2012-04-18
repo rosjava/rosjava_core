@@ -35,12 +35,24 @@ import java.util.Map;
  */
 public class NodeIdentifier {
 
-  private final GraphName nodeName;
+  private final GraphName name;
   private final URI uri;
 
-  public static NodeIdentifier newFromStrings(String nodeName, String uri) {
+  public static NodeIdentifier forName(String name) {
+    return new NodeIdentifier(new GraphName(name), null);
+  }
+
+  public static NodeIdentifier forUri(String uri) {
     try {
-      return new NodeIdentifier(new GraphName(nodeName), new URI(uri));
+      return new NodeIdentifier(null, new URI(uri));
+    } catch (URISyntaxException e) {
+      throw new RosRuntimeException(e);
+    }
+  }
+
+  public static NodeIdentifier forNameAndUri(String name, String uri) {
+    try {
+      return new NodeIdentifier(new GraphName(name), new URI(uri));
     } catch (URISyntaxException e) {
       throw new RosRuntimeException(e);
     }
@@ -59,37 +71,22 @@ public class NodeIdentifier {
    * so, wildcards are unnecessary in this case and would likely lead to buggy
    * code.
    * 
-   * @param nodeName
-   *          the {@link GraphName} that the {@link SlaveServer} is known as
+   * @param name
+   *          the {@link GraphName} that the {@link Node} is known as
    * @param uri
-   *          the {@link URI} of the {@link SlaveServer}'s XML-RPC server
+   *          the {@link URI} of the {@link Node}'s {@link SlaveServer} XML-RPC server
    */
-  public NodeIdentifier(GraphName nodeName, URI uri) {
-    Preconditions.checkArgument(nodeName != null || uri != null);
-    if (nodeName != null) {
-      Preconditions.checkArgument(nodeName.isGlobal());
+  public NodeIdentifier(GraphName name, URI uri) {
+    Preconditions.checkArgument(name != null || uri != null);
+    if (name != null) {
+      Preconditions.checkArgument(name.isGlobal());
     }
-    this.nodeName = nodeName;
+    this.name = name;
     this.uri = uri;
   }
 
-  /**
-   * @param uri
-   *          the {@link URI} of the {@link SlaveServer}
-   * @return an anonymous {@link NodeIdentifier} with the specified
-   *         {@link URI}
-   */
-  static NodeIdentifier newAnonymous(URI uri) {
-    return new NodeIdentifier(GraphName.newAnonymous(), uri);
-  }
-
-  @Override
-  public String toString() {
-    return "NodeSlaveIdentifier<" + nodeName + ", " + uri + ">";
-  }
-
   public GraphName getNodeName() {
-    return nodeName;
+    return name;
   }
 
   public URI getUri() {
@@ -98,15 +95,20 @@ public class NodeIdentifier {
 
   public Map<String, String> toConnectionHeader() {
     return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
+        .put(ConnectionHeaderFields.CALLER_ID, name.toString())
         .build();
+  }
+
+  @Override
+  public String toString() {
+    return "NodeIdentifier<" + name + ", " + uri + ">";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((nodeName == null) ? 0 : nodeName.hashCode());
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
     result = prime * result + ((uri == null) ? 0 : uri.hashCode());
     return result;
   }
@@ -120,10 +122,10 @@ public class NodeIdentifier {
     if (getClass() != obj.getClass())
       return false;
     NodeIdentifier other = (NodeIdentifier) obj;
-    if (nodeName == null) {
-      if (other.nodeName != null)
+    if (name == null) {
+      if (other.name != null)
         return false;
-    } else if (!nodeName.equals(other.nodeName))
+    } else if (!name.equals(other.name))
       return false;
     if (uri == null) {
       if (other.uri != null)

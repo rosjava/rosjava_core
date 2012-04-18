@@ -33,8 +33,8 @@ public class TopicIdentifier {
   
   private final GraphName name;
   
-  public static TopicIdentifier newFromString(String topicName) {
-    return new TopicIdentifier(new GraphName(topicName));
+  public static TopicIdentifier forName(String name) {
+    return new TopicIdentifier(new GraphName(name));
   }
 
   public TopicIdentifier(GraphName name) {

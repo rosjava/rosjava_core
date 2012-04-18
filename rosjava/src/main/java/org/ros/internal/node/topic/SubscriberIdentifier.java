@@ -33,11 +33,6 @@ public class SubscriberIdentifier {
   private final NodeIdentifier nodeIdentifier;
   private final TopicIdentifier topicIdentifier;
 
-  public static SubscriberIdentifier newFromStrings(String nodeName, String uri, String topicName) {
-    return new SubscriberIdentifier(NodeIdentifier.newFromStrings(nodeName, uri),
-        TopicIdentifier.newFromString(topicName));
-  }
-
   public SubscriberIdentifier(NodeIdentifier nodeIdentifier, TopicIdentifier topicIdentifier) {
     Preconditions.checkNotNull(nodeIdentifier);
     Preconditions.checkNotNull(topicIdentifier);

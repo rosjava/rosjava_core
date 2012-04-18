@@ -51,8 +51,8 @@ public class PublisherIdentifier {
   }
 
   public static PublisherIdentifier newFromStrings(String nodeName, String uri, String topicName) {
-    return new PublisherIdentifier(NodeIdentifier.newFromStrings(nodeName, uri),
-        TopicIdentifier.newFromString(topicName));
+    return new PublisherIdentifier(NodeIdentifier.forNameAndUri(nodeName, uri),
+        TopicIdentifier.forName(topicName));
   }
 
   public PublisherIdentifier(NodeIdentifier nodeIdentifier, TopicIdentifier topicIdentifier) {

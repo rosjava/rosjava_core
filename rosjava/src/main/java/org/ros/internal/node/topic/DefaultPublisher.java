@@ -190,15 +190,17 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   /**
    * Add a {@link Subscriber} connection to this {@link Publisher}.
    * 
+   * @param subscriberIdentifer
+   *          the {@link SubscriberIdentifier} of the new subscriber
    * @param channel
    *          the communication {@link Channel} to the {@link Subscriber}
    */
-  public void addSubscriberChannel(Channel channel) {
+  public void addSubscriber(SubscriberIdentifier subscriberIdentifer, Channel channel) {
     if (DEBUG) {
-      log.info("Adding channel: " + channel);
+      log.info("Adding subscriber: " + subscriberIdentifer);
     }
     outgoingMessageQueue.addChannel(channel);
-    signalOnNewSubscriber();
+    signalOnNewSubscriber(subscriberIdentifier);
   }
 
   @Override
@@ -286,16 +288,18 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   /**
    * Signal all {@link PublisherListener}s that the {@link Publisher} has a new
    * {@link Subscriber}.
-   * 
    * <p>
    * Each listener is called in a separate thread.
+   * 
+   * @param subscriberIdentifier
+   *          the {@link SubscriberIdentifier} of the new {@link Subscriber}
    */
-  private void signalOnNewSubscriber() {
+  private void signalOnNewSubscriber(final SubscriberIdentifier subscriberIdentifier) {
     final Publisher<T> publisher = this;
     listeners.signal(new SignalRunnable<PublisherListener<T>>() {
       @Override
       public void run(PublisherListener<T> listener) {
-        listener.onNewSubscriber(publisher);
+        listener.onNewSubscriber(publisher, subscriberIdentifier);
       }
     });
   }
@@ -303,9 +307,11 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   /**
    * Signal all {@link PublisherListener}s that the {@link Publisher} is being
    * shut down. Listeners should exit quickly since they may block shut down.
-   * 
    * <p>
    * Each listener is called in a separate thread.
+   * 
+   * @param timeout
+   * @param unit
    */
   private void signalOnShutdown(long timeout, TimeUnit unit) {
     final Publisher<T> publisher = this;

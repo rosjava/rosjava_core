@@ -36,8 +36,9 @@ public class PublisherFactory {
   private final ScheduledExecutorService executorService;
   private final NodeIdentifier nodeIdentifier;
 
-  public PublisherFactory(NodeIdentifier nodeIdentifier, TopicParticipantManager topicParticipantManager,
-      MessageFactory messageFactory, ScheduledExecutorService executorService) {
+  public PublisherFactory(NodeIdentifier nodeIdentifier,
+      TopicParticipantManager topicParticipantManager, MessageFactory messageFactory,
+      ScheduledExecutorService executorService) {
     this.nodeIdentifier = nodeIdentifier;
     this.topicParticipantManager = topicParticipantManager;
     this.messageFactory = messageFactory;
@@ -75,7 +76,7 @@ public class PublisherFactory {
             topicParticipantManager.removePublisher((DefaultPublisher<T>) publisher);
           }
         });
-        topicParticipantManager.putPublisher(publisher);
+        topicParticipantManager.addPublisher(publisher);
         return publisher;
       }
     }
