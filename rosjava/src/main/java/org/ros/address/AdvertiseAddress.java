@@ -104,7 +104,7 @@ public class AdvertiseAddress {
   public URI toUri(String scheme) {
     Preconditions.checkNotNull(portCallable);
     try {
-      return new URI(scheme, null, host, portCallable.call(), null, null, null);
+      return new URI(scheme, null, host, portCallable.call(), "/", null, null);
     } catch (Exception e) {
       throw new RosRuntimeException("Failed to create URI: " + this, e);
     }
