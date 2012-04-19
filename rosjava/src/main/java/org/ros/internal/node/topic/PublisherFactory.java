@@ -72,6 +72,13 @@ public class PublisherFactory {
                 messageFactory, executorService);
         publisher.addListener(new DefaultPublisherListener<T>() {
           @Override
+          public void onNewSubscriber(Publisher<T> publisher,
+              SubscriberIdentifier subscriberIdentifier) {
+            topicParticipantManager.addPublisherConnection((DefaultPublisher<T>) publisher,
+                subscriberIdentifier);
+          }
+
+          @Override
           public void onShutdown(Publisher<T> publisher) {
             topicParticipantManager.removePublisher((DefaultPublisher<T>) publisher);
           }

@@ -121,11 +121,11 @@ public class SlaveServer extends XmlRpcServer {
     return Process.getPid();
   }
 
-  public List<DefaultSubscriber<?>> getSubscriptions() {
+  public Collection<DefaultSubscriber<?>> getSubscriptions() {
     return topicParticipantManager.getSubscribers();
   }
 
-  public List<DefaultPublisher<?>> getPublications() {
+  public Collection<DefaultPublisher<?>> getPublications() {
     return topicParticipantManager.getPublishers();
   }
 

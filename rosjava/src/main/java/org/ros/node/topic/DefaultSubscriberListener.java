@@ -16,6 +16,8 @@
 
 package org.ros.node.topic;
 
+import org.ros.internal.node.topic.PublisherIdentifier;
+
 /**
  * A {@link SubscriberListener} which provides empty defaults for all signals.
  * 
@@ -40,7 +42,7 @@ public class DefaultSubscriberListener<T> implements SubscriberListener<T> {
   }
 
   @Override
-  public void onNewPublisher(Subscriber<T> subscriber) {
+  public void onNewPublisher(Subscriber<T> subscriber, PublisherIdentifier publisherIdentifier) {
   }
 
   @Override

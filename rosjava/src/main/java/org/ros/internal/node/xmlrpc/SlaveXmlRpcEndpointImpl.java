@@ -33,6 +33,7 @@ import org.ros.namespace.GraphName;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,7 +89,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
   @Override
   public List<Object> getSubscriptions(String callerId) {
-    List<DefaultSubscriber<?>> subscribers = slave.getSubscriptions();
+    Collection<DefaultSubscriber<?>> subscribers = slave.getSubscriptions();
     List<List<String>> subscriptions = Lists.newArrayList();
     for (DefaultSubscriber<?> subscriber : subscribers) {
       subscriptions.add(subscriber.getTopicDeclarationAsList());
@@ -98,7 +99,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
   @Override
   public List<Object> getPublications(String callerId) {
-    List<DefaultPublisher<?>> publishers = slave.getPublications();
+    Collection<DefaultPublisher<?>> publishers = slave.getPublications();
     List<List<String>> publications = Lists.newArrayList();
     for (DefaultPublisher<?> publisher : publishers) {
       publications.add(publisher.getTopicDeclarationAsList());

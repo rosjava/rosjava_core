@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
+import org.ros.node.Node;
 
 import java.net.URI;
 import java.net.URISyntaxException;

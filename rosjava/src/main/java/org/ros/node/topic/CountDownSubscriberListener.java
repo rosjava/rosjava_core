@@ -16,6 +16,8 @@
 
 package org.ros.node.topic;
 
+import org.ros.internal.node.topic.PublisherIdentifier;
+
 import org.ros.internal.node.CountDownRegistrantListener;
 
 import java.util.concurrent.CountDownLatch;
@@ -74,7 +76,7 @@ public class CountDownSubscriberListener<T> extends CountDownRegistrantListener<
   }
 
   @Override
-  public void onNewPublisher(Subscriber<T> subscriber) {
+  public void onNewPublisher(Subscriber<T> subscriber, PublisherIdentifier publisherIdentifier) {
     newPublisherLatch.countDown();
   }
 

@@ -144,8 +144,10 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     }
     tcpClientConnectionManager.connect(toString(), address, new SubscriberHandshakeHandler<T>(
         toDefinition().toConnectionHeader(), incomingMessageQueue), "SubscriberHandshakeHandler");
+    // TODO(damonkohler): knownPublishers is duplicate information that is
+    // already available to the TopicParticipantManager.
     knownPublishers.add(publisherIdentifier);
-    signalOnNewPublisher();
+    signalOnNewPublisher(publisherIdentifier);
   }
 
   /**
@@ -158,8 +160,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
    */
   public void updatePublishers(Collection<PublisherIdentifier> publishers) {
     for (final PublisherIdentifier publisher : publishers) {
-      executorService
-          .execute(new UpdatePublisherRunnable<T>(this, this.nodeIdentifier, publisher));
+      executorService.execute(new UpdatePublisherRunnable<T>(this, this.nodeIdentifier, publisher));
     }
   }
 
@@ -188,7 +189,6 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   /**
    * Signal all {@link SubscriberListener}s that the {@link Subscriber} has
    * successfully registered with the master.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */
@@ -224,7 +224,6 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   /**
    * Signal all {@link SubscriberListener}s that the {@link Subscriber} has
    * successfully unregistered with the master.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */
@@ -242,7 +241,6 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   /**
    * Signal all {@link SubscriberListener}s that the {@link Subscriber} has
    * failed to unregister with the master.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */
@@ -260,16 +258,15 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   /**
    * Signal all {@link SubscriberListener}s that a new {@link Publisher} has
    * connected.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */
-  public void signalOnNewPublisher() {
+  public void signalOnNewPublisher(final PublisherIdentifier publisherIdentifier) {
     final Subscriber<T> subscriber = this;
     subscriberListeners.signal(new SignalRunnable<SubscriberListener<T>>() {
       @Override
       public void run(SubscriberListener<T> listener) {
-        listener.onNewPublisher(subscriber);
+        listener.onNewPublisher(subscriber, publisherIdentifier);
       }
     });
   }
@@ -277,7 +274,6 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   /**
    * Signal all {@link SubscriberListener}s that the {@link Subscriber} has shut
    * down.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */

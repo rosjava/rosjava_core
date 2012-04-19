@@ -16,14 +16,16 @@
 
 package org.ros.internal.node.topic;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -38,11 +40,23 @@ public class TopicParticipantManager {
    * A mapping from topic name to {@link Subscriber}.
    */
   private final Map<GraphName, DefaultSubscriber<?>> subscribers;
-  
+
   /**
    * A mapping from topic name to {@link Publisher}.
    */
   private final Map<GraphName, DefaultPublisher<?>> publishers;
+
+  /**
+   * A mapping from {@link Subscriber} to its connected
+   * {@link PublisherIdentifier}s.
+   */
+  private final Multimap<DefaultSubscriber<?>, PublisherIdentifier> subscriberConnections;
+
+  /**
+   * A mapping from {@link Publisher} to its connected
+   * {@link SubscriberIdentifier}s.
+   */
+  private final Multimap<DefaultPublisher<?>, SubscriberIdentifier> publisherConnections;
 
   // TODO(damonkohler): Change to ListenerCollection.
   private TopicParticipantManagerListener listener;
@@ -50,6 +64,8 @@ public class TopicParticipantManager {
   public TopicParticipantManager() {
     publishers = Maps.newConcurrentMap();
     subscribers = Maps.newConcurrentMap();
+    subscriberConnections = HashMultimap.create();
+    publisherConnections = HashMultimap.create();
   }
 
   public void setListener(TopicParticipantManagerListener listener) {
@@ -100,11 +116,39 @@ public class TopicParticipantManager {
     }
   }
 
-  public List<DefaultSubscriber<?>> getSubscribers() {
+  public void addSubscriberConnection(DefaultSubscriber<?> subscriber,
+      PublisherIdentifier publisherIdentifier) {
+    subscriberConnections.put(subscriber, publisherIdentifier);
+  }
+
+  public void removeSubscriberConnection(DefaultSubscriber<?> subscriber,
+      PublisherIdentifier publisherIdentifier) {
+    subscriberConnections.remove(subscriber, publisherIdentifier);
+  }
+
+  public void addPublisherConnection(DefaultPublisher<?> publisher,
+      SubscriberIdentifier subscriberIdentifier) {
+    publisherConnections.put(publisher, subscriberIdentifier);
+  }
+
+  public void removePublisherConnection(DefaultPublisher<?> publisher,
+      SubscriberIdentifier subscriberIdentifier) {
+    publisherConnections.remove(publisher, subscriberIdentifier);
+  }
+
+  public Collection<DefaultSubscriber<?>> getSubscribers() {
     return ImmutableList.copyOf(subscribers.values());
   }
 
-  public List<DefaultPublisher<?>> getPublishers() {
+  public Collection<PublisherIdentifier> getSubscriberConnections(DefaultSubscriber<?> subscriber) {
+    return ImmutableList.copyOf(subscriberConnections.get(subscriber));
+  }
+
+  public Collection<DefaultPublisher<?>> getPublishers() {
     return ImmutableList.copyOf(publishers.values());
+  }
+
+  public Collection<SubscriberIdentifier> getPublisherConnections(DefaultPublisher<?> publisher) {
+    return ImmutableList.copyOf(publisherConnections.get(publisher));
   }
 }

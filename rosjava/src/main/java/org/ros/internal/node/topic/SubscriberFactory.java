@@ -34,8 +34,8 @@ public class SubscriberFactory {
   private final TopicParticipantManager topicParticipantManager;
   private final ScheduledExecutorService executorService;
 
-  public SubscriberFactory(NodeIdentifier nodeIdentifier, TopicParticipantManager topicParticipantManager,
-      ScheduledExecutorService executorService) {
+  public SubscriberFactory(NodeIdentifier nodeIdentifier,
+      TopicParticipantManager topicParticipantManager, ScheduledExecutorService executorService) {
     this.nodeIdentifier = nodeIdentifier;
     this.topicParticipantManager = topicParticipantManager;
     this.executorService = executorService;
@@ -66,9 +66,16 @@ public class SubscriberFactory {
         subscriber = (DefaultSubscriber<T>) topicParticipantManager.getSubscriber(topicName);
       } else {
         subscriber =
-            DefaultSubscriber.newDefault(nodeIdentifier, topicDeclaration,
-                executorService, messageDeserializer);
+            DefaultSubscriber.newDefault(nodeIdentifier, topicDeclaration, executorService,
+                messageDeserializer);
         subscriber.addSubscriberListener(new DefaultSubscriberListener<T>() {
+          @Override
+          public void onNewPublisher(Subscriber<T> subscriber,
+              PublisherIdentifier publisherIdentifier) {
+            topicParticipantManager.addSubscriberConnection((DefaultSubscriber<T>) subscriber,
+                publisherIdentifier);
+          }
+
           @Override
           public void onShutdown(Subscriber<T> subscriber) {
             topicParticipantManager.removeSubscriber((DefaultSubscriber<T>) subscriber);
