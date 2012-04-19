@@ -69,7 +69,7 @@ public class PublisherIdentifier {
         .build();
   }
 
-  public NodeIdentifier getNodeSlaveIdentifier() {
+  public NodeIdentifier getNodeIdentifier() {
     return nodeIdentifier;
   }
 
@@ -78,7 +78,7 @@ public class PublisherIdentifier {
    *         {@link Publisher}
    */
   public GraphName getNodeName() {
-    return nodeIdentifier.getNodeName();
+    return nodeIdentifier.getName();
   }
 
   /**

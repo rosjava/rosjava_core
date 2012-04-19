@@ -290,7 +290,7 @@ public class DefaultNode implements Node {
   @Override
   public URI lookupService(GraphName serviceName) {
     Response<URI> response =
-        masterClient.lookupService(slaveServer.toNodeIdentifier().getNodeName(),
+        masterClient.lookupService(slaveServer.toNodeIdentifier().getName(),
             resolveName(serviceName).toString());
     if (response.getStatusCode() == StatusCode.SUCCESS) {
       return response.getResult();

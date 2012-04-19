@@ -55,7 +55,7 @@ public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
   public ParameterClient(NodeIdentifier nodeIdentifier, URI uri) {
     super(uri, ParameterServerXmlRpcEndpoint.class);
     this.nodeIdentifier = nodeIdentifier;
-    nodeName = nodeIdentifier.getNodeName().toString();
+    nodeName = nodeIdentifier.getName().toString();
   }
 
   public Response<Object> getParam(GraphName parameterName) {

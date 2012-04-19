@@ -71,7 +71,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    * @return a void {@link Response}
    */
   public Response<Void> registerService(NodeIdentifier slave, ServiceServer<?, ?> service) {
-    return Response.fromListChecked(xmlRpcEndpoint.registerService(slave.getNodeName().toString(),
+    return Response.fromListChecked(xmlRpcEndpoint.registerService(slave.getName().toString(),
         service.getName().toString(), service.getUri().toString(), slave.getUri().toString()),
         new VoidResultFactory());
   }
@@ -88,7 +88,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    */
   public Response<Integer> unregisterService(NodeIdentifier slave, ServiceServer<?, ?> service) {
     return Response.fromListChecked(xmlRpcEndpoint.unregisterService(
-        slave.getNodeName().toString(), service.getName().toString(), service.getUri().toString()),
+        slave.getName().toString(), service.getName().toString(), service.getUri().toString()),
         new IntegerResultFactory());
   }
 
@@ -107,7 +107,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    *         currently publishing the specified topic
    */
   public Response<List<URI>> registerSubscriber(NodeIdentifier slave, Subscriber<?> subscriber) {
-    return Response.fromListChecked(xmlRpcEndpoint.registerSubscriber(slave.getNodeName()
+    return Response.fromListChecked(xmlRpcEndpoint.registerSubscriber(slave.getName()
         .toString(), subscriber.getTopicName().toString(), subscriber.getTopicMessageType(), slave
         .getUri().toString()), new UriListResultFactory());
   }
@@ -122,7 +122,7 @@ public class MasterClient extends Client<MasterXmlRpcEndpoint> {
    * @return the number of unregistered {@link Subscriber}s
    */
   public Response<Integer> unregisterSubscriber(NodeIdentifier slave, Subscriber<?> subscriber) {
-    return Response.fromListChecked(xmlRpcEndpoint.unregisterSubscriber(slave.getNodeName()
+    return Response.fromListChecked(xmlRpcEndpoint.unregisterSubscriber(slave.getName()
         .toString(), subscriber.getTopicName().toString(), slave.getUri().toString()),
         new IntegerResultFactory());
   }

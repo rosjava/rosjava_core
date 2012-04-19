@@ -204,10 +204,10 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
           }
         });
         if (success) {
-          Collection<PublisherIdentifier> publishers =
+          Collection<PublisherIdentifier> publisherIdentifiers =
               PublisherIdentifier.newCollectionFromUris(holder.get().getResult(),
                   subscriber.getTopicDeclaration());
-          subscriber.updatePublishers(publishers);
+          subscriber.updatePublishers(publisherIdentifiers);
           subscriber.signalOnMasterRegistrationSuccess();
         } else {
           subscriber.signalOnMasterRegistrationFailure();

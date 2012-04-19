@@ -36,7 +36,6 @@ import org.ros.node.topic.SubscriberListener;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -151,16 +150,17 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   }
 
   /**
-   * Updates the list of {@link DefaultPublisher}s for the topic that this
-   * {@link DefaultSubscriber} is interested in.
+   * Updates the list of {@link Publisher}s for the topic that this
+   * {@link Subscriber} is interested in.
    * 
-   * @param publishers
-   *          {@link List} of {@link PublisherIdentifier}s for the subscribed
-   *          topic
+   * @param publisherIdentifiers
+   *          {@link Collection} of {@link PublisherIdentifier}s for the
+   *          subscribed topic
    */
-  public void updatePublishers(Collection<PublisherIdentifier> publishers) {
-    for (final PublisherIdentifier publisher : publishers) {
-      executorService.execute(new UpdatePublisherRunnable<T>(this, this.nodeIdentifier, publisher));
+  public void updatePublishers(Collection<PublisherIdentifier> publisherIdentifiers) {
+    for (final PublisherIdentifier publisherIdentifier : publisherIdentifiers) {
+      executorService.execute(new UpdatePublisherRunnable<T>(this, this.nodeIdentifier,
+          publisherIdentifier));
     }
   }
 

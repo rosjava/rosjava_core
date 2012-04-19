@@ -86,7 +86,7 @@ public class NodeIdentifier {
     this.uri = uri;
   }
 
-  public GraphName getNodeName() {
+  public GraphName getName() {
     return name;
   }
 

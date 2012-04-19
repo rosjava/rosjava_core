@@ -47,7 +47,7 @@ public class SubscriberIdentifier {
         .build();
   }
 
-  public NodeIdentifier getSlaveIdentifier() {
+  public NodeIdentifier getNodeIdentifier() {
     return nodeIdentifier;
   }
 

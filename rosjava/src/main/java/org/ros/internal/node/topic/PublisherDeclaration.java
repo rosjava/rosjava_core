@@ -62,11 +62,11 @@ public class PublisherDeclaration {
   }
 
   public NodeIdentifier getSlaveIdentifier() {
-    return publisherIdentifier.getNodeSlaveIdentifier();
+    return publisherIdentifier.getNodeIdentifier();
   }
 
   public GraphName getSlaveName() {
-    return publisherIdentifier.getNodeSlaveIdentifier().getNodeName();
+    return publisherIdentifier.getNodeIdentifier().getName();
   }
 
   public URI getSlaveUri() {

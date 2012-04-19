@@ -27,6 +27,7 @@ import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
+import org.ros.internal.node.topic.SubscriberIdentifier;
 import org.ros.internal.node.topic.TopicDeclaration;
 import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl;
@@ -101,11 +102,44 @@ public class SlaveServer extends XmlRpcServer {
   }
 
   public List<Object> getBusInfo(String callerId) {
-    // For each publication and subscription (alive and dead):
-    // ((connection_id, destination_caller_id, direction, transport, topic_name,
-    // connected)*)
-    // TODO(kwc): returning empty list right now to keep debugging tools happy
-    return Lists.newArrayList();
+    List<Object> busInfo = Lists.newArrayList();
+    // The connection ID field is opaque to the user. A monotonically increasing
+    // integer for now is sufficient.
+    int id = 0;
+    for (DefaultPublisher<?> publisher : getPublications()) {
+      for (SubscriberIdentifier subscriberIdentifier : topicParticipantManager
+          .getPublisherConnections(publisher)) {
+        List<String> publisherBusInfo = Lists.newArrayList();
+        publisherBusInfo.add(Integer.toString(id));
+        publisherBusInfo.add(subscriberIdentifier.getNodeIdentifier().getName().toString());
+        // TODO(damonkohler): Pull out BusInfo constants.
+        publisherBusInfo.add("o");
+        // TODO(damonkohler): Add getter for protocol to topic participants.
+        publisherBusInfo.add(ProtocolNames.TCPROS);
+        publisherBusInfo.add(publisher.getTopicName().toString());
+        busInfo.add(publisherBusInfo);
+        id++;
+      }
+    }
+    for (DefaultSubscriber<?> subscriber : getSubscriptions()) {
+      for (PublisherIdentifier publisherIdentifer : topicParticipantManager
+          .getSubscriberConnections(subscriber)) {
+        List<String> subscriberBusInfo = Lists.newArrayList();
+        subscriberBusInfo.add(Integer.toString(id));
+        // Subscriber connection PublisherIdentifiers are populated with node
+        // URIs instead of names. As a result, the only identifier information
+        // available is the URI.
+        subscriberBusInfo.add(publisherIdentifer.getNodeIdentifier().getUri().toString());
+        // TODO(damonkohler): Pull out BusInfo constants.
+        subscriberBusInfo.add("i");
+        // TODO(damonkohler): Add getter for protocol to topic participants.
+        subscriberBusInfo.add(ProtocolNames.TCPROS);
+        subscriberBusInfo.add(publisherIdentifer.getTopicName().toString());
+        busInfo.add(subscriberBusInfo);
+        id++;
+      }
+    }
+    return busInfo;
   }
 
   public URI getMasterUri() {

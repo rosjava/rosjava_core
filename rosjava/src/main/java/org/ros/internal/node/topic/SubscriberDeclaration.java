@@ -55,8 +55,8 @@ public class SubscriberDeclaration {
     this.topicDeclaration = topicDeclaration;
   }
 
-  public NodeIdentifier getSlaveIdentifier() {
-    return subscriberIdentifier.getSlaveIdentifier();
+  public NodeIdentifier getNodeIdentifier() {
+    return subscriberIdentifier.getNodeIdentifier();
   }
 
   public URI getSlaveUri() {
