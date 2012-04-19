@@ -79,6 +79,12 @@ public class Md5GeneratorTest {
   }
 
   @Test
+  public void testOdometry() {
+    TopicDescription topicDescription = topicDescriptionFactory.newFromType("nav_msgs/Odometry");
+    assertEquals("cd5e73d190d741a2f92e81eda573aca7", topicDescription.getMd5Checksum());
+  }
+
+  @Test
   public void testEmpty() {
     ServiceDescription serviceDescription = serviceDescriptionFactory.newFromType("std_srvs/Empty");
     assertEquals("d41d8cd98f00b204e9800998ecf8427e", serviceDescription.getMd5Checksum());

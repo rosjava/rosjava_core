@@ -60,12 +60,16 @@ public class Md5Generator {
       }
 
       @Override
-      public void list(String type, String name) {
+      public void list(String type, int size, String name) {
         if (!PrimitiveFieldType.existsFor(type)) {
-          type = generate(type);
-          variables.add(String.format("%s %s\n", type, name));
+          String md5Checksum = generate(type);
+          variables.add(String.format("%s %s\n", md5Checksum, name));
         } else {
-          variables.add(String.format("%s[] %s\n", type, name));
+          if (size != -1) {
+            variables.add(String.format("%s[%d] %s\n", type, size, name));
+          } else {
+            variables.add(String.format("%s[] %s\n", type, name));
+          }
         }
       }
 

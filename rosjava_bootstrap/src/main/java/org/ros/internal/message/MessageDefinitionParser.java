@@ -62,10 +62,12 @@ public class MessageDefinitionParser {
      * 
      * @param type
      *          the type of the array
+     * @param size
+     *          the size of the array or -1 if the size is unbounded
      * @param name
      *          the name of the array
      */
-    void list(String type, String name);
+    void list(String type, int size, String name);
   }
 
   /**
@@ -131,11 +133,15 @@ public class MessageDefinitionParser {
       name = name.trim();
     }
     boolean array = false;
+    int size = -1;
     if (type.endsWith("]")) {
-      // TODO(damonkohler): Handle fixed length arrays. Currently, the size
-      // specification is ignored since Collections can grow as needed.
-      type = type.substring(0, type.lastIndexOf('['));
+      int leftBracketIndex = type.lastIndexOf('[');
+      int rightBracketIndex = type.lastIndexOf(']');
       array = true;
+      if (rightBracketIndex - leftBracketIndex > 1) {
+        size = Integer.parseInt(type.substring(leftBracketIndex + 1, rightBracketIndex));
+      }
+      type = type.substring(0, leftBracketIndex);
     }
     if (type.equals("Header")) {
       // The header field is treated as though it were a built-in and silently
@@ -160,7 +166,7 @@ public class MessageDefinitionParser {
       visitor.constant(type, name, value);
     } else {
       if (array) {
-        visitor.list(type, name);
+        visitor.list(type, size, name);
       } else {
         visitor.scalar(type, name);
       }

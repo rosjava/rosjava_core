@@ -56,7 +56,7 @@ public class MessageContextFactory {
       }
 
       @Override
-      public void list(String type, String name) {
+      public void list(String type, int size, String name) {
         context.addValueListField(getFieldType(type), name);
       }
 
