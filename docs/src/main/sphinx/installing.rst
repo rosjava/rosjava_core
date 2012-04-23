@@ -23,7 +23,8 @@ insufficient.
   sudo apt-get install python-setuptools
   easy_install --prefix ~/.local -U rosinstall
   export PATH=$PATH:~/.local/bin
-  cd ~/my_ros_workspace
+  mkdir ~/my_workspace
+  cd ~/my_workspace
   rosws init
   rosws merge /opt/ros/electric/.rosinstall
   rosws merge http://rosjava.googlecode.com/hg/.rosinstall
