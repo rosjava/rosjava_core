@@ -140,8 +140,10 @@ you're a ROS veteran. The :javadoc:`org.ros.topic.Publisher` publishes
 .. literalinclude:: ../../../../rosjava_tutorial_pubsub/src/main/java/org/ros/rosjava_tutorial_pubsub/Talker.java
   :language: java
   :linenos:
+  :lines: 17-
+  :emphasize-lines: 27,37
 
-Line 43 will probably feel unfamailiar even to ROS veterans. This is one
+Line 27 will probably feel unfamailiar even to ROS veterans. This is one
 example of rosjava's asynchornous API. The intent of our
 :javadoc:`org.ros.rosjava_tutorial_pubsub.Talker` class is to publish a hello
 world message to anyone who will listen once per second. One way to accomplish
@@ -151,7 +153,7 @@ method. So, we create a :javadoc:`org.ros.concurrent.CancellableLoop` and ask
 the :javadoc:`org.ros.node.Node` to execute it. The loop will be interrupted
 automatically when the :javadoc:`org.ros.node.Node` exits.
 
-On line 53 we create a new ``std_msgs.String`` message to publish using the
+On line 37 we create a new ``std_msgs.String`` message to publish using the
 :javadoc:`org.ros.node.topic.Publisher#newMessage()` method. Messages in
 rosjava cannot be instantiated directly. More on that later.
 
@@ -161,8 +163,10 @@ class.
 .. literalinclude:: ../../../../rosjava_tutorial_pubsub/src/main/java/org/ros/rosjava_tutorial_pubsub/Listener.java
   :language: java
   :linenos:
+  :lines: 17-
+  :emphasize-lines: 26
 
-In line 42 we see another example of rosjava's asynchornous API. We can add as
+In line 26 we see another example of rosjava's asynchornous API. We can add as
 many :javadoc:`org.ros.message.MessageListener`\s to our
 :javadoc:`org.ros.node.topic.Subscriber` as we like. When a new message is
 received, all of our :javadoc:`org.ros.message.MessageListener`\s will be
@@ -229,9 +233,11 @@ a ROS veteran.
 .. literalinclude:: ../../../../rosjava_tutorial_services/src/main/java/org/ros/rosjava_tutorial_services/Server.java
   :language: java
   :linenos:
+  :lines: 17-
+  :emphasize-lines: 28
 
 The :javadoc:`org.ros.node.service.ServiceResponseBuilder` is called
-asynchronously for each incoming request. On line 44 we modify the response
+asynchronously for each incoming request. On line 28 we modify the response
 output parameter to contain the sum of the two integers in the request. The
 response will be sent once the
 :javadoc:`org.ros.node.service.ServiceResponseBuilder#build(T, S)` returns.
@@ -242,14 +248,16 @@ class.
 .. literalinclude:: ../../../../rosjava_tutorial_services/src/main/java/org/ros/rosjava_tutorial_services/Client.java
   :language: java
   :linenos:
+  :lines: 17-
+  :emphasize-lines: 35-46
 
-In line 51 we see another example of rosjava's asynchornous API. When the response is
-received, our :javadoc:`org.ros.node.service.ServiceResponseListener` will be
-called with the incoming response as an argument to
-:javadoc:`org.ros.node.service.ServiceResponseListener#onSuccess(T)`.
-
-In the event that the server thows a
-:javadoc:`org.ros.exception.ServiceException` while building the response,
+On lines 35-46 we see another example of rosjava's asynchornous API. When the
+response is received, our
+:javadoc:`org.ros.node.service.ServiceResponseListener` will be called with the
+incoming response as an argument to
+:javadoc:`org.ros.node.service.ServiceResponseListener#onSuccess(T)`. In the
+event that the server thows a :javadoc:`org.ros.exception.ServiceException`
+while building the response,
 :javadoc:`org.ros.node.service.ServiceResponseListener#onFailure(RemoteException)`
 will be called. The :javadoc:`org.ros.exception.RemoteException` will contain
 the error message from the server.
