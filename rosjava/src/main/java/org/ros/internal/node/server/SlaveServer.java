@@ -166,8 +166,9 @@ public class SlaveServer extends XmlRpcServer {
   }
 
   public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
-    if (topicParticipantManager.hasSubscriber(topicName)) {
-      DefaultSubscriber<?> subscriber = topicParticipantManager.getSubscriber(topicName);
+    GraphName graphName = new GraphName(topicName);
+    if (topicParticipantManager.hasSubscriber(graphName)) {
+      DefaultSubscriber<?> subscriber = topicParticipantManager.getSubscriber(graphName);
       TopicDeclaration topicDeclaration = subscriber.getTopicDeclaration();
       Collection<PublisherIdentifier> identifiers =
           PublisherIdentifier.newCollectionFromUris(publisherUris, topicDeclaration);
@@ -178,9 +179,9 @@ public class SlaveServer extends XmlRpcServer {
   public ProtocolDescription requestTopic(String topicName, Collection<String> protocols)
       throws ServerException {
     // Canonicalize topic name.
-    topicName = new GraphName(topicName).toGlobal().toString();
-    if (!topicParticipantManager.hasPublisher(topicName)) {
-      throw new ServerException("No publishers for topic: " + topicName);
+    GraphName graphName = new GraphName(topicName).toGlobal();
+    if (!topicParticipantManager.hasPublisher(graphName)) {
+      throw new ServerException("No publishers for topic: " + graphName);
     }
     for (String protocol : protocols) {
       if (protocol.equals(ProtocolNames.TCPROS)) {

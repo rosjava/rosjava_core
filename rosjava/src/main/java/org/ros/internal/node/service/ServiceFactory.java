@@ -18,9 +18,9 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.DuplicateServiceException;
 import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.node.server.SlaveServer;
-import org.ros.internal.node.server.master.MasterServer;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
@@ -52,10 +52,8 @@ public class ServiceFactory {
   }
 
   /**
-   * Gets or creates a {@link DefaultServiceServer} instance.
-   * {@link DefaultServiceServer}s are cached and reused per service. When a new
-   * {@link DefaultServiceServer} is generated, it is registered with the
-   * {@link MasterServer}.
+   * Creates a {@link DefaultServiceServer} instance and registers it with the
+   * master.
    * 
    * @param serviceDeclaration
    *          the {@link ServiceDescription} that is being served
@@ -69,30 +67,38 @@ public class ServiceFactory {
    *          a {@link MessageFactory} to be used for creating responses
    * @return a {@link DefaultServiceServer} instance
    */
-  @SuppressWarnings("unchecked")
   public <T, S> DefaultServiceServer<T, S> newServer(ServiceDeclaration serviceDeclaration,
       ServiceResponseBuilder<T, S> responseBuilder, MessageDeserializer<T> deserializer,
       MessageSerializer<S> serializer, MessageFactory messageFactory) {
     DefaultServiceServer<T, S> serviceServer;
     GraphName name = serviceDeclaration.getName();
-    boolean createdNewServer = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasServer(name)) {
-        serviceServer = (DefaultServiceServer<T, S>) serviceManager.getServer(name);
+        throw new DuplicateServiceException(String.format("ServiceServer %s already exists.", name));
       } else {
         serviceServer =
             new DefaultServiceServer<T, S>(serviceDeclaration, responseBuilder,
                 slaveServer.getTcpRosAdvertiseAddress(), deserializer, serializer, messageFactory,
                 executorService);
-        createdNewServer = true;
+        serviceManager.addServer(serviceServer);
       }
     }
-
-    if (createdNewServer) {
-      serviceManager.addServer(serviceServer);
-    }
     return serviceServer;
+  }
+
+  /**
+   * @param name
+   *          the {@link GraphName} of the {@link DefaultServiceServer}
+   * @return the {@link DefaultServiceServer} with the given name or
+   *         {@code null} if it does not exist
+   */
+  @SuppressWarnings("unchecked")
+  public <T, S> DefaultServiceServer<T, S> getServer(GraphName name) {
+    if (serviceManager.hasServer(name)) {
+      return (DefaultServiceServer<T, S>) serviceManager.getServer(name);
+    }
+    return null;
   }
 
   /**
@@ -127,12 +133,12 @@ public class ServiceFactory {
         serviceClient =
             DefaultServiceClient.newDefault(nodeName, serviceDeclaration, serializer, deserializer,
                 messageFactory, executorService);
+        serviceManager.addClient(serviceClient);
         createdNewClient = true;
       }
     }
 
     if (createdNewClient) {
-      serviceManager.addClient(serviceClient);
       serviceClient.connect(serviceDeclaration.getUri());
     }
     return serviceClient;

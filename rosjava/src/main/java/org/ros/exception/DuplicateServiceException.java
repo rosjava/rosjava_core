@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2012 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,17 +19,9 @@ package org.ros.exception;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosRuntimeException extends RuntimeException {
+public class DuplicateServiceException extends RosRuntimeException {
 
-  public RosRuntimeException(final Throwable throwable) {
-    super(throwable);
-  }
-
-  public RosRuntimeException(final String message, final Throwable throwable) {
-    super(message, throwable);
-  }
-
-  public RosRuntimeException(final String message) {
+  public DuplicateServiceException(final String message) {
     super(message);
   }
 }

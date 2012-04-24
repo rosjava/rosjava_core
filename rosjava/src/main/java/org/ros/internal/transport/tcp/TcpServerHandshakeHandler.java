@@ -92,7 +92,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
       Exception {
     Preconditions.checkState(incomingHeader.containsKey(ConnectionHeaderFields.TOPIC),
         "Handshake header missing field: " + ConnectionHeaderFields.TOPIC);
-    String topicName = incomingHeader.get(ConnectionHeaderFields.TOPIC);
+    GraphName topicName = new GraphName(incomingHeader.get(ConnectionHeaderFields.TOPIC));
     Preconditions.checkState(topicParticipantManager.hasPublisher(topicName),
         "No publisher for topic: " + topicName);
     DefaultPublisher<?> publisher = topicParticipantManager.getPublisher(topicName);
@@ -104,7 +104,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
     }
     String nodeName = incomingHeader.get(ConnectionHeaderFields.CALLER_ID);
     publisher.addSubscriber(new SubscriberIdentifier(NodeIdentifier.forName(nodeName),
-        TopicIdentifier.forName(topicName)), channel);
+        new TopicIdentifier(topicName)), channel);
 
     // Once the handshake is complete, there will be nothing incoming on the
     // channel. So, we replace the handshake handler with a handler which will

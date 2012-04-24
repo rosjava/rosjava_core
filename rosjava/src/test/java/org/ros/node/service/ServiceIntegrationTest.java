@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.ros.RosTest;
+import org.ros.exception.DuplicateServiceException;
 import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceException;
@@ -58,6 +59,12 @@ public class ServiceIntegrationTest extends RosTest {
                     response.setSum(request.getA() + request.getB());
                   }
                 });
+        try {
+          node.newServiceServer(SERVICE_NAME, test_ros.AddTwoInts._TYPE, null);
+          fail();
+        } catch (DuplicateServiceException e) {
+          // Only one ServiceServer with a given name can be created.
+        }
         serviceServer.addListener(countDownServiceServerListener);
       }
 
@@ -75,7 +82,7 @@ public class ServiceIntegrationTest extends RosTest {
       }
     }, nodeConfiguration);
 
-    countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS);
+    assertTrue(countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     final CountDownLatch latch = new CountDownLatch(1);
     nodeMainExecutor.execute(new NodeMain() {
@@ -162,7 +169,7 @@ public class ServiceIntegrationTest extends RosTest {
       }
     }, nodeConfiguration);
 
-    countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS);
+    assertTrue(countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     final CountDownLatch latch = new CountDownLatch(1);
     nodeMainExecutor.execute(new NodeMain() {

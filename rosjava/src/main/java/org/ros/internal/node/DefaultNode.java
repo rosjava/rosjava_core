@@ -18,8 +18,6 @@ package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.ros.node.service.ServiceResponseBuilder;
-
 import org.apache.commons.logging.Log;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerCollection;
@@ -58,6 +56,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
@@ -262,11 +261,39 @@ public class DefaultNode implements Node {
     return newServiceServer(new GraphName(serviceName), serviceType, responseBuilder);
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T, S> ServiceServer<T, S> getServiceServer(GraphName serviceName) {
+    return (ServiceServer<T, S>) serviceManager.getServer(serviceName);
+  }
+
+  @Override
+  public <T, S> ServiceServer<T, S> getServiceServer(String serviceName) {
+    return getServiceServer(new GraphName(serviceName));
+  }
+
+  @Override
+  public URI lookupServiceUri(GraphName serviceName) {
+    Response<URI> response =
+        masterClient.lookupService(slaveServer.toNodeIdentifier().getName(),
+            resolveName(serviceName).toString());
+    if (response.getStatusCode() == StatusCode.SUCCESS) {
+      return response.getResult();
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  public URI lookupServiceUri(String serviceName) {
+    return lookupServiceUri(new GraphName(serviceName));
+  }
+
   @Override
   public <T, S> ServiceClient<T, S> newServiceClient(GraphName serviceName, String serviceType)
       throws ServiceNotFoundException {
     GraphName resolvedServiceName = resolveName(serviceName);
-    URI uri = lookupService(resolvedServiceName);
+    URI uri = lookupServiceUri(resolvedServiceName);
     if (uri == null) {
       throw new ServiceNotFoundException("No such service " + resolvedServiceName + " of type "
           + serviceType);
@@ -285,23 +312,6 @@ public class DefaultNode implements Node {
   public <T, S> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
       throws ServiceNotFoundException {
     return newServiceClient(new GraphName(serviceName), serviceType);
-  }
-
-  @Override
-  public URI lookupService(GraphName serviceName) {
-    Response<URI> response =
-        masterClient.lookupService(slaveServer.toNodeIdentifier().getName(),
-            resolveName(serviceName).toString());
-    if (response.getStatusCode() == StatusCode.SUCCESS) {
-      return response.getResult();
-    } else {
-      return null;
-    }
-  }
-
-  @Override
-  public URI lookupService(String serviceName) {
-    return lookupService(new GraphName(serviceName));
   }
 
   @Override

@@ -16,8 +16,6 @@
 
 package org.ros.node;
 
-import org.ros.node.service.ServiceResponseBuilder;
-
 import org.apache.commons.logging.Log;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.exception.ServiceNotFoundException;
@@ -30,6 +28,7 @@ import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
@@ -150,7 +149,7 @@ public interface Node {
   <T> Subscriber<T> newSubscriber(String topicName, String messageType);
 
   /**
-   * Create a {@link ServiceServer}.
+   * Create a new {@link ServiceServer}.
    * 
    * @param serviceName
    *          the name of the service
@@ -168,6 +167,31 @@ public interface Node {
    */
   <T, S> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
       ServiceResponseBuilder<T, S> serviceResponseBuilder);
+
+  /**
+   * @param serviceName
+   *          the {@link GraphName} of the {@link ServiceServer}
+   * @return the {@link ServiceServer} with the given name or {@code null} if it
+   *         does not exist
+   */
+  <T, S> ServiceServer<T, S> getServiceServer(GraphName serviceName);
+
+  /**
+   * @see Node#getServiceServer(GraphName)
+   */
+  <T, S> ServiceServer<T, S> getServiceServer(String serviceName);
+
+  /**
+   * @param serviceName
+   *          the {@link GraphName} of the service {@link URI} to lookup
+   * @return the {@link URI} of the service or {@code null} if it does not exist
+   */
+  URI lookupServiceUri(GraphName serviceName);
+
+  /**
+   * @see #lookupServiceUri(GraphName)
+   */
+  URI lookupServiceUri(String serviceName);
 
   /**
    * Create a {@link ServiceClient}.
@@ -188,19 +212,6 @@ public interface Node {
    */
   <T, S> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
       throws ServiceNotFoundException;
-
-  /**
-   * @param serviceName
-   *          the {@link GraphName} of the service to lookup
-   * @return {@link URI} of the service or {@code null} if the service does not
-   *         exist
-   */
-  URI lookupService(GraphName serviceName);
-
-  /**
-   * @see #lookupService(GraphName)
-   */
-  URI lookupService(String serviceName);
 
   /**
    * Create a {@link ParameterTree} to query and set parameters on the ROS

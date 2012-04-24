@@ -19,6 +19,7 @@ package org.ros.internal.node.topic;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
+import org.ros.namespace.GraphName;
 import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
 
@@ -61,7 +62,7 @@ public class PublisherFactory {
   @SuppressWarnings("unchecked")
   public <T> Publisher<T> newOrExisting(TopicDeclaration topicDeclaration,
       MessageSerializer<T> messageSerializer) {
-    String topicName = topicDeclaration.getName().toString();
+    GraphName topicName = topicDeclaration.getName();
 
     synchronized (topicParticipantManager) {
       if (topicParticipantManager.hasPublisher(topicName)) {

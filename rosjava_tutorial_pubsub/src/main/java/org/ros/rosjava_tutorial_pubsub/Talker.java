@@ -38,7 +38,7 @@ public class Talker implements NodeMain {
   public void onStart(final Node node) {
     final Publisher<std_msgs.String> publisher =
         node.newPublisher("chatter", std_msgs.String._TYPE);
-    // This CancellableLoop will be canceled automatically when the Node shuts
+    // This CancellableLoop will be canceled automatically when the node shuts
     // down.
     node.executeCancellableLoop(new CancellableLoop() {
       private int sequenceNumber;

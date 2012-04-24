@@ -60,8 +60,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   private static final TimeUnit DEFAULT_SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
   /**
-   * Queue of all messages being published by this {@link Publisher}
-   * .org.ros.message.MessageFactory
+   * Queue of all messages being published by this {@link Publisher}.
    */
   private final OutgoingMessageQueue<T> outgoingMessageQueue;
   private final ListenerCollection<PublisherListener<T>> listeners;
@@ -216,7 +215,6 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   /**
    * Signal all {@link PublisherListener}s that the {@link Publisher} has
    * successfully registered with the master.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */
@@ -234,7 +232,6 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   /**
    * Signal all {@link PublisherListener}s that the {@link Publisher} has failed
    * to register with the master.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */
@@ -252,7 +249,6 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   /**
    * Signal all {@link PublisherListener}s that the {@link Publisher} has
    * successfully unregistered with the master.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */
@@ -270,7 +266,6 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   /**
    * Signal all {@link PublisherListener}s that the {@link Publisher} has failed
    * to unregister with the master.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */

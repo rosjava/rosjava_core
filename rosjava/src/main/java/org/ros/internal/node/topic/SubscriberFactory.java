@@ -18,6 +18,7 @@ package org.ros.internal.node.topic;
 
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.message.MessageDeserializer;
+import org.ros.namespace.GraphName;
 import org.ros.node.topic.DefaultSubscriberListener;
 import org.ros.node.topic.Subscriber;
 
@@ -57,15 +58,13 @@ public class SubscriberFactory {
   @SuppressWarnings("unchecked")
   public <T> Subscriber<T> newOrExisting(TopicDeclaration topicDeclaration,
       MessageDeserializer<T> messageDeserializer) {
-    String topicName = topicDeclaration.getName().toString();
-    DefaultSubscriber<T> subscriber;
-    boolean createdNewSubscriber = false;
+    GraphName topicName = topicDeclaration.getName();
 
     synchronized (topicParticipantManager) {
       if (topicParticipantManager.hasSubscriber(topicName)) {
-        subscriber = (DefaultSubscriber<T>) topicParticipantManager.getSubscriber(topicName);
+        return (DefaultSubscriber<T>) topicParticipantManager.getSubscriber(topicName);
       } else {
-        subscriber =
+        DefaultSubscriber<T> subscriber =
             DefaultSubscriber.newDefault(nodeIdentifier, topicDeclaration, executorService,
                 messageDeserializer);
         subscriber.addSubscriberListener(new DefaultSubscriberListener<T>() {
@@ -81,13 +80,9 @@ public class SubscriberFactory {
             topicParticipantManager.removeSubscriber((DefaultSubscriber<T>) subscriber);
           }
         });
-        createdNewSubscriber = true;
+        topicParticipantManager.addSubscriber(subscriber);
+        return subscriber;
       }
     }
-
-    if (createdNewSubscriber) {
-      topicParticipantManager.addSubscriber(subscriber);
-    }
-    return subscriber;
   }
 }

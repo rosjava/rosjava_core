@@ -72,20 +72,20 @@ public class TopicParticipantManager {
     this.listener = listener;
   }
 
-  public boolean hasSubscriber(String topicName) {
-    return subscribers.containsKey(new GraphName(topicName));
+  public boolean hasSubscriber(GraphName topicName) {
+    return subscribers.containsKey(topicName);
   }
 
-  public boolean hasPublisher(String topicName) {
-    return publishers.containsKey(new GraphName(topicName));
+  public boolean hasPublisher(GraphName topicName) {
+    return publishers.containsKey(topicName);
   }
 
-  public DefaultPublisher<?> getPublisher(String topicName) {
-    return publishers.get(new GraphName(topicName));
+  public DefaultPublisher<?> getPublisher(GraphName topicName) {
+    return publishers.get(topicName);
   }
 
-  public DefaultSubscriber<?> getSubscriber(String topicName) {
-    return subscribers.get(new GraphName(topicName));
+  public DefaultSubscriber<?> getSubscriber(GraphName topicName) {
+    return subscribers.get(topicName);
   }
 
   public void addPublisher(DefaultPublisher<?> publisher) {
