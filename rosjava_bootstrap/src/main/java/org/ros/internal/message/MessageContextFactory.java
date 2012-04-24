@@ -64,9 +64,8 @@ public class MessageContextFactory {
       public void constant(String type, String name, String value) {
         Preconditions.checkArgument(PrimitiveFieldType.existsFor(type),
             "Only primitive field types may be constant: " + messageDeclaration);
-        PrimitiveFieldType primitiveFieldType = PrimitiveFieldType.valueOf(type.toUpperCase());
-        context.addConstantField(primitiveFieldType, name,
-            primitiveFieldType.parseFromString(value));
+        FieldType fieldType = PrimitiveFieldType.valueOf(type.toUpperCase());
+        context.addConstantField(fieldType, name, fieldType.parseFromString(value));
       }
     };
     MessageDefinitionParser messageDefinitionParser = new MessageDefinitionParser(visitor);
