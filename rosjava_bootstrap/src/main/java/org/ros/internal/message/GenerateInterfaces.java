@@ -19,9 +19,8 @@ package org.ros.internal.message;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import org.ros.EnvironmentVariables;
-
 import org.apache.commons.io.FileUtils;
+import org.ros.EnvironmentVariables;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.service.ServiceDefinitionFileProvider;
 import org.ros.internal.message.topic.TopicDefinitionFileProvider;
@@ -75,7 +74,6 @@ public class GenerateInterfaces {
       }
     }
     for (MessageIdentifier topicType : topicTypes) {
-      File file = new File(outputDirectory, topicType.getType() + ".java");
       String definition = messageDefinitionProviderChain.get(topicType.getType());
       MessageDeclaration messageDeclaration = new MessageDeclaration(topicType, definition);
       MessageInterfaceBuilder builder = new MessageInterfaceBuilder();
@@ -83,7 +81,16 @@ public class GenerateInterfaces {
       builder.setPackageName(messageDeclaration.getPackage());
       builder.setInterfaceName(messageDeclaration.getName());
       builder.setAddConstantsAndMethods(true);
-      FileUtils.writeStringToFile(file, builder.build(messageFactory));
+      String content;
+      try {
+        content = builder.build(messageFactory);
+      } catch (Exception e) {
+        System.out.println(String.format("Failed to generate interface for %s: %s",
+            topicType.getType(), e.getMessage()));
+        continue;
+      }
+      File file = new File(outputDirectory, topicType.getType() + ".java");
+      FileUtils.writeStringToFile(file, content);
     }
   }
 
@@ -109,7 +116,6 @@ public class GenerateInterfaces {
       }
     }
     for (MessageIdentifier serviceType : serviceTypes) {
-      File file = new File(outputDirectory, serviceType.getType() + ".java");
       String definition = messageDefinitionProviderChain.get(serviceType.getType());
 
       MessageInterfaceBuilder builder = new MessageInterfaceBuilder();
@@ -132,9 +138,18 @@ public class GenerateInterfaces {
       responseBuilder.setInterfaceName("Response");
       responseBuilder.setAddConstantsAndMethods(true);
 
-      String nestedContent =
-          requestBuilder.build(messageFactory) + "\n" + responseBuilder.build(messageFactory);
+      String nestedContent;
+      try {
+        nestedContent =
+            requestBuilder.build(messageFactory) + "\n" + responseBuilder.build(messageFactory);
+      } catch (Exception e) {
+        System.err.println(String.format("Failed to generate interface for %s: %s",
+            serviceType.getType(), e.getMessage()));
+        continue;
+      }
       builder.setNestedContent(nestedContent);
+      File file = new File(outputDirectory, serviceType.getType() + ".java");
+      // TODO(damonkohler): Passing in null here is confusing.
       FileUtils.writeStringToFile(file, builder.build(null));
     }
   }
@@ -160,13 +175,13 @@ public class GenerateInterfaces {
     if (arguments.size() == 0) {
       arguments.add(".");
     }
-    File outputDirectory = new File(arguments.remove(0));
     String rosPackagePath = System.getenv(EnvironmentVariables.ROS_PACKAGE_PATH);
     Collection<File> packagePath = Lists.newArrayList();
     for (String path : rosPackagePath.split(File.pathSeparator)) {
       packagePath.add(new File(path));
     }
     GenerateInterfaces generateInterfaces = new GenerateInterfaces();
+    File outputDirectory = new File(arguments.remove(0));
     generateInterfaces.generate(outputDirectory, arguments, packagePath);
   }
 }
