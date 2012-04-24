@@ -18,8 +18,6 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.node.service.ServiceResponseBuilder;
-
 import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.server.master.MasterServer;
@@ -28,6 +26,7 @@ import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceClient;
+import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -67,7 +66,7 @@ public class ServiceFactory {
    * @param serializer
    *          a {@link MessageSerializer} to be used for outgoing messages
    * @param messageFactory
-   *          TODO
+   *          a {@link MessageFactory} to be used for creating responses
    * @return a {@link DefaultServiceServer} instance
    */
   @SuppressWarnings("unchecked")
@@ -75,8 +74,8 @@ public class ServiceFactory {
       ServiceResponseBuilder<T, S> responseBuilder, MessageDeserializer<T> deserializer,
       MessageSerializer<S> serializer, MessageFactory messageFactory) {
     DefaultServiceServer<T, S> serviceServer;
-    String name = serviceDeclaration.getName().toString();
-    boolean createdNewService = false;
+    GraphName name = serviceDeclaration.getName();
+    boolean createdNewServer = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasServer(name)) {
@@ -86,12 +85,12 @@ public class ServiceFactory {
             new DefaultServiceServer<T, S>(serviceDeclaration, responseBuilder,
                 slaveServer.getTcpRosAdvertiseAddress(), deserializer, serializer, messageFactory,
                 executorService);
-        createdNewService = true;
+        createdNewServer = true;
       }
     }
 
-    if (createdNewService) {
-      slaveServer.addService(serviceServer);
+    if (createdNewServer) {
+      serviceManager.addServer(serviceServer);
     }
     return serviceServer;
   }
@@ -102,9 +101,14 @@ public class ServiceFactory {
    * {@link DefaultServiceClient} is created, it is connected to the
    * {@link DefaultServiceServer}.
    * 
+   * @param serviceDeclaration
+   *          the {@link ServiceDescription} that is being served
+   * @param deserializer
+   *          a {@link MessageDeserializer} to be used for incoming messages
+   * @param serializer
+   *          a {@link MessageSerializer} to be used for outgoing messages
    * @param messageFactory
-   *          TODO
-   * 
+   *          a {@link MessageFactory} to be used for creating requests
    * @return a {@link DefaultServiceClient} instance
    */
   @SuppressWarnings("unchecked")
@@ -113,8 +117,8 @@ public class ServiceFactory {
       MessageFactory messageFactory) {
     Preconditions.checkNotNull(serviceDeclaration.getUri());
     DefaultServiceClient<T, S> serviceClient;
-    String name = serviceDeclaration.getName().toString();
-    boolean createdNewService = false;
+    GraphName name = serviceDeclaration.getName();
+    boolean createdNewClient = false;
 
     synchronized (serviceManager) {
       if (serviceManager.hasClient(name)) {
@@ -123,11 +127,12 @@ public class ServiceFactory {
         serviceClient =
             DefaultServiceClient.newDefault(nodeName, serviceDeclaration, serializer, deserializer,
                 messageFactory, executorService);
-        createdNewService = true;
+        createdNewClient = true;
       }
     }
 
-    if (createdNewService) {
+    if (createdNewClient) {
+      serviceManager.addClient(serviceClient);
       serviceClient.connect(serviceDeclaration.getUri());
     }
     return serviceClient;

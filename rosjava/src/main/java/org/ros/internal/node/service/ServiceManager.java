@@ -55,11 +55,11 @@ public class ServiceManager {
     this.listener = listener;
   }
 
-  public boolean hasServer(String serviceName) {
-    return serviceServers.containsKey(new GraphName(serviceName));
+  public boolean hasServer(GraphName name) {
+    return serviceServers.containsKey(name);
   }
 
-  public void putServer(DefaultServiceServer<?, ?> serviceServer) {
+  public void addServer(DefaultServiceServer<?, ?> serviceServer) {
     serviceServers.put(serviceServer.getName(), serviceServer);
     if (listener != null) {
       listener.onServiceServerAdded(serviceServer);
@@ -73,15 +73,15 @@ public class ServiceManager {
     }
   }
 
-  public DefaultServiceServer<?, ?> getServer(String serviceName) {
-    return serviceServers.get(new GraphName(serviceName));
+  public DefaultServiceServer<?, ?> getServer(GraphName name) {
+    return serviceServers.get(name);
   }
 
-  public boolean hasClient(String serviceName) {
-    return serviceClients.containsKey(new GraphName(serviceName));
+  public boolean hasClient(GraphName name) {
+    return serviceClients.containsKey(name);
   }
 
-  public void putClient(DefaultServiceClient<?, ?> serviceClient) {
+  public void addClient(DefaultServiceClient<?, ?> serviceClient) {
     serviceClients.put(serviceClient.getName(), serviceClient);
   }
 
@@ -89,8 +89,8 @@ public class ServiceManager {
     serviceClients.remove(serviceClient.getName());
   }
 
-  public DefaultServiceClient<?, ?> getClient(String serviceName) {
-    return serviceClients.get(new GraphName(serviceName));
+  public DefaultServiceClient<?, ?> getClient(GraphName name) {
+    return serviceClients.get(name);
   }
 
   public List<DefaultServiceServer<?, ?>> getServers() {

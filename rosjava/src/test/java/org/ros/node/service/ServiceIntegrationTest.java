@@ -84,6 +84,11 @@ public class ServiceIntegrationTest extends RosTest {
         ServiceClient<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceClient;
         try {
           serviceClient = node.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
+          // Test that requesting another client for the same service returns
+          // the same instance.
+          ServiceClient<?, ?> duplicate =
+              node.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
+          assertEquals(serviceClient, duplicate);
         } catch (ServiceNotFoundException e) {
           throw new RosRuntimeException(e);
         }

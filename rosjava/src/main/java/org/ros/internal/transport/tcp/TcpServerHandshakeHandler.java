@@ -18,8 +18,6 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.node.topic.TopicIdentifier;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -35,9 +33,11 @@ import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.service.ServiceResponseEncoder;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.SubscriberIdentifier;
+import org.ros.internal.node.topic.TopicIdentifier;
 import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import org.ros.namespace.GraphName;
 
 import java.util.Map;
 
@@ -73,7 +73,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
 
   private void handleServiceHandshake(MessageEvent e, ChannelPipeline pipeline,
       Map<String, String> incomingHeader) {
-    String serviceName = incomingHeader.get(ConnectionHeaderFields.SERVICE);
+    GraphName serviceName = new GraphName(incomingHeader.get(ConnectionHeaderFields.SERVICE));
     Preconditions.checkState(serviceManager.hasServer(serviceName));
     DefaultServiceServer<?, ?> serviceServer = serviceManager.getServer(serviceName);
     e.getChannel().write(serviceServer.finishHandshake(incomingHeader));

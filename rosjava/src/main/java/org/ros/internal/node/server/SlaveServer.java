@@ -22,7 +22,6 @@ import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.parameter.ParameterManager;
-import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
@@ -51,7 +50,6 @@ public class SlaveServer extends XmlRpcServer {
   private final GraphName nodeName;
   private final MasterClient masterClient;
   private final TopicParticipantManager topicParticipantManager;
-  private final ServiceManager serviceManager;
   private final ParameterManager parameterManager;
   private final TcpRosServer tcpRosServer;
 
@@ -64,7 +62,6 @@ public class SlaveServer extends XmlRpcServer {
     this.nodeName = nodeName;
     this.masterClient = master;
     this.topicParticipantManager = topicParticipantManager;
-    this.serviceManager = serviceManager;
     this.parameterManager = parameterManager;
     this.tcpRosServer =
         new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicParticipantManager,
@@ -91,10 +88,6 @@ public class SlaveServer extends XmlRpcServer {
   public void shutdown() {
     super.shutdown();
     tcpRosServer.shutdown();
-  }
-
-  public void addService(DefaultServiceServer<?, ?> server) {
-    serviceManager.putServer(server);
   }
 
   public List<Object> getBusStats(String callerId) {
