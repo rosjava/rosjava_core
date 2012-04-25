@@ -18,8 +18,8 @@ package org.ros;
 
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
-import org.ros.node.NodeMain;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
@@ -29,7 +29,7 @@ import org.ros.node.topic.Subscriber;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class PassthroughTestNode implements NodeMain {
+public class PassthroughTestNode extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
@@ -37,14 +37,14 @@ public class PassthroughTestNode implements NodeMain {
   }
 
   @Override
-  public void onStart(final Node node) {
+  public void onStart(final ConnectedNode connectedNode) {
     // The goal of the passthrough node is simply to retransmit the messages
     // sent to it. This allows us to external verify that the node is compatible
     // with multiple publishers, multiple subscribers, etc...
 
     // String pass through
     final Publisher<std_msgs.String> pub_string =
-        node.newPublisher("string_out", std_msgs.String._TYPE);
+        connectedNode.newPublisher("string_out", std_msgs.String._TYPE);
     MessageListener<std_msgs.String> string_cb = new MessageListener<std_msgs.String>() {
       @Override
       public void onNewMessage(std_msgs.String m) {
@@ -52,38 +52,38 @@ public class PassthroughTestNode implements NodeMain {
       }
     };
     Subscriber<std_msgs.String> stringSubscriber =
-        node.newSubscriber("string_in", "std_msgs/String");
+        connectedNode.newSubscriber("string_in", "std_msgs/String");
     stringSubscriber.addMessageListener(string_cb);
 
     // Int64 pass through
-    final Publisher<std_msgs.Int64> pub_int64 = node.newPublisher("int64_out", "std_msgs/Int64");
+    final Publisher<std_msgs.Int64> pub_int64 = connectedNode.newPublisher("int64_out", "std_msgs/Int64");
     MessageListener<std_msgs.Int64> int64_cb = new MessageListener<std_msgs.Int64>() {
       @Override
       public void onNewMessage(std_msgs.Int64 m) {
         pub_int64.publish(m);
       }
     };
-    Subscriber<std_msgs.Int64> int64Subscriber = node.newSubscriber("int64_in", "std_msgs/Int64");
+    Subscriber<std_msgs.Int64> int64Subscriber = connectedNode.newSubscriber("int64_in", "std_msgs/Int64");
     int64Subscriber.addMessageListener(int64_cb);
 
     // TestHeader pass through
     final Publisher<test_ros.TestHeader> pub_header =
-        node.newPublisher("test_header_out", test_ros.TestHeader._TYPE);
+        connectedNode.newPublisher("test_header_out", test_ros.TestHeader._TYPE);
     MessageListener<test_ros.TestHeader> header_cb = new MessageListener<test_ros.TestHeader>() {
       @Override
       public void onNewMessage(test_ros.TestHeader m) {
         m.setOrigCallerId(m.getCallerId());
-        m.setCallerId(node.getName().toString());
+        m.setCallerId(connectedNode.getName().toString());
         pub_header.publish(m);
       }
     };
     Subscriber<test_ros.TestHeader> testHeaderSubscriber =
-        node.newSubscriber("test_header_in", "test_ros/TestHeader");
+        connectedNode.newSubscriber("test_header_in", "test_ros/TestHeader");
     testHeaderSubscriber.addMessageListener(header_cb);
 
     // TestComposite pass through
     final Publisher<test_ros.Composite> pub_composite =
-        node.newPublisher("composite_out", "test_ros/Composite");
+        connectedNode.newPublisher("composite_out", "test_ros/Composite");
     MessageListener<test_ros.Composite> composite_cb = new MessageListener<test_ros.Composite>() {
       @Override
       public void onNewMessage(test_ros.Composite m) {
@@ -91,15 +91,7 @@ public class PassthroughTestNode implements NodeMain {
       }
     };
     Subscriber<test_ros.Composite> compositeSubscriber =
-        node.newSubscriber("composite_in", "test_ros/Composite");
+        connectedNode.newSubscriber("composite_in", "test_ros/Composite");
     compositeSubscriber.addMessageListener(composite_cb);
-  }
-
-  @Override
-  public void onShutdown(Node node) {
-  }
-
-  @Override
-  public void onShutdownComplete(Node node) {
   }
 }

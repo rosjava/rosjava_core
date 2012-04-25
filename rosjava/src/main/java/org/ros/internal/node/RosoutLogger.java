@@ -16,11 +16,9 @@
 
 package org.ros.internal.node;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.node.Node;
+import org.ros.Topics;
 import org.ros.node.topic.Publisher;
 
 import java.io.PrintWriter;
@@ -30,23 +28,21 @@ import java.io.StringWriter;
  * Logger that logs to both an underlying Apache Commons Log as well as /rosout.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public class RosoutLogger implements Log {
+class RosoutLogger implements Log {
 
-  private static final String ROSOUT_TOPIC = "/rosout";
-
-  private final Node node;
+  private final DefaultNode defaultNode;
   private final Publisher<rosgraph_msgs.Log> publisher;
   private final Log log;
 
-  RosoutLogger(Node node) {
-    this.node = node;
-    publisher = node.newPublisher(ROSOUT_TOPIC, "rosgraph_msgs/Log");
-    log = LogFactory.getLog(node.getName().toString());
+  public RosoutLogger(DefaultNode defaultNode) {
+    this.defaultNode = defaultNode;
+    publisher = defaultNode.newPublisher(Topics.ROSOUT, rosgraph_msgs.Log._TYPE);
+    log = LogFactory.getLog(defaultNode.getName().toString());
   }
 
-  @VisibleForTesting
-  Publisher<rosgraph_msgs.Log> getPublisher() {
+  public Publisher<rosgraph_msgs.Log> getPublisher() {
     return publisher;
   }
 
@@ -58,11 +54,10 @@ public class RosoutLogger implements Log {
   }
 
   private void publish(byte level, Object message) {
-    rosgraph_msgs.Log logMessage =
-        node.getTopicMessageFactory().newFromType(rosgraph_msgs.Log._TYPE);
-    logMessage.getHeader().setStamp(node.getCurrentTime());
+    rosgraph_msgs.Log logMessage = publisher.newMessage();
+    logMessage.getHeader().setStamp(defaultNode.getCurrentTime());
     logMessage.setLevel(level);
-    logMessage.setName(node.getName().toString());
+    logMessage.setName(defaultNode.getName().toString());
     logMessage.setMsg(message.toString());
     // TODO(damonkohler): Should update the topics field with a list of all
     // published and subscribed topics for the node that created this logger.

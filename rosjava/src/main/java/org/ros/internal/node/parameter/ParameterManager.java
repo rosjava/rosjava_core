@@ -16,49 +16,70 @@
 
 package org.ros.internal.node.parameter;
 
-import java.util.Collection;
+import com.google.common.collect.Maps;
 
+import org.ros.concurrent.ListenerCollection;
+import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.namespace.GraphName;
 import org.ros.node.parameter.ParameterListener;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ParameterManager {
 
-  private final Multimap<GraphName, ParameterListener> listeners;
-  
-  public ParameterManager() {
-    listeners = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, ParameterListener>create());
+  private final ExecutorService executorService;
+  private final Map<GraphName, ListenerCollection<ParameterListener>> listeners;
+
+  public ParameterManager(ExecutorService executorService) {
+    this.executorService = executorService;
+    listeners = Maps.newHashMap();
   }
-  
-  public void addListener(GraphName key, ParameterListener listener) {
-    listeners.put(key, listener);
+
+  public void addListener(GraphName parameterName, ParameterListener listener) {
+    synchronized (listeners) {
+      if (!listeners.containsKey(parameterName)) {
+        listeners.put(parameterName, new ListenerCollection<ParameterListener>(executorService));
+      }
+      listeners.get(parameterName).add(listener);
+    }
   }
-  
-  public void removeListener(GraphName key, ParameterListener listener) {
-    listeners.remove(key, listener);
+
+  public void removeListener(GraphName parameterName, ParameterListener listener) {
+    synchronized (listeners) {
+      if (!listeners.containsKey(parameterName)) {
+        return;
+      }
+      ListenerCollection<ParameterListener> listenerCollection = listeners.get(parameterName);
+      listenerCollection.remove(listener);
+      if (listenerCollection.size() == 0) {
+        listeners.remove(parameterName);
+      }
+    }
   }
-  
+
   /**
-   * @param key
+   * @param parameterName
    * @param value
    * @return the number of listeners called with the new value
    */
-  public int updateParameter(GraphName key, Object value) {
+  public int updateParameter(GraphName parameterName, final Object value) {
     int numberOfListeners = 0;
-    synchronized(listeners) {
-      Collection<ParameterListener> listenersForKey = listeners.get(key);
-      numberOfListeners = listenersForKey.size();
-      for (ParameterListener listener : listenersForKey) {
-        listener.onNewValue(value);
+    synchronized (listeners) {
+      if (listeners.containsKey(parameterName)) {
+        ListenerCollection<ParameterListener> listenerCollection = listeners.get(parameterName);
+        numberOfListeners = listenerCollection.size();
+        listenerCollection.signal(new SignalRunnable<ParameterListener>() {
+          @Override
+          public void run(ParameterListener listener) {
+            listener.onNewValue(value);
+          }
+        });
       }
     }
     return numberOfListeners;
   }
-  
 }

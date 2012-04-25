@@ -20,8 +20,8 @@ import org.ros.concurrent.CancellableLoop;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
-import org.ros.node.NodeMain;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
@@ -30,7 +30,7 @@ import org.ros.node.topic.Subscriber;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class SlaveApiTestNode implements NodeMain {
+public class SlaveApiTestNode extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
@@ -38,10 +38,10 @@ public class SlaveApiTestNode implements NodeMain {
   }
 
   @Override
-  public void onStart(final Node node) {
+  public void onStart(final ConnectedNode connectedNode) {
     // Basic chatter in/out test.
     final Publisher<std_msgs.String> pub_string =
-        node.newPublisher("chatter_out", std_msgs.String._TYPE);
+        connectedNode.newPublisher("chatter_out", std_msgs.String._TYPE);
     MessageListener<std_msgs.String> chatter_cb = new MessageListener<std_msgs.String>() {
       @Override
       public void onNewMessage(std_msgs.String m) {
@@ -50,12 +50,12 @@ public class SlaveApiTestNode implements NodeMain {
     };
 
     Subscriber<std_msgs.String> stringSubscriber =
-        node.newSubscriber("chatter_in", std_msgs.String._TYPE);
+        connectedNode.newSubscriber("chatter_in", std_msgs.String._TYPE);
     stringSubscriber.addMessageListener(chatter_cb);
 
     // Have at least one case of dual pub/sub on the same topic.
     final Publisher<std_msgs.Int64> pub_int64_pubsub =
-        node.newPublisher("int64", std_msgs.Int64._TYPE);
+        connectedNode.newPublisher("int64", std_msgs.Int64._TYPE);
     MessageListener<std_msgs.Int64> int64_cb = new MessageListener<std_msgs.Int64>() {
       @Override
       public void onNewMessage(std_msgs.Int64 m) {
@@ -63,15 +63,15 @@ public class SlaveApiTestNode implements NodeMain {
     };
 
     Subscriber<std_msgs.Int64> int64Subscriber =
-        node.newSubscriber("int64", "std_msgs/std_msgs.Int64");
+        connectedNode.newSubscriber("int64", "std_msgs/std_msgs.Int64");
     int64Subscriber.addMessageListener(int64_cb);
 
     // Don't do any performance optimizations here. We want to make sure that
     // GC, etc. is working.
-    node.executeCancellableLoop(new CancellableLoop() {
+    connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
-        MessageFactory topicMessageFactory = node.getTopicMessageFactory();
+        MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
         std_msgs.String chatter = topicMessageFactory.newFromType(std_msgs.String._TYPE);
         chatter.setData("hello " + System.currentTimeMillis());
         pub_string.publish(chatter);
@@ -82,13 +82,5 @@ public class SlaveApiTestNode implements NodeMain {
         Thread.sleep(100);
       }
     });
-  }
-
-  @Override
-  public void onShutdown(Node node) {
-  }
-
-  @Override
-  public void onShutdownComplete(Node node) {
   }
 }

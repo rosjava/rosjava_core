@@ -46,13 +46,13 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
   private final NodeFactory nodeFactory;
   private final ScheduledExecutorService scheduledExecutorService;
-  private final Multimap<GraphName, Node> nodes;
+  private final Multimap<GraphName, ConnectedNode> connectedNodes;
   private final BiMap<Node, NodeMain> nodeMains;
 
   private class RegistrationListener implements NodeListener {
     @Override
-    public void onStart(Node node) {
-      registerNode(node);
+    public void onStart(ConnectedNode connectedNode) {
+      registerNode(connectedNode);
     }
 
     @Override
@@ -61,6 +61,12 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
     @Override
     public void onShutdownComplete(Node node) {
+      unregisterNode(node);
+    }
+
+    @Override
+    public void onError(Node node, Throwable throwable) {
+      log.error("Node error.", throwable);
       unregisterNode(node);
     }
   }
@@ -93,7 +99,8 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
       ScheduledExecutorService scheduledExecutorService) {
     this.nodeFactory = nodeFactory;
     this.scheduledExecutorService = scheduledExecutorService;
-    nodes = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, Node>create());
+    connectedNodes =
+        Multimaps.synchronizedMultimap(HashMultimap.<GraphName, ConnectedNode>create());
     nodeMains = Maps.synchronizedBiMap(HashBiMap.<Node, NodeMain>create());
   }
 
@@ -144,9 +151,9 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
   @Override
   public void shutdown() {
-    synchronized (nodes) {
-      for (Node node : nodes.values()) {
-        safelyShutdownNode(node);
+    synchronized (connectedNodes) {
+      for (ConnectedNode connectedNode : connectedNodes.values()) {
+        safelyShutdownNode(connectedNode);
       }
     }
   }
@@ -163,34 +170,33 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
       node.shutdown();
     } catch (Exception e) {
       // Ignore spurious errors during shutdown.
-      System.err.println("Exception thrown while shutting down node.");
-      e.printStackTrace();
+      log.error("Exception thrown while shutting down node.", e);
       // We don't expect any more callbacks from a node that throws an exception
       // while shutting down. So, we unregister it immediately.
       unregisterNode(node);
       success = false;
     }
     if (success) {
-      System.out.println("Shutdown successful.");
+      log.info("Shutdown successful.");
     }
   }
 
   /**
-   * Register a {@link Node} with the {@link NodeMainExecutor}.
+   * Register a {@link ConnectedNode} with the {@link NodeMainExecutor}.
    * 
-   * @param nodeMain
-   *          the {@link NodeMain} associated with the {@link Node}
+   * @param connectedNode
+   *          the {@link ConnectedNode} to register
    */
-  private void registerNode(Node node) {
-    GraphName nodeName = node.getName();
-    synchronized (nodes) {
-      for (Node illegalNode : nodes.get(nodeName)) {
+  private void registerNode(ConnectedNode connectedNode) {
+    GraphName nodeName = connectedNode.getName();
+    synchronized (connectedNodes) {
+      for (ConnectedNode illegalConnectedNode : connectedNodes.get(nodeName)) {
         System.err.println(String.format(
             "Node name collision. Existing node %s (%s) will be shutdown.", nodeName,
-            illegalNode.getUri()));
-        illegalNode.shutdown();
+            illegalConnectedNode.getUri()));
+        illegalConnectedNode.shutdown();
       }
-      nodes.put(nodeName, node);
+      connectedNodes.put(nodeName, connectedNode);
     }
   }
 
@@ -201,7 +207,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
    *          the {@link Node} to unregister
    */
   private void unregisterNode(Node node) {
-    nodes.get(node.getName()).remove(node);
+    connectedNodes.get(node.getName()).remove(node);
     nodeMains.remove(node);
   }
 }

@@ -16,26 +16,52 @@
 
 package org.ros.time;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
+import org.ros.RosTest;
 import org.ros.address.InetAddressFactory;
+import org.ros.namespace.GraphName;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class NtpTimeProviderTest {
+public class NtpTimeProviderTest extends RosTest {
 
+  // TODO(damonkohler): This is only a simple sanity check.
   @Test
-  public void testNtpTime() throws IOException {
-    // TODO(damonkohler): This is only a simple sanity check.
-    NtpTimeProvider ntpTimeProvider =
+  public void testSanity() throws InterruptedException {
+    final NtpTimeProvider ntpTimeProvider =
         new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"),
             Executors.newScheduledThreadPool(Integer.MAX_VALUE));
-    ntpTimeProvider.updateTime();
-    ntpTimeProvider.getCurrentTime();
-    System.out.println("System time: " + System.currentTimeMillis());
-    System.out.println("NTP time: " + ntpTimeProvider.getCurrentTime().totalNsecs() / 1000000);
+    final CountDownLatch latch = new CountDownLatch(1);
+    nodeConfiguration.setTimeProvider(ntpTimeProvider);
+    nodeMainExecutor.execute(new AbstractNodeMain() {
+      @Override
+      public GraphName getDefaultNodeName() {
+        return new GraphName("node");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        try {
+          ntpTimeProvider.updateTime();
+        } catch (IOException e) {
+          // Ignored. This is only a sanity check.
+        }
+        ntpTimeProvider.getCurrentTime();
+        System.out.println("System time: " + System.currentTimeMillis());
+        System.out.println("NTP time: " + ntpTimeProvider.getCurrentTime().totalNsecs() / 1000000);
+        latch.countDown();
+      }
+    }, nodeConfiguration);
+    assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 }

@@ -31,7 +31,7 @@ import org.ros.internal.node.xmlrpc.XmlRpcEndpoint;
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class NodeServerTest {
+public class XmlRpcServerTest {
 
   class FakeNode implements XmlRpcEndpoint {
   }
@@ -71,5 +71,4 @@ public class NodeServerTest {
 
     xmlRpcServer.shutdown();
   }
-  
 }

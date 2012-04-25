@@ -56,7 +56,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public class NodeConfiguration {
 
   /**
-   * The default master URI.
+   * The default master {@link URI}.
    */
   public static final URI DEFAULT_MASTER_URI;
 
@@ -67,6 +67,24 @@ public class NodeConfiguration {
       throw new RosRuntimeException(e);
     }
   }
+
+  private NameResolver parentResolver;
+  private URI masterUri;
+  private File rosRoot;
+  private List<File> rosPackagePath;
+  private GraphName nodeName;
+  private TopicDescriptionFactory topicDescriptionFactory;
+  private MessageFactory topicMessageFactory;
+  private ServiceDescriptionFactory serviceDescriptionFactory;
+  private MessageFactory serviceRequestMessageFactory;
+  private MessageFactory serviceResponseMessageFactory;
+  private MessageSerializationFactory messageSerializationFactory;
+  private BindAddress tcpRosBindAddress;
+  private AdvertiseAddressFactory tcpRosAdvertiseAddressFactory;
+  private BindAddress xmlRpcBindAddress;
+  private AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory;
+  private ScheduledExecutorService scheduledExecutorService;
+  private TimeProvider timeProvider;
 
   /**
    * @param nodeConfiguration
@@ -90,33 +108,10 @@ public class NodeConfiguration {
     copy.tcpRosAdvertiseAddressFactory = nodeConfiguration.tcpRosAdvertiseAddressFactory;
     copy.xmlRpcBindAddress = nodeConfiguration.xmlRpcBindAddress;
     copy.xmlRpcAdvertiseAddressFactory = nodeConfiguration.xmlRpcAdvertiseAddressFactory;
+    copy.scheduledExecutorService = nodeConfiguration.scheduledExecutorService;
     copy.timeProvider = nodeConfiguration.timeProvider;
-    copy.executorService = nodeConfiguration.executorService;
     return copy;
   }
-
-  private NameResolver parentResolver;
-  private URI masterUri;
-  private File rosRoot;
-  private List<File> rosPackagePath;
-  private GraphName nodeName;
-  private TopicDescriptionFactory topicDescriptionFactory;
-  private MessageFactory topicMessageFactory;
-  private ServiceDescriptionFactory serviceDescriptionFactory;
-  private MessageFactory serviceRequestMessageFactory;
-  private MessageFactory serviceResponseMessageFactory;
-  private MessageSerializationFactory messageSerializationFactory;
-  private BindAddress tcpRosBindAddress;
-  private AdvertiseAddressFactory tcpRosAdvertiseAddressFactory;
-  private BindAddress xmlRpcBindAddress;
-  private AdvertiseAddressFactory xmlRpcAdvertiseAddressFactory;
-  private TimeProvider timeProvider;
-
-  /**
-   * Executor service which should be used for all thread creation in the ROS
-   * app.
-   */
-  private ScheduledExecutorService executorService;
 
   /**
    * Creates a new {@link NodeConfiguration} for a publicly accessible

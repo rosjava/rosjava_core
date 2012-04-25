@@ -190,9 +190,9 @@ public class MessageQueueIntegrationTest {
 
   private void expectMessages() throws InterruptedException {
     CountDownLatch firstLatch = expectMessage(firstIncomingMessageQueue);
-    // CountDownLatch secondLatch = expectMessage(secondIncomingMessageQueue);
+    CountDownLatch secondLatch = expectMessage(secondIncomingMessageQueue);
     assertTrue(firstLatch.await(3, TimeUnit.SECONDS));
-    // assertTrue(secondLatch.await(3, TimeUnit.SECONDS));
+    assertTrue(secondLatch.await(3, TimeUnit.SECONDS));
   }
 
   private void expectNoMessages() throws InterruptedException {

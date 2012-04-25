@@ -30,8 +30,8 @@ import org.ros.RosTest;
 import org.ros.exception.ParameterClassCastException;
 import org.ros.exception.ParameterNotFoundException;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
-import org.ros.node.NodeMain;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 
 import java.util.Collection;
 import java.util.List;
@@ -49,24 +49,16 @@ public class ParameterTreeIntegrationTest extends RosTest {
   @Before
   public void setup() throws InterruptedException {
     final CountDownLatch latch = new CountDownLatch(1);
-    nodeMainExecutor.execute(new NodeMain() {
-      @Override
-      public void onStart(Node node) {
-        parameters = node.newParameterTree();
-        latch.countDown();
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
         return new GraphName("node_name");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        parameters = connectedNode.getParameterTree();
+        latch.countDown();
       }
     }, nodeConfiguration);
     assertTrue(latch.await(1, TimeUnit.SECONDS));
@@ -167,10 +159,15 @@ public class ParameterTreeIntegrationTest extends RosTest {
   public void testParameterPubSub() throws InterruptedException {
     final CountDownLatch nodeLatch = new CountDownLatch(1);
     final CountDownLatch parameterLatch = new CountDownLatch(1);
-    nodeMainExecutor.execute(new NodeMain() {
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
-      public void onStart(Node node) {
-        ParameterTree subscriberParameters = node.newParameterTree();
+      public GraphName getDefaultNodeName() {
+        return new GraphName("subscriber");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        ParameterTree subscriberParameters = connectedNode.getParameterTree();
         subscriberParameters.addParameterListener("/foo/bar", new ParameterListener() {
           @Override
           public void onNewValue(Object value) {
@@ -179,19 +176,6 @@ public class ParameterTreeIntegrationTest extends RosTest {
           }
         });
         nodeLatch.countDown();
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
-      @Override
-      public GraphName getDefaultNodeName() {
-        return new GraphName("subscriber");
       }
     }, nodeConfiguration);
     nodeLatch.await(1, TimeUnit.SECONDS);

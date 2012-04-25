@@ -19,8 +19,6 @@ package org.ros.internal.node;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.ros.internal.node.server.master.MasterServer;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +29,7 @@ import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.SlaveServer;
+import org.ros.internal.node.server.master.MasterServer;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.namespace.GraphName;
@@ -58,7 +57,7 @@ public class MasterSlaveIntegrationTest {
     masterClient = new MasterClient(masterServer.getUri());
     TopicParticipantManager topicParticipantManager = new TopicParticipantManager();
     ServiceManager serviceManager = new ServiceManager();
-    ParameterManager parameterManager = new ParameterManager();
+    ParameterManager parameterManager = new ParameterManager(executorService);
     slaveServer =
         new SlaveServer(new GraphName("/foo"), BindAddress.newPublic(),
             AdvertiseAddress.newPublic(), BindAddress.newPublic(), AdvertiseAddress.newPublic(),
@@ -84,5 +83,4 @@ public class MasterSlaveIntegrationTest {
     Response<Integer> response = slaveClient.getPid();
     assertTrue(response.getResult() > 0);
   }
-
 }

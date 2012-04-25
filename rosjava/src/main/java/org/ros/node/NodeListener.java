@@ -24,22 +24,22 @@ package org.ros.node;
 public interface NodeListener {
 
   /**
-   * Called when the {@link Node} has been started.
+   * Called when the {@link Node} has started and successfully connected to the
+   * master.
    * 
-   * @param node
-   *          the {@link Node} that has been started
+   * @param connectedNode
+   *          the {@link ConnectedNode} that has been started
    */
-  void onStart(Node node);
+  void onStart(ConnectedNode connectedNode);
 
   /**
-   * Called when the {@link Node} has started shutting down. Shutdown will be
-   * delayed, although not indefinitely, until all {@link NodeListener}s have
-   * returned from this method.
-   * 
+   * Called when the {@link ConnectedNode} has started shutting down. Shutdown
+   * will be delayed, although not indefinitely, until all {@link NodeListener}s
+   * have returned from this method.
    * <p>
-   * Since this method can potentially delay {@link Node} shutdown, it is
-   * preferred to use {@link #onShutdownComplete(Node)} when {@link Node}
-   * resources are not required during the method call.
+   * Since this method can potentially delay {@link ConnectedNode} shutdown, it
+   * is preferred to use {@link #onShutdownComplete(Node)} when
+   * {@link ConnectedNode} resources are not required during the method call.
    * 
    * @param node
    *          the {@link Node} that has started shutting down
@@ -53,4 +53,14 @@ public interface NodeListener {
    *          the {@link Node} that has shut down
    */
   void onShutdownComplete(Node node);
+
+  /**
+   * Called when the {@link Node} experiences an unrecoverable error.
+   * 
+   * @param node
+   *          the {@link Node} that experienced the error
+   * @param throwable
+   *          the {@link Throwable} describing the error condition
+   */
+  void onError(Node node, Throwable throwable);
 }

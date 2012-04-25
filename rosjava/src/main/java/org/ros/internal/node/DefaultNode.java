@@ -19,6 +19,7 @@ package org.ros.internal.node;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.apache.commons.logging.Log;
+import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
@@ -28,6 +29,7 @@ import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.message.topic.TopicDescription;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.client.Registrar;
+import org.ros.internal.node.parameter.DefaultParameterTree;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
@@ -50,6 +52,7 @@ import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.namespace.NodeNameResolver;
+import org.ros.node.ConnectedNode;
 import org.ros.node.DefaultNodeFactory;
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
@@ -58,13 +61,17 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
+import org.ros.node.topic.DefaultPublisherListener;
+import org.ros.node.topic.DefaultSubscriberListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import org.ros.time.ClockTopicTimeProvider;
 import org.ros.time.TimeProvider;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -75,42 +82,38 @@ import java.util.concurrent.TimeUnit;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultNode implements Node {
+public class DefaultNode implements ConnectedNode {
 
   private static final boolean DEBUG = false;
 
+  // TODO(damonkohler): Move to NodeConfiguration.
   /**
    * The maximum delay before shutdown will begin even if all
    * {@link NodeListener}s have not yet returned from their
-   * {@link NodeListener#onShutdown(Node)} callback.
+   * {@link NodeListener#onShutdown(ConnectedNode)} callback.
    */
   private static final int MAX_SHUTDOWN_DELAY_DURATION = 5;
   private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;
 
-  private final GraphName nodeName;
   private final NodeConfiguration nodeConfiguration;
-  private final NodeNameResolver resolver;
-  private final RosoutLogger log;
+  private final ListenerCollection<NodeListener> nodeListeners;
+  private final ScheduledExecutorService scheduledExecutorService;
+  private final URI masterUri;
   private final MasterClient masterClient;
-  private final SlaveServer slaveServer;
   private final TopicParticipantManager topicParticipantManager;
   private final ServiceManager serviceManager;
   private final ParameterManager parameterManager;
+  private final GraphName nodeName;
+  private final NodeNameResolver resolver;
+  private final SlaveServer slaveServer;
+  private final ParameterTree parameterTree;
   private final PublisherFactory publisherFactory;
   private final SubscriberFactory subscriberFactory;
   private final ServiceFactory serviceFactory;
   private final Registrar registrar;
-  private final URI masterUri;
 
-  /**
-   * Used for all thread creation.
-   */
-  private final ScheduledExecutorService scheduledExecutorService;
-
-  /**
-   * All {@link NodeListener} instances registered with the node.
-   */
-  private final ListenerCollection<NodeListener> nodeListeners;
+  private RosoutLogger log;
+  private TimeProvider timeProvider;
 
   /**
    * {@link DefaultNode}s should only be constructed using the
@@ -132,7 +135,7 @@ public class DefaultNode implements Node {
     masterClient = new MasterClient(masterUri);
     topicParticipantManager = new TopicParticipantManager();
     serviceManager = new ServiceManager();
-    parameterManager = new ParameterManager();
+    parameterManager = new ParameterManager(scheduledExecutorService);
 
     GraphName basename = nodeConfiguration.getNodeName();
     NameResolver parentResolver = nodeConfiguration.getParentResolver();
@@ -147,6 +150,11 @@ public class DefaultNode implements Node {
     slaveServer.start();
 
     NodeIdentifier nodeIdentifier = slaveServer.toNodeIdentifier();
+
+    parameterTree =
+        DefaultParameterTree.newFromNodeIdentifier(nodeIdentifier, masterClient.getRemoteUri(),
+            resolver, parameterManager);
+
     publisherFactory =
         new PublisherFactory(nodeIdentifier, topicParticipantManager,
             nodeConfiguration.getTopicMessageFactory(), scheduledExecutorService);
@@ -158,12 +166,62 @@ public class DefaultNode implements Node {
     registrar = new Registrar(masterClient, scheduledExecutorService);
     topicParticipantManager.setListener(registrar);
     serviceManager.setListener(registrar);
-    registrar.start(nodeIdentifier);
 
-    // NOTE(damonkohler): This must be created after the Registrar has been
-    // initialized with the SlaveServer's NodeIdentifier so that it can
-    // register the /rosout Publisher.
+    scheduledExecutorService.execute(new Runnable() {
+      @Override
+      public void run() {
+        start();
+      }
+    });
+  }
+
+  private void start() {
+    // The Registrar must be started first so that master registration is
+    // possible during startup.
+    registrar.start(slaveServer.toNodeIdentifier());
+
+    // During startup, we wait for 1) the RosoutLogger and 2) the TimeProvider.
+    final CountDownLatch latch = new CountDownLatch(2);
+
     log = new RosoutLogger(this);
+    log.getPublisher().addListener(new DefaultPublisherListener<rosgraph_msgs.Log>() {
+      @Override
+      public void onMasterRegistrationSuccess(Publisher<rosgraph_msgs.Log> registrant) {
+        latch.countDown();
+      }
+    });
+
+    boolean useSimTime = false;
+    try {
+      useSimTime =
+          parameterTree.has(Parameters.USE_SIM_TIME)
+              && parameterTree.getBoolean(Parameters.USE_SIM_TIME);
+    } catch (Exception e) {
+      signalOnError(e);
+    }
+    if (useSimTime) {
+      ClockTopicTimeProvider clockTopicTimeProvider = new ClockTopicTimeProvider(this);
+      clockTopicTimeProvider.getSubscriber().addSubscriberListener(
+          new DefaultSubscriberListener<rosgraph_msgs.Clock>() {
+            @Override
+            public void onMasterRegistrationSuccess(Subscriber<rosgraph_msgs.Clock> subscriber) {
+              latch.countDown();
+            }
+          });
+      timeProvider = clockTopicTimeProvider;
+    } else {
+      timeProvider = nodeConfiguration.getTimeProvider();
+      latch.countDown();
+    }
+
+    try {
+      latch.await();
+    } catch (InterruptedException e) {
+      signalOnError(e);
+      shutdown();
+      return;
+    }
+
     signalOnStart();
   }
 
@@ -316,12 +374,7 @@ public class DefaultNode implements Node {
 
   @Override
   public Time getCurrentTime() {
-    return nodeConfiguration.getTimeProvider().getCurrentTime();
-  }
-
-  @Override
-  public TimeProvider getTimeProvider() {
-    return nodeConfiguration.getTimeProvider();
+    return timeProvider.getCurrentTime();
   }
 
   @Override
@@ -390,9 +443,8 @@ public class DefaultNode implements Node {
   }
 
   @Override
-  public ParameterTree newParameterTree() {
-    return org.ros.internal.node.parameter.DefaultParameterTree.newFromSlaveIdentifier(
-        slaveServer.toNodeIdentifier(), masterClient.getRemoteUri(), resolver, parameterManager);
+  public ParameterTree getParameterTree() {
+    return parameterTree;
   }
 
   @Override
@@ -431,17 +483,32 @@ public class DefaultNode implements Node {
   }
 
   /**
-   * SignalRunnable all {@link NodeListener}s that the {@link Node} has started.
-   * 
+   * SignalRunnable all {@link NodeListener}s that the {@link Node} has
+   * experienced an error.
    * <p>
    * Each listener is called in a separate thread.
    */
-  private void signalOnStart() {
+  private void signalOnError(final Throwable throwable) {
     final Node node = this;
     nodeListeners.signal(new SignalRunnable<NodeListener>() {
       @Override
       public void run(NodeListener listener) {
-        listener.onStart(node);
+        listener.onError(node, throwable);
+      }
+    });
+  }
+
+  /**
+   * SignalRunnable all {@link NodeListener}s that the {@link Node} has started.
+   * <p>
+   * Each listener is called in a separate thread.
+   */
+  private void signalOnStart() {
+    final ConnectedNode connectedNode = this;
+    nodeListeners.signal(new SignalRunnable<NodeListener>() {
+      @Override
+      public void run(NodeListener listener) {
+        listener.onStart(connectedNode);
       }
     });
   }
@@ -449,7 +516,6 @@ public class DefaultNode implements Node {
   /**
    * SignalRunnable all {@link NodeListener}s that the {@link Node} has started
    * shutting down.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */
@@ -472,7 +538,6 @@ public class DefaultNode implements Node {
   /**
    * SignalRunnable all {@link NodeListener}s that the {@link Node} has shut
    * down.
-   * 
    * <p>
    * Each listener is called in a separate thread.
    */
@@ -505,7 +570,7 @@ public class DefaultNode implements Node {
     scheduledExecutorService.execute(cancellableLoop);
     addListener(new NodeListener() {
       @Override
-      public void onStart(Node node) {
+      public void onStart(ConnectedNode connectedNode) {
       }
 
       @Override
@@ -515,6 +580,11 @@ public class DefaultNode implements Node {
 
       @Override
       public void onShutdownComplete(Node node) {
+      }
+
+      @Override
+      public void onError(Node node, Throwable throwable) {
+        cancellableLoop.cancel();
       }
     });
   }

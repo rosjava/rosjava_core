@@ -17,7 +17,8 @@
 package org.ros.rosjava_tutorial_services;
 
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 import org.ros.node.NodeMain;
 import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
@@ -27,7 +28,7 @@ import org.ros.node.service.ServiceServer;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Server implements NodeMain {
+public class Server extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
@@ -35,8 +36,8 @@ public class Server implements NodeMain {
   }
 
   @Override
-  public void onStart(Node node) {
-    node.newServiceServer("add_two_ints", test_ros.AddTwoInts._TYPE,
+  public void onStart(ConnectedNode connectedNode) {
+    connectedNode.newServiceServer("add_two_ints", test_ros.AddTwoInts._TYPE,
         new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
           @Override
           public void build(test_ros.AddTwoInts.Request request,
@@ -44,13 +45,5 @@ public class Server implements NodeMain {
             response.setSum(request.getA() + request.getB());
           }
         });
-  }
-
-  @Override
-  public void onShutdown(Node node) {
-  }
-
-  @Override
-  public void onShutdownComplete(Node node) {
   }
 }

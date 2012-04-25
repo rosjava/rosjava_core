@@ -30,8 +30,8 @@ import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
-import org.ros.node.NodeMain;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
@@ -55,33 +55,32 @@ public class TopicIntegrationTest extends RosTest {
 
   @Test
   public void testOnePublisherToOneSubscriber() throws InterruptedException {
-    nodeMainExecutor.execute(new NodeMain() {
-      @Override
-      public void onStart(Node node) {
-        Publisher<std_msgs.String> publisher = node.newPublisher("foo", std_msgs.String._TYPE);
-        publisher.setLatchMode(true);
-        publisher.publish(expectedMessage);
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
         return new GraphName("publisher");
       }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        Publisher<std_msgs.String> publisher =
+            connectedNode.newPublisher("foo", std_msgs.String._TYPE);
+        publisher.setLatchMode(true);
+        publisher.publish(expectedMessage);
+      }
     }, nodeConfiguration);
 
     final CountDownLatch messageReceived = new CountDownLatch(1);
-    nodeMainExecutor.execute(new NodeMain() {
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
-      public void onStart(Node node) {
-        Subscriber<std_msgs.String> subscriber = node.newSubscriber("foo", std_msgs.String._TYPE);
+      public GraphName getDefaultNodeName() {
+        return new GraphName("subscriber");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        Subscriber<std_msgs.String> subscriber =
+            connectedNode.newSubscriber("foo", std_msgs.String._TYPE);
         subscriber.addMessageListener(new MessageListener<std_msgs.String>() {
           @Override
           public void onNewMessage(std_msgs.String message) {
@@ -89,19 +88,6 @@ public class TopicIntegrationTest extends RosTest {
             messageReceived.countDown();
           }
         });
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
-      @Override
-      public GraphName getDefaultNodeName() {
-        return new GraphName("subscriber");
       }
     }, nodeConfiguration);
 
@@ -122,10 +108,16 @@ public class TopicIntegrationTest extends RosTest {
     final CountDownSubscriberListener<std_msgs.String> subscriberListener =
         CountDownSubscriberListener.newDefault();
     final CountDownLatch messageReceived = new CountDownLatch(1);
-    nodeMainExecutor.execute(new NodeMain() {
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
-      public void onStart(Node node) {
-        Subscriber<std_msgs.String> subscriber = node.newSubscriber("foo", std_msgs.String._TYPE);
+      public GraphName getDefaultNodeName() {
+        return new GraphName("subscriber");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        Subscriber<std_msgs.String> subscriber =
+            connectedNode.newSubscriber("foo", std_msgs.String._TYPE);
         subscriber.addSubscriberListener(subscriberListener);
         subscriber.addMessageListener(new MessageListener<std_msgs.String>() {
           @Override
@@ -135,42 +127,22 @@ public class TopicIntegrationTest extends RosTest {
           }
         });
       }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
-      @Override
-      public GraphName getDefaultNodeName() {
-        return new GraphName("subscriber");
-      }
     }, nodeConfiguration);
 
     subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS);
 
-    nodeMainExecutor.execute(new NodeMain() {
-      @Override
-      public void onStart(Node node) {
-        Publisher<std_msgs.String> publisher = node.newPublisher("foo", std_msgs.String._TYPE);
-        publisher.setLatchMode(true);
-        publisher.publish(expectedMessage);
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
         return new GraphName("publisher");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        Publisher<std_msgs.String> publisher =
+            connectedNode.newPublisher("foo", std_msgs.String._TYPE);
+        publisher.setLatchMode(true);
+        publisher.publish(expectedMessage);
       }
     }, nodeConfiguration);
 
@@ -179,12 +151,17 @@ public class TopicIntegrationTest extends RosTest {
 
   @Test
   public void testAddDisconnectedPublisher() {
-    nodeMainExecutor.execute(new NodeMain() {
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
-      public void onStart(Node node) {
+      public GraphName getDefaultNodeName() {
+        return new GraphName("subscriber");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
         DefaultSubscriber<std_msgs.String> subscriber =
-            (DefaultSubscriber<std_msgs.String>) node.<std_msgs.String>newSubscriber("foo",
-                std_msgs.String._TYPE);
+            (DefaultSubscriber<std_msgs.String>) connectedNode.<std_msgs.String>newSubscriber(
+                "foo", std_msgs.String._TYPE);
         try {
           subscriber.addPublisher(PublisherIdentifier.newFromStrings("foo", "http://foo", "foo"),
               new InetSocketAddress(1234));
@@ -192,19 +169,6 @@ public class TopicIntegrationTest extends RosTest {
         } catch (RuntimeException e) {
           // Connecting to a disconnected publisher should fail.
         }
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
-      @Override
-      public GraphName getDefaultNodeName() {
-        return new GraphName("subscriber");
       }
     }, nodeConfiguration);
   }
@@ -234,61 +198,45 @@ public class TopicIntegrationTest extends RosTest {
 
   @Test
   public void testHeader() throws InterruptedException {
-    nodeMainExecutor.execute(new NodeMain() {
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
-      public void onStart(final Node node) {
+      public GraphName getDefaultNodeName() {
+        return new GraphName("publisher");
+      }
+
+      @Override
+      public void onStart(final ConnectedNode connectedNode) {
         final Publisher<test_ros.TestHeader> publisher =
-            node.newPublisher("foo", test_ros.TestHeader._TYPE);
+            connectedNode.newPublisher("foo", test_ros.TestHeader._TYPE);
         CancellableLoop cancellableLoop = new CancellableLoop() {
           @Override
           public void loop() throws InterruptedException {
             test_ros.TestHeader testHeader =
-                node.getTopicMessageFactory().newFromType(test_ros.TestHeader._TYPE);
+                connectedNode.getTopicMessageFactory().newFromType(test_ros.TestHeader._TYPE);
             testHeader.getHeader().setFrameId("frame");
-            testHeader.getHeader().setStamp(node.getCurrentTime());
+            testHeader.getHeader().setStamp(connectedNode.getCurrentTime());
             publisher.publish(testHeader);
             // There needs to be some time between messages in order to
             // guarantee that the timestamp increases.
             Thread.sleep(1);
           }
         };
-        node.executeCancellableLoop(cancellableLoop);
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
-      @Override
-      public GraphName getDefaultNodeName() {
-        return new GraphName("publisher");
+        connectedNode.executeCancellableLoop(cancellableLoop);
       }
     }, nodeConfiguration);
 
     final Listener listener = new Listener();
-    nodeMainExecutor.execute(new NodeMain() {
-      @Override
-      public void onStart(Node node) {
-        Subscriber<test_ros.TestHeader> subscriber =
-            node.newSubscriber("foo", test_ros.TestHeader._TYPE);
-        subscriber.addMessageListener(listener);
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
         return new GraphName("subscriber");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        Subscriber<test_ros.TestHeader> subscriber =
+            connectedNode.newSubscriber("foo", test_ros.TestHeader._TYPE);
+        subscriber.addMessageListener(listener);
       }
     }, nodeConfiguration);
 

@@ -25,7 +25,7 @@ import org.ros.node.topic.Subscriber;
  * 
  * <p>
  * {@link NodeMain} is the one required {@link NodeListener} for {@link Node}
- * creation. {@link NodeListener#onStart(Node)} should be used to set up your
+ * creation. {@link NodeListener#onStart(ConnectedNode)} should be used to set up your
  * program's {@link Publisher}s, {@link Subscriber}s, etc.
  * 
  * @author ethan.rublee@gmail.com (Ethan Rublee)

@@ -24,22 +24,21 @@ import static org.ros.Assert.assertGraphNameEquals;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.ros.address.AdvertiseAddress;
-import org.ros.address.BindAddress;
+import org.ros.RosCore;
+import org.ros.RosTest;
+import org.ros.concurrent.Holder;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.master.MasterServer;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.internal.transport.ProtocolNames;
-import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
-import org.ros.node.DefaultNodeFactory;
-import org.ros.node.Node;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeFactory;
+import org.ros.node.NodeMain;
 import org.ros.node.topic.CountDownPublisherListener;
 import org.ros.node.topic.CountDownSubscriberListener;
 import org.ros.node.topic.Publisher;
@@ -49,184 +48,183 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for the {@link DefaultNode}.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
+ * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultNodeTest {
-
-  private MasterServer masterServer;
-  private NodeConfiguration privateNodeConfiguration;
-  private NodeFactory nodeFactory;
-  private URI masterUri;
-  private ScheduledExecutorService scheduledExecutorService;
+public class DefaultNodeTest extends RosTest {
 
   void checkHostName(String hostName) {
     assertTrue(!hostName.equals("0.0.0.0"));
     assertTrue(!hostName.equals("0:0:0:0:0:0:0:0"));
   }
 
-  @Before
-  public void setUp() throws Exception {
-    scheduledExecutorService = Executors.newScheduledThreadPool(10);
-    masterServer = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
-    masterServer.start();
-    masterUri = masterServer.getUri();
-    checkHostName(masterUri.getHost());
-    privateNodeConfiguration = NodeConfiguration.newPrivate(masterUri);
-    privateNodeConfiguration.setNodeName("node_name");
-    nodeFactory = new DefaultNodeFactory(scheduledExecutorService);
-  }
+  private void checkNodeAddress(final String host) throws InterruptedException {
+    final Holder<InetSocketAddress> holder = Holder.newEmpty();
+    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, rosCore.getUri());
+    nodeMainExecutor.execute(new AbstractNodeMain() {
+      @Override
+      public GraphName getDefaultNodeName() {
+        return new GraphName("node");
+      }
 
-  public void shutdown() {
-    scheduledExecutorService.shutdown();
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        holder.set(((DefaultNode) connectedNode).getAddress());
+      }
+    }, nodeConfiguration);
+
+    assertTrue(holder.await(1, TimeUnit.SECONDS));
+    assertTrue(holder.get().getPort() > 0);
+    assertEquals(holder.get().getHostName(), host);
   }
 
   @Test
   public void testCreatePublic() throws Exception {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
     assertFalse(InetAddresses.isInetAddress(host));
-    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, masterServer.getUri());
-    nodeConfiguration.setNodeName("node");
-    Node node = nodeFactory.newNode(nodeConfiguration);
-    InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
-    assertTrue(nodeAddress.getPort() > 0);
-    assertEquals(nodeAddress.getHostName(), host);
-    node.shutdown();
+    checkNodeAddress(host);
   }
 
   @Test
-  public void testCreatePublicWithIpv4() throws Exception {
+  public void testCreatePublicWithIpv4() throws InterruptedException {
     String host = "1.2.3.4";
-    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, masterServer.getUri());
-    nodeConfiguration.setNodeName("node");
-    Node node = nodeFactory.newNode(nodeConfiguration);
-    InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
-    assertTrue(nodeAddress.getPort() > 0);
-    assertEquals(nodeAddress.getHostName(), host);
-    node.shutdown();
+    checkNodeAddress(host);
   }
 
   @Test
-  public void testCreatePublicWithIpv6() throws Exception {
+  public void testCreatePublicWithIpv6() throws InterruptedException {
     String host = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
-    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(host, masterServer.getUri());
-    nodeConfiguration.setNodeName("node");
-    Node node = nodeFactory.newNode(nodeConfiguration);
-    InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
-    assertTrue(nodeAddress.getPort() > 0);
-    assertEquals(nodeAddress.getHostName(), host);
-    node.shutdown();
+    checkNodeAddress(host);
   }
 
   @Test
-  public void testCreatePrivate() {
-    Node node = nodeFactory.newNode(privateNodeConfiguration);
-    InetSocketAddress nodeAddress = ((DefaultNode) node).getAddress();
-    assertTrue(nodeAddress.getPort() > 0);
-    assertTrue(nodeAddress.getAddress().isLoopbackAddress());
-    node.shutdown();
+  public void testCreatePrivate() throws InterruptedException {
+    checkNodeAddress(nodeConfiguration.getTcpRosAdvertiseAddress().getHost());
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testPubSubRegistration() throws InterruptedException {
-    Node node = nodeFactory.newNode(privateNodeConfiguration);
-    ((DefaultNode) node).getRegistrar().setRetryDelay(1, TimeUnit.MILLISECONDS);
-
-    RosoutLogger rosoutLogger = (RosoutLogger) node.getLog();
-    CountDownPublisherListener<rosgraph_msgs.Log> rosoutLoggerPublisherListener =
+  public void testRegistration() throws InterruptedException {
+    final CountDownPublisherListener<std_msgs.String> publisherListener =
         CountDownPublisherListener.newDefault();
-    rosoutLogger.getPublisher().addListener(rosoutLoggerPublisherListener);
-    assertTrue(rosoutLoggerPublisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
-
-    CountDownPublisherListener<std_msgs.String> publisherListener =
-        CountDownPublisherListener.newDefault();
-    Publisher<std_msgs.String> publisher = node.newPublisher("/foo", std_msgs.String._TYPE);
-    publisher.addListener(publisherListener);
-    assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
-
-    CountDownSubscriberListener<std_msgs.String> subscriberListener =
+    final CountDownSubscriberListener<std_msgs.String> subscriberListener =
         CountDownSubscriberListener.newDefault();
-    Subscriber<std_msgs.String> subscriber = node.newSubscriber("/foo", std_msgs.String._TYPE);
-    subscriber.addSubscriberListener(subscriberListener);
+
+    NodeMain nodeMain = new AbstractNodeMain() {
+      @Override
+      public GraphName getDefaultNodeName() {
+        return new GraphName("node");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        Publisher<std_msgs.String> publisher =
+            connectedNode.newPublisher("foo", std_msgs.String._TYPE);
+        publisher.addListener(publisherListener);
+        Subscriber<std_msgs.String> subscriber =
+            connectedNode.newSubscriber("foo", std_msgs.String._TYPE);
+        subscriber.addSubscriberListener(subscriberListener);
+      }
+    };
+
+    nodeMainExecutor.execute(nodeMain, nodeConfiguration);
+
+    assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     assertTrue(subscriberListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     // There are now two registered publishers /rosout and /foo.
-    List<Object> systemState = masterServer.getSystemState();
+    List<Object> systemState = rosCore.getMasterServer().getSystemState();
     assertEquals(2, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_PUBLISHERS)).size());
     assertEquals(1, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_SUBSCRIBERS)).size());
 
-    node.shutdown();
+    nodeMainExecutor.shutdownNodeMain(nodeMain);
 
     assertTrue(publisherListener.awaitShutdown(1, TimeUnit.SECONDS));
     assertTrue(subscriberListener.awaitShutdown(1, TimeUnit.SECONDS));
 
-    systemState = masterServer.getSystemState();
+    systemState = rosCore.getMasterServer().getSystemState();
     assertEquals(0, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_PUBLISHERS)).size());
     assertEquals(0, ((List<Object>) systemState.get(MasterServer.SYSTEM_STATE_SUBSCRIBERS)).size());
   }
 
   @Test
-  public void testResolveName() {
-    NodeConfiguration nodeConfiguration = NodeConfiguration.newPrivate(masterUri);
+  public void testResolveName() throws InterruptedException {
+    final Holder<ConnectedNode> holder = Holder.newEmpty();
     nodeConfiguration.setParentResolver(NameResolver.newFromNamespace("/ns1"));
-    nodeConfiguration.setNodeName("test_resolver");
-    Node node = nodeFactory.newNode(nodeConfiguration);
+    nodeMainExecutor.execute(new AbstractNodeMain() {
+      @Override
+      public GraphName getDefaultNodeName() {
+        return new GraphName("test_resolver");
+      }
 
-    assertGraphNameEquals("/foo", node.resolveName("/foo"));
-    assertGraphNameEquals("/ns1/foo", node.resolveName("foo"));
-    assertGraphNameEquals("/ns1/test_resolver/foo", node.resolveName("~foo"));
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        holder.set(connectedNode);
+      }
+    }, nodeConfiguration);
 
-    Publisher<std_msgs.Int64> pub = node.newPublisher("pub", std_msgs.Int64._TYPE);
+    assertTrue(holder.await(1, TimeUnit.SECONDS));
+    ConnectedNode connectedNode = holder.get();
+
+    assertGraphNameEquals("/foo", connectedNode.resolveName("/foo"));
+    assertGraphNameEquals("/ns1/foo", connectedNode.resolveName("foo"));
+    assertGraphNameEquals("/ns1/test_resolver/foo", connectedNode.resolveName("~foo"));
+
+    Publisher<std_msgs.Int64> pub = connectedNode.newPublisher("pub", std_msgs.Int64._TYPE);
     assertGraphNameEquals("/ns1/pub", pub.getTopicName());
-    pub = node.newPublisher("/pub", std_msgs.Int64._TYPE);
+    pub = connectedNode.newPublisher("/pub", std_msgs.Int64._TYPE);
     assertGraphNameEquals("/pub", pub.getTopicName());
-    pub = node.newPublisher("~pub", std_msgs.Int64._TYPE);
+    pub = connectedNode.newPublisher("~pub", std_msgs.Int64._TYPE);
     assertGraphNameEquals("/ns1/test_resolver/pub", pub.getTopicName());
 
-    MessageListener<std_msgs.Int64> callback = new MessageListener<std_msgs.Int64>() {
-      @Override
-      public void onNewMessage(std_msgs.Int64 message) {
-      }
-    };
-
-    Subscriber<std_msgs.Int64> sub = node.newSubscriber("sub", std_msgs.Int64._TYPE);
-    sub.addMessageListener(callback);
+    Subscriber<std_msgs.Int64> sub = connectedNode.newSubscriber("sub", std_msgs.Int64._TYPE);
     assertGraphNameEquals("/ns1/sub", sub.getTopicName());
-    sub = node.newSubscriber("/sub", std_msgs.Int64._TYPE);
-    sub.addMessageListener(callback);
+    sub = connectedNode.newSubscriber("/sub", std_msgs.Int64._TYPE);
     assertGraphNameEquals("/sub", sub.getTopicName());
-    sub = node.newSubscriber("~sub", std_msgs.Int64._TYPE);
-    sub.addMessageListener(callback);
+    sub = connectedNode.newSubscriber("~sub", std_msgs.Int64._TYPE);
     assertGraphNameEquals("/ns1/test_resolver/sub", sub.getTopicName());
   }
 
   @Test
   public void testPublicAddresses() throws InterruptedException {
-    MasterServer master = new MasterServer(BindAddress.newPublic(), AdvertiseAddress.newPublic());
-    master.start();
-    URI masterUri = master.getUri();
+    RosCore rosCore = RosCore.newPublic();
+    rosCore.start();
+    assertTrue(rosCore.awaitStart(1, TimeUnit.SECONDS));
+
+    URI masterUri = rosCore.getUri();
     checkHostName(masterUri.getHost());
 
+    final Holder<ConnectedNode> holder = Holder.newEmpty();
     NodeConfiguration nodeConfiguration =
         NodeConfiguration.newPublic(masterUri.getHost(), masterUri);
-    nodeConfiguration.setNodeName("test_addresses");
-    Node node = nodeFactory.newNode(nodeConfiguration);
+    nodeMainExecutor.execute(new AbstractNodeMain() {
+      @Override
+      public GraphName getDefaultNodeName() {
+        return new GraphName("test_addresses");
+      }
 
-    URI nodeUri = node.getUri();
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        holder.set(connectedNode);
+      };
+    }, nodeConfiguration);
+
+    assertTrue(holder.await(1, TimeUnit.SECONDS));
+
+    ConnectedNode connectedNode = holder.get();
+    URI nodeUri = connectedNode.getUri();
     assertTrue(nodeUri.getPort() > 0);
     checkHostName(nodeUri.getHost());
 
     CountDownPublisherListener<std_msgs.Int64> publisherListener =
         CountDownPublisherListener.newDefault();
     Publisher<std_msgs.Int64> publisher =
-        node.newPublisher("test_addresses_pub", std_msgs.Int64._TYPE);
+        connectedNode.newPublisher("test_addresses_pub", std_msgs.Int64._TYPE);
     publisher.addListener(publisherListener);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 

@@ -16,6 +16,8 @@
 
 package org.ros;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.server.master.MasterServer;
@@ -80,5 +82,10 @@ public class RosCore {
 
   public void shutdown() {
     masterServer.shutdown();
+  }
+
+  @VisibleForTesting
+  public MasterServer getMasterServer() {
+    return masterServer;
   }
 }

@@ -8,14 +8,12 @@ import org.junit.Test;
 import org.ros.RosCore;
 import org.ros.RosTest;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
-import org.ros.node.NodeMain;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 import org.ros.node.topic.CountDownPublisherListener;
 import org.ros.node.topic.Publisher;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 
@@ -27,34 +25,19 @@ public class MasterRegistrationTest extends RosTest {
   private CountDownPublisherListener<std_msgs.String> publisherListener;
   private Publisher<std_msgs.String> publisher;
 
-  public static int pickFreePort() throws IOException {
-    ServerSocket server = new ServerSocket(0);
-    int port = server.getLocalPort();
-    server.close();
-    return port;
-  }
-
   @Test
   public void testRegisterPublisher() throws InterruptedException {
     publisherListener = CountDownPublisherListener.newDefault();
-    nodeMainExecutor.execute(new NodeMain() {
-      @Override
-      public void onStart(Node node) {
-        publisher = node.newPublisher("/topic", std_msgs.String._TYPE);
-        publisher.addListener(publisherListener);
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return new GraphName("/node");
+        return new GraphName("node");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        publisher = connectedNode.newPublisher("topic", std_msgs.String._TYPE);
+        publisher.addListener(publisherListener);
       }
     }, nodeConfiguration);
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
@@ -65,40 +48,27 @@ public class MasterRegistrationTest extends RosTest {
   @Test
   public void testRegisterPublisherRetries() throws InterruptedException, IOException,
       URISyntaxException {
-    int port = pickFreePort();
-    final RosCore rosCore = RosCore.newPrivate(port);
+    int port = rosCore.getUri().getPort();
     publisherListener = CountDownPublisherListener.newDefault();
-    // We cannot use rosCore.getUri() here because it hasn't started yet.
-    nodeConfiguration.setMasterUri(new URI("http://localhost:" + port));
-    nodeMainExecutor.execute(new NodeMain() {
-      @Override
-      public void onStart(Node node) {
-        ((DefaultNode) node).getRegistrar().setRetryDelay(100, TimeUnit.MILLISECONDS);
-        publisher = node.newPublisher("/topic", std_msgs.String._TYPE);
-        publisherListener = CountDownPublisherListener.newDefault();
-        publisher.addListener(publisherListener);
-        try {
-          assertTrue(publisherListener.awaitMasterRegistrationFailure(1, TimeUnit.SECONDS));
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
-        rosCore.start();
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return new GraphName("/node");
+        return new GraphName("node");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        rosCore.shutdown();
+        ((DefaultNode) connectedNode).getRegistrar().setRetryDelay(1, TimeUnit.MILLISECONDS);
+        publisher = connectedNode.newPublisher("topic", std_msgs.String._TYPE);
+        publisher.addListener(publisherListener);
       }
     }, nodeConfiguration);
-    rosCore.awaitStart();
+
+    assertTrue(publisherListener.awaitMasterRegistrationFailure(1, TimeUnit.SECONDS));
+    rosCore = RosCore.newPrivate(port);
+    rosCore.start();
+    assertTrue(rosCore.awaitStart(1, TimeUnit.SECONDS));
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
     publisher.shutdown();
     assertTrue(publisherListener.awaitMasterUnregistrationSuccess(1, TimeUnit.SECONDS));

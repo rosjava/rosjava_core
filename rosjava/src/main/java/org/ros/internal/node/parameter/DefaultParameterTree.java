@@ -23,8 +23,8 @@ import org.ros.exception.ParameterNotFoundException;
 import org.ros.internal.node.client.ParameterClient;
 import org.ros.internal.node.response.Response;
 import org.ros.internal.node.response.StatusCode;
-import org.ros.internal.node.server.ParameterServer;
 import org.ros.internal.node.server.NodeIdentifier;
+import org.ros.internal.node.server.ParameterServer;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.parameter.ParameterListener;
@@ -44,10 +44,10 @@ import java.util.Map;
 public class DefaultParameterTree implements ParameterTree {
 
   private final ParameterClient parameterClient;
-  private final NameResolver resolver;
   private final ParameterManager parameterManager;
+  private final NameResolver resolver;
 
-  public static DefaultParameterTree newFromSlaveIdentifier(NodeIdentifier nodeIdentifier,
+  public static DefaultParameterTree newFromNodeIdentifier(NodeIdentifier nodeIdentifier,
       URI masterUri, NameResolver resolver, ParameterManager parameterManager) {
     ParameterClient client = new ParameterClient(nodeIdentifier, masterUri);
     return new DefaultParameterTree(client, parameterManager, resolver);

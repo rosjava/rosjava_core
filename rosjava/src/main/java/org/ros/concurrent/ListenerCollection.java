@@ -3,6 +3,7 @@ package org.ros.concurrent;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -14,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ListenerCollection<T> {
 
-  private final ScheduledExecutorService executorService;
+  private final ExecutorService executorService;
   private final Collection<T> listeners;
 
   public interface SignalRunnable<U> {
@@ -26,7 +27,7 @@ public class ListenerCollection<T> {
    *          the {@link ScheduledExecutorService} to use when executing
    *          listener callbacks
    */
-  public ListenerCollection(ScheduledExecutorService executorService) {
+  public ListenerCollection(ExecutorService executorService) {
     this.executorService = executorService;
     listeners = new CopyOnWriteArrayList<T>();
   }
@@ -35,10 +36,10 @@ public class ListenerCollection<T> {
    * @param listeners
    *          an initial {@link Collection} of listeners to add
    * @param executorService
-   *          the {@link ScheduledExecutorService} to use when executing
-   *          listener callbacks
+   *          the {@link ExecutorService} to use when executing listener
+   *          callbacks
    */
-  public ListenerCollection(Collection<T> listeners, ScheduledExecutorService executorService) {
+  public ListenerCollection(Collection<T> listeners, ExecutorService executorService) {
     this(executorService);
     if (listeners != null) {
       addAll(listeners);
@@ -64,16 +65,24 @@ public class ListenerCollection<T> {
   /**
    * @param listener
    *          the listener to remove
+   * @return {@code true} if the listener was removed, {@code false} otherwise
    */
-  public void remove(T listener) {
-    listeners.remove(listener);
+  public boolean remove(T listener) {
+    return listeners.remove(listener);
   }
 
   /**
-   * Removes all listeners.
+   * Removes all listeners from the collection.
    */
   public void clear() {
     listeners.clear();
+  }
+
+  /**
+   * @return the number of listeners in the collection
+   */
+  public int size() {
+    return listeners.size();
   }
 
   /**

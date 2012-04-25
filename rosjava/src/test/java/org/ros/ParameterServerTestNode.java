@@ -21,8 +21,8 @@ import org.ros.concurrent.CancellableLoop;
 import org.ros.message.MessageFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
-import org.ros.node.Node;
-import org.ros.node.NodeMain;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
 
@@ -36,7 +36,7 @@ import java.util.Map;
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  */
-public class ParameterServerTestNode implements NodeMain {
+public class ParameterServerTestNode extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
@@ -45,33 +45,33 @@ public class ParameterServerTestNode implements NodeMain {
 
   @SuppressWarnings("rawtypes")
   @Override
-  public void onStart(Node node) {
-    final Publisher<std_msgs.String> pub_tilde = node.newPublisher("tilde", std_msgs.String._TYPE);
+  public void onStart(ConnectedNode connectedNode) {
+    final Publisher<std_msgs.String> pub_tilde = connectedNode.newPublisher("tilde", std_msgs.String._TYPE);
     final Publisher<std_msgs.String> pub_string =
-        node.newPublisher("string", std_msgs.String._TYPE);
-    final Publisher<std_msgs.Int64> pub_int = node.newPublisher("int", "std_msgs/Int64");
-    final Publisher<std_msgs.Bool> pub_bool = node.newPublisher("bool", "std_msgs/Bool");
-    final Publisher<std_msgs.Float64> pub_float = node.newPublisher("float", "std_msgs/Float64");
+        connectedNode.newPublisher("string", std_msgs.String._TYPE);
+    final Publisher<std_msgs.Int64> pub_int = connectedNode.newPublisher("int", "std_msgs/Int64");
+    final Publisher<std_msgs.Bool> pub_bool = connectedNode.newPublisher("bool", "std_msgs/Bool");
+    final Publisher<std_msgs.Float64> pub_float = connectedNode.newPublisher("float", "std_msgs/Float64");
     final Publisher<test_ros.Composite> pub_composite =
-        node.newPublisher("composite", "test_ros/Composite");
+        connectedNode.newPublisher("composite", "test_ros/Composite");
     final Publisher<test_ros.TestArrays> pub_list =
-        node.newPublisher("list", "test_ros/TestArrays");
+        connectedNode.newPublisher("list", "test_ros/TestArrays");
 
-    ParameterTree param = node.newParameterTree();
+    ParameterTree param = connectedNode.getParameterTree();
 
-    Log log = node.getLog();
-    MessageFactory topicMessageFactory = node.getTopicMessageFactory();
+    Log log = connectedNode.getLog();
+    MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
     final std_msgs.String tilde_m = topicMessageFactory.newFromType(std_msgs.String._TYPE);
-    tilde_m.setData(param.getString(node.resolveName("~tilde").toString()));
+    tilde_m.setData(param.getString(connectedNode.resolveName("~tilde").toString()));
     log.info("tilde: " + tilde_m.getData());
 
     GraphName paramNamespace = new GraphName(param.getString("parameter_namespace"));
     GraphName targetNamespace = new GraphName(param.getString("target_namespace"));
     log.info("parameter_namespace: " + paramNamespace);
     log.info("target_namespace: " + targetNamespace);
-    NameResolver resolver = node.getResolver().newChild(paramNamespace);
-    NameResolver setResolver = node.getResolver().newChild(targetNamespace);
+    NameResolver resolver = connectedNode.getResolver().newChild(paramNamespace);
+    NameResolver setResolver = connectedNode.getResolver().newChild(targetNamespace);
 
     final std_msgs.String string_m = topicMessageFactory.newFromType(std_msgs.String._TYPE);
     string_m.setData(param.getString(resolver.resolve("string")));
@@ -114,7 +114,7 @@ public class ParameterServerTestNode implements NodeMain {
     param.set(setResolver.resolve("composite"), composite_map);
     param.set(setResolver.resolve("list"), Arrays.asList(list));
 
-    node.executeCancellableLoop(new CancellableLoop() {
+    connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
         pub_tilde.publish(tilde_m);
@@ -127,13 +127,5 @@ public class ParameterServerTestNode implements NodeMain {
         Thread.sleep(100);
       }
     });
-  }
-
-  @Override
-  public void onShutdown(Node node) {
-  }
-
-  @Override
-  public void onShutdownComplete(Node node) {
   }
 }

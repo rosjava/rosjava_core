@@ -18,6 +18,7 @@ package org.ros.rosjava_tutorial_pubsub;
 
 import org.ros.concurrent.CancellableLoop;
 import org.ros.namespace.GraphName;
+import org.ros.node.ConnectedNode;
 import org.ros.node.Node;
 import org.ros.node.NodeMain;
 import org.ros.node.topic.Publisher;
@@ -35,12 +36,12 @@ public class Talker implements NodeMain {
   }
 
   @Override
-  public void onStart(final Node node) {
+  public void onStart(final ConnectedNode connectedNode) {
     final Publisher<std_msgs.String> publisher =
-        node.newPublisher("chatter", std_msgs.String._TYPE);
+        connectedNode.newPublisher("chatter", std_msgs.String._TYPE);
     // This CancellableLoop will be canceled automatically when the node shuts
     // down.
-    node.executeCancellableLoop(new CancellableLoop() {
+    connectedNode.executeCancellableLoop(new CancellableLoop() {
       private int sequenceNumber;
 
       @Override
@@ -65,5 +66,9 @@ public class Talker implements NodeMain {
 
   @Override
   public void onShutdownComplete(Node node) {
+  }
+
+  @Override
+  public void onError(Node node, Throwable throwable) {
   }
 }

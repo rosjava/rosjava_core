@@ -20,7 +20,8 @@ import org.ros.exception.RemoteException;
 import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 import org.ros.node.NodeMain;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.service.ServiceResponseListener;
@@ -30,7 +31,7 @@ import org.ros.node.service.ServiceResponseListener;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Client implements NodeMain {
+public class Client extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
@@ -38,10 +39,10 @@ public class Client implements NodeMain {
   }
 
   @Override
-  public void onStart(final Node node) {
+  public void onStart(final ConnectedNode connectedNode) {
     ServiceClient<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceClient;
     try {
-      serviceClient = node.newServiceClient("add_two_ints", test_ros.AddTwoInts._TYPE);
+      serviceClient = connectedNode.newServiceClient("add_two_ints", test_ros.AddTwoInts._TYPE);
     } catch (ServiceNotFoundException e) {
       throw new RosRuntimeException(e);
     }
@@ -51,7 +52,7 @@ public class Client implements NodeMain {
     serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoInts.Response>() {
       @Override
       public void onSuccess(test_ros.AddTwoInts.Response response) {
-        node.getLog().info(
+        connectedNode.getLog().info(
             String.format("%d + %d = %d", request.getA(), request.getB(), response.getSum()));
       }
 
@@ -60,13 +61,5 @@ public class Client implements NodeMain {
         throw new RosRuntimeException(e);
       }
     });
-  }
-
-  @Override
-  public void onShutdown(Node node) {
-  }
-
-  @Override
-  public void onShutdownComplete(Node node) {
   }
 }

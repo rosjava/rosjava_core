@@ -28,8 +28,8 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.namespace.GraphName;
-import org.ros.node.Node;
-import org.ros.node.NodeMain;
+import org.ros.node.AbstractNodeMain;
+import org.ros.node.ConnectedNode;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -45,56 +45,54 @@ public class ServiceIntegrationTest extends RosTest {
   public void testPesistentServiceConnection() throws Exception {
     final CountDownServiceServerListener<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
-    nodeMainExecutor.execute(new NodeMain() {
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
-      public void onStart(final Node node) {
+      public GraphName getDefaultNodeName() {
+        return new GraphName("server");
+      }
+
+      @Override
+      public void onStart(final ConnectedNode connectedNode) {
         ServiceServer<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceServer =
-            node.newServiceServer(
-                SERVICE_NAME,
-                test_ros.AddTwoInts._TYPE,
-                new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
-                  @Override
-                  public void build(test_ros.AddTwoInts.Request request,
-                      test_ros.AddTwoInts.Response response) {
-                    response.setSum(request.getA() + request.getB());
-                  }
-                });
+            connectedNode
+                .newServiceServer(
+                    SERVICE_NAME,
+                    test_ros.AddTwoInts._TYPE,
+                    new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
+                      @Override
+                      public void build(test_ros.AddTwoInts.Request request,
+                          test_ros.AddTwoInts.Response response) {
+                        response.setSum(request.getA() + request.getB());
+                      }
+                    });
         try {
-          node.newServiceServer(SERVICE_NAME, test_ros.AddTwoInts._TYPE, null);
+          connectedNode.newServiceServer(SERVICE_NAME, test_ros.AddTwoInts._TYPE, null);
           fail();
         } catch (DuplicateServiceException e) {
           // Only one ServiceServer with a given name can be created.
         }
         serviceServer.addListener(countDownServiceServerListener);
       }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
-      @Override
-      public GraphName getDefaultNodeName() {
-        return new GraphName("server");
-      }
     }, nodeConfiguration);
 
     assertTrue(countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     final CountDownLatch latch = new CountDownLatch(1);
-    nodeMainExecutor.execute(new NodeMain() {
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
-      public void onStart(Node node) {
+      public GraphName getDefaultNodeName() {
+        return new GraphName("client");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
         ServiceClient<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceClient;
         try {
-          serviceClient = node.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
+          serviceClient = connectedNode.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
           // Test that requesting another client for the same service returns
           // the same instance.
           ServiceClient<?, ?> duplicate =
-              node.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
+              connectedNode.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
           assertEquals(serviceClient, duplicate);
         } catch (ServiceNotFoundException e) {
           throw new RosRuntimeException(e);
@@ -115,19 +113,6 @@ public class ServiceIntegrationTest extends RosTest {
           }
         });
       }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
-      @Override
-      public GraphName getDefaultNodeName() {
-        return new GraphName("client");
-      }
     }, nodeConfiguration);
 
     assertTrue(latch.await(1, TimeUnit.SECONDS));
@@ -138,46 +123,44 @@ public class ServiceIntegrationTest extends RosTest {
     final String errorMessage = "Error!";
     final CountDownServiceServerListener<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
-    nodeMainExecutor.execute(new NodeMain() {
-      @Override
-      public void onStart(Node node) {
-        ServiceServer<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceServer =
-            node.newServiceServer(
-                SERVICE_NAME,
-                test_ros.AddTwoInts._TYPE,
-                new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
-                  @Override
-                  public void build(test_ros.AddTwoInts.Request request,
-                      test_ros.AddTwoInts.Response response) throws ServiceException {
-                    throw new ServiceException(errorMessage);
-                  }
-                });
-        serviceServer.addListener(countDownServiceServerListener);
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
         return new GraphName("server");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        ServiceServer<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceServer =
+            connectedNode
+                .newServiceServer(
+                    SERVICE_NAME,
+                    test_ros.AddTwoInts._TYPE,
+                    new ServiceResponseBuilder<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response>() {
+                      @Override
+                      public void build(test_ros.AddTwoInts.Request request,
+                          test_ros.AddTwoInts.Response response) throws ServiceException {
+                        throw new ServiceException(errorMessage);
+                      }
+                    });
+        serviceServer.addListener(countDownServiceServerListener);
       }
     }, nodeConfiguration);
 
     assertTrue(countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     final CountDownLatch latch = new CountDownLatch(1);
-    nodeMainExecutor.execute(new NodeMain() {
+    nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
-      public void onStart(Node node) {
+      public GraphName getDefaultNodeName() {
+        return new GraphName("client");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
         ServiceClient<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceClient;
         try {
-          serviceClient = node.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
+          serviceClient = connectedNode.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
         } catch (ServiceNotFoundException e) {
           throw new RosRuntimeException(e);
         }
@@ -194,19 +177,6 @@ public class ServiceIntegrationTest extends RosTest {
             latch.countDown();
           }
         });
-      }
-
-      @Override
-      public void onShutdownComplete(Node node) {
-      }
-
-      @Override
-      public void onShutdown(Node node) {
-      }
-
-      @Override
-      public GraphName getDefaultNodeName() {
-        return new GraphName("client");
       }
     }, nodeConfiguration);
 

@@ -307,6 +307,11 @@ If you want to use messages that you define:
 - ensure that my_msgs is in your ROS_PACKAGE_PATH (see :roswiki:`EnvironmentVariables`)
 - reinstall rosjava_messages (see :doc:`building`)
 
+.. code-block:: bash
+
+  roscd rosjava_messages
+  ../gradlew install
+
 Parameters
 ----------
 
