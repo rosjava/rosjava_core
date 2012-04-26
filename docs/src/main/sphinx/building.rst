@@ -25,7 +25,7 @@ To run the tests, you may execute the test task:
 
   ./gradlew test
 
-To generate Eclipse project files:
+To generate Eclipse project files, you may execute the eclipse:
 
 .. code-block:: bash
 

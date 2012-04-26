@@ -92,7 +92,7 @@ implementation:
     }
 
     @Override
-    public void onStart(Node node) {
+    public void onStart(ConnectedNode node) {
     }
 
     @Override
@@ -101,6 +101,10 @@ implementation:
 
     @Override
     public void onShutdownComplete(Node node) {
+    }
+
+    @Override
+    public void onError(Node node, Throwable throwable) {
     }
   }
 
@@ -112,10 +116,11 @@ when refering to nodes, topics, and parameters. Most methods which accept a
 :javadoc:`org.ros.namespace.GraphName` will also accept a string for
 convenience.
 
-The :javadoc:`org.ros.node.NodeListener#onStart(org.ros.node.Node)` method is
-the entry point for your program (or node). The :javadoc:`org.ros.node.Node`
-parameter is the factory we use to build things like
-:javadoc:`org.ros.topic.Publisher`\s and :javadoc:`org.ros.topic.Subscriber`\s.
+The :javadoc:`org.ros.node.NodeListener#onStart(org.ros.node.ConnectedNode)`
+method is the entry point for your program (or node). The
+:javadoc:`org.ros.node.ConnectedNode` parameter is the factory we use to build
+things like :javadoc:`org.ros.topic.Publisher`\s and
+:javadoc:`org.ros.topic.Subscriber`\s.
 
 The :javadoc:`org.ros.node.NodeListener#onShutdown(org.ros.node.Node)` method is
 the first exit point for your program. It will be executed as soon as shutdown
@@ -127,6 +132,15 @@ The :javadoc:`org.ros.node.NodeListener#onShutdownComplete(org.ros.node.Node)`
 method is the final exit point for your program. It will be executed after all
 publishers, subscribers, etc. have been shutdown. This is the preferred place
 to handle clean up since it will not delay shutdown.
+
+The :javadoc:`org.ros.node.NodeListener#onError(org.ros.node.Node,
+java.lang.Throwable)` method is called when an error occurs in the
+:javadoc:`org.ros.node.Node` itself. These errors are typically fatal.  The
+:javadoc:`org.ros.node.NodeListener#onShutdown(org.ros.node.Node)` and
+:javadoc:`org.ros.node.NodeListener#onShutdownComplete(org.ros.node.Node)`
+methods will be called following the call to
+:javadoc:`org.ros.node.NodeListener#onError(org.ros.node.Node,
+java.lang.Throwable)`.
 
 Publishers and subscribers
 --------------------------
@@ -141,9 +155,9 @@ you're a ROS veteran. The :javadoc:`org.ros.topic.Publisher` publishes
   :language: java
   :linenos:
   :lines: 17-
-  :emphasize-lines: 27,37
+  :emphasize-lines: 28,38
 
-Line 27 will probably feel unfamailiar even to ROS veterans. This is one
+Line 28 will probably feel unfamailiar even to ROS veterans. This is one
 example of rosjava's asynchornous API. The intent of our
 :javadoc:`org.ros.rosjava_tutorial_pubsub.Talker` class is to publish a hello
 world message to anyone who will listen once per second. One way to accomplish
@@ -153,7 +167,7 @@ method. So, we create a :javadoc:`org.ros.concurrent.CancellableLoop` and ask
 the :javadoc:`org.ros.node.Node` to execute it. The loop will be interrupted
 automatically when the :javadoc:`org.ros.node.Node` exits.
 
-On line 37 we create a new ``std_msgs.String`` message to publish using the
+On line 38 we create a new ``std_msgs.String`` message to publish using the
 :javadoc:`org.ros.node.topic.Publisher#newMessage()` method. Messages in
 rosjava cannot be instantiated directly. More on that later.
 
@@ -164,10 +178,10 @@ class.
   :language: java
   :linenos:
   :lines: 17-
-  :emphasize-lines: 26
+  :emphasize-lines: 27-32
 
-In line 26 we see another example of rosjava's asynchornous API. We can add as
-many :javadoc:`org.ros.message.MessageListener`\s to our
+In lines 27-32 we see another example of rosjava's asynchornous API. We can add
+as many :javadoc:`org.ros.message.MessageListener`\s to our
 :javadoc:`org.ros.node.topic.Subscriber` as we like. When a new message is
 received, all of our :javadoc:`org.ros.message.MessageListener`\s will be
 called with the incoming message as an argument to
@@ -234,10 +248,10 @@ a ROS veteran.
   :language: java
   :linenos:
   :lines: 17-
-  :emphasize-lines: 28
+  :emphasize-lines: 29
 
 The :javadoc:`org.ros.node.service.ServiceResponseBuilder` is called
-asynchronously for each incoming request. On line 28 we modify the response
+asynchronously for each incoming request. On line 29 we modify the response
 output parameter to contain the sum of the two integers in the request. The
 response will be sent once the
 :javadoc:`org.ros.node.service.ServiceResponseBuilder#build(T, S)` returns.
@@ -249,9 +263,9 @@ class.
   :language: java
   :linenos:
   :lines: 17-
-  :emphasize-lines: 35-46
+  :emphasize-lines: 36-47
 
-On lines 35-46 we see another example of rosjava's asynchornous API. When the
+In lines 36-47 we see another example of rosjava's asynchornous API. When the
 response is received, our
 :javadoc:`org.ros.node.service.ServiceResponseListener` will be called with the
 incoming response as an argument to
