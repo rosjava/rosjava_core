@@ -33,7 +33,7 @@ task copySphinxConf(type: Copy) {
   rename 'conf.py.in', 'conf.py'
 }
 
-task install(type: Exec, dependsOn: [copySphinxConf, javadoc]) {
+task docs(type: Exec, dependsOn: [copySphinxConf, javadoc]) {
   commandLine 'make', 'html'
 }
 

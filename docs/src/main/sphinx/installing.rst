@@ -6,11 +6,6 @@ Installing rosjava_core
 These instructions assume that you have already installed ROS on your system.
 See :roswiki:`ROS/Installation` if you need help installing ROS.
 
-When choosing a release to install, please consider that:
-
-* The *oldest* ROS release that rosjava has been tested with is: **Electric**
-* The *newest* ROS release that rosjava has been tested with is: **Electric**
-
 These instructions also assume you are using Ubuntu. However, the differences
 between platforms should be minimal.
 
@@ -20,24 +15,25 @@ insufficient.
 
 .. code-block:: bash
 
-  sudo apt-get install python-setuptools
-  easy_install --prefix ~/.local -U rosinstall
-  export PATH=$PATH:~/.local/bin
+  sudo apt-get install python-pip
+  sudo pip install --upgrade rosinstall
   mkdir ~/my_workspace
   cd ~/my_workspace
   rosws init
   rosws merge /opt/ros/electric/.rosinstall
   rosws merge http://rosjava.googlecode.com/hg/.rosinstall
   rosws update
+  source setup.bash
 
-.. note:: The rosws tool will remind you as well, but don't forget to source
-  the appropriate, newly generated setup script.
+.. note:: You should source the correct setup script for your shell (e.g.
+  setup.bash for Bash or setup.zsh for Z shell).
 
-If you would like to build the rosjava_core documentation, you will also need Pygments 1.5+.
+If you would like to build the rosjava_core documentation, you will also need
+Pygments 1.5+ and Sphinx 1.1.3+.
 
 .. code-block:: bash
 
-  easy_install --prefix ~/.local -U pygments
+  sudo pip install --upgrade sphinx Pygments
 
 .. _rosws tutorial: http://www.ros.org/doc/api/rosinstall/html/rosws_tutorial.html
 
