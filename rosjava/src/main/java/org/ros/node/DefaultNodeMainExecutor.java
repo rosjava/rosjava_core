@@ -102,6 +102,12 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
     connectedNodes =
         Multimaps.synchronizedMultimap(HashMultimap.<GraphName, ConnectedNode>create());
     nodeMains = Maps.synchronizedBiMap(HashBiMap.<Node, NodeMain>create());
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      @Override
+      public void run() {
+        DefaultNodeMainExecutor.this.shutdown();
+      }
+    }));
   }
 
   @Override
