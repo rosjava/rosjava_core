@@ -32,7 +32,7 @@ import java.nio.ByteBuffer;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageSerializationTest {
+public class RawMessageSerializationTest {
 
   private TopicDefinitionResourceProvider topicDefinitionResourceProvider;
   private MessageFactory messageFactory;

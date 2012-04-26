@@ -16,20 +16,40 @@
 
 package org.ros.internal.message;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
+
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class DefaultMessageInterfaceClassProvider implements MessageInterfaceClassProvider {
 
+  private final Map<String, Class<?>> cache;
+
+  public DefaultMessageInterfaceClassProvider() {
+    cache = Maps.newConcurrentMap();
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public <T> Class<T> get(String messageType) {
+    if (cache.containsKey(messageType)) {
+      return (Class<T>) cache.get(messageType);
+    }
     try {
       String className = messageType.replace("/", ".");
-      return (Class<T>) getClass().getClassLoader().loadClass(className);
+      Class<T> messageInterfaceClass = (Class<T>) getClass().getClassLoader().loadClass(className);
+      cache.put(messageType, messageInterfaceClass);
+      return messageInterfaceClass;
     } catch (ClassNotFoundException e) {
       return (Class<T>) RawMessage.class;
     }
+  }
+
+  @VisibleForTesting
+  <T> void add(String messageType, Class<T> messageInterfaceClass) {
+    cache.put(messageType, messageInterfaceClass);
   }
 }

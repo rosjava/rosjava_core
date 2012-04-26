@@ -16,9 +16,10 @@
 
 package org.ros.internal.message;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageFactory;
-
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -26,16 +27,23 @@ import org.ros.message.MessageFactory;
 public class DefaultMessageFactory implements MessageFactory {
 
   private final MessageDefinitionProvider messageDefinitionProvider;
+  private final DefaultMessageInterfaceClassProvider messageInterfaceClassProvider;
   private final MessageProxyFactory messageProxyFactory;
 
   public DefaultMessageFactory(MessageDefinitionProvider messageDefinitionProvider) {
     this.messageDefinitionProvider = messageDefinitionProvider;
-    messageProxyFactory = new MessageProxyFactory(new DefaultMessageInterfaceClassProvider(), this);
+    messageInterfaceClassProvider = new DefaultMessageInterfaceClassProvider();
+    messageProxyFactory = new MessageProxyFactory(getMessageInterfaceClassProvider(), this);
   }
 
   @Override
   public <T> T newFromType(String messageType) {
     String messageDefinition = messageDefinitionProvider.get(messageType);
     return messageProxyFactory.newMessageProxy(messageType, messageDefinition);
+  }
+
+  @VisibleForTesting
+  DefaultMessageInterfaceClassProvider getMessageInterfaceClassProvider() {
+    return messageInterfaceClassProvider;
   }
 }
