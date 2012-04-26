@@ -178,7 +178,10 @@ public class GenerateInterfaces {
     String rosPackagePath = System.getenv(EnvironmentVariables.ROS_PACKAGE_PATH);
     Collection<File> packagePath = Lists.newArrayList();
     for (String path : rosPackagePath.split(File.pathSeparator)) {
-      packagePath.add(new File(path));
+      File packageDirectory = new File(path);
+      if (packageDirectory.exists()) {
+        packagePath.add(packageDirectory);
+      }
     }
     GenerateInterfaces generateInterfaces = new GenerateInterfaces();
     File outputDirectory = new File(arguments.remove(0));

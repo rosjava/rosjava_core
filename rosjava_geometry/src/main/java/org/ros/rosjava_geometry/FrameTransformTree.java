@@ -122,6 +122,10 @@ public class FrameTransformTree {
     this.prefix = prefix;
   }
 
+  public void setPrefix(String prefix) {
+    setPrefix(new GraphName(prefix));
+  }
+
   private GraphName makeFullyQualified(GraphName frame) {
     Preconditions.checkNotNull(frame, "Frame not specified.");
     if (prefix != null) {
