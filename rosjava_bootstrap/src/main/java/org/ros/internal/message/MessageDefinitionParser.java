@@ -45,7 +45,7 @@ public class MessageDefinitionParser {
      * @param value
      *          the value of the constant
      */
-    void constant(String type, String name, String value);
+    void constantValue(String type, String name, String value);
 
     /**
      * Called for each scalar in the message definition.
@@ -55,7 +55,7 @@ public class MessageDefinitionParser {
      * @param name
      *          the name of the scalar
      */
-    void scalar(String type, String name);
+    void variableValue(String type, String name);
 
     /**
      * Called for each array in the message definition.
@@ -67,7 +67,7 @@ public class MessageDefinitionParser {
      * @param name
      *          the name of the array
      */
-    void list(String type, int size, String name);
+    void variableList(String type, int size, String name);
   }
 
   /**
@@ -163,12 +163,12 @@ public class MessageDefinitionParser {
         value = value.substring(0, value.indexOf('#'));
         value = value.trim();
       }
-      visitor.constant(type, name, value);
+      visitor.constantValue(type, name, value);
     } else {
       if (array) {
-        visitor.list(type, size, name);
+        visitor.variableList(type, size, name);
       } else {
-        visitor.scalar(type, name);
+        visitor.variableValue(type, name);
       }
     }
   }

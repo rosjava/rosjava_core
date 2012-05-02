@@ -67,27 +67,8 @@ public class MessageContext {
     return messageDeclaration.getDefinition();
   }
 
-  public <T> void addConstantField(FieldType type, String name, T value) {
-    ScalarField<T> field = ScalarField.newConstant(type, name, value);
-    fields.put(name, field);
-    orderedFields.add(field);
-  }
-
-  public <T> void addConstantListField(String name, FieldType type, List<T> value) {
-    ListField<T> field = ListField.newConstant(type, name, value);
-    fields.put(name, field);
-    orderedFields.add(field);
-  }
-
-  public void addValueField(FieldType type, String name) {
-    ScalarField<?> field = ScalarField.newValue(type, name);
-    fields.put(name, field);
-    orderedFields.add(field);
-  }
-
-  public void addValueListField(FieldType type, String name) {
-    ListField<?> field = ListField.newValue(type, name);
-    fields.put(name, field);
+  public void addField(Field field) {
+    fields.put(field.getName(), field);
     orderedFields.add(field);
   }
 

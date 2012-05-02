@@ -19,49 +19,54 @@ package org.ros.internal.message;
 import com.google.common.base.Preconditions;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class ScalarField<T> extends Field {
+public class FloatArrayField extends Field {
 
-  private T value;
+  private final int size;
 
-  static <T> ScalarField<T> newConstant(FieldType type, String name, T value) {
-    return new ScalarField<T>(type, name, value, true);
+  private float[] value;
+
+  public static FloatArrayField newVariable(int size, String name) {
+    return new FloatArrayField(PrimitiveFieldType.FLOAT32, name, size, new float[Math.max(0, size)]);
   }
 
-  @SuppressWarnings("unchecked")
-  static <T> ScalarField<T> newValue(FieldType type, String name) {
-    return new ScalarField<T>(type, name, (T) type.getDefaultValue(), false);
-  }
-
-  private ScalarField(FieldType type, String name, T value, boolean isConstant) {
-    super(type, name, isConstant);
-    this.value = value;
+  private FloatArrayField(FieldType type, String name, int size, float[] value) {
+    super(type, name, false);
+    this.size = size;
+    setValue(value);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public T getValue() {
+  public float[] getValue() {
     return value;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void setValue(Object value) {
-    Preconditions.checkState(!isConstant);
-    this.value = (T) value;
+    Preconditions.checkArgument(size < 0 || ((float[]) value).length == size);
+    this.value = (float[]) value;
   }
 
   @Override
   public void serialize(ByteBuffer buffer) {
-    type.serialize(value, buffer);
+    buffer.putInt(value.length);
+    for (float v : value) {
+      type.serialize(v, buffer);
+    }
   }
 
   @Override
   public void deserialize(ByteBuffer buffer) {
-    value = type.<T>deserialize(buffer);
+    int size = buffer.getInt();
+    value = new float[size];
+    for (int i = 0; i < size; i++) {
+      value[i] = (Float) type.deserialize(buffer);
+    }
   }
 
   @Override
@@ -71,20 +76,16 @@ class ScalarField<T> extends Field {
 
   @Override
   public int getSerializedSize() {
-    Preconditions.checkNotNull(value, "Cannot serialize null field: " + this);
-    if (type instanceof MessageFieldType) {
-      return ((Message) value).toRawMessage().getSerializedSize();
-    } else if (type == PrimitiveFieldType.STRING) {
-      // We only support ASCII strings and reserve 4 bytes for the length.
-      return ((String) value).length() + 4;
-    } else {
-      return type.getSerializedSize();
-    }
+    Preconditions.checkNotNull(value);
+    // Reserve 4 bytes for the length.
+    int size = 4;
+    size += type.getSerializedSize() * value.length;
+    return size;
   }
 
   @Override
   public String toString() {
-    return "ScalarField<" + type + ", " + name + ">";
+    return "FloatArrayField<" + type + ", " + name + ">";
   }
 
   @Override
@@ -95,7 +96,6 @@ class ScalarField<T> extends Field {
     return result;
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -104,11 +104,11 @@ class ScalarField<T> extends Field {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ScalarField other = (ScalarField) obj;
+    FloatArrayField other = (FloatArrayField) obj;
     if (value == null) {
       if (other.value != null)
         return false;
-    } else if (!value.equals(other.value))
+    } else if (!Arrays.equals(value, other.value))
       return false;
     return true;
   }

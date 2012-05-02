@@ -26,8 +26,7 @@ import org.ros.node.ConnectedNode;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,16 +45,20 @@ public class ParameterServerTestNode extends AbstractNodeMain {
   @SuppressWarnings("rawtypes")
   @Override
   public void onStart(ConnectedNode connectedNode) {
-    final Publisher<std_msgs.String> pub_tilde = connectedNode.newPublisher("tilde", std_msgs.String._TYPE);
+    final Publisher<std_msgs.String> pub_tilde =
+        connectedNode.newPublisher("tilde", std_msgs.String._TYPE);
     final Publisher<std_msgs.String> pub_string =
         connectedNode.newPublisher("string", std_msgs.String._TYPE);
-    final Publisher<std_msgs.Int64> pub_int = connectedNode.newPublisher("int", "std_msgs/Int64");
-    final Publisher<std_msgs.Bool> pub_bool = connectedNode.newPublisher("bool", "std_msgs/Bool");
-    final Publisher<std_msgs.Float64> pub_float = connectedNode.newPublisher("float", "std_msgs/Float64");
+    final Publisher<std_msgs.Int64> pub_int =
+        connectedNode.newPublisher("int", std_msgs.Int64._TYPE);
+    final Publisher<std_msgs.Bool> pub_bool =
+        connectedNode.newPublisher("bool", std_msgs.Bool._TYPE);
+    final Publisher<std_msgs.Float64> pub_float =
+        connectedNode.newPublisher("float", std_msgs.Float64._TYPE);
     final Publisher<test_ros.Composite> pub_composite =
-        connectedNode.newPublisher("composite", "test_ros/Composite");
+        connectedNode.newPublisher("composite", test_ros.Composite._TYPE);
     final Publisher<test_ros.TestArrays> pub_list =
-        connectedNode.newPublisher("list", "test_ros/TestArrays");
+        connectedNode.newPublisher("list", test_ros.TestArrays._TYPE);
 
     ParameterTree param = connectedNode.getParameterTree();
 
@@ -100,11 +103,13 @@ public class ParameterServerTestNode extends AbstractNodeMain {
 
     final test_ros.TestArrays list_m = topicMessageFactory.newFromType(test_ros.TestArrays._TYPE);
     // only using the integer part for easier (non-float) comparison
-    Object[] list = param.getList(resolver.resolve("list")).toArray();
-    list_m.setInt32Array(new ArrayList<Integer>());
-    for (int i = 0; i < list.length; i++) {
-      list_m.getInt32Array().add((Integer) list[i]);
+    @SuppressWarnings("unchecked")
+    List<Integer> list = (List<Integer>) param.getList(resolver.resolve("list"));
+    int[] data = new int[list.size()];
+    for (int i = 0; i < list.size(); i++) {
+      data[i] = list.get(i);
     }
+    list_m.setInt32Array(data);
 
     // Set parameters
     param.set(setResolver.resolve("string"), string_m.getData());
@@ -112,7 +117,7 @@ public class ParameterServerTestNode extends AbstractNodeMain {
     param.set(setResolver.resolve("float"), float_m.getData());
     param.set(setResolver.resolve("bool"), bool_m.getData());
     param.set(setResolver.resolve("composite"), composite_map);
-    param.set(setResolver.resolve("list"), Arrays.asList(list));
+    param.set(setResolver.resolve("list"), list);
 
     connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override

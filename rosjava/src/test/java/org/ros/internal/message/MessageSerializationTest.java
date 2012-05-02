@@ -92,7 +92,7 @@ public class MessageSerializationTest {
   @Test
   public void testUint8() {
     std_msgs.UInt8 message = defaultMessageFactory.newFromType(std_msgs.UInt8._TYPE);
-    message.setData((short) 42);
+    message.setData((byte) 42);
     checkSerializeAndDeserialize(message);
   }
 

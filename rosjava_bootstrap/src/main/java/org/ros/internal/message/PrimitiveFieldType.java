@@ -38,6 +38,11 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
+    public BooleanArrayField newVariableList(String name, int size) {
+      return BooleanArrayField.newVariable(size, name);
+    }
+
+    @Override
     public int getSerializedSize() {
       return 1;
     }
@@ -59,12 +64,22 @@ public enum PrimitiveFieldType implements FieldType {
     public Boolean parseFromString(String value) {
       return value.equals("1");
     }
+
+    @Override
+    public String getJavaTypeName() {
+      return "boolean";
+    }
   },
   INT8 {
     @SuppressWarnings("unchecked")
     @Override
     public Byte getDefaultValue() {
       return Byte.valueOf((byte) 0);
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return ByteArrayField.newVariable(name, size);
     }
 
     @Override
@@ -89,6 +104,11 @@ public enum PrimitiveFieldType implements FieldType {
     public Byte parseFromString(String value) {
       return Byte.parseByte(value);
     }
+
+    @Override
+    public String getJavaTypeName() {
+      return "byte";
+    }
   },
   /**
    * @deprecated replaced by {@link PrimitiveFieldType#INT8}
@@ -98,6 +118,11 @@ public enum PrimitiveFieldType implements FieldType {
     @Override
     public Byte getDefaultValue() {
       return INT8.getDefaultValue();
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return INT8.newVariableList(name, size);
     }
 
     @Override
@@ -121,35 +146,49 @@ public enum PrimitiveFieldType implements FieldType {
     public Byte parseFromString(String value) {
       return INT8.parseFromString(value);
     }
+
+    @Override
+    public String getJavaTypeName() {
+      return INT8.getJavaTypeName();
+    }
   },
   UINT8 {
     @SuppressWarnings("unchecked")
     @Override
-    public Short getDefaultValue() {
-      return Short.valueOf((short) 0);
+    public Byte getDefaultValue() {
+      return INT8.getDefaultValue();
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return INT8.newVariableList(name, size);
     }
 
     @Override
     public int getSerializedSize() {
-      return 1;
+      return INT8.getSerializedSize();
     }
 
     @Override
     public <T> void serialize(T value, ByteBuffer buffer) {
-      Preconditions.checkArgument(value instanceof Short);
-      buffer.put(((Short) value).byteValue());
+      INT8.serialize(value, buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Short deserialize(ByteBuffer buffer) {
-      return Short.valueOf(buffer.get());
+    public Byte deserialize(ByteBuffer buffer) {
+      return INT8.deserialize(buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Short parseFromString(String value) {
-      return Short.parseShort(value);
+    public Byte parseFromString(String value) {
+      return INT8.parseFromString(value);
+    }
+
+    @Override
+    public String getJavaTypeName() {
+      return INT8.getJavaTypeName();
     }
   },
   /**
@@ -158,8 +197,13 @@ public enum PrimitiveFieldType implements FieldType {
   CHAR {
     @SuppressWarnings("unchecked")
     @Override
-    public Short getDefaultValue() {
+    public Byte getDefaultValue() {
       return UINT8.getDefaultValue();
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return UINT8.newVariableList(name, size);
     }
 
     @Override
@@ -174,14 +218,19 @@ public enum PrimitiveFieldType implements FieldType {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Short deserialize(ByteBuffer buffer) {
+    public Byte deserialize(ByteBuffer buffer) {
       return UINT8.deserialize(buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Short parseFromString(String value) {
+    public Byte parseFromString(String value) {
       return UINT8.parseFromString(value);
+    }
+
+    @Override
+    public String getJavaTypeName() {
+      return "byte";
     }
   },
   INT16 {
@@ -189,6 +238,11 @@ public enum PrimitiveFieldType implements FieldType {
     @Override
     public Short getDefaultValue() {
       return Short.valueOf((short) 0);
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return ShortArrayField.newVariable(this, size, name);
     }
 
     @Override
@@ -213,35 +267,49 @@ public enum PrimitiveFieldType implements FieldType {
     public Short parseFromString(String value) {
       return Short.parseShort(value);
     }
+
+    @Override
+    public String getJavaTypeName() {
+      return "short";
+    }
   },
   UINT16 {
     @SuppressWarnings("unchecked")
     @Override
-    public Integer getDefaultValue() {
-      return Integer.valueOf(0);
+    public Short getDefaultValue() {
+      return INT16.getDefaultValue();
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return INT16.newVariableList(name, size);
     }
 
     @Override
     public int getSerializedSize() {
-      return 2;
+      return INT16.getSerializedSize();
     }
 
     @Override
     public <T> void serialize(T value, ByteBuffer buffer) {
-      Preconditions.checkArgument(value instanceof Integer);
-      buffer.putShort(((Integer) value).shortValue());
+      INT16.serialize(value, buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Integer deserialize(ByteBuffer buffer) {
-      return Integer.valueOf(buffer.getShort());
+    public Short deserialize(ByteBuffer buffer) {
+      return INT16.deserialize(buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Integer parseFromString(String value) {
-      return Integer.parseInt(value);
+      return INT16.parseFromString(value);
+    }
+
+    @Override
+    public String getJavaTypeName() {
+      return INT16.getJavaTypeName();
     }
   },
   INT32 {
@@ -249,6 +317,11 @@ public enum PrimitiveFieldType implements FieldType {
     @Override
     public Integer getDefaultValue() {
       return Integer.valueOf(0);
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return IntegerArrayField.newVariable(this, size, name);
     }
 
     @Override
@@ -273,35 +346,49 @@ public enum PrimitiveFieldType implements FieldType {
     public Integer parseFromString(String value) {
       return Integer.parseInt(value);
     }
+
+    @Override
+    public String getJavaTypeName() {
+      return "int";
+    }
   },
   UINT32 {
     @SuppressWarnings("unchecked")
     @Override
-    public Long getDefaultValue() {
-      return Long.valueOf(0);
+    public Integer getDefaultValue() {
+      return INT32.getDefaultValue();
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return INT32.newVariableList(name, size);
     }
 
     @Override
     public int getSerializedSize() {
-      return 4;
+      return INT32.getSerializedSize();
     }
 
     @Override
     public <T> void serialize(T value, ByteBuffer buffer) {
-      Preconditions.checkArgument(value instanceof Long);
-      buffer.putInt(((Long) value).intValue());
+      INT32.serialize(value, buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Long deserialize(ByteBuffer buffer) {
-      return (long) buffer.getInt();
+    public Integer deserialize(ByteBuffer buffer) {
+      return INT32.deserialize(buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Long parseFromString(String value) {
-      return Long.parseLong(value);
+      return INT32.parseFromString(value);
+    }
+
+    @Override
+    public String getJavaTypeName() {
+      return INT32.getJavaTypeName();
     }
   },
   INT64 {
@@ -312,6 +399,11 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
+    public Field newVariableList(String name, int size) {
+      return LongArrayField.newVariable(this, size, name);
+    }
+
+    @Override
     public int getSerializedSize() {
       return 8;
     }
@@ -332,36 +424,50 @@ public enum PrimitiveFieldType implements FieldType {
     @Override
     public Long parseFromString(String value) {
       return Long.parseLong(value);
+    }
+
+    @Override
+    public String getJavaTypeName() {
+      return "long";
     }
   },
   UINT64 {
     @SuppressWarnings("unchecked")
     @Override
     public Long getDefaultValue() {
-      return Long.valueOf(0);
+      return INT64.getDefaultValue();
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return INT64.newVariableList(name, size);
     }
 
     @Override
     public int getSerializedSize() {
-      return 8;
+      return INT64.getSerializedSize();
     }
 
     @Override
     public <T> void serialize(T value, ByteBuffer buffer) {
-      Preconditions.checkArgument(value instanceof Long);
-      buffer.putLong((Long) value);
+      INT64.serialize(value, buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Long deserialize(ByteBuffer buffer) {
-      return buffer.getLong();
+      return INT64.deserialize(buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Long parseFromString(String value) {
-      return Long.parseLong(value);
+      return INT64.parseFromString(value);
+    }
+
+    @Override
+    public String getJavaTypeName() {
+      return INT64.getJavaTypeName();
     }
   },
   FLOAT32 {
@@ -369,6 +475,11 @@ public enum PrimitiveFieldType implements FieldType {
     @Override
     public Float getDefaultValue() {
       return Float.valueOf(0);
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return FloatArrayField.newVariable(size, name);
     }
 
     @Override
@@ -393,6 +504,11 @@ public enum PrimitiveFieldType implements FieldType {
     public Float parseFromString(String value) {
       return Float.parseFloat(value);
     }
+
+    @Override
+    public String getJavaTypeName() {
+      return "float";
+    }
   },
   FLOAT64 {
     @SuppressWarnings("unchecked")
@@ -404,6 +520,11 @@ public enum PrimitiveFieldType implements FieldType {
     @Override
     public int getSerializedSize() {
       return 8;
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return DoubleArrayField.newVariable(size, name);
     }
 
     @Override
@@ -423,12 +544,22 @@ public enum PrimitiveFieldType implements FieldType {
     public Double parseFromString(String value) {
       return Double.parseDouble(value);
     }
+
+    @Override
+    public String getJavaTypeName() {
+      return "double";
+    }
   },
   STRING {
     @SuppressWarnings("unchecked")
     @Override
     public String getDefaultValue() {
       return "";
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return ListField.newVariable(this, name);
     }
 
     @Override
@@ -459,12 +590,22 @@ public enum PrimitiveFieldType implements FieldType {
     public String parseFromString(String value) {
       return value;
     }
+
+    @Override
+    public String getJavaTypeName() {
+      return "java.lang.String";
+    }
   },
   TIME {
     @SuppressWarnings("unchecked")
     @Override
     public Time getDefaultValue() {
       return new Time();
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return ListField.newVariable(this, name);
     }
 
     @Override
@@ -490,12 +631,22 @@ public enum PrimitiveFieldType implements FieldType {
     public Void parseFromString(String value) {
       throw new UnsupportedOperationException();
     }
+
+    @Override
+    public String getJavaTypeName() {
+      return Time.class.getName();
+    }
   },
   DURATION {
     @SuppressWarnings("unchecked")
     @Override
     public Duration getDefaultValue() {
       return new Duration();
+    }
+
+    @Override
+    public Field newVariableList(String name, int size) {
+      return ListField.newVariable(this, name);
     }
 
     @Override
@@ -521,6 +672,11 @@ public enum PrimitiveFieldType implements FieldType {
     public Void parseFromString(String value) {
       throw new UnsupportedOperationException();
     }
+
+    @Override
+    public String getJavaTypeName() {
+      return Duration.class.getName();
+    }
   };
 
   private static final ImmutableSet<String> TYPE_NAMES;
@@ -535,6 +691,16 @@ public enum PrimitiveFieldType implements FieldType {
 
   public static boolean existsFor(String name) {
     return TYPE_NAMES.contains(name);
+  }
+
+  @Override
+  public Field newVariableValue(String name) {
+    return ValueField.newVariable(this, name);
+  }
+
+  @Override
+  public <T> Field newConstantValue(String name, T value) {
+    return ValueField.newConstant(this, name, value);
   }
 
   @Override

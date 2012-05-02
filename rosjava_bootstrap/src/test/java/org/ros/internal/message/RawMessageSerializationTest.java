@@ -16,7 +16,7 @@
 
 package org.ros.internal.message;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 
@@ -47,7 +47,8 @@ public class RawMessageSerializationTest {
     ByteBuffer buffer = rawMessage.serialize();
     DefaultMessageDeserializer<RawMessage> deserializer =
         new DefaultMessageDeserializer<RawMessage>(rawMessage.getIdentifier(), messageFactory);
-    assertEquals(rawMessage, deserializer.deserialize(buffer));
+    RawMessage deserializedMessage = deserializer.deserialize(buffer);
+    assertTrue(rawMessage.equals(deserializedMessage));
   }
 
   @Test
@@ -69,7 +70,7 @@ public class RawMessageSerializationTest {
   @Test
   public void testUint8() {
     RawMessage rawMessage = messageFactory.newFromType("std_msgs/UInt8");
-    rawMessage.setUInt8("data", (short) 42);
+    rawMessage.setUInt8("data", (byte) 42);
     checkSerializeAndDeserialize(rawMessage);
   }
 
@@ -176,7 +177,7 @@ public class RawMessageSerializationTest {
   public void testInt32Array() {
     topicDefinitionResourceProvider.add("foo/foo", "int32[] data");
     RawMessage rawMessage = messageFactory.newFromType("foo/foo");
-    rawMessage.setInt32List("data", Lists.newArrayList(1, 2, 3, 4, 5));
+    rawMessage.setInt32Array("data", new int[] { 1, 2, 3, 4, 5 });
     checkSerializeAndDeserialize(rawMessage);
   }
 }

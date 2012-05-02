@@ -17,34 +17,33 @@
 package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
- * 
- * @param <T>
- *          the value type
  */
-public class ListField<T> extends Field {
+class ValueField<T> extends Field {
 
-  private List<T> value;
+  private T value;
 
-  public static <T> ListField<T> newVariable(FieldType type, String name) {
-    return new ListField<T>(type, name, new ArrayList<T>());
+  static <T> ValueField<T> newConstant(FieldType type, String name, T value) {
+    return new ValueField<T>(type, name, value, true);
   }
 
-  private ListField(FieldType type, String name, List<T> value) {
-    super(type, name, false);
+  @SuppressWarnings("unchecked")
+  static <T> ValueField<T> newVariable(FieldType type, String name) {
+    return new ValueField<T>(type, name, (T) type.getDefaultValue(), false);
+  }
+
+  private ValueField(FieldType type, String name, T value, boolean isConstant) {
+    super(type, name, isConstant);
     this.value = value;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<T> getValue() {
+  public T getValue() {
     return value;
   }
 
@@ -52,24 +51,17 @@ public class ListField<T> extends Field {
   @Override
   public void setValue(Object value) {
     Preconditions.checkState(!isConstant);
-    this.value = (List<T>) value;
+    this.value = (T) value;
   }
 
   @Override
   public void serialize(ByteBuffer buffer) {
-    buffer.putInt(value.size());
-    for (T v : value) {
-      type.serialize(v, buffer);
-    }
+    type.serialize(value, buffer);
   }
 
   @Override
   public void deserialize(ByteBuffer buffer) {
-    int size = buffer.getInt();
-    value = Lists.newArrayList();
-    for (int i = 0; i < size; i++) {
-      value.add(type.<T>deserialize(buffer));
-    }
+    value = type.<T>deserialize(buffer);
   }
 
   @Override
@@ -77,30 +69,22 @@ public class ListField<T> extends Field {
     return String.format("%s %s\n", type, name);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public int getSerializedSize() {
-    Preconditions.checkNotNull(value);
-    // Reserve 4 bytes for the length.
-    int size = 4;
+    Preconditions.checkNotNull(value, "Cannot serialize null field: " + this);
     if (type instanceof MessageFieldType) {
-      for (Message message : (List<Message>) value) {
-        size += message.toRawMessage().getSerializedSize();
-      }
+      return ((Message) value).toRawMessage().getSerializedSize();
     } else if (type == PrimitiveFieldType.STRING) {
-      for (String string : (List<String>) value) {
-        // We only support ASCII strings and reserve 4 bytes for the length.
-        size += string.length() + 4;
-      }
+      // We only support ASCII strings and reserve 4 bytes for the length.
+      return ((String) value).length() + 4;
     } else {
-      size += type.getSerializedSize() * ((List<?>) value).size();
+      return type.getSerializedSize();
     }
-    return size;
   }
 
   @Override
   public String toString() {
-    return "ListField<" + type + ", " + name + ">";
+    return "ValueField<" + type + ", " + name + ">";
   }
 
   @Override
@@ -120,7 +104,7 @@ public class ListField<T> extends Field {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ListField other = (ListField) obj;
+    ValueField other = (ValueField) obj;
     if (value == null) {
       if (other.value != null)
         return false;

@@ -37,6 +37,21 @@ public class MessageFieldType implements FieldType {
   }
 
   @Override
+  public Field newVariableValue(String name) {
+    return ValueField.newVariable(this, name);
+  }
+
+  @Override
+  public <T> Field newConstantValue(String name, T value) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Field newVariableList(String name, int size) {
+    return ListField.newVariable(this, name);
+  }
+
+  @Override
   public <T> T getDefaultValue() {
     return messageFactory.newFromType(messageIdentifier.getType());
   }
@@ -44,6 +59,11 @@ public class MessageFieldType implements FieldType {
   @Override
   public String getMd5String() {
     return null;
+  }
+
+  @Override
+  public String getJavaTypeName() {
+    return String.format("%s.%s", messageIdentifier.getPackage(), messageIdentifier.getName());
   }
 
   @Override

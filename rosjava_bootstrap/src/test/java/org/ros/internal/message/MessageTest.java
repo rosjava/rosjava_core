@@ -18,14 +18,10 @@ package org.ros.internal.message;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.Lists;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.message.topic.TopicDefinitionResourceProvider;
 import org.ros.message.MessageFactory;
-
-import java.util.ArrayList;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -108,8 +104,8 @@ public class MessageTest {
   public void testInt8List() {
     topicDefinitionResourceProvider.add("foo/foo", "int8[] data");
     RawMessage rawMessage = messageFactory.newFromType("foo/foo");
-    ArrayList<Byte> data = Lists.newArrayList((byte) 1, (byte) 2, (byte) 3);
-    rawMessage.setInt8List("data", data);
-    assertEquals(data, rawMessage.getInt8List("data"));
+    byte[] data = new byte[] { (byte) 1, (byte) 2, (byte) 3 };
+    rawMessage.setInt8Array("data", data);
+    assertEquals(data, rawMessage.getInt8Array("data"));
   }
 }

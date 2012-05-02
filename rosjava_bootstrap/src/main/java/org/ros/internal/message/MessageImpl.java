@@ -36,19 +36,18 @@ public class MessageImpl implements RawMessage, GetInstance {
     this.context = context;
   }
 
-  private <T> T getFieldValue(FieldType type, String name) {
+  private Object getFieldValue(FieldType type, String name) {
     if (context.hasField(type, name)) {
-      return context.getField(name).<T>getValue();
+      return context.getField(name).getValue();
     }
-    throw new RosRuntimeException("Unknown field: " + type + " " + name);
+    throw new RosRuntimeException(String.format("Uknown field: %s %s", type, name));
   }
 
-  private <T> void setFieldValue(FieldType type, String name, T value) {
+  private void setFieldValue(FieldType type, String name, Object value) {
     if (context.hasField(type, name)) {
       context.getField(name).setValue(value);
     } else {
-      throw new RosRuntimeException("Unable to set field value: " + type + " " + name + " = "
-          + value);
+      throw new RosRuntimeException(String.format("Uknown field: %s %s", type, name));
     }
   }
 
@@ -89,82 +88,83 @@ public class MessageImpl implements RawMessage, GetInstance {
 
   @Override
   public boolean getBool(String name) {
-    return this.<Boolean>getFieldValue(PrimitiveFieldType.BOOL, name);
+    return (Boolean) getFieldValue(PrimitiveFieldType.BOOL, name);
   }
 
   @Override
-  public List<Boolean> getBoolList(String name) {
-    return this.<List<Boolean>>getFieldValue(PrimitiveFieldType.BOOL, name);
+  public boolean[] getBoolArray(String name) {
+    return (boolean[]) getFieldValue(PrimitiveFieldType.BOOL, name);
   }
 
   @Override
   public Duration getDuration(String name) {
-    return this.<Duration>getFieldValue(PrimitiveFieldType.DURATION, name);
+    return (Duration) getFieldValue(PrimitiveFieldType.DURATION, name);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<Duration> getDurationList(String name) {
-    return this.<List<Duration>>getFieldValue(PrimitiveFieldType.DURATION, name);
+    return (List<Duration>) getFieldValue(PrimitiveFieldType.DURATION, name);
   }
 
   @Override
   public float getFloat32(String name) {
-    return this.<Float>getFieldValue(PrimitiveFieldType.FLOAT32, name);
+    return (Float) getFieldValue(PrimitiveFieldType.FLOAT32, name);
   }
 
   @Override
-  public List<Float> getFloat32List(String name) {
-    return this.<List<Float>>getFieldValue(PrimitiveFieldType.FLOAT32, name);
+  public float[] getFloat32Array(String name) {
+    return (float[]) getFieldValue(PrimitiveFieldType.FLOAT32, name);
   }
 
   @Override
   public double getFloat64(String name) {
-    return this.<Double>getFieldValue(PrimitiveFieldType.FLOAT64, name);
+    return (Double) getFieldValue(PrimitiveFieldType.FLOAT64, name);
   }
 
   @Override
-  public List<Double> getFloat64List(String name) {
-    return this.<List<Double>>getFieldValue(PrimitiveFieldType.FLOAT64, name);
+  public double[] getFloat64Array(String name) {
+    return (double[]) getFieldValue(PrimitiveFieldType.FLOAT64, name);
   }
 
   @Override
   public short getInt16(String name) {
-    return this.<Short>getFieldValue(PrimitiveFieldType.INT16, name);
+    return (Short) getFieldValue(PrimitiveFieldType.INT16, name);
   }
 
   @Override
-  public List<Short> getInt16List(String name) {
-    return this.<List<Short>>getFieldValue(PrimitiveFieldType.INT16, name);
+  public short[] getInt16Array(String name) {
+    return (short[]) getFieldValue(PrimitiveFieldType.INT16, name);
   }
 
   @Override
   public int getInt32(String name) {
-    return this.<Integer>getFieldValue(PrimitiveFieldType.INT32, name);
+    return (Integer) getFieldValue(PrimitiveFieldType.INT32, name);
   }
 
   @Override
-  public List<Integer> getInt32List(String name) {
-    return this.<List<Integer>>getFieldValue(PrimitiveFieldType.INT32, name);
+  public int[] getInt32Array(String name) {
+    return (int[]) getFieldValue(PrimitiveFieldType.INT32, name);
   }
 
   @Override
   public long getInt64(String name) {
-    return this.<Long>getFieldValue(PrimitiveFieldType.INT64, name);
+    return (Long) getFieldValue(PrimitiveFieldType.INT64, name);
   }
 
   @Override
-  public List<Long> getInt64List(String name) {
-    return this.<List<Long>>getFieldValue(PrimitiveFieldType.INT64, name);
+  public long[] getInt64Array(String name) {
+    return (long[]) getFieldValue(PrimitiveFieldType.INT64, name);
   }
 
   @Override
   public byte getInt8(String name) {
-    return this.<Byte>getFieldValue(PrimitiveFieldType.INT8, name);
+    return (Byte) getFieldValue(PrimitiveFieldType.INT8, name);
   }
 
   @Override
-  public List<Byte> getInt8List(String name) {
-    return this.<List<Byte>>getFieldValue(PrimitiveFieldType.INT8, name);
+  public byte[] getInt8Array(String name) {
+    return (byte[]) getFieldValue(PrimitiveFieldType.INT8, name);
   }
 
   @Override
@@ -185,62 +185,64 @@ public class MessageImpl implements RawMessage, GetInstance {
 
   @Override
   public String getString(String name) {
-    return getFieldValue(PrimitiveFieldType.STRING, name);
+    return (String) getFieldValue(PrimitiveFieldType.STRING, name);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<String> getStringList(String name) {
-    return getFieldValue(PrimitiveFieldType.STRING, name);
+    return (List<String>) getFieldValue(PrimitiveFieldType.STRING, name);
   }
 
   @Override
   public Time getTime(String name) {
-    return getFieldValue(PrimitiveFieldType.TIME, name);
+    return (Time) getFieldValue(PrimitiveFieldType.TIME, name);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<Time> getTimeList(String name) {
-    return getFieldValue(PrimitiveFieldType.TIME, name);
+    return (List<Time>) getFieldValue(PrimitiveFieldType.TIME, name);
   }
 
   @Override
-  public int getUInt16(String name) {
-    return this.<Integer>getFieldValue(PrimitiveFieldType.UINT16, name);
+  public short getUInt16(String name) {
+    return (Short) getFieldValue(PrimitiveFieldType.UINT16, name);
   }
 
   @Override
-  public List<Integer> getUint16List(String name) {
-    return this.<List<Integer>>getFieldValue(PrimitiveFieldType.UINT16, name);
+  public short[] getUInt16List(String name) {
+    return (short[]) getFieldValue(PrimitiveFieldType.UINT16, name);
   }
 
   @Override
-  public long getUInt32(String name) {
-    return this.<Long>getFieldValue(PrimitiveFieldType.UINT32, name);
+  public int getUInt32(String name) {
+    return (Integer) getFieldValue(PrimitiveFieldType.UINT32, name);
   }
 
   @Override
-  public List<Long> getUint32List(String name) {
-    return this.<List<Long>>getFieldValue(PrimitiveFieldType.UINT32, name);
+  public int[] getUInt32List(String name) {
+    return (int[]) getFieldValue(PrimitiveFieldType.UINT32, name);
   }
 
   @Override
   public long getUInt64(String name) {
-    return this.<Long>getFieldValue(PrimitiveFieldType.UINT64, name);
+    return (Long) getFieldValue(PrimitiveFieldType.UINT64, name);
   }
 
   @Override
-  public List<Long> getUint64List(String name) {
-    return this.<List<Long>>getFieldValue(PrimitiveFieldType.UINT64, name);
+  public long[] getUInt64Array(String name) {
+    return (long[]) getFieldValue(PrimitiveFieldType.UINT64, name);
   }
 
   @Override
   public short getUInt8(String name) {
-    return this.<Short>getFieldValue(PrimitiveFieldType.UINT8, name);
+    return (Short) getFieldValue(PrimitiveFieldType.UINT8, name);
   }
 
   @Override
-  public List<Short> getUint8List(String name) {
-    return this.<List<Short>>getFieldValue(PrimitiveFieldType.UINT8, name);
+  public short[] getUInt8Array(String name) {
+    return (short[]) getFieldValue(PrimitiveFieldType.UINT8, name);
   }
 
   @Override
@@ -249,7 +251,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setBoolList(String name, List<Boolean> value) {
+  public void setBoolArray(String name, boolean[] value) {
     setFieldValue(PrimitiveFieldType.BOOL, name, value);
   }
 
@@ -269,7 +271,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setFloat32List(String name, List<Float> value) {
+  public void setFloat32Array(String name, float[] value) {
     setFieldValue(PrimitiveFieldType.FLOAT32, name, value);
   }
 
@@ -279,7 +281,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setFloat64List(String name, List<Double> value) {
+  public void setFloat64Array(String name, double[] value) {
     setFieldValue(PrimitiveFieldType.FLOAT64, name, value);
   }
 
@@ -289,7 +291,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setInt16List(String name, List<Short> value) {
+  public void setInt16Array(String name, short[] value) {
     setFieldValue(PrimitiveFieldType.INT16, name, value);
   }
 
@@ -299,7 +301,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setInt32List(String name, List<Integer> value) {
+  public void setInt32Array(String name, int[] value) {
     setFieldValue(PrimitiveFieldType.INT32, name, value);
   }
 
@@ -309,7 +311,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setInt64List(String name, List<Long> value) {
+  public void setInt64Array(String name, long[] value) {
     setFieldValue(PrimitiveFieldType.INT64, name, value);
   }
 
@@ -319,7 +321,7 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setInt8List(String name, List<Byte> value) {
+  public void setInt8Array(String name, byte[] value) {
     setFieldValue(PrimitiveFieldType.INT8, name, value);
   }
 
@@ -356,22 +358,22 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setUInt16(String name, int value) {
+  public void setUInt16(String name, short value) {
     setFieldValue(PrimitiveFieldType.UINT16, name, value);
   }
 
   @Override
-  public void setUint16List(String name, List<Integer> value) {
+  public void setUInt16Array(String name, short[] value) {
     setFieldValue(PrimitiveFieldType.UINT16, name, value);
   }
 
   @Override
-  public void setUInt32(String name, long value) {
+  public void setUInt32(String name, int value) {
     setFieldValue(PrimitiveFieldType.UINT32, name, value);
   }
 
   @Override
-  public void setUint32List(String name, List<Long> value) {
+  public void setUInt32Array(String name, int[] value) {
     setFieldValue(PrimitiveFieldType.UINT32, name, value);
   }
 
@@ -381,30 +383,30 @@ public class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public void setUint64List(String name, List<Long> value) {
+  public void setUInt64Array(String name, long[] value) {
     setFieldValue(PrimitiveFieldType.UINT64, name, value);
   }
 
   @Override
-  public void setUInt8(String name, short value) {
+  public void setUInt8(String name, byte value) {
     setFieldValue(PrimitiveFieldType.UINT8, name, value);
   }
 
   @Override
-  public void setUint8List(String name, List<Short> value) {
+  public void setUInt8Array(String name, byte[] value) {
     setFieldValue(PrimitiveFieldType.UINT8, name, value);
   }
 
   @SuppressWarnings("deprecation")
   @Override
   public byte getByte(String name) {
-    return this.<Byte>getFieldValue(PrimitiveFieldType.BYTE, name);
+    return (Byte) getFieldValue(PrimitiveFieldType.BYTE, name);
   }
 
   @SuppressWarnings("deprecation")
   @Override
   public short getChar(String name) {
-    return this.<Short>getFieldValue(PrimitiveFieldType.CHAR, name);
+    return (Short) getFieldValue(PrimitiveFieldType.CHAR, name);
   }
 
   @SuppressWarnings("deprecation")
@@ -421,26 +423,26 @@ public class MessageImpl implements RawMessage, GetInstance {
 
   @SuppressWarnings("deprecation")
   @Override
-  public void setByteList(String name, List<Byte> value) {
+  public void setByteArray(String name, byte[] value) {
     setFieldValue(PrimitiveFieldType.BYTE, name, value);
   }
 
   @SuppressWarnings("deprecation")
   @Override
-  public void setCharList(String name, List<Short> value) {
+  public void setCharArray(String name, short[] value) {
     setFieldValue(PrimitiveFieldType.CHAR, name, value);
   }
 
   @SuppressWarnings("deprecation")
   @Override
-  public List<Byte> getByteList(String name) {
-    return getFieldValue(PrimitiveFieldType.BYTE, name);
+  public byte[] getByteArray(String name) {
+    return (byte[]) getFieldValue(PrimitiveFieldType.BYTE, name);
   }
 
   @SuppressWarnings("deprecation")
   @Override
-  public List<Short> getCharList(String name) {
-    return getFieldValue(PrimitiveFieldType.CHAR, name);
+  public short[] getCharArray(String name) {
+    return (short[]) getFieldValue(PrimitiveFieldType.CHAR, name);
   }
 
   @Override

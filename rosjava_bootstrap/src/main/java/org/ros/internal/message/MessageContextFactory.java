@@ -51,21 +51,21 @@ public class MessageContextFactory {
       }
 
       @Override
-      public void scalar(String type, String name) {
-        context.addValueField(getFieldType(type), name);
+      public void variableValue(String type, String name) {
+        FieldType fieldType = getFieldType(type);
+        context.addField(fieldType.newVariableValue(name));
       }
 
       @Override
-      public void list(String type, int size, String name) {
-        context.addValueListField(getFieldType(type), name);
+      public void variableList(String type, int size, String name) {
+        FieldType fieldType = getFieldType(type);
+        context.addField(fieldType.newVariableList(name, size));
       }
 
       @Override
-      public void constant(String type, String name, String value) {
-        Preconditions.checkArgument(PrimitiveFieldType.existsFor(type),
-            "Only primitive field types may be constant: " + messageDeclaration);
-        FieldType fieldType = PrimitiveFieldType.valueOf(type.toUpperCase());
-        context.addConstantField(fieldType, name, fieldType.parseFromString(value));
+      public void constantValue(String type, String name, String value) {
+        FieldType fieldType = getFieldType(type);
+        context.addField(fieldType.newConstantValue(name, fieldType.parseFromString(value)));
       }
     };
     MessageDefinitionParser messageDefinitionParser = new MessageDefinitionParser(visitor);

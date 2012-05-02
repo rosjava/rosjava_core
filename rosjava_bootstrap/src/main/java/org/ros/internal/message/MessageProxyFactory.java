@@ -21,7 +21,7 @@ import com.google.common.base.Preconditions;
 import org.ros.message.MessageFactory;
 
 import java.lang.reflect.Proxy;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -30,7 +30,7 @@ public class MessageProxyFactory {
 
   private static final String HEADER_MESSAGE_TYPE = "std_msgs/Header";
   private static final String SEQUENCE_FIELD_NAME = "seq";
-  private static final AtomicLong SEQUENCE_NUMBER = new AtomicLong(0);
+  private static final AtomicInteger SEQUENCE_NUMBER = new AtomicInteger(0);
 
   private final MessageInterfaceClassProvider messageInterfaceClassProvider;
   private final MessageContextFactory messageContextFactory;

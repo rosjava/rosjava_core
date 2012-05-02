@@ -17,48 +17,46 @@
 package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
- * 
- * @param <T>
- *          the value type
  */
-public class ListField<T> extends Field {
+public class BooleanArrayField extends Field {
 
-  private List<T> value;
+  private final int size;
 
-  public static <T> ListField<T> newVariable(FieldType type, String name) {
-    return new ListField<T>(type, name, new ArrayList<T>());
+  private boolean[] value;
+
+  public static BooleanArrayField newVariable(int size, String name) {
+    return new BooleanArrayField(PrimitiveFieldType.BOOL, name, size,
+        new boolean[Math.max(0, size)]);
   }
 
-  private ListField(FieldType type, String name, List<T> value) {
+  private BooleanArrayField(FieldType type, String name, int size, boolean[] value) {
     super(type, name, false);
-    this.value = value;
+    this.size = size;
+    setValue(value);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<T> getValue() {
+  public boolean[] getValue() {
     return value;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void setValue(Object value) {
-    Preconditions.checkState(!isConstant);
-    this.value = (List<T>) value;
+    Preconditions.checkArgument(size < 0 || ((boolean[]) value).length == size);
+    this.value = (boolean[]) value;
   }
 
   @Override
   public void serialize(ByteBuffer buffer) {
-    buffer.putInt(value.size());
-    for (T v : value) {
+    buffer.putInt(value.length);
+    for (boolean v : value) {
       type.serialize(v, buffer);
     }
   }
@@ -66,9 +64,9 @@ public class ListField<T> extends Field {
   @Override
   public void deserialize(ByteBuffer buffer) {
     int size = buffer.getInt();
-    value = Lists.newArrayList();
+    value = new boolean[size];
     for (int i = 0; i < size; i++) {
-      value.add(type.<T>deserialize(buffer));
+      value[i] = (Boolean) type.deserialize(buffer);
     }
   }
 
@@ -77,30 +75,18 @@ public class ListField<T> extends Field {
     return String.format("%s %s\n", type, name);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public int getSerializedSize() {
     Preconditions.checkNotNull(value);
     // Reserve 4 bytes for the length.
     int size = 4;
-    if (type instanceof MessageFieldType) {
-      for (Message message : (List<Message>) value) {
-        size += message.toRawMessage().getSerializedSize();
-      }
-    } else if (type == PrimitiveFieldType.STRING) {
-      for (String string : (List<String>) value) {
-        // We only support ASCII strings and reserve 4 bytes for the length.
-        size += string.length() + 4;
-      }
-    } else {
-      size += type.getSerializedSize() * ((List<?>) value).size();
-    }
+    size += type.getSerializedSize() * value.length;
     return size;
   }
 
   @Override
   public String toString() {
-    return "ListField<" + type + ", " + name + ">";
+    return "BooleanArrayField<" + type + ", " + name + ">";
   }
 
   @Override
@@ -111,7 +97,6 @@ public class ListField<T> extends Field {
     return result;
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -120,11 +105,11 @@ public class ListField<T> extends Field {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ListField other = (ListField) obj;
+    BooleanArrayField other = (BooleanArrayField) obj;
     if (value == null) {
       if (other.value != null)
         return false;
-    } else if (!value.equals(other.value))
+    } else if (!Arrays.equals(value, other.value))
       return false;
     return true;
   }

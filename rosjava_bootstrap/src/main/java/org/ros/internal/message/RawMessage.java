@@ -28,21 +28,9 @@ import java.util.List;
  */
 public interface RawMessage extends Message {
 
-  MessageIdentifier getIdentifier();
-
-  String getType();
-
-  String getPackage();
-
-  String getName();
-
-  String getDefinition();
-
-  int getSerializedSize();
-
-  ByteBuffer serialize();
-
   boolean getBool(String name);
+
+  boolean[] getBoolArray(String name);
 
   /**
    * @deprecated replaced by {@link #getInt8(String)}
@@ -50,39 +38,95 @@ public interface RawMessage extends Message {
   byte getByte(String name);
 
   /**
+   * @deprecated replaced by {@link #getInt8Array(String)}
+   */
+  byte[] getByteArray(String name);
+
+  /**
    * @deprecated replaced by {@link #getUInt8(String)}
    */
   short getChar(String name);
 
+  /**
+   * @deprecated replaced by {@link #getUInt8Array(String)}
+   */
+  short[] getCharArray(String name);
+
+  String getDefinition();
+
   Duration getDuration(String name);
+
+  List<Duration> getDurationList(String name);
+
+  List<Field> getFields();
 
   float getFloat32(String name);
 
+  float[] getFloat32Array(String name);
+
   double getFloat64(String name);
+
+  double[] getFloat64Array(String name);
+
+  MessageIdentifier getIdentifier();
 
   short getInt16(String name);
 
+  short[] getInt16Array(String name);
+
   int getInt32(String name);
+
+  int[] getInt32Array(String name);
 
   long getInt64(String name);
 
+  long[] getInt64Array(String name);
+
   byte getInt8(String name);
+
+  byte[] getInt8Array(String name);
 
   <T extends RawMessage> T getMessage(String name);
 
+  <T extends Message> List<T> getMessageList(String name);
+
+  String getName();
+
+  String getPackage();
+
+  int getSerializedSize();
+
   String getString(String name);
+
+  List<String> getStringList(String name);
 
   Time getTime(String name);
 
-  int getUInt16(String name);
+  List<Time> getTimeList(String name);
 
-  long getUInt32(String name);
+  String getType();
+
+  short getUInt16(String name);
+
+  short[] getUInt16List(String name);
+
+  int getUInt32(String name);
+
+  int[] getUInt32List(String name);
 
   long getUInt64(String name);
 
+  long[] getUInt64Array(String name);
+
   short getUInt8(String name);
 
+  short[] getUInt8Array(String name);
+
+  ByteBuffer serialize();
+
   void setBool(String name, boolean value);
+
+  void setBoolArray(String name, boolean[] value);
 
   /**
    * @deprecated replaced by {@link #setInt8(String, byte)}
@@ -90,117 +134,73 @@ public interface RawMessage extends Message {
   void setByte(String name, byte value);
 
   /**
-   * @deprecated replaced by {@link #setUInt8(String, short)}
+   * @deprecated replaced by {@link #setInt8Array(String, byte[])}
+   */
+  void setByteArray(String name, byte[] value);
+
+  /**
+   * @deprecated replaced by {@link #setUInt8(String, byte)}
    */
   void setChar(String name, short value);
 
+  /**
+   * @deprecated replaced by {@link #setUInt8Array(String, byte[])}
+   */
+  void setCharArray(String name, short[] value);
+
   void setDuration(String name, Duration value);
-
-  void setFloat32(String name, float value);
-
-  void setFloat64(String name, double value);
-
-  void setInt8(String name, byte value);
-
-  void setInt16(String name, short value);
-
-  void setInt32(String name, int value);
-
-  void setInt64(String name, long value);
-
-  void setUInt8(String name, short value);
-
-  void setUInt16(String name, int value);
-
-  void setUInt32(String name, long value);
-
-  void setUInt64(String name, long value);
-
-  void setMessage(String name, RawMessage value);
-
-  void setString(String name, String value);
-
-  void setTime(String name, Time value);
-
-  void setStringList(String name, List<String> value);
-
-  void setInt8List(String name, List<Byte> value);
-
-  void setUint8List(String name, List<Short> value);
 
   void setDurationList(String name, List<Duration> value);
 
-  void setTimeList(String name, List<Time> value);
+  void setFloat32(String name, float value);
 
-  void setBoolList(String name, List<Boolean> value);
+  void setFloat32Array(String name, float[] value);
 
-  /**
-   * @deprecated replaced by {@link #setInt8List(String, List)}
-   */
-  void setByteList(String name, List<Byte> value);
+  void setFloat64(String name, double value);
 
-  /**
-   * @deprecated replaced by {@link #setUint8List(String, List)}
-   */
-  void setCharList(String name, List<Short> value);
+  void setFloat64Array(String name, double[] value);
 
-  void setFloat64List(String name, List<Double> value);
+  void setInt16(String name, short value);
 
-  void setFloat32List(String name, List<Float> value);
+  void setInt16Array(String name, short[] value);
 
-  void setUint64List(String name, List<Long> value);
+  void setInt32(String name, int value);
 
-  void setInt64List(String name, List<Long> value);
+  void setInt32Array(String name, int[] value);
 
-  void setUint32List(String name, List<Long> value);
+  void setInt64(String name, long value);
 
-  void setInt32List(String name, List<Integer> value);
+  void setInt64Array(String name, long[] value);
 
-  void setUint16List(String name, List<Integer> value);
+  void setInt8(String name, byte value);
 
-  void setInt16List(String name, List<Short> value);
+  void setInt8Array(String name, byte[] value);
 
-  <T extends Message> List<T> getMessageList(String name);
+  void setMessage(String name, RawMessage value);
 
   void setMessageList(String name, List<Message> value);
 
-  List<Duration> getDurationList(String name);
+  void setString(String name, String value);
 
-  List<Time> getTimeList(String name);
+  void setStringList(String name, List<String> value);
 
-  List<Boolean> getBoolList(String name);
+  void setTime(String name, Time value);
 
-  /**
-   * @deprecated replaced by {@link #getInt8List(String)}
-   */
-  List<Byte> getByteList(String name);
+  void setTimeList(String name, List<Time> value);
 
-  /**
-   * @deprecated replaced by {@link #getUint8List(String)}
-   */
-  List<Short> getCharList(String name);
+  void setUInt16(String name, short value);
 
-  List<Double> getFloat64List(String name);
+  void setUInt16Array(String name, short[] value);
 
-  List<Float> getFloat32List(String name);
+  void setUInt32(String name, int value);
 
-  List<Long> getUint64List(String name);
+  void setUInt32Array(String name, int[] value);
 
-  List<Long> getInt64List(String name);
+  void setUInt64(String name, long value);
 
-  List<Long> getUint32List(String name);
+  void setUInt64Array(String name, long[] value);
 
-  List<Integer> getInt32List(String name);
+  void setUInt8(String name, byte value);
 
-  List<Integer> getUint16List(String name);
-
-  List<Short> getInt16List(String name);
-
-  List<Short> getUint8List(String name);
-
-  List<Byte> getInt8List(String name);
-
-  List<String> getStringList(String name);
-
-  List<Field> getFields();
+  void setUInt8Array(String name, byte[] value);
 }
