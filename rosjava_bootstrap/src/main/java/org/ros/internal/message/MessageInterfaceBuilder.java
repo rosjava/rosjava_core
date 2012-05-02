@@ -167,18 +167,7 @@ public class MessageInterfaceBuilder {
       if (field.isConstant()) {
         continue;
       }
-      FieldType fieldType = field.getType();
-      String type = fieldType.getJavaTypeName();
-      if (fieldType instanceof PrimitiveFieldType) {
-        if (!(field instanceof ValueField)) {
-          type += "[]";
-        }
-      }
-      if (fieldType instanceof MessageFieldType) {
-        if (field instanceof ListField) {
-          type = String.format("java.util.List<%s>", type);
-        }
-      }
+      String type = field.getJavaTypeName();
       String getter = field.getGetterName();
       if (!getters.contains(getter)) {
         builder.append(String.format("  %s %s();\n", type, getter));

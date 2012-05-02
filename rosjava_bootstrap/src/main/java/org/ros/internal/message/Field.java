@@ -92,6 +92,8 @@ public abstract class Field {
 
   public abstract void setValue(Object value);
 
+  public abstract String getJavaTypeName();
+
   @Override
   public int hashCode() {
     final int prime = 31;

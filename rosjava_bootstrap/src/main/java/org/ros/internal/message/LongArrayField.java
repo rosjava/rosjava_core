@@ -86,6 +86,11 @@ public class LongArrayField extends Field {
   }
 
   @Override
+  public String getJavaTypeName() {
+    return type.getJavaTypeName() + "[]";
+  }
+
+  @Override
   public String toString() {
     return "LongArrayField<" + type + ", " + name + ">";
   }

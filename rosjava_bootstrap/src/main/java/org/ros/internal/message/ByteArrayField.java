@@ -84,6 +84,11 @@ public class ByteArrayField extends Field {
   }
 
   @Override
+  public String getJavaTypeName() {
+    return type.getJavaTypeName() + "[]";
+  }
+
+  @Override
   public String toString() {
     return "ByteArrayField<" + type + ", " + name + ">";
   }

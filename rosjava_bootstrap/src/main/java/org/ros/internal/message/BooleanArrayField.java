@@ -85,6 +85,11 @@ public class BooleanArrayField extends Field {
   }
 
   @Override
+  public String getJavaTypeName() {
+    return type.getJavaTypeName() + "[]";
+  }
+
+  @Override
   public String toString() {
     return "BooleanArrayField<" + type + ", " + name + ">";
   }

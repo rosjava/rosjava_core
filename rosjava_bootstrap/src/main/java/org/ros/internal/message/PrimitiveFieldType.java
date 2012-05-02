@@ -183,7 +183,7 @@ public enum PrimitiveFieldType implements FieldType {
     @SuppressWarnings("unchecked")
     @Override
     public Byte parseFromString(String value) {
-      return INT8.parseFromString(value);
+      return (byte) Short.parseShort(value);
     }
 
     @Override
@@ -230,7 +230,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public String getJavaTypeName() {
-      return "byte";
+      return UINT8.getJavaTypeName();
     }
   },
   INT16 {
@@ -303,8 +303,8 @@ public enum PrimitiveFieldType implements FieldType {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Integer parseFromString(String value) {
-      return INT16.parseFromString(value);
+    public Short parseFromString(String value) {
+      return (short) Integer.parseInt(value);
     }
 
     @Override
@@ -382,8 +382,8 @@ public enum PrimitiveFieldType implements FieldType {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Long parseFromString(String value) {
-      return INT32.parseFromString(value);
+    public Integer parseFromString(String value) {
+      return (int) Long.parseLong(value);
     }
 
     @Override

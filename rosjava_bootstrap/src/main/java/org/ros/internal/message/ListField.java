@@ -99,6 +99,11 @@ public class ListField<T> extends Field {
   }
 
   @Override
+  public String getJavaTypeName() {
+    return String.format("java.util.List<%s>", type.getJavaTypeName());
+  }
+
+  @Override
   public String toString() {
     return "ListField<" + type + ", " + name + ">";
   }
