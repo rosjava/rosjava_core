@@ -49,6 +49,8 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
 
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
+  private static final String HANDSHAKE_HANDLER_NAME = "SubscriberHandshakeHandler";
+
   /**
    * The maximum delay before shutdown will begin even if all
    * {@link SubscriberListener}s have not yet returned from their
@@ -81,7 +83,12 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     this.executorService = executorService;
     incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
     knownPublishers = Sets.newHashSet();
-    tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
+    SubscriberHandshakeHandler<T> subscriberHandshakeHandler =
+        new SubscriberHandshakeHandler<T>(toDeclaration().toConnectionHeader(),
+            incomingMessageQueue);
+    tcpClientConnectionManager =
+        new TcpClientConnectionManager(HANDSHAKE_HANDLER_NAME, subscriberHandshakeHandler,
+            executorService);
     subscriberListeners = new ListenerCollection<SubscriberListener<T>>(executorService);
     subscriberListeners.add(new DefaultSubscriberListener<T>() {
       @Override
@@ -110,7 +117,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     return new SubscriberIdentifier(nodeIdentifier, getTopicDeclaration().getIdentifier());
   }
 
-  public SubscriberDeclaration toDefinition() {
+  public SubscriberDeclaration toDeclaration() {
     return new SubscriberDeclaration(toIdentifier(), getTopicDeclaration());
   }
 
@@ -141,8 +148,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     if (knownPublishers.contains(publisherIdentifier)) {
       return;
     }
-    tcpClientConnectionManager.connect(toString(), address, new SubscriberHandshakeHandler<T>(
-        toDefinition().toConnectionHeader(), incomingMessageQueue), "SubscriberHandshakeHandler");
+    tcpClientConnectionManager.connect(toString(), address);
     // TODO(damonkohler): knownPublishers is duplicate information that is
     // already available to the TopicParticipantManager.
     knownPublishers.add(publisherIdentifier);
@@ -159,7 +165,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
    */
   public void updatePublishers(Collection<PublisherIdentifier> publisherIdentifiers) {
     for (final PublisherIdentifier publisherIdentifier : publisherIdentifiers) {
-      executorService.execute(new UpdatePublisherRunnable<T>(this, this.nodeIdentifier,
+      executorService.execute(new UpdatePublisherRunnable<T>(this, nodeIdentifier,
           publisherIdentifier));
     }
   }

@@ -17,12 +17,12 @@
 package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientConnection;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
@@ -43,20 +43,21 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
+  private static final String HANDSHAKE_HANDLER_NAME = "ServiceClientHandshakeHandler";
+
   private final ServiceDeclaration serviceDeclaration;
   private final MessageSerializer<T> serializer;
-  private final MessageDeserializer<S> deserializer;
   private final MessageFactory messageFactory;
-  private final ScheduledExecutorService executorService;
   private final Queue<ServiceResponseListener<S>> responseListeners;
-  private final ImmutableMap<String, String> header;
+  private final ConnectionHeader connectionHeader;
   private final TcpClientConnectionManager tcpClientConnectionManager;
 
   private TcpClientConnection tcpClientConnection;
 
   public static <S, T> DefaultServiceClient<S, T> newDefault(GraphName nodeName,
       ServiceDeclaration serviceDeclaration, MessageSerializer<S> serializer,
-      MessageDeserializer<T> deserializer, MessageFactory messageFactory, ScheduledExecutorService executorService) {
+      MessageDeserializer<T> deserializer, MessageFactory messageFactory,
+      ScheduledExecutorService executorService) {
     return new DefaultServiceClient<S, T>(nodeName, serviceDeclaration, serializer, deserializer,
         messageFactory, executorService);
   }
@@ -66,18 +67,18 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
       MessageFactory messageFactory, ScheduledExecutorService executorService) {
     this.serviceDeclaration = serviceDeclaration;
     this.serializer = serializer;
-    this.deserializer = deserializer;
     this.messageFactory = messageFactory;
-    this.executorService = executorService;
     responseListeners = Lists.newLinkedList();
-    header =
-        ImmutableMap.<String, String>builder()
-            .put(ConnectionHeaderFields.CALLER_ID, nodeName.toString())
-            // TODO(damonkohler): Support non-persistent connections.
-            .put(ConnectionHeaderFields.PERSISTENT, "1")
-            .putAll(serviceDeclaration.toConnectionHeader())
-            .build();
-    tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
+    connectionHeader = new ConnectionHeader();
+    connectionHeader.addField(ConnectionHeaderFields.CALLER_ID, nodeName.toString());
+    // TODO(damonkohler): Support non-persistent connections.
+    connectionHeader.addField(ConnectionHeaderFields.PERSISTENT, "1");
+    connectionHeader.merge(serviceDeclaration.toConnectionHeader());
+    ServiceClientHandshakeHandler<T, S> handler =
+        new ServiceClientHandshakeHandler<T, S>(connectionHeader, responseListeners, deserializer,
+            executorService);
+    tcpClientConnectionManager =
+        new TcpClientConnectionManager(HANDSHAKE_HANDLER_NAME, handler, executorService);
   }
 
   @Override
@@ -86,12 +87,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"), "Invalid service URI.");
     Preconditions.checkState(tcpClientConnection == null, "Already connected once.");
     InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
-    ServiceClientHandshakeHandler<T, S> handler =
-        new ServiceClientHandshakeHandler<T, S>(header, responseListeners, deserializer,
-            executorService);
-    tcpClientConnection =
-        tcpClientConnectionManager.connect(toString(), address, handler,
-            "ServiceClientHandshakeHandler");
+    tcpClientConnection = tcpClientConnectionManager.connect(toString(), address);
     // TODO(damonkohler): Remove this once blocking on handshakes is supported.
     // See issue 75.
     try {
@@ -123,7 +119,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   public String toString() {
     return "ServiceClient<" + serviceDeclaration + ">";
   }
-  
+
   @Override
   public T newMessage() {
     return messageFactory.newFromType(serviceDeclaration.getType());

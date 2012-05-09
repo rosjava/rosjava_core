@@ -16,11 +16,11 @@
 
 package org.ros.internal.node.topic;
 
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.master.client.TopicSystemState;
 import org.ros.namespace.GraphName;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Base definition of a {@link TopicSystemState}.
@@ -59,7 +59,7 @@ public abstract class DefaultTopicParticipant implements TopicParticipant {
   /**
    * @return the connection header for the {@link TopicSystemState}
    */
-  public Map<String, String> getTopicDeclarationHeader() {
+  public ConnectionHeader getTopicDeclarationHeader() {
     return topicDeclaration.toConnectionHeader();
   }
 

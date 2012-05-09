@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2012 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,7 +16,6 @@
 
 package org.ros.internal.transport;
 
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -24,17 +23,17 @@ import java.util.Map;
 public interface ClientHandshake {
 
   /**
-   * @param incomingHeader
+   * @param incommingConnectionHeader
    *          the {@link ConnectionHeader} sent by the server
    * @return {@code true} if the handshake is successful, {@code false}
    *         otherwise
    */
-  boolean handshake(Map<String, String> incomingHeader);
+  boolean handshake(ConnectionHeader incommingConnectionHeader);
   
   /**
    * @return the outgoing {@link ConnectionHeader}
    */
-  Map<String, String> getOutgoingHeader();
+  ConnectionHeader getOutgoingConnectionHeader();
 
   /**
    * @return the error {@link String} returned by the server if an error occurs,

@@ -39,7 +39,6 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.service.ServiceServerListener;
 
 import java.net.URI;
-import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -97,20 +96,20 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
     });
   }
 
-  public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
+  public ChannelBuffer finishHandshake(ConnectionHeader incomingConnectionHeader) {
     if (DEBUG) {
-      log.info("Client handshake header: " + incomingHeader);
+      log.info("Client handshake header: " + incomingConnectionHeader);
     }
-    Map<String, String> header = getDeclaration().toConnectionHeader();
-    String expectedChecksum = header.get(ConnectionHeaderFields.MD5_CHECKSUM);
-    String incomingChecksum = incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
+    ConnectionHeader connectionHeader = toDeclaration().toConnectionHeader();
+    String expectedChecksum = connectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
+    String incomingChecksum = incomingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
     // TODO(damonkohler): Pull out header field comparison logic.
     Preconditions.checkState(incomingChecksum.equals(expectedChecksum)
         || incomingChecksum.equals("*"));
     if (DEBUG) {
-      log.info("Server handshake header: " + header);
+      log.info("Server handshake header: " + connectionHeader);
     }
-    return ConnectionHeader.encode(header);
+    return connectionHeader.encode();
   }
 
   @Override
@@ -127,7 +126,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
    * @return a new {@link ServiceDeclaration} with this
    *         {@link DefaultServiceServer}'s {@link URI}
    */
-  ServiceDeclaration getDeclaration() {
+  ServiceDeclaration toDeclaration() {
     ServiceIdentifier identifier = new ServiceIdentifier(serviceDeclaration.getName(), getUri());
     return new ServiceDeclaration(identifier, new ServiceDescription(serviceDeclaration.getType(),
         serviceDeclaration.getDefinition(), serviceDeclaration.getMd5Checksum()));
@@ -223,6 +222,6 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
 
   @Override
   public String toString() {
-    return "ServiceServer<" + getDeclaration() + ">";
+    return "ServiceServer<" + toDeclaration() + ">";
   }
 }

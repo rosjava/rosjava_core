@@ -16,10 +16,8 @@
 
 package org.ros.internal.node.topic;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
 import org.ros.internal.node.server.NodeIdentifier;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
@@ -37,7 +35,8 @@ public class SubscriberDeclaration {
   /**
    * Creates a subscriber definition from the headers in a connection header.
    * 
-   * @param header The header data.
+   * @param header
+   *          The header data.
    * 
    * @return The subscriber definition from the header data.
    */
@@ -67,13 +66,11 @@ public class SubscriberDeclaration {
     return topicDeclaration.getName();
   }
 
-  public Map<String, String> toConnectionHeader() {
-    // NOTE(damonkohler): ImmutableMap.Builder does not allow duplicate fields
-    // while building.
-    Map<String, String> header = Maps.newHashMap();
-    header.putAll(subscriberIdentifier.toConnectionHeader());
-    header.putAll(topicDeclaration.toConnectionHeader());
-    return ImmutableMap.copyOf(header);
+  public ConnectionHeader toConnectionHeader() {
+    ConnectionHeader connectionHeader = new ConnectionHeader();
+    connectionHeader.merge(subscriberIdentifier.toConnectionHeader());
+    connectionHeader.merge(topicDeclaration.toConnectionHeader());
+    return connectionHeader;
   }
 
   @Override
@@ -93,16 +90,23 @@ public class SubscriberDeclaration {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
     SubscriberDeclaration other = (SubscriberDeclaration) obj;
     if (subscriberIdentifier == null) {
-      if (other.subscriberIdentifier != null) return false;
-    } else if (!subscriberIdentifier.equals(other.subscriberIdentifier)) return false;
+      if (other.subscriberIdentifier != null)
+        return false;
+    } else if (!subscriberIdentifier.equals(other.subscriberIdentifier))
+      return false;
     if (topicDeclaration == null) {
-      if (other.topicDeclaration != null) return false;
-    } else if (!topicDeclaration.equals(other.topicDeclaration)) return false;
+      if (other.topicDeclaration != null)
+        return false;
+    } else if (!topicDeclaration.equals(other.topicDeclaration))
+      return false;
     return true;
   }
 }

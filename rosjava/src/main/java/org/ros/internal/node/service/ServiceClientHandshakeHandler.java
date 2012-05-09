@@ -16,9 +16,6 @@
 
 package org.ros.internal.node.service;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -28,74 +25,67 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.transport.ConnectionHeader;
-import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.service.ServiceServer;
 
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
- * A Netty {@link SimpleChannelHandler} which handles the service client handshake.
+ * Performs a handshake with the connected {@link ServiceServer}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  * 
  * @param <T>
- *          the connected {@link ServiceServer} responds to requests of this type
+ *          the connected {@link ServiceServer} responds to requests of this
+ *          type
  * @param <S>
  *          the connected {@link ServiceServer} returns responses of this type
  */
 class ServiceClientHandshakeHandler<T, S> extends SimpleChannelHandler {
 
-  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ServiceClientHandshakeHandler.class);
 
-  private final ImmutableMap<String, String> header;
+  private final ConnectionHeader connectionHeader;
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final MessageDeserializer<S> deserializer;
   private final ScheduledExecutorService executorService;
+  private final ServiceClientHandshake serviceClientHandshake;
 
-  public ServiceClientHandshakeHandler(ImmutableMap<String, String> header,
+  public ServiceClientHandshakeHandler(ConnectionHeader connectionHeader,
       Queue<ServiceResponseListener<S>> responseListeners,
       MessageDeserializer<S> deserializer, ScheduledExecutorService executorService) {
-    this.header = header;
+    this.connectionHeader = connectionHeader;
     this.responseListeners = responseListeners;
     this.deserializer = deserializer;
     this.executorService = executorService;
+    serviceClientHandshake = new ServiceClientHandshake(connectionHeader);
   }
 
   @Override
   public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    e.getChannel().write(ConnectionHeader.encode(header));
+    e.getChannel().write(connectionHeader.encode());
     super.channelConnected(ctx, e);
   }
 
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-    ChannelBuffer incomingBuffer = (ChannelBuffer) e.getMessage();
-    // TODO(damonkohler): Handle handshake errors.
-    handshake(incomingBuffer);
-    ChannelPipeline pipeline = e.getChannel().getPipeline();
-    pipeline.remove(TcpClientPipelineFactory.LENGTH_FIELD_BASED_FRAME_DECODER);
-    pipeline.remove(this);
-    pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<S>());
-    pipeline.addLast("ResponseHandler", new ServiceResponseHandler<S>(responseListeners,
-        deserializer, executorService));
-    super.messageReceived(ctx, e);
-  }
-
-  private void handshake(ChannelBuffer buffer) {
-    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
-    if (DEBUG) {
-      log.info("Incoming handshake header: " + incomingHeader);
-      log.info("Expected handshake header: " + header);
+    ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
+    ConnectionHeader incomingConnectionHeader = ConnectionHeader.decode(buffer);
+    if (serviceClientHandshake.handshake(incomingConnectionHeader)) {
+      ChannelPipeline pipeline = e.getChannel().getPipeline();
+      pipeline.remove(TcpClientPipelineFactory.LENGTH_FIELD_BASED_FRAME_DECODER);
+      pipeline.remove(this);
+      pipeline.addLast("ResponseDecoder", new ServiceResponseDecoder<S>());
+      pipeline.addLast("ResponseHandler", new ServiceResponseHandler<S>(responseListeners,
+          deserializer, executorService));
+    } else {
+      // TODO(damonkohler): Call listener that connection failed.
+      log.error("Service client handshake failed: " + serviceClientHandshake.getErrorMessage());
+      e.getChannel().close();
     }
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.TYPE).equals(
-        header.get(ConnectionHeaderFields.TYPE)));
-    Preconditions.checkState(incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM).equals(
-        header.get(ConnectionHeaderFields.MD5_CHECKSUM)));
+    super.messageReceived(ctx, e);
   }
 }

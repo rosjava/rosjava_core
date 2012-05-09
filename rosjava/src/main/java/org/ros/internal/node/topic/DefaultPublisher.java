@@ -17,8 +17,6 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +35,6 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
 
-import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -123,7 +120,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     return new PublisherIdentifier(nodeIdentifier, getTopicDeclaration().getIdentifier());
   }
 
-  public PublisherDeclaration getDeclaration() {
+  public PublisherDeclaration toDeclaration() {
     return PublisherDeclaration.newFromNodeIdentifier(nodeIdentifier, getTopicDeclaration());
   }
 
@@ -157,33 +154,32 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
    * 
    * @return encoded connection header from subscriber
    */
-  public ChannelBuffer finishHandshake(Map<String, String> incomingHeader) {
-    Map<String, String> topicDefinitionHeader = getTopicDeclarationHeader();
+  public ChannelBuffer finishHandshake(ConnectionHeader incomingHeader) {
+    ConnectionHeader topicDefinitionHeader = getTopicDeclarationHeader();
     if (DEBUG) {
       log.info("Subscriber handshake header: " + incomingHeader);
       log.info("Publisher handshake header: " + topicDefinitionHeader);
     }
     // TODO(damonkohler): Return errors to the subscriber over the wire.
-    String incomingType = incomingHeader.get(ConnectionHeaderFields.TYPE);
-    String expectedType = topicDefinitionHeader.get(ConnectionHeaderFields.TYPE);
+    String incomingType = incomingHeader.getField(ConnectionHeaderFields.TYPE);
+    String expectedType = topicDefinitionHeader.getField(ConnectionHeaderFields.TYPE);
     boolean messageTypeMatches =
         incomingType.equals(expectedType)
             || incomingType.equals(Subscriber.TOPIC_MESSAGE_TYPE_WILDCARD);
     Preconditions.checkState(messageTypeMatches, "Unexpected message type " + incomingType + " != "
         + expectedType);
-    String incomingChecksum = incomingHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
-    String expectedChecksum = topicDefinitionHeader.get(ConnectionHeaderFields.MD5_CHECKSUM);
+    String incomingChecksum = incomingHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
+    String expectedChecksum = topicDefinitionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
     boolean checksumMatches =
         incomingChecksum.equals(expectedChecksum)
             || incomingChecksum.equals(Subscriber.TOPIC_MESSAGE_TYPE_WILDCARD);
     Preconditions.checkState(checksumMatches, "Unexpected message MD5 " + incomingChecksum + " != "
         + expectedChecksum);
-    Map<String, String> header = Maps.newHashMap();
-    header.putAll(getDeclaration().toConnectionHeader());
+    ConnectionHeader outgoingConnectionHeader = toDeclaration().toConnectionHeader();
     // TODO(damonkohler): Force latch mode to be consistent throughout the life
     // of the publisher.
-    header.put(ConnectionHeaderFields.LATCHING, getLatchMode() ? "1" : "0");
-    return ConnectionHeader.encode(ImmutableMap.copyOf(header));
+    outgoingConnectionHeader.addField(ConnectionHeaderFields.LATCHING, getLatchMode() ? "1" : "0");
+    return outgoingConnectionHeader.encode();
   }
 
   /**
@@ -325,7 +321,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
 
   @Override
   public String toString() {
-    return "Publisher<" + getDeclaration() + ">";
+    return "Publisher<" + toDeclaration() + ">";
   }
 
   @Override

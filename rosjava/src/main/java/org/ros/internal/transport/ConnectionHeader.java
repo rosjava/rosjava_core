@@ -23,9 +23,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.ros.exception.RosRuntimeException;
 
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -39,13 +41,7 @@ public class ConnectionHeader {
 
   private static final int ESTIMATED_HEADER_SIZE = 1024;
 
-  private ConnectionHeader() {
-    // Utility class
-  }
-
-  private static String decodeAsciiString(ChannelBuffer buffer, int length) {
-    return buffer.readBytes(length).toString(Charset.forName("US-ASCII"));
-  }
+  private final Map<String, String> fields;
 
   /**
    * Decodes a header that came over the wire into a {@link Map} of fields and
@@ -55,8 +51,8 @@ public class ConnectionHeader {
    *          the incoming {@link ChannelBuffer} containing the header
    * @return a {@link Map} of header fields and values
    */
-  public static Map<String, String> decode(ChannelBuffer buffer) {
-    Map<String, String> result = Maps.newHashMap();
+  public static ConnectionHeader decode(ChannelBuffer buffer) {
+    Map<String, String> fields = Maps.newHashMap();
     int position = 0;
     int readableBytes = buffer.readableBytes();
     while (position < readableBytes) {
@@ -74,15 +70,25 @@ public class ConnectionHeader {
           String.format("Invalid field in handshake header: \"%s\"", field));
       String[] keyAndValue = field.split("=");
       if (keyAndValue.length == 1) {
-        result.put(keyAndValue[0], "");
+        fields.put(keyAndValue[0], "");
       } else {
-        result.put(keyAndValue[0], keyAndValue[1]);
+        fields.put(keyAndValue[0], keyAndValue[1]);
       }
     }
     if (DEBUG) {
-      log.info("Decoded header: " + result);
+      log.info("Decoded header: " + fields);
     }
-    return result;
+    ConnectionHeader connectionHeader = new ConnectionHeader();
+    connectionHeader.mergeFields(fields);
+    return connectionHeader;
+  }
+
+  private static String decodeAsciiString(ChannelBuffer buffer, int length) {
+    return buffer.readBytes(length).toString(Charset.forName("US-ASCII"));
+  }
+
+  public ConnectionHeader() {
+    this.fields = Maps.newConcurrentMap();
   }
 
   /**
@@ -94,14 +100,73 @@ public class ConnectionHeader {
    * @return a {@link ChannelBuffer} containing the encoded header for wire
    *         transmission
    */
-  public static ChannelBuffer encode(Map<String, String> header) {
+  public ChannelBuffer encode() {
     ChannelBuffer buffer =
         ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, ESTIMATED_HEADER_SIZE);
-    for (Entry<String, String> entry : header.entrySet()) {
+    for (Entry<String, String> entry : fields.entrySet()) {
       String field = entry.getKey() + "=" + entry.getValue();
       buffer.writeInt(field.length());
       buffer.writeBytes(field.getBytes(Charset.forName("US-ASCII")));
     }
     return buffer;
+  }
+
+  public void merge(ConnectionHeader other) {
+    Map<String, String> otherFields = other.getFields();
+    mergeFields(otherFields);
+  }
+
+  public void mergeFields(Map<String, String> other) {
+    for (Entry<String, String> field : other.entrySet()) {
+      String name = field.getKey();
+      String value = field.getValue();
+      addField(name, value);
+    }
+  }
+
+  public void addField(String name, String value) {
+    if (!fields.containsKey(name) || fields.get(name).equals(value)) {
+      fields.put(name, value);
+    } else {
+      throw new RosRuntimeException(String.format("Unable to merge field %s: %s != %s", name,
+          value, fields.get(name)));
+    }
+  }
+
+  public Map<String, String> getFields() {
+    return Collections.unmodifiableMap(fields);
+  }
+
+  public boolean hasField(String name) {
+    return fields.containsKey(name);
+  }
+
+  public String getField(String name) {
+    return fields.get(name);
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((fields == null) ? 0 : fields.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    ConnectionHeader other = (ConnectionHeader) obj;
+    if (fields == null) {
+      if (other.fields != null)
+        return false;
+    } else if (!fields.equals(other.fields))
+      return false;
+    return true;
   }
 }

@@ -17,14 +17,12 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 import org.ros.internal.node.server.NodeIdentifier;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -52,13 +50,10 @@ public class PublisherDeclaration {
     this.topicDeclaration = topicDeclaration;
   }
   
-  public Map<String, String> toConnectionHeader() {
-    // NOTE(damonkohler): ImmutableMap.Builder does not allow duplicate fields
-    // while building.
-    Map<String, String> header = Maps.newHashMap();
-    header.putAll(publisherIdentifier.toConnectionHeader());
-    header.putAll(topicDeclaration.toConnectionHeader());
-    return ImmutableMap.copyOf(header);
+  public ConnectionHeader toConnectionHeader() {
+    ConnectionHeader connectionHeader = publisherIdentifier.toConnectionHeader();
+    connectionHeader.merge(topicDeclaration.toConnectionHeader());
+    return connectionHeader;
   }
 
   public NodeIdentifier getSlaveIdentifier() {

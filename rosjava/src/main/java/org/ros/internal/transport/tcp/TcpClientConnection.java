@@ -31,8 +31,9 @@ import java.net.SocketAddress;
 public class TcpClientConnection {
 
   private final String name;
-  private final SocketAddress remoteAddress;
   private final ClientBootstrap bootstrap;
+  private final SocketAddress remoteAddress;
+  private final RetryingConnectionHandler retryingConnectionHandler;
 
   /**
    * {@code true} if this client connection should reconnect when disconnected.
@@ -57,12 +58,21 @@ public class TcpClientConnection {
    * @param remoteAddress
    *          the {@link SocketAddress} to reconnect to
    */
-  TcpClientConnection(String name, ClientBootstrap bootstrap, SocketAddress remoteAddress) {
+  public TcpClientConnection(String name, ClientBootstrap bootstrap, SocketAddress remoteAddress) {
     this.name = name;
     this.bootstrap = bootstrap;
     this.remoteAddress = remoteAddress;
+    retryingConnectionHandler = new RetryingConnectionHandler(this);
     persistent = true;
     defunct = false;
+  }
+
+   /**
+   * @return the {@link RetryingConnectionHandler} for this
+   *         {@link TcpClientConnection}
+   */
+  public RetryingConnectionHandler getRetryingConnectionHandler() {
+    return retryingConnectionHandler;
   }
 
   /**

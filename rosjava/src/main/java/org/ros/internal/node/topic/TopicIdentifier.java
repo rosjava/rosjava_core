@@ -17,12 +17,10 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
-
-import java.util.Map;
 
 /**
  * The identifier for a topic in a ROS graph.
@@ -43,10 +41,10 @@ public class TopicIdentifier {
     this.name = name;
   }
   
-  public Map<String, String> toConnectionHeader() {
-    return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.TOPIC, name.toString())
-        .build();
+  public ConnectionHeader toConnectionHeader() {
+    ConnectionHeader connectionHeader = new ConnectionHeader();
+    connectionHeader.addField(ConnectionHeaderFields.TOPIC, name.toString());
+    return connectionHeader;
   }
 
   public GraphName getName() {

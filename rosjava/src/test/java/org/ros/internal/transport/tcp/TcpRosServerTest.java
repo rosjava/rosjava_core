@@ -38,10 +38,10 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class TcpRosServerTest {
   private ScheduledExecutorService executorService;
-	
+
   @Before
   public void setup() {
-	executorService = Executors.newScheduledThreadPool(10);
+    executorService = Executors.newScheduledThreadPool(10);
   }
 
   @After
@@ -52,7 +52,8 @@ public class TcpRosServerTest {
   @Test
   public void testGetAddressFailsIfServerNotRunning() throws UnknownHostException {
     TcpRosServer tcpRosServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null, executorService);
+        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,
+            executorService);
 
     try {
       tcpRosServer.getAddress();
@@ -79,7 +80,8 @@ public class TcpRosServerTest {
   @Test
   public void testFailIfPortTaken() {
     TcpRosServer firstServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null, executorService);
+        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,
+            executorService);
     firstServer.start();
     try {
       TcpRosServer secondServer =
@@ -96,7 +98,8 @@ public class TcpRosServerTest {
   @Test
   public void testFailIfStartedWhileRunning() {
     TcpRosServer tcpRosServer =
-        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null, executorService);
+        new TcpRosServer(BindAddress.newPublic(), AdvertiseAddress.newPublic(), null, null,
+            executorService);
     tcpRosServer.start();
     try {
       tcpRosServer.start();

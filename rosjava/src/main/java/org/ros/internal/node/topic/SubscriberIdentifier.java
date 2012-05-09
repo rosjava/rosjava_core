@@ -17,13 +17,12 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 
 import org.ros.internal.node.server.NodeIdentifier;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -40,11 +39,11 @@ public class SubscriberIdentifier {
     this.topicIdentifier = topicIdentifier;
   }
 
-  public Map<String, String> toConnectionHeader() {
-    return new ImmutableMap.Builder<String, String>()
-        .putAll(nodeIdentifier.toConnectionHeader())
-        .putAll(topicIdentifier.toConnectionHeader())
-        .build();
+  public ConnectionHeader toConnectionHeader() {
+    ConnectionHeader connectionHeader = new ConnectionHeader();
+    connectionHeader.merge(nodeIdentifier.toConnectionHeader());
+    connectionHeader.merge(topicIdentifier.toConnectionHeader());
+    return connectionHeader;
   }
 
   public NodeIdentifier getNodeIdentifier() {
@@ -79,16 +78,23 @@ public class SubscriberIdentifier {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
     SubscriberIdentifier other = (SubscriberIdentifier) obj;
     if (nodeIdentifier == null) {
-      if (other.nodeIdentifier != null) return false;
-    } else if (!nodeIdentifier.equals(other.nodeIdentifier)) return false;
+      if (other.nodeIdentifier != null)
+        return false;
+    } else if (!nodeIdentifier.equals(other.nodeIdentifier))
+      return false;
     if (topicIdentifier == null) {
-      if (other.topicIdentifier != null) return false;
-    } else if (!topicIdentifier.equals(other.topicIdentifier)) return false;
+      if (other.topicIdentifier != null)
+        return false;
+    } else if (!topicIdentifier.equals(other.topicIdentifier))
+      return false;
     return true;
   }
 }

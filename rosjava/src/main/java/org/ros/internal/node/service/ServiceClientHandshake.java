@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2012 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.node.topic;
+package org.ros.internal.node.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,31 +22,35 @@ import org.ros.internal.node.BaseClientHandshake;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SubscriberHandshake extends BaseClientHandshake {
+public class ServiceClientHandshake extends BaseClientHandshake {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(SubscriberHandshake.class);
-  
-  public SubscriberHandshake(ConnectionHeader outgoingConnectionHeader) {
+  private static final Log log = LogFactory.getLog(ServiceClientHandshake.class);
+
+  public ServiceClientHandshake(ConnectionHeader outgoingConnectionHeader) {
     super(outgoingConnectionHeader);
   }
 
   @Override
   public boolean handshake(ConnectionHeader incommingConnectionHeader) {
     if (DEBUG) {
-      log.info("Outgoing subscriber connection header: " + outgoingConnectionHeader);
-      log.info("Incoming publisher connection header: " + incommingConnectionHeader);
+      log.info("Outgoing service client connection header: " + outgoingConnectionHeader);
+      log.info("Incoming service server connection header: " + incommingConnectionHeader);
     }
     setErrorMessage(incommingConnectionHeader.getField(ConnectionHeaderFields.ERROR));
+    if (getErrorMessage() != null) {
+      return false;
+    }
     if (!incommingConnectionHeader.getField(ConnectionHeaderFields.TYPE).equals(
-        outgoingConnectionHeader.getField(ConnectionHeaderFields.TYPE))) {
+        incommingConnectionHeader.getField(ConnectionHeaderFields.TYPE))) {
       setErrorMessage("Message types don't match.");
     }
     if (!incommingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM).equals(
-        outgoingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM))) {
+        incommingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM))) {
       setErrorMessage("Checksums don't match.");
     }
     return getErrorMessage() == null;

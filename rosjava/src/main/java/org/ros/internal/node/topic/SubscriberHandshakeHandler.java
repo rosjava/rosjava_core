@@ -30,8 +30,6 @@ import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import java.util.Map;
-
 /**
  * Performs a handshake with the connected {@link Publisher} and connects the
  * {@link Publisher} to the {@link IncomingMessageQueue} on success.
@@ -48,27 +46,27 @@ class SubscriberHandshakeHandler<T> extends SimpleChannelHandler {
   private final IncomingMessageQueue<T> incomingMessageQueue;
   private final SubscriberHandshake subscriberHandshake;
 
-  public SubscriberHandshakeHandler(Map<String, String> outgoingHeader,
+  public SubscriberHandshakeHandler(ConnectionHeader outgoingConnectionHeader,
       IncomingMessageQueue<T> incomingMessageQueue) {
-    subscriberHandshake = new SubscriberHandshake(outgoingHeader);
+    subscriberHandshake = new SubscriberHandshake(outgoingConnectionHeader);
     this.incomingMessageQueue = incomingMessageQueue;
   }
 
   @Override
   public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    e.getChannel().write(ConnectionHeader.encode(subscriberHandshake.getOutgoingHeader()));
+    e.getChannel().write(subscriberHandshake.getOutgoingConnectionHeader().encode());
     super.channelConnected(ctx, e);
   }
 
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
-    Map<String, String> incomingHeader = ConnectionHeader.decode(buffer);
-    if (subscriberHandshake.handshake(incomingHeader)) {
+    ConnectionHeader incomingConnectionHeader = ConnectionHeader.decode(buffer);
+    if (subscriberHandshake.handshake(incomingConnectionHeader)) {
       ChannelPipeline pipeline = e.getChannel().getPipeline();
       pipeline.remove(this);
       pipeline.addLast("MessageHandler", incomingMessageQueue.newChannelHandler());
-      String latching = incomingHeader.get(ConnectionHeaderFields.LATCHING);
+      String latching = incomingConnectionHeader.getField(ConnectionHeaderFields.LATCHING);
       if (latching != null && latching.equals("1")) {
         incomingMessageQueue.setLatchMode(true);
       }

@@ -26,22 +26,16 @@ import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
  */
 public class TcpClientPipelineFactory extends ConnectionTrackingChannelPipelineFactory {
 
-  public static final String RETRYING_CONNECTION_HANDLER = "RetryingConnectionHandler";
   public static final String LENGTH_FIELD_BASED_FRAME_DECODER = "LengthFieldBasedFrameDecoder";
   public static final String LENGTH_FIELD_PREPENDER = "LengthFieldPrepender";
 
-  private final TcpClientConnection tcpClientConnection;
-
-  public TcpClientPipelineFactory(ChannelGroup channelGroup, TcpClientConnection tcpClientConnection) {
+  public TcpClientPipelineFactory(ChannelGroup channelGroup) {
     super(channelGroup);
-    this.tcpClientConnection = tcpClientConnection;
   }
 
   @Override
   public ChannelPipeline getPipeline() {
     ChannelPipeline pipeline = super.getPipeline();
-    pipeline.addLast(RETRYING_CONNECTION_HANDLER,
-        new RetryingConnectionHandler(tcpClientConnection));
     pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));
     pipeline.addLast(LENGTH_FIELD_BASED_FRAME_DECODER, new LengthFieldBasedFrameDecoder(
         Integer.MAX_VALUE, 0, 4, 0, 4));

@@ -17,14 +17,13 @@
 package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 
 import org.ros.internal.message.service.ServiceDescription;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -41,13 +40,14 @@ public class ServiceDeclaration {
     this.description = description;
   }
 
-  public Map<String, String> toConnectionHeader() {
-    return new ImmutableMap.Builder<String, String>()
-        .put(ConnectionHeaderFields.SERVICE, getName().toString())
-        .put(ConnectionHeaderFields.TYPE, description.getType())
-        .put(ConnectionHeaderFields.MESSAGE_DEFINITION, description.getDefinition())
-        .put(ConnectionHeaderFields.MD5_CHECKSUM, description.getMd5Checksum())
-        .build();
+  public ConnectionHeader toConnectionHeader() {
+    ConnectionHeader connectionHeader = new ConnectionHeader();
+    connectionHeader.addField(ConnectionHeaderFields.SERVICE, getName().toString());
+    connectionHeader.addField(ConnectionHeaderFields.TYPE, description.getType());
+    connectionHeader.addField(ConnectionHeaderFields.MESSAGE_DEFINITION,
+        description.getDefinition());
+    connectionHeader.addField(ConnectionHeaderFields.MD5_CHECKSUM, description.getMd5Checksum());
+    return connectionHeader;
   }
 
   public String getType() {
@@ -80,7 +80,7 @@ public class ServiceDeclaration {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
-    result = prime * result + ((description == null) ? 0 : description .hashCode());
+    result = prime * result + ((description == null) ? 0 : description.hashCode());
     return result;
   }
 

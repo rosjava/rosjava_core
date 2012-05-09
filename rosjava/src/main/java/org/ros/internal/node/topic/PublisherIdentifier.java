@@ -17,17 +17,16 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 import org.ros.internal.node.server.NodeIdentifier;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.namespace.GraphName;
 import org.ros.node.Node;
 import org.ros.node.topic.Publisher;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -62,11 +61,11 @@ public class PublisherIdentifier {
     this.topicIdentifier = topicIdentifier;
   }
 
-  public Map<String, String> toConnectionHeader() {
-    return new ImmutableMap.Builder<String, String>()
-        .putAll(nodeIdentifier.toConnectionHeader())
-        .putAll(topicIdentifier.toConnectionHeader())
-        .build();
+  public ConnectionHeader toConnectionHeader() {
+    ConnectionHeader connectionHeader = new ConnectionHeader();
+    connectionHeader.merge(nodeIdentifier.toConnectionHeader());
+    connectionHeader.merge(topicIdentifier.toConnectionHeader());
+    return connectionHeader;
   }
 
   public NodeIdentifier getNodeIdentifier() {

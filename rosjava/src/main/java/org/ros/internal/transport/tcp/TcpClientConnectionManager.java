@@ -18,23 +18,12 @@ package org.ros.internal.transport.tcp;
 
 import com.google.common.collect.Lists;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.buffer.ChannelBufferFactory;
-import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandler;
-import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.ros.exception.RosRuntimeException;
 
 import java.net.SocketAddress;
-import java.nio.ByteOrder;
 import java.util.Collection;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -43,72 +32,37 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class TcpClientConnectionManager {
 
-  private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(TcpClientConnectionManager.class);
-
-  private static final int CONNECTION_TIMEOUT_MILLIS = 5000;
-
-  private final ChannelFactory channelFactory;
   private final ChannelGroup channelGroup;
-  private final ChannelBufferFactory channelBufferFactory;
+  private final TcpClientConnectionFactory tcpClientConnectionFactory;
   private final Collection<TcpClientConnection> tcpClientConnections;
 
-  public TcpClientConnectionManager(ScheduledExecutorService executorService) {
-    channelFactory = new NioClientSocketChannelFactory(executorService, executorService);
+  public TcpClientConnectionManager(String channelHandlerName, ChannelHandler channelHandler,
+      ScheduledExecutorService scheduledExecutorService) {
     channelGroup = new DefaultChannelGroup();
-    channelBufferFactory = new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN);
+    tcpClientConnectionFactory =
+        new TcpClientConnectionFactory(channelHandlerName, channelHandler, channelGroup,
+            scheduledExecutorService);
     tcpClientConnections = Lists.newArrayList();
   }
 
   /**
    * Connects to a server.
-   * 
+   *
    * <p>
    * This call blocks until the connection is established or fails.
-   * 
+   *
    * @param connectionName
    * @param address
    * @param handler
    * @param handlerName
    * @return a new {@link TcpClientConnection}
    */
-  public TcpClientConnection connect(String connectionName, SocketAddress address,
-      final ChannelHandler handler, final String handlerName) {
-    ClientBootstrap bootstrap = new ClientBootstrap(channelFactory);
-    bootstrap.setOption("bufferFactory", channelBufferFactory);
-    bootstrap.setOption("connectionTimeoutMillis", CONNECTION_TIMEOUT_MILLIS);
-    bootstrap.setOption("keepAlive", true);
-    TcpClientConnection tcpClientConnection = newTcpClient(connectionName, bootstrap, address);
-    TcpClientPipelineFactory factory =
-        new TcpClientPipelineFactory(channelGroup, tcpClientConnection) {
-          @Override
-          public ChannelPipeline getPipeline() {
-            ChannelPipeline pipeline = super.getPipeline();
-            pipeline.addLast(handlerName, handler);
-            return pipeline;
-          }
-        };
-    bootstrap.setPipelineFactory(factory);
-    ChannelFuture future = bootstrap.connect(address).awaitUninterruptibly();
-    if (future.isSuccess()) {
-      Channel channel = future.getChannel();
-      tcpClientConnection.setChannel(channel);
-      if (DEBUG) {
-        log.info("Connected to: " + address);
-      }
-    } else {
-      // We expect the first connection to succeed. If not, fail fast.
-      throw new RosRuntimeException("Connection exception: " + address, future.getCause());
-    }
-    return tcpClientConnection;
-  }
-
-  private TcpClientConnection newTcpClient(String name, ClientBootstrap bootstrap,
-      SocketAddress address) {
-    TcpClientConnection tcpClientConnection = new TcpClientConnection(name, bootstrap, address);
-    tcpClientConnections.add(tcpClientConnection);
-    return tcpClientConnection;
-  }
+  public TcpClientConnection connect(String connectionName, SocketAddress socketAddress) {
+    TcpClientConnection tcpClientConnection =
+        tcpClientConnectionFactory.connect(connectionName, socketAddress);
+     tcpClientConnections.add(tcpClientConnection);
+     return tcpClientConnection;
+   }
 
   /**
    * Sets all {@link TcpClientConnection}s as non-persistent and closes all open

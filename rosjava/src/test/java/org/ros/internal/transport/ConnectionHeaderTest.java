@@ -18,12 +18,8 @@ package org.ros.internal.transport;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.Maps;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.junit.Test;
-
-import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -32,10 +28,10 @@ public class ConnectionHeaderTest {
 
   @Test
   public void testEncodeAndDecode() {
-    final Map<String, String> header = Maps.newHashMap();
-    header.put("foo", "bar");
-    header.put("bloop", "");
-    ChannelBuffer encoded = ConnectionHeader.encode(header);
-    assertEquals(header, ConnectionHeader.decode(encoded));
+    ConnectionHeader connectionHeader = new ConnectionHeader();
+    connectionHeader.addField("foo", "bar");
+    connectionHeader.addField("bloop", "");
+    ChannelBuffer encoded = connectionHeader.encode();
+    assertEquals(connectionHeader, ConnectionHeader.decode(encoded));
   }
 }

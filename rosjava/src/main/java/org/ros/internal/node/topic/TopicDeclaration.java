@@ -17,10 +17,10 @@
 package org.ros.internal.node.topic;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import org.ros.internal.message.topic.TopicDescription;
+import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
 
@@ -52,7 +52,8 @@ public class TopicDeclaration {
     return new TopicDeclaration(new TopicIdentifier(name), topicDescription);
   }
 
-  public static TopicDeclaration newFromTopicName(GraphName topicName, TopicDescription topicDescription) {
+  public static TopicDeclaration newFromTopicName(GraphName topicName,
+      TopicDescription topicDescription) {
     return new TopicDeclaration(new TopicIdentifier(topicName), topicDescription);
   }
 
@@ -75,13 +76,15 @@ public class TopicDeclaration {
     return topicDescription.getType();
   }
 
-  public Map<String, String> toConnectionHeader() {
-    return new ImmutableMap.Builder<String, String>()
-        .putAll(topicIdentifier.toConnectionHeader())
-        .put(ConnectionHeaderFields.TYPE, topicDescription.getType())
-        .put(ConnectionHeaderFields.MESSAGE_DEFINITION, topicDescription.getDefinition())
-        .put(ConnectionHeaderFields.MD5_CHECKSUM, topicDescription.getMd5Checksum())
-        .build();
+  public ConnectionHeader toConnectionHeader() {
+    ConnectionHeader connectionHeader = new ConnectionHeader();
+    connectionHeader.merge(topicIdentifier.toConnectionHeader());
+    connectionHeader.addField(ConnectionHeaderFields.TYPE, topicDescription.getType());
+    connectionHeader.addField(ConnectionHeaderFields.MESSAGE_DEFINITION,
+        topicDescription.getDefinition());
+    connectionHeader.addField(ConnectionHeaderFields.MD5_CHECKSUM,
+        topicDescription.getMd5Checksum());
+    return connectionHeader;
   }
 
   public List<String> toList() {
