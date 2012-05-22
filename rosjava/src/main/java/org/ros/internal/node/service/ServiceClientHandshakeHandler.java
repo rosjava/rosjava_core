@@ -19,7 +19,6 @@ package org.ros.internal.node.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -72,11 +71,6 @@ class ServiceClientHandshakeHandler<T, S> extends SimpleChannelHandler implement
   @Override
   public String getName() {
     return NAME;
-  }
-  
-  @Override
-  public ChannelHandler getChannelHandler() {
-    return this;
   }
 
   @Override

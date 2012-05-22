@@ -19,13 +19,13 @@ package org.ros.internal.transport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
+import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;
+import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
 
@@ -36,7 +36,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class IncomingMessageQueue<T> {
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
@@ -50,7 +50,13 @@ public class IncomingMessageQueue<T> {
   private boolean latchMode;
   private T latchedMessage;
 
-  private final class Receiver extends SimpleChannelHandler {
+  private final class Receiver extends AbstractNamedChannelHandler {
+
+    @Override
+    public String getName() {
+      return "IncomingMessageQueueChannelHandler";
+    }
+
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
       ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
@@ -144,10 +150,10 @@ public class IncomingMessageQueue<T> {
   }
 
   /**
-   * @return a new {@link ChannelHandler} that will receive messages and add
+   * @return a new {@link NamedChannelHandler} that will receive messages and add
    *         them to the queue
    */
-  public ChannelHandler newChannelHandler() {
+  public NamedChannelHandler newNamedChannelHandler() {
     return new Receiver();
   }
 }

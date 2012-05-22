@@ -94,12 +94,11 @@ public class TcpClient {
       public ChannelPipeline getPipeline() {
         ChannelPipeline pipeline = super.getPipeline();
         for (NamedChannelHandler namedChannelHandler : namedChannelHandlers) {
-          pipeline.addLast(namedChannelHandler.getName(), namedChannelHandler.getChannelHandler());
+          pipeline.addLast(namedChannelHandler.getName(), namedChannelHandler);
         }
         RetryingConnectionHandler retryingConnectionHandler =
             tcpClientConnection.getRetryingConnectionHandler();
-        pipeline.addLast(retryingConnectionHandler.getName(),
-            retryingConnectionHandler.getChannelHandler());
+        pipeline.addLast(retryingConnectionHandler.getName(), retryingConnectionHandler);
         return pipeline;
       }
     };
@@ -117,7 +116,7 @@ public class TcpClient {
     }
     return tcpClientConnection;
   }
-  
+
   public ChannelFuture write(ChannelBuffer buffer) {
     Preconditions.checkNotNull(tcpClientConnection);
     return tcpClientConnection.write(buffer);

@@ -23,7 +23,6 @@ import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
 
 import java.net.ConnectException;
 import java.net.SocketAddress;
@@ -35,13 +34,11 @@ import java.util.TimerTask;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RetryingConnectionHandler extends SimpleChannelHandler implements
-    NamedChannelHandler {
+public class RetryingConnectionHandler extends AbstractNamedChannelHandler {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(RetryingConnectionHandler.class);
 
-  private static final String RETRYING_CONNECTION_HANDLER = "RetryingConnectionHandler";
   private static final String CONNECTION_REFUSED = "Connection refused";
 
   // TODO(damonkohler): Allow the TcpClientConnection to alter the
@@ -58,12 +55,7 @@ public class RetryingConnectionHandler extends SimpleChannelHandler implements
 
   @Override
   public String getName() {
-    return RETRYING_CONNECTION_HANDLER;
-  }
-  
-  @Override
-  public SimpleChannelHandler getChannelHandler() {
-    return this;
+    return "RetryingConnectionHandler";
   }
   
   @Override

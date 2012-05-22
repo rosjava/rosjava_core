@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -46,7 +45,6 @@ import org.ros.internal.message.MessageDefinitionReflectionProvider;
 import org.ros.internal.message.topic.TopicMessageFactory;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicParticipantManager;
-import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.internal.transport.tcp.TcpClient;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
@@ -125,33 +123,11 @@ public class MessageQueueIntegrationTest {
             MessageIdentifier.newFromType(std_msgs.String._TYPE), topicMessageFactory),
             executorService);
     firstTcpClientConnectionManager = new TcpClientConnectionManager(executorService);
-    firstTcpClientConnectionManager.addNamedChannelHandler(new NamedChannelHandler() {
-      private final ChannelHandler channelHandler = firstIncomingMessageQueue.newChannelHandler();
-
-      @Override
-      public String getName() {
-        return "MessageHandler";
-      };
-
-      @Override
-      public org.jboss.netty.channel.ChannelHandler getChannelHandler() {
-        return channelHandler;
-      };
-    });
+    firstTcpClientConnectionManager.addNamedChannelHandler(firstIncomingMessageQueue
+        .newNamedChannelHandler());
     secondTcpClientConnectionManager = new TcpClientConnectionManager(executorService);
-    secondTcpClientConnectionManager.addNamedChannelHandler(new NamedChannelHandler() {
-      private final ChannelHandler channelHandler = secondIncomingMessageQueue.newChannelHandler();
-
-      @Override
-      public String getName() {
-        return "MessageHandler";
-      }
-
-      @Override
-      public org.jboss.netty.channel.ChannelHandler getChannelHandler() {
-        return channelHandler;
-      }
-    });
+    secondTcpClientConnectionManager.addNamedChannelHandler(secondIncomingMessageQueue
+        .newNamedChannelHandler());
   }
 
   @After

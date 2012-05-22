@@ -16,17 +16,11 @@
 
 package org.ros.internal.transport.tcp;
 
-import org.jboss.netty.channel.ChannelDownstreamHandler;
-import org.jboss.netty.channel.ChannelHandler;
-import org.jboss.netty.channel.ChannelUpstreamHandler;
+import org.jboss.netty.channel.SimpleChannelHandler;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface NamedChannelHandler extends ChannelUpstreamHandler, ChannelDownstreamHandler {
-
-  /**
-   * @return the name of this {@link ChannelHandler}
-   */
-  String getName();
+public abstract class AbstractNamedChannelHandler extends SimpleChannelHandler implements
+    NamedChannelHandler {
 }

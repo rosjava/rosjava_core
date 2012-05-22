@@ -19,16 +19,14 @@ package org.ros.internal.node.topic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
-import org.ros.internal.transport.tcp.NamedChannelHandler;
+import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
@@ -41,11 +39,9 @@ import org.ros.node.topic.Subscriber;
  * @param <T>
  *          the {@link Subscriber} may only subscribe to messages of this type
  */
-class SubscriberHandshakeHandler<T> extends SimpleChannelHandler implements NamedChannelHandler {
+class SubscriberHandshakeHandler<T> extends AbstractNamedChannelHandler {
 
   private static final Log log = LogFactory.getLog(SubscriberHandshakeHandler.class);
-
-  private static final String NAME = "SubscriberHandshakeHandler";
 
   private final IncomingMessageQueue<T> incomingMessageQueue;
   private final SubscriberHandshake subscriberHandshake;
@@ -58,14 +54,9 @@ class SubscriberHandshakeHandler<T> extends SimpleChannelHandler implements Name
   
   @Override
   public String getName() {
-    return NAME;
+    return "SubscriberHandshakeHandler";
   }
   
-  @Override
-  public ChannelHandler getChannelHandler() {
-    return this;
-  }
-
   @Override
   public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
     e.getChannel().write(subscriberHandshake.getOutgoingConnectionHeader().encode());
@@ -80,7 +71,7 @@ class SubscriberHandshakeHandler<T> extends SimpleChannelHandler implements Name
     if (subscriberHandshake.handshake(incomingConnectionHeader)) {
       ChannelPipeline pipeline = e.getChannel().getPipeline();
       pipeline.remove(this);
-      pipeline.addLast("MessageHandler", incomingMessageQueue.newChannelHandler());
+      pipeline.addLast("MessageHandler", incomingMessageQueue.newNamedChannelHandler());
       String latching = incomingConnectionHeader.getField(ConnectionHeaderFields.LATCHING);
       if (latching != null && latching.equals("1")) {
         incomingMessageQueue.setLatchMode(true);
