@@ -16,25 +16,46 @@
 
 package org.ros.internal.message;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
+
 import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageIdentifier;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
+ * A {@link MessageDefinitionProvider} that uses reflection to load the message
+ * definition {@link String} from a generated interface {@link Class}.
+ * <p>
+ * Note that this {@link MessageDefinitionProvider} does not support enumerating
+ * messages by package.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MessageDefinitionReflectionProvider implements MessageDefinitionProvider {
 
   private static final String DEFINITION_FIELD = "_DEFINITION";
 
+  private final Map<String, String> cache;
+
+  public MessageDefinitionReflectionProvider() {
+    cache = Maps.newConcurrentMap();
+  }
+
   @Override
   public String get(String messageType) {
+    if (cache.containsKey(messageType)) {
+      return cache.get(messageType);
+    }
     try {
       String className = messageType.replace("/", ".");
       Class<?> loadedClass = getClass().getClassLoader().loadClass(className);
-      return (String) loadedClass.getDeclaredField(DEFINITION_FIELD).get(null);
+      String messageDefinition = (String) loadedClass.getDeclaredField(DEFINITION_FIELD).get(null);
+      cache.put(messageType, messageDefinition);
+      return messageDefinition;
     } catch (Exception e) {
       throw new RosRuntimeException(e);
     }
@@ -58,5 +79,10 @@ public class MessageDefinitionReflectionProvider implements MessageDefinitionPro
   @Override
   public Collection<MessageIdentifier> getMessageIdentifiersByPackage(String pkg) {
     throw new UnsupportedOperationException();
+  }
+  
+  @VisibleForTesting
+  public void add(String messageType, String messageDefinition) {
+    cache.put(messageType, messageDefinition);
   }
 }

@@ -22,7 +22,6 @@ import com.google.common.collect.Lists;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.ros.internal.message.topic.TopicDefinitionResourceProvider;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
@@ -34,7 +33,7 @@ import java.util.List;
  */
 public class MessageSerializationTest {
 
-  private TopicDefinitionResourceProvider topicDefinitionResourceProvider;
+  private MessageDefinitionReflectionProvider messageDefinitionReflectionProvider;
   private DefaultMessageFactory defaultMessageFactory;
 
   private interface Nested extends Message {
@@ -57,10 +56,10 @@ public class MessageSerializationTest {
 
   @Before
   public void setUp() {
-    topicDefinitionResourceProvider = new TopicDefinitionResourceProvider();
-    topicDefinitionResourceProvider.add(Nested._TYPE, Nested._DEFINITION);
-    topicDefinitionResourceProvider.add(NestedList._TYPE, NestedList._DEFINITION);
-    defaultMessageFactory = new DefaultMessageFactory(topicDefinitionResourceProvider);
+    messageDefinitionReflectionProvider = new MessageDefinitionReflectionProvider();
+    messageDefinitionReflectionProvider.add(Nested._TYPE, Nested._DEFINITION);
+    messageDefinitionReflectionProvider.add(NestedList._TYPE, NestedList._DEFINITION);
+    defaultMessageFactory = new DefaultMessageFactory(messageDefinitionReflectionProvider);
     defaultMessageFactory.getMessageInterfaceClassProvider().add(Nested._TYPE, Nested.class);
     defaultMessageFactory.getMessageInterfaceClassProvider().add(NestedList._TYPE, NestedList.class);
   }
@@ -184,7 +183,7 @@ public class MessageSerializationTest {
 
   @Test
   public void testNestedMessageArray() {
-    topicDefinitionResourceProvider.add(NestedList._TYPE, NestedList._DEFINITION);
+    messageDefinitionReflectionProvider.add(NestedList._TYPE, NestedList._DEFINITION);
     NestedList nestedListMessage = defaultMessageFactory.newFromType(NestedList._TYPE);
     std_msgs.String stringMessageA = defaultMessageFactory.newFromType(std_msgs.String._TYPE);
     stringMessageA.setData("Hello, ROS!");
