@@ -36,7 +36,7 @@ import org.ros.exception.RosRuntimeException;
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -59,10 +59,9 @@ public class TcpClient {
 
   private TcpClientConnection tcpClientConnection;
 
-  public TcpClient(ChannelGroup channelGroup, ScheduledExecutorService scheduledExecutorService) {
+  public TcpClient(ChannelGroup channelGroup, Executor executor) {
     this.channelGroup = channelGroup;
-    channelFactory =
-        new NioClientSocketChannelFactory(scheduledExecutorService, scheduledExecutorService);
+    channelFactory = new NioClientSocketChannelFactory(executor, executor);
     channelBufferFactory = new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN);
     bootstrap = new ClientBootstrap(channelFactory);
     bootstrap.setOption("bufferFactory", channelBufferFactory);

@@ -25,20 +25,20 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executor;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class TcpClientConnectionManager {
+public class TcpClientManager {
 
   private final ChannelGroup channelGroup;
   private final Collection<TcpClient> tcpClients;
   private final List<NamedChannelHandler> namedChannelHandlers;
-  private final ScheduledExecutorService scheduledExecutorService;
+  private final Executor executor;
 
-  public TcpClientConnectionManager(ScheduledExecutorService scheduledExecutorService) {
-    this.scheduledExecutorService = scheduledExecutorService;
+  public TcpClientManager(Executor executor) {
+    this.executor = executor;
     channelGroup = new DefaultChannelGroup();
     tcpClients = Lists.newArrayList();
     namedChannelHandlers = Lists.newArrayList();
@@ -64,7 +64,7 @@ public class TcpClientConnectionManager {
    * @return a new {@link TcpClient}
    */
   public TcpClient connect(String connectionName, SocketAddress socketAddress) {
-    TcpClient tcpClient = new TcpClient(channelGroup, scheduledExecutorService);
+    TcpClient tcpClient = new TcpClient(channelGroup, executor);
     tcpClient.addAllNamedChannelHandlers(namedChannelHandlers);
     tcpClient.connect(connectionName, socketAddress);
     tcpClients.add(tcpClient);

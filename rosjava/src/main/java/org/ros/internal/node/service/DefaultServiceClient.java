@@ -25,7 +25,7 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClient;
-import org.ros.internal.transport.tcp.TcpClientConnectionManager;
+import org.ros.internal.transport.tcp.TcpClientManager;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
@@ -48,7 +48,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   private final MessageFactory messageFactory;
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final ConnectionHeader connectionHeader;
-  private final TcpClientConnectionManager tcpClientConnectionManager;
+  private final TcpClientManager tcpClientManager;
 
   private TcpClient tcpClient;
 
@@ -72,11 +72,11 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     // TODO(damonkohler): Support non-persistent connections.
     connectionHeader.addField(ConnectionHeaderFields.PERSISTENT, "1");
     connectionHeader.merge(serviceDeclaration.toConnectionHeader());
-    tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
+    tcpClientManager = new TcpClientManager(executorService);
     ServiceClientHandshakeHandler<T, S> serviceClientHandshakeHandler =
         new ServiceClientHandshakeHandler<T, S>(connectionHeader, responseListeners, deserializer,
             executorService);
-    tcpClientConnectionManager.addNamedChannelHandler(serviceClientHandshakeHandler);
+    tcpClientManager.addNamedChannelHandler(serviceClientHandshakeHandler);
   }
 
   @Override
@@ -85,7 +85,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"), "Invalid service URI.");
     Preconditions.checkState(tcpClient == null, "Already connected once.");
     InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
-    tcpClient = tcpClientConnectionManager.connect(toString(), address);
+    tcpClient = tcpClientManager.connect(toString(), address);
     // TODO(damonkohler): Remove this once blocking on handshakes is supported.
     // See issue 75.
     try {
@@ -98,7 +98,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   @Override
   public void shutdown() {
     Preconditions.checkNotNull(tcpClient, "Not connected.");
-    tcpClientConnectionManager.shutdown();
+    tcpClientManager.shutdown();
   }
 
   @Override

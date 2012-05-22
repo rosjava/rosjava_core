@@ -46,7 +46,7 @@ import org.ros.internal.message.topic.TopicMessageFactory;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.internal.transport.tcp.TcpClient;
-import org.ros.internal.transport.tcp.TcpClientConnectionManager;
+import org.ros.internal.transport.tcp.TcpClientManager;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageIdentifier;
@@ -68,8 +68,8 @@ public class MessageQueueIntegrationTest {
   private static final Log log = LogFactory.getLog(MessageQueueIntegrationTest.class);
 
   private ScheduledExecutorService executorService;
-  private TcpClientConnectionManager firstTcpClientConnectionManager;
-  private TcpClientConnectionManager secondTcpClientConnectionManager;
+  private TcpClientManager firstTcpClientManager;
+  private TcpClientManager secondTcpClientManager;
   private OutgoingMessageQueue<Message> outgoingMessageQueue;
   private IncomingMessageQueue<std_msgs.String> firstIncomingMessageQueue;
   private IncomingMessageQueue<std_msgs.String> secondIncomingMessageQueue;
@@ -122,11 +122,11 @@ public class MessageQueueIntegrationTest {
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
             MessageIdentifier.newFromType(std_msgs.String._TYPE), topicMessageFactory),
             executorService);
-    firstTcpClientConnectionManager = new TcpClientConnectionManager(executorService);
-    firstTcpClientConnectionManager.addNamedChannelHandler(firstIncomingMessageQueue
+    firstTcpClientManager = new TcpClientManager(executorService);
+    firstTcpClientManager.addNamedChannelHandler(firstIncomingMessageQueue
         .newNamedChannelHandler());
-    secondTcpClientConnectionManager = new TcpClientConnectionManager(executorService);
-    secondTcpClientConnectionManager.addNamedChannelHandler(secondIncomingMessageQueue
+    secondTcpClientManager = new TcpClientManager(executorService);
+    secondTcpClientManager.addNamedChannelHandler(secondIncomingMessageQueue
         .newNamedChannelHandler());
   }
 
@@ -174,9 +174,9 @@ public class MessageQueueIntegrationTest {
     return serverChannel;
   }
 
-  private TcpClient connect(TcpClientConnectionManager tcpClientConnectionManager,
+  private TcpClient connect(TcpClientManager TcpClientManager,
       Channel serverChannel) {
-    return tcpClientConnectionManager.connect("Foo", serverChannel.getLocalAddress());
+    return TcpClientManager.connect("Foo", serverChannel.getLocalAddress());
   }
 
   private CountDownLatch expectMessage(IncomingMessageQueue<std_msgs.String> incomingMessageQueue)
@@ -210,8 +210,8 @@ public class MessageQueueIntegrationTest {
   public void testSendAndReceiveMessage() throws InterruptedException {
     startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
-    connect(firstTcpClientConnectionManager, serverChannel);
-    connect(secondTcpClientConnectionManager, serverChannel);
+    connect(firstTcpClientManager, serverChannel);
+    connect(secondTcpClientManager, serverChannel);
     expectMessages();
   }
 
@@ -225,8 +225,8 @@ public class MessageQueueIntegrationTest {
     Channel serverChannel = buildServerChannel();
     firstIncomingMessageQueue.setLatchMode(true);
     secondIncomingMessageQueue.setLatchMode(true);
-    connect(firstTcpClientConnectionManager, serverChannel);
-    connect(secondTcpClientConnectionManager, serverChannel);
+    connect(firstTcpClientManager, serverChannel);
+    connect(secondTcpClientManager, serverChannel);
     // The first set of incoming messages could either be from the Publisher
     // latching or the Subscriber latching. This is equivalent to waiting for
     // the message to arrive and ensures that we've latched it in.
@@ -244,8 +244,8 @@ public class MessageQueueIntegrationTest {
   public void testSendAfterIncomingQueueShutdown() throws InterruptedException {
     startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
-    connect(firstTcpClientConnectionManager, serverChannel);
-    firstTcpClientConnectionManager.shutdown();
+    connect(firstTcpClientManager, serverChannel);
+    firstTcpClientManager.shutdown();
     outgoingMessageQueue.put(expectedMessage);
   }
 
@@ -253,7 +253,7 @@ public class MessageQueueIntegrationTest {
   public void testSendAfterServerChannelClosed() throws InterruptedException {
     startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
-    connect(firstTcpClientConnectionManager, serverChannel);
+    connect(firstTcpClientManager, serverChannel);
     serverChannel.close().await();
     outgoingMessageQueue.put(expectedMessage);
   }
@@ -262,7 +262,7 @@ public class MessageQueueIntegrationTest {
   public void testSendAfterOutgoingQueueShutdown() throws InterruptedException {
     startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
-    connect(firstTcpClientConnectionManager, serverChannel);
+    connect(firstTcpClientManager, serverChannel);
     outgoingMessageQueue.shutdown();
     outgoingMessageQueue.put(expectedMessage);
   }
@@ -271,8 +271,8 @@ public class MessageQueueIntegrationTest {
   public void testReconnect() throws InterruptedException {
     startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
-    connect(firstTcpClientConnectionManager, serverChannel);
-    connect(secondTcpClientConnectionManager, serverChannel);
+    connect(firstTcpClientManager, serverChannel);
+    connect(secondTcpClientManager, serverChannel);
     expectMessages();
 
     // Disconnect the outgoing queue's incoming connections.
@@ -289,8 +289,8 @@ public class MessageQueueIntegrationTest {
     expectMessages();
 
     // Shutdown to check that we will not reconnect.
-    firstTcpClientConnectionManager.shutdown();
-    secondTcpClientConnectionManager.shutdown();
+    firstTcpClientManager.shutdown();
+    secondTcpClientManager.shutdown();
     firstIncomingMessageQueue.shutdown();
     secondIncomingMessageQueue.shutdown();
     future = outgoingMessageQueue.getChannelGroup().close();

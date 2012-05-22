@@ -26,7 +26,7 @@ import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
-import org.ros.internal.transport.tcp.TcpClientConnectionManager;
+import org.ros.internal.transport.tcp.TcpClientManager;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
 import org.ros.node.topic.DefaultSubscriberListener;
@@ -61,7 +61,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   private final ScheduledExecutorService executorService;
   private final IncomingMessageQueue<T> incomingMessageQueue;
   private final Set<PublisherIdentifier> knownPublishers;
-  private final TcpClientConnectionManager tcpClientConnectionManager;
+  private final TcpClientManager tcpClientManager;
 
   /**
    * Manages the {@link SubscriberListener}s for this {@link Subscriber}.
@@ -81,11 +81,11 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     this.executorService = executorService;
     incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
     knownPublishers = Sets.newHashSet();
-    tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
+    tcpClientManager = new TcpClientManager(executorService);
     SubscriberHandshakeHandler<T> subscriberHandshakeHandler =
         new SubscriberHandshakeHandler<T>(toDeclaration().toConnectionHeader(),
             incomingMessageQueue, executorService);
-    tcpClientConnectionManager.addNamedChannelHandler(subscriberHandshakeHandler);
+    tcpClientManager.addNamedChannelHandler(subscriberHandshakeHandler);
     subscriberListeners = new ListenerCollection<SubscriberListener<T>>(executorService);
     subscriberListeners.add(new DefaultSubscriberListener<T>() {
       @Override
@@ -145,7 +145,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     if (knownPublishers.contains(publisherIdentifier)) {
       return;
     }
-    tcpClientConnectionManager.connect(toString(), address);
+    tcpClientManager.connect(toString(), address);
     // TODO(damonkohler): knownPublishers is duplicate information that is
     // already available to the TopicParticipantManager.
     knownPublishers.add(publisherIdentifier);
@@ -171,7 +171,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   public void shutdown(long timeout, TimeUnit unit) {
     signalOnShutdown(timeout, unit);
     incomingMessageQueue.shutdown();
-    tcpClientConnectionManager.shutdown();
+    tcpClientManager.shutdown();
   }
 
   @Override
