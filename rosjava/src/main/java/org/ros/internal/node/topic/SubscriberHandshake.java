@@ -23,6 +23,8 @@ import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
 /**
+ * Handshake logic from the subscriber side of a topic connection.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class SubscriberHandshake extends BaseClientHandshake {

@@ -22,8 +22,9 @@ import org.ros.internal.node.BaseClientHandshake;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 
-
 /**
+ * Handshake logic from the client side of a service connection.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ServiceClientHandshake extends BaseClientHandshake {

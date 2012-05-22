@@ -84,7 +84,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
     SubscriberHandshakeHandler<T> subscriberHandshakeHandler =
         new SubscriberHandshakeHandler<T>(toDeclaration().toConnectionHeader(),
-            incomingMessageQueue);
+            incomingMessageQueue, executorService);
     tcpClientConnectionManager.addNamedChannelHandler(subscriberHandshakeHandler);
     subscriberListeners = new ListenerCollection<SubscriberListener<T>>(executorService);
     subscriberListeners.add(new DefaultSubscriberListener<T>() {

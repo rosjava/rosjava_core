@@ -17,28 +17,26 @@
 package org.ros.internal.transport;
 
 /**
- * Encapsulates client-side transport handshake logic.
+ * A listener for handshake events.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public interface ClientHandshake {
+public interface ClientHandshakeListener {
 
   /**
-   * @param incommingConnectionHeader
-   *          the {@link ConnectionHeader} sent by the server
-   * @return {@code true} if the handshake is successful, {@code false}
-   *         otherwise
+   * Called when the {@link ClientHandshake} completes successfully.
+   * 
+   * @param outgoingConnectionHeader
+   * @param incomingConnectionHeader
    */
-  boolean handshake(ConnectionHeader incommingConnectionHeader);
+  void onSuccess(ConnectionHeader outgoingConnectionHeader,
+      ConnectionHeader incomingConnectionHeader);
 
   /**
-   * @return the outgoing {@link ConnectionHeader}
+   * Called when the {@link ClientHandshake} fails.
+   * 
+   * @param outgoingConnectionHeader
+   * @param errorMessage
    */
-  ConnectionHeader getOutgoingConnectionHeader();
-
-  /**
-   * @return the error {@link String} returned by the server if an error occurs,
-   *         {@code null} otherwise
-   */
-  String getErrorMessage();
+  void onFailure(ConnectionHeader outgoingConnectionHeader, String errorMessage);
 }

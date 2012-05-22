@@ -22,6 +22,8 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.replay.ReplayingDecoder;
 
 /**
+ * Decodes service responses.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 class ServiceResponseDecoder<ResponseType> extends
@@ -60,5 +62,4 @@ class ServiceResponseDecoder<ResponseType> extends
     checkpoint(ServiceResponseDecoderState.ERROR_CODE);
     response = new ServiceServerResponse();
   }
-
 }

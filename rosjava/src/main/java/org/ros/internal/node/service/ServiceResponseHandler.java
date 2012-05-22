@@ -29,7 +29,7 @@ import org.ros.node.service.ServiceResponseListener;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Queue;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ExecutorService;
 
 /**
  * A Netty {@link SimpleChannelHandler} for service responses.
@@ -40,10 +40,10 @@ class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
 
   private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
   private final MessageDeserializer<ResponseType> deserializer;
-  private final ScheduledExecutorService executorService;
+  private final ExecutorService executorService;
 
   public ServiceResponseHandler(Queue<ServiceResponseListener<ResponseType>> messageListeners,
-      MessageDeserializer<ResponseType> deserializer, ScheduledExecutorService executorService) {
+      MessageDeserializer<ResponseType> deserializer, ExecutorService executorService) {
     this.responseListeners = messageListeners;
     this.deserializer = deserializer;
     this.executorService = executorService;

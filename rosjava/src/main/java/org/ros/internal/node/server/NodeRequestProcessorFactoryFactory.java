@@ -24,9 +24,9 @@ import org.apache.xmlrpc.server.RequestProcessorFactoryFactory;
  * 
  * @param <T>
  */
-class NodeRequestProcessorFactoryFactory<T extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint> implements
-    RequestProcessorFactoryFactory {
-  
+class NodeRequestProcessorFactoryFactory<T extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint>
+    implements RequestProcessorFactoryFactory {
+
   private final RequestProcessorFactory factory = new NodeRequestProcessorFactory();
   private final T node;
 
@@ -34,7 +34,7 @@ class NodeRequestProcessorFactoryFactory<T extends org.ros.internal.node.xmlrpc.
     this.node = instance;
   }
 
-  @SuppressWarnings({"rawtypes"})
+  @SuppressWarnings("rawtypes")
   @Override
   public RequestProcessorFactory getRequestProcessorFactory(Class unused) {
     return factory;
@@ -46,5 +46,4 @@ class NodeRequestProcessorFactoryFactory<T extends org.ros.internal.node.xmlrpc.
       return node;
     }
   }
-  
 }

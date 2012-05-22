@@ -19,8 +19,9 @@ package org.ros.internal.node;
 import org.ros.internal.transport.ClientHandshake;
 import org.ros.internal.transport.ConnectionHeader;
 
-
 /**
+ * An abstract {@link ClientHandshake} implementation for convenience. 
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public abstract class BaseClientHandshake implements ClientHandshake {

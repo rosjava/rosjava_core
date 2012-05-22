@@ -18,17 +18,18 @@ package org.ros.internal.node.topic;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
+import org.ros.internal.transport.BaseClientHandshakeHandler;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
-import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;
+import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+
+import java.util.concurrent.ExecutorService;
 
 /**
  * Performs a handshake with the connected {@link Publisher} and connects the
@@ -39,47 +40,39 @@ import org.ros.node.topic.Subscriber;
  * @param <T>
  *          the {@link Subscriber} may only subscribe to messages of this type
  */
-class SubscriberHandshakeHandler<T> extends AbstractNamedChannelHandler {
+class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
 
   private static final Log log = LogFactory.getLog(SubscriberHandshakeHandler.class);
 
   private final IncomingMessageQueue<T> incomingMessageQueue;
-  private final SubscriberHandshake subscriberHandshake;
 
   public SubscriberHandshakeHandler(ConnectionHeader outgoingConnectionHeader,
-      IncomingMessageQueue<T> incomingMessageQueue) {
-    subscriberHandshake = new SubscriberHandshake(outgoingConnectionHeader);
+      final IncomingMessageQueue<T> incomingMessageQueue, ExecutorService executorService) {
+    super(new SubscriberHandshake(outgoingConnectionHeader), executorService);
     this.incomingMessageQueue = incomingMessageQueue;
   }
-  
+
+  @Override
+  protected void onSuccess(ConnectionHeader incomingConnectionHeader, ChannelHandlerContext ctx,
+      MessageEvent e) {
+    ChannelPipeline pipeline = e.getChannel().getPipeline();
+    pipeline.remove(SubscriberHandshakeHandler.this);
+    NamedChannelHandler namedChannelHandler = incomingMessageQueue.newNamedChannelHandler();
+    pipeline.addLast(namedChannelHandler.getName(), namedChannelHandler);
+    String latching = incomingConnectionHeader.getField(ConnectionHeaderFields.LATCHING);
+    if (latching != null && latching.equals("1")) {
+      incomingMessageQueue.setLatchMode(true);
+    }
+  }
+
+  @Override
+  protected void onFailure(String errorMessage, ChannelHandlerContext ctx, MessageEvent e) {
+    log.error("Subscriber handshake failed: " + errorMessage);
+    e.getChannel().close();
+  }
+
   @Override
   public String getName() {
     return "SubscriberHandshakeHandler";
-  }
-  
-  @Override
-  public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-    e.getChannel().write(subscriberHandshake.getOutgoingConnectionHeader().encode());
-    super.channelConnected(ctx, e);
-  }
-
-  @Override
-  public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-    super.messageReceived(ctx, e);
-    ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
-    ConnectionHeader incomingConnectionHeader = ConnectionHeader.decode(buffer);
-    if (subscriberHandshake.handshake(incomingConnectionHeader)) {
-      ChannelPipeline pipeline = e.getChannel().getPipeline();
-      pipeline.remove(this);
-      pipeline.addLast("MessageHandler", incomingMessageQueue.newNamedChannelHandler());
-      String latching = incomingConnectionHeader.getField(ConnectionHeaderFields.LATCHING);
-      if (latching != null && latching.equals("1")) {
-        incomingMessageQueue.setLatchMode(true);
-      }
-    } else {
-      // TODO(damonkohler): Call listener that connection failed.
-      log.error("Subscriber handshake failed: " + subscriberHandshake.getErrorMessage());
-      e.getChannel().close();
-    }
   }
 }
