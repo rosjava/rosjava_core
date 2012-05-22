@@ -49,8 +49,6 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
 
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);
 
-  private static final String HANDSHAKE_HANDLER_NAME = "SubscriberHandshakeHandler";
-
   /**
    * The maximum delay before shutdown will begin even if all
    * {@link SubscriberListener}s have not yet returned from their
@@ -83,12 +81,11 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     this.executorService = executorService;
     incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
     knownPublishers = Sets.newHashSet();
+    tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
     SubscriberHandshakeHandler<T> subscriberHandshakeHandler =
         new SubscriberHandshakeHandler<T>(toDeclaration().toConnectionHeader(),
             incomingMessageQueue);
-    tcpClientConnectionManager =
-        new TcpClientConnectionManager(HANDSHAKE_HANDLER_NAME, subscriberHandshakeHandler,
-            executorService);
+    tcpClientConnectionManager.addNamedChannelHandler(subscriberHandshakeHandler);
     subscriberListeners = new ListenerCollection<SubscriberListener<T>>(executorService);
     subscriberListeners.add(new DefaultSubscriberListener<T>() {
       @Override

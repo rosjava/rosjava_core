@@ -91,7 +91,7 @@ public class TopicIntegrationTest extends RosTest {
       }
     }, nodeConfiguration);
 
-    assertTrue(messageReceived.await(10, TimeUnit.SECONDS));
+    assertTrue(messageReceived.await(1, TimeUnit.SECONDS));
   }
 
   /**
@@ -146,7 +146,7 @@ public class TopicIntegrationTest extends RosTest {
       }
     }, nodeConfiguration);
 
-    assertTrue(messageReceived.await(10, TimeUnit.SECONDS));
+    assertTrue(messageReceived.await(1, TimeUnit.SECONDS));
   }
 
   @Test
@@ -240,6 +240,6 @@ public class TopicIntegrationTest extends RosTest {
       }
     }, nodeConfiguration);
 
-    assertTrue(listener.await(10, TimeUnit.SECONDS));
+    assertTrue(listener.await(1, TimeUnit.SECONDS));
   }
 }

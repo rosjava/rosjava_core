@@ -19,6 +19,7 @@ package org.ros.internal.node.topic;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -27,6 +28,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.IncomingMessageQueue;
+import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
@@ -39,9 +41,11 @@ import org.ros.node.topic.Subscriber;
  * @param <T>
  *          the {@link Subscriber} may only subscribe to messages of this type
  */
-class SubscriberHandshakeHandler<T> extends SimpleChannelHandler {
+class SubscriberHandshakeHandler<T> extends SimpleChannelHandler implements NamedChannelHandler {
 
   private static final Log log = LogFactory.getLog(SubscriberHandshakeHandler.class);
+
+  private static final String NAME = "SubscriberHandshakeHandler";
 
   private final IncomingMessageQueue<T> incomingMessageQueue;
   private final SubscriberHandshake subscriberHandshake;
@@ -50,6 +54,16 @@ class SubscriberHandshakeHandler<T> extends SimpleChannelHandler {
       IncomingMessageQueue<T> incomingMessageQueue) {
     subscriberHandshake = new SubscriberHandshake(outgoingConnectionHeader);
     this.incomingMessageQueue = incomingMessageQueue;
+  }
+  
+  @Override
+  public String getName() {
+    return NAME;
+  }
+  
+  @Override
+  public ChannelHandler getChannelHandler() {
+    return this;
   }
 
   @Override
@@ -60,6 +74,7 @@ class SubscriberHandshakeHandler<T> extends SimpleChannelHandler {
 
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+    super.messageReceived(ctx, e);
     ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
     ConnectionHeader incomingConnectionHeader = ConnectionHeader.decode(buffer);
     if (subscriberHandshake.handshake(incomingConnectionHeader)) {
@@ -75,6 +90,5 @@ class SubscriberHandshakeHandler<T> extends SimpleChannelHandler {
       log.error("Subscriber handshake failed: " + subscriberHandshake.getErrorMessage());
       e.getChannel().close();
     }
-    super.messageReceived(ctx, e);
   }
 }

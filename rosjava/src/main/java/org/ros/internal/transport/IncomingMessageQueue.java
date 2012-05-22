@@ -36,7 +36,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class IncomingMessageQueue<T> {
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
 
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
@@ -54,6 +54,9 @@ public class IncomingMessageQueue<T> {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
       ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
+      if (DEBUG) {
+        log.info(String.format("Received %d bytes.", buffer.readableBytes()));
+      }
       T message = deserializer.deserialize(buffer.toByteBuffer());
       messages.put(message);
       if (DEBUG) {

@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.buffer.HeapChannelBufferFactory;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
@@ -45,7 +46,8 @@ import org.ros.internal.message.MessageDefinitionReflectionProvider;
 import org.ros.internal.message.topic.TopicMessageFactory;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicParticipantManager;
-import org.ros.internal.transport.tcp.TcpClientConnection;
+import org.ros.internal.transport.tcp.NamedChannelHandler;
+import org.ros.internal.transport.tcp.TcpClient;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 import org.ros.message.MessageDefinitionProvider;
@@ -118,16 +120,38 @@ public class MessageQueueIntegrationTest {
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
             MessageIdentifier.newFromType(std_msgs.String._TYPE), topicMessageFactory),
             executorService);
-    firstTcpClientConnectionManager =
-        new TcpClientConnectionManager("MessageHandler",
-            firstIncomingMessageQueue.newChannelHandler(), executorService);
     secondIncomingMessageQueue =
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
             MessageIdentifier.newFromType(std_msgs.String._TYPE), topicMessageFactory),
             executorService);
-    secondTcpClientConnectionManager =
-        new TcpClientConnectionManager("MessageHandler",
-            secondIncomingMessageQueue.newChannelHandler(), executorService);
+    firstTcpClientConnectionManager = new TcpClientConnectionManager(executorService);
+    firstTcpClientConnectionManager.addNamedChannelHandler(new NamedChannelHandler() {
+      private final ChannelHandler channelHandler = firstIncomingMessageQueue.newChannelHandler();
+
+      @Override
+      public String getName() {
+        return "MessageHandler";
+      };
+
+      @Override
+      public org.jboss.netty.channel.ChannelHandler getChannelHandler() {
+        return channelHandler;
+      };
+    });
+    secondTcpClientConnectionManager = new TcpClientConnectionManager(executorService);
+    secondTcpClientConnectionManager.addNamedChannelHandler(new NamedChannelHandler() {
+      private final ChannelHandler channelHandler = secondIncomingMessageQueue.newChannelHandler();
+
+      @Override
+      public String getName() {
+        return "MessageHandler";
+      }
+
+      @Override
+      public org.jboss.netty.channel.ChannelHandler getChannelHandler() {
+        return channelHandler;
+      }
+    });
   }
 
   @After
@@ -174,7 +198,7 @@ public class MessageQueueIntegrationTest {
     return serverChannel;
   }
 
-  private TcpClientConnection connect(TcpClientConnectionManager tcpClientConnectionManager,
+  private TcpClient connect(TcpClientConnectionManager tcpClientConnectionManager,
       Channel serverChannel) {
     return tcpClientConnectionManager.connect("Foo", serverChannel.getLocalAddress());
   }
@@ -288,8 +312,9 @@ public class MessageQueueIntegrationTest {
     assertTrue(future.isCompleteSuccess());
     expectMessages();
 
-    // Shutdown the TcpClientConnectionManagers to check that we will not
-    // reconnect.
+    // Shutdown to check that we will not reconnect.
+    firstTcpClientConnectionManager.shutdown();
+    secondTcpClientConnectionManager.shutdown();
     firstIncomingMessageQueue.shutdown();
     secondIncomingMessageQueue.shutdown();
     future = outgoingMessageQueue.getChannelGroup().close();

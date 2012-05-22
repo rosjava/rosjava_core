@@ -19,12 +19,14 @@ package org.ros.internal.node.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.internal.transport.ConnectionHeader;
+import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.service.ServiceResponseListener;
@@ -44,9 +46,12 @@ import java.util.concurrent.ScheduledExecutorService;
  * @param <S>
  *          the connected {@link ServiceServer} returns responses of this type
  */
-class ServiceClientHandshakeHandler<T, S> extends SimpleChannelHandler {
+class ServiceClientHandshakeHandler<T, S> extends SimpleChannelHandler implements
+    NamedChannelHandler {
 
   private static final Log log = LogFactory.getLog(ServiceClientHandshakeHandler.class);
+
+  private static final String NAME = "ServiceClientHandshakeHandler";
 
   private final ConnectionHeader connectionHeader;
   private final Queue<ServiceResponseListener<S>> responseListeners;
@@ -55,13 +60,23 @@ class ServiceClientHandshakeHandler<T, S> extends SimpleChannelHandler {
   private final ServiceClientHandshake serviceClientHandshake;
 
   public ServiceClientHandshakeHandler(ConnectionHeader connectionHeader,
-      Queue<ServiceResponseListener<S>> responseListeners,
-      MessageDeserializer<S> deserializer, ScheduledExecutorService executorService) {
+      Queue<ServiceResponseListener<S>> responseListeners, MessageDeserializer<S> deserializer,
+      ScheduledExecutorService executorService) {
     this.connectionHeader = connectionHeader;
     this.responseListeners = responseListeners;
     this.deserializer = deserializer;
     this.executorService = executorService;
     serviceClientHandshake = new ServiceClientHandshake(connectionHeader);
+  }
+  
+  @Override
+  public String getName() {
+    return NAME;
+  }
+  
+  @Override
+  public ChannelHandler getChannelHandler() {
+    return this;
   }
 
   @Override
@@ -72,6 +87,7 @@ class ServiceClientHandshakeHandler<T, S> extends SimpleChannelHandler {
 
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+    super.messageReceived(ctx, e);
     ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
     ConnectionHeader incomingConnectionHeader = ConnectionHeader.decode(buffer);
     if (serviceClientHandshake.handshake(incomingConnectionHeader)) {
@@ -86,6 +102,5 @@ class ServiceClientHandshakeHandler<T, S> extends SimpleChannelHandler {
       log.error("Service client handshake failed: " + serviceClientHandshake.getErrorMessage());
       e.getChannel().close();
     }
-    super.messageReceived(ctx, e);
   }
 }

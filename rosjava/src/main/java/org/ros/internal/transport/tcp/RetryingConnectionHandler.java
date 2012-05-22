@@ -35,11 +35,13 @@ import java.util.TimerTask;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RetryingConnectionHandler extends SimpleChannelHandler {
+public class RetryingConnectionHandler extends SimpleChannelHandler implements
+    NamedChannelHandler {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(RetryingConnectionHandler.class);
 
+  private static final String RETRYING_CONNECTION_HANDLER = "RetryingConnectionHandler";
   private static final String CONNECTION_REFUSED = "Connection refused";
 
   // TODO(damonkohler): Allow the TcpClientConnection to alter the
@@ -54,6 +56,16 @@ public class RetryingConnectionHandler extends SimpleChannelHandler {
     this.timer = new Timer();
   }
 
+  @Override
+  public String getName() {
+    return RETRYING_CONNECTION_HANDLER;
+  }
+  
+  @Override
+  public SimpleChannelHandler getChannelHandler() {
+    return this;
+  }
+  
   @Override
   public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
     tcpClientConnection.setChannel(null);

@@ -19,12 +19,12 @@ package org.ros.internal.transport.tcp;
 import com.google.common.collect.Lists;
 
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 
 import java.net.SocketAddress;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -33,48 +33,54 @@ import java.util.concurrent.ScheduledExecutorService;
 public class TcpClientConnectionManager {
 
   private final ChannelGroup channelGroup;
-  private final TcpClientConnectionFactory tcpClientConnectionFactory;
-  private final Collection<TcpClientConnection> tcpClientConnections;
+  private final Collection<TcpClient> tcpClients;
+  private final List<NamedChannelHandler> namedChannelHandlers;
+  private final ScheduledExecutorService scheduledExecutorService;
 
-  public TcpClientConnectionManager(String channelHandlerName, ChannelHandler channelHandler,
-      ScheduledExecutorService scheduledExecutorService) {
+  public TcpClientConnectionManager(ScheduledExecutorService scheduledExecutorService) {
+    this.scheduledExecutorService = scheduledExecutorService;
     channelGroup = new DefaultChannelGroup();
-    tcpClientConnectionFactory =
-        new TcpClientConnectionFactory(channelHandlerName, channelHandler, channelGroup,
-            scheduledExecutorService);
-    tcpClientConnections = Lists.newArrayList();
+    tcpClients = Lists.newArrayList();
+    namedChannelHandlers = Lists.newArrayList();
+  }
+
+  public void addNamedChannelHandler(NamedChannelHandler namedChannelHandler) {
+    namedChannelHandlers.add(namedChannelHandler);
+  }
+
+  public void addAllNamedChannelHandlers(List<NamedChannelHandler> namedChannelHandlers) {
+    this.namedChannelHandlers.addAll(namedChannelHandlers);
   }
 
   /**
    * Connects to a server.
-   *
    * <p>
    * This call blocks until the connection is established or fails.
-   *
+   * 
    * @param connectionName
-   * @param address
-   * @param handler
-   * @param handlerName
-   * @return a new {@link TcpClientConnection}
+   *          the name of the new connection
+   * @param socketAddress
+   *          the {@link SocketAddress} to connect to
+   * @return a new {@link TcpClient}
    */
-  public TcpClientConnection connect(String connectionName, SocketAddress socketAddress) {
-    TcpClientConnection tcpClientConnection =
-        tcpClientConnectionFactory.connect(connectionName, socketAddress);
-     tcpClientConnections.add(tcpClientConnection);
-     return tcpClientConnection;
-   }
+  public TcpClient connect(String connectionName, SocketAddress socketAddress) {
+    TcpClient tcpClient = new TcpClient(channelGroup, scheduledExecutorService);
+    tcpClient.addAllNamedChannelHandlers(namedChannelHandlers);
+    tcpClient.connect(connectionName, socketAddress);
+    tcpClients.add(tcpClient);
+    return tcpClient;
+  }
 
   /**
    * Sets all {@link TcpClientConnection}s as non-persistent and closes all open
    * {@link Channel}s.
    */
   public void shutdown() {
-    for (TcpClientConnection tcpClientConnection : tcpClientConnections) {
-      tcpClientConnection.setPersistent(false);
-      tcpClientConnection.setChannel(null);
+    for (TcpClient tcpClient : tcpClients) {
+      tcpClient.shutdown();
     }
     channelGroup.close().awaitUninterruptibly();
-    tcpClientConnections.clear();
+    tcpClients.clear();
     // Not calling channelFactory.releaseExternalResources() or
     // bootstrap.releaseExternalResources() since only external resources are
     // the ExecutorService and control of that must remain with the overall

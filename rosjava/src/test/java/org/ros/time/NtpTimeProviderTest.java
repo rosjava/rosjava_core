@@ -35,9 +35,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class NtpTimeProviderTest extends RosTest {
 
-  // TODO(damonkohler): This is only a simple sanity check.
   @Test
-  public void testSanity() throws InterruptedException {
+  public void testNtpUbuntuCom() throws InterruptedException {
     final NtpTimeProvider ntpTimeProvider =
         new NtpTimeProvider(InetAddressFactory.newFromHostString("ntp.ubuntu.com"),
             Executors.newScheduledThreadPool(Integer.MAX_VALUE));

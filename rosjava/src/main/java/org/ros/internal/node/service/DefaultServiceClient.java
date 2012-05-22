@@ -24,7 +24,7 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
-import org.ros.internal.transport.tcp.TcpClientConnection;
+import org.ros.internal.transport.tcp.TcpClient;
 import org.ros.internal.transport.tcp.TcpClientConnectionManager;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
@@ -43,8 +43,6 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
-  private static final String HANDSHAKE_HANDLER_NAME = "ServiceClientHandshakeHandler";
-
   private final ServiceDeclaration serviceDeclaration;
   private final MessageSerializer<T> serializer;
   private final MessageFactory messageFactory;
@@ -52,7 +50,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   private final ConnectionHeader connectionHeader;
   private final TcpClientConnectionManager tcpClientConnectionManager;
 
-  private TcpClientConnection tcpClientConnection;
+  private TcpClient tcpClient;
 
   public static <S, T> DefaultServiceClient<S, T> newDefault(GraphName nodeName,
       ServiceDeclaration serviceDeclaration, MessageSerializer<S> serializer,
@@ -74,20 +72,20 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     // TODO(damonkohler): Support non-persistent connections.
     connectionHeader.addField(ConnectionHeaderFields.PERSISTENT, "1");
     connectionHeader.merge(serviceDeclaration.toConnectionHeader());
-    ServiceClientHandshakeHandler<T, S> handler =
+    tcpClientConnectionManager = new TcpClientConnectionManager(executorService);
+    ServiceClientHandshakeHandler<T, S> serviceClientHandshakeHandler =
         new ServiceClientHandshakeHandler<T, S>(connectionHeader, responseListeners, deserializer,
             executorService);
-    tcpClientConnectionManager =
-        new TcpClientConnectionManager(HANDSHAKE_HANDLER_NAME, handler, executorService);
+    tcpClientConnectionManager.addNamedChannelHandler(serviceClientHandshakeHandler);
   }
 
   @Override
   public void connect(URI uri) {
     Preconditions.checkNotNull(uri, "URI must be specified.");
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"), "Invalid service URI.");
-    Preconditions.checkState(tcpClientConnection == null, "Already connected once.");
+    Preconditions.checkState(tcpClient == null, "Already connected once.");
     InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
-    tcpClientConnection = tcpClientConnectionManager.connect(toString(), address);
+    tcpClient = tcpClientConnectionManager.connect(toString(), address);
     // TODO(damonkohler): Remove this once blocking on handshakes is supported.
     // See issue 75.
     try {
@@ -99,7 +97,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   @Override
   public void shutdown() {
-    Preconditions.checkNotNull(tcpClientConnection, "Not connected.");
+    Preconditions.checkNotNull(tcpClient, "Not connected.");
     tcpClientConnectionManager.shutdown();
   }
 
@@ -107,7 +105,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   public void call(T request, ServiceResponseListener<S> listener) {
     ChannelBuffer wrappedBuffer = ChannelBuffers.wrappedBuffer(serializer.serialize(request));
     responseListeners.add(listener);
-    tcpClientConnection.write(wrappedBuffer).awaitUninterruptibly();
+    tcpClient.write(wrappedBuffer).awaitUninterruptibly();
   }
 
   @Override
