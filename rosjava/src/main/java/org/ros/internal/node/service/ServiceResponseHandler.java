@@ -66,6 +66,5 @@ class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
         }
       }
     });
-    super.messageReceived(ctx, e);
   }
 }
