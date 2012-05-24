@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.transport.ClientHandshakeListener;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.internal.transport.tcp.TcpClient;
@@ -36,12 +37,52 @@ import org.ros.node.service.ServiceResponseListener;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
+ * Default implementation of a {@link ServiceClient}.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
+
+  private final class HandshakeLatch implements ClientHandshakeListener {
+
+    private CountDownLatch latch;
+    private boolean success;
+    private String errorMessage;
+
+    @Override
+    public void onSuccess(ConnectionHeader outgoingConnectionHeader,
+        ConnectionHeader incomingConnectionHeader) {
+      success = true;
+      latch.countDown();
+    }
+
+    @Override
+    public void onFailure(ConnectionHeader outgoingConnectionHeader, String errorMessage) {
+      this.errorMessage = errorMessage;
+      success = false;
+      latch.countDown();
+    }
+
+    public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
+      latch.await(timeout, unit);
+      return success;
+    }
+
+    public String getErrorMessage() {
+      return errorMessage;
+    }
+
+    public void reset() {
+      latch = new CountDownLatch(1);
+      success = false;
+      errorMessage = null;
+    }
+  }
 
   private final ServiceDeclaration serviceDeclaration;
   private final MessageSerializer<T> serializer;
@@ -49,6 +90,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final ConnectionHeader connectionHeader;
   private final TcpClientManager tcpClientManager;
+  private final HandshakeLatch handshakeLatch;
 
   private TcpClient tcpClient;
 
@@ -76,6 +118,8 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     ServiceClientHandshakeHandler<T, S> serviceClientHandshakeHandler =
         new ServiceClientHandshakeHandler<T, S>(connectionHeader, responseListeners, deserializer,
             executorService);
+    handshakeLatch = new HandshakeLatch();
+    serviceClientHandshakeHandler.addListener(handshakeLatch);
     tcpClientManager.addNamedChannelHandler(serviceClientHandshakeHandler);
   }
 
@@ -85,13 +129,14 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"), "Invalid service URI.");
     Preconditions.checkState(tcpClient == null, "Already connected once.");
     InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
+    handshakeLatch.reset();
     tcpClient = tcpClientManager.connect(toString(), address);
-    // TODO(damonkohler): Remove this once blocking on handshakes is supported.
-    // See issue 75.
     try {
-      Thread.sleep(500);
+      if (!handshakeLatch.await(1, TimeUnit.SECONDS)) {
+        throw new RosRuntimeException(handshakeLatch.getErrorMessage());
+      }
     } catch (InterruptedException e) {
-      throw new RosRuntimeException(e);
+      throw new RosRuntimeException("Handshake timed out.");
     }
   }
 

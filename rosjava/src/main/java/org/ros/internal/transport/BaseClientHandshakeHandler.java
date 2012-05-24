@@ -57,7 +57,6 @@ public abstract class BaseClientHandshakeHandler extends AbstractNamedChannelHan
 
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-    super.messageReceived(ctx, e);
     ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
     ConnectionHeader connectionHeader = ConnectionHeader.decode(buffer);
     if (clientHandshake.handshake(connectionHeader)) {

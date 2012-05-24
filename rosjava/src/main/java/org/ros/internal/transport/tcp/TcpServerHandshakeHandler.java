@@ -66,7 +66,6 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
     } else {
       handleSubscriberHandshake(ctx, e, pipeline, incomingHeader);
     }
-    super.messageReceived(ctx, e);
   }
 
   private void handleServiceHandshake(MessageEvent e, ChannelPipeline pipeline,
