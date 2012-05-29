@@ -125,26 +125,26 @@ public class MessageInterfaceBuilder {
   @SuppressWarnings("deprecation")
   private String getJavaValue(PrimitiveFieldType primitiveFieldType, String value) {
     switch (primitiveFieldType) {
-    case BOOL:
-      return Boolean.valueOf(!value.equals("0") && !value.equals("false")).toString();
-    case FLOAT32:
-      return value + "f";
-    case STRING:
-      return "\"" + escapeJava(value) + "\"";
-    case BYTE:
-    case CHAR:
-    case INT8:
-    case UINT8:
-    case INT16:
-    case UINT16:
-    case INT32:
-    case UINT32:
-    case INT64:
-    case UINT64:
-    case FLOAT64:
-      return value;
-    default:
-      throw new RosRuntimeException("Unsupported PrimitiveFieldType: " + primitiveFieldType);
+      case BOOL:
+        return Boolean.valueOf(!value.equals("0") && !value.equals("false")).toString();
+      case FLOAT32:
+        return value + "f";
+      case STRING:
+        return "\"" + escapeJava(value) + "\"";
+      case BYTE:
+      case CHAR:
+      case INT8:
+      case UINT8:
+      case INT16:
+      case UINT16:
+      case INT32:
+      case UINT32:
+      case INT64:
+      case UINT64:
+      case FLOAT64:
+        return value;
+      default:
+        throw new RosRuntimeException("Unsupported PrimitiveFieldType: " + primitiveFieldType);
     }
   }
 
@@ -152,10 +152,12 @@ public class MessageInterfaceBuilder {
     for (Field field : messageContext.getFields()) {
       if (field.isConstant()) {
         Preconditions.checkState(field.getType() instanceof PrimitiveFieldType);
-        PrimitiveFieldType primitiveFieldType = (PrimitiveFieldType) field.getType();
-        String value = getJavaValue(primitiveFieldType, field.getValue().toString());
-        builder.append(String.format("  static final %s %s = %s;\n",
-            primitiveFieldType.getJavaTypeName(), field.getName(), value));
+        // We use FieldType and cast back to PrimitiveFieldType below to avoid a
+        // bug in the Sun JDK: http://gs.sun.com/view_bug.do?bug_id=6522780
+        FieldType fieldType = (FieldType) field.getType();
+        String value = getJavaValue((PrimitiveFieldType) fieldType, field.getValue().toString());
+        builder.append(String.format("  static final %s %s = %s;\n", fieldType.getJavaTypeName(),
+            field.getName(), value));
       }
     }
   }
