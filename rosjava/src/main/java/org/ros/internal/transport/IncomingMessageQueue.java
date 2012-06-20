@@ -29,6 +29,7 @@ import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -43,8 +44,8 @@ public class IncomingMessageQueue<T> {
 
   private final MessageDeserializer<T> deserializer;
   private final ScheduledExecutorService executorService;
-  private final CircularBlockingQueue<T> messages;
-  private final ListenerCollection<MessageListener<T>> listeners;
+  private final CircularBlockingQueue<ByteBuffer> buffers;
+  private final ListenerCollection<MessageListener<T>> messageListeners;
   private final Dispatcher dispatcher;
 
   private boolean latchMode;
@@ -61,13 +62,9 @@ public class IncomingMessageQueue<T> {
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
       ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
       if (DEBUG) {
-        log.info(String.format("Received %d bytes.", buffer.readableBytes()));
+        log.info(String.format("Received %d byte message.", buffer.readableBytes()));
       }
-      T message = deserializer.deserialize(buffer.toByteBuffer());
-      messages.put(message);
-      if (DEBUG) {
-        log.info("Received message: " + message);
-      }
+      buffers.put(buffer.copy().toByteBuffer());
       super.messageReceived(ctx, e);
     }
   }
@@ -75,12 +72,12 @@ public class IncomingMessageQueue<T> {
   private final class Dispatcher extends CancellableLoop {
     @Override
     public void loop() throws InterruptedException {
-      final T message = messages.take();
+      final T message = deserializer.deserialize(buffers.take());
       latchedMessage = message;
       if (DEBUG) {
         log.info("Dispatched message: " + message);
       }
-      listeners.signal(new SignalRunnable<MessageListener<T>>() {
+      messageListeners.signal(new SignalRunnable<MessageListener<T>>() {
         @Override
         public void run(MessageListener<T> listener) {
           listener.onNewMessage(message);
@@ -93,8 +90,8 @@ public class IncomingMessageQueue<T> {
       ScheduledExecutorService executorService) {
     this.deserializer = deserializer;
     this.executorService = executorService;
-    messages = new CircularBlockingQueue<T>(MESSAGE_BUFFER_CAPACITY);
-    listeners = new ListenerCollection<MessageListener<T>>(executorService);
+    buffers = new CircularBlockingQueue<ByteBuffer>(MESSAGE_BUFFER_CAPACITY);
+    messageListeners = new ListenerCollection<MessageListener<T>>(executorService);
     dispatcher = new Dispatcher();
     latchMode = false;
     latchedMessage = null;
@@ -113,7 +110,7 @@ public class IncomingMessageQueue<T> {
     if (DEBUG) {
       log.info("Adding listener.");
     }
-    listeners.add(listener);
+    messageListeners.add(listener);
     if (latchMode && latchedMessage != null) {
       if (DEBUG) {
         log.info("Dispatching latched message: " + latchedMessage);
@@ -128,7 +125,7 @@ public class IncomingMessageQueue<T> {
   }
 
   public void removeListener(MessageListener<T> listener) {
-    listeners.remove(listener);
+    messageListeners.remove(listener);
   }
 
   public void shutdown() {
@@ -139,14 +136,14 @@ public class IncomingMessageQueue<T> {
    * @see CircularBlockingQueue#setLimit(int)
    */
   public void setLimit(int limit) {
-    messages.setLimit(limit);
+    buffers.setLimit(limit);
   }
 
   /**
    * @see CircularBlockingQueue#getLimit()
    */
   public int getLimit() {
-    return messages.getLimit();
+    return buffers.getLimit();
   }
 
   /**

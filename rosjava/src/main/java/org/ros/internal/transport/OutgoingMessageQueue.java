@@ -43,24 +43,24 @@ public class OutgoingMessageQueue<T> {
   private static final int MESSAGE_BUFFER_CAPACITY = 8192;
 
   private final MessageSerializer<T> serializer;
-  private final CircularBlockingQueue<T> messages;
+  private final CircularBlockingQueue<ChannelBuffer> buffers;
   private final ChannelGroup channelGroup;
   private final Writer writer;
 
   private boolean latchMode;
-  private T latchedMessage;
+  private ChannelBuffer latchedBuffer;
 
   private final class Writer extends CancellableLoop {
     @Override
     public void loop() throws InterruptedException {
-      writeMessageToChannel(messages.take());
+      writeMessageToChannel(buffers.take());
     }
   }
 
   public OutgoingMessageQueue(MessageSerializer<T> serializer,
       ScheduledExecutorService executorService) {
     this.serializer = serializer;
-    messages = new CircularBlockingQueue<T>(MESSAGE_BUFFER_CAPACITY);
+    buffers = new CircularBlockingQueue<ChannelBuffer>(MESSAGE_BUFFER_CAPACITY);
     channelGroup = new DefaultChannelGroup();
     writer = new Writer();
     latchMode = false;
@@ -75,13 +75,9 @@ public class OutgoingMessageQueue<T> {
     return latchMode;
   }
 
-  private void writeMessageToChannel(T message) {
-    ByteBuffer serializedMessage = serializer.serialize(message);
-    ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(serializedMessage);
+  private void writeMessageToChannel(ChannelBuffer buffer) {
     if (DEBUG) {
-      // TODO(damonkohler): Add a utility method for a better
-      // ChannelBuffer.toString() method.
-      log.info("Writing message: " + message);
+      log.info(String.format("Writing %d bytes.", buffer.readableBytes()));
     }
     channelGroup.write(buffer);
   }
@@ -91,12 +87,14 @@ public class OutgoingMessageQueue<T> {
    *          the message to add to the queue
    */
   public void put(T message) {
+    ByteBuffer serializedMessage = serializer.serialize(message);
+    ChannelBuffer buffer = ChannelBuffers.wrappedBuffer(serializedMessage);
     try {
-      messages.put(message);
+      buffers.put(buffer);
     } catch (InterruptedException e) {
       throw new RosRuntimeException(e);
     }
-    latchedMessage = message;
+    latchedBuffer = buffer;
   }
 
   /**
@@ -111,14 +109,14 @@ public class OutgoingMessageQueue<T> {
    * @see CircularBlockingQueue#setLimit(int)
    */
   public void setLimit(int limit) {
-    messages.setLimit(limit);
+    buffers.setLimit(limit);
   }
 
   /**
    * @see CircularBlockingQueue#getLimit
    */
   public int getLimit() {
-    return messages.getLimit();
+    return buffers.getLimit();
   }
 
   /**
@@ -134,11 +132,11 @@ public class OutgoingMessageQueue<T> {
       log.info("Adding channel: " + channel);
     }
     channelGroup.add(channel);
-    if (latchMode && latchedMessage != null) {
+    if (latchMode && latchedBuffer != null) {
       if (DEBUG) {
-        log.info("Writing latched message: " + latchedMessage);
+        log.info("Writing latched message: " + latchedBuffer);
       }
-      writeMessageToChannel(latchedMessage);
+      writeMessageToChannel(latchedBuffer);
     }
   }
 
