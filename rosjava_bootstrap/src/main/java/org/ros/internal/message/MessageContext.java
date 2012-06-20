@@ -36,7 +36,7 @@ public class MessageContext {
   private final List<Field> orderedFields;
 
   public static MessageContext newFromStrings(String type, String definition) {
-    MessageIdentifier messageIdentifier = MessageIdentifier.newFromType(type);
+    MessageIdentifier messageIdentifier = MessageIdentifier.of(type);
     MessageDeclaration messageDeclaration = new MessageDeclaration(messageIdentifier, definition);
     return new MessageContext(messageDeclaration);
   }

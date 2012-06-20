@@ -36,7 +36,7 @@ public class TopicDefinitionResourceProvider implements MessageDefinitionProvide
   }
 
   private String topicTypeToResourceName(String topicType) {
-    MessageIdentifier messageIdentifier = MessageIdentifier.newFromType(topicType);
+    MessageIdentifier messageIdentifier = MessageIdentifier.of(topicType);
     return String.format("/%s/msg/%s.msg", messageIdentifier.getPackage(),
         messageIdentifier.getName());
   }

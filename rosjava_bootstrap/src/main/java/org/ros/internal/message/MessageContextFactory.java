@@ -45,7 +45,7 @@ public class MessageContextFactory {
         if (PrimitiveFieldType.existsFor(type)) {
           fieldType = PrimitiveFieldType.valueOf(type.toUpperCase());
         } else {
-          fieldType = new MessageFieldType(MessageIdentifier.newFromType(type), messageFactory);
+          fieldType = new MessageFieldType(MessageIdentifier.of(type), messageFactory);
         }
         return fieldType;
       }
@@ -74,8 +74,7 @@ public class MessageContextFactory {
   }
 
   public MessageContext newFromStrings(String messageType, String messageDefinition) {
-    MessageDeclaration messageDeclaration =
-        MessageDeclaration.newFromStrings(messageType, messageDefinition);
+    MessageDeclaration messageDeclaration = MessageDeclaration.of(messageType, messageDefinition);
     return newFromMessageDeclaration(messageDeclaration);
   }
 }

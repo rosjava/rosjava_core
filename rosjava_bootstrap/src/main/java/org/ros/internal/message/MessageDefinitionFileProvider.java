@@ -55,7 +55,7 @@ public class MessageDefinitionFileProvider implements MessageDefinitionProvider 
     String filename = file.getAbsolutePath();
     String name = FilenameUtils.getBaseName(filename);
     String pkg = getParentBaseName(getParent(filename));
-    return new MessageIdentifier(pkg, name);
+    return MessageIdentifier.of(pkg, name);
   }
 
   private void addDefinition(File file, String definition) {

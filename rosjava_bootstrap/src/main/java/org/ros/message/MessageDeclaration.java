@@ -17,6 +17,13 @@
 package org.ros.message;
 
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
+import org.ros.exception.RosRuntimeException;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 /**
  * An {@link MessageIdentifier} and definition pair from which all qualities of
@@ -27,11 +34,23 @@ import com.google.common.base.Preconditions;
  */
 public class MessageDeclaration {
 
+  private static final Cache<MessageIdentifier, MessageDeclaration> cache = CacheBuilder
+      .newBuilder().build();
+
   private final MessageIdentifier messageIdentifier;
   private final String definition;
 
-  public static MessageDeclaration newFromStrings(String type, String definition) {
-    return new MessageDeclaration(MessageIdentifier.newFromType(type), definition);
+  public static MessageDeclaration of(final String type, final String definition) {
+    try {
+      return cache.get(MessageIdentifier.of(type), new Callable<MessageDeclaration>() {
+        @Override
+        public MessageDeclaration call() throws Exception {
+          return new MessageDeclaration(MessageIdentifier.of(type), definition);
+        }
+      });
+    } catch (ExecutionException e) {
+      throw new RosRuntimeException(e);
+    }
   }
 
   /**
@@ -67,7 +86,7 @@ public class MessageDeclaration {
     Preconditions.checkNotNull(definition);
     return definition;
   }
-  
+
   @Override
   public String toString() {
     return String.format("MessageDeclaration<%s>", messageIdentifier.toString());

@@ -48,7 +48,7 @@ public class DefaultMessageSerializationFactory implements MessageSerializationF
 
   @Override
   public <T> MessageDeserializer<T> newMessageDeserializer(String messageType) {
-    return new DefaultMessageDeserializer<T>(MessageIdentifier.newFromType(messageType),
+    return new DefaultMessageDeserializer<T>(MessageIdentifier.of(messageType),
         topicMessageFactory);
   }
 
@@ -61,7 +61,7 @@ public class DefaultMessageSerializationFactory implements MessageSerializationF
   @Override
   public <T> org.ros.message.MessageDeserializer<T>
       newServiceRequestDeserializer(String serviceType) {
-    return new DefaultMessageDeserializer<T>(MessageIdentifier.newFromType(serviceType),
+    return new DefaultMessageDeserializer<T>(MessageIdentifier.of(serviceType),
         serviceRequestMessageFactory);
   }
 
@@ -74,7 +74,7 @@ public class DefaultMessageSerializationFactory implements MessageSerializationF
   @Override
   public <T> org.ros.message.MessageDeserializer<T> newServiceResponseDeserializer(
       String serviceType) {
-    return new DefaultMessageDeserializer<T>(MessageIdentifier.newFromType(serviceType),
+    return new DefaultMessageDeserializer<T>(MessageIdentifier.of(serviceType),
         serviceResponseMessageFactory);
   }
 }

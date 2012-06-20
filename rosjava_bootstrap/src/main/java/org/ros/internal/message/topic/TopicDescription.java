@@ -29,7 +29,7 @@ public class TopicDescription extends MessageDeclaration {
   private final String md5Checksum;
 
   public TopicDescription(String type, String definition, String md5Checksum) {
-    super(MessageIdentifier.newFromType(type), definition);
+    super(MessageIdentifier.of(type), definition);
     this.md5Checksum = md5Checksum;
   }
 

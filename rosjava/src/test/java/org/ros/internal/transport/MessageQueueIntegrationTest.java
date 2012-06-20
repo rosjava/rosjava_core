@@ -116,11 +116,11 @@ public class MessageQueueIntegrationTest {
         new OutgoingMessageQueue<Message>(new DefaultMessageSerializer(), executorService);
     firstIncomingMessageQueue =
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
-            MessageIdentifier.newFromType(std_msgs.String._TYPE), topicMessageFactory),
+            MessageIdentifier.of(std_msgs.String._TYPE), topicMessageFactory),
             executorService);
     secondIncomingMessageQueue =
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
-            MessageIdentifier.newFromType(std_msgs.String._TYPE), topicMessageFactory),
+            MessageIdentifier.of(std_msgs.String._TYPE), topicMessageFactory),
             executorService);
     firstTcpClientManager = new TcpClientManager(executorService);
     firstTcpClientManager.addNamedChannelHandler(firstIncomingMessageQueue

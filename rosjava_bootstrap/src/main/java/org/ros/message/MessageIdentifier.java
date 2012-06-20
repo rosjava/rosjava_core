@@ -17,6 +17,13 @@
 package org.ros.message;
 
 import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
+import org.ros.exception.RosRuntimeException;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * Uniquely identifies a message.
@@ -25,23 +32,41 @@ import com.google.common.base.Preconditions;
  */
 public class MessageIdentifier {
 
+  private static final LoadingCache<String, MessageIdentifier> cache = CacheBuilder.newBuilder()
+      .build(new CacheLoader<String, MessageIdentifier>() {
+        @Override
+        public MessageIdentifier load(String type) throws Exception {
+          return new MessageIdentifier(type);
+        }
+      });
+
+  private final String type;
   private final String pkg;
   private final String name;
-  
-  public static MessageIdentifier newFromType(String type) {
-    Preconditions.checkNotNull(type);
-    Preconditions.checkArgument(type.contains("/"), "Type must be fully qualified: " + type);
-    String[] packageAndName = type.split("/", 2);
-    return new MessageIdentifier(packageAndName[0], packageAndName[1]);
+
+  public static MessageIdentifier of(String pkg, String name) {
+    return of(pkg + "/" + name);
   }
 
-  public MessageIdentifier(String pkg, String name) {
-    this.pkg = pkg;
-    this.name = name;
+  public static MessageIdentifier of(String type) {
+    try {
+      return cache.get(type);
+    } catch (ExecutionException e) {
+      throw new RosRuntimeException(e);
+    }
+  }
+
+  public MessageIdentifier(String type) {
+    Preconditions.checkNotNull(type);
+    Preconditions.checkArgument(type.contains("/"), "Type must be fully qualified: " + type);
+    this.type = type;
+    String[] packageAndName = type.split("/", 2);
+    pkg = packageAndName[0];
+    name = packageAndName[1];
   }
 
   public String getType() {
-    return String.format("%s/%s", pkg, name);
+    return type;
   }
 
   public String getPackage() {
@@ -54,15 +79,14 @@ public class MessageIdentifier {
 
   @Override
   public String toString() {
-    return String.format("MessageIdentifier<%s/%s>", pkg, name);
+    return String.format("MessageIdentifier<%s>", type);
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
-    result = prime * result + ((pkg == null) ? 0 : pkg.hashCode());
+    result = prime * result + ((type == null) ? 0 : type.hashCode());
     return result;
   }
 
@@ -75,15 +99,10 @@ public class MessageIdentifier {
     if (getClass() != obj.getClass())
       return false;
     MessageIdentifier other = (MessageIdentifier) obj;
-    if (name == null) {
-      if (other.name != null)
+    if (type == null) {
+      if (other.type != null)
         return false;
-    } else if (!name.equals(other.name))
-      return false;
-    if (pkg == null) {
-      if (other.pkg != null)
-        return false;
-    } else if (!pkg.equals(other.pkg))
+    } else if (!type.equals(other.type))
       return false;
     return true;
   }

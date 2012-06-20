@@ -34,7 +34,7 @@ public class ServiceDescription extends MessageDeclaration {
   private final String md5Checksum;
 
   public ServiceDescription(String type, String definition, String md5Checksum) {
-    super(MessageIdentifier.newFromType(type), definition);
+    super(MessageIdentifier.of(type), definition);
     this.md5Checksum = md5Checksum;
     List<String> requestAndResponse = MessageDefinitionTupleParser.parse(definition, 2);
     requestDefinition = requestAndResponse.get(0);
