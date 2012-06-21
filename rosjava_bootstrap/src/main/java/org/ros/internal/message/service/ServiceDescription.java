@@ -29,7 +29,9 @@ import java.util.List;
  */
 public class ServiceDescription extends MessageDeclaration {
 
+  private final String requestType;
   private final String requestDefinition;
+  private final String responseType;
   private final String responseDefinition;
   private final String md5Checksum;
 
@@ -37,6 +39,8 @@ public class ServiceDescription extends MessageDeclaration {
     super(MessageIdentifier.of(type), definition);
     this.md5Checksum = md5Checksum;
     List<String> requestAndResponse = MessageDefinitionTupleParser.parse(definition, 2);
+    requestType = type + "Request";
+    responseType = type + "Response";
     requestDefinition = requestAndResponse.get(0);
     responseDefinition = requestAndResponse.get(1);
   }
@@ -45,8 +49,16 @@ public class ServiceDescription extends MessageDeclaration {
     return md5Checksum;
   }
 
+  public String getRequestType() {
+    return requestType;
+  }
+
   public String getRequestDefinition() {
     return requestDefinition;
+  }
+
+  public String getResponseType() {
+    return responseType;
   }
 
   public String getResponseDefinition() {

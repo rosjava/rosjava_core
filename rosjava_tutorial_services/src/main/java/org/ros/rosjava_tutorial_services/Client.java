@@ -40,18 +40,18 @@ public class Client extends AbstractNodeMain {
 
   @Override
   public void onStart(final ConnectedNode connectedNode) {
-    ServiceClient<test_ros.AddTwoInts.Request, test_ros.AddTwoInts.Response> serviceClient;
+    ServiceClient<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> serviceClient;
     try {
       serviceClient = connectedNode.newServiceClient("add_two_ints", test_ros.AddTwoInts._TYPE);
     } catch (ServiceNotFoundException e) {
       throw new RosRuntimeException(e);
     }
-    final test_ros.AddTwoInts.Request request = serviceClient.newMessage();
+    final test_ros.AddTwoIntsRequest request = serviceClient.newMessage();
     request.setA(2);
     request.setB(2);
-    serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoInts.Response>() {
+    serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoIntsResponse>() {
       @Override
-      public void onSuccess(test_ros.AddTwoInts.Response response) {
+      public void onSuccess(test_ros.AddTwoIntsResponse response) {
         connectedNode.getLog().info(
             String.format("%d + %d = %d", request.getA(), request.getB(), response.getSum()));
       }

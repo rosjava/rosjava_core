@@ -76,21 +76,7 @@ public class GenerateInterfaces {
     for (MessageIdentifier topicType : topicTypes) {
       String definition = messageDefinitionProviderChain.get(topicType.getType());
       MessageDeclaration messageDeclaration = new MessageDeclaration(topicType, definition);
-      MessageInterfaceBuilder builder = new MessageInterfaceBuilder();
-      builder.setMessageDeclaration(messageDeclaration);
-      builder.setPackageName(messageDeclaration.getPackage());
-      builder.setInterfaceName(messageDeclaration.getName());
-      builder.setAddConstantsAndMethods(true);
-      String content;
-      try {
-        content = builder.build(messageFactory);
-      } catch (Exception e) {
-        System.out.println(String.format("Failed to generate interface for %s: %s",
-            topicType.getType(), e.getMessage()));
-        continue;
-      }
-      File file = new File(outputDirectory, topicType.getType() + ".java");
-      FileUtils.writeStringToFile(file, content);
+      writeInterface(messageDeclaration, outputDirectory, true);
     }
   }
 
@@ -117,40 +103,34 @@ public class GenerateInterfaces {
     }
     for (MessageIdentifier serviceType : serviceTypes) {
       String definition = messageDefinitionProviderChain.get(serviceType.getType());
-
-      MessageInterfaceBuilder builder = new MessageInterfaceBuilder();
-      builder.setMessageDeclaration(new MessageDeclaration(serviceType, definition));
-      builder.setPackageName(serviceType.getPackage());
-      builder.setInterfaceName(serviceType.getName());
-      builder.setAddConstantsAndMethods(false);
-
+      MessageDeclaration serviceDeclaration =
+          MessageDeclaration.of(serviceType.getType(), definition);
+      writeInterface(serviceDeclaration, outputDirectory, false);
       List<String> requestAndResponse = MessageDefinitionTupleParser.parse(definition, 2);
-      MessageDeclaration request = new MessageDeclaration(serviceType, requestAndResponse.get(0));
-      MessageDeclaration response = new MessageDeclaration(serviceType, requestAndResponse.get(1));
+      MessageDeclaration requestDeclaration =
+          MessageDeclaration.of(serviceType.getType() + "Request", requestAndResponse.get(0));
+      MessageDeclaration responseDeclaration =
+          MessageDeclaration.of(serviceType.getType() + "Response", requestAndResponse.get(1));
+      writeInterface(requestDeclaration, outputDirectory, true);
+      writeInterface(responseDeclaration, outputDirectory, true);
+    }
+  }
 
-      MessageInterfaceBuilder requestBuilder = new MessageInterfaceBuilder();
-      requestBuilder.setMessageDeclaration(request);
-      requestBuilder.setInterfaceName("Request");
-      requestBuilder.setAddConstantsAndMethods(true);
-
-      MessageInterfaceBuilder responseBuilder = new MessageInterfaceBuilder();
-      responseBuilder.setMessageDeclaration(response);
-      responseBuilder.setInterfaceName("Response");
-      responseBuilder.setAddConstantsAndMethods(true);
-
-      String nestedContent;
-      try {
-        nestedContent =
-            requestBuilder.build(messageFactory) + "\n" + responseBuilder.build(messageFactory);
-      } catch (Exception e) {
-        System.err.println(String.format("Failed to generate interface for %s: %s",
-            serviceType.getType(), e.getMessage()));
-        continue;
-      }
-      builder.setNestedContent(nestedContent);
-      File file = new File(outputDirectory, serviceType.getType() + ".java");
-      // TODO(damonkohler): Passing in null here is confusing.
-      FileUtils.writeStringToFile(file, builder.build(null));
+  private void writeInterface(MessageDeclaration messageDeclaration, File outputDirectory,
+      boolean addConstantsAndMethods) {
+    MessageInterfaceBuilder builder = new MessageInterfaceBuilder();
+    builder.setPackageName(messageDeclaration.getPackage());
+    builder.setInterfaceName(messageDeclaration.getName());
+    builder.setMessageDeclaration(messageDeclaration);
+    builder.setAddConstantsAndMethods(addConstantsAndMethods);
+    try {
+      String content;
+      content = builder.build(messageFactory);
+      File file = new File(outputDirectory, messageDeclaration.getType() + ".java");
+      FileUtils.writeStringToFile(file, content);
+    } catch (Exception e) {
+      System.out.println(String.format("Failed to generate interface for %s: %s",
+          messageDeclaration.getType(), e.getMessage()));
     }
   }
 
