@@ -38,20 +38,20 @@ public class NameResolver {
   }
 
   public static NameResolver newFromNamespace(String namespace) {
-    return newFromNamespace(new GraphName(namespace));
+    return newFromNamespace(GraphName.of(namespace));
   }
 
   public static NameResolver newRoot() {
-    return newFromNamespace(GraphName.newRoot());
+    return newFromNamespace(GraphName.root());
   }
 
   public static NameResolver newRootFromRemappings(Map<GraphName, GraphName> remappings) {
-    return new NameResolver(GraphName.newRoot(), remappings);
+    return new NameResolver(GraphName.root(), remappings);
   }
 
   public static NameResolver newFromNamespaceAndRemappings(String namespace,
       Map<GraphName, GraphName> remappings) {
-    return new NameResolver(new GraphName(namespace), remappings);
+    return new NameResolver(GraphName.of(namespace), remappings);
   }
 
   public NameResolver(GraphName namespace, Map<GraphName, GraphName> remappings) {
@@ -95,21 +95,21 @@ public class NameResolver {
    * @see #resolve(GraphName, GraphName)
    */
   public GraphName resolve(String namespace, String name) {
-    return resolve(new GraphName(namespace), new GraphName(name));
+    return resolve(GraphName.of(namespace), GraphName.of(name));
   }
 
   /**
    * @see #resolve(GraphName, GraphName)
    */
   public GraphName resolve(GraphName namespace, String name) {
-    return resolve(namespace, new GraphName(name));
+    return resolve(namespace, GraphName.of(name));
   }
 
   /**
    * @see #resolve(GraphName, GraphName)
    */
   public GraphName resolve(String namespace, GraphName name) {
-    return resolve(new GraphName(namespace), name);
+    return resolve(GraphName.of(namespace), name);
   }
 
   /**
@@ -125,7 +125,7 @@ public class NameResolver {
    * @see #resolve(GraphName)
    */
   public GraphName resolve(String name) {
-    return resolve(new GraphName(name));
+    return resolve(GraphName.of(name));
   }
 
   /**
@@ -155,7 +155,7 @@ public class NameResolver {
    * @see #newChild(GraphName)
    */
   public NameResolver newChild(String namespace) {
-    return newChild(new GraphName(namespace));
+    return newChild(GraphName.of(namespace));
   }
 
   protected GraphName lookUpRemapping(GraphName name) {

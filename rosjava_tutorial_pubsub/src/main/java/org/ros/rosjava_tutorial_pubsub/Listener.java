@@ -33,7 +33,7 @@ public class Listener extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("rosjava_tutorial_pubsub/listener");
+    return GraphName.of("rosjava_tutorial_pubsub/listener");
   }
 
   @Override

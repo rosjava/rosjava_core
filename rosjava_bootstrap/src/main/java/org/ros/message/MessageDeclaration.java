@@ -47,6 +47,8 @@ public class MessageDeclaration {
   }
 
   public static MessageDeclaration of(final String type, final String definition) {
+    Preconditions.checkNotNull(type);
+    Preconditions.checkNotNull(definition);
     try {
       return cache.get(MessageIdentifier.of(type), new Callable<MessageDeclaration>() {
         @Override

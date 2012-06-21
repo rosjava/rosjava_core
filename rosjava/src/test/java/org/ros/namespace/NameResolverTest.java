@@ -61,7 +61,7 @@ public class NameResolverTest {
     } catch (IllegalArgumentException e) {
     }
 
-    GraphName root = GraphName.newRoot();
+    GraphName root = GraphName.root();
     assertEquals(root, r.resolve(root, ""));
     assertEquals(root, r.resolve(root, root));
     assertEquals(root, r.resolve("/anything/bar", root));
@@ -99,8 +99,8 @@ public class NameResolverTest {
   @Test
   public void testResolveNameRemapping() {
     HashMap<GraphName, GraphName> remappings = new HashMap<GraphName, GraphName>();
-    remappings.put(new GraphName("name"), new GraphName("/my/name"));
-    remappings.put(new GraphName("foo"), new GraphName("/my/foo"));
+    remappings.put(GraphName.of("name"), GraphName.of("/my/name"));
+    remappings.put(GraphName.of("foo"), GraphName.of("/my/foo"));
 
     NameResolver r = NameResolver.newRootFromRemappings(remappings);
 

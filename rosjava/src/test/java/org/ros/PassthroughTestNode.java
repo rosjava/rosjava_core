@@ -33,7 +33,7 @@ public class PassthroughTestNode extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("rosjava/passthrough_test_node");
+    return GraphName.of("rosjava/passthrough_test_node");
   }
 
   @Override

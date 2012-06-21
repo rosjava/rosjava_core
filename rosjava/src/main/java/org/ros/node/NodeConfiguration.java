@@ -310,7 +310,7 @@ public class NodeConfiguration {
    * @return this {@link NodeConfiguration}
    */
   public NodeConfiguration setNodeName(String nodeName) {
-    return setNodeName(new GraphName(nodeName));
+    return setNodeName(GraphName.of(nodeName));
   }
 
   /**
@@ -335,7 +335,7 @@ public class NodeConfiguration {
    * @return this {@link NodeConfiguration}
    */
   public NodeConfiguration setDefaultNodeName(String nodeName) {
-    return setDefaultNodeName(new GraphName(nodeName));
+    return setDefaultNodeName(GraphName.of(nodeName));
   }
 
   /**

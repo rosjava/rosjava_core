@@ -39,7 +39,7 @@ public class ParameterServerTestNode extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("rosjava/parameter_server_test_node");
+    return GraphName.of("rosjava/parameter_server_test_node");
   }
 
   @SuppressWarnings("rawtypes")
@@ -69,8 +69,8 @@ public class ParameterServerTestNode extends AbstractNodeMain {
     tilde_m.setData(param.getString(connectedNode.resolveName("~tilde").toString()));
     log.info("tilde: " + tilde_m.getData());
 
-    GraphName paramNamespace = new GraphName(param.getString("parameter_namespace"));
-    GraphName targetNamespace = new GraphName(param.getString("target_namespace"));
+    GraphName paramNamespace = GraphName.of(param.getString("parameter_namespace"));
+    GraphName targetNamespace = GraphName.of(param.getString("target_namespace"));
     log.info("parameter_namespace: " + paramNamespace);
     log.info("target_namespace: " + targetNamespace);
     NameResolver resolver = connectedNode.getResolver().newChild(paramNamespace);

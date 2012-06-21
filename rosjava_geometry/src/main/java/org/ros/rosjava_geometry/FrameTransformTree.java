@@ -57,7 +57,7 @@ public class FrameTransformTree {
    *          the transform to add
    */
   public void updateTransform(geometry_msgs.TransformStamped transform) {
-    GraphName frame = new GraphName(transform.getChildFrameId());
+    GraphName frame = GraphName.of(transform.getChildFrameId());
     transforms.put(frame, transform);
   }
 
@@ -114,7 +114,7 @@ public class FrameTransformTree {
         return new FrameTransform(result, sourceFrame, targetFrame);
       }
       result = Transform.newFromTransformMessage(transformStamped.getTransform()).multiply(result);
-      targetFrame = makeFullyQualified(new GraphName(transformStamped.getHeader().getFrameId()));
+      targetFrame = makeFullyQualified(GraphName.of(transformStamped.getHeader().getFrameId()));
     }
   }
 
@@ -123,7 +123,7 @@ public class FrameTransformTree {
   }
 
   public void setPrefix(String prefix) {
-    setPrefix(new GraphName(prefix));
+    setPrefix(GraphName.of(prefix));
   }
 
   private GraphName makeFullyQualified(GraphName frame) {

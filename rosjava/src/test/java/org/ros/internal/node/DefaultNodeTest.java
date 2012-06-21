@@ -69,7 +69,7 @@ public class DefaultNodeTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return new GraphName("node");
+        return GraphName.of("node");
       }
 
       @Override
@@ -118,7 +118,7 @@ public class DefaultNodeTest extends RosTest {
     NodeMain nodeMain = new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return new GraphName("node");
+        return GraphName.of("node");
       }
 
       @Override
@@ -159,7 +159,7 @@ public class DefaultNodeTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return new GraphName("test_resolver");
+        return GraphName.of("test_resolver");
       }
 
       @Override
@@ -205,7 +205,7 @@ public class DefaultNodeTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return new GraphName("test_addresses");
+        return GraphName.of("test_addresses");
       }
 
       @Override
@@ -229,9 +229,9 @@ public class DefaultNodeTest extends RosTest {
     assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
     // Check the TCPROS server address via the XML-RPC API.
-    SlaveClient slaveClient = new SlaveClient(new GraphName("test_addresses"), nodeUri);
+    SlaveClient slaveClient = new SlaveClient(GraphName.of("test_addresses"), nodeUri);
     Response<ProtocolDescription> response =
-        slaveClient.requestTopic(new GraphName("test_addresses_pub"),
+        slaveClient.requestTopic(GraphName.of("test_addresses_pub"),
             Lists.newArrayList(ProtocolNames.TCPROS));
     ProtocolDescription result = response.getResult();
     InetSocketAddress tcpRosAddress = result.getAdverstiseAddress().toInetSocketAddress();

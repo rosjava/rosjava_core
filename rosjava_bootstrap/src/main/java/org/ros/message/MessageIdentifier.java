@@ -51,10 +51,14 @@ public class MessageIdentifier {
   }
 
   public static MessageIdentifier of(String pkg, String name) {
+    Preconditions.checkNotNull(pkg);
+    Preconditions.checkNotNull(name);
     return of(pkg + "/" + name);
   }
 
   public static MessageIdentifier of(String type) {
+    Preconditions.checkNotNull(type);
+    Preconditions.checkArgument(type.contains("/"), "Type must be fully qualified: " + type);
     try {
       return cache.get(type);
     } catch (ExecutionException e) {

@@ -25,6 +25,6 @@ import org.ros.namespace.GraphName;
  */
 public interface Topics {
 
-  public static final GraphName ROSOUT = new GraphName("/rosout");
-  public static final GraphName CLOCK = new GraphName("/clock");
+  public static final GraphName ROSOUT = GraphName.of("/rosout");
+  public static final GraphName CLOCK = GraphName.of("/clock");
 }

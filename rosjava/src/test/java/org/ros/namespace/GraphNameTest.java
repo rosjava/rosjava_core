@@ -42,14 +42,14 @@ public class GraphNameTest {
     try {
       String[] canonical = { "abc", "ab7", "/abc", "/abc/bar", "/", "~garage", "~foo/bar" };
       for (String c : canonical) {
-        assertGraphNameEquals(c, new GraphName(c));
+        assertGraphNameEquals(c, GraphName.of(c));
       }
       // test canonicalization
-      assertGraphNameEquals("", new GraphName(""));
-      assertGraphNameEquals("/", new GraphName("/"));
-      assertGraphNameEquals("/foo", new GraphName("/foo/"));
-      assertGraphNameEquals("foo", new GraphName("foo/"));
-      assertGraphNameEquals("foo/bar", new GraphName("foo/bar/"));
+      assertGraphNameEquals("", GraphName.of(""));
+      assertGraphNameEquals("/", GraphName.of("/"));
+      assertGraphNameEquals("/foo", GraphName.of("/foo/"));
+      assertGraphNameEquals("foo", GraphName.of("foo/"));
+      assertGraphNameEquals("foo/bar", GraphName.of("foo/bar/"));
     } catch (IllegalArgumentException e) {
       fail("These names should be valid" + e.toString());
     }
@@ -61,7 +61,7 @@ public class GraphNameTest {
         { "", "abc", "ab7", "ab7_kdfJKSDJFGkd", "/abc", "/", "~private", "~private/something",
             "/global", "/global/", "/global/local" };
     for (String v : valid) {
-      new GraphName(v);
+      GraphName.of(v);
     }
   }
 
@@ -70,7 +70,7 @@ public class GraphNameTest {
     final String[] illegalChars = { "=", "-", "(", ")", "*", "%", "^" };
     for (String i : illegalChars) {
       try {
-        new GraphName("good" + i);
+        GraphName.of("good" + i);
         fail("Bad name not caught: " + i);
       } catch (RuntimeException e) {
       }
@@ -78,7 +78,7 @@ public class GraphNameTest {
     final String[] illegalNames = { "/~private", "5foo" };
     for (String i : illegalNames) {
       try {
-        new GraphName(i);
+        GraphName.of(i);
         fail("Bad name not caught" + i);
       } catch (RuntimeException e) {
       }
@@ -89,11 +89,11 @@ public class GraphNameTest {
   public void testIsGlobal() {
     final String[] tests = { "/", "/global", "/global2" };
     for (String t : tests) {
-      assertTrue(new GraphName(t).isGlobal());
+      assertTrue(GraphName.of(t).isGlobal());
     }
     final String[] fails = { "", "not_global", "not/global" };
     for (String t : fails) {
-      assertFalse(new GraphName(t).isGlobal());
+      assertFalse(GraphName.of(t).isGlobal());
     }
   }
 
@@ -101,40 +101,40 @@ public class GraphNameTest {
   public void testIsPrivate() {
     String[] tests = { "~name", "~name/sub" };
     for (String t : tests) {
-      assertTrue(new GraphName(t).isPrivate());
+      assertTrue(GraphName.of(t).isPrivate());
     }
     String[] fails = { "", "not_private", "not/private", "/" };
     for (String f : fails) {
-      assertFalse(new GraphName(f).isPrivate());
+      assertFalse(GraphName.of(f).isPrivate());
     }
   }
 
   @Test
   public void testIsRelative() {
-    GraphName n = new GraphName("name");
+    GraphName n = GraphName.of("name");
     assertTrue(n.isRelative());
-    n = new GraphName("/name");
+    n = GraphName.of("/name");
     assertFalse(n.isRelative());
   }
 
   @Test
   public void testGetParent() {
-    GraphName global = new GraphName("/");
-    GraphName empty = new GraphName("");
+    GraphName global = GraphName.of("/");
+    GraphName empty = GraphName.of("");
     // parent of empty is empty, just like dirname
-    assertEquals(empty, new GraphName("").getParent());
+    assertEquals(empty, GraphName.of("").getParent());
     // parent of global is global, just like dirname
-    assertEquals(global, new GraphName("/").getParent());
+    assertEquals(global, GraphName.of("/").getParent());
 
     // test with global names
-    assertEquals(new GraphName("/wg"), new GraphName("/wg/name").getParent());
-    assertEquals(new GraphName("/wg"), new GraphName("/wg/name/").getParent());
-    assertEquals(global, new GraphName("/wg/").getParent());
-    assertEquals(global, new GraphName("/wg").getParent());
+    assertEquals(GraphName.of("/wg"), GraphName.of("/wg/name").getParent());
+    assertEquals(GraphName.of("/wg"), GraphName.of("/wg/name/").getParent());
+    assertEquals(global, GraphName.of("/wg/").getParent());
+    assertEquals(global, GraphName.of("/wg").getParent());
 
     // test with relative names
-    assertEquals(new GraphName("wg"), new GraphName("wg/name").getParent());
-    assertEquals(empty, new GraphName("wg/").getParent());
+    assertEquals(GraphName.of("wg"), GraphName.of("wg/name").getParent());
+    assertEquals(empty, GraphName.of("wg/").getParent());
   }
 
   @Test
@@ -164,23 +164,23 @@ public class GraphNameTest {
 
   @Test
   public void testGetName() {
-    assertGraphNameEquals("", new GraphName("").getBasename());
-    assertGraphNameEquals("", new GraphName("").getBasename());
-    assertGraphNameEquals("foo", new GraphName("/foo").getBasename());
-    assertGraphNameEquals("foo", new GraphName("foo").getBasename());
+    assertGraphNameEquals("", GraphName.of("").getBasename());
+    assertGraphNameEquals("", GraphName.of("").getBasename());
+    assertGraphNameEquals("foo", GraphName.of("/foo").getBasename());
+    assertGraphNameEquals("foo", GraphName.of("foo").getBasename());
     // The trailing slash is removed when creating a GraphName.
-    assertGraphNameEquals("foo", new GraphName("foo/").getBasename());
-    assertGraphNameEquals("bar", new GraphName("/foo/bar").getBasename());
-    assertGraphNameEquals("bar", new GraphName("foo/bar").getBasename());
+    assertGraphNameEquals("foo", GraphName.of("foo/").getBasename());
+    assertGraphNameEquals("bar", GraphName.of("/foo/bar").getBasename());
+    assertGraphNameEquals("bar", GraphName.of("foo/bar").getBasename());
   }
 
   @Test
   public void testJoin() {
-    assertEquals(new GraphName("/bar"), new GraphName("/").join(new GraphName("bar")));
-    assertEquals(new GraphName("bar"), new GraphName("").join(new GraphName("bar")));
-    assertEquals(new GraphName("foo/bar"), new GraphName("foo").join(new GraphName("bar")));
-    assertEquals(new GraphName("/foo/bar"), new GraphName("/foo").join(new GraphName("bar")));
-    assertEquals(new GraphName("/bar"), new GraphName("/foo").join(new GraphName("/bar")));
+    assertEquals(GraphName.of("/bar"), GraphName.of("/").join(GraphName.of("bar")));
+    assertEquals(GraphName.of("bar"), GraphName.of("").join(GraphName.of("bar")));
+    assertEquals(GraphName.of("foo/bar"), GraphName.of("foo").join(GraphName.of("bar")));
+    assertEquals(GraphName.of("/foo/bar"), GraphName.of("/foo").join(GraphName.of("bar")));
+    assertEquals(GraphName.of("/bar"), GraphName.of("/foo").join(GraphName.of("/bar")));
   }
 
   @Test

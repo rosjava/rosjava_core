@@ -60,7 +60,6 @@ public class NodeNameResolver extends NameResolver {
    */
   @Override
   public GraphName resolve(String name) {
-    return resolve(new GraphName(name));
+    return resolve(GraphName.of(name));
   }
-
 }
