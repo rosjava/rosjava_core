@@ -16,6 +16,7 @@
 
 package org.ros.message;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -43,6 +44,11 @@ public class MessageIdentifier {
   private final String type;
   private final String pkg;
   private final String name;
+
+  @VisibleForTesting
+  public static void invalidateAll() {
+    cache.invalidateAll();
+  }
 
   public static MessageIdentifier of(String pkg, String name) {
     return of(pkg + "/" + name);

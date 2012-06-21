@@ -16,6 +16,7 @@
 
 package org.ros.message;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -39,6 +40,11 @@ public class MessageDeclaration {
 
   private final MessageIdentifier messageIdentifier;
   private final String definition;
+
+  @VisibleForTesting
+  public static void invalidateAll() {
+    cache.invalidateAll();
+  }
 
   public static MessageDeclaration of(final String type, final String definition) {
     try {

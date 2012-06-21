@@ -20,11 +20,14 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.message.topic.TopicDefinitionResourceProvider;
 import org.ros.message.Duration;
+import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
+import org.ros.message.MessageIdentifier;
 import org.ros.message.Time;
 
 import java.nio.ByteBuffer;
@@ -38,9 +41,15 @@ public class RawMessageSerializationTest {
   private MessageFactory messageFactory;
 
   @Before
-  public void setUp() {
+  public void before() {
     topicDefinitionResourceProvider = new TopicDefinitionResourceProvider();
     messageFactory = new DefaultMessageFactory(topicDefinitionResourceProvider);
+  }
+
+  @After
+  public void after() {
+    MessageIdentifier.invalidateAll();
+    MessageDeclaration.invalidateAll();
   }
 
   private void checkSerializeAndDeserialize(RawMessage rawMessage) {
