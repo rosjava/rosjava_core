@@ -17,7 +17,11 @@
 package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
+import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.MessageDefinitionParser.MessageDefinitionVisitor;
 import org.ros.internal.message.field.Field;
 import org.ros.internal.message.field.FieldFactory;
@@ -28,19 +32,36 @@ import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageIdentifier;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MessageContextFactory {
+public class MessageContextProvider {
 
   private final MessageFactory messageFactory;
+  private final LoadingCache<MessageDeclaration, MessageContext> cache;
 
-  public MessageContextFactory(MessageFactory messageFactory) {
+  public MessageContextProvider(MessageFactory messageFactory) {
     Preconditions.checkNotNull(messageFactory);
     this.messageFactory = messageFactory;
+    cache = CacheBuilder.newBuilder().build(new CacheLoader<MessageDeclaration, MessageContext>() {
+      @Override
+      public MessageContext load(MessageDeclaration messageDeclaration) throws Exception {
+        return newFromMessageDeclaration(messageDeclaration);
+      }
+    });
   }
 
-  public MessageContext newFromMessageDeclaration(final MessageDeclaration messageDeclaration) {
+  public MessageContext provide(MessageDeclaration messageDeclaration) {
+    try {
+      return cache.get(messageDeclaration);
+    } catch (ExecutionException e) {
+      throw new RosRuntimeException(e);
+    }
+  }
+
+  private MessageContext newFromMessageDeclaration(final MessageDeclaration messageDeclaration) {
     final MessageContext context = new MessageContext(messageDeclaration, messageFactory);
     MessageDefinitionVisitor visitor = new MessageDefinitionVisitor() {
       private FieldType getFieldType(String type) {
@@ -91,10 +112,5 @@ public class MessageContextFactory {
     MessageDefinitionParser messageDefinitionParser = new MessageDefinitionParser(visitor);
     messageDefinitionParser.parse(messageDeclaration.getType(), messageDeclaration.getDefinition());
     return context;
-  }
-
-  public MessageContext newFromStrings(String messageType, String messageDefinition) {
-    MessageDeclaration messageDeclaration = MessageDeclaration.of(messageType, messageDefinition);
-    return newFromMessageDeclaration(messageDeclaration);
   }
 }

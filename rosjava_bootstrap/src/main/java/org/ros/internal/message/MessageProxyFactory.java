@@ -18,6 +18,7 @@ package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 
 import java.lang.reflect.Proxy;
@@ -33,12 +34,12 @@ public class MessageProxyFactory {
   private static final AtomicInteger SEQUENCE_NUMBER = new AtomicInteger(0);
 
   private final MessageInterfaceClassProvider messageInterfaceClassProvider;
-  private final MessageContextFactory messageContextFactory;
+  private final MessageContextProvider messageContextProvider;
 
   public MessageProxyFactory(MessageInterfaceClassProvider messageInterfaceClassProvider,
       MessageFactory messageFactory) {
     this.messageInterfaceClassProvider = messageInterfaceClassProvider;
-    messageContextFactory = new MessageContextFactory(messageFactory);
+    messageContextProvider = new MessageContextProvider(messageFactory);
   }
 
   // TODO(damonkohler): Use MessageDeclaration.
@@ -46,7 +47,8 @@ public class MessageProxyFactory {
   public <T> T newMessageProxy(String messageType, String messageDefinition) {
     Preconditions.checkNotNull(messageType);
     Preconditions.checkNotNull(messageDefinition);
-    MessageContext context = messageContextFactory.newFromStrings(messageType, messageDefinition);
+    MessageContext context =
+        messageContextProvider.provide(MessageDeclaration.of(messageType, messageDefinition));
     Class<T> messageInterfaceClass = (Class<T>) messageInterfaceClassProvider.get(messageType);
     MessageImpl implementation = newMessageProxyImplementation(context);
     return newProxy(messageInterfaceClass, implementation);

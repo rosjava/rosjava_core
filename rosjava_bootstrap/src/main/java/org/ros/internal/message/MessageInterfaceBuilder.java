@@ -111,9 +111,8 @@ public class MessageInterfaceBuilder {
     builder.append(String.format("  static final java.lang.String _DEFINITION = \"%s\";\n",
         escapeJava(messageDeclaration.getDefinition())));
     if (addConstantsAndMethods) {
-      MessageContextFactory messageContextFactory = new MessageContextFactory(messageFactory);
-      MessageContext messageContext =
-          messageContextFactory.newFromMessageDeclaration(messageDeclaration);
+      MessageContextProvider messageContextProvider = new MessageContextProvider(messageFactory);
+      MessageContext messageContext = messageContextProvider.provide(messageDeclaration);
       appendConstants(messageContext, builder);
       appendSettersAndGetters(messageContext, builder);
     }
