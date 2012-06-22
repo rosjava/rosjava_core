@@ -42,14 +42,12 @@ public class MessageProxyFactory {
     messageContextProvider = new MessageContextProvider(messageFactory);
   }
 
-  // TODO(damonkohler): Use MessageDeclaration.
   @SuppressWarnings("unchecked")
-  public <T> T newMessageProxy(String messageType, String messageDefinition) {
-    Preconditions.checkNotNull(messageType);
-    Preconditions.checkNotNull(messageDefinition);
-    MessageContext context =
-        messageContextProvider.provide(MessageDeclaration.of(messageType, messageDefinition));
-    Class<T> messageInterfaceClass = (Class<T>) messageInterfaceClassProvider.get(messageType);
+  public <T> T newMessageProxy(MessageDeclaration messageDeclaration) {
+    Preconditions.checkNotNull(messageDeclaration);
+    MessageContext context = messageContextProvider.provide(messageDeclaration);
+    Class<T> messageInterfaceClass =
+        (Class<T>) messageInterfaceClassProvider.get(messageDeclaration.getType());
     MessageImpl implementation = newMessageProxyImplementation(context);
     return newProxy(messageInterfaceClass, implementation);
   }
