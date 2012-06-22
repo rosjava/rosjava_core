@@ -50,12 +50,15 @@ public class MessageDeclaration {
     Preconditions.checkNotNull(type);
     Preconditions.checkNotNull(definition);
     try {
-      return cache.get(MessageIdentifier.of(type), new Callable<MessageDeclaration>() {
-        @Override
-        public MessageDeclaration call() throws Exception {
-          return new MessageDeclaration(MessageIdentifier.of(type), definition);
-        }
-      });
+      MessageDeclaration messageDeclaration =
+          cache.get(MessageIdentifier.of(type), new Callable<MessageDeclaration>() {
+            @Override
+            public MessageDeclaration call() throws Exception {
+              return new MessageDeclaration(MessageIdentifier.of(type), definition);
+            }
+          });
+      Preconditions.checkState(messageDeclaration.getDefinition().equals(definition));
+      return messageDeclaration;
     } catch (ExecutionException e) {
       throw new RosRuntimeException(e);
     }
