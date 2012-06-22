@@ -19,13 +19,13 @@ package org.ros.internal.message;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-import org.ros.internal.message.context.MessageContext;
-import org.ros.internal.message.context.MessageContextProvider;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.message.context.MessageContext;
+import org.ros.internal.message.context.MessageContextProvider;
 import org.ros.internal.message.field.Field;
 import org.ros.internal.message.field.FieldType;
+import org.ros.internal.message.field.MessageFields;
 import org.ros.internal.message.field.PrimitiveFieldType;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
@@ -177,12 +177,13 @@ public class MessageInterfaceBuilder {
         continue;
       }
       String type = field.getJavaTypeName();
-      String getter = field.getGetterName();
+      String fieldJavaName = messageContext.getFieldJavaName(field.getName());
+      String getter = "get" + fieldJavaName;
+      String setter = "set" + fieldJavaName;
       if (!getters.contains(getter)) {
         builder.append(String.format("  %s %s();\n", type, getter));
       }
       getters.add(getter);
-      String setter = field.getSetterName();
       if (!setters.contains(setter)) {
         builder.append(String.format("  void %s(%s value);\n", setter, type));
       }

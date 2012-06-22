@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 
 import org.ros.internal.message.context.MessageContext;
 import org.ros.internal.message.context.MessageContextProvider;
-
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 
@@ -48,19 +47,16 @@ public class MessageProxyFactory {
   @SuppressWarnings("unchecked")
   public <T> T newMessageProxy(MessageDeclaration messageDeclaration) {
     Preconditions.checkNotNull(messageDeclaration);
-    MessageContext context = messageContextProvider.of(messageDeclaration);
+    MessageContext messageContext = messageContextProvider.of(messageDeclaration);
+    MessageImpl messageImpl = new MessageImpl(messageContext);
+    // Header messages are automatically populated with a monotonically
+    // increasing sequence number.
+    if (messageImpl.getType().equals(HEADER_MESSAGE_TYPE)) {
+      messageImpl.setUInt32(SEQUENCE_FIELD_NAME, SEQUENCE_NUMBER.incrementAndGet());
+    }
     Class<T> messageInterfaceClass =
         (Class<T>) messageInterfaceClassProvider.get(messageDeclaration.getType());
-    MessageImpl implementation = newMessageProxyImplementation(context);
-    return newProxy(messageInterfaceClass, implementation);
-  }
-
-  private MessageImpl newMessageProxyImplementation(MessageContext context) {
-    MessageImpl implementation = new MessageImpl(context);
-    if (implementation.getType().equals(HEADER_MESSAGE_TYPE)) {
-      implementation.setUInt32(SEQUENCE_FIELD_NAME, SEQUENCE_NUMBER.incrementAndGet());
-    }
-    return implementation;
+    return newProxy(messageInterfaceClass, messageImpl);
   }
 
   /**

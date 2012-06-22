@@ -14,15 +14,13 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.field;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import org.ros.internal.message.context.MessageContext;
-
 import org.ros.exception.RosRuntimeException;
-import org.ros.internal.message.field.Field;
+import org.ros.internal.message.context.MessageContext;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +29,7 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class MessageFields {
+public class MessageFields {
 
   private final Map<String, Field> fields;
   private final List<Field> orderedFields;

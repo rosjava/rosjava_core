@@ -16,11 +16,11 @@
 
 package org.ros.internal.message;
 
-import org.ros.internal.message.context.MessageContext;
-
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.message.context.MessageContext;
 import org.ros.internal.message.field.Field;
 import org.ros.internal.message.field.MessageFieldType;
+import org.ros.internal.message.field.MessageFields;
 import org.ros.message.Duration;
 import org.ros.message.MessageIdentifier;
 import org.ros.message.Time;
@@ -40,6 +40,10 @@ class MessageImpl implements RawMessage, GetInstance {
   public MessageImpl(MessageContext messageContext) {
     this.messageContext = messageContext;
     messageFields = new MessageFields(messageContext);
+  }
+
+  public MessageContext getMessageContext() {
+    return messageContext;
   }
 
   @Override

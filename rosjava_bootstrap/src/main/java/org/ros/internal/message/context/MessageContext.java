@@ -36,12 +36,14 @@ public class MessageContext {
   private final MessageDeclaration messageDeclaration;
   private final MessageFactory messageFactory;
   private final Map<String, FieldFactory> fieldFactories;
+  private final Map<String, String> fieldJavaNames;
   private final List<String> fieldNames;
 
   public MessageContext(MessageDeclaration messageDeclaration, MessageFactory messageFactory) {
     this.messageDeclaration = messageDeclaration;
     this.messageFactory = messageFactory;
     this.fieldFactories = Maps.newConcurrentMap();
+    this.fieldJavaNames = Maps.newConcurrentMap();
     this.fieldNames = Lists.newArrayList();
   }
 
@@ -71,12 +73,26 @@ public class MessageContext {
 
   public void addFieldFactory(String name, FieldFactory fieldFactory) {
     fieldFactories.put(name, fieldFactory);
+    fieldJavaNames.put(name, getJavaName(name));
     fieldNames.add(name);
+  }
+
+  private String getJavaName(String name) {
+    String[] parts = name.split("_");
+    StringBuilder fieldName = new StringBuilder();
+    for (String part : parts) {
+      fieldName.append(part.substring(0, 1).toUpperCase() + part.substring(1));
+    }
+    return fieldName.toString();
   }
 
   public boolean hasField(String name) {
     // O(1) instead of an O(n) check against the list of field names.
     return fieldFactories.containsKey(name);
+  }
+
+  public String getFieldJavaName(String name) {
+    return fieldJavaNames.get(name);
   }
 
   public FieldFactory getFieldFactory(String name) {
