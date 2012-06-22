@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.field;
 
 import java.nio.ByteBuffer;
 
@@ -27,10 +27,24 @@ public abstract class Field {
   protected final String name;
   protected final boolean isConstant;
 
+  private final String getterName;
+  private final String setterName;
+
   protected Field(FieldType type, String name, boolean isConstant) {
     this.name = name;
     this.type = type;
     this.isConstant = isConstant;
+    getterName = "get" + getJavaName();
+    setterName = "set" + getJavaName();
+  }
+
+  private String getJavaName() {
+    String[] parts = name.split("_");
+    StringBuilder fieldName = new StringBuilder();
+    for (String part : parts) {
+      fieldName.append(part.substring(0, 1).toUpperCase() + part.substring(1));
+    }
+    return fieldName.toString();
   }
 
   /**
@@ -54,21 +68,12 @@ public abstract class Field {
     return isConstant;
   }
 
-  private String getJavaName() {
-    String[] parts = name.split("_");
-    StringBuilder fieldName = new StringBuilder();
-    for (String part : parts) {
-      fieldName.append(part.substring(0, 1).toUpperCase() + part.substring(1));
-    }
-    return fieldName.toString();
-  }
-
   public String getGetterName() {
-    return "get" + getJavaName();
+    return getterName;
   }
 
   public String getSetterName() {
-    return "set" + getJavaName();
+    return setterName;
   }
 
   /**
@@ -90,6 +95,7 @@ public abstract class Field {
 
   public abstract <T> T getValue();
 
+  // TODO(damonkohler): Why not make Field generic?
   public abstract void setValue(Object value);
 
   public abstract String getJavaTypeName();

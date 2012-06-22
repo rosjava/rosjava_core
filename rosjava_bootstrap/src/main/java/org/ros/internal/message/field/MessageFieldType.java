@@ -14,8 +14,11 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.field;
 
+import org.ros.internal.message.DefaultMessageDeserializer;
+import org.ros.internal.message.Message;
+import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageIdentifier;
 
@@ -28,12 +31,16 @@ public class MessageFieldType implements FieldType {
 
   private final MessageIdentifier messageIdentifier;
   private final MessageFactory messageFactory;
-  private final org.ros.message.MessageDeserializer<RawMessage> deserializer;
+  private final MessageDeserializer<Message> deserializer;
 
   public MessageFieldType(MessageIdentifier messageIdentifier, MessageFactory messageFactory) {
     this.messageIdentifier = messageIdentifier;
     this.messageFactory = messageFactory;
-    deserializer = new DefaultMessageDeserializer<RawMessage>(messageIdentifier, messageFactory);
+    deserializer = new DefaultMessageDeserializer<Message>(messageIdentifier, messageFactory);
+  }
+
+  public MessageFactory getMessageFactory() {
+    return messageFactory;
   }
 
   @Override
@@ -53,7 +60,7 @@ public class MessageFieldType implements FieldType {
 
   @Override
   public <T> T getDefaultValue() {
-    return messageFactory.newFromType(messageIdentifier.getType());
+    return getMessageFactory().newFromType(messageIdentifier.getType());
   }
 
   @Override

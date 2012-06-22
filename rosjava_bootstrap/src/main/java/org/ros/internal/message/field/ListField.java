@@ -14,60 +14,62 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.field;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.message.Message;
+
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ *          the value type
  */
-public class ShortArrayField extends Field {
+public class ListField<T> extends Field {
 
-  private final int size;
+  private List<T> value;
 
-  private short[] value;
-
-  public static ShortArrayField newVariable(FieldType type, int size, String name) {
-    Preconditions.checkArgument(type.equals(PrimitiveFieldType.UINT8)
-        || type.equals(PrimitiveFieldType.INT16));
-    return new ShortArrayField(type, size, name, new short[Math.max(0, size)]);
+  public static <T> ListField<T> newVariable(FieldType type, String name) {
+    return new ListField<T>(type, name);
   }
 
-  private ShortArrayField(FieldType type, int size, String name, short[] value) {
+  private ListField(FieldType type, String name) {
     super(type, name, false);
-    this.size = size;
-    setValue(value);
+    value = new ArrayList<T>();
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public short[] getValue() {
+  public List<T> getValue() {
     return value;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void setValue(Object value) {
-    Preconditions.checkArgument(size < 0 || ((short[]) value).length == size);
-    this.value = (short[]) value;
+    Preconditions.checkNotNull(value);
+    this.value = (List<T>) value;
   }
 
   @Override
   public void serialize(ByteBuffer buffer) {
-    buffer.putInt(value.length);
-    for (short v : value) {
+    buffer.putInt(value.size());
+    for (T v : value) {
       type.serialize(v, buffer);
     }
   }
 
   @Override
   public void deserialize(ByteBuffer buffer) {
+    value.clear();
     int size = buffer.getInt();
-    value = new short[size];
     for (int i = 0; i < size; i++) {
-      value[i] = (Short) type.deserialize(buffer);
+      value.add(type.<T>deserialize(buffer));
     }
   }
 
@@ -76,23 +78,35 @@ public class ShortArrayField extends Field {
     return String.format("%s %s\n", type, name);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public int getSerializedSize() {
     Preconditions.checkNotNull(value);
     // Reserve 4 bytes for the length.
     int size = 4;
-    size += type.getSerializedSize() * value.length;
+    if (type instanceof MessageFieldType) {
+      for (Message message : (List<Message>) value) {
+        size += message.toRawMessage().getSerializedSize();
+      }
+    } else if (type == PrimitiveFieldType.STRING) {
+      for (String string : (List<String>) value) {
+        // We only support ASCII strings and reserve 4 bytes for the length.
+        size += string.length() + 4;
+      }
+    } else {
+      size += type.getSerializedSize() * ((List<?>) value).size();
+    }
     return size;
   }
 
   @Override
   public String getJavaTypeName() {
-    return type.getJavaTypeName() + "[]";
+    return String.format("java.util.List<%s>", type.getJavaTypeName());
   }
 
   @Override
   public String toString() {
-    return "ShortArrayField<" + type + ", " + name + ">";
+    return "ListField<" + type + ", " + name + ">";
   }
 
   @Override
@@ -103,6 +117,7 @@ public class ShortArrayField extends Field {
     return result;
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -111,11 +126,11 @@ public class ShortArrayField extends Field {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ShortArrayField other = (ShortArrayField) obj;
+    ListField other = (ListField) obj;
     if (value == null) {
       if (other.value != null)
         return false;
-    } else if (!Arrays.equals(value, other.value))
+    } else if (!value.equals(other.value))
       return false;
     return true;
   }

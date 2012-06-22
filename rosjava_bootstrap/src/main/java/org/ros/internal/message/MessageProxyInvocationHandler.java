@@ -16,6 +16,8 @@
 
 package org.ros.internal.message;
 
+import org.ros.internal.message.field.Field;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;

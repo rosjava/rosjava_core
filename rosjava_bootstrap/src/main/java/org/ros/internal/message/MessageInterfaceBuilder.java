@@ -21,6 +21,9 @@ import com.google.common.collect.Sets;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.message.field.Field;
+import org.ros.internal.message.field.FieldType;
+import org.ros.internal.message.field.PrimitiveFieldType;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 
@@ -149,7 +152,8 @@ public class MessageInterfaceBuilder {
   }
 
   private void appendConstants(MessageContext messageContext, StringBuilder builder) {
-    for (Field field : messageContext.getFields()) {
+    MessageFields messageFields = new MessageFields(messageContext);
+    for (Field field : messageFields.getFields()) {
       if (field.isConstant()) {
         Preconditions.checkState(field.getType() instanceof PrimitiveFieldType);
         // We use FieldType and cast back to PrimitiveFieldType below to avoid a
@@ -165,7 +169,8 @@ public class MessageInterfaceBuilder {
   private void appendSettersAndGetters(MessageContext messageContext, StringBuilder builder) {
     Set<String> setters = Sets.newHashSet();
     Set<String> getters = Sets.newHashSet();
-    for (Field field : messageContext.getFields()) {
+    MessageFields messageFields = new MessageFields(messageContext);
+    for (Field field : messageFields.getFields()) {
       if (field.isConstant()) {
         continue;
       }

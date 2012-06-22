@@ -16,6 +16,7 @@
 
 package org.ros.internal.message;
 
+import org.ros.internal.message.field.Field;
 import org.ros.message.Duration;
 import org.ros.message.MessageIdentifier;
 import org.ros.message.Time;
@@ -86,7 +87,7 @@ public interface RawMessage extends Message {
 
   byte[] getInt8Array(String name);
 
-  <T extends RawMessage> T getMessage(String name);
+  <T extends Message> T getMessage(String name);
 
   <T extends Message> List<T> getMessageList(String name);
 
@@ -176,7 +177,7 @@ public interface RawMessage extends Message {
 
   void setInt8Array(String name, byte[] value);
 
-  void setMessage(String name, RawMessage value);
+  void setMessage(String name, Message value);
 
   void setMessageList(String name, List<Message> value);
 

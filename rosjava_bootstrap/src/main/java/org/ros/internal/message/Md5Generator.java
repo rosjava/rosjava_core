@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.ros.internal.message.MessageDefinitionParser.MessageDefinitionVisitor;
+import org.ros.internal.message.field.PrimitiveFieldType;
 import org.ros.message.MessageDefinitionProvider;
 
 import java.util.List;

@@ -19,6 +19,7 @@ package org.ros.internal.message;
 import com.google.common.base.Preconditions;
 
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.message.field.PrimitiveFieldType;
 
 import java.io.BufferedReader;
 import java.io.IOException;

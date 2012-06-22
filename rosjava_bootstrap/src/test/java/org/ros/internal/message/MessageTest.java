@@ -88,7 +88,7 @@ public class MessageTest {
     fooMessage.setMessage("data", barMessage);
     byte data = 42;
     barMessage.setInt8("data", data);
-    assertEquals(data, fooMessage.getMessage("data").getInt8("data"));
+    assertEquals(data, fooMessage.getMessage("data").toRawMessage().getInt8("data"));
   }
 
   @Test

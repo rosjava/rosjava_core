@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.field;
 
 import com.google.common.base.Preconditions;
 
@@ -24,39 +24,40 @@ import java.util.Arrays;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DoubleArrayField extends Field {
+public class LongArrayField extends Field {
 
   private final int size;
 
-  private double[] value;
+  private long[] value;
 
-  public static DoubleArrayField newVariable(int size, String name) {
-    return new DoubleArrayField(PrimitiveFieldType.FLOAT64, size, name,
-        new double[Math.max(0, size)]);
+  public static LongArrayField newVariable(FieldType type, int size, String name) {
+    Preconditions.checkArgument(type.equals(PrimitiveFieldType.UINT32)
+        || type.equals(PrimitiveFieldType.INT64) || type.equals(PrimitiveFieldType.UINT64));
+    return new LongArrayField(type, size, name);
   }
 
-  private DoubleArrayField(FieldType type, int size, String name, double[] value) {
+  private LongArrayField(FieldType type, int size, String name) {
     super(type, name, false);
     this.size = size;
-    setValue(value);
+    setValue(new long[Math.max(0, size)]);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public double[] getValue() {
+  public long[] getValue() {
     return value;
   }
 
   @Override
   public void setValue(Object value) {
-    Preconditions.checkArgument(size < 0 || ((double[]) value).length == size);
-    this.value = (double[]) value;
+    Preconditions.checkArgument(size < 0 || ((long[]) value).length == size);
+    this.value = (long[]) value;
   }
 
   @Override
   public void serialize(ByteBuffer buffer) {
     buffer.putInt(value.length);
-    for (double v : value) {
+    for (long v : value) {
       type.serialize(v, buffer);
     }
   }
@@ -64,9 +65,9 @@ public class DoubleArrayField extends Field {
   @Override
   public void deserialize(ByteBuffer buffer) {
     int size = buffer.getInt();
-    value = new double[size];
+    value = new long[size];
     for (int i = 0; i < size; i++) {
-      value[i] = (Double) type.deserialize(buffer);
+      value[i] = (Long) type.deserialize(buffer);
     }
   }
 
@@ -91,7 +92,7 @@ public class DoubleArrayField extends Field {
 
   @Override
   public String toString() {
-    return "DoubleArrayField<" + type + ", " + name + ">";
+    return "LongArrayField<" + type + ", " + name + ">";
   }
 
   @Override
@@ -110,7 +111,7 @@ public class DoubleArrayField extends Field {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    DoubleArrayField other = (DoubleArrayField) obj;
+    LongArrayField other = (LongArrayField) obj;
     if (value == null) {
       if (other.value != null)
         return false;

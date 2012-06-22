@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.field;
 
 import com.google.common.base.Preconditions;
 
@@ -24,40 +24,40 @@ import java.util.Arrays;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class LongArrayField extends Field {
+public class IntegerArrayField extends Field {
 
   private final int size;
 
-  private long[] value;
+  private int[] value;
 
-  public static LongArrayField newVariable(FieldType type, int size, String name) {
-    Preconditions.checkArgument(type.equals(PrimitiveFieldType.UINT32)
-        || type.equals(PrimitiveFieldType.INT64) || type.equals(PrimitiveFieldType.UINT64));
-    return new LongArrayField(type, size, name, new long[Math.max(0, size)]);
+  public static IntegerArrayField newVariable(FieldType type, int size, String name) {
+    Preconditions.checkArgument(type.equals(PrimitiveFieldType.UINT16)
+        || type.equals(PrimitiveFieldType.INT32));
+    return new IntegerArrayField(type, name, size);
   }
 
-  private LongArrayField(FieldType type, int size, String name, long[] value) {
+  private IntegerArrayField(FieldType type, String name, int size) {
     super(type, name, false);
     this.size = size;
-    setValue(value);
+    setValue(new int[Math.max(0, size)]);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public long[] getValue() {
+  public int[] getValue() {
     return value;
   }
 
   @Override
   public void setValue(Object value) {
-    Preconditions.checkArgument(size < 0 || ((long[]) value).length == size);
-    this.value = (long[]) value;
+    Preconditions.checkArgument(size < 0 || ((int[]) value).length == size);
+    this.value = (int[]) value;
   }
 
   @Override
   public void serialize(ByteBuffer buffer) {
     buffer.putInt(value.length);
-    for (long v : value) {
+    for (int v : value) {
       type.serialize(v, buffer);
     }
   }
@@ -65,9 +65,9 @@ public class LongArrayField extends Field {
   @Override
   public void deserialize(ByteBuffer buffer) {
     int size = buffer.getInt();
-    value = new long[size];
+    value = new int[size];
     for (int i = 0; i < size; i++) {
-      value[i] = (Long) type.deserialize(buffer);
+      value[i] = (Integer) type.deserialize(buffer);
     }
   }
 
@@ -92,7 +92,7 @@ public class LongArrayField extends Field {
 
   @Override
   public String toString() {
-    return "LongArrayField<" + type + ", " + name + ">";
+    return "IntegerArrayField<" + type + ", " + name + ">";
   }
 
   @Override
@@ -111,7 +111,7 @@ public class LongArrayField extends Field {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    LongArrayField other = (LongArrayField) obj;
+    IntegerArrayField other = (IntegerArrayField) obj;
     if (value == null) {
       if (other.value != null)
         return false;

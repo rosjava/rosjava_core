@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.field;
 
 import com.google.common.base.Preconditions;
 
@@ -24,38 +24,38 @@ import java.util.Arrays;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class FloatArrayField extends Field {
+public class ByteArrayField extends Field {
 
   private final int size;
 
-  private float[] value;
+  private byte[] value;
 
-  public static FloatArrayField newVariable(int size, String name) {
-    return new FloatArrayField(PrimitiveFieldType.FLOAT32, name, size, new float[Math.max(0, size)]);
+  public static ByteArrayField newVariable(String name, int size) {
+    return new ByteArrayField(PrimitiveFieldType.INT8, name, size);
   }
 
-  private FloatArrayField(FieldType type, String name, int size, float[] value) {
+  private ByteArrayField(FieldType type, String name, int size) {
     super(type, name, false);
     this.size = size;
-    setValue(value);
+    setValue(new byte[Math.max(0, size)]);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public float[] getValue() {
+  public byte[] getValue() {
     return value;
   }
 
   @Override
   public void setValue(Object value) {
-    Preconditions.checkArgument(size < 0 || ((float[]) value).length == size);
-    this.value = (float[]) value;
+    Preconditions.checkArgument(size < 0 || ((byte[]) value).length == size);
+    this.value = (byte[]) value;
   }
 
   @Override
   public void serialize(ByteBuffer buffer) {
     buffer.putInt(value.length);
-    for (float v : value) {
+    for (byte v : value) {
       type.serialize(v, buffer);
     }
   }
@@ -63,9 +63,9 @@ public class FloatArrayField extends Field {
   @Override
   public void deserialize(ByteBuffer buffer) {
     int size = buffer.getInt();
-    value = new float[size];
+    value = new byte[size];
     for (int i = 0; i < size; i++) {
-      value[i] = (Float) type.deserialize(buffer);
+      value[i] = (Byte) type.deserialize(buffer);
     }
   }
 
@@ -90,7 +90,7 @@ public class FloatArrayField extends Field {
 
   @Override
   public String toString() {
-    return "FloatArrayField<" + type + ", " + name + ">";
+    return "ByteArrayField<" + type + ", " + name + ">";
   }
 
   @Override
@@ -109,7 +109,7 @@ public class FloatArrayField extends Field {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    FloatArrayField other = (FloatArrayField) obj;
+    ByteArrayField other = (ByteArrayField) obj;
     if (value == null) {
       if (other.value != null)
         return false;

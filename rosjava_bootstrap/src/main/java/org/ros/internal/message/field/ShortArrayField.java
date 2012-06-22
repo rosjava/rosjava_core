@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.field;
 
 import com.google.common.base.Preconditions;
 
@@ -24,38 +24,40 @@ import java.util.Arrays;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ByteArrayField extends Field {
+public class ShortArrayField extends Field {
 
   private final int size;
 
-  private byte[] value;
+  private short[] value;
 
-  public static ByteArrayField newVariable(String name, int size) {
-    return new ByteArrayField(PrimitiveFieldType.INT8, name, size, new byte[Math.max(0, size)]);
+  public static ShortArrayField newVariable(FieldType type, int size, String name) {
+    Preconditions.checkArgument(type.equals(PrimitiveFieldType.UINT8)
+        || type.equals(PrimitiveFieldType.INT16));
+    return new ShortArrayField(type, size, name);
   }
 
-  private ByteArrayField(FieldType type, String name, int size, byte[] value) {
+  private ShortArrayField(FieldType type, int size, String name) {
     super(type, name, false);
     this.size = size;
-    setValue(value);
+    setValue(new short[Math.max(0, size)]);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public byte[] getValue() {
+  public short[] getValue() {
     return value;
   }
 
   @Override
   public void setValue(Object value) {
-    Preconditions.checkArgument(size < 0 || ((byte[]) value).length == size);
-    this.value = (byte[]) value;
+    Preconditions.checkArgument(size < 0 || ((short[]) value).length == size);
+    this.value = (short[]) value;
   }
 
   @Override
   public void serialize(ByteBuffer buffer) {
     buffer.putInt(value.length);
-    for (byte v : value) {
+    for (short v : value) {
       type.serialize(v, buffer);
     }
   }
@@ -63,9 +65,9 @@ public class ByteArrayField extends Field {
   @Override
   public void deserialize(ByteBuffer buffer) {
     int size = buffer.getInt();
-    value = new byte[size];
+    value = new short[size];
     for (int i = 0; i < size; i++) {
-      value[i] = (Byte) type.deserialize(buffer);
+      value[i] = (Short) type.deserialize(buffer);
     }
   }
 
@@ -90,7 +92,7 @@ public class ByteArrayField extends Field {
 
   @Override
   public String toString() {
-    return "ByteArrayField<" + type + ", " + name + ">";
+    return "ShortArrayField<" + type + ", " + name + ">";
   }
 
   @Override
@@ -109,7 +111,7 @@ public class ByteArrayField extends Field {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ByteArrayField other = (ByteArrayField) obj;
+    ShortArrayField other = (ShortArrayField) obj;
     if (value == null) {
       if (other.value != null)
         return false;

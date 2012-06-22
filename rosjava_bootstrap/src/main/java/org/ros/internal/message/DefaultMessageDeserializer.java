@@ -16,6 +16,7 @@
 
 package org.ros.internal.message;
 
+import org.ros.internal.message.field.Field;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageIdentifier;

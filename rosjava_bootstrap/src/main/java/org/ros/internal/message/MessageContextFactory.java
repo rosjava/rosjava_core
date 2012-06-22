@@ -19,6 +19,11 @@ package org.ros.internal.message;
 import com.google.common.base.Preconditions;
 
 import org.ros.internal.message.MessageDefinitionParser.MessageDefinitionVisitor;
+import org.ros.internal.message.field.Field;
+import org.ros.internal.message.field.FieldFactory;
+import org.ros.internal.message.field.FieldType;
+import org.ros.internal.message.field.MessageFieldType;
+import org.ros.internal.message.field.PrimitiveFieldType;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageIdentifier;
@@ -36,7 +41,7 @@ public class MessageContextFactory {
   }
 
   public MessageContext newFromMessageDeclaration(final MessageDeclaration messageDeclaration) {
-    final MessageContext context = new MessageContext(messageDeclaration);
+    final MessageContext context = new MessageContext(messageDeclaration, messageFactory);
     MessageDefinitionVisitor visitor = new MessageDefinitionVisitor() {
       private FieldType getFieldType(String type) {
         Preconditions.checkArgument(!type.equals(messageDeclaration.getType()),
@@ -51,21 +56,36 @@ public class MessageContextFactory {
       }
 
       @Override
-      public void variableValue(String type, String name) {
-        FieldType fieldType = getFieldType(type);
-        context.addField(fieldType.newVariableValue(name));
+      public void variableValue(String type, final String name) {
+        final FieldType fieldType = getFieldType(type);
+        context.addFieldFactory(name, new FieldFactory() {
+          @Override
+          public Field create() {
+            return fieldType.newVariableValue(name);
+          }
+        });
       }
 
       @Override
-      public void variableList(String type, int size, String name) {
-        FieldType fieldType = getFieldType(type);
-        context.addField(fieldType.newVariableList(name, size));
+      public void variableList(String type, final int size, final String name) {
+        final FieldType fieldType = getFieldType(type);
+        context.addFieldFactory(name, new FieldFactory() {
+          @Override
+          public Field create() {
+            return fieldType.newVariableList(name, size);
+          }
+        });
       }
 
       @Override
-      public void constantValue(String type, String name, String value) {
-        FieldType fieldType = getFieldType(type);
-        context.addField(fieldType.newConstantValue(name, fieldType.parseFromString(value)));
+      public void constantValue(String type, final String name, final String value) {
+        final FieldType fieldType = getFieldType(type);
+        context.addFieldFactory(name, new FieldFactory() {
+          @Override
+          public Field create() {
+            return fieldType.newConstantValue(name, fieldType.parseFromString(value));
+          }
+        });
       }
     };
     MessageDefinitionParser messageDefinitionParser = new MessageDefinitionParser(visitor);
