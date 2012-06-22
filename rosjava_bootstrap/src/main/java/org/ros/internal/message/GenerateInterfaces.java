@@ -19,6 +19,9 @@ package org.ros.internal.message;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import org.ros.internal.message.definition.MessageDefinitionProviderChain;
+import org.ros.internal.message.definition.MessageDefinitionTupleParser;
+
 import org.apache.commons.io.FileUtils;
 import org.ros.EnvironmentVariables;
 import org.ros.exception.RosRuntimeException;

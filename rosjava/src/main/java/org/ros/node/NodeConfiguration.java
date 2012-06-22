@@ -16,6 +16,8 @@
 
 package org.ros.node;
 
+import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
+
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.AdvertiseAddressFactory;
 import org.ros.address.BindAddress;
@@ -24,7 +26,6 @@ import org.ros.address.PublicAdvertiseAddressFactory;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.DefaultMessageFactory;
 import org.ros.internal.message.DefaultMessageSerializationFactory;
-import org.ros.internal.message.MessageDefinitionReflectionProvider;
 import org.ros.internal.message.service.ServiceDescriptionFactory;
 import org.ros.internal.message.service.ServiceRequestMessageFactory;
 import org.ros.internal.message.service.ServiceResponseMessageFactory;

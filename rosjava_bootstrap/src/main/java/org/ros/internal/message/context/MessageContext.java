@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.context;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

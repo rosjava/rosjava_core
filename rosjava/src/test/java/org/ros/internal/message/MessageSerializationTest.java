@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.Lists;
 
+import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.message.Duration;

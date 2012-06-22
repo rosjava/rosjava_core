@@ -16,7 +16,8 @@
 
 package org.ros.internal.message.service;
 
-import org.ros.internal.message.MessageDefinitionTupleParser;
+import org.ros.internal.message.definition.MessageDefinitionTupleParser;
+
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageIdentifier;
 

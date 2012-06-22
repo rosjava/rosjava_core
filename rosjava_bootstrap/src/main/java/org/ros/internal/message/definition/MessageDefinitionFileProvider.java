@@ -14,9 +14,11 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.definition;
 
 import com.google.common.collect.Maps;
+
+import org.ros.internal.message.StringFileProvider;
 
 import org.apache.commons.io.FilenameUtils;
 import org.ros.message.MessageDefinitionProvider;

@@ -16,9 +16,10 @@
 
 package org.ros.internal.message.topic;
 
+import org.ros.internal.message.definition.MessageDefinitionFileProvider;
+
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.ros.internal.message.MessageDefinitionFileProvider;
 import org.ros.internal.message.StringFileProvider;
 
 import java.io.File;

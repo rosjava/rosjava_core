@@ -19,6 +19,9 @@ package org.ros.internal.message;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import org.ros.internal.message.context.MessageContext;
+import org.ros.internal.message.context.MessageContextProvider;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.field.Field;
@@ -112,7 +115,7 @@ public class MessageInterfaceBuilder {
         escapeJava(messageDeclaration.getDefinition())));
     if (addConstantsAndMethods) {
       MessageContextProvider messageContextProvider = new MessageContextProvider(messageFactory);
-      MessageContext messageContext = messageContextProvider.provide(messageDeclaration);
+      MessageContext messageContext = messageContextProvider.of(messageDeclaration);
       appendConstants(messageContext, builder);
       appendSettersAndGetters(messageContext, builder);
     }

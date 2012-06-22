@@ -16,6 +16,8 @@
 
 package org.ros.internal.message;
 
+import org.ros.internal.message.context.MessageContext;
+
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.field.Field;
 import org.ros.internal.message.field.MessageFieldType;

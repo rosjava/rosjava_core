@@ -18,6 +18,9 @@ package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
 
+import org.ros.internal.message.context.MessageContext;
+import org.ros.internal.message.context.MessageContextProvider;
+
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 
@@ -45,7 +48,7 @@ public class MessageProxyFactory {
   @SuppressWarnings("unchecked")
   public <T> T newMessageProxy(MessageDeclaration messageDeclaration) {
     Preconditions.checkNotNull(messageDeclaration);
-    MessageContext context = messageContextProvider.provide(messageDeclaration);
+    MessageContext context = messageContextProvider.of(messageDeclaration);
     Class<T> messageInterfaceClass =
         (Class<T>) messageInterfaceClassProvider.get(messageDeclaration.getType());
     MessageImpl implementation = newMessageProxyImplementation(context);

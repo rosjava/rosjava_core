@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.message;
+package org.ros.internal.message.definition;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

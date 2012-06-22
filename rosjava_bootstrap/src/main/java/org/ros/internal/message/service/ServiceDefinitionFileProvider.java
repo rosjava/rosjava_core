@@ -16,7 +16,7 @@
 
 package org.ros.internal.message.service;
 
-import org.ros.internal.message.MessageDefinitionFileProvider;
+import org.ros.internal.message.definition.MessageDefinitionFileProvider;
 
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
