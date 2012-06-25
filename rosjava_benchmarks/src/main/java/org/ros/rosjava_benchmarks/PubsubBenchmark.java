@@ -55,29 +55,30 @@ public class PubsubBenchmark extends AbstractNodeMain {
 
   @Override
   public void onStart(final ConnectedNode connectedNode) {
-    time = connectedNode.getCurrentTime();
-    statusPublisher = connectedNode.newPublisher("status", std_msgs.String._TYPE);
-    tfPublisher = connectedNode.newPublisher("tf", tf.tfMessage._TYPE);
     tfSubscriber = connectedNode.newSubscriber("tf", tf.tfMessage._TYPE);
-    final std_msgs.String status = statusPublisher.newMessage();
     tfSubscriber.addMessageListener(new MessageListener<tf.tfMessage>() {
       @Override
       public void onNewMessage(tfMessage message) {
         counter.incrementAndGet();
       }
     });
+
+    tfPublisher = connectedNode.newPublisher("tf", tf.tfMessage._TYPE);
+    final tf.tfMessage tfMessage = tfPublisher.newMessage();
+    geometry_msgs.TransformStamped transformStamped =
+        connectedNode.getTopicMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
+    tfMessage.getTransforms().add(transformStamped);
     connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
-        final tf.tfMessage tfMessage = tfPublisher.newMessage();
-        geometry_msgs.TransformStamped transformStamped =
-            connectedNode.getTopicMessageFactory()
-                .newFromType(geometry_msgs.TransformStamped._TYPE);
-        tfMessage.getTransforms().add(transformStamped);
         tfPublisher.publish(tfMessage);
       }
     });
+
+    time = connectedNode.getCurrentTime();
+    statusPublisher = connectedNode.newPublisher("status", std_msgs.String._TYPE);
     final Rate rate = new WallTimeRate(1);
+    final std_msgs.String status = statusPublisher.newMessage();
     connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
