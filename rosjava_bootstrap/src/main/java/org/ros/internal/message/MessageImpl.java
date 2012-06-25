@@ -46,6 +46,10 @@ class MessageImpl implements RawMessage, GetInstance {
     return messageContext;
   }
 
+  public MessageFields getMessageFields() {
+    return messageFields;
+  }
+
   @Override
   public RawMessage toRawMessage() {
     return (RawMessage) this;

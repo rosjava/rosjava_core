@@ -62,17 +62,17 @@ public class MessageProxyFactory {
   /**
    * @param interfaceClass
    *          the interface class to provide
-   * @param implementation
+   * @param messageImpl
    *          the instance to proxy
    * @return a new proxy for {@code implementation} that implements
    *         {@code interfaceClass}
    */
   @SuppressWarnings("unchecked")
-  private <T> T newProxy(Class<T> interfaceClass, final MessageImpl implementation) {
-    ClassLoader classLoader = implementation.getClass().getClassLoader();
+  private <T> T newProxy(Class<T> interfaceClass, final MessageImpl messageImpl) {
+    ClassLoader classLoader = messageImpl.getClass().getClassLoader();
     Class<?>[] interfaces = new Class<?>[] { interfaceClass, GetInstance.class };
     MessageProxyInvocationHandler invocationHandler =
-        new MessageProxyInvocationHandler(implementation);
+        new MessageProxyInvocationHandler(messageImpl);
     return (T) Proxy.newProxyInstance(classLoader, interfaces, invocationHandler);
   }
 }

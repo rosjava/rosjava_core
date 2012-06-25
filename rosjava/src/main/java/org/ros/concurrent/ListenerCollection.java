@@ -87,23 +87,26 @@ public class ListenerCollection<T> {
 
   /**
    * Signal all listeners.
-   * 
    * <p>
    * Each {@link SignalRunnable} is executed in a separate thread.
    */
-  public void signal(SignalRunnable<T> signalRunnable) {
-    try {
-      signal(signalRunnable, 0, TimeUnit.SECONDS);
-    } catch (InterruptedException e) {
-      // We don't wait for completion so we can ignore the unlikely
-      // InterruptedException thrown by CountDownLatch.await().
+  public void signal(final SignalRunnable<T> signalRunnable) {
+    // Calling the blocking version of signal() with a 0 second timeout is
+    // significantly slower than having now CountDownLatch at all. So, we
+    // duplicate a little code here for the sake of performance.
+    for (final T listener : listeners) {
+      executorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          signalRunnable.run(listener);
+        }
+      });
     }
   }
 
   /**
    * Signal all listeners and wait for the all {@link SignalRunnable}s to
    * return.
-   * 
    * <p>
    * Each {@link SignalRunnable} is executed in a separate thread.
    */

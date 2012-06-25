@@ -32,20 +32,35 @@ import java.util.Map;
 public class MessageFields {
 
   private final Map<String, Field> fields;
+  private final Map<String, Field> setters;
+  private final Map<String, Field> getters;
   private final List<Field> orderedFields;
 
   public MessageFields(MessageContext messageContext) {
-    fields = Maps.newConcurrentMap();
+    fields = Maps.newHashMap();
+    setters = Maps.newHashMap();
+    getters = Maps.newHashMap();
     orderedFields = Lists.newArrayList();
     for (String name : messageContext.getFieldNames()) {
       Field field = messageContext.getFieldFactory(name).create();
       fields.put(name, field);
+      String javaName = messageContext.getFieldJavaName(name);
+      setters.put("set" + javaName, field);
+      getters.put("get" + javaName, field);
       orderedFields.add(field);
     }
   }
 
   public Field getField(String name) {
     return fields.get(name);
+  }
+
+  public Field getSetterField(String name) {
+    return setters.get(name);
+  }
+
+  public Field getGetterField(String name) {
+    return getters.get(name);
   }
 
   public List<Field> getFields() {

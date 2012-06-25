@@ -29,6 +29,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Encapsulates the immutable metadata that describes a message type.
+ * <p>
+ * Note that this class is not thread safe.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MessageContext {
@@ -42,8 +46,8 @@ public class MessageContext {
   public MessageContext(MessageDeclaration messageDeclaration, MessageFactory messageFactory) {
     this.messageDeclaration = messageDeclaration;
     this.messageFactory = messageFactory;
-    this.fieldFactories = Maps.newConcurrentMap();
-    this.fieldJavaNames = Maps.newConcurrentMap();
+    this.fieldFactories = Maps.newHashMap();
+    this.fieldJavaNames = Maps.newHashMap();
     this.fieldNames = Lists.newArrayList();
   }
 

@@ -17,14 +17,16 @@
 package org.ros.internal.message.definition;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageIdentifier;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A {@link MessageDefinitionProvider} that uses reflection to load the message
@@ -39,24 +41,24 @@ public class MessageDefinitionReflectionProvider implements MessageDefinitionPro
 
   private static final String DEFINITION_FIELD = "_DEFINITION";
 
-  private final Map<String, String> cache;
+  private final LoadingCache<String, String> cache;
 
   public MessageDefinitionReflectionProvider() {
-    cache = Maps.newConcurrentMap();
+    cache = CacheBuilder.newBuilder().build(new CacheLoader<String, String>() {
+      @Override
+      public String load(String messageType) throws Exception {
+        String className = messageType.replace("/", ".");
+        Class<?> loadedClass = getClass().getClassLoader().loadClass(className);
+        return (String) loadedClass.getDeclaredField(DEFINITION_FIELD).get(null);
+      }
+    });
   }
 
   @Override
   public String get(String messageType) {
-    if (cache.containsKey(messageType)) {
-      return cache.get(messageType);
-    }
     try {
-      String className = messageType.replace("/", ".");
-      Class<?> loadedClass = getClass().getClassLoader().loadClass(className);
-      String messageDefinition = (String) loadedClass.getDeclaredField(DEFINITION_FIELD).get(null);
-      cache.put(messageType, messageDefinition);
-      return messageDefinition;
-    } catch (Exception e) {
+      return cache.get(messageType);
+    } catch (ExecutionException e) {
       throw new RosRuntimeException(e);
     }
   }
@@ -80,7 +82,7 @@ public class MessageDefinitionReflectionProvider implements MessageDefinitionPro
   public Collection<MessageIdentifier> getMessageIdentifiersByPackage(String pkg) {
     throw new UnsupportedOperationException();
   }
-  
+
   @VisibleForTesting
   public void add(String messageType, String messageDefinition) {
     cache.put(messageType, messageDefinition);
