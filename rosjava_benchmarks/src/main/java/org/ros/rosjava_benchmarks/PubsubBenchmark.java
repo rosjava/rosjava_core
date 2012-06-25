@@ -17,6 +17,8 @@
 package org.ros.rosjava_benchmarks;
 
 import org.ros.concurrent.CancellableLoop;
+import org.ros.concurrent.Rate;
+import org.ros.concurrent.WallTimeRate;
 import org.ros.message.Duration;
 import org.ros.message.MessageListener;
 import org.ros.message.Time;
@@ -75,6 +77,7 @@ public class PubsubBenchmark extends AbstractNodeMain {
         tfPublisher.publish(tfMessage);
       }
     });
+    final Rate rate = new WallTimeRate(1);
     connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
@@ -86,6 +89,7 @@ public class PubsubBenchmark extends AbstractNodeMain {
           statusPublisher.publish(status);
           time = now;
         }
+        rate.sleep();
       }
     });
   }
