@@ -40,14 +40,16 @@ public class MessageContext {
   private final MessageDeclaration messageDeclaration;
   private final MessageFactory messageFactory;
   private final Map<String, FieldFactory> fieldFactories;
-  private final Map<String, String> fieldJavaNames;
+  private final Map<String, String> fieldGetterNames;
+  private final Map<String, String> fieldSetterNames;
   private final List<String> fieldNames;
 
   public MessageContext(MessageDeclaration messageDeclaration, MessageFactory messageFactory) {
     this.messageDeclaration = messageDeclaration;
     this.messageFactory = messageFactory;
     this.fieldFactories = Maps.newHashMap();
-    this.fieldJavaNames = Maps.newHashMap();
+    this.fieldGetterNames = Maps.newHashMap();
+    this.fieldSetterNames = Maps.newHashMap();
     this.fieldNames = Lists.newArrayList();
   }
 
@@ -77,7 +79,8 @@ public class MessageContext {
 
   public void addFieldFactory(String name, FieldFactory fieldFactory) {
     fieldFactories.put(name, fieldFactory);
-    fieldJavaNames.put(name, getJavaName(name));
+    fieldGetterNames.put(name, "get" + getJavaName(name));
+    fieldSetterNames.put(name, "set" + getJavaName(name));
     fieldNames.add(name);
   }
 
@@ -95,8 +98,12 @@ public class MessageContext {
     return fieldFactories.containsKey(name);
   }
 
-  public String getFieldJavaName(String name) {
-    return fieldJavaNames.get(name);
+  public String getFieldGetterName(String name) {
+    return fieldGetterNames.get(name);
+  }
+
+  public String getFieldSetterName(String name) {
+    return fieldSetterNames.get(name);
   }
 
   public FieldFactory getFieldFactory(String name) {

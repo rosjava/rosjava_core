@@ -62,14 +62,6 @@ public class PubsubBenchmark extends AbstractNodeMain {
       @Override
       public void onNewMessage(tfMessage message) {
         counter.incrementAndGet();
-        Time now = connectedNode.getCurrentTime();
-        Duration delta = now.subtract(time);
-        if (delta.totalNsecs() > TimeUnit.NANOSECONDS.convert(5, TimeUnit.SECONDS)) {
-          double hz = counter.getAndSet(0) * 1e9 / delta.totalNsecs();
-          status.setData(String.format("%.2f Hz", hz));
-          statusPublisher.publish(status);
-          time = now;
-        }
       }
     });
     connectedNode.executeCancellableLoop(new CancellableLoop() {
@@ -81,6 +73,19 @@ public class PubsubBenchmark extends AbstractNodeMain {
                 .newFromType(geometry_msgs.TransformStamped._TYPE);
         tfMessage.getTransforms().add(transformStamped);
         tfPublisher.publish(tfMessage);
+      }
+    });
+    connectedNode.executeCancellableLoop(new CancellableLoop() {
+      @Override
+      protected void loop() throws InterruptedException {
+        Time now = connectedNode.getCurrentTime();
+        Duration delta = now.subtract(time);
+        if (delta.totalNsecs() > TimeUnit.NANOSECONDS.convert(5, TimeUnit.SECONDS)) {
+          double hz = counter.getAndSet(0) * 1e9 / delta.totalNsecs();
+          status.setData(String.format("%.2f Hz", hz));
+          statusPublisher.publish(status);
+          time = now;
+        }
       }
     });
   }

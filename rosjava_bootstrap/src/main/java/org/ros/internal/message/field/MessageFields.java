@@ -44,9 +44,8 @@ public class MessageFields {
     for (String name : messageContext.getFieldNames()) {
       Field field = messageContext.getFieldFactory(name).create();
       fields.put(name, field);
-      String javaName = messageContext.getFieldJavaName(name);
-      setters.put("set" + javaName, field);
-      getters.put("get" + javaName, field);
+      getters.put(messageContext.getFieldGetterName(name), field);
+      setters.put(messageContext.getFieldSetterName(name), field);
       orderedFields.add(field);
     }
   }

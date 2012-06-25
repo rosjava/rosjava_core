@@ -17,7 +17,6 @@
 package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.ros.exception.RosRuntimeException;
@@ -29,8 +28,6 @@ import org.ros.internal.message.field.MessageFields;
 import org.ros.internal.message.field.PrimitiveFieldType;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
-
-import java.util.Set;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -169,25 +166,16 @@ public class MessageInterfaceBuilder {
   }
 
   private void appendSettersAndGetters(MessageContext messageContext, StringBuilder builder) {
-    Set<String> setters = Sets.newHashSet();
-    Set<String> getters = Sets.newHashSet();
     MessageFields messageFields = new MessageFields(messageContext);
     for (Field field : messageFields.getFields()) {
       if (field.isConstant()) {
         continue;
       }
       String type = field.getJavaTypeName();
-      String fieldJavaName = messageContext.getFieldJavaName(field.getName());
-      String getter = "get" + fieldJavaName;
-      String setter = "set" + fieldJavaName;
-      if (!getters.contains(getter)) {
-        builder.append(String.format("  %s %s();\n", type, getter));
-      }
-      getters.add(getter);
-      if (!setters.contains(setter)) {
-        builder.append(String.format("  void %s(%s value);\n", setter, type));
-      }
-      setters.add(setter);
+      String getter = messageContext.getFieldGetterName(field.getName());
+      String setter = messageContext.getFieldSetterName(field.getName());
+      builder.append(String.format("  %s %s();\n", type, getter));
+      builder.append(String.format("  void %s(%s value);\n", setter, type));
     }
   }
 }
