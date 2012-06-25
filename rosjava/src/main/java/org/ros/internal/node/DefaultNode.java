@@ -90,7 +90,7 @@ public class DefaultNode implements ConnectedNode {
   /**
    * The maximum delay before shutdown will begin even if all
    * {@link NodeListener}s have not yet returned from their
-   * {@link NodeListener#onShutdown(ConnectedNode)} callback.
+   * {@link NodeListener#onShutdown(Node)} callback.
    */
   private static final int MAX_SHUTDOWN_DELAY_DURATION = 5;
   private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;

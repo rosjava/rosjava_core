@@ -92,11 +92,8 @@ public class ConnectionHeader {
   }
 
   /**
-   * Encodes a header {@link Map} of fields and values for transmission over the
-   * wire.
+   * Encodes this {@link ConnectionHeader} for transmission over the wire.
    * 
-   * @param header
-   *          a {@link Map} of header fields and values
    * @return a {@link ChannelBuffer} containing the encoded header for wire
    *         transmission
    */

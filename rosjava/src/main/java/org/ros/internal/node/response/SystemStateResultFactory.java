@@ -16,17 +16,17 @@
 
 package org.ros.internal.node.response;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
+import org.ros.master.client.SystemState;
+import org.ros.master.client.TopicSystemState;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import org.ros.master.client.SystemState;
-import org.ros.master.client.TopicSystemState;
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * A {@link ResultFactory} to take an object and turn it into a
@@ -74,15 +74,15 @@ public class SystemStateResultFactory implements ResultFactory<SystemState> {
 		return new SystemState(topics.values());
 	}
 
-	/**
-	 * Extract out the publisher data.
-	 * 
-	 * @param pubvals
-	 *            the list of lists containing both a topic name and a list of
-	 *            publisher nodes for that topic
-	 * 
-	 * @return a mapping from topic name to the set of publishers for that topic
-	 */
+	  /**
+   * Extract out the publisher data.
+   * 
+   * @param pubPairs
+   *          the list of lists containing both a topic name and a list of
+   *          publisher nodes for that topic
+   * 
+   * @return a mapping from topic name to the set of publishers for that topic
+   */
 	private Map<String, Set<String>> getPublishers(Object pubPairs) {
 		Map<String, Set<String>> topicToPublishers = Maps.newHashMap();
 
