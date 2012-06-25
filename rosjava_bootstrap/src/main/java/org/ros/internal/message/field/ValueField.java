@@ -33,9 +33,8 @@ class ValueField<T> extends Field {
     return new ValueField<T>(type, name, value, true);
   }
 
-  @SuppressWarnings("unchecked")
   static <T> ValueField<T> newVariable(FieldType type, String name) {
-    return new ValueField<T>(type, name, (T) type.getDefaultValue(), false);
+    return new ValueField<T>(type, name, null, false);
   }
 
   private ValueField(FieldType type, String name, T value, boolean isConstant) {
@@ -46,6 +45,9 @@ class ValueField<T> extends Field {
   @SuppressWarnings("unchecked")
   @Override
   public T getValue() {
+    if (value == null) {
+      setValue(type.getDefaultValue());
+    }
     return value;
   }
 
@@ -59,7 +61,7 @@ class ValueField<T> extends Field {
 
   @Override
   public void serialize(ByteBuffer buffer) {
-    type.serialize(value, buffer);
+    type.serialize(getValue(), buffer);
   }
 
   @Override
@@ -76,10 +78,10 @@ class ValueField<T> extends Field {
   @Override
   public int getSerializedSize() {
     if (type instanceof MessageFieldType) {
-      return ((Message) value).toRawMessage().getSerializedSize();
+      return ((Message) getValue()).toRawMessage().getSerializedSize();
     } else if (type == PrimitiveFieldType.STRING) {
       // We only support ASCII strings and reserve 4 bytes for the length.
-      return ((String) value).length() + 4;
+      return ((String) getValue()).length() + 4;
     } else {
       return type.getSerializedSize();
     }
@@ -99,11 +101,10 @@ class ValueField<T> extends Field {
   public int hashCode() {
     final int prime = 31;
     int result = super.hashCode();
-    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    result = prime * result + ((getValue() == null) ? 0 : getValue().hashCode());
     return result;
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -112,11 +113,11 @@ class ValueField<T> extends Field {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ValueField other = (ValueField) obj;
-    if (value == null) {
-      if (other.value != null)
+    Field other = (Field) obj;
+    if (getValue() == null) {
+      if (other.getValue() != null)
         return false;
-    } else if (!value.equals(other.value))
+    } else if (!getValue().equals(other.getValue()))
       return false;
     return true;
   }
