@@ -48,7 +48,7 @@ public class ServiceIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("server");
+        return new GraphName("server");
       }
 
       @Override
@@ -81,7 +81,7 @@ public class ServiceIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("client");
+        return new GraphName("client");
       }
 
       @Override
@@ -126,7 +126,7 @@ public class ServiceIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("server");
+        return new GraphName("server");
       }
 
       @Override
@@ -153,7 +153,7 @@ public class ServiceIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("client");
+        return new GraphName("client");
       }
 
       @Override

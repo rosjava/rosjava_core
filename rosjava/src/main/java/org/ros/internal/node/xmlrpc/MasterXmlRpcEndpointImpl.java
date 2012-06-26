@@ -56,12 +56,12 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
   @Override
   public List<Object> getPublishedTopics(String callerId, String subgraph) {
     return Response.newSuccess("current topics",
-        master.getPublishedTopics(GraphName.of(callerId), GraphName.of(subgraph))).toList();
+        master.getPublishedTopics(new GraphName(callerId), new GraphName(subgraph))).toList();
   }
 
   @Override
   public List<Object> getTopicTypes(String callerId) {
-    return Response.newSuccess("topic types", master.getTopicTypes(GraphName.of(callerId)))
+    return Response.newSuccess("topic types", master.getTopicTypes(new GraphName(callerId)))
         .toList();
   }
 
@@ -77,7 +77,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
 
   @Override
   public List<Object> lookupNode(String callerId, String nodeName) {
-    URI nodeSlaveUri = master.lookupNode(GraphName.of(nodeName));
+    URI nodeSlaveUri = master.lookupNode(new GraphName(nodeName));
     if (nodeSlaveUri != null) {
       return Response.newSuccess("Success", nodeSlaveUri.toString()).toList();
     } else {
@@ -90,7 +90,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
       String callerSlaveUri) {
     try {
       List<URI> subscribers =
-          master.registerPublisher(GraphName.of(callerId), new URI(callerSlaveUri), GraphName.of(
+          master.registerPublisher(new GraphName(callerId), new URI(callerSlaveUri), new GraphName(
               topicName), topicMessageType);
       List<String> urls = Lists.newArrayList();
       for (URI uri : subscribers) {
@@ -105,7 +105,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
 
   @Override
   public List<Object> unregisterPublisher(String callerId, String topicName, String callerSlaveUri) {
-    boolean result = master.unregisterPublisher(GraphName.of(callerId), GraphName.of(topicName));
+    boolean result = master.unregisterPublisher(new GraphName(callerId), new GraphName(topicName));
     return Response.newSuccess("Success", result ? 1 : 0).toList();
   }
 
@@ -114,8 +114,8 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
       String topicMessageType, String callerSlaveUri) {
     try {
       List<URI> publishers =
-          master.registerSubscriber(GraphName.of(callerId), new URI(callerSlaveUri),
-              GraphName.of(topicName), topicMessageType);
+          master.registerSubscriber(new GraphName(callerId), new URI(callerSlaveUri),
+              new GraphName(topicName), topicMessageType);
       List<String> urls = Lists.newArrayList();
       for (URI uri : publishers) {
         urls.add(uri.toString());
@@ -130,13 +130,13 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
   @Override
   public List<Object>
       unregisterSubscriber(String callerId, String topicName, String callerSlaveUri) {
-    boolean result = master.unregisterSubscriber(GraphName.of(callerId), GraphName.of(topicName));
+    boolean result = master.unregisterSubscriber(new GraphName(callerId), new GraphName(topicName));
     return Response.newSuccess("Success", result ? 1 : 0).toList();
   }
 
   @Override
   public List<Object> lookupService(String callerId, String serviceName) {
-    URI slaveUri = master.lookupService(GraphName.of(serviceName));
+    URI slaveUri = master.lookupService(new GraphName(serviceName));
     if (slaveUri != null) {
       return Response.newSuccess("Success", slaveUri.toString()).toList();
     }
@@ -147,7 +147,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
   public List<Object> registerService(String callerId, String serviceName, String serviceUri,
       String callerSlaveUri) {
     try {
-      master.registerService(GraphName.of(callerId), new URI(callerSlaveUri), GraphName.of(
+      master.registerService(new GraphName(callerId), new URI(callerSlaveUri), new GraphName(
           serviceName), new URI(serviceUri));
       return Response.newSuccess("Success", 0).toList();
     } catch (URISyntaxException e) {
@@ -159,7 +159,7 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
   public List<Object> unregisterService(String callerId, String serviceName, String serviceUri) {
     try {
       boolean result =
-          master.unregisterService(GraphName.of(callerId), GraphName.of(serviceName), new URI(
+          master.unregisterService(new GraphName(callerId), new GraphName(serviceName), new URI(
               serviceUri));
       return Response.newSuccess("Success", result ? 1 : 0).toList();
     } catch (URISyntaxException e) {
@@ -169,43 +169,43 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
 
   @Override
   public List<Object> setParam(String callerId, String key, Boolean value) {
-    parameterServer.set(GraphName.of(key), value);
+    parameterServer.set(new GraphName(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, Integer value) {
-    parameterServer.set(GraphName.of(key), value);
+    parameterServer.set(new GraphName(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, Double value) {
-    parameterServer.set(GraphName.of(key), value);
+    parameterServer.set(new GraphName(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, String value) {
-    parameterServer.set(GraphName.of(key), value);
+    parameterServer.set(new GraphName(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, List<?> value) {
-    parameterServer.set(GraphName.of(key), value);
+    parameterServer.set(new GraphName(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> setParam(String callerId, String key, Map<?, ?> value) {
-    parameterServer.set(GraphName.of(key), value);
+    parameterServer.set(new GraphName(key), value);
     return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> getParam(String callerId, String key) {
-    Object value = parameterServer.get(GraphName.of(key));
+    Object value = parameterServer.get(new GraphName(key));
     if (value == null) {
       return Response.newError("Parameter \"" + key + "\" is not set.", null).toList();
     }
@@ -219,9 +219,9 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
 
   @Override
   public List<Object> subscribeParam(String callerId, String callerSlaveUri, String key) {
-    parameterServer.subscribe(GraphName.of(key),
+    parameterServer.subscribe(new GraphName(key),
         NodeIdentifier.forNameAndUri(callerId, callerSlaveUri));
-    Object value = parameterServer.get(GraphName.of(key));
+    Object value = parameterServer.get(new GraphName(key));
     if (value == null) {
       // Must return an empty map as the value of an unset parameter.
       value = new HashMap<String, Object>();
@@ -236,13 +236,13 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
 
   @Override
   public List<Object> deleteParam(String callerId, String key) {
-    parameterServer.delete(GraphName.of(key));
+    parameterServer.delete(new GraphName(key));
     return Response.newSuccess("Success", null).toList();
   }
 
   @Override
   public List<Object> hasParam(String callerId, String key) {
-    return Response.newSuccess("Success", parameterServer.has(GraphName.of(key))).toList();
+    return Response.newSuccess("Success", parameterServer.has(new GraphName(key))).toList();
   }
 
   @Override

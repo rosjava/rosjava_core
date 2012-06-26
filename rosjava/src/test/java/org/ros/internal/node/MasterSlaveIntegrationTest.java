@@ -59,12 +59,12 @@ public class MasterSlaveIntegrationTest {
     ServiceManager serviceManager = new ServiceManager();
     ParameterManager parameterManager = new ParameterManager(executorService);
     slaveServer =
-        new SlaveServer(GraphName.of("/foo"), BindAddress.newPrivate(),
+        new SlaveServer(new GraphName("/foo"), BindAddress.newPrivate(),
             AdvertiseAddress.newPrivate(), BindAddress.newPrivate(), AdvertiseAddress.newPrivate(),
             masterClient, topicParticipantManager, serviceManager, parameterManager,
             executorService);
     slaveServer.start();
-    slaveClient = new SlaveClient(GraphName.of("/bar"), slaveServer.getUri());
+    slaveClient = new SlaveClient(new GraphName("/bar"), slaveServer.getUri());
   }
 
   @After

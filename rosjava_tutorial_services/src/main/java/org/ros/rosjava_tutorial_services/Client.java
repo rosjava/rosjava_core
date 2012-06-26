@@ -35,7 +35,7 @@ public class Client extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return GraphName.of("rosjava_tutorial_services/client");
+    return new GraphName("rosjava_tutorial_services/client");
   }
 
   @Override

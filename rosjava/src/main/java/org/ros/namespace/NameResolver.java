@@ -38,7 +38,7 @@ public class NameResolver {
   }
 
   public static NameResolver newFromNamespace(String namespace) {
-    return newFromNamespace(GraphName.of(namespace));
+    return newFromNamespace(new GraphName(namespace));
   }
 
   public static NameResolver newRoot() {
@@ -51,7 +51,7 @@ public class NameResolver {
 
   public static NameResolver newFromNamespaceAndRemappings(String namespace,
       Map<GraphName, GraphName> remappings) {
-    return new NameResolver(GraphName.of(namespace), remappings);
+    return new NameResolver(new GraphName(namespace), remappings);
   }
 
   public NameResolver(GraphName namespace, Map<GraphName, GraphName> remappings) {
@@ -95,21 +95,21 @@ public class NameResolver {
    * @see #resolve(GraphName, GraphName)
    */
   public GraphName resolve(String namespace, String name) {
-    return resolve(GraphName.of(namespace), GraphName.of(name));
+    return resolve(new GraphName(namespace), new GraphName(name));
   }
 
   /**
    * @see #resolve(GraphName, GraphName)
    */
   public GraphName resolve(GraphName namespace, String name) {
-    return resolve(namespace, GraphName.of(name));
+    return resolve(namespace, new GraphName(name));
   }
 
   /**
    * @see #resolve(GraphName, GraphName)
    */
   public GraphName resolve(String namespace, GraphName name) {
-    return resolve(GraphName.of(namespace), name);
+    return resolve(new GraphName(namespace), name);
   }
 
   /**
@@ -125,7 +125,7 @@ public class NameResolver {
    * @see #resolve(GraphName)
    */
   public GraphName resolve(String name) {
-    return resolve(GraphName.of(name));
+    return resolve(new GraphName(name));
   }
 
   /**
@@ -155,7 +155,7 @@ public class NameResolver {
    * @see #newChild(GraphName)
    */
   public NameResolver newChild(String namespace) {
-    return newChild(GraphName.of(namespace));
+    return newChild(new GraphName(namespace));
   }
 
   protected GraphName lookUpRemapping(GraphName name) {

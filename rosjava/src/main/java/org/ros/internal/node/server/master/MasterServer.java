@@ -77,7 +77,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
    * The node name (i.e. the callerId XML-RPC field) used when the
    * {@link MasterServer} contacts a {@link SlaveServer}.
    */
-  private static final GraphName MASTER_NODE_NAME = GraphName.of("/master");
+  private static final GraphName MASTER_NODE_NAME = new GraphName("/master");
 
   /**
    * The manager for handling master registration information.

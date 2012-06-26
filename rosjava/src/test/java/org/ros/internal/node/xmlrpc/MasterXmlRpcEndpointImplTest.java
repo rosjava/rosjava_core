@@ -53,7 +53,7 @@ public class MasterXmlRpcEndpointImplTest {
   @Test
   public void testLookupNodeExisting() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
-    final GraphName nodeName = GraphName.of("/foo");
+    final GraphName nodeName = new GraphName("/foo");
     final URI nodeSlaveUri = new URI("http://bar");
     when(mockMaster.lookupNode(eq(nodeName))).thenReturn(nodeSlaveUri);
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
@@ -88,9 +88,9 @@ public class MasterXmlRpcEndpointImplTest {
   @Test
   public void testRegisterPublisher() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
-    final GraphName nodeName = GraphName.of("/slave");
+    final GraphName nodeName = new GraphName("/slave");
     final URI nodeSlaveUri = new URI("http://api");
-    final GraphName topicName = GraphName.of("/topic");
+    final GraphName topicName = new GraphName("/topic");
     final String messageType = "/topicType";
     when(
         mockMaster
@@ -120,9 +120,9 @@ public class MasterXmlRpcEndpointImplTest {
   @Test
   public void testRegisterSubscriber() throws Exception {
     MasterServer mockMaster = mock(MasterServer.class);
-    final GraphName nodeName = GraphName.of("/slave");
+    final GraphName nodeName = new GraphName("/slave");
     final URI nodeSlaveUri = new URI("http://api");
-    final GraphName topicName = GraphName.of("/topic");
+    final GraphName topicName = new GraphName("/topic");
     final String topicMessageType = "/topicType";
 
     when(

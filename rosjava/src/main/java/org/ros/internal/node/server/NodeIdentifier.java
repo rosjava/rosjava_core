@@ -39,7 +39,7 @@ public class NodeIdentifier {
   private final URI uri;
 
   public static NodeIdentifier forName(String name) {
-    return new NodeIdentifier(GraphName.of(name), null);
+    return new NodeIdentifier(new GraphName(name), null);
   }
 
   public static NodeIdentifier forUri(String uri) {
@@ -52,7 +52,7 @@ public class NodeIdentifier {
 
   public static NodeIdentifier forNameAndUri(String name, String uri) {
     try {
-      return new NodeIdentifier(GraphName.of(name), new URI(uri));
+      return new NodeIdentifier(new GraphName(name), new URI(uri));
     } catch (URISyntaxException e) {
       throw new RosRuntimeException(e);
     }

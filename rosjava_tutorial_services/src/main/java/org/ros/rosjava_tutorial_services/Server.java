@@ -32,7 +32,7 @@ public class Server extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return GraphName.of("rosjava_tutorial_services/server");
+    return new GraphName("rosjava_tutorial_services/server");
   }
 
   @Override

@@ -45,7 +45,7 @@ public class NtpTimeProviderTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("node");
+        return new GraphName("node");
       }
 
       @Override

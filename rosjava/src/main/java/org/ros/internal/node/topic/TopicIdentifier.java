@@ -32,7 +32,7 @@ public class TopicIdentifier {
   private final GraphName name;
   
   public static TopicIdentifier forName(String name) {
-    return new TopicIdentifier(GraphName.of(name));
+    return new TopicIdentifier(new GraphName(name));
   }
 
   public TopicIdentifier(GraphName name) {

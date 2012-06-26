@@ -25,5 +25,5 @@ import org.ros.namespace.GraphName;
  */
 public interface Parameters {
 
-  public static final GraphName USE_SIM_TIME = GraphName.of("/use_sim_time");
+  public static final GraphName USE_SIM_TIME = new GraphName("/use_sim_time");
 }

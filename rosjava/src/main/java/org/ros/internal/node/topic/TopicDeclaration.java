@@ -44,7 +44,7 @@ public class TopicDeclaration {
    */
   public static TopicDeclaration newFromHeader(Map<String, String> header) {
     Preconditions.checkArgument(header.containsKey(ConnectionHeaderFields.TOPIC));
-    GraphName name = GraphName.of(header.get(ConnectionHeaderFields.TOPIC));
+    GraphName name = new GraphName(header.get(ConnectionHeaderFields.TOPIC));
     String type = header.get(ConnectionHeaderFields.TYPE);
     String definition = header.get(ConnectionHeaderFields.MESSAGE_DEFINITION);
     String md5Checksum = header.get(ConnectionHeaderFields.MD5_CHECKSUM);

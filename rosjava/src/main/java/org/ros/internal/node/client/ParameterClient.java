@@ -98,7 +98,7 @@ public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
         Response.fromListCheckedFailure(xmlRpcEndpoint.searchParam(nodeName, parameterName.toString()),
             new StringResultFactory());
     return new Response<GraphName>(response.getStatusCode(), response.getStatusMessage(),
-        GraphName.of(response.getResult()));
+        new GraphName(response.getResult()));
   }
 
   public Response<Object> subscribeParam(GraphName parameterName) {
@@ -127,7 +127,7 @@ public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
         Response.fromListChecked(xmlRpcEndpoint.getParamNames(nodeName), new StringListResultFactory());
     List<GraphName> graphNames = Lists.newArrayList();
     for (String name : response.getResult()) {
-      graphNames.add(GraphName.of(name));
+      graphNames.add(new GraphName(name));
     }
     return new Response<List<GraphName>>(response.getStatusCode(), response.getStatusMessage(),
         graphNames);

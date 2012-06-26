@@ -18,13 +18,7 @@ package org.ros.namespace;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
-import org.ros.exception.RosRuntimeException;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -45,8 +39,6 @@ public class GraphName {
   private static final String SEPARATOR = "/";
   private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
 
-  private static final Cache<String, GraphName> cache = CacheBuilder.newBuilder().build();
-
   private static AtomicInteger anonymousCounter = new AtomicInteger();
 
   private final String name;
@@ -59,47 +51,21 @@ public class GraphName {
    * @return a new {@link GraphName} suitable for creating an anonymous node
    */
   public static GraphName newAnonymous() {
-    return GraphName.of(ANONYMOUS_PREFIX + anonymousCounter.incrementAndGet());
+    return new GraphName(ANONYMOUS_PREFIX + anonymousCounter.incrementAndGet());
   }
 
   /**
    * @return a {@link GraphName} representing the root namespace
    */
   public static GraphName root() {
-    return GraphName.of(ROOT);
+    return new GraphName(ROOT);
   }
 
   /**
    * @return an empty {@link GraphName}
    */
   public static GraphName empty() {
-    return GraphName.of(EMPTY);
-  }
-
-  /**
-   * Returns a {@link GraphName} instance representing the specified name. If a
-   * new instance is not required, this method should generally be used in
-   * preference to the constructor {@link #GraphName(String)}, as this method is
-   * likely to yield significantly better space and time performance by caching
-   * frequently requested values.
-   * 
-   * @param name
-   * @return a {@link GraphName} instance representing the specified name
-   */
-  public static GraphName of(String name) {
-    Preconditions.checkNotNull(name);
-    Preconditions.checkArgument(validate(name), "Invalid graph name: " + name);
-    final String canonicalName = canonicalize(name);
-    try {
-      return cache.get(canonicalName, new Callable<GraphName>() {
-        @Override
-        public GraphName call() throws Exception {
-          return new GraphName(canonicalName);
-        }
-      });
-    } catch (ExecutionException e) {
-      throw new RosRuntimeException(e);
-    }
+    return new GraphName(EMPTY);
   }
 
   /**
@@ -241,7 +207,7 @@ public class GraphName {
     }
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > 1) {
-      return GraphName.of(name.substring(0, slashIdx));
+      return new GraphName(name.substring(0, slashIdx));
     } else {
       if (isGlobal()) {
         return GraphName.root();
@@ -258,7 +224,7 @@ public class GraphName {
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > -1) {
       if (slashIdx + 1 < name.length()) {
-        return GraphName.of(name.substring(slashIdx + 1));
+        return new GraphName(name.substring(slashIdx + 1));
       }
       return GraphName.empty();
     }
@@ -274,7 +240,7 @@ public class GraphName {
    */
   public GraphName toRelative() {
     if (isPrivate() || isGlobal()) {
-      return GraphName.of(name.substring(1));
+      return new GraphName(name.substring(1));
     } else {
       return this;
     }
@@ -290,9 +256,9 @@ public class GraphName {
     if (isGlobal()) {
       return this;
     } else if (isPrivate()) {
-      return GraphName.of(GraphName.ROOT + name.substring(1));
+      return new GraphName(GraphName.ROOT + name.substring(1));
     } else {
-      return GraphName.of(GraphName.ROOT + name);
+      return new GraphName(GraphName.ROOT + name);
     }
   }
 
@@ -311,7 +277,7 @@ public class GraphName {
     } else if (isRoot()) {
       return other.toGlobal();
     } else {
-      return GraphName.of(toString() + SEPARATOR + other.toString());
+      return new GraphName(toString() + SEPARATOR + other.toString());
     }
   }
 

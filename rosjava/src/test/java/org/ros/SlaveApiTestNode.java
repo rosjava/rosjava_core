@@ -34,7 +34,7 @@ public class SlaveApiTestNode extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return GraphName.of("rosjava/slave_api_test_node");
+    return new GraphName("rosjava/slave_api_test_node");
   }
 
   @Override

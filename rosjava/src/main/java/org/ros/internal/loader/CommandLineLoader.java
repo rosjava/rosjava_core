@@ -133,7 +133,7 @@ public class CommandLineLoader {
       if (remapping.startsWith("__")) {
         specialRemappings.put(remap[0], remap[1]);
       } else {
-        remappings.put(GraphName.of(remap[0]), GraphName.of(remap[1]));
+        remappings.put(new GraphName(remap[0]), new GraphName(remap[1]));
       }
     }
   }
@@ -150,9 +150,9 @@ public class CommandLineLoader {
     GraphName namespace = GraphName.root();
     if (specialRemappings.containsKey(CommandLineVariables.ROS_NAMESPACE)) {
       namespace =
-          GraphName.of(specialRemappings.get(CommandLineVariables.ROS_NAMESPACE)).toGlobal();
+          new GraphName(specialRemappings.get(CommandLineVariables.ROS_NAMESPACE)).toGlobal();
     } else if (environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
-      namespace = GraphName.of(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
+      namespace = new GraphName(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
     }
     return new NameResolver(namespace, remappings);
   }

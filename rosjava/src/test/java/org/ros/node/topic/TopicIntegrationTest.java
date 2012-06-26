@@ -59,7 +59,7 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("publisher");
+        return new GraphName("publisher");
       }
 
       @Override
@@ -75,7 +75,7 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("subscriber");
+        return new GraphName("subscriber");
       }
 
       @Override
@@ -112,7 +112,7 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("subscriber");
+        return new GraphName("subscriber");
       }
 
       @Override
@@ -135,7 +135,7 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("publisher");
+        return new GraphName("publisher");
       }
 
       @Override
@@ -155,7 +155,7 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("subscriber");
+        return new GraphName("subscriber");
       }
 
       @Override
@@ -202,7 +202,7 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("publisher");
+        return new GraphName("publisher");
       }
 
       @Override
@@ -230,7 +230,7 @@ public class TopicIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return GraphName.of("subscriber");
+        return new GraphName("subscriber");
       }
 
       @Override

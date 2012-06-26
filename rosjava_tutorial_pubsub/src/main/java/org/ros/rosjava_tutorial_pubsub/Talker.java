@@ -32,7 +32,7 @@ public class Talker extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return GraphName.of("rosjava_tutorial_pubsub/talker");
+    return new GraphName("rosjava_tutorial_pubsub/talker");
   }
 
   @Override

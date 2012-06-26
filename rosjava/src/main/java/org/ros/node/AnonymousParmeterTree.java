@@ -36,7 +36,7 @@ public class AnonymousParmeterTree implements ParameterTree {
   private ParameterTree parameterTree;
 
   public AnonymousParmeterTree(URI masterUri) {
-    NodeIdentifier nodeIdentifier = new NodeIdentifier(GraphName.of("invalid"), null);
+    NodeIdentifier nodeIdentifier = new NodeIdentifier(new GraphName("invalid"), null);
     parameterTree =
         DefaultParameterTree.newFromNodeIdentifier(nodeIdentifier, masterUri, NameResolver.newRoot(), null);
   }

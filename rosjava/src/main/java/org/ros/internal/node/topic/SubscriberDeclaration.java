@@ -42,7 +42,7 @@ public class SubscriberDeclaration {
    */
   public static SubscriberDeclaration newFromHeader(Map<String, String> header) {
     NodeIdentifier nodeIdentifier =
-        new NodeIdentifier(GraphName.of(header.get(ConnectionHeaderFields.CALLER_ID)), null);
+        new NodeIdentifier(new GraphName(header.get(ConnectionHeaderFields.CALLER_ID)), null);
     TopicDeclaration topicDeclaration = TopicDeclaration.newFromHeader(header);
     return new SubscriberDeclaration(new SubscriberIdentifier(nodeIdentifier,
         topicDeclaration.getIdentifier()), topicDeclaration);

@@ -108,7 +108,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
   }
 
   private List<Object> parameterUpdate(String parameterName, Object parameterValue) {
-    if (slave.paramUpdate(GraphName.of(parameterName), parameterValue) > 0) {
+    if (slave.paramUpdate(new GraphName(parameterName), parameterValue) > 0) {
       return Response.newSuccess("Success", null).toList();
     }
     return Response
