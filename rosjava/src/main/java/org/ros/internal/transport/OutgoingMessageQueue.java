@@ -18,6 +18,8 @@ package org.ros.internal.transport;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import org.ros.concurrent.CircularBlockingQueue;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
