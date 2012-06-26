@@ -22,10 +22,9 @@ import com.google.common.collect.Maps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.message.MessageBuffers;
 
-import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Map;
@@ -38,8 +37,6 @@ public class ConnectionHeader {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(ConnectionHeader.class);
-
-  private static final int ESTIMATED_HEADER_SIZE = 1024;
 
   private final Map<String, String> fields;
 
@@ -98,8 +95,7 @@ public class ConnectionHeader {
    *         transmission
    */
   public ChannelBuffer encode() {
-    ChannelBuffer buffer =
-        ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, ESTIMATED_HEADER_SIZE);
+    ChannelBuffer buffer = MessageBuffers.dynamicBuffer();
     for (Entry<String, String> entry : fields.entrySet()) {
       String field = entry.getKey() + "=" + entry.getValue();
       buffer.writeInt(field.length());

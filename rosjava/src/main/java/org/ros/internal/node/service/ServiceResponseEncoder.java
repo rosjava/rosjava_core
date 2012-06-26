@@ -16,27 +16,22 @@
 
 package org.ros.internal.node.service;
 
-import java.nio.ByteOrder;
-
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
+import org.ros.internal.message.MessageBuffers;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public final class ServiceResponseEncoder extends OneToOneEncoder {
 
-  private static final int ESTIMATED_RESPONSE_SIZE = 8192;
-
   @Override
   protected Object encode(ChannelHandlerContext ctx, Channel channel, Object msg) throws Exception {
     if (msg instanceof ServiceServerResponse) {
       ServiceServerResponse response = (ServiceServerResponse) msg;
-      ChannelBuffer buffer = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN,
-          ESTIMATED_RESPONSE_SIZE);
+      ChannelBuffer buffer = MessageBuffers.dynamicBuffer();
       buffer.writeByte(response.getErrorCode());
       buffer.writeInt(response.getMessageLength());
       buffer.writeBytes(response.getMessage());
@@ -45,5 +40,4 @@ public final class ServiceResponseEncoder extends OneToOneEncoder {
       return msg;
     }
   }
-
 }

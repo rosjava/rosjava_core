@@ -22,13 +22,13 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.exception.ServiceException;
+import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.node.service.ServiceResponseBuilder;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 
@@ -43,6 +43,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
   private final MessageSerializer<S> serializer;
   private final MessageFactory messageFactory;
   private final ExecutorService executorService;
+  private final MessageBuffers channelBufferPool;
 
   public ServiceRequestHandler(ServiceDeclaration serviceDeclaration,
       ServiceResponseBuilder<T, S> responseBuilder, MessageDeserializer<T> deserializer,
@@ -54,15 +55,15 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
     this.responseBuilder = responseBuilder;
     this.messageFactory = messageFactory;
     this.executorService = executorService;
+    channelBufferPool = new MessageBuffers();
   }
 
-  private ChannelBuffer handleRequest(ChannelBuffer buffer) throws ServiceException {
-    T request = deserializer.deserialize(buffer);
+  private void handleRequest(ChannelBuffer requestBuffer, ChannelBuffer responseBuffer)
+      throws ServiceException {
+    T request = deserializer.deserialize(requestBuffer);
     S response = messageFactory.newFromType(serviceDeclaration.getType());
     responseBuilder.build(request, response);
-    ChannelBuffer responseBuffer = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 256);
     serializer.serialize(response, responseBuffer);
-    return responseBuffer;
   }
 
   private void handleSuccess(final ChannelHandlerContext ctx, ServiceServerResponse response,
@@ -92,14 +93,19 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
       @Override
       public void run() {
         ServiceServerResponse response = new ServiceServerResponse();
-        ChannelBuffer responseBuffer;
+        ChannelBuffer responseBuffer = channelBufferPool.borrowChannelBuffer();
+        boolean success;
         try {
-          responseBuffer = handleRequest(requestBuffer);
+          handleRequest(requestBuffer, responseBuffer);
+          success = true;
         } catch (ServiceException ex) {
           handleError(ctx, response, ex.getMessage());
-          return;
+          success = false;
         }
-        handleSuccess(ctx, response, responseBuffer);
+        if (success) {
+          handleSuccess(ctx, response, responseBuffer);
+        }
+        channelBufferPool.returnChannelBuffer(responseBuffer);
       }
     });
     super.messageReceived(ctx, e);

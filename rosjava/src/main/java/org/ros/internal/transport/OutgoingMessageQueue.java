@@ -18,20 +18,18 @@ package org.ros.internal.transport;
 
 import com.google.common.annotations.VisibleForTesting;
 
-import org.ros.concurrent.CircularBlockingQueue;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.ros.concurrent.CancellableLoop;
+import org.ros.concurrent.CircularBlockingQueue;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageSerializer;
 
-import java.nio.ByteOrder;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -42,13 +40,13 @@ public class OutgoingMessageQueue<T> {
   private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
 
   private static final int MESSAGE_QUEUE_CAPACITY = 8192;
-  private static final int ESTIMATED_MESSAGE_SIZE = 256;
 
   private final MessageSerializer<T> serializer;
   private final CircularBlockingQueue<T> queue;
   private final ChannelGroup channelGroup;
   private final Writer writer;
   private final ChannelBuffer buffer;
+  private final ChannelBuffer latchedBuffer;
 
   private boolean latchMode;
   private T latchedMessage;
@@ -69,7 +67,8 @@ public class OutgoingMessageQueue<T> {
     queue = new CircularBlockingQueue<T>(MESSAGE_QUEUE_CAPACITY);
     channelGroup = new DefaultChannelGroup();
     writer = new Writer();
-    buffer = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, ESTIMATED_MESSAGE_SIZE);
+    buffer = MessageBuffers.dynamicBuffer();
+    latchedBuffer = MessageBuffers.dynamicBuffer();
     latchMode = false;
     executorService.execute(writer);
   }
@@ -136,9 +135,10 @@ public class OutgoingMessageQueue<T> {
     channelGroup.add(channel);
   }
 
+  // TODO(damonkohler): Avoid re-serializing the latched message if it hasn't
+  // changed.
   private synchronized void writeLatchedMessage(Channel channel) {
-    ChannelBuffer latchedBuffer =
-        ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, ESTIMATED_MESSAGE_SIZE);
+    latchedBuffer.clear();
     serializer.serialize(latchedMessage, latchedBuffer);
     channel.write(latchedBuffer);
   }

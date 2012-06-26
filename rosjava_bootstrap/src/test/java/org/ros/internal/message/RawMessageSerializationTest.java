@@ -21,15 +21,12 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Lists;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.message.topic.TopicDefinitionResourceProvider;
 import org.ros.message.Duration;
 import org.ros.message.MessageFactory;
 import org.ros.message.Time;
-
-import java.nio.ByteOrder;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -46,7 +43,7 @@ public class RawMessageSerializationTest {
   }
 
   private void checkSerializeAndDeserialize(Message message) {
-    ChannelBuffer buffer = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 256);
+    ChannelBuffer buffer = MessageBuffers.dynamicBuffer();
     DefaultMessageSerializer serializer = new DefaultMessageSerializer();
     serializer.serialize(message, buffer);
     DefaultMessageDeserializer<RawMessage> deserializer =

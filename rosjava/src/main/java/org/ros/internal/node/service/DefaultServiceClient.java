@@ -20,8 +20,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.message.MessageBuffers;
 import org.ros.internal.transport.ClientHandshakeListener;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -36,7 +36,6 @@ import org.ros.node.service.ServiceResponseListener;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.ByteOrder;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -88,6 +87,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   private final ServiceDeclaration serviceDeclaration;
   private final MessageSerializer<T> serializer;
   private final MessageFactory messageFactory;
+  private final MessageBuffers channelBufferPool;
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final ConnectionHeader connectionHeader;
   private final TcpClientManager tcpClientManager;
@@ -109,6 +109,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     this.serviceDeclaration = serviceDeclaration;
     this.serializer = serializer;
     this.messageFactory = messageFactory;
+    channelBufferPool = new MessageBuffers();
     responseListeners = Lists.newLinkedList();
     connectionHeader = new ConnectionHeader();
     connectionHeader.addField(ConnectionHeaderFields.CALLER_ID, nodeName.toString());
@@ -149,10 +150,11 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   @Override
   public void call(T request, ServiceResponseListener<S> listener) {
-    ChannelBuffer buffer = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 256);
+    ChannelBuffer buffer = channelBufferPool.borrowChannelBuffer();
     serializer.serialize(request, buffer);
     responseListeners.add(listener);
     tcpClient.write(buffer).awaitUninterruptibly();
+    channelBufferPool.returnChannelBuffer(buffer);
   }
 
   @Override
