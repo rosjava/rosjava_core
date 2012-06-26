@@ -47,7 +47,7 @@ public class MessageProxyFactory {
   @SuppressWarnings("unchecked")
   public <T> T newMessageProxy(MessageDeclaration messageDeclaration) {
     Preconditions.checkNotNull(messageDeclaration);
-    MessageContext messageContext = messageContextProvider.of(messageDeclaration);
+    MessageContext messageContext = messageContextProvider.get(messageDeclaration);
     MessageImpl messageImpl = new MessageImpl(messageContext);
     // Header messages are automatically populated with a monotonically
     // increasing sequence number.

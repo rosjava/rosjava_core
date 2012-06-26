@@ -16,15 +16,7 @@
 
 package org.ros.message;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
-import org.ros.exception.RosRuntimeException;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 /**
  * An {@link MessageIdentifier} and definition pair from which all qualities of
@@ -35,33 +27,13 @@ import java.util.concurrent.ExecutionException;
  */
 public class MessageDeclaration {
 
-  private static final Cache<MessageIdentifier, MessageDeclaration> cache = CacheBuilder
-      .newBuilder().build();
-
   private final MessageIdentifier messageIdentifier;
   private final String definition;
 
-  @VisibleForTesting
-  public static void invalidateAll() {
-    cache.invalidateAll();
-  }
-
-  public static MessageDeclaration of(final String type, final String definition) {
+  public static MessageDeclaration of(String type, String definition) {
     Preconditions.checkNotNull(type);
     Preconditions.checkNotNull(definition);
-    try {
-      MessageDeclaration messageDeclaration =
-          cache.get(MessageIdentifier.of(type), new Callable<MessageDeclaration>() {
-            @Override
-            public MessageDeclaration call() throws Exception {
-              return new MessageDeclaration(MessageIdentifier.of(type), definition);
-            }
-          });
-      Preconditions.checkState(messageDeclaration.getDefinition().equals(definition));
-      return messageDeclaration;
-    } catch (ExecutionException e) {
-      throw new RosRuntimeException(e);
-    }
+    return new MessageDeclaration(MessageIdentifier.of(type), definition);
   }
 
   /**

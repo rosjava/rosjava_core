@@ -112,7 +112,7 @@ public class MessageInterfaceBuilder {
         escapeJava(messageDeclaration.getDefinition())));
     if (addConstantsAndMethods) {
       MessageContextProvider messageContextProvider = new MessageContextProvider(messageFactory);
-      MessageContext messageContext = messageContextProvider.of(messageDeclaration);
+      MessageContext messageContext = messageContextProvider.get(messageDeclaration);
       appendConstants(messageContext, builder);
       appendSettersAndGetters(messageContext, builder);
     }

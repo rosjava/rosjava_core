@@ -21,9 +21,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.message.topic.TopicDefinitionResourceProvider;
-import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
-import org.ros.message.MessageIdentifier;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -37,8 +35,6 @@ public class MessageTest {
   public void before() {
     topicDefinitionResourceProvider = new TopicDefinitionResourceProvider();
     messageFactory = new DefaultMessageFactory(topicDefinitionResourceProvider);
-    MessageIdentifier.invalidateAll();
-    MessageDeclaration.invalidateAll();
   }
 
   @Test

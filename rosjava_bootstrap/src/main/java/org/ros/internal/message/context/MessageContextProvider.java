@@ -17,45 +17,39 @@
 package org.ros.internal.message.context;
 
 import com.google.common.base.Preconditions;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Maps;
 
-import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.definition.MessageDefinitionParser;
 import org.ros.internal.message.definition.MessageDefinitionParser.MessageDefinitionVisitor;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class MessageContextProvider {
 
-  private final LoadingCache<MessageDeclaration, MessageContext> cache;
+  private final Map<MessageDeclaration, MessageContext> cache;
+  private final MessageFactory messageFactory;
 
   public MessageContextProvider(final MessageFactory messageFactory) {
+    this.messageFactory = messageFactory;
     Preconditions.checkNotNull(messageFactory);
-    cache = CacheBuilder.newBuilder().build(new CacheLoader<MessageDeclaration, MessageContext>() {
-      @Override
-      public MessageContext load(MessageDeclaration messageDeclaration) throws Exception {
-        MessageContext messageContext = new MessageContext(messageDeclaration, messageFactory);
-        MessageDefinitionVisitor visitor = new MessageContextBuilder(messageContext);
-        MessageDefinitionParser messageDefinitionParser = new MessageDefinitionParser(visitor);
-        messageDefinitionParser.parse(messageDeclaration.getType(),
-            messageDeclaration.getDefinition());
-        return messageContext;
-      }
-    });
+    cache = Maps.newConcurrentMap();
   }
 
-  public MessageContext of(MessageDeclaration messageDeclaration) {
-    try {
-      return cache.get(messageDeclaration);
-    } catch (ExecutionException e) {
-      throw new RosRuntimeException(e);
+  public MessageContext get(MessageDeclaration messageDeclaration) {
+    MessageContext messageContext = cache.get(messageDeclaration);
+    if (messageContext == null) {
+      messageContext = new MessageContext(messageDeclaration, messageFactory);
+      MessageDefinitionVisitor visitor = new MessageContextBuilder(messageContext);
+      MessageDefinitionParser messageDefinitionParser = new MessageDefinitionParser(visitor);
+      messageDefinitionParser.parse(messageDeclaration.getType(),
+          messageDeclaration.getDefinition());
+      cache.put(messageDeclaration, messageContext);
     }
+    return messageContext;
   }
 }

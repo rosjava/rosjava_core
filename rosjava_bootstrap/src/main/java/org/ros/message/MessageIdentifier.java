@@ -16,15 +16,7 @@
 
 package org.ros.message;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-
-import org.ros.exception.RosRuntimeException;
-
-import java.util.concurrent.ExecutionException;
 
 /**
  * Uniquely identifies a message.
@@ -33,22 +25,9 @@ import java.util.concurrent.ExecutionException;
  */
 public class MessageIdentifier {
 
-  private static final LoadingCache<String, MessageIdentifier> cache = CacheBuilder.newBuilder()
-      .build(new CacheLoader<String, MessageIdentifier>() {
-        @Override
-        public MessageIdentifier load(String type) throws Exception {
-          return new MessageIdentifier(type);
-        }
-      });
-
   private final String type;
   private final String pkg;
   private final String name;
-
-  @VisibleForTesting
-  public static void invalidateAll() {
-    cache.invalidateAll();
-  }
 
   public static MessageIdentifier of(String pkg, String name) {
     Preconditions.checkNotNull(pkg);
@@ -59,11 +38,7 @@ public class MessageIdentifier {
   public static MessageIdentifier of(String type) {
     Preconditions.checkNotNull(type);
     Preconditions.checkArgument(type.contains("/"), "Type must be fully qualified: " + type);
-    try {
-      return cache.get(type);
-    } catch (ExecutionException e) {
-      throw new RosRuntimeException(e);
-    }
+    return new MessageIdentifier(type);
   }
 
   public MessageIdentifier(String type) {

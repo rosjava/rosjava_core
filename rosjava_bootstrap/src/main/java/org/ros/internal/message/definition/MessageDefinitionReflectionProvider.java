@@ -17,16 +17,14 @@
 package org.ros.internal.message.definition;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Maps;
 
 import org.ros.exception.RosRuntimeException;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageIdentifier;
 
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
 
 /**
  * A {@link MessageDefinitionProvider} that uses reflection to load the message
@@ -41,26 +39,26 @@ public class MessageDefinitionReflectionProvider implements MessageDefinitionPro
 
   private static final String DEFINITION_FIELD = "_DEFINITION";
 
-  private final LoadingCache<String, String> cache;
+  private final Map<String, String> cache;
 
   public MessageDefinitionReflectionProvider() {
-    cache = CacheBuilder.newBuilder().build(new CacheLoader<String, String>() {
-      @Override
-      public String load(String messageType) throws Exception {
-        String className = messageType.replace("/", ".");
-        Class<?> loadedClass = getClass().getClassLoader().loadClass(className);
-        return (String) loadedClass.getDeclaredField(DEFINITION_FIELD).get(null);
-      }
-    });
+    cache = Maps.newConcurrentMap();
   }
 
   @Override
   public String get(String messageType) {
-    try {
-      return cache.get(messageType);
-    } catch (ExecutionException e) {
-      throw new RosRuntimeException(e);
+    String messageDefinition = cache.get(messageType);
+    if (messageDefinition == null) {
+      String className = messageType.replace("/", ".");
+      try {
+        Class<?> loadedClass = getClass().getClassLoader().loadClass(className);
+        messageDefinition = (String) loadedClass.getDeclaredField(DEFINITION_FIELD).get(null);
+        cache.put(messageType, messageDefinition);
+      } catch (Exception e) {
+        throw new RosRuntimeException(e);
+      }
     }
+    return messageDefinition;
   }
 
   @Override
