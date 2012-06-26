@@ -28,6 +28,7 @@ import org.ros.message.MessageSerializer;
 import org.ros.node.service.ServiceResponseBuilder;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 
@@ -55,11 +56,13 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
     this.executorService = executorService;
   }
 
-  private ByteBuffer handleRequest(ByteBuffer buffer) throws ServiceException {
+  private ChannelBuffer handleRequest(ChannelBuffer buffer) throws ServiceException {
     T request = deserializer.deserialize(buffer);
     S response = messageFactory.newFromType(serviceDeclaration.getType());
     responseBuilder.build(request, response);
-    return serializer.serialize(response);
+    ChannelBuffer responseBuffer = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 256);
+    serializer.serialize(response, responseBuffer);
+    return responseBuffer;
   }
 
   private void handleSuccess(final ChannelHandlerContext ctx, ServiceServerResponse response,
@@ -91,8 +94,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
         ServiceServerResponse response = new ServiceServerResponse();
         ChannelBuffer responseBuffer;
         try {
-          responseBuffer =
-              ChannelBuffers.wrappedBuffer(handleRequest(requestBuffer.toByteBuffer()));
+          responseBuffer = handleRequest(requestBuffer);
         } catch (ServiceException ex) {
           handleError(ctx, response, ex.getMessage());
           return;

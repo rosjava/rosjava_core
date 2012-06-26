@@ -20,14 +20,15 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.Lists;
 
-import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
-
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
-import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
 
 /**
@@ -67,7 +68,9 @@ public class MessageSerializationTest {
   }
 
   private <T extends Message> void checkSerializeAndDeserialize(T message) {
-    ByteBuffer buffer = message.toRawMessage().serialize();
+    ChannelBuffer buffer = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 256);
+    DefaultMessageSerializer serializer = new DefaultMessageSerializer();
+    serializer.serialize(message, buffer);
     DefaultMessageDeserializer<T> deserializer =
         new DefaultMessageDeserializer<T>(message.toRawMessage().getIdentifier(),
             defaultMessageFactory);

@@ -29,7 +29,6 @@ import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -40,11 +39,11 @@ public class IncomingMessageQueue<T> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(IncomingMessageQueue.class);
 
-  private static final int MESSAGE_BUFFER_CAPACITY = 8192;
+  private static final int MESSAGE_QUEUE_CAPACITY = 8192;
 
   private final MessageDeserializer<T> deserializer;
   private final ScheduledExecutorService executorService;
-  private final CircularBlockingQueue<ByteBuffer> buffers;
+  private final CircularBlockingQueue<ChannelBuffer> buffers;
   private final ListenerCollection<MessageListener<T>> messageListeners;
   private final Dispatcher dispatcher;
 
@@ -64,7 +63,9 @@ public class IncomingMessageQueue<T> {
       if (DEBUG) {
         log.info(String.format("Received %d byte message.", buffer.readableBytes()));
       }
-      buffers.put(buffer.copy().toByteBuffer());
+      // We have to make a defensive copy here because Netty does not guarantee
+      // that the returned ChannelBuffer will not be reused.
+      buffers.put(buffer.copy());
       super.messageReceived(ctx, e);
     }
   }
@@ -90,7 +91,7 @@ public class IncomingMessageQueue<T> {
       ScheduledExecutorService executorService) {
     this.deserializer = deserializer;
     this.executorService = executorService;
-    buffers = new CircularBlockingQueue<ByteBuffer>(MESSAGE_BUFFER_CAPACITY);
+    buffers = new CircularBlockingQueue<ChannelBuffer>(MESSAGE_QUEUE_CAPACITY);
     messageListeners = new ListenerCollection<MessageListener<T>>(executorService);
     dispatcher = new Dispatcher();
     latchMode = false;
@@ -147,8 +148,8 @@ public class IncomingMessageQueue<T> {
   }
 
   /**
-   * @return a new {@link NamedChannelHandler} that will receive messages and add
-   *         them to the queue
+   * @return a new {@link NamedChannelHandler} that will receive messages and
+   *         add them to the queue
    */
   public NamedChannelHandler newNamedChannelHandler() {
     return new Receiver();

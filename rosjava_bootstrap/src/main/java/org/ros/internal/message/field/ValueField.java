@@ -18,9 +18,7 @@ package org.ros.internal.message.field;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.message.Message;
-
-import java.nio.ByteBuffer;
+import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -60,12 +58,12 @@ class ValueField<T> extends Field {
   }
 
   @Override
-  public void serialize(ByteBuffer buffer) {
+  public void serialize(ChannelBuffer buffer) {
     type.serialize(getValue(), buffer);
   }
 
   @Override
-  public void deserialize(ByteBuffer buffer) {
+  public void deserialize(ChannelBuffer buffer) {
     Preconditions.checkState(!isConstant);
     setValue(type.<T>deserialize(buffer));
   }
@@ -73,18 +71,6 @@ class ValueField<T> extends Field {
   @Override
   public String getMd5String() {
     return String.format("%s %s\n", type, name);
-  }
-
-  @Override
-  public int getSerializedSize() {
-    if (type instanceof MessageFieldType) {
-      return ((Message) getValue()).toRawMessage().getSerializedSize();
-    } else if (type == PrimitiveFieldType.STRING) {
-      // We only support ASCII strings and reserve 4 bytes for the length.
-      return ((String) getValue()).length() + 4;
-    } else {
-      return type.getSerializedSize();
-    }
   }
 
   @Override

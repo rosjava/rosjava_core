@@ -25,8 +25,6 @@ import org.ros.message.Duration;
 import org.ros.message.MessageIdentifier;
 import org.ros.message.Time;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.List;
 
 /**
@@ -434,28 +432,6 @@ class MessageImpl implements RawMessage, GetInstance {
   @Override
   public short[] getCharArray(String name) {
     return (short[]) messageFields.getFieldValue(name);
-  }
-
-  @Override
-  public int getSerializedSize() {
-    int size = 0;
-    for (Field field : getFields()) {
-      size += field.getSerializedSize();
-    }
-    return size;
-  }
-
-  @Override
-  public ByteBuffer serialize() {
-    int length = getSerializedSize();
-    ByteBuffer buffer = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
-    for (Field field : getFields()) {
-      if (!field.isConstant()) {
-        field.serialize(buffer);
-      }
-    }
-    buffer.flip();
-    return buffer;
   }
 
   @Override

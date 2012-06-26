@@ -19,6 +19,7 @@ dependencies {
   compile 'org.apache.commons:com.springsource.org.apache.commons.lang:2.4.0'
   compile 'org.apache.commons:com.springsource.org.apache.commons.io:1.4.0'
   compile 'com.google.guava:guava:12.0'
+  compile 'io.netty:netty:3.5.1.Final'
   testCompile 'junit:junit:4.8.2'
 }
 

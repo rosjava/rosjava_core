@@ -16,13 +16,15 @@
 
 package org.ros.internal.message.field;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.internal.message.DefaultMessageDeserializer;
+import org.ros.internal.message.DefaultMessageSerializer;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageIdentifier;
+import org.ros.message.MessageSerializer;
 
-import java.nio.ByteBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -31,11 +33,13 @@ public class MessageFieldType implements FieldType {
 
   private final MessageIdentifier messageIdentifier;
   private final MessageFactory messageFactory;
+  private final MessageSerializer<Message> serializer;
   private final MessageDeserializer<Message> deserializer;
 
   public MessageFieldType(MessageIdentifier messageIdentifier, MessageFactory messageFactory) {
     this.messageIdentifier = messageIdentifier;
     this.messageFactory = messageFactory;
+    serializer = new DefaultMessageSerializer();
     deserializer = new DefaultMessageDeserializer<Message>(messageIdentifier, messageFactory);
   }
 
@@ -84,13 +88,13 @@ public class MessageFieldType implements FieldType {
   }
 
   @Override
-  public <T> void serialize(T value, ByteBuffer buffer) {
-    buffer.put(((Message) value).toRawMessage().serialize());
+  public <T> void serialize(T value, ChannelBuffer buffer) {
+    serializer.serialize((Message) value, buffer);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public Message deserialize(ByteBuffer buffer) {
+  public Message deserialize(ChannelBuffer buffer) {
     return deserializer.deserialize(buffer);
   }
 

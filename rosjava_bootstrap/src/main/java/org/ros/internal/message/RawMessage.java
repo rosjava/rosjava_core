@@ -21,7 +21,6 @@ import org.ros.message.Duration;
 import org.ros.message.MessageIdentifier;
 import org.ros.message.Time;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -95,8 +94,6 @@ public interface RawMessage extends Message {
 
   String getPackage();
 
-  int getSerializedSize();
-
   String getString(String name);
 
   List<String> getStringList(String name);
@@ -122,8 +119,6 @@ public interface RawMessage extends Message {
   short getUInt8(String name);
 
   short[] getUInt8Array(String name);
-
-  ByteBuffer serialize();
 
   void setBool(String name, boolean value);
 

@@ -18,9 +18,8 @@ package org.ros.internal.message.field;
 
 import com.google.common.base.Preconditions;
 
-import org.ros.internal.message.Message;
+import org.jboss.netty.buffer.ChannelBuffer;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,17 +56,17 @@ public class ListField<T> extends Field {
   }
 
   @Override
-  public void serialize(ByteBuffer buffer) {
-    buffer.putInt(value.size());
+  public void serialize(ChannelBuffer buffer) {
+    buffer.writeInt(value.size());
     for (T v : value) {
       type.serialize(v, buffer);
     }
   }
 
   @Override
-  public void deserialize(ByteBuffer buffer) {
+  public void deserialize(ChannelBuffer buffer) {
     value.clear();
-    int size = buffer.getInt();
+    int size = buffer.readInt();
     for (int i = 0; i < size; i++) {
       value.add(type.<T>deserialize(buffer));
     }
@@ -76,27 +75,6 @@ public class ListField<T> extends Field {
   @Override
   public String getMd5String() {
     return String.format("%s %s\n", type, name);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public int getSerializedSize() {
-    Preconditions.checkNotNull(value);
-    // Reserve 4 bytes for the length.
-    int size = 4;
-    if (type instanceof MessageFieldType) {
-      for (Message message : (List<Message>) value) {
-        size += message.toRawMessage().getSerializedSize();
-      }
-    } else if (type == PrimitiveFieldType.STRING) {
-      for (String string : (List<String>) value) {
-        // We only support ASCII strings and reserve 4 bytes for the length.
-        size += string.length() + 4;
-      }
-    } else {
-      size += type.getSerializedSize() * ((List<?>) value).size();
-    }
-    return size;
   }
 
   @Override

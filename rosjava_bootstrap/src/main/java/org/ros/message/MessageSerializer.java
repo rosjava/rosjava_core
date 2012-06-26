@@ -16,7 +16,7 @@
 
 package org.ros.message;
 
-import java.nio.ByteBuffer;
+import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -26,5 +26,5 @@ import java.nio.ByteBuffer;
  */
 public interface MessageSerializer<T> {
 
-  ByteBuffer serialize(T message);
+  void serialize(T message, ChannelBuffer buffer);
 }

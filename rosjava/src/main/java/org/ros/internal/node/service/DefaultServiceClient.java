@@ -36,6 +36,7 @@ import org.ros.node.service.ServiceResponseListener;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.ByteOrder;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -148,9 +149,10 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   @Override
   public void call(T request, ServiceResponseListener<S> listener) {
-    ChannelBuffer wrappedBuffer = ChannelBuffers.wrappedBuffer(serializer.serialize(request));
+    ChannelBuffer buffer = ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, 256);
+    serializer.serialize(request, buffer);
     responseListeners.add(listener);
-    tcpClient.write(wrappedBuffer).awaitUninterruptibly();
+    tcpClient.write(buffer).awaitUninterruptibly();
   }
 
   @Override

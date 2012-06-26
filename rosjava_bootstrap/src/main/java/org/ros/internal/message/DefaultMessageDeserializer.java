@@ -16,13 +16,11 @@
 
 package org.ros.internal.message;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.internal.message.field.Field;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageIdentifier;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -40,8 +38,7 @@ public class DefaultMessageDeserializer<T> implements MessageDeserializer<T> {
 
   @SuppressWarnings("unchecked")
   @Override
-  public T deserialize(ByteBuffer buffer) {
-    buffer.order(ByteOrder.LITTLE_ENDIAN);
+  public T deserialize(ChannelBuffer buffer) {
     Message message = messageFactory.newFromType(messageIdentifier.getType());
     for (Field field : message.toRawMessage().getFields()) {
       if (!field.isConstant()) {

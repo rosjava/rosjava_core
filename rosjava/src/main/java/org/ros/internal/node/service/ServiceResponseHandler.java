@@ -18,6 +18,7 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
@@ -26,7 +27,6 @@ import org.ros.internal.node.response.StatusCode;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.service.ServiceResponseListener;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -54,14 +54,14 @@ class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
     final ServiceResponseListener<ResponseType> listener = responseListeners.poll();
     Preconditions.checkNotNull(listener, "No listener for incoming service response.");
     final ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
-    final ByteBuffer buffer = response.getMessage().toByteBuffer();
+    final ChannelBuffer buffer = response.getMessage();
     executorService.execute(new Runnable() {
       @Override
       public void run() {
         if (response.getErrorCode() == 1) {
           listener.onSuccess(deserializer.deserialize(buffer));
         } else {
-          String message = Charset.forName("US-ASCII").decode(buffer).toString();
+          String message = Charset.forName("US-ASCII").decode(buffer.toByteBuffer()).toString();
           listener.onFailure(new RemoteException(StatusCode.ERROR, message));
         }
       }

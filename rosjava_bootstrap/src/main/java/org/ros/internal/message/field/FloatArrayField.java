@@ -18,7 +18,8 @@ package org.ros.internal.message.field;
 
 import com.google.common.base.Preconditions;
 
-import java.nio.ByteBuffer;
+import org.jboss.netty.buffer.ChannelBuffer;
+
 import java.util.Arrays;
 
 /**
@@ -53,16 +54,16 @@ public class FloatArrayField extends Field {
   }
 
   @Override
-  public void serialize(ByteBuffer buffer) {
-    buffer.putInt(value.length);
+  public void serialize(ChannelBuffer buffer) {
+    buffer.writeInt(value.length);
     for (float v : value) {
       type.serialize(v, buffer);
     }
   }
 
   @Override
-  public void deserialize(ByteBuffer buffer) {
-    int size = buffer.getInt();
+  public void deserialize(ChannelBuffer buffer) {
+    int size = buffer.readInt();
     value = new float[size];
     for (int i = 0; i < size; i++) {
       value[i] = (Float) type.deserialize(buffer);
@@ -72,15 +73,6 @@ public class FloatArrayField extends Field {
   @Override
   public String getMd5String() {
     return String.format("%s %s\n", type, name);
-  }
-
-  @Override
-  public int getSerializedSize() {
-    Preconditions.checkNotNull(value);
-    // Reserve 4 bytes for the length.
-    int size = 4;
-    size += type.getSerializedSize() * value.length;
-    return size;
   }
 
   @Override

@@ -20,8 +20,6 @@ dependencies {
   compile project(':apache_xmlrpc_common')
   compile project(':apache_xmlrpc_server')
   compile project(':apache_xmlrpc_client')
-  compile 'org.jboss.netty:netty:3.2.4.Final'
-  compile 'com.google.guava:guava:r07'
   compile 'dnsjava:dnsjava:2.1.1'
   compile 'org.apache.commons:com.springsource.org.apache.commons.logging:1.1.1'
   compile 'org.apache.commons:com.springsource.org.apache.commons.net:2.0.0'

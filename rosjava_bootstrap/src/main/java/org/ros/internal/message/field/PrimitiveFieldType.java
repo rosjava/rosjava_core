@@ -19,6 +19,7 @@ package org.ros.internal.message.field;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 
@@ -48,15 +49,15 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       Preconditions.checkArgument(value instanceof Boolean);
-      buffer.put((byte) ((Boolean) value ? 1 : 0));
+      buffer.writeByte((byte) ((Boolean) value ? 1 : 0));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Boolean deserialize(ByteBuffer buffer) {
-      return buffer.get() == 1;
+    public Boolean deserialize(ChannelBuffer buffer) {
+      return buffer.readByte() == 1;
     }
 
     @SuppressWarnings("unchecked")
@@ -88,15 +89,15 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       Preconditions.checkArgument(value instanceof Byte);
-      buffer.put((Byte) value);
+      buffer.writeByte((Byte) value);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Byte deserialize(ByteBuffer buffer) {
-      return buffer.get();
+    public Byte deserialize(ChannelBuffer buffer) {
+      return buffer.readByte();
     }
 
     @SuppressWarnings("unchecked")
@@ -131,13 +132,13 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       INT8.serialize(value, buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Byte deserialize(ByteBuffer buffer) {
+    public Byte deserialize(ChannelBuffer buffer) {
       return INT8.deserialize(buffer);
     }
 
@@ -170,13 +171,13 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       INT8.serialize(value, buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Byte deserialize(ByteBuffer buffer) {
+    public Byte deserialize(ChannelBuffer buffer) {
       return INT8.deserialize(buffer);
     }
 
@@ -212,13 +213,13 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       UINT8.serialize(value, buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Byte deserialize(ByteBuffer buffer) {
+    public Byte deserialize(ChannelBuffer buffer) {
       return UINT8.deserialize(buffer);
     }
 
@@ -251,15 +252,15 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       Preconditions.checkArgument(value instanceof Short);
-      buffer.putShort((Short) value);
+      buffer.writeShort((Short) value);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Short deserialize(ByteBuffer buffer) {
-      return buffer.getShort();
+    public Short deserialize(ChannelBuffer buffer) {
+      return buffer.readShort();
     }
 
     @SuppressWarnings("unchecked")
@@ -291,13 +292,13 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       INT16.serialize(value, buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Short deserialize(ByteBuffer buffer) {
+    public Short deserialize(ChannelBuffer buffer) {
       return INT16.deserialize(buffer);
     }
 
@@ -330,15 +331,15 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       Preconditions.checkArgument(value instanceof Integer);
-      buffer.putInt((Integer) value);
+      buffer.writeInt((Integer) value);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Integer deserialize(ByteBuffer buffer) {
-      return buffer.getInt();
+    public Integer deserialize(ChannelBuffer buffer) {
+      return buffer.readInt();
     }
 
     @SuppressWarnings("unchecked")
@@ -370,13 +371,13 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       INT32.serialize(value, buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Integer deserialize(ByteBuffer buffer) {
+    public Integer deserialize(ChannelBuffer buffer) {
       return INT32.deserialize(buffer);
     }
 
@@ -409,15 +410,15 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       Preconditions.checkArgument(value instanceof Long);
-      buffer.putLong((Long) value);
+      buffer.writeLong((Long) value);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Long deserialize(ByteBuffer buffer) {
-      return buffer.getLong();
+    public Long deserialize(ChannelBuffer buffer) {
+      return buffer.readLong();
     }
 
     @SuppressWarnings("unchecked")
@@ -449,13 +450,13 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       INT64.serialize(value, buffer);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Long deserialize(ByteBuffer buffer) {
+    public Long deserialize(ChannelBuffer buffer) {
       return INT64.deserialize(buffer);
     }
 
@@ -488,15 +489,15 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       Preconditions.checkArgument(value instanceof Float);
-      buffer.putFloat((Float) value);
+      buffer.writeFloat((Float) value);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Float deserialize(ByteBuffer buffer) {
-      return buffer.getFloat();
+    public Float deserialize(ChannelBuffer buffer) {
+      return buffer.readFloat();
     }
 
     @SuppressWarnings("unchecked")
@@ -528,15 +529,15 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       Preconditions.checkArgument(value instanceof Double);
-      buffer.putDouble((Double) value);
+      buffer.writeDouble((Double) value);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Double deserialize(ByteBuffer buffer) {
-      return buffer.getDouble();
+    public Double deserialize(ChannelBuffer buffer) {
+      return buffer.readDouble();
     }
 
     @SuppressWarnings("unchecked")
@@ -568,20 +569,18 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       Preconditions.checkArgument(value instanceof String);
       byte[] bytes = ((String) value).getBytes();
-      buffer.putInt(bytes.length);
-      buffer.put(bytes);
+      buffer.writeInt(bytes.length);
+      buffer.writeBytes(bytes);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public String deserialize(ByteBuffer buffer) {
-      int length = buffer.getInt();
-      ByteBuffer stringBuffer = buffer.slice();
-      stringBuffer.limit(length);
-      buffer.position(buffer.position() + length);
+    public String deserialize(ChannelBuffer buffer) {
+      int length = buffer.readInt();
+      ByteBuffer stringBuffer = buffer.readSlice(length).toByteBuffer();
       return Charset.forName("US-ASCII").decode(stringBuffer).toString();
     }
 
@@ -614,16 +613,16 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       Preconditions.checkArgument(value instanceof Time);
-      buffer.putInt(((Time) value).secs);
-      buffer.putInt(((Time) value).nsecs);
+      buffer.writeInt(((Time) value).secs);
+      buffer.writeInt(((Time) value).nsecs);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Time deserialize(ByteBuffer buffer) {
-      return new Time(buffer.getInt(), buffer.getInt());
+    public Time deserialize(ChannelBuffer buffer) {
+      return new Time(buffer.readInt(), buffer.readInt());
     }
 
     @SuppressWarnings("unchecked")
@@ -655,16 +654,16 @@ public enum PrimitiveFieldType implements FieldType {
     }
 
     @Override
-    public <T> void serialize(T value, ByteBuffer buffer) {
+    public <T> void serialize(T value, ChannelBuffer buffer) {
       Preconditions.checkArgument(value instanceof Duration);
-      buffer.putInt(((Duration) value).secs);
-      buffer.putInt(((Duration) value).nsecs);
+      buffer.writeInt(((Duration) value).secs);
+      buffer.writeInt(((Duration) value).nsecs);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Duration deserialize(ByteBuffer buffer) {
-      return new Duration(buffer.getInt(), buffer.getInt());
+    public Duration deserialize(ChannelBuffer buffer) {
+      return new Duration(buffer.readInt(), buffer.readInt());
     }
 
     @SuppressWarnings("unchecked")
