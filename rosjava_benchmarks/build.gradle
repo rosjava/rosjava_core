@@ -20,4 +20,5 @@ mainClassName = 'org.ros.RosRun'
 
 dependencies {
   compile project(':rosjava')
+  compile project(':rosjava_geometry')
 }

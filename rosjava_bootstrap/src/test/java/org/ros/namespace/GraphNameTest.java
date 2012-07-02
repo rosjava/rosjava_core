@@ -19,7 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.ros.Assert.assertGraphNameEquals;
+
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,13 +30,15 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-
 /**
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class GraphNameTest {
+
+  public void assertGraphNameEquals(String name, GraphName graphName) {
+    assertEquals(name, graphName.toString());
+  }
 
   @Test
   public void testToString() {
@@ -44,12 +47,6 @@ public class GraphNameTest {
       for (String c : canonical) {
         assertGraphNameEquals(c, new GraphName(c));
       }
-      // test canonicalization
-      assertGraphNameEquals("", new GraphName(""));
-      assertGraphNameEquals("/", new GraphName("/"));
-      assertGraphNameEquals("/foo", new GraphName("/foo/"));
-      assertGraphNameEquals("foo", new GraphName("foo/"));
-      assertGraphNameEquals("foo/bar", new GraphName("foo/bar/"));
     } catch (IllegalArgumentException e) {
       fail("These names should be valid" + e.toString());
     }
@@ -139,27 +136,27 @@ public class GraphNameTest {
 
   @Test
   public void testCanonicalizeName() {
-    assertEquals("", GraphName.canonicalize(""));
-    assertEquals("/", GraphName.canonicalize("/"));
-    assertEquals("/", GraphName.canonicalize("//"));
-    assertEquals("/", GraphName.canonicalize("///"));
+    assertGraphNameEquals("", new GraphName(""));
+    assertGraphNameEquals("/", new GraphName("/"));
+    assertGraphNameEquals("/", new GraphName("//"));
+    assertGraphNameEquals("/", new GraphName("///"));
 
-    assertEquals("foo", GraphName.canonicalize("foo"));
-    assertEquals("foo", GraphName.canonicalize("foo/"));
-    assertEquals("foo", GraphName.canonicalize("foo//"));
+    assertGraphNameEquals("foo", new GraphName("foo"));
+    assertGraphNameEquals("foo", new GraphName("foo/"));
+    assertGraphNameEquals("foo", new GraphName("foo//"));
 
-    assertEquals("/foo", GraphName.canonicalize("/foo"));
-    assertEquals("/foo", GraphName.canonicalize("/foo/"));
-    assertEquals("/foo", GraphName.canonicalize("/foo//"));
+    assertGraphNameEquals("/foo", new GraphName("/foo"));
+    assertGraphNameEquals("/foo", new GraphName("/foo/"));
+    assertGraphNameEquals("/foo", new GraphName("/foo//"));
 
-    assertEquals("/foo/bar", GraphName.canonicalize("/foo/bar"));
-    assertEquals("/foo/bar", GraphName.canonicalize("/foo/bar/"));
-    assertEquals("/foo/bar", GraphName.canonicalize("/foo/bar//"));
+    assertGraphNameEquals("/foo/bar", new GraphName("/foo/bar"));
+    assertGraphNameEquals("/foo/bar", new GraphName("/foo/bar/"));
+    assertGraphNameEquals("/foo/bar", new GraphName("/foo/bar//"));
 
-    assertEquals("~foo", GraphName.canonicalize("~foo"));
-    assertEquals("~foo", GraphName.canonicalize("~foo/"));
-    assertEquals("~foo", GraphName.canonicalize("~foo//"));
-    assertEquals("~foo", GraphName.canonicalize("~/foo"));
+    assertGraphNameEquals("~foo", new GraphName("~foo"));
+    assertGraphNameEquals("~foo", new GraphName("~foo/"));
+    assertGraphNameEquals("~foo", new GraphName("~foo//"));
+    assertGraphNameEquals("~foo", new GraphName("~/foo"));
   }
 
   @Test

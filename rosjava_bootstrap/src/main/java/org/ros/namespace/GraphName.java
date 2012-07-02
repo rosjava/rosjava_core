@@ -19,7 +19,10 @@ package org.ros.namespace;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
+import org.ros.exception.RosRuntimeException;
+
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * ROS graph resource name.
@@ -37,7 +40,15 @@ public class GraphName {
   private static final String EMPTY = "";
   private static final String ROOT = "/";
   private static final String SEPARATOR = "/";
-  private static final String VALID_ROS_NAME_PATTERN = "^[\\~\\/A-Za-z][\\w_\\/]*$";
+
+  // TODO(damonkohler): Why make empty names valid?
+  /**
+   * Graph names must match this pattern to be valid.
+   * <p>
+   * Note that empty graph names are considered valid.
+   */
+  private static final Pattern VALID_GRAPH_NAME_PATTERN = Pattern
+      .compile("^([\\~\\/A-Za-z][\\w_\\/]*)?$");
 
   private static AtomicInteger anonymousCounter = new AtomicInteger();
 
@@ -76,39 +87,21 @@ public class GraphName {
    */
   public GraphName(String name) {
     Preconditions.checkNotNull(name);
-    Preconditions.checkArgument(validate(name), "Invalid graph name: " + name);
     this.name = canonicalize(name);
   }
 
   /**
-   * Returns {@code true} if the supplied {@link String} can be used to
-   * construct a {@link GraphName}.
-   * 
-   * @param name
-   *          the {@link String} representation of a {@link GraphName} to
-   *          validate
-   * @return {@code true} if the supplied name is can be used to construct a
-   *         {@link GraphName}
-   */
-  public static boolean validate(String name) {
-    // Allow empty names.
-    if (name.length() > 0) {
-      if (!name.matches(VALID_ROS_NAME_PATTERN)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Convert name into canonical representation. Canonical representation has no
-   * trailing slashes. Canonical names can be global, private, or relative.
+   * Validate and convert the graph name into its canonical representation.
+   * Canonical representations have no trailing slashes and can be global,
+   * private, or relative.
    * 
    * @param name
    * @return the canonical name for this {@link GraphName}
    */
-  public static String canonicalize(String name) {
-    Preconditions.checkArgument(validate(name));
+  private String canonicalize(String name) {
+    if (!VALID_GRAPH_NAME_PATTERN.matcher(name).matches()) {
+      throw new RosRuntimeException("Invalid graph name: " + name);
+    }
     // Trim trailing slashes for canonical representation.
     while (!name.equals(GraphName.ROOT) && name.endsWith(SEPARATOR)) {
       name = name.substring(0, name.length() - 1);

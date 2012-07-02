@@ -1,9 +1,28 @@
+/*
+ * Copyright (C) 2012 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.ros.rosjava_geometry;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+/**
+ * @author damonkohler@google.com (Damon Kohler)
+ */
 public class Vector3Test {
 
   @Test
@@ -49,4 +68,19 @@ public class Vector3Test {
     assertEquals(Math.sqrt(3), new Vector3(1, 1, 1).length(), 1e-9);
   }
 
+  @Test
+  public void testPowersOf2() {
+    System.out.println(Integer.numberOfLeadingZeros(Integer.MAX_VALUE));
+    System.out.println(1 << 30);
+    int max = Integer.MAX_VALUE / 2;
+    System.out.println(max);
+    int newStride = max - 1;
+    newStride |= newStride >> 1;
+    newStride |= newStride >> 2;
+    newStride |= newStride >> 4;
+    newStride |= newStride >> 8;
+    newStride |= newStride >> 16;
+    newStride++;
+    System.out.println(newStride);
+  }
 }

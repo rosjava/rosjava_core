@@ -118,7 +118,7 @@ public class NameResolver {
    * @return the name resolved relative to the default namespace
    */
   public GraphName resolve(GraphName name) {
-    return resolve(getNamespace(), name);
+    return resolve(namespace, name);
   }
 
   /**
@@ -147,8 +147,7 @@ public class NameResolver {
    *         parent {@link NameResolver}'s namespace
    */
   public NameResolver newChild(GraphName namespace) {
-    GraphName resolverNamespace = resolve(namespace);
-    return new NameResolver(resolverNamespace, remappings);
+    return new NameResolver(resolve(namespace), remappings);
   }
 
   /**

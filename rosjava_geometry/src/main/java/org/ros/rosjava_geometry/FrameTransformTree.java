@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 
 import geometry_msgs.TransformStamped;
 import org.ros.namespace.GraphName;
+import org.ros.namespace.NameResolver;
 
 import java.util.Map;
 
@@ -36,34 +37,42 @@ import java.util.Map;
  */
 public class FrameTransformTree {
 
+  private final NameResolver nameResolver;
+
   /**
    * A {@link Map} from child frame ID to the child frame's most recent
    * transform.
    */
   private final Map<GraphName, geometry_msgs.TransformStamped> transforms;
 
-  // TODO(damonkohler): Use NameResolver?
-  private GraphName prefix;
-
-  public FrameTransformTree() {
+  public FrameTransformTree(NameResolver nameResolver) {
+    this.nameResolver = nameResolver;
     transforms = Maps.newConcurrentMap();
-    prefix = null;
   }
 
   /**
-   * Adds a transform.
+   * Updates the transform tree with the provided transform.
    * 
    * @param transform
-   *          the transform to add
+   *          the transform to update
    */
   public void updateTransform(geometry_msgs.TransformStamped transform) {
-    GraphName frame = new GraphName(transform.getChildFrameId());
-    transforms.put(frame, transform);
+    transforms.put(nameResolver.resolve(transform.getChildFrameId()), transform);
+  }
+
+  public GraphName findRootFrame(GraphName sourceFrame) {
+    GraphName targetFrame = sourceFrame;
+    while (true) {
+      TransformStamped transformStamped = getLatestTransform(targetFrame);
+      if (transformStamped == null) {
+        return targetFrame;
+      }
+      targetFrame = nameResolver.resolve(transformStamped.getHeader().getFrameId());
+    }
   }
 
   private geometry_msgs.TransformStamped getLatestTransform(GraphName frame) {
-    GraphName fullyQualifiedFrame = makeFullyQualified(frame);
-    return transforms.get(fullyQualifiedFrame);
+    return transforms.get(nameResolver.resolve(frame));
   }
 
   /**
@@ -105,7 +114,7 @@ public class FrameTransformTree {
    * @return the {@link Transform} from {@code frame} to root
    */
   private FrameTransform newFrameTransformToRoot(GraphName frame) {
-    GraphName sourceFrame = makeFullyQualified(frame);
+    GraphName sourceFrame = nameResolver.resolve(frame);
     Transform result = Transform.newIdentityTransform();
     GraphName targetFrame = sourceFrame;
     while (true) {
@@ -114,23 +123,7 @@ public class FrameTransformTree {
         return new FrameTransform(result, sourceFrame, targetFrame);
       }
       result = Transform.newFromTransformMessage(transformStamped.getTransform()).multiply(result);
-      targetFrame = makeFullyQualified(new GraphName(transformStamped.getHeader().getFrameId()));
+      targetFrame = nameResolver.resolve(transformStamped.getHeader().getFrameId());
     }
-  }
-
-  public void setPrefix(GraphName prefix) {
-    this.prefix = prefix;
-  }
-
-  public void setPrefix(String prefix) {
-    setPrefix(new GraphName(prefix));
-  }
-
-  private GraphName makeFullyQualified(GraphName frame) {
-    Preconditions.checkNotNull(frame, "Frame not specified.");
-    if (prefix != null) {
-      return prefix.join(frame);
-    }
-    return frame.toGlobal();
   }
 }
