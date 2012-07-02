@@ -35,14 +35,16 @@ public class ClockTopicTimeProvider implements TimeProvider {
 
   private final Subscriber<rosgraph_msgs.Clock> subscriber;
 
+  private Object mutex;
   private rosgraph_msgs.Clock clock;
 
   public ClockTopicTimeProvider(DefaultNode defaultNode) {
     subscriber = defaultNode.newSubscriber(Topics.CLOCK, rosgraph_msgs.Clock._TYPE);
+    mutex = new Object();
     subscriber.addMessageListener(new MessageListener<Clock>() {
       @Override
       public void onNewMessage(Clock message) {
-        synchronized (clock) {
+        synchronized (mutex) {
           clock = message;
         }
       }
@@ -56,7 +58,7 @@ public class ClockTopicTimeProvider implements TimeProvider {
   @Override
   public Time getCurrentTime() {
     Preconditions.checkNotNull(clock);
-    synchronized (clock) {
+    synchronized (mutex) {
       return new Time(clock.getClock());
     }
   }
