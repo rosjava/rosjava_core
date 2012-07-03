@@ -34,9 +34,9 @@ public class MessageContextProvider {
   private final Map<MessageDeclaration, MessageContext> cache;
   private final MessageFactory messageFactory;
 
-  public MessageContextProvider(final MessageFactory messageFactory) {
-    this.messageFactory = messageFactory;
+  public MessageContextProvider(MessageFactory messageFactory) {
     Preconditions.checkNotNull(messageFactory);
+    this.messageFactory = messageFactory;
     cache = Maps.newConcurrentMap();
   }
 
