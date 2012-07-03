@@ -182,4 +182,12 @@ public class RawMessageSerializationTest {
     rawMessage.setInt32Array("data", new int[] { 1, 2, 3, 4, 5 });
     checkSerializeAndDeserialize(rawMessage);
   }
+
+  @Test
+  public void testFloat64Array() {
+    topicDefinitionResourceProvider.add("foo/foo", "float64[] data");
+    RawMessage rawMessage = messageFactory.newFromType("foo/foo");
+    rawMessage.setFloat64Array("data", new double[] { 1, 2, 3, 4, 5 });
+    checkSerializeAndDeserialize(rawMessage);
+  }
 }

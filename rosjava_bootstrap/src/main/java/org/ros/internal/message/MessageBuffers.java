@@ -66,6 +66,7 @@ public class MessageBuffers {
 
       @Override
       public void passivateObject(ChannelBuffer channelBuffer) throws Exception {
+        channelBuffer.clear();
       }
     });
   }

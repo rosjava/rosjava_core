@@ -77,7 +77,7 @@ public class ServiceIntegrationTest extends RosTest {
 
     assertTrue(countDownServiceServerListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
 
-    final CountDownLatch latch = new CountDownLatch(1);
+    final CountDownLatch latch = new CountDownLatch(2);
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
@@ -104,6 +104,22 @@ public class ServiceIntegrationTest extends RosTest {
           @Override
           public void onSuccess(test_ros.AddTwoIntsResponse response) {
             assertEquals(response.getSum(), 4);
+            latch.countDown();
+          }
+
+          @Override
+          public void onFailure(RemoteException e) {
+            throw new RuntimeException(e);
+          }
+        });
+
+        // Regression test for issue 122.
+        request.setA(3);
+        request.setB(3);
+        serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoIntsResponse>() {
+          @Override
+          public void onSuccess(test_ros.AddTwoIntsResponse response) {
+            assertEquals(response.getSum(), 6);
             latch.countDown();
           }
 
