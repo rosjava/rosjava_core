@@ -17,6 +17,7 @@
 package org.ros.internal.message;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.ros.exception.RosRuntimeException;
@@ -28,6 +29,8 @@ import org.ros.internal.message.field.MessageFields;
 import org.ros.internal.message.field.PrimitiveFieldType;
 import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
+
+import java.util.Set;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -167,6 +170,7 @@ public class MessageInterfaceBuilder {
 
   private void appendSettersAndGetters(MessageContext messageContext, StringBuilder builder) {
     MessageFields messageFields = new MessageFields(messageContext);
+    Set<String> getters = Sets.newHashSet();
     for (Field field : messageFields.getFields()) {
       if (field.isConstant()) {
         continue;
@@ -174,6 +178,14 @@ public class MessageInterfaceBuilder {
       String type = field.getJavaTypeName();
       String getter = messageContext.getFieldGetterName(field.getName());
       String setter = messageContext.getFieldSetterName(field.getName());
+      if (getters.contains(getter)) {
+        // In the case that two or more message fields have the same name except
+        // for capitalization, we only generate a getter and setter pair for the
+        // first one. The following fields will only be accessible via the
+        // RawMessage interface.
+        continue;
+      }
+      getters.add(getter);
       builder.append(String.format("  %s %s();\n", type, getter));
       builder.append(String.format("  void %s(%s value);\n", setter, type));
     }
