@@ -67,20 +67,4 @@ public class Vector3Test {
     assertEquals(2, new Vector3(0, 0, 2).length(), 1e-9);
     assertEquals(Math.sqrt(3), new Vector3(1, 1, 1).length(), 1e-9);
   }
-
-  @Test
-  public void testPowersOf2() {
-    System.out.println(Integer.numberOfLeadingZeros(Integer.MAX_VALUE));
-    System.out.println(1 << 30);
-    int max = Integer.MAX_VALUE / 2;
-    System.out.println(max);
-    int newStride = max - 1;
-    newStride |= newStride >> 1;
-    newStride |= newStride >> 2;
-    newStride |= newStride >> 4;
-    newStride |= newStride >> 8;
-    newStride |= newStride >> 16;
-    newStride++;
-    System.out.println(newStride);
-  }
 }
