@@ -31,8 +31,8 @@ public class ByteArrayField extends Field {
 
   private byte[] value;
 
-  public static ByteArrayField newVariable(String name, int size) {
-    return new ByteArrayField(PrimitiveFieldType.INT8, name, size);
+  public static ByteArrayField newVariable(FieldType type, String name, int size) {
+    return new ByteArrayField(type, name, size);
   }
 
   private ByteArrayField(FieldType type, String name, int size) {

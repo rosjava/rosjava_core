@@ -31,13 +31,13 @@ public class LongArrayField extends Field {
 
   private long[] value;
 
-  public static LongArrayField newVariable(FieldType type, int size, String name) {
+  public static LongArrayField newVariable(FieldType type, String name, int size) {
     Preconditions.checkArgument(type.equals(PrimitiveFieldType.UINT32)
         || type.equals(PrimitiveFieldType.INT64) || type.equals(PrimitiveFieldType.UINT64));
-    return new LongArrayField(type, size, name);
+    return new LongArrayField(type, name, size);
   }
 
-  private LongArrayField(FieldType type, int size, String name) {
+  private LongArrayField(FieldType type, String name, int size) {
     super(type, name, false);
     this.size = size;
     setValue(new long[Math.max(0, size)]);

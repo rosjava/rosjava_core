@@ -31,13 +31,11 @@ public class ShortArrayField extends Field {
 
   private short[] value;
 
-  public static ShortArrayField newVariable(FieldType type, int size, String name) {
-    Preconditions.checkArgument(type.equals(PrimitiveFieldType.UINT8)
-        || type.equals(PrimitiveFieldType.INT16));
-    return new ShortArrayField(type, size, name);
+  public static ShortArrayField newVariable(FieldType type, String name, int size) {
+    return new ShortArrayField(type, name, size);
   }
 
-  private ShortArrayField(FieldType type, int size, String name) {
+  private ShortArrayField(FieldType type, String name, int size) {
     super(type, name, false);
     this.size = size;
     setValue(new short[Math.max(0, size)]);

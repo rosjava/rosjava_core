@@ -31,7 +31,7 @@ public class FloatArrayField extends Field {
 
   private float[] value;
 
-  public static FloatArrayField newVariable(int size, String name) {
+  public static FloatArrayField newVariable(String name, int size) {
     return new FloatArrayField(PrimitiveFieldType.FLOAT32, name, size);
   }
 

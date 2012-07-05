@@ -31,9 +31,7 @@ public class IntegerArrayField extends Field {
 
   private int[] value;
 
-  public static IntegerArrayField newVariable(FieldType type, int size, String name) {
-    Preconditions.checkArgument(type.equals(PrimitiveFieldType.UINT16)
-        || type.equals(PrimitiveFieldType.INT32));
+  public static IntegerArrayField newVariable(FieldType type, String name, int size) {
     return new IntegerArrayField(type, name, size);
   }
 

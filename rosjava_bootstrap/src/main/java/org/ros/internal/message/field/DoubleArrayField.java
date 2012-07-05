@@ -31,11 +31,11 @@ public class DoubleArrayField extends Field {
 
   private double[] value;
 
-  public static DoubleArrayField newVariable(int size, String name) {
-    return new DoubleArrayField(PrimitiveFieldType.FLOAT64, size, name);
+  public static DoubleArrayField newVariable(String name, int size) {
+    return new DoubleArrayField(PrimitiveFieldType.FLOAT64, name, size);
   }
 
-  private DoubleArrayField(FieldType type, int size, String name) {
+  private DoubleArrayField(FieldType type, String name, int size) {
     super(type, name, false);
     this.size = size;
     setValue(new double[Math.max(0, size)]);

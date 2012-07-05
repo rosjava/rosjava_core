@@ -31,7 +31,7 @@ public class BooleanArrayField extends Field {
 
   private boolean[] value;
 
-  public static BooleanArrayField newVariable(int size, String name) {
+  public static BooleanArrayField newVariable(String name, int size) {
     return new BooleanArrayField(PrimitiveFieldType.BOOL, name, size);
   }
 

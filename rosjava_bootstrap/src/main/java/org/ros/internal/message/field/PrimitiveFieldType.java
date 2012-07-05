@@ -40,7 +40,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public BooleanArrayField newVariableList(String name, int size) {
-      return BooleanArrayField.newVariable(size, name);
+      return BooleanArrayField.newVariable(name, size);
     }
 
     @Override
@@ -80,7 +80,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return ByteArrayField.newVariable(name, size);
+      return ByteArrayField.newVariable(this, name, size);
     }
 
     @Override
@@ -123,7 +123,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return INT8.newVariableList(name, size);
+      return ByteArrayField.newVariable(this, name, size);
     }
 
     @Override
@@ -162,7 +162,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return INT8.newVariableList(name, size);
+      return ByteArrayField.newVariable(this, name, size);
     }
 
     @Override
@@ -204,7 +204,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return UINT8.newVariableList(name, size);
+      return ByteArrayField.newVariable(this, name, size);
     }
 
     @Override
@@ -243,7 +243,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return ShortArrayField.newVariable(this, size, name);
+      return ShortArrayField.newVariable(this, name, size);
     }
 
     @Override
@@ -283,7 +283,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return INT16.newVariableList(name, size);
+      return ShortArrayField.newVariable(this, name, size);
     }
 
     @Override
@@ -322,7 +322,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return IntegerArrayField.newVariable(this, size, name);
+      return IntegerArrayField.newVariable(this, name, size);
     }
 
     @Override
@@ -362,7 +362,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return INT32.newVariableList(name, size);
+      return IntegerArrayField.newVariable(this, name, size);
     }
 
     @Override
@@ -401,7 +401,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return LongArrayField.newVariable(this, size, name);
+      return LongArrayField.newVariable(this, name, size);
     }
 
     @Override
@@ -480,7 +480,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return FloatArrayField.newVariable(size, name);
+      return FloatArrayField.newVariable(name, size);
     }
 
     @Override
@@ -525,7 +525,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return DoubleArrayField.newVariable(size, name);
+      return DoubleArrayField.newVariable(name, size);
     }
 
     @Override
