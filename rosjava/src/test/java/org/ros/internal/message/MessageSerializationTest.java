@@ -186,7 +186,7 @@ public class MessageSerializationTest {
   }
 
   @Test
-  public void testNestedMessageArray() {
+  public void testNestedMessageList() {
     messageDefinitionReflectionProvider.add(NestedList._TYPE, NestedList._DEFINITION);
     NestedList nestedListMessage = defaultMessageFactory.newFromType(NestedList._TYPE);
     std_msgs.String stringMessageA = defaultMessageFactory.newFromType(std_msgs.String._TYPE);

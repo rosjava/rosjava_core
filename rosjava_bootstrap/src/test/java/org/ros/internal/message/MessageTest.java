@@ -18,6 +18,8 @@ package org.ros.internal.message;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.collect.Lists;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.message.topic.TopicDefinitionResourceProvider;
@@ -59,8 +61,7 @@ public class MessageTest {
 
   @Test
   public void testStringWithComments() {
-    topicDefinitionResourceProvider.add("foo/foo",
-        "# foo\nstring data\n    # string other data");
+    topicDefinitionResourceProvider.add("foo/foo", "# foo\nstring data\n    # string other data");
     String data = "Hello, ROS!";
     RawMessage rawMessage = messageFactory.newFromType("foo/foo");
     rawMessage.setString("data", data);
@@ -85,6 +86,18 @@ public class MessageTest {
     byte data = 42;
     barMessage.setInt8("data", data);
     assertEquals(data, fooMessage.getMessage("data").toRawMessage().getInt8("data"));
+  }
+
+  @Test
+  public void testNestedMessageList() {
+    topicDefinitionResourceProvider.add("foo/foo", "bar[] data");
+    topicDefinitionResourceProvider.add("foo/bar", "int8 data");
+    RawMessage fooMessage = messageFactory.newFromType("foo/foo");
+    RawMessage barMessage = messageFactory.newFromType("foo/bar");
+    fooMessage.setMessageList("data", Lists.<Message>newArrayList(barMessage));
+    byte data = 42;
+    barMessage.toRawMessage().setInt8("data", data);
+    assertEquals(data, fooMessage.getMessageList("data").get(0).toRawMessage().getInt8("data"));
   }
 
   @Test
