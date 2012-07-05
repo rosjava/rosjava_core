@@ -142,7 +142,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   @Override
   public void publish(T message) {
     if (DEBUG) {
-      log.info("Publishing message: " + message);
+      log.info(String.format("Publishing message %s on topic %s.", message, getTopicName()));
     }
     outgoingMessageQueue.put(message);
   }
@@ -192,7 +192,8 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
    */
   public void addSubscriber(SubscriberIdentifier subscriberIdentifer, Channel channel) {
     if (DEBUG) {
-      log.info("Adding subscriber: " + subscriberIdentifer);
+      log.info(String.format("Adding subscriber %s channel %s to publisher %s.",
+          subscriberIdentifer, channel, this));
     }
     outgoingMessageQueue.addChannel(channel);
     signalOnNewSubscriber(subscriberIdentifer);

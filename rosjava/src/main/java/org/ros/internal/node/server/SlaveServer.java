@@ -178,6 +178,7 @@ public class SlaveServer extends XmlRpcServer {
 
   public ProtocolDescription requestTopic(String topicName, Collection<String> protocols)
       throws ServerException {
+    // TODO(damonkohler): Use NameResolver.
     // Canonicalize topic name.
     GraphName graphName = new GraphName(topicName).toGlobal();
     if (!topicParticipantManager.hasPublisher(graphName)) {

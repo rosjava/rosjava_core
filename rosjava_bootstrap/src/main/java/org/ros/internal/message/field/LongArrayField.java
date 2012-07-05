@@ -57,7 +57,9 @@ public class LongArrayField extends Field {
 
   @Override
   public void serialize(ChannelBuffer buffer) {
-    buffer.writeInt(value.length);
+    if (size < 0) {
+      buffer.writeInt(value.length);
+    }
     for (long v : value) {
       type.serialize(v, buffer);
     }
@@ -65,9 +67,12 @@ public class LongArrayField extends Field {
 
   @Override
   public void deserialize(ChannelBuffer buffer) {
-    int size = buffer.readInt();
-    value = new long[size];
-    for (int i = 0; i < size; i++) {
+    int currentSize = size;
+    if (currentSize < 0) {
+      currentSize = buffer.readInt();
+    }
+    value = new long[currentSize];
+    for (int i = 0; i < currentSize; i++) {
       value[i] = (Long) type.deserialize(buffer);
     }
   }

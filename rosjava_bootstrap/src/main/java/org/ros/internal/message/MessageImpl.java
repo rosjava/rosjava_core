@@ -440,6 +440,11 @@ class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
+  public String toString() {
+    return String.format("MessageImpl<%s>", getType());
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;

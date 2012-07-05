@@ -37,6 +37,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class OutgoingMessageQueue<T> {
 
+  private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
 
   private static final int MESSAGE_QUEUE_CAPACITY = 8192;
@@ -57,6 +58,11 @@ public class OutgoingMessageQueue<T> {
       T message = queue.take();
       buffer.clear();
       serializer.serialize(message, buffer);
+      if (DEBUG) {
+        log.info(String.format("Writing %d bytes to %d channels.", buffer.readableBytes(),
+            channelGroup.size()));
+      }
+      // Note that the buffer is automatically duplicated by Netty to avoid race conditions.
       channelGroup.write(buffer);
     }
   }

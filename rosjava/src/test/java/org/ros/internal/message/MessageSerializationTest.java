@@ -36,6 +36,7 @@ public class MessageSerializationTest {
 
   private MessageDefinitionReflectionProvider messageDefinitionReflectionProvider;
   private DefaultMessageFactory defaultMessageFactory;
+  private DefaultMessageSerializer serializer;
 
   private interface Nested extends Message {
     static final java.lang.String _TYPE = "test/Nested";
@@ -56,18 +57,18 @@ public class MessageSerializationTest {
   }
 
   @Before
-  public void setUp() {
+  public void before() {
     messageDefinitionReflectionProvider = new MessageDefinitionReflectionProvider();
     messageDefinitionReflectionProvider.add(Nested._TYPE, Nested._DEFINITION);
     messageDefinitionReflectionProvider.add(NestedList._TYPE, NestedList._DEFINITION);
     defaultMessageFactory = new DefaultMessageFactory(messageDefinitionReflectionProvider);
     defaultMessageFactory.getMessageInterfaceClassProvider().add(Nested._TYPE, Nested.class);
     defaultMessageFactory.getMessageInterfaceClassProvider().add(NestedList._TYPE, NestedList.class);
+    serializer = new DefaultMessageSerializer();
   }
 
   private <T extends Message> void checkSerializeAndDeserialize(T message) {
     ChannelBuffer buffer = MessageBuffers.dynamicBuffer();
-    DefaultMessageSerializer serializer = new DefaultMessageSerializer();
     serializer.serialize(message, buffer);
     DefaultMessageDeserializer<T> deserializer =
         new DefaultMessageDeserializer<T>(message.toRawMessage().getIdentifier(),
@@ -194,5 +195,20 @@ public class MessageSerializationTest {
     stringMessageB.setData("Hello, ROS!");
     nestedListMessage.setData(Lists.<std_msgs.String>newArrayList(stringMessageA, stringMessageB));
     checkSerializeAndDeserialize(nestedListMessage);
+  }
+
+  /**
+   * Regression test for issue 125.
+   */
+  @Test
+  public void testOdometry() {
+    nav_msgs.Odometry message = defaultMessageFactory.newFromType(nav_msgs.Odometry._TYPE);
+    checkSerializeAndDeserialize(message);
+    ChannelBuffer buffer = MessageBuffers.dynamicBuffer();
+    serializer.serialize(message, buffer);
+    for (byte b : buffer.toByteBuffer().array()) {
+      System.out.print(String.format("0x%02x ", b));
+      assertEquals(0, b);
+    }
   }
 }

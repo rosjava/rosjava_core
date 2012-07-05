@@ -16,14 +16,13 @@
 
 package org.ros.internal.transport;
 
-import org.ros.concurrent.CircularBlockingQueue;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.ros.concurrent.CancellableLoop;
+import org.ros.concurrent.CircularBlockingQueue;
 import org.ros.concurrent.ListenerCollection;
 import org.ros.concurrent.ListenerCollection.SignalRunnable;
 import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;

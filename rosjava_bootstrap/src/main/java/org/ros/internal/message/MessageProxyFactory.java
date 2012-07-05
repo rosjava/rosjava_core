@@ -52,7 +52,7 @@ public class MessageProxyFactory {
     // Header messages are automatically populated with a monotonically
     // increasing sequence number.
     if (messageImpl.getType().equals(HEADER_MESSAGE_TYPE)) {
-      messageImpl.setUInt32(SEQUENCE_FIELD_NAME, SEQUENCE_NUMBER.incrementAndGet());
+      messageImpl.setUInt32(SEQUENCE_FIELD_NAME, SEQUENCE_NUMBER.getAndIncrement());
     }
     Class<T> messageInterfaceClass =
         (Class<T>) messageInterfaceClassProvider.get(messageDeclaration.getType());

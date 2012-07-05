@@ -139,6 +139,11 @@ public class ConnectionHeader {
   }
 
   @Override
+  public String toString() {
+    return String.format("ConnectionHeader <%s>", fields.toString());
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;

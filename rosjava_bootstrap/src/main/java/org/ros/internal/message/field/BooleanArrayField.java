@@ -55,7 +55,9 @@ public class BooleanArrayField extends Field {
 
   @Override
   public void serialize(ChannelBuffer buffer) {
-    buffer.writeInt(value.length);
+    if (size < 0) {
+      buffer.writeInt(value.length);
+    }
     for (boolean v : value) {
       type.serialize(v, buffer);
     }
@@ -63,9 +65,12 @@ public class BooleanArrayField extends Field {
 
   @Override
   public void deserialize(ChannelBuffer buffer) {
-    int size = buffer.readInt();
-    value = new boolean[size];
-    for (int i = 0; i < size; i++) {
+    int currentSize = size;
+    if (currentSize < 0) {
+      currentSize = buffer.readInt();
+    }
+    value = new boolean[currentSize];
+    for (int i = 0; i < currentSize; i++) {
       value[i] = (Boolean) type.deserialize(buffer);
     }
   }

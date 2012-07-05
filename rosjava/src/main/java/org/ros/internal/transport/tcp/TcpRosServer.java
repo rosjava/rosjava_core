@@ -81,8 +81,8 @@ public class TcpRosServer {
         new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN));
     bootstrap.setOption("child.keepAlive", true);
     incomingChannelGroup = new DefaultChannelGroup();
-    bootstrap.setPipelineFactory(new TcpServerPipelineFactory(incomingChannelGroup, topicParticipantManager,
-        serviceManager));
+    bootstrap.setPipelineFactory(new TcpServerPipelineFactory(incomingChannelGroup,
+        topicParticipantManager, serviceManager));
 
     outgoingChannel = bootstrap.bind(bindAddress.toInetSocketAddress());
     advertiseAddress.setPortCallable(new Callable<Integer>() {
