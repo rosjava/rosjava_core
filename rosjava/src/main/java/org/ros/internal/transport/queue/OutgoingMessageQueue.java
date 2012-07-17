@@ -28,7 +28,6 @@ import org.jboss.netty.channel.group.ChannelGroupFutureListener;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.CircularBlockingQueue;
-import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.MessageBufferPool;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageSerializer;
@@ -42,6 +41,8 @@ public class OutgoingMessageQueue<T> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
+
+  private static final int QUEUE_CAPACITY = 128;
 
   private final MessageSerializer<T> serializer;
   private final CircularBlockingQueue<T> queue;
@@ -78,7 +79,7 @@ public class OutgoingMessageQueue<T> {
 
   public OutgoingMessageQueue(MessageSerializer<T> serializer, ExecutorService executorService) {
     this.serializer = serializer;
-    queue = new CircularBlockingQueue<T>(Integer.MAX_VALUE);
+    queue = new CircularBlockingQueue<T>(QUEUE_CAPACITY);
     channelGroup = new DefaultChannelGroup();
     writer = new Writer();
     messageBufferPool = new MessageBufferPool();
@@ -99,12 +100,8 @@ public class OutgoingMessageQueue<T> {
    * @param message
    *          the message to add to the queue
    */
-  public void put(T message) {
-    try {
-      queue.put(message);
-    } catch (InterruptedException e) {
-      throw new RosRuntimeException(e);
-    }
+  public void add(T message) {
+    queue.add(message);
     setLatchedMessage(message);
   }
 
@@ -118,20 +115,6 @@ public class OutgoingMessageQueue<T> {
   public void shutdown() {
     writer.cancel();
     channelGroup.close().awaitUninterruptibly();
-  }
-
-  /**
-   * @see CircularBlockingQueue#setLimit(int)
-   */
-  public void setQueueLimit(int limit) {
-    queue.setLimit(limit);
-  }
-
-  /**
-   * @see CircularBlockingQueue#getLimit
-   */
-  public int getQueueLimit() {
-    return queue.getLimit();
   }
 
   /**

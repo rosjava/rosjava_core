@@ -44,6 +44,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class TopicIntegrationTest extends RosTest {
 
+  private static final int QUEUE_CAPACITY = 128;
+
   private final std_msgs.String expectedMessage;
 
   public TopicIntegrationTest() {
@@ -87,7 +89,7 @@ public class TopicIntegrationTest extends RosTest {
             assertEquals(expectedMessage, message);
             messageReceived.countDown();
           }
-        }, Integer.MAX_VALUE);
+        }, QUEUE_CAPACITY);
       }
     }, nodeConfiguration);
 
@@ -125,7 +127,7 @@ public class TopicIntegrationTest extends RosTest {
             assertEquals(expectedMessage, message);
             messageReceived.countDown();
           }
-        }, Integer.MAX_VALUE);
+        }, QUEUE_CAPACITY);
       }
     }, nodeConfiguration);
 
@@ -236,7 +238,7 @@ public class TopicIntegrationTest extends RosTest {
       public void onStart(ConnectedNode connectedNode) {
         Subscriber<test_ros.TestHeader> subscriber =
             connectedNode.newSubscriber("foo", test_ros.TestHeader._TYPE);
-        subscriber.addMessageListener(listener, Integer.MAX_VALUE);
+        subscriber.addMessageListener(listener, QUEUE_CAPACITY);
       }
     }, nodeConfiguration);
 

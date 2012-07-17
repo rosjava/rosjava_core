@@ -16,12 +16,13 @@
 
 package org.ros.internal.transport.queue;
 
+import org.ros.concurrent.CircularBlockingQueue;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
-import org.ros.concurrent.CircularBlockingQueue;
 import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;
 import org.ros.message.MessageDeserializer;
 
@@ -59,7 +60,7 @@ public class MessageReceiver<T> extends AbstractNamedChannelHandler {
     // TODO(damonkohler): Use MessageBuffers pool.
     // We have to make a defensive copy of the buffer here because Netty does
     // not guarantee that the returned ChannelBuffer will not be reused.
-    lazyMessages.put(new LazyMessage<T>(buffer.copy(), deserializer));
+    lazyMessages.add(new LazyMessage<T>(buffer.copy(), deserializer));
     super.messageReceived(ctx, e);
   }
 }

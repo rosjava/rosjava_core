@@ -24,7 +24,7 @@ import com.google.common.util.concurrent.SettableFuture;
  * @param <T>
  *          the entry type
  */
-final class ListenableEntry<T> {
+public class ListenableEntry<T> {
 
   private final T entry;
   private final SettableFuture<Void> future;

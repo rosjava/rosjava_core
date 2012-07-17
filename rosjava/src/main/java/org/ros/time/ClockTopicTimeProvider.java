@@ -48,7 +48,7 @@ public class ClockTopicTimeProvider implements TimeProvider {
           clock = message;
         }
       }
-    }, Integer.MAX_VALUE);
+    });
   }
 
   public Subscriber<rosgraph_msgs.Clock> getSubscriber() {

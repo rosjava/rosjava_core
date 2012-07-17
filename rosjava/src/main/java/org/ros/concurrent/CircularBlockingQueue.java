@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Google Inc.
+ * Copyright (C) 2012 Google Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,24 +18,33 @@ package org.ros.concurrent;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Queue;
 
 /**
- * A {@link BlockingQueue} that removes the old elements when the number of
- * elements exceeds the limit.
+ * A {@link Queue} that removes the old elements when the number of elements
+ * exceeds the limit and blocks on {@link #take()} when there are no elements
+ * available.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class CircularBlockingQueue<T> {
 
-  private final LinkedBlockingQueue<ListenableEntry<T>> queue;
+  private final ListenableEntry<T>[] queue;
+  private final Object mutex;
 
   /**
-   * The number of elements allowed in the queue at one time. Unlike the
-   * capacity specified by
-   * {@link CircularBlockingQueue#CircularBlockingQueue(int)}, {@link #limit}
-   * can be changed at runtime.
+   * Points to the next entry that will be returned by {@link #take()} unless
+   * {@link #isEmpty()}.
+   */
+  private int start;
+
+  /**
+   * The number of entries in the queue.
+   */
+  private int length;
+
+  /**
+   * The maximum number of entries in the queue.
    */
   private int limit;
 
@@ -43,96 +52,68 @@ public class CircularBlockingQueue<T> {
    * @param capacity
    *          the maximum number of elements allowed in the queue
    */
+  @SuppressWarnings("unchecked")
   public CircularBlockingQueue(int capacity) {
-    queue = new LinkedBlockingQueue<ListenableEntry<T>>(capacity);
-    this.limit = capacity;
+    queue = (ListenableEntry<T>[]) new ListenableEntry[capacity];
+    mutex = new Object();
+    start = 0;
+    length = 0;
+    limit = capacity;
   }
 
   /**
-   * Constructs a new {@link CircularBlockingQueue} with the capacity set to
-   * {@link Integer#MAX_VALUE}.
-   */
-  public CircularBlockingQueue() {
-    this(Integer.MAX_VALUE);
-  }
-
-  /**
-   * Remove elements until the size of the queue is lower than the limit.
-   */
-  private void shrink() {
-    while (queue.size() > limit) {
-      ListenableEntry<T> listenableEntry = queue.remove();
-      listenableEntry.getFuture().setException(new DroppedEntryException());
-    }
-  }
-
-  /**
-   * Adjusts the limit on the number of elements allowed in the queue.
-   * 
-   * @param limit
-   *          the number of elements allowed in the queue
-   */
-  public void setLimit(int limit) {
-    this.limit = limit;
-    shrink();
-  }
-
-  /**
-   * @return the number of elements allowed in the queue
-   */
-  public int getLimit() {
-    return limit;
-  }
-
-  /**
-   * @return the number of elements in the queue
-   */
-  public int getSize() {
-    return queue.size();
-  }
-
-  /**
-   * Adds the specified entry to the tail of the queue, waiting if necessary for
-   * space to become available and then shrinking the queue if necessary to stay
-   * within the queue's limit.
-   * <p>
-   * When the queue shrinks, older entries are removed first.
+   * Adds the specified entry to the tail of the queue, overwriting older
+   * entries if necessary.
    * 
    * @param entry
    *          the entry to add
    * @return a {@link ListenableFuture} whose result will be set when the item
    *         is removed from the queue or whose exception will be set when the
    *         item is dropped from the queue
-   * @throws InterruptedException
    */
-  public ListenableFuture<Void> put(T entry) throws InterruptedException {
+  public ListenableFuture<Void> add(T entry) {
     ListenableEntry<T> listenableEntry = new ListenableEntry<T>(entry);
-    synchronized (queue) {
-      try {
-        queue.put(listenableEntry);
-      } finally {
-        shrink();
+    synchronized (mutex) {
+      queue[(start + length) % limit] = listenableEntry;
+      if (length == limit) {
+        queue[start].getFuture().setException(new DroppedEntryException());
+        start = (start + 1) % limit;
+      } else {
+        length++;
       }
-      queue.notify();
+      mutex.notify();
     }
     return listenableEntry.getFuture();
   }
 
   /**
-   * @see LinkedBlockingQueue#take()
+   * Returns the oldest entry in the queue, blocking if necessary until an entry
+   * is available.
+   * 
+   * @return the oldest entry
+   * @throws InterruptedException
    */
   public T take() throws InterruptedException {
     ListenableEntry<T> listenableEntry;
-    synchronized (queue) {
+    synchronized (mutex) {
       while (true) {
-        listenableEntry = queue.poll();
-        if (listenableEntry != null) {
+        if (length > 0) {
+          listenableEntry = queue[start];
+          start = (start + 1) % limit;
+          length--;
           break;
         }
-        queue.wait();
+        mutex.wait();
       }
     }
     listenableEntry.getFuture().set(null);
     return listenableEntry.getEntry();
+  }
+
+  /**
+   * @return {@code true} if the queue is empty, {@code false} otherwise
+   */
+  public boolean isEmpty() {
+    return length == 0;
   }
 }

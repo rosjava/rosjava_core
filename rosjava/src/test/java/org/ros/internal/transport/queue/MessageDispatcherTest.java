@@ -39,6 +39,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MessageDispatcherTest {
 
+  private static final int QUEUE_CAPACITY = 128;
+
   private ExecutorService executorService;
   private CircularBlockingQueue<LazyMessage<std_msgs.Int32>> lazyMessages;
   private MessageFactory messageFactory;
@@ -46,7 +48,7 @@ public class MessageDispatcherTest {
   @Before
   public void before() {
     executorService = Executors.newCachedThreadPool();
-    lazyMessages = new CircularBlockingQueue<LazyMessage<std_msgs.Int32>>();
+    lazyMessages = new CircularBlockingQueue<LazyMessage<std_msgs.Int32>>(128);
     messageFactory = new DefaultMessageFactory(new MessageDefinitionReflectionProvider());
   }
 
@@ -75,14 +77,14 @@ public class MessageDispatcherTest {
         } catch (InterruptedException e) {
         }
       }
-    }, Integer.MAX_VALUE);
+    }, QUEUE_CAPACITY);
     executorService.execute(messageDispatcher);
 
     for (int i = 0; i < numberOfMessages; i++) {
       final int count = i;
       std_msgs.Int32 message = messageFactory.newFromType(std_msgs.Int32._TYPE);
       message.setData(count);
-      lazyMessages.put(new LazyMessage<std_msgs.Int32>(message));
+      lazyMessages.add(new LazyMessage<std_msgs.Int32>(message));
     }
 
     assertTrue(latch.await(1, TimeUnit.SECONDS));

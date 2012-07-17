@@ -30,6 +30,8 @@ import java.util.concurrent.TimeUnit;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ListenerGroup<T> {
+  
+  private final static int DEFAULT_QUEUE_CAPACITY = 128;
 
   private final ExecutorService executorService;
   private final Collection<EventDispatcher<T>> eventDispatchers;
@@ -44,13 +46,13 @@ public class ListenerGroup<T> {
    * 
    * @param listener
    *          the listener to add
-   * @param limit
+   * @param queueCapacity
    *          the maximum number of events to buffer
    * @return the {@link EventDispatcher} responsible for calling the specified
    *         listener
    */
-  public EventDispatcher<T> add(T listener, int limit) {
-    EventDispatcher<T> eventDispatcher = new EventDispatcher<T>(listener, limit);
+  public EventDispatcher<T> add(T listener, int queueCapacity) {
+    EventDispatcher<T> eventDispatcher = new EventDispatcher<T>(listener, queueCapacity);
     eventDispatchers.add(eventDispatcher);
     executorService.execute(eventDispatcher);
     return eventDispatcher;
@@ -58,7 +60,7 @@ public class ListenerGroup<T> {
 
   /**
    * Adds the specified listener to the {@link ListenerGroup} with the queue
-   * limit set to {@link Integer#MAX_VALUE}.
+   * limit set to {@link #DEFAULT_QUEUE_CAPACITY}.
    * 
    * @param listener
    *          the listener to add
@@ -66,7 +68,7 @@ public class ListenerGroup<T> {
    *         listener
    */
   public EventDispatcher<T> add(T listener) {
-    return add(listener, Integer.MAX_VALUE);
+    return add(listener, DEFAULT_QUEUE_CAPACITY);
   }
 
   /**
@@ -97,7 +99,7 @@ public class ListenerGroup<T> {
    *         calling the specified listeners
    */
   public Collection<EventDispatcher<T>> addAll(Collection<T> listeners) {
-    return addAll(listeners, Integer.MAX_VALUE);
+    return addAll(listeners, DEFAULT_QUEUE_CAPACITY);
   }
 
   /**

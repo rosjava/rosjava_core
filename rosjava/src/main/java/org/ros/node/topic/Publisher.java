@@ -116,15 +116,4 @@ public interface Publisher<T> extends TopicParticipant {
    *          the {@link PublisherListener} to add
    */
   void addListener(PublisherListener<T> listener);
-
-  /**
-   * @param limit
-   *          the maximum number of messages to queue (i.e. buffer) for sending
-   */
-  void setQueueLimit(int limit);
-
-  /**
-   * @return the maximum number of messages to queue (i.e. buffer) for sending
-   */
-  int getQueueLimit();
 }

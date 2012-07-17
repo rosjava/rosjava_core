@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutorService;
 public class IncomingMessageQueue<T> {
 
   /**
-   * The maximum number of incoming messages that will be queued by default.
+   * The maximum number of incoming messages that will be queued.
    * <p>
    * This limit applies to dispatching {@link LazyMessage}s as they arrive over
    * the network. It is independent of {@link MessageDispatcher} queue
@@ -37,15 +37,14 @@ public class IncomingMessageQueue<T> {
    * {@link IncomingMessageQueue#addListener(MessageListener, int)} which are
    * consumed by user provided {@link MessageListener}s.
    */
-  private static final int DEFAULT_LAZY_MESSAGES_LIMIT = 32;
+  private static final int QUEUE_CAPACITY = 128;
 
   private final CircularBlockingQueue<LazyMessage<T>> lazyMessages;
   private final MessageReceiver<T> messageReceiver;
   private final MessageDispatcher<T> messageDispatcher;
 
   public IncomingMessageQueue(MessageDeserializer<T> deserializer, ExecutorService executorService) {
-    lazyMessages = new CircularBlockingQueue<LazyMessage<T>>();
-    lazyMessages.setLimit(DEFAULT_LAZY_MESSAGES_LIMIT);
+    lazyMessages = new CircularBlockingQueue<LazyMessage<T>>(QUEUE_CAPACITY);
     messageReceiver = new MessageReceiver<T>(lazyMessages, deserializer);
     messageDispatcher = new MessageDispatcher<T>(lazyMessages, executorService);
     executorService.execute(messageDispatcher);
@@ -63,13 +62,6 @@ public class IncomingMessageQueue<T> {
    */
   public boolean getLatchMode() {
     return messageDispatcher.getLatchMode();
-  }
-
-  /**
-   * @see CircularBlockingQueue#setLimit(int)
-   */
-  public void setLimit(int limit) {
-    lazyMessages.setLimit(limit);
   }
 
   /**

@@ -69,6 +69,8 @@ public class MessageQueueIntegrationTest {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(MessageQueueIntegrationTest.class);
 
+  private static final int QUEUE_CAPACITY = 128;
+
   private ExecutorService executorService;
   private TcpClientManager firstTcpClientManager;
   private TcpClientManager secondTcpClientManager;
@@ -123,11 +125,9 @@ public class MessageQueueIntegrationTest {
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
             MessageIdentifier.of(std_msgs.String._TYPE), topicMessageFactory), executorService);
     firstTcpClientManager = new TcpClientManager(executorService);
-    firstTcpClientManager
-        .addNamedChannelHandler(firstIncomingMessageQueue.getMessageReceiver());
+    firstTcpClientManager.addNamedChannelHandler(firstIncomingMessageQueue.getMessageReceiver());
     secondTcpClientManager = new TcpClientManager(executorService);
-    secondTcpClientManager.addNamedChannelHandler(secondIncomingMessageQueue
-        .getMessageReceiver());
+    secondTcpClientManager.addNamedChannelHandler(secondIncomingMessageQueue.getMessageReceiver());
   }
 
   @After
@@ -140,7 +140,7 @@ public class MessageQueueIntegrationTest {
     executorService.execute(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
-        outgoingMessageQueue.put(expectedMessage);
+        outgoingMessageQueue.add(expectedMessage);
         Thread.sleep(100);
       }
     });
@@ -187,7 +187,7 @@ public class MessageQueueIntegrationTest {
         assertEquals(message, expectedMessage);
         latch.countDown();
       }
-    }, Integer.MAX_VALUE);
+    }, QUEUE_CAPACITY);
     return latch;
   }
 
@@ -216,26 +216,22 @@ public class MessageQueueIntegrationTest {
 
   @Test
   public void testSendAndReceiveLatchedMessage() throws InterruptedException {
-    // Setting latched mode and writing a message should cause any future
-    // IncomingMessageQueue to receive that message.
+    // Setting latched mode and writing a message should cause any
+    // IncomingMessageQueues that connect in the future to receive the message.
     outgoingMessageQueue.setLatchMode(true);
-    outgoingMessageQueue.setQueueLimit(0);
-    outgoingMessageQueue.put(expectedMessage);
+    outgoingMessageQueue.add(expectedMessage);
     Channel serverChannel = buildServerChannel();
     firstIncomingMessageQueue.setLatchMode(true);
     secondIncomingMessageQueue.setLatchMode(true);
     connect(firstTcpClientManager, serverChannel);
     connect(secondTcpClientManager, serverChannel);
-    // The first set of incoming messages could either be from the Publisher
-    // latching or the Subscriber latching. This is equivalent to waiting for
-    // the message to arrive and ensures that we've latched it in.
+    // The first set of incoming messages could either be from the
+    // OutgoingMessageQueue latching or the Subscriber latching. This is
+    // equivalent to waiting for the message to arrive and ensures that we've
+    // latched it in.
     expectMessages();
-    // Configure both queues to drop all incoming messages and any that are
-    // currently queued.
-    firstIncomingMessageQueue.setLimit(0);
-    secondIncomingMessageQueue.setLimit(0);
-    // The second set of incoming messages can only be from the Subscriber
-    // latching since we've dropped all other messages.
+    // The second set of incoming messages can only be from the
+    // IncomingMessageQueue latching since we only sent one message.
     expectMessages();
   }
 
@@ -245,7 +241,7 @@ public class MessageQueueIntegrationTest {
     Channel serverChannel = buildServerChannel();
     connect(firstTcpClientManager, serverChannel);
     firstTcpClientManager.shutdown();
-    outgoingMessageQueue.put(expectedMessage);
+    outgoingMessageQueue.add(expectedMessage);
   }
 
   @Test
@@ -254,7 +250,7 @@ public class MessageQueueIntegrationTest {
     Channel serverChannel = buildServerChannel();
     connect(firstTcpClientManager, serverChannel);
     assertTrue(serverChannel.close().await(1, TimeUnit.SECONDS));
-    outgoingMessageQueue.put(expectedMessage);
+    outgoingMessageQueue.add(expectedMessage);
   }
 
   @Test
@@ -263,7 +259,7 @@ public class MessageQueueIntegrationTest {
     Channel serverChannel = buildServerChannel();
     connect(firstTcpClientManager, serverChannel);
     outgoingMessageQueue.shutdown();
-    outgoingMessageQueue.put(expectedMessage);
+    outgoingMessageQueue.add(expectedMessage);
   }
 
   @Test

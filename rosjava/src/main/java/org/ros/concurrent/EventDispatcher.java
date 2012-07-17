@@ -33,34 +33,21 @@ public class EventDispatcher<T> extends CancellableLoop {
   private final T listener;
   private final CircularBlockingQueue<Event<T>> events;
 
-  public EventDispatcher(T listener, int limit) {
+  public EventDispatcher(T listener, int queueCapacity) {
     this.listener = listener;
-    events = new CircularBlockingQueue<Event<T>>();
-    events.setLimit(limit);
-  }
-
-  /**
-   * @see CircularBlockingQueue#setLimit(int)
-   */
-  public void setQueueLimit(int limit) {
-    events.setLimit(limit);
+    events = new CircularBlockingQueue<Event<T>>(queueCapacity);
   }
 
   @SuppressWarnings("unchecked")
   public ListenableFuture<Void> signal(final SignalRunnable<T> signalRunnable) {
-    try {
-      Event<T> event = new Event<T>(signalRunnable);
-      ListenableFuture<List<Void>> futures = Futures.allAsList(events.put(event), event.getFuture());
-      return Futures.transform(futures, new Function<List<Void>, Void>() {
-        @Override
-        public Void apply(List<Void> input) {
-          return null;
-        }
-      });
-    } catch (InterruptedException e) {
-      cancel();
-      return Futures.immediateFailedFuture(e);
-    }
+    Event<T> event = new Event<T>(signalRunnable);
+    ListenableFuture<List<Void>> futures = Futures.allAsList(events.add(event), event.getFuture());
+    return Futures.transform(futures, new Function<List<Void>, Void>() {
+      @Override
+      public Void apply(List<Void> input) {
+        return null;
+      }
+    });
   }
 
   @Override

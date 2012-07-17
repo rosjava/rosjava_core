@@ -144,7 +144,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     if (DEBUG) {
       log.info(String.format("Publishing message %s on topic %s.", message, getTopicName()));
     }
-    outgoingMessageQueue.put(message);
+    outgoingMessageQueue.add(message);
   }
 
   /**
@@ -318,15 +318,5 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   @Override
   public String toString() {
     return "Publisher<" + toDeclaration() + ">";
-  }
-
-  @Override
-  public void setQueueLimit(int limit) {
-    outgoingMessageQueue.setQueueLimit(limit);
-  }
-
-  @Override
-  public int getQueueLimit() {
-    return outgoingMessageQueue.getQueueLimit();
   }
 }
