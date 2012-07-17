@@ -16,8 +16,6 @@
 
 package org.ros.concurrent;
 
-import com.google.common.util.concurrent.ListenableFuture;
-
 import java.util.Queue;
 
 /**
@@ -29,7 +27,7 @@ import java.util.Queue;
  */
 public class CircularBlockingQueue<T> {
 
-  private final ListenableEntry<T>[] queue;
+  private final T[] queue;
   private final Object mutex;
 
   /**
@@ -54,7 +52,7 @@ public class CircularBlockingQueue<T> {
    */
   @SuppressWarnings("unchecked")
   public CircularBlockingQueue(int capacity) {
-    queue = (ListenableEntry<T>[]) new ListenableEntry[capacity];
+    queue = (T[]) new Object[capacity];
     mutex = new Object();
     start = 0;
     length = 0;
@@ -67,23 +65,17 @@ public class CircularBlockingQueue<T> {
    * 
    * @param entry
    *          the entry to add
-   * @return a {@link ListenableFuture} whose result will be set when the item
-   *         is removed from the queue or whose exception will be set when the
-   *         item is dropped from the queue
    */
-  public ListenableFuture<Void> add(T entry) {
-    ListenableEntry<T> listenableEntry = new ListenableEntry<T>(entry);
+  public void add(T entry) {
     synchronized (mutex) {
-      queue[(start + length) % limit] = listenableEntry;
+      queue[(start + length) % limit] = entry;
       if (length == limit) {
-        queue[start].getFuture().setException(new DroppedEntryException());
         start = (start + 1) % limit;
       } else {
         length++;
       }
       mutex.notify();
     }
-    return listenableEntry.getFuture();
   }
 
   /**
@@ -94,11 +86,11 @@ public class CircularBlockingQueue<T> {
    * @throws InterruptedException
    */
   public T take() throws InterruptedException {
-    ListenableEntry<T> listenableEntry;
+    T entry;
     synchronized (mutex) {
       while (true) {
         if (length > 0) {
-          listenableEntry = queue[start];
+          entry = queue[start];
           start = (start + 1) % limit;
           length--;
           break;
@@ -106,8 +98,7 @@ public class CircularBlockingQueue<T> {
         mutex.wait();
       }
     }
-    listenableEntry.getFuture().set(null);
-    return listenableEntry.getEntry();
+    return entry;
   }
 
   /**

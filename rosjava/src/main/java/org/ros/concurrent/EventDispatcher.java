@@ -16,11 +16,6 @@
 
 package org.ros.concurrent;
 
-import com.google.common.base.Function;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-
-import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -31,28 +26,20 @@ import java.util.List;
 public class EventDispatcher<T> extends CancellableLoop {
 
   private final T listener;
-  private final CircularBlockingQueue<Event<T>> events;
+  private final CircularBlockingQueue<SignalRunnable<T>> events;
 
   public EventDispatcher(T listener, int queueCapacity) {
     this.listener = listener;
-    events = new CircularBlockingQueue<Event<T>>(queueCapacity);
+    events = new CircularBlockingQueue<SignalRunnable<T>>(queueCapacity);
   }
 
-  @SuppressWarnings("unchecked")
-  public ListenableFuture<Void> signal(final SignalRunnable<T> signalRunnable) {
-    Event<T> event = new Event<T>(signalRunnable);
-    ListenableFuture<List<Void>> futures = Futures.allAsList(events.add(event), event.getFuture());
-    return Futures.transform(futures, new Function<List<Void>, Void>() {
-      @Override
-      public Void apply(List<Void> input) {
-        return null;
-      }
-    });
+  public void signal(final SignalRunnable<T> signalRunnable) {
+    events.add(signalRunnable);
   }
 
   @Override
   public void loop() throws InterruptedException {
-    Event<T> event = events.take();
-    event.run(listener);
+    SignalRunnable<T> signalRunnable = events.take();
+    signalRunnable.run(listener);
   }
 }

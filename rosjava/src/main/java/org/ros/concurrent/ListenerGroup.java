@@ -17,7 +17,6 @@
 package org.ros.concurrent;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
@@ -30,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class ListenerGroup<T> {
-  
+
   private final static int DEFAULT_QUEUE_CAPACITY = 128;
 
   private final ExecutorService executorService;
@@ -123,28 +122,27 @@ public class ListenerGroup<T> {
   /**
    * Signals all listeners and waits for the result.
    * <p>
-   * Each {@link SignalRunnable} is executed in a separate thread.
+   * Each {@link SignalRunnable} is executed in a separate thread. In the event
+   * that the {@link SignalRunnable} is be dropped from the
+   * {@link EventDispatcher}'s queue and thus not executed, this method will
+   * block for the entire specified timeout.
    * 
    * @return {@code true} if all listeners completed within the specified time
    *         limit, {@code false} otherwise
    * @throws InterruptedException
    */
-  public boolean signal(SignalRunnable<T> signalRunnable, long timeout, TimeUnit unit)
+  public boolean signal(final SignalRunnable<T> signalRunnable, long timeout, TimeUnit unit)
       throws InterruptedException {
-    Collection<ListenableFuture<Void>> futures = Lists.newArrayList();
-    for (EventDispatcher<T> eventDispatcher : eventDispatchers) {
-      futures.add(eventDispatcher.signal(signalRunnable));
-    }
-    // We can't use Futures.allAsList() here since it does not provide a
-    // timeout.
-    final CountDownLatch latch = new CountDownLatch(futures.size());
-    for (ListenableFuture<Void> future : futures) {
-      future.addListener(new Runnable() {
+    Collection<EventDispatcher<T>> copy = Lists.newArrayList(eventDispatchers);
+    final CountDownLatch latch = new CountDownLatch(copy.size());
+    for (EventDispatcher<T> eventDispatcher : copy) {
+      eventDispatcher.signal(new SignalRunnable<T>() {
         @Override
-        public void run() {
+        public void run(T listener) {
+          signalRunnable.run(listener);
           latch.countDown();
         }
-      }, executorService);
+      });
     }
     return latch.await(timeout, unit);
   }
