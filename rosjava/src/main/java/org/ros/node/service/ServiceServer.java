@@ -56,16 +56,4 @@ public interface ServiceServer<T, S> {
    *          the {@link ServiceServerListener} to add
    */
   void addListener(ServiceServerListener<T, S> listener);
-
-  /**
-   * Remove a {@link ServiceServerListener}.
-   * 
-   * <p>
-   * This has no effect if the specified {@link ServiceServerListener} was never
-   * added.
-   * 
-   * @param listener
-   *          the {@link ServiceServerListener} to remove
-   */
-  void removeListener(ServiceServerListener<T, S> listener);
 }

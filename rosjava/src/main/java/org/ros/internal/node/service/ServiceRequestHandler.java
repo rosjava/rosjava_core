@@ -43,7 +43,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
   private final MessageSerializer<S> serializer;
   private final MessageFactory messageFactory;
   private final ExecutorService executorService;
-  private final MessageBuffers channelBufferPool;
+  private final MessageBuffers messageBuffers;
 
   public ServiceRequestHandler(ServiceDeclaration serviceDeclaration,
       ServiceResponseBuilder<T, S> responseBuilder, MessageDeserializer<T> deserializer,
@@ -55,7 +55,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
     this.responseBuilder = responseBuilder;
     this.messageFactory = messageFactory;
     this.executorService = executorService;
-    channelBufferPool = new MessageBuffers();
+    messageBuffers = new MessageBuffers();
   }
 
   private void handleRequest(ChannelBuffer requestBuffer, ChannelBuffer responseBuffer)
@@ -93,7 +93,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
       @Override
       public void run() {
         ServiceServerResponse response = new ServiceServerResponse();
-        ChannelBuffer responseBuffer = channelBufferPool.borrowChannelBuffer();
+        ChannelBuffer responseBuffer = messageBuffers.acquire();
         boolean success;
         try {
           handleRequest(requestBuffer, responseBuffer);
@@ -105,7 +105,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
         if (success) {
           handleSuccess(ctx, response, responseBuffer);
         }
-        channelBufferPool.returnChannelBuffer(responseBuffer);
+        messageBuffers.release(responseBuffer);
       }
     });
     super.messageReceived(ctx, e);

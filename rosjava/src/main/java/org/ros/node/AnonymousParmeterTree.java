@@ -271,20 +271,4 @@ public class AnonymousParmeterTree implements ParameterTree {
   public void addParameterListener(String name, ParameterListener listener) {
     throw new UnsupportedOperationException();
   }
-
-  /**
-   * @throws UnsupportedOperationException
-   */
-  @Override
-  public void removeParameterListener(GraphName name, ParameterListener listener) {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * @throws UnsupportedOperationException
-   */
-  @Override
-  public void removeParameterListener(String name, ParameterListener listener) {
-    throw new UnsupportedOperationException();
-  }
 }

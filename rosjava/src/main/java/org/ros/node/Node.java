@@ -104,17 +104,6 @@ public interface Node {
   void addListener(NodeListener listener);
 
   /**
-   * Remove a {@link NodeListener} from the {@link Node}.
-   * 
-   * <p>
-   * If the given {@link NodeListener} is not registered, this has no effect.
-   * 
-   * @param listener
-   *          the {@link NodeListener} to remove
-   */
-  void removeListener(NodeListener listener);
-
-  /**
    * @return the {@link ScheduledExecutorService} that this {@link Node} uses
    */
   ScheduledExecutorService getScheduledExecutorService();

@@ -21,11 +21,11 @@ import com.google.common.collect.Sets;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ros.concurrent.ListenerCollection;
-import org.ros.concurrent.ListenerCollection.SignalRunnable;
+import org.ros.concurrent.ListenerGroup;
+import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.node.server.NodeIdentifier;
-import org.ros.internal.transport.IncomingMessageQueue;
 import org.ros.internal.transport.ProtocolNames;
+import org.ros.internal.transport.queue.IncomingMessageQueue;
 import org.ros.internal.transport.tcp.TcpClientManager;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
@@ -66,7 +66,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   /**
    * Manages the {@link SubscriberListener}s for this {@link Subscriber}.
    */
-  private final ListenerCollection<SubscriberListener<T>> subscriberListeners;
+  private final ListenerGroup<SubscriberListener<T>> subscriberListeners;
 
   public static <S> DefaultSubscriber<S> newDefault(NodeIdentifier nodeIdentifier,
       TopicDeclaration description, ScheduledExecutorService executorService,
@@ -86,7 +86,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
         new SubscriberHandshakeHandler<T>(toDeclaration().toConnectionHeader(),
             incomingMessageQueue, executorService);
     tcpClientManager.addNamedChannelHandler(subscriberHandshakeHandler);
-    subscriberListeners = new ListenerCollection<SubscriberListener<T>>(executorService);
+    subscriberListeners = new ListenerGroup<SubscriberListener<T>>(executorService);
     subscriberListeners.add(new DefaultSubscriberListener<T>() {
       @Override
       public void onMasterRegistrationSuccess(Subscriber<T> registrant) {
@@ -128,13 +128,13 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   }
 
   @Override
-  public void addMessageListener(MessageListener<T> listener) {
-    incomingMessageQueue.addListener(listener);
+  public void addMessageListener(MessageListener<T> messageListener, int limit) {
+    incomingMessageQueue.addListener(messageListener, limit);
   }
 
   @Override
-  public void removeMessageListener(MessageListener<T> listener) {
-    incomingMessageQueue.removeListener(listener);
+  public void addMessageListener(MessageListener<T> messageListener) {
+    addMessageListener(messageListener, 1);
   }
 
   @VisibleForTesting
@@ -181,11 +181,6 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
 
   @Override
   public void addSubscriberListener(SubscriberListener<T> listener) {
-    subscriberListeners.add(listener);
-  }
-
-  @Override
-  public void removeSubscriberListener(SubscriberListener<T> listener) {
     subscriberListeners.add(listener);
   }
 
@@ -298,15 +293,5 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   @Override
   public String toString() {
     return "Subscriber<" + getTopicDeclaration() + ">";
-  }
-
-  @Override
-  public void setQueueLimit(int limit) {
-    incomingMessageQueue.setLimit(limit);
-  }
-
-  @Override
-  public int getQueueLimit() {
-    return incomingMessageQueue.getLimit();
   }
 }

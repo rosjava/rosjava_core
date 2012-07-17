@@ -35,8 +35,8 @@ public class TcpServerPipelineFactory extends ConnectionTrackingChannelPipelineF
   private final TopicParticipantManager topicParticipantManager;
   private final ServiceManager serviceManager;
 
-  public TcpServerPipelineFactory(ChannelGroup channelGroup, TopicParticipantManager topicParticipantManager,
-      ServiceManager serviceManager) {
+  public TcpServerPipelineFactory(ChannelGroup channelGroup,
+      TopicParticipantManager topicParticipantManager, ServiceManager serviceManager) {
     super(channelGroup);
     this.topicParticipantManager = topicParticipantManager;
     this.serviceManager = serviceManager;
@@ -48,7 +48,8 @@ public class TcpServerPipelineFactory extends ConnectionTrackingChannelPipelineF
     pipeline.addLast(LENGTH_FIELD_PREPENDER, new LengthFieldPrepender(4));
     pipeline.addLast(LENGTH_FIELD_BASED_FRAME_DECODER, new LengthFieldBasedFrameDecoder(
         Integer.MAX_VALUE, 0, 4, 0, 4));
-    pipeline.addLast(HANDSHAKE_HANDLER, new TcpServerHandshakeHandler(topicParticipantManager, serviceManager));
+    pipeline.addLast(HANDSHAKE_HANDLER, new TcpServerHandshakeHandler(topicParticipantManager,
+        serviceManager));
     return pipeline;
   }
 }

@@ -21,8 +21,8 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.logging.Log;
 import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
-import org.ros.concurrent.ListenerCollection;
-import org.ros.concurrent.ListenerCollection.SignalRunnable;
+import org.ros.concurrent.ListenerGroup;
+import org.ros.concurrent.SignalRunnable;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.service.ServiceDescription;
@@ -96,7 +96,7 @@ public class DefaultNode implements ConnectedNode {
   private static final TimeUnit MAX_SHUTDOWN_DELAY_UNITS = TimeUnit.SECONDS;
 
   private final NodeConfiguration nodeConfiguration;
-  private final ListenerCollection<NodeListener> nodeListeners;
+  private final ListenerGroup<NodeListener> nodeListeners;
   private final ScheduledExecutorService scheduledExecutorService;
   private final URI masterUri;
   private final MasterClient masterClient;
@@ -128,8 +128,8 @@ public class DefaultNode implements ConnectedNode {
   public DefaultNode(NodeConfiguration nodeConfiguration, Collection<NodeListener> nodeListeners,
       ScheduledExecutorService scheduledExecutorService) {
     this.nodeConfiguration = NodeConfiguration.copyOf(nodeConfiguration);
-    this.nodeListeners =
-        new ListenerCollection<NodeListener>(nodeListeners, scheduledExecutorService);
+    this.nodeListeners = new ListenerGroup<NodeListener>(scheduledExecutorService);
+    this.nodeListeners.addAll(nodeListeners);
     this.scheduledExecutorService = scheduledExecutorService;
     masterUri = nodeConfiguration.getMasterUri();
     masterClient = new MasterClient(masterUri);
@@ -475,11 +475,6 @@ public class DefaultNode implements ConnectedNode {
   @Override
   public void addListener(NodeListener listener) {
     nodeListeners.add(listener);
-  }
-
-  @Override
-  public void removeListener(NodeListener listener) {
-    nodeListeners.remove(listener);
   }
 
   /**

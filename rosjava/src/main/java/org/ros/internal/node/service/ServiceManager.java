@@ -43,7 +43,7 @@ public class ServiceManager {
    */
   private final Map<GraphName, DefaultServiceClient<?, ?>> serviceClients;
   
-  // TODO(damonkohler): Change to ListenerCollection.
+  // TODO(damonkohler): Change to ListenerGroup.
   private ServiceManagerListener listener;
 
   public ServiceManager() {

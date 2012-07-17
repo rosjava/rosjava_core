@@ -58,7 +58,7 @@ public class TopicParticipantManager {
    */
   private final Multimap<DefaultPublisher<?>, SubscriberIdentifier> publisherConnections;
 
-  // TODO(damonkohler): Change to ListenerCollection.
+  // TODO(damonkohler): Change to ListenerGroup.
   private TopicParticipantManagerListener listener;
 
   public TopicParticipantManager() {

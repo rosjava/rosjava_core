@@ -87,7 +87,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   private final ServiceDeclaration serviceDeclaration;
   private final MessageSerializer<T> serializer;
   private final MessageFactory messageFactory;
-  private final MessageBuffers channelBufferPool;
+  private final MessageBuffers messageBuffers;
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final ConnectionHeader connectionHeader;
   private final TcpClientManager tcpClientManager;
@@ -109,7 +109,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     this.serviceDeclaration = serviceDeclaration;
     this.serializer = serializer;
     this.messageFactory = messageFactory;
-    channelBufferPool = new MessageBuffers();
+    messageBuffers = new MessageBuffers();
     responseListeners = Lists.newLinkedList();
     connectionHeader = new ConnectionHeader();
     connectionHeader.addField(ConnectionHeaderFields.CALLER_ID, nodeName.toString());
@@ -150,11 +150,11 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   @Override
   public void call(T request, ServiceResponseListener<S> listener) {
-    ChannelBuffer buffer = channelBufferPool.borrowChannelBuffer();
+    ChannelBuffer buffer = messageBuffers.acquire();
     serializer.serialize(request, buffer);
     responseListeners.add(listener);
     tcpClient.write(buffer).awaitUninterruptibly();
-    channelBufferPool.returnChannelBuffer(buffer);
+    messageBuffers.release(buffer);
   }
 
   @Override

@@ -115,16 +115,6 @@ public class DefaultParameterTree implements ParameterTree {
   }
 
   @Override
-  public void removeParameterListener(GraphName name, ParameterListener listener) {
-    parameterManager.removeListener(name, listener);
-  }
-
-  @Override
-  public void removeParameterListener(String name, ParameterListener listener) {
-    removeParameterListener(new GraphName(name), listener);
-  }
-
-  @Override
   public void set(GraphName name, boolean value) {
     GraphName resolvedName = resolver.resolve(name);
     parameterClient.setParam(resolvedName, value);

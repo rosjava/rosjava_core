@@ -14,18 +14,23 @@
  * the License.
  */
 
-package org.ros.internal.transport.tcp;
-
-import org.jboss.netty.channel.SimpleChannelHandler;
+package org.ros.concurrent;
 
 /**
+ * Decouples specific listener interfaces from the signaling implementation.
+ * 
  * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ *          the type of listener
  */
-public abstract class AbstractNamedChannelHandler extends SimpleChannelHandler implements
-    NamedChannelHandler {
-
-  @Override
-  public String toString() {
-    return String.format("NamedChannelHandler<%s, %s>", getName(), super.toString());
-  }
+public interface SignalRunnable<T> {
+  /**
+   * This method will be called when the listener should be signaled. Users
+   * should override this method to call the appropriate listener method(s).
+   * 
+   * @param listener
+   *          the listener to signal
+   */
+  void run(T listener);
 }

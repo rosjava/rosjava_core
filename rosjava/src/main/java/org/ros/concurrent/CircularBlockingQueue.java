@@ -16,7 +16,7 @@
 
 package org.ros.concurrent;
 
-import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -29,12 +29,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class CircularBlockingQueue<T> {
 
-  private final int capacity;
-  private final LinkedBlockingQueue<T> queue;
+  private final LinkedBlockingQueue<ListenableEntry<T>> queue;
 
   /**
-   * The number of elements allowed in the queue at one time. Unlike
-   * {@link #capacity}, this can be changed at runtime.
+   * The number of elements allowed in the queue at one time. Unlike the
+   * capacity specified by
+   * {@link CircularBlockingQueue#CircularBlockingQueue(int)}, {@link #limit}
+   * can be changed at runtime.
    */
   private int limit;
 
@@ -43,9 +44,16 @@ public class CircularBlockingQueue<T> {
    *          the maximum number of elements allowed in the queue
    */
   public CircularBlockingQueue(int capacity) {
-    queue = new LinkedBlockingQueue<T>(capacity);
-    this.capacity = capacity;
-    this.limit = capacity - 1;
+    queue = new LinkedBlockingQueue<ListenableEntry<T>>(capacity);
+    this.limit = capacity;
+  }
+
+  /**
+   * Constructs a new {@link CircularBlockingQueue} with the capacity set to
+   * {@link Integer#MAX_VALUE}.
+   */
+  public CircularBlockingQueue() {
+    this(Integer.MAX_VALUE);
   }
 
   /**
@@ -53,19 +61,18 @@ public class CircularBlockingQueue<T> {
    */
   private void shrink() {
     while (queue.size() > limit) {
-      queue.remove();
+      ListenableEntry<T> listenableEntry = queue.remove();
+      listenableEntry.getFuture().setException(new DroppedEntryException());
     }
   }
 
   /**
-   * Adjusts the limit on the number of elements allowed in the queue. The limit
-   * must be less than the capacity and defaults to {@code capacity - 1}.
+   * Adjusts the limit on the number of elements allowed in the queue.
    * 
    * @param limit
    *          the number of elements allowed in the queue
    */
   public void setLimit(int limit) {
-    Preconditions.checkArgument(limit < capacity, "Limit must be less than capacity.");
     this.limit = limit;
     shrink();
   }
@@ -84,27 +91,48 @@ public class CircularBlockingQueue<T> {
     return queue.size();
   }
 
-  public void put(T entry) throws InterruptedException {
+  /**
+   * Adds the specified entry to the tail of the queue, waiting if necessary for
+   * space to become available and then shrinking the queue if necessary to stay
+   * within the queue's limit.
+   * <p>
+   * When the queue shrinks, older entries are removed first.
+   * 
+   * @param entry
+   *          the entry to add
+   * @return a {@link ListenableFuture} whose result will be set when the item
+   *         is removed from the queue or whose exception will be set when the
+   *         item is dropped from the queue
+   * @throws InterruptedException
+   */
+  public ListenableFuture<Void> put(T entry) throws InterruptedException {
+    ListenableEntry<T> listenableEntry = new ListenableEntry<T>(entry);
     synchronized (queue) {
       try {
-        queue.put(entry);
+        queue.put(listenableEntry);
       } finally {
         shrink();
       }
       queue.notify();
     }
+    return listenableEntry.getFuture();
   }
 
+  /**
+   * @see LinkedBlockingQueue#take()
+   */
   public T take() throws InterruptedException {
-    T element = null;
+    ListenableEntry<T> listenableEntry;
     synchronized (queue) {
       while (true) {
-        element = queue.poll();
-        if (element != null) {
-          return element;
+        listenableEntry = queue.poll();
+        if (listenableEntry != null) {
+          break;
         }
         queue.wait();
       }
     }
+    listenableEntry.getFuture().set(null);
+    return listenableEntry.getEntry();
   }
 }

@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -43,9 +41,12 @@ import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.message.DefaultMessageDeserializer;
 import org.ros.internal.message.DefaultMessageSerializer;
 import org.ros.internal.message.Message;
+import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
 import org.ros.internal.message.topic.TopicMessageFactory;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicParticipantManager;
+import org.ros.internal.transport.queue.IncomingMessageQueue;
+import org.ros.internal.transport.queue.OutgoingMessageQueue;
 import org.ros.internal.transport.tcp.TcpClient;
 import org.ros.internal.transport.tcp.TcpClientManager;
 import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
@@ -56,8 +57,8 @@ import org.ros.message.MessageListener;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -68,7 +69,7 @@ public class MessageQueueIntegrationTest {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(MessageQueueIntegrationTest.class);
 
-  private ScheduledExecutorService executorService;
+  private ExecutorService executorService;
   private TcpClientManager firstTcpClientManager;
   private TcpClientManager secondTcpClientManager;
   private OutgoingMessageQueue<Message> outgoingMessageQueue;
@@ -108,7 +109,7 @@ public class MessageQueueIntegrationTest {
 
   @Before
   public void setup() {
-    executorService = Executors.newScheduledThreadPool(10);
+    executorService = Executors.newCachedThreadPool();
     MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
     TopicMessageFactory topicMessageFactory = new TopicMessageFactory(messageDefinitionProvider);
     expectedMessage = topicMessageFactory.newFromType(std_msgs.String._TYPE);
@@ -117,18 +118,16 @@ public class MessageQueueIntegrationTest {
         new OutgoingMessageQueue<Message>(new DefaultMessageSerializer(), executorService);
     firstIncomingMessageQueue =
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
-            MessageIdentifier.of(std_msgs.String._TYPE), topicMessageFactory),
-            executorService);
+            MessageIdentifier.of(std_msgs.String._TYPE), topicMessageFactory), executorService);
     secondIncomingMessageQueue =
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
-            MessageIdentifier.of(std_msgs.String._TYPE), topicMessageFactory),
-            executorService);
+            MessageIdentifier.of(std_msgs.String._TYPE), topicMessageFactory), executorService);
     firstTcpClientManager = new TcpClientManager(executorService);
-    firstTcpClientManager.addNamedChannelHandler(firstIncomingMessageQueue
-        .newNamedChannelHandler());
+    firstTcpClientManager
+        .addNamedChannelHandler(firstIncomingMessageQueue.getMessageReceiver());
     secondTcpClientManager = new TcpClientManager(executorService);
     secondTcpClientManager.addNamedChannelHandler(secondIncomingMessageQueue
-        .newNamedChannelHandler());
+        .getMessageReceiver());
   }
 
   @After
@@ -175,8 +174,7 @@ public class MessageQueueIntegrationTest {
     return serverChannel;
   }
 
-  private TcpClient connect(TcpClientManager TcpClientManager,
-      Channel serverChannel) {
+  private TcpClient connect(TcpClientManager TcpClientManager, Channel serverChannel) {
     return TcpClientManager.connect("Foo", serverChannel.getLocalAddress());
   }
 
@@ -189,7 +187,7 @@ public class MessageQueueIntegrationTest {
         assertEquals(message, expectedMessage);
         latch.countDown();
       }
-    });
+    }, Integer.MAX_VALUE);
     return latch;
   }
 
@@ -255,7 +253,7 @@ public class MessageQueueIntegrationTest {
     startRepeatingPublisher();
     Channel serverChannel = buildServerChannel();
     connect(firstTcpClientManager, serverChannel);
-    serverChannel.close().await();
+    assertTrue(serverChannel.close().await(1, TimeUnit.SECONDS));
     outgoingMessageQueue.put(expectedMessage);
   }
 

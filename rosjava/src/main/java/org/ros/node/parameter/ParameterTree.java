@@ -383,18 +383,4 @@ public interface ParameterTree {
    * @see #addParameterListener(GraphName, ParameterListener)
    */
   void addParameterListener(String name, ParameterListener listener);
-
-  /**
-   * Unsubscribes from changes to the specified parameter.
-   * 
-   * @param name
-   * @param listener
-   */
-  void removeParameterListener(GraphName name, ParameterListener listener);
-
-  /**
-   * @see #removeParameterListener(GraphName, ParameterListener)
-   */
-  void removeParameterListener(String name, ParameterListener listener);
-
 }

@@ -18,8 +18,8 @@ package org.ros.internal.node.parameter;
 
 import com.google.common.collect.Maps;
 
-import org.ros.concurrent.ListenerCollection;
-import org.ros.concurrent.ListenerCollection.SignalRunnable;
+import org.ros.concurrent.ListenerGroup;
+import org.ros.concurrent.SignalRunnable;
 import org.ros.namespace.GraphName;
 import org.ros.node.parameter.ParameterListener;
 
@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 public class ParameterManager {
 
   private final ExecutorService executorService;
-  private final Map<GraphName, ListenerCollection<ParameterListener>> listeners;
+  private final Map<GraphName, ListenerGroup<ParameterListener>> listeners;
 
   public ParameterManager(ExecutorService executorService) {
     this.executorService = executorService;
@@ -42,22 +42,9 @@ public class ParameterManager {
   public void addListener(GraphName parameterName, ParameterListener listener) {
     synchronized (listeners) {
       if (!listeners.containsKey(parameterName)) {
-        listeners.put(parameterName, new ListenerCollection<ParameterListener>(executorService));
+        listeners.put(parameterName, new ListenerGroup<ParameterListener>(executorService));
       }
       listeners.get(parameterName).add(listener);
-    }
-  }
-
-  public void removeListener(GraphName parameterName, ParameterListener listener) {
-    synchronized (listeners) {
-      if (!listeners.containsKey(parameterName)) {
-        return;
-      }
-      ListenerCollection<ParameterListener> listenerCollection = listeners.get(parameterName);
-      listenerCollection.remove(listener);
-      if (listenerCollection.size() == 0) {
-        listeners.remove(parameterName);
-      }
     }
   }
 
@@ -70,7 +57,7 @@ public class ParameterManager {
     int numberOfListeners = 0;
     synchronized (listeners) {
       if (listeners.containsKey(parameterName)) {
-        ListenerCollection<ParameterListener> listenerCollection = listeners.get(parameterName);
+        ListenerGroup<ParameterListener> listenerCollection = listeners.get(parameterName);
         numberOfListeners = listenerCollection.size();
         listenerCollection.signal(new SignalRunnable<ParameterListener>() {
           @Override

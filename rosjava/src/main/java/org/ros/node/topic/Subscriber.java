@@ -39,17 +39,27 @@ public interface Subscriber<T> extends TopicParticipant {
   public static final String TOPIC_MESSAGE_TYPE_WILDCARD = "*";
 
   /**
-   * @param listener
-   *          this {@link MessageListener} will be called for every new message
+   * Adds a {@link MessageListener} to be called when new messages are received.
+   * <p>
+   * The {@link MessageListener} will be executed serially in its own thread. If
+   * the {@link MessageListener} processes new messages slower than they arrive,
+   * new messages will be queued up to the specified limit. Older messages are
+   * removed from the buffer when the buffer limit is exceeded.
+   * 
+   * @param messageListener
+   *          this {@link MessageListener} will be called when new messages are
    *          received
+   * @param limit
+   *          the maximum number of messages to buffer
    */
-  void addMessageListener(MessageListener<T> listener);
+  void addMessageListener(MessageListener<T> messageListener, int limit);
 
   /**
-   * @param listener
-   *          the {@link MessageListener} to remove
+   * Adds a {@link MessageListener} with a limit of 1.
+   * 
+   * @see #addMessageListener(MessageListener, int)
    */
-  void removeMessageListener(MessageListener<T> listener);
+  void addMessageListener(MessageListener<T> messageListener);
 
   /**
    * Shuts down and unregisters the {@link Subscriber}. using the default
@@ -81,28 +91,6 @@ public interface Subscriber<T> extends TopicParticipant {
    *          The listener to add.
    */
   void addSubscriberListener(SubscriberListener<T> listener);
-
-  /**
-   * Remove a lifecycle listener from the subscriber.
-   * 
-   * <p>
-   * Nothing will happen if the given listener is not registered.
-   * 
-   * @param listener
-   *          The listener to remove.
-   */
-  void removeSubscriberListener(SubscriberListener<T> listener);
-
-  /**
-   * @param limit
-   *          the maximum number of incoming messages to queue (i.e. buffer)
-   */
-  void setQueueLimit(int limit);
-
-  /**
-   * @return the maximum number of incoming messages to queue (i.e. buffer)
-   */
-  int getQueueLimit();
 
   /**
    * @return {@code true} if the {@link Publisher} of this {@link Subscriber}'s

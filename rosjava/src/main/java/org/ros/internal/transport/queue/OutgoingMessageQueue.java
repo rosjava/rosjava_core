@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.ros.internal.transport;
+package org.ros.internal.transport.queue;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.group.ChannelGroup;
+import org.jboss.netty.channel.group.ChannelGroupFuture;
+import org.jboss.netty.channel.group.ChannelGroupFutureListener;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.CircularBlockingQueue;
@@ -30,7 +32,7 @@ import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageSerializer;
 
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -40,13 +42,11 @@ public class OutgoingMessageQueue<T> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
 
-  private static final int MESSAGE_QUEUE_CAPACITY = 8192;
-
   private final MessageSerializer<T> serializer;
   private final CircularBlockingQueue<T> queue;
   private final ChannelGroup channelGroup;
   private final Writer writer;
-  private final ChannelBuffer buffer;
+  private final MessageBuffers messageBuffers;
   private final ChannelBuffer latchedBuffer;
 
   private boolean latchMode;
@@ -56,24 +56,31 @@ public class OutgoingMessageQueue<T> {
     @Override
     public void loop() throws InterruptedException {
       T message = queue.take();
-      buffer.clear();
+      final ChannelBuffer buffer = messageBuffers.acquire();
       serializer.serialize(message, buffer);
       if (DEBUG) {
         log.info(String.format("Writing %d bytes to %d channels.", buffer.readableBytes(),
             channelGroup.size()));
       }
-      // Note that the buffer is automatically duplicated by Netty to avoid race conditions.
-      channelGroup.write(buffer);
+      // Note that the buffer is automatically "duplicated" by Netty to avoid
+      // race conditions. However, the duplicated buffer and the original buffer
+      // share the same backing array. So, we have to wait until the write
+      // operation is complete before returning the buffer to the pool.
+      channelGroup.write(buffer).addListener(new ChannelGroupFutureListener() {
+        @Override
+        public void operationComplete(ChannelGroupFuture future) throws Exception {
+          messageBuffers.release(buffer);
+        }
+      });
     }
   }
 
-  public OutgoingMessageQueue(MessageSerializer<T> serializer,
-      ScheduledExecutorService executorService) {
+  public OutgoingMessageQueue(MessageSerializer<T> serializer, ExecutorService executorService) {
     this.serializer = serializer;
-    queue = new CircularBlockingQueue<T>(MESSAGE_QUEUE_CAPACITY);
+    queue = new CircularBlockingQueue<T>(Integer.MAX_VALUE);
     channelGroup = new DefaultChannelGroup();
     writer = new Writer();
-    buffer = MessageBuffers.dynamicBuffer();
+    messageBuffers = new MessageBuffers();
     latchedBuffer = MessageBuffers.dynamicBuffer();
     latchMode = false;
     executorService.execute(writer);
@@ -157,7 +164,7 @@ public class OutgoingMessageQueue<T> {
   }
 
   @VisibleForTesting
-  ChannelGroup getChannelGroup() {
+  public ChannelGroup getChannelGroup() {
     return channelGroup;
   }
 }

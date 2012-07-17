@@ -118,17 +118,6 @@ public interface Publisher<T> extends TopicParticipant {
   void addListener(PublisherListener<T> listener);
 
   /**
-   * Remove a lifecycle listener from the {@link Publisher}.
-   * 
-   * <p>
-   * Nothing will happen if the given listener is not registered.
-   * 
-   * @param listener
-   *          the {@link PublisherListener} to remove
-   */
-  void removeListener(PublisherListener<T> listener);
-
-  /**
    * @param limit
    *          the maximum number of messages to queue (i.e. buffer) for sending
    */

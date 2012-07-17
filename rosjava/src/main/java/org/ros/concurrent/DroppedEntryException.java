@@ -14,18 +14,10 @@
  * the License.
  */
 
-package org.ros.internal.transport.tcp;
-
-import org.jboss.netty.channel.SimpleChannelHandler;
+package org.ros.concurrent;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public abstract class AbstractNamedChannelHandler extends SimpleChannelHandler implements
-    NamedChannelHandler {
-
-  @Override
-  public String toString() {
-    return String.format("NamedChannelHandler<%s, %s>", getName(), super.toString());
-  }
+public class DroppedEntryException extends Exception {
 }

@@ -20,8 +20,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
-import org.ros.concurrent.ListenerCollection;
-import org.ros.concurrent.ListenerCollection.SignalRunnable;
+import org.ros.concurrent.ListenerGroup;
+import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.transport.tcp.AbstractNamedChannelHandler;
 
 import java.util.concurrent.ExecutorService;
@@ -34,19 +34,15 @@ import java.util.concurrent.ExecutorService;
 public abstract class BaseClientHandshakeHandler extends AbstractNamedChannelHandler {
 
   private final ClientHandshake clientHandshake;
-  private final ListenerCollection<ClientHandshakeListener> clientHandshakeListeners;
+  private final ListenerGroup<ClientHandshakeListener> clientHandshakeListeners;
 
   public BaseClientHandshakeHandler(ClientHandshake clientHandshake, ExecutorService executorService) {
     this.clientHandshake = clientHandshake;
-    clientHandshakeListeners = new ListenerCollection<ClientHandshakeListener>(executorService);
+    clientHandshakeListeners = new ListenerGroup<ClientHandshakeListener>(executorService);
   }
 
   public void addListener(ClientHandshakeListener clientHandshakeListener) {
     clientHandshakeListeners.add(clientHandshakeListener);
-  }
-
-  public void removeListener(ClientHandshakeListener clientHandshakeListener) {
-    clientHandshakeListeners.remove(clientHandshakeListener);
   }
 
   @Override

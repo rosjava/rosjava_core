@@ -23,8 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
 import org.ros.address.AdvertiseAddress;
-import org.ros.concurrent.ListenerCollection;
-import org.ros.concurrent.ListenerCollection.SignalRunnable;
+import org.ros.concurrent.ListenerGroup;
+import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.transport.ConnectionHeader;
@@ -58,7 +58,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
   private final MessageSerializer<S> messageSerializer;
   private final MessageFactory messageFactory;
   private final ScheduledExecutorService scheduledExecutorService;
-  private final ListenerCollection<ServiceServerListener<T, S>> listenerCollection;
+  private final ListenerGroup<ServiceServerListener<T, S>> listenerGroup;
 
   public DefaultServiceServer(ServiceDeclaration serviceDeclaration,
       ServiceResponseBuilder<T, S> serviceResponseBuilder, AdvertiseAddress advertiseAddress,
@@ -71,9 +71,8 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
     this.messageSerializer = messageSerializer;
     this.messageFactory = messageFactory;
     this.scheduledExecutorService = scheduledExecutorService;
-    listenerCollection =
-        new ListenerCollection<ServiceServerListener<T, S>>(scheduledExecutorService);
-    listenerCollection.add(new DefaultServiceServerListener<T, S>() {
+    listenerGroup = new ListenerGroup<ServiceServerListener<T, S>>(scheduledExecutorService);
+    listenerGroup.add(new DefaultServiceServerListener<T, S>() {
       @Override
       public void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {
         log.info("Service registered: " + DefaultServiceServer.this);
@@ -102,7 +101,8 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
     }
     ConnectionHeader connectionHeader = toDeclaration().toConnectionHeader();
     String expectedChecksum = connectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
-    String incomingChecksum = incomingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
+    String incomingChecksum =
+        incomingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
     // TODO(damonkohler): Pull out header field comparison logic.
     Preconditions.checkState(incomingChecksum.equals(expectedChecksum)
         || incomingChecksum.equals("*"));
@@ -146,7 +146,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
    */
   public void signalOnMasterRegistrationSuccess() {
     final ServiceServer<T, S> serviceServer = this;
-    listenerCollection.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+    listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
       @Override
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterRegistrationSuccess(serviceServer);
@@ -163,7 +163,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
    */
   public void signalOnMasterRegistrationFailure() {
     final ServiceServer<T, S> serviceServer = this;
-    listenerCollection.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+    listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
       @Override
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterRegistrationFailure(serviceServer);
@@ -180,7 +180,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
    */
   public void signalOnMasterUnregistrationSuccess() {
     final ServiceServer<T, S> serviceServer = this;
-    listenerCollection.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+    listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
       @Override
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterUnregistrationSuccess(serviceServer);
@@ -197,7 +197,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
    */
   public void signalOnMasterUnregistrationFailure() {
     final ServiceServer<T, S> serviceServer = this;
-    listenerCollection.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+    listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
       @Override
       public void run(ServiceServerListener<T, S> listener) {
         listener.onMasterUnregistrationFailure(serviceServer);
@@ -212,12 +212,7 @@ public class DefaultServiceServer<T, S> implements ServiceServer<T, S> {
 
   @Override
   public void addListener(ServiceServerListener<T, S> listener) {
-    listenerCollection.add(listener);
-  }
-
-  @Override
-  public void removeListener(ServiceServerListener<T, S> listener) {
-    listenerCollection.remove(listener);
+    listenerGroup.add(listener);
   }
 
   @Override

@@ -24,7 +24,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.ros.internal.transport.BaseClientHandshakeHandler;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
-import org.ros.internal.transport.IncomingMessageQueue;
+import org.ros.internal.transport.queue.IncomingMessageQueue;
 import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
@@ -57,7 +57,7 @@ class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
       MessageEvent e) {
     ChannelPipeline pipeline = e.getChannel().getPipeline();
     pipeline.remove(SubscriberHandshakeHandler.this);
-    NamedChannelHandler namedChannelHandler = incomingMessageQueue.newNamedChannelHandler();
+    NamedChannelHandler namedChannelHandler = incomingMessageQueue.getMessageReceiver();
     pipeline.addLast(namedChannelHandler.getName(), namedChannelHandler);
     String latching = incomingConnectionHeader.getField(ConnectionHeaderFields.LATCHING);
     if (latching != null && latching.equals("1")) {

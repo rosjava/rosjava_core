@@ -22,12 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
-import org.ros.concurrent.ListenerCollection;
-import org.ros.concurrent.ListenerCollection.SignalRunnable;
+import org.ros.concurrent.ListenerGroup;
+import org.ros.concurrent.SignalRunnable;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
-import org.ros.internal.transport.OutgoingMessageQueue;
+import org.ros.internal.transport.queue.OutgoingMessageQueue;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
 import org.ros.node.topic.DefaultPublisherListener;
@@ -60,7 +60,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
    * Queue of all messages being published by this {@link Publisher}.
    */
   private final OutgoingMessageQueue<T> outgoingMessageQueue;
-  private final ListenerCollection<PublisherListener<T>> listeners;
+  private final ListenerGroup<PublisherListener<T>> listeners;
   private final NodeIdentifier nodeIdentifier;
   private final MessageFactory messageFactory;
 
@@ -71,7 +71,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     this.nodeIdentifier = nodeIdentifier;
     this.messageFactory = messageFactory;
     outgoingMessageQueue = new OutgoingMessageQueue<T>(serializer, executorService);
-    listeners = new ListenerCollection<PublisherListener<T>>(executorService);
+    listeners = new ListenerGroup<PublisherListener<T>>(executorService);
     listeners.add(new DefaultPublisherListener<T>() {
       @Override
       public void onMasterRegistrationSuccess(Publisher<T> registrant) {
@@ -202,11 +202,6 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   @Override
   public void addListener(PublisherListener<T> listener) {
     listeners.add(listener);
-  }
-
-  @Override
-  public void removeListener(PublisherListener<T> listener) {
-    listeners.remove(listener);
   }
 
   /**

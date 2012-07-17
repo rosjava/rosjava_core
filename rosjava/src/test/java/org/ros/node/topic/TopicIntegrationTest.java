@@ -20,11 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
-
 import org.junit.Test;
 import org.ros.RosTest;
 import org.ros.concurrent.CancellableLoop;
+import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
 import org.ros.internal.message.topic.TopicMessageFactory;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
@@ -88,7 +87,7 @@ public class TopicIntegrationTest extends RosTest {
             assertEquals(expectedMessage, message);
             messageReceived.countDown();
           }
-        });
+        }, Integer.MAX_VALUE);
       }
     }, nodeConfiguration);
 
@@ -126,7 +125,7 @@ public class TopicIntegrationTest extends RosTest {
             assertEquals(expectedMessage, message);
             messageReceived.countDown();
           }
-        });
+        }, Integer.MAX_VALUE);
       }
     }, nodeConfiguration);
 
@@ -174,19 +173,21 @@ public class TopicIntegrationTest extends RosTest {
     }, nodeConfiguration);
   }
 
-  private class Listener implements MessageListener<test_ros.TestHeader> {
-
+  private final class Listener implements MessageListener<test_ros.TestHeader> {
     private final CountDownLatch latch = new CountDownLatch(10);
 
     private test_ros.TestHeader lastMessage;
 
     @Override
     public void onNewMessage(test_ros.TestHeader message) {
+      int seq = message.getHeader().getSeq();
+      long stamp = message.getHeader().getStamp().totalNsecs();
       if (lastMessage != null) {
-        assertTrue(String.format("message seq %d <= previous seq %d", message.getHeader().getSeq(),
-            lastMessage.getHeader().getSeq()), message.getHeader().getSeq() > lastMessage
-            .getHeader().getSeq());
-        assertTrue(message.getHeader().getStamp().compareTo(lastMessage.getHeader().getStamp()) > 0);
+        int lastSeq = lastMessage.getHeader().getSeq();
+        long lastStamp = lastMessage.getHeader().getStamp().totalNsecs();
+        assertTrue(String.format("message seq %d <= previous seq %d", seq, lastSeq), seq > lastSeq);
+        assertTrue(String.format("message stamp %d <= previous stamp %d", stamp, lastStamp),
+            stamp > lastStamp);
       }
       lastMessage = message;
       latch.countDown();
@@ -209,20 +210,18 @@ public class TopicIntegrationTest extends RosTest {
       public void onStart(final ConnectedNode connectedNode) {
         final Publisher<test_ros.TestHeader> publisher =
             connectedNode.newPublisher("foo", test_ros.TestHeader._TYPE);
-        CancellableLoop cancellableLoop = new CancellableLoop() {
+        connectedNode.executeCancellableLoop(new CancellableLoop() {
           @Override
           public void loop() throws InterruptedException {
-            test_ros.TestHeader testHeader =
+            test_ros.TestHeader message =
                 connectedNode.getTopicMessageFactory().newFromType(test_ros.TestHeader._TYPE);
-            testHeader.getHeader().setFrameId("frame");
-            testHeader.getHeader().setStamp(connectedNode.getCurrentTime());
-            publisher.publish(testHeader);
+            message.getHeader().setStamp(connectedNode.getCurrentTime());
+            publisher.publish(message);
             // There needs to be some time between messages in order to
             // guarantee that the timestamp increases.
             Thread.sleep(1);
           }
-        };
-        connectedNode.executeCancellableLoop(cancellableLoop);
+        });
       }
     }, nodeConfiguration);
 
@@ -237,7 +236,7 @@ public class TopicIntegrationTest extends RosTest {
       public void onStart(ConnectedNode connectedNode) {
         Subscriber<test_ros.TestHeader> subscriber =
             connectedNode.newSubscriber("foo", test_ros.TestHeader._TYPE);
-        subscriber.addMessageListener(listener);
+        subscriber.addMessageListener(listener, Integer.MAX_VALUE);
       }
     }, nodeConfiguration);
 

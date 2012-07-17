@@ -72,12 +72,12 @@ public class MessageBuffers {
   }
 
   /**
-   * Borrowed {@link ChannelBuffer}s must be returned using
-   * {@link #returnChannelBuffer(ChannelBuffer)}.
+   * Acquired {@link ChannelBuffer}s must be returned using
+   * {@link #release(ChannelBuffer)}.
    * 
-   * @return a borrowed {@link ChannelBuffer}
+   * @return an unused {@link ChannelBuffer}
    */
-  public ChannelBuffer borrowChannelBuffer() {
+  public ChannelBuffer acquire() {
     try {
       return pool.borrowObject();
     } catch (Exception e) {
@@ -86,12 +86,12 @@ public class MessageBuffers {
   }
 
   /**
-   * Return a previously borrowed {@link ChannelBuffer}.
+   * Release a previously acquired {@link ChannelBuffer}.
    * 
    * @param channelBuffer
-   *          the {@link ChannelBuffer} to return
+   *          the {@link ChannelBuffer} to release
    */
-  public void returnChannelBuffer(ChannelBuffer channelBuffer) {
+  public void release(ChannelBuffer channelBuffer) {
     try {
       pool.returnObject(channelBuffer);
     } catch (Exception e) {

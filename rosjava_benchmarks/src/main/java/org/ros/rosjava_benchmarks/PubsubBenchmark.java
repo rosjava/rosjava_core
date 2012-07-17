@@ -64,6 +64,7 @@ public class PubsubBenchmark extends AbstractNodeMain {
     });
 
     tfPublisher = connectedNode.newPublisher("tf", tf.tfMessage._TYPE);
+    tfPublisher.setQueueLimit(1);
     final tf.tfMessage tfMessage = tfPublisher.newMessage();
     geometry_msgs.TransformStamped transformStamped =
         connectedNode.getTopicMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);

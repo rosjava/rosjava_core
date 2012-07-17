@@ -14,18 +14,31 @@
  * the License.
  */
 
-package org.ros.internal.transport.tcp;
+package org.ros.concurrent;
 
-import org.jboss.netty.channel.SimpleChannelHandler;
+import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * 
+ * @param <T>
+ *          the entry type
  */
-public abstract class AbstractNamedChannelHandler extends SimpleChannelHandler implements
-    NamedChannelHandler {
+final class ListenableEntry<T> {
 
-  @Override
-  public String toString() {
-    return String.format("NamedChannelHandler<%s, %s>", getName(), super.toString());
+  private final T entry;
+  private final SettableFuture<Void> future;
+
+  public ListenableEntry(T entry) {
+    this.entry = entry;
+    future = SettableFuture.create();
+  }
+
+  public T getEntry() {
+    return entry;
+  }
+
+  public SettableFuture<Void> getFuture() {
+    return future;
   }
 }
