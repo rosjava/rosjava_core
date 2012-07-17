@@ -29,6 +29,7 @@ import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.CircularBlockingQueue;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.message.MessageBufferPool;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageSerializer;
 
@@ -46,7 +47,7 @@ public class OutgoingMessageQueue<T> {
   private final CircularBlockingQueue<T> queue;
   private final ChannelGroup channelGroup;
   private final Writer writer;
-  private final MessageBuffers messageBuffers;
+  private final MessageBufferPool messageBufferPool;
   private final ChannelBuffer latchedBuffer;
 
   private boolean latchMode;
@@ -56,7 +57,7 @@ public class OutgoingMessageQueue<T> {
     @Override
     public void loop() throws InterruptedException {
       T message = queue.take();
-      final ChannelBuffer buffer = messageBuffers.acquire();
+      final ChannelBuffer buffer = messageBufferPool.acquire();
       serializer.serialize(message, buffer);
       if (DEBUG) {
         log.info(String.format("Writing %d bytes to %d channels.", buffer.readableBytes(),
@@ -69,7 +70,7 @@ public class OutgoingMessageQueue<T> {
       channelGroup.write(buffer).addListener(new ChannelGroupFutureListener() {
         @Override
         public void operationComplete(ChannelGroupFuture future) throws Exception {
-          messageBuffers.release(buffer);
+          messageBufferPool.release(buffer);
         }
       });
     }
@@ -80,7 +81,7 @@ public class OutgoingMessageQueue<T> {
     queue = new CircularBlockingQueue<T>(Integer.MAX_VALUE);
     channelGroup = new DefaultChannelGroup();
     writer = new Writer();
-    messageBuffers = new MessageBuffers();
+    messageBufferPool = new MessageBufferPool();
     latchedBuffer = MessageBuffers.dynamicBuffer();
     latchMode = false;
     executorService.execute(writer);

@@ -22,7 +22,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.exception.ServiceException;
-import org.ros.internal.message.MessageBuffers;
+import org.ros.internal.message.MessageBufferPool;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
@@ -43,7 +43,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
   private final MessageSerializer<S> serializer;
   private final MessageFactory messageFactory;
   private final ExecutorService executorService;
-  private final MessageBuffers messageBuffers;
+  private final MessageBufferPool messageBufferPool;
 
   public ServiceRequestHandler(ServiceDeclaration serviceDeclaration,
       ServiceResponseBuilder<T, S> responseBuilder, MessageDeserializer<T> deserializer,
@@ -55,7 +55,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
     this.responseBuilder = responseBuilder;
     this.messageFactory = messageFactory;
     this.executorService = executorService;
-    messageBuffers = new MessageBuffers();
+    messageBufferPool = new MessageBufferPool();
   }
 
   private void handleRequest(ChannelBuffer requestBuffer, ChannelBuffer responseBuffer)
@@ -93,7 +93,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
       @Override
       public void run() {
         ServiceServerResponse response = new ServiceServerResponse();
-        ChannelBuffer responseBuffer = messageBuffers.acquire();
+        ChannelBuffer responseBuffer = messageBufferPool.acquire();
         boolean success;
         try {
           handleRequest(requestBuffer, responseBuffer);
@@ -105,7 +105,7 @@ class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
         if (success) {
           handleSuccess(ctx, response, responseBuffer);
         }
-        messageBuffers.release(responseBuffer);
+        messageBufferPool.release(responseBuffer);
       }
     });
     super.messageReceived(ctx, e);

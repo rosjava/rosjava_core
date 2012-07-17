@@ -16,12 +16,8 @@
 
 package org.ros.internal.message;
 
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.PoolableObjectFactory;
-import org.apache.commons.pool.impl.StackObjectPool;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.ros.exception.RosRuntimeException;
 
 import java.nio.ByteOrder;
 
@@ -32,9 +28,11 @@ import java.nio.ByteOrder;
  */
 public class MessageBuffers {
 
-  private static final int ESTIMATED_LENGTH = 256;
+  static final int ESTIMATED_LENGTH = 256;
 
-  private final ObjectPool<ChannelBuffer> pool;
+  private MessageBuffers() {
+    // Utility class.
+  }
 
   /**
    * @return a new {@link ChannelBuffer} for {@link Message} serialization that
@@ -42,60 +40,5 @@ public class MessageBuffers {
    */
   public static ChannelBuffer dynamicBuffer() {
     return ChannelBuffers.dynamicBuffer(ByteOrder.LITTLE_ENDIAN, ESTIMATED_LENGTH);
-  }
-
-  public MessageBuffers() {
-    pool = new StackObjectPool<ChannelBuffer>(new PoolableObjectFactory<ChannelBuffer>() {
-      @Override
-      public ChannelBuffer makeObject() throws Exception {
-        return dynamicBuffer();
-      }
-
-      @Override
-      public void destroyObject(ChannelBuffer channelBuffer) throws Exception {
-      }
-
-      @Override
-      public boolean validateObject(ChannelBuffer channelBuffer) {
-        return true;
-      }
-
-      @Override
-      public void activateObject(ChannelBuffer channelBuffer) throws Exception {
-      }
-
-      @Override
-      public void passivateObject(ChannelBuffer channelBuffer) throws Exception {
-        channelBuffer.clear();
-      }
-    });
-  }
-
-  /**
-   * Acquired {@link ChannelBuffer}s must be returned using
-   * {@link #release(ChannelBuffer)}.
-   * 
-   * @return an unused {@link ChannelBuffer}
-   */
-  public ChannelBuffer acquire() {
-    try {
-      return pool.borrowObject();
-    } catch (Exception e) {
-      throw new RosRuntimeException(e);
-    }
-  }
-
-  /**
-   * Release a previously acquired {@link ChannelBuffer}.
-   * 
-   * @param channelBuffer
-   *          the {@link ChannelBuffer} to release
-   */
-  public void release(ChannelBuffer channelBuffer) {
-    try {
-      pool.returnObject(channelBuffer);
-    } catch (Exception e) {
-      throw new RosRuntimeException(e);
-    }
   }
 }

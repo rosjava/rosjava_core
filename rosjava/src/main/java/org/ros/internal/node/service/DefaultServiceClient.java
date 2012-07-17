@@ -21,7 +21,7 @@ import com.google.common.collect.Lists;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
-import org.ros.internal.message.MessageBuffers;
+import org.ros.internal.message.MessageBufferPool;
 import org.ros.internal.transport.ClientHandshakeListener;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -87,7 +87,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   private final ServiceDeclaration serviceDeclaration;
   private final MessageSerializer<T> serializer;
   private final MessageFactory messageFactory;
-  private final MessageBuffers messageBuffers;
+  private final MessageBufferPool messageBufferPool;
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final ConnectionHeader connectionHeader;
   private final TcpClientManager tcpClientManager;
@@ -109,7 +109,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     this.serviceDeclaration = serviceDeclaration;
     this.serializer = serializer;
     this.messageFactory = messageFactory;
-    messageBuffers = new MessageBuffers();
+    messageBufferPool = new MessageBufferPool();
     responseListeners = Lists.newLinkedList();
     connectionHeader = new ConnectionHeader();
     connectionHeader.addField(ConnectionHeaderFields.CALLER_ID, nodeName.toString());
@@ -150,11 +150,11 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   @Override
   public void call(T request, ServiceResponseListener<S> listener) {
-    ChannelBuffer buffer = messageBuffers.acquire();
+    ChannelBuffer buffer = messageBufferPool.acquire();
     serializer.serialize(request, buffer);
     responseListeners.add(listener);
     tcpClient.write(buffer).awaitUninterruptibly();
-    messageBuffers.release(buffer);
+    messageBufferPool.release(buffer);
   }
 
   @Override
