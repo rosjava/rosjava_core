@@ -123,14 +123,14 @@ public class OutgoingMessageQueue<T> {
   /**
    * @see CircularBlockingQueue#setLimit(int)
    */
-  public void setLimit(int limit) {
+  public void setQueueLimit(int limit) {
     queue.setLimit(limit);
   }
 
   /**
    * @see CircularBlockingQueue#getLimit
    */
-  public int getLimit() {
+  public int getQueueLimit() {
     return queue.getLimit();
   }
 

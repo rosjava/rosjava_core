@@ -219,7 +219,7 @@ public class MessageQueueIntegrationTest {
     // Setting latched mode and writing a message should cause any future
     // IncomingMessageQueue to receive that message.
     outgoingMessageQueue.setLatchMode(true);
-    outgoingMessageQueue.setLimit(0);
+    outgoingMessageQueue.setQueueLimit(0);
     outgoingMessageQueue.put(expectedMessage);
     Channel serverChannel = buildServerChannel();
     firstIncomingMessageQueue.setLatchMode(true);

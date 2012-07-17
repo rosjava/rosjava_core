@@ -42,7 +42,7 @@ public class EventDispatcher<T> extends CancellableLoop {
   /**
    * @see CircularBlockingQueue#setLimit(int)
    */
-  public void setLimit(int limit) {
+  public void setQueueLimit(int limit) {
     events.setLimit(limit);
   }
 

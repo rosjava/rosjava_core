@@ -322,11 +322,11 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
 
   @Override
   public void setQueueLimit(int limit) {
-    outgoingMessageQueue.setLimit(limit);
+    outgoingMessageQueue.setQueueLimit(limit);
   }
 
   @Override
   public int getQueueLimit() {
-    return outgoingMessageQueue.getLimit();
+    return outgoingMessageQueue.getQueueLimit();
   }
 }
