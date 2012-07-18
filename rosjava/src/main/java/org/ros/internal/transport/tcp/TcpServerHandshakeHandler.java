@@ -70,7 +70,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
 
   private void handleServiceHandshake(MessageEvent e, ChannelPipeline pipeline,
       ConnectionHeader incomingHeader) {
-    GraphName serviceName = new GraphName(incomingHeader.getField(ConnectionHeaderFields.SERVICE));
+    GraphName serviceName = GraphName.of(incomingHeader.getField(ConnectionHeaderFields.SERVICE));
     Preconditions.checkState(serviceManager.hasServer(serviceName));
     DefaultServiceServer<?, ?> serviceServer = serviceManager.getServer(serviceName);
     e.getChannel().write(serviceServer.finishHandshake(incomingHeader));
@@ -90,7 +90,7 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
     Preconditions.checkState(incomingConnectionHeader.hasField(ConnectionHeaderFields.TOPIC),
         "Handshake header missing field: " + ConnectionHeaderFields.TOPIC);
     GraphName topicName =
-        new GraphName(incomingConnectionHeader.getField(ConnectionHeaderFields.TOPIC));
+        GraphName.of(incomingConnectionHeader.getField(ConnectionHeaderFields.TOPIC));
     Preconditions.checkState(topicParticipantManager.hasPublisher(topicName),
         "No publisher for topic: " + topicName);
     DefaultPublisher<?> publisher = topicParticipantManager.getPublisher(topicName);

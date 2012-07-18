@@ -32,7 +32,7 @@ public class MessageSerializationTestNode implements NodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("message_serialization_test_node");
+    return GraphName.of("message_serialization_test_node");
   }
 
   @Override

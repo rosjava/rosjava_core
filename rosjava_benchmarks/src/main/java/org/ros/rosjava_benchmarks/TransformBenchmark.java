@@ -46,7 +46,7 @@ public class TransformBenchmark extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("transform_benchmark");
+    return GraphName.of("transform_benchmark");
   }
 
   @Override
@@ -59,8 +59,8 @@ public class TransformBenchmark extends AbstractNodeMain {
         connectedNode.getTopicMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
     turtle2.getHeader().setFrameId("world");
     turtle2.setChildFrameId("turtle2");
-    final GraphName sourceFrame = new GraphName("turtle1");
-    final GraphName targetFrame = new GraphName("turtle2");
+    final GraphName sourceFrame = GraphName.of("turtle1");
+    final GraphName targetFrame = GraphName.of("turtle2");
     final FrameTransformTree frameTransformTree = new FrameTransformTree(NameResolver.newRoot());
     connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override

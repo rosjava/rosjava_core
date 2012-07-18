@@ -68,7 +68,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public boolean has(String name) {
-    return has(new GraphName(name));
+    return has(GraphName.of(name));
   }
 
   @Override
@@ -79,7 +79,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public void delete(String name) {
-    delete(new GraphName(name));
+    delete(GraphName.of(name));
   }
 
   @Override
@@ -95,7 +95,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public GraphName search(String name) {
-    return search(new GraphName(name));
+    return search(GraphName.of(name));
   }
 
   @Override
@@ -111,7 +111,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public void addParameterListener(String name, ParameterListener listener) {
-    addParameterListener(new GraphName(name), listener);
+    addParameterListener(GraphName.of(name), listener);
   }
 
   @Override
@@ -122,7 +122,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public void set(String name, boolean value) {
-    set(new GraphName(name), value);
+    set(GraphName.of(name), value);
   }
 
   @Override
@@ -133,7 +133,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public void set(String name, int value) {
-    set(new GraphName(name), value);
+    set(GraphName.of(name), value);
   }
 
   @Override
@@ -144,7 +144,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public void set(String name, double value) {
-    set(new GraphName(name), value);
+    set(GraphName.of(name), value);
   }
 
   @Override
@@ -155,7 +155,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public void set(String name, String value) {
-    set(new GraphName(name), value);
+    set(GraphName.of(name), value);
   }
 
   @Override
@@ -166,7 +166,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public void set(String name, List<?> value) {
-    set(new GraphName(name), value);
+    set(GraphName.of(name), value);
   }
 
   @Override
@@ -177,7 +177,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public void set(String name, Map<?, ?> value) {
-    set(new GraphName(name), value);
+    set(GraphName.of(name), value);
   }
 
   private <T> T get(GraphName name, Class<T> type) {
@@ -217,7 +217,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public boolean getBoolean(String name) {
-    return getBoolean(new GraphName(name));
+    return getBoolean(GraphName.of(name));
   }
 
   @Override
@@ -227,7 +227,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public boolean getBoolean(String name, boolean defaultValue) {
-    return getBoolean(new GraphName(name), defaultValue);
+    return getBoolean(GraphName.of(name), defaultValue);
   }
 
   @Override
@@ -237,7 +237,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public int getInteger(String name) {
-    return getInteger(new GraphName(name));
+    return getInteger(GraphName.of(name));
   }
 
   @Override
@@ -247,7 +247,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public int getInteger(String name, int defaultValue) {
-    return getInteger(new GraphName(name), defaultValue);
+    return getInteger(GraphName.of(name), defaultValue);
   }
 
   @Override
@@ -257,7 +257,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public double getDouble(String name) {
-    return getDouble(new GraphName(name));
+    return getDouble(GraphName.of(name));
   }
 
   @Override
@@ -267,7 +267,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public double getDouble(String name, double defaultValue) {
-    return getDouble(new GraphName(name), defaultValue);
+    return getDouble(GraphName.of(name), defaultValue);
   }
 
   @Override
@@ -277,7 +277,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public String getString(String name) {
-    return get(new GraphName(name), String.class);
+    return get(GraphName.of(name), String.class);
   }
 
   @Override
@@ -287,7 +287,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public String getString(String name, String defaultValue) {
-    return getString(new GraphName(name), defaultValue);
+    return getString(GraphName.of(name), defaultValue);
   }
 
   @Override
@@ -297,7 +297,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public List<?> getList(String name) {
-    return getList(new GraphName(name));
+    return getList(GraphName.of(name));
   }
 
   @Override
@@ -307,7 +307,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public List<?> getList(String name, List<?> defaultValue) {
-    return getList(new GraphName(name), defaultValue);
+    return getList(GraphName.of(name), defaultValue);
   }
 
   @Override
@@ -317,7 +317,7 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public Map<?, ?> getMap(String name) {
-    return getMap(new GraphName(name));
+    return getMap(GraphName.of(name));
   }
 
   @Override
@@ -327,6 +327,6 @@ public class DefaultParameterTree implements ParameterTree {
 
   @Override
   public Map<?, ?> getMap(String name, Map<?, ?> defaultValue) {
-    return getMap(new GraphName(name), defaultValue);
+    return getMap(GraphName.of(name), defaultValue);
   }
 }

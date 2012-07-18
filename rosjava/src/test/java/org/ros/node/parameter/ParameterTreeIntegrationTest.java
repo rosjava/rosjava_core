@@ -52,7 +52,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return new GraphName("node_name");
+        return GraphName.of("node_name");
       }
 
       @Override
@@ -151,8 +151,8 @@ public class ParameterTreeIntegrationTest extends RosTest {
     parameters.set("/bloop", "doh");
     Collection<GraphName> names = parameters.getNames();
     assertEquals(2, names.size());
-    assertTrue(names.contains(new GraphName("/foo/bar")));
-    assertTrue(names.contains(new GraphName("/bloop")));
+    assertTrue(names.contains(GraphName.of("/foo/bar")));
+    assertTrue(names.contains(GraphName.of("/bloop")));
   }
 
   @Test
@@ -162,7 +162,7 @@ public class ParameterTreeIntegrationTest extends RosTest {
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
       public GraphName getDefaultNodeName() {
-        return new GraphName("subscriber");
+        return GraphName.of("subscriber");
       }
 
       @Override

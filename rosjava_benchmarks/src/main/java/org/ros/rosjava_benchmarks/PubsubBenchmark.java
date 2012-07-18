@@ -50,7 +50,7 @@ public class PubsubBenchmark extends AbstractNodeMain {
 
   @Override
   public GraphName getDefaultNodeName() {
-    return new GraphName("pubsub_benchmark");
+    return GraphName.of("pubsub_benchmark");
   }
 
   @Override

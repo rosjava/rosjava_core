@@ -50,7 +50,7 @@ public class ParameterServer {
   public ParameterServer() {
     tree = Maps.newConcurrentMap();
     subscribers = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, NodeIdentifier>create());
-    masterName = new GraphName("/master");
+    masterName = GraphName.of("/master");
   }
 
   public void subscribe(GraphName name, NodeIdentifier nodeIdentifier) {
@@ -211,10 +211,10 @@ public class ParameterServer {
     for (String name : subtree.keySet()) {
       Object possibleSubtree = subtree.get(name);
       if (possibleSubtree instanceof Map) {
-        names.addAll(getSubtreeNames(parent.join(new GraphName(name)),
+        names.addAll(getSubtreeNames(parent.join(GraphName.of(name)),
             (Map<String, Object>) possibleSubtree, names));
       } else {
-        names.add(parent.join(new GraphName(name)));
+        names.add(parent.join(GraphName.of(name)));
       }
     }
     return names;

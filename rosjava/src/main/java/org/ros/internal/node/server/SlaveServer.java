@@ -166,7 +166,7 @@ public class SlaveServer extends XmlRpcServer {
   }
 
   public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
-    GraphName graphName = new GraphName(topicName);
+    GraphName graphName = GraphName.of(topicName);
     if (topicParticipantManager.hasSubscriber(graphName)) {
       DefaultSubscriber<?> subscriber = topicParticipantManager.getSubscriber(graphName);
       TopicDeclaration topicDeclaration = subscriber.getTopicDeclaration();
@@ -180,7 +180,7 @@ public class SlaveServer extends XmlRpcServer {
       throws ServerException {
     // TODO(damonkohler): Use NameResolver.
     // Canonicalize topic name.
-    GraphName graphName = new GraphName(topicName).toGlobal();
+    GraphName graphName = GraphName.of(topicName).toGlobal();
     if (!topicParticipantManager.hasPublisher(graphName)) {
       throw new ServerException("No publishers for topic: " + graphName);
     }

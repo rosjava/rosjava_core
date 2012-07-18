@@ -277,7 +277,7 @@ public class DefaultNode implements ConnectedNode {
 
   @Override
   public <T> Publisher<T> newPublisher(String topicName, String messageType) {
-    return newPublisher(new GraphName(topicName), messageType);
+    return newPublisher(GraphName.of(topicName), messageType);
   }
 
   @Override
@@ -294,7 +294,7 @@ public class DefaultNode implements ConnectedNode {
 
   @Override
   public <T> Subscriber<T> newSubscriber(String topicName, String messageType) {
-    return newSubscriber(new GraphName(topicName), messageType);
+    return newSubscriber(GraphName.of(topicName), messageType);
   }
 
   @Override
@@ -316,7 +316,7 @@ public class DefaultNode implements ConnectedNode {
   @Override
   public <T, S> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
       ServiceResponseBuilder<T, S> responseBuilder) {
-    return newServiceServer(new GraphName(serviceName), serviceType, responseBuilder);
+    return newServiceServer(GraphName.of(serviceName), serviceType, responseBuilder);
   }
 
   @SuppressWarnings("unchecked")
@@ -327,7 +327,7 @@ public class DefaultNode implements ConnectedNode {
 
   @Override
   public <T, S> ServiceServer<T, S> getServiceServer(String serviceName) {
-    return getServiceServer(new GraphName(serviceName));
+    return getServiceServer(GraphName.of(serviceName));
   }
 
   @Override
@@ -344,7 +344,7 @@ public class DefaultNode implements ConnectedNode {
 
   @Override
   public URI lookupServiceUri(String serviceName) {
-    return lookupServiceUri(new GraphName(serviceName));
+    return lookupServiceUri(GraphName.of(serviceName));
   }
 
   @Override
@@ -369,7 +369,7 @@ public class DefaultNode implements ConnectedNode {
   @Override
   public <T, S> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
       throws ServiceNotFoundException {
-    return newServiceClient(new GraphName(serviceName), serviceType);
+    return newServiceClient(GraphName.of(serviceName), serviceType);
   }
 
   @Override
@@ -394,7 +394,7 @@ public class DefaultNode implements ConnectedNode {
 
   @Override
   public GraphName resolveName(String name) {
-    return resolver.resolve(new GraphName(name));
+    return resolver.resolve(GraphName.of(name));
   }
 
   @Override

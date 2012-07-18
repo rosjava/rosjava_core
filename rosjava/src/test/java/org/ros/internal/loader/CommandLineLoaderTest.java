@@ -130,11 +130,11 @@ public class CommandLineLoaderTest {
     assertEquals(defaultRosRoot, nodeConfiguration.getRosRoot());
     assertEquals("192.168.0.1", nodeConfiguration.getTcpRosAdvertiseAddress().getHost());
     assertEquals("192.168.0.1", nodeConfiguration.getXmlRpcAdvertiseAddress().getHost());
-    assertEquals(new GraphName("/foo/bar"), nodeConfiguration.getParentResolver().getNamespace());
+    assertEquals(GraphName.of("/foo/bar"), nodeConfiguration.getParentResolver().getNamespace());
     Assert.assertEquals(rosPackagePathList, nodeConfiguration.getRosPackagePath());
 
     // Test ROS namespace resolution and canonicalization
-    GraphName canonical = new GraphName("/baz/bar");
+    GraphName canonical = GraphName.of("/baz/bar");
     env = getDefaultEnv();
     env.put(EnvironmentVariables.ROS_NAMESPACE, "baz/bar");
     loader = new CommandLineLoader(emptyArgv, env);
@@ -171,7 +171,7 @@ public class CommandLineLoaderTest {
     assertEquals(new URI("http://override:22622"), nodeConfiguration.getMasterUri());
 
     // Test ROS namespace resolution and canonicalization
-    GraphName canonical = new GraphName("/baz/bar");
+    GraphName canonical = GraphName.of("/baz/bar");
     env = getDefaultEnv();
     args = Lists.newArrayList("Foo", CommandLineVariables.ROS_NAMESPACE + ":=baz/bar");
     nodeConfiguration = new CommandLineLoader(args, env).build();

@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
  * 
  * @see <a href="http://www.ros.org/wiki/Names">Names documentation</a>
  * 
- * @author ethan.rublee@gmail.com (Ethan Rublee)
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class GraphName {
@@ -37,7 +36,6 @@ public class GraphName {
   @VisibleForTesting
   static final String ANONYMOUS_PREFIX = "anonymous_";
 
-  private static final String EMPTY = "";
   private static final String ROOT = "/";
   private static final String SEPARATOR = "/";
 
@@ -76,18 +74,23 @@ public class GraphName {
    * @return an empty {@link GraphName}
    */
   public static GraphName empty() {
-    return new GraphName(EMPTY);
+    return new GraphName("");
   }
 
   /**
-   * Constructs a new canonical {@link GraphName}.
+   * Returns a new {@link GraphName} of the specified {@link #name}.
    * 
    * @param name
    *          the name of this resource
+   * @return a new {@link GraphName} for {@link #name}
    */
-  public GraphName(String name) {
+  public static GraphName of(String name) {
+    return new GraphName(canonicalize(name));
+  }
+
+  private GraphName(String name) {
     Preconditions.checkNotNull(name);
-    this.name = canonicalize(name);
+    this.name = name;
   }
 
   /**
@@ -98,7 +101,7 @@ public class GraphName {
    * @param name
    * @return the canonical name for this {@link GraphName}
    */
-  private String canonicalize(String name) {
+  private static String canonicalize(String name) {
     if (!VALID_GRAPH_NAME_PATTERN.matcher(name).matches()) {
       throw new RosRuntimeException("Invalid graph name: " + name);
     }
@@ -130,7 +133,7 @@ public class GraphName {
    * @return {@code true} if this name is a global name, {@code false} otherwise
    */
   public boolean isGlobal() {
-    return name.startsWith(GraphName.ROOT);
+    return !isEmpty() && name.charAt(0) == '/';
   }
 
   /**
@@ -146,7 +149,7 @@ public class GraphName {
    *         otherwise
    */
   public boolean isEmpty() {
-    return name.equals("");
+    return name.isEmpty();
   }
 
   /**
@@ -166,7 +169,7 @@ public class GraphName {
    * @return {@code true} if the name is a private name, {@code false} otherwise
    */
   public boolean isPrivate() {
-    return name.startsWith("~");
+    return !isEmpty() && name.charAt(0) == '~';
   }
 
   /**
@@ -201,13 +204,11 @@ public class GraphName {
     int slashIdx = name.lastIndexOf('/');
     if (slashIdx > 1) {
       return new GraphName(name.substring(0, slashIdx));
-    } else {
-      if (isGlobal()) {
-        return GraphName.root();
-      } else {
-        return GraphName.empty();
-      }
     }
+    if (isGlobal()) {
+      return GraphName.root();
+    }
+    return GraphName.empty();
   }
 
   /**
@@ -234,9 +235,8 @@ public class GraphName {
   public GraphName toRelative() {
     if (isPrivate() || isGlobal()) {
       return new GraphName(name.substring(1));
-    } else {
-      return this;
     }
+    return this;
   }
 
   /**
@@ -248,11 +248,11 @@ public class GraphName {
   public GraphName toGlobal() {
     if (isGlobal()) {
       return this;
-    } else if (isPrivate()) {
-      return new GraphName(GraphName.ROOT + name.substring(1));
-    } else {
-      return new GraphName(GraphName.ROOT + name);
     }
+    if (isPrivate()) {
+      return new GraphName(GraphName.ROOT + name.substring(1));
+    }
+    return new GraphName(GraphName.ROOT + name);
   }
 
   /**
@@ -260,18 +260,18 @@ public class GraphName {
    * 
    * @param other
    *          the {@link GraphName} to join with, if other is global, this will
-   *          return other.
+   *          return other
    * @return a {@link GraphName} representing the concatenation of this
    *         {@link GraphName} and {@code other}
    */
   public GraphName join(GraphName other) {
     if (other.isGlobal() || isEmpty()) {
       return other;
-    } else if (isRoot()) {
-      return other.toGlobal();
-    } else {
-      return new GraphName(toString() + SEPARATOR + other.toString());
     }
+    if (isRoot()) {
+      return other.toGlobal();
+    }
+    return new GraphName(toString() + SEPARATOR + other.toString());
   }
 
   @Override
@@ -281,10 +281,7 @@ public class GraphName {
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
-    return result;
+    return name.hashCode();
   }
 
   @Override
