@@ -16,6 +16,7 @@
 
 package org.ros.internal.message;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.context.MessageContext;
 import org.ros.internal.message.field.Field;
@@ -433,7 +434,17 @@ class MessageImpl implements RawMessage, GetInstance {
   public short[] getCharArray(String name) {
     return (short[]) messageFields.getFieldValue(name);
   }
+  
+  @Override
+  public ChannelBuffer getChannelBuffer(String name) {
+    return (ChannelBuffer) messageFields.getFieldValue(name);
+  }
 
+  @Override
+  public void setChannelBuffer(String name, ChannelBuffer value) {
+    messageFields.setFieldValue(name, value);
+  }
+  
   @Override
   public Object getInstance() {
     return this;

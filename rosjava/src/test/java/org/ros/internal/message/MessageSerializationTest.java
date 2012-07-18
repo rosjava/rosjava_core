@@ -63,13 +63,15 @@ public class MessageSerializationTest {
     messageDefinitionReflectionProvider.add(NestedList._TYPE, NestedList._DEFINITION);
     defaultMessageFactory = new DefaultMessageFactory(messageDefinitionReflectionProvider);
     defaultMessageFactory.getMessageInterfaceClassProvider().add(Nested._TYPE, Nested.class);
-    defaultMessageFactory.getMessageInterfaceClassProvider().add(NestedList._TYPE, NestedList.class);
+    defaultMessageFactory.getMessageInterfaceClassProvider()
+        .add(NestedList._TYPE, NestedList.class);
     serializer = new DefaultMessageSerializer();
   }
 
   private <T extends Message> void checkSerializeAndDeserialize(T message) {
     ChannelBuffer buffer = MessageBuffers.dynamicBuffer();
     serializer.serialize(message, buffer);
+    dumpBuffer(buffer);
     DefaultMessageDeserializer<T> deserializer =
         new DefaultMessageDeserializer<T>(message.toRawMessage().getIdentifier(),
             defaultMessageFactory);
@@ -206,9 +208,29 @@ public class MessageSerializationTest {
     checkSerializeAndDeserialize(message);
     ChannelBuffer buffer = MessageBuffers.dynamicBuffer();
     serializer.serialize(message, buffer);
-    for (byte b : buffer.toByteBuffer().array()) {
-      System.out.print(String.format("0x%02x ", b));
-      assertEquals(0, b);
+    dumpBuffer(buffer);
+    // Throw away sequence number.
+    buffer.readInt();
+    while (buffer.readable()) {
+      byte b = buffer.readByte();
+      assertEquals("All serialized bytes should be 0. Check stdout.", 0, b);
     }
+  }
+
+  private void dumpBuffer(ChannelBuffer buffer) {
+    buffer = buffer.duplicate();
+    System.out.printf("Dumping %d readable bytes:\n", buffer.readableBytes());
+    int i = 0;
+    while (buffer.readable()) {
+      byte b = buffer.readByte();
+      System.out.printf("0x%02x ", b);
+      if (++i % 8 == 0) {
+        System.out.print("   ");
+      }
+      if (i % 16 == 0) {
+        System.out.print("\n");
+      }
+    }
+    System.out.print("\n\n");
   }
 }

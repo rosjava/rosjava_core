@@ -19,12 +19,11 @@ package org.ros.internal.message;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import org.ros.internal.message.definition.MessageDefinitionProviderChain;
-import org.ros.internal.message.definition.MessageDefinitionTupleParser;
-
 import org.apache.commons.io.FileUtils;
 import org.ros.EnvironmentVariables;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.message.definition.MessageDefinitionProviderChain;
+import org.ros.internal.message.definition.MessageDefinitionTupleParser;
 import org.ros.internal.message.service.ServiceDefinitionFileProvider;
 import org.ros.internal.message.topic.TopicDefinitionFileProvider;
 import org.ros.message.MessageDeclaration;
@@ -132,8 +131,8 @@ public class GenerateInterfaces {
       File file = new File(outputDirectory, messageDeclaration.getType() + ".java");
       FileUtils.writeStringToFile(file, content);
     } catch (Exception e) {
-      System.out.println(String.format("Failed to generate interface for %s: %s",
-          messageDeclaration.getType(), e.getMessage()));
+      System.out.printf("Failed to generate interface for %s.\n", messageDeclaration.getType());
+      e.printStackTrace();
     }
   }
 

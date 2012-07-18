@@ -176,6 +176,16 @@ public class RawMessageSerializationTest {
   }
 
   @Test
+  public void testChannelBuffer() {
+    topicDefinitionResourceProvider.add("foo/foo", "uint8[] data");
+    ChannelBuffer buffer = MessageBuffers.dynamicBuffer();
+    buffer.writeBytes(new byte[] { 1, 2, 3, 4, 5 });
+    RawMessage rawMessage = messageFactory.newFromType("foo/foo");
+    rawMessage.setChannelBuffer("data", buffer);
+    checkSerializeAndDeserialize(rawMessage);
+  }
+
+  @Test
   public void testInt32Array() {
     topicDefinitionResourceProvider.add("foo/foo", "int32[] data");
     RawMessage rawMessage = messageFactory.newFromType("foo/foo");

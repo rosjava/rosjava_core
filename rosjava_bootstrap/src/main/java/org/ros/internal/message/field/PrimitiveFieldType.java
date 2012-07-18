@@ -162,7 +162,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return ByteArrayField.newVariable(this, name, size);
+      return ChannelBufferField.newVariable(this, name, size);
     }
 
     @Override
@@ -204,7 +204,7 @@ public enum PrimitiveFieldType implements FieldType {
 
     @Override
     public Field newVariableList(String name, int size) {
-      return ByteArrayField.newVariable(this, name, size);
+      return ChannelBufferField.newVariable(this, name, size);
     }
 
     @Override
