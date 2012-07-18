@@ -107,11 +107,11 @@ public interface RawMessage extends Message {
 
   short getUInt16(String name);
 
-  short[] getUInt16List(String name);
+  short[] getUInt16Array(String name);
 
   int getUInt32(String name);
 
-  int[] getUInt32List(String name);
+  int[] getUInt32Array(String name);
 
   long getUInt64(String name);
 

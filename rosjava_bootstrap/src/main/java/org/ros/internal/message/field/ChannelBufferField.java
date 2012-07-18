@@ -21,6 +21,8 @@ import com.google.common.base.Preconditions;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.internal.message.MessageBuffers;
 
+import java.nio.ByteOrder;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -50,6 +52,7 @@ public class ChannelBufferField extends Field {
 
   @Override
   public void setValue(Object value) {
+    Preconditions.checkArgument(((ChannelBuffer) value).order() == ByteOrder.LITTLE_ENDIAN);
     Preconditions.checkArgument(size < 0 || ((ChannelBuffer) value).readableBytes() == size);
     this.value = (ChannelBuffer) value;
   }

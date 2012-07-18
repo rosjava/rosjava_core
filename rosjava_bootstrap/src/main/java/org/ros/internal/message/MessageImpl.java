@@ -209,7 +209,7 @@ class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public short[] getUInt16List(String name) {
+  public short[] getUInt16Array(String name) {
     return (short[]) messageFields.getFieldValue(name);
   }
 
@@ -219,7 +219,7 @@ class MessageImpl implements RawMessage, GetInstance {
   }
 
   @Override
-  public int[] getUInt32List(String name) {
+  public int[] getUInt32Array(String name) {
     return (int[]) messageFields.getFieldValue(name);
   }
 
