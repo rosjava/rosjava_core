@@ -40,10 +40,10 @@ public class FrameTransformTree {
   private final NameResolver nameResolver;
 
   /**
-   * A {@link Map} from child frame ID to the child frame's most recent
-   * transform.
+   * A {@link Map} of the most recent {@link LazyFrameTransform} by source
+   * frame.
    */
-  private final Map<GraphName, geometry_msgs.TransformStamped> transforms;
+  private final Map<GraphName, LazyFrameTransform> transforms;
 
   public FrameTransformTree(NameResolver nameResolver) {
     this.nameResolver = nameResolver;
@@ -53,26 +53,20 @@ public class FrameTransformTree {
   /**
    * Updates the transform tree with the provided transform.
    * 
-   * @param transform
+   * @param transformStamped
    *          the transform to update
    */
-  public void updateTransform(geometry_msgs.TransformStamped transform) {
-    transforms.put(nameResolver.resolve(transform.getChildFrameId()), transform);
+  public void updateTransform(geometry_msgs.TransformStamped transformStamped) {
+    GraphName source = nameResolver.resolve(transformStamped.getChildFrameId());
+    transforms.put(source, new LazyFrameTransform(transformStamped));
   }
 
-  public GraphName findRootFrame(GraphName sourceFrame) {
-    GraphName targetFrame = sourceFrame;
-    while (true) {
-      TransformStamped transformStamped = getLatestTransform(targetFrame);
-      if (transformStamped == null) {
-        return targetFrame;
-      }
-      targetFrame = nameResolver.resolve(transformStamped.getHeader().getFrameId());
+  private FrameTransform getLatestTransform(GraphName frame) {
+    LazyFrameTransform lazyFrameTransform = transforms.get(nameResolver.resolve(frame));
+    if (lazyFrameTransform != null) {
+      return lazyFrameTransform.get();
     }
-  }
-
-  private geometry_msgs.TransformStamped getLatestTransform(GraphName frame) {
-    return transforms.get(nameResolver.resolve(frame));
+    return null;
   }
 
   /**
@@ -86,26 +80,25 @@ public class FrameTransformTree {
   public boolean canTransform(GraphName sourceFrame, GraphName targetFrame) {
     Preconditions.checkNotNull(sourceFrame);
     Preconditions.checkNotNull(targetFrame);
-    FrameTransform sourceFrameTransform = newFrameTransformToRoot(sourceFrame);
-    FrameTransform targetFrameTransform = newFrameTransformToRoot(targetFrame);
-    return sourceFrameTransform.getTargetFrame().equals(targetFrameTransform.getTargetFrame());
+    FrameTransform source = newFrameTransformToRoot(sourceFrame);
+    FrameTransform target = newFrameTransformToRoot(targetFrame);
+    return source.getTargetFrame().equals(target.getTargetFrame());
   }
 
   /**
    * @return the {@link FrameTransform} from source the frame to the target
-   *         frame
+   *         frame, or {@code null} if no {@link FrameTransform} could be found
    */
   public FrameTransform newFrameTransform(GraphName sourceFrame, GraphName targetFrame) {
     Preconditions.checkNotNull(sourceFrame);
     Preconditions.checkNotNull(targetFrame);
-    Preconditions.checkArgument(canTransform(sourceFrame, targetFrame),
-        String.format("Cannot transform between %s and %s.", sourceFrame, targetFrame));
-    FrameTransform sourceFrameTransform = newFrameTransformToRoot(sourceFrame);
-    FrameTransform targetFrameTransform = newFrameTransformToRoot(targetFrame);
-    Transform transform =
-        targetFrameTransform.getTransform().invert().multiply(sourceFrameTransform.getTransform());
-    return new FrameTransform(transform, sourceFrameTransform.getSourceFrame(),
-        targetFrameTransform.getSourceFrame());
+    FrameTransform source = newFrameTransformToRoot(sourceFrame);
+    FrameTransform target = newFrameTransformToRoot(targetFrame);
+    if (source.getTargetFrame().equals(target.getTargetFrame())) {
+      Transform transform = target.getTransform().invert().multiply(source.getTransform());
+      return new FrameTransform(transform, source.getSourceFrame(), target.getSourceFrame());
+    }
+    return null;
   }
 
   /**
@@ -115,15 +108,16 @@ public class FrameTransformTree {
    */
   private FrameTransform newFrameTransformToRoot(GraphName frame) {
     GraphName sourceFrame = nameResolver.resolve(frame);
-    Transform result = Transform.newIdentityTransform();
-    GraphName targetFrame = sourceFrame;
+    FrameTransform result =
+        new FrameTransform(Transform.newIdentityTransform(), sourceFrame, sourceFrame);
     while (true) {
-      TransformStamped transformStamped = getLatestTransform(targetFrame);
-      if (transformStamped == null) {
-        return new FrameTransform(result, sourceFrame, targetFrame);
+      FrameTransform parent = getLatestTransform(result.getTargetFrame());
+      if (parent == null) {
+        return result;
       }
-      result = Transform.newFromTransformMessage(transformStamped.getTransform()).multiply(result);
-      targetFrame = nameResolver.resolve(transformStamped.getHeader().getFrameId());
+      Transform transform = result.getTransform().multiply(parent.getTransform());
+      GraphName targetFrame = nameResolver.resolve(parent.getSourceFrame());
+      result = new FrameTransform(transform, sourceFrame, targetFrame);
     }
   }
 }

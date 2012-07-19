@@ -29,6 +29,14 @@ public class FrameTransform {
   private final GraphName source;
   private final GraphName target;
 
+  public static FrameTransform
+      fromTransformStamped(geometry_msgs.TransformStamped transformStamped) {
+    Transform transform = Transform.newFromTransformMessage(transformStamped.getTransform());
+    String source = transformStamped.getHeader().getFrameId();
+    String target = transformStamped.getChildFrameId();
+    return new FrameTransform(transform, GraphName.of(source), GraphName.of(target));
+  }
+
   public FrameTransform(Transform transform, GraphName source, GraphName target) {
     this.transform = transform;
     this.source = source;

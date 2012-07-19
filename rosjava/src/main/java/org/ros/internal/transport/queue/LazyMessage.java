@@ -50,7 +50,6 @@ public class LazyMessage<T> {
     this.buffer = buffer;
     this.deserializer = deserializer;
     mutex = new Object();
-    message = null;
   }
 
   @VisibleForTesting
