@@ -25,40 +25,67 @@ import com.google.common.base.Preconditions;
  */
 public class MessageIdentifier {
 
-  private final String type;
-  private final String pkg;
-  private final String name;
+  private String type;
+  private String pkg;
+  private String name;
 
   public static MessageIdentifier of(String pkg, String name) {
     Preconditions.checkNotNull(pkg);
     Preconditions.checkNotNull(name);
-    return of(pkg + "/" + name);
+    return new MessageIdentifier(pkg, name);
   }
 
   public static MessageIdentifier of(String type) {
     Preconditions.checkNotNull(type);
-    Preconditions.checkArgument(type.contains("/"), "Type must be fully qualified: " + type);
+    // We're not using Preconditions.checkArgument() here because we want a
+    // useful error message without paying the performance penalty of
+    // constructing it every time.
+    if (!type.contains("/")) {
+      throw new IllegalArgumentException(String.format(
+          "Type name is invalid or not fully qualified: \"%s\"", type));
+    }
     return new MessageIdentifier(type);
   }
 
-  public MessageIdentifier(String type) {
-    Preconditions.checkNotNull(type);
-    Preconditions.checkArgument(type.contains("/"), "Type must be fully qualified: " + type);
+  private MessageIdentifier(String type) {
     this.type = type;
+  }
+
+  private MessageIdentifier(String pkg, String name) {
+    this.pkg = pkg;
+    this.name = name;
+  }
+
+  public String getType() {
+    if (type == null) {
+      // Using StringBuilder like this is about 40% faster than using the +
+      // operator.
+      StringBuilder stringBuilder = new StringBuilder(pkg.length() + name.length() + 1);
+      stringBuilder.append(pkg);
+      stringBuilder.append("/");
+      stringBuilder.append(name);
+      type = stringBuilder.toString();
+    }
+    return type;
+  }
+
+  private void splitType() {
     String[] packageAndName = type.split("/", 2);
     pkg = packageAndName[0];
     name = packageAndName[1];
   }
 
-  public String getType() {
-    return type;
-  }
-
   public String getPackage() {
+    if (pkg == null) {
+      splitType();
+    }
     return pkg;
   }
 
   public String getName() {
+    if (name == null) {
+      splitType();
+    }
     return name;
   }
 

@@ -67,15 +67,17 @@ public class MessageFields {
   }
 
   public Object getFieldValue(String name) {
-    if (fields.containsKey(name)) {
-      return fields.get(name).getValue();
+    Field field = fields.get(name);
+    if (field != null) {
+      return field.getValue();
     }
     throw new RosRuntimeException("Uknown field: " + name);
   }
 
   public void setFieldValue(String name, Object value) {
-    if (fields.containsKey(name)) {
-      fields.get(name).setValue(value);
+    Field field = fields.get(name);
+    if (field != null) {
+      field.setValue(value);
     } else {
       throw new RosRuntimeException("Uknown field: " + name);
     }
