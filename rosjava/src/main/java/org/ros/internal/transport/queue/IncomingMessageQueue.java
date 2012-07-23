@@ -37,14 +37,14 @@ public class IncomingMessageQueue<T> {
    * {@link IncomingMessageQueue#addListener(MessageListener, int)} which are
    * consumed by user provided {@link MessageListener}s.
    */
-  private static final int QUEUE_CAPACITY = 128;
+  private static final int QUEUE_CAPACITY = 16;
 
-  private final CircularBlockingQueue<LazyMessage<T>> lazyMessages;
   private final MessageReceiver<T> messageReceiver;
   private final MessageDispatcher<T> messageDispatcher;
 
   public IncomingMessageQueue(MessageDeserializer<T> deserializer, ExecutorService executorService) {
-    lazyMessages = new CircularBlockingQueue<LazyMessage<T>>(QUEUE_CAPACITY);
+    CircularBlockingQueue<LazyMessage<T>> lazyMessages =
+        new CircularBlockingQueue<LazyMessage<T>>(QUEUE_CAPACITY);
     messageReceiver = new MessageReceiver<T>(lazyMessages, deserializer);
     messageDispatcher = new MessageDispatcher<T>(lazyMessages, executorService);
     executorService.execute(messageDispatcher);

@@ -57,7 +57,6 @@ public class MessageReceiver<T> extends AbstractNamedChannelHandler {
     if (DEBUG) {
       log.info(String.format("Received %d byte message.", buffer.readableBytes()));
     }
-    // TODO(damonkohler): Use MessageBuffers pool.
     // We have to make a defensive copy of the buffer here because Netty does
     // not guarantee that the returned ChannelBuffer will not be reused.
     lazyMessages.add(new LazyMessage<T>(buffer.copy(), deserializer));

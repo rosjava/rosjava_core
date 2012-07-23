@@ -73,9 +73,7 @@ public class ChannelBufferField extends Field {
     if (currentSize < 0) {
       currentSize = buffer.readInt();
     }
-    // There are no guarantees this buffer won't be reused so we create a
-    // defensive copy.
-    value = buffer.readSlice(currentSize).copy();
+    value = buffer.readSlice(currentSize);
   }
 
   @Override

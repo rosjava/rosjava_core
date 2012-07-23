@@ -42,7 +42,7 @@ public class OutgoingMessageQueue<T> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
 
-  private static final int QUEUE_CAPACITY = 128;
+  private static final int QUEUE_CAPACITY = 16;
 
   private final MessageSerializer<T> serializer;
   private final CircularBlockingQueue<T> queue;
