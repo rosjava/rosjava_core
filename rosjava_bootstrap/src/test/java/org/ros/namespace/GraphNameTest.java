@@ -175,6 +175,7 @@ public class GraphNameTest {
   public void testJoin() {
     assertEquals(GraphName.of("/bar"), GraphName.of("/").join(GraphName.of("bar")));
     assertEquals(GraphName.of("bar"), GraphName.of("").join(GraphName.of("bar")));
+    assertEquals(GraphName.of("bar"), GraphName.of("bar").join(GraphName.of("")));
     assertEquals(GraphName.of("foo/bar"), GraphName.of("foo").join(GraphName.of("bar")));
     assertEquals(GraphName.of("/foo/bar"), GraphName.of("/foo").join(GraphName.of("bar")));
     assertEquals(GraphName.of("/bar"), GraphName.of("/foo").join(GraphName.of("/bar")));
@@ -201,5 +202,4 @@ public class GraphNameTest {
     assertTrue(latch.await(1, TimeUnit.SECONDS));
     assertEquals(sampleSize, anonymousGraphNames.size());
   }
-
 }

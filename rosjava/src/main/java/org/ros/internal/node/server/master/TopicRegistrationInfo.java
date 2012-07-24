@@ -17,14 +17,13 @@
 package org.ros.internal.node.server.master;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 import org.ros.master.client.TopicSystemState;
 import org.ros.namespace.GraphName;
 import org.ros.node.topic.Subscriber;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -117,8 +116,8 @@ public class TopicRegistrationInfo {
    * 
    * @return an immutable list of publishers
    */
-  public List<NodeRegistrationInfo> getPublishers() {
-    return ImmutableList.copyOf(publishers);
+  public Set<NodeRegistrationInfo> getPublishers() {
+    return ImmutableSet.copyOf(publishers);
   }
 
   /**
@@ -153,8 +152,8 @@ public class TopicRegistrationInfo {
    * 
    * @return an immutable list of publishers
    */
-  public List<NodeRegistrationInfo> getSubscribers() {
-    return ImmutableList.copyOf(subscribers);
+  public Set<NodeRegistrationInfo> getSubscribers() {
+    return ImmutableSet.copyOf(subscribers);
   }
 
   /**

@@ -10,7 +10,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import org.junit.Before;
@@ -64,7 +63,7 @@ public class MasterRegistrationManagerImplTest {
 
     // Make sure only publisher in the topic is the topic we got for the node
     // name
-    assertEquals(Lists.newArrayList(node), topic.getPublishers());
+    assertEquals(Sets.newHashSet(node), topic.getPublishers());
 
     // No attempt for node shutdown
     verify(registrationListener, Mockito.never()).onNodeReplacement(node);
@@ -97,7 +96,7 @@ public class MasterRegistrationManagerImplTest {
 
     // Make sure only subscriber in the topic is the topic we got for the node
     // name
-    assertEquals(Lists.newArrayList(node), topic.getSubscribers());
+    assertEquals(Sets.newHashSet(node), topic.getSubscribers());
 
     // No attempt for node shutdown
     verify(registrationListener, Mockito.never()).onNodeReplacement(node);
@@ -383,7 +382,7 @@ public class MasterRegistrationManagerImplTest {
     assertEquals(Sets.newHashSet(topicPublisher2), node2.getPublishers());
 
     // Both publishers in topic
-    assertEquals(Lists.newArrayList(node1, node2), topicPublisher1.getPublishers());
+    assertEquals(Sets.newHashSet(node1, node2), topicPublisher1.getPublishers());
 
     // No attempt for node shutdown
     verify(registrationListener, Mockito.never()).onNodeReplacement(node1);
@@ -497,7 +496,7 @@ public class MasterRegistrationManagerImplTest {
     // and the node will show this published topic.
     assertTrue(topic1.getPublishers().isEmpty());
     assertEquals(Sets.newHashSet(topic2), node.getPublishers());
-    assertEquals(Lists.newArrayList(node), topic2.getPublishers());
+    assertEquals(Sets.newHashSet(node), topic2.getPublishers());
   }
 
   /**
@@ -559,7 +558,7 @@ public class MasterRegistrationManagerImplTest {
     // and the node will show this subscribed topic.
     assertTrue(topic1.getSubscribers().isEmpty());
     assertEquals(Sets.newHashSet(topic2), node.getSubscribers());
-    assertEquals(Lists.newArrayList(node), topic2.getSubscribers());
+    assertEquals(Sets.newHashSet(node), topic2.getSubscribers());
   }
 
   /**

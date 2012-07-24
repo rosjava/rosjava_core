@@ -271,6 +271,9 @@ public class GraphName {
     if (isRoot()) {
       return other.toGlobal();
     }
+    if (other.isEmpty()) {
+      return this;
+    }
     return new GraphName(toString() + SEPARATOR + other.toString());
   }
 
