@@ -103,7 +103,7 @@ public class Vector3 {
     return new Vector3(message.getX(), message.getY(), message.getZ());
   }
 
-  public static Vector3 newIdentityVector3() {
+  public static Vector3 newZeroVector() {
     return new Vector3(0, 0, 0);
   }
 

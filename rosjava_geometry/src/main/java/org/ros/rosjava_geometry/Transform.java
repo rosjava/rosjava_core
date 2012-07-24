@@ -35,8 +35,7 @@ public class Transform {
   }
 
   public Transform multiply(Transform other) {
-    return new Transform(transformVector(other.getTranslation()),
-        transformQuaternion(other.getRotation()));
+    return new Transform(translate(other.getTranslation()), rotate(other.getRotation()));
   }
 
   public Transform invert() {
@@ -44,26 +43,30 @@ public class Transform {
     return new Transform(inverseRotation.rotateVector(translation.invert()), inverseRotation);
   }
 
-  public Vector3 transformVector(Vector3 vector) {
+  public Vector3 translate(Vector3 vector) {
     return translation.add(rotation.rotateVector(vector));
   }
 
-  public Quaternion transformQuaternion(Quaternion quaternion) {
+  public Quaternion rotate(Quaternion quaternion) {
     return rotation.multiply(quaternion);
+  }
+
+  public double[] toMatrix() {
+    double x = getRotation().getX();
+    double y = getRotation().getY();
+    double z = getRotation().getZ();
+    double w = getRotation().getW();
+    return new double[] {
+        1 - 2 * y * y - 2 * z * z, 2 * x * y + 2 * z * w, 2 * x * z - 2 * y * w, 0,
+        2 * x * y - 2 * z * w, 1 - 2 * x * x - 2 * z * z, 2 * y * z + 2 * x * w, 0,
+        2 * x * z + 2 * y * w, 2 * y * z - 2 * x * w, 1 - 2 * x * x - 2 * y * y, 0,
+        getTranslation().getX(), getTranslation().getY(), getTranslation().getZ(), 1
+        };
   }
 
   public geometry_msgs.Transform toTransformMessage(geometry_msgs.Transform result) {
     result.setTranslation(translation.toVector3Message(result.getTranslation()));
     result.setRotation(rotation.toQuaternionMessage(result.getRotation()));
-    return result;
-  }
-
-  public geometry_msgs.TransformStamped toTransformStampedMessage(GraphName frame,
-      GraphName childFrame, Time stamp, geometry_msgs.TransformStamped result) {
-    result.getHeader().setFrameId(frame.toString());
-    result.getHeader().setStamp(stamp);
-    result.setChildFrameId(childFrame.toString());
-    result.setTransform(toTransformMessage(result.getTransform()));
     return result;
   }
 
@@ -108,11 +111,42 @@ public class Transform {
   }
 
   public static Transform newIdentityTransform() {
-    return new Transform(Vector3.newIdentityVector3(), Quaternion.newIdentityQuaternion());
+    return new Transform(Vector3.newZeroVector(), Quaternion.newIdentityQuaternion());
   }
 
   @Override
   public String toString() {
     return String.format("Transform<%s, %s>", translation, rotation);
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((rotation == null) ? 0 : rotation.hashCode());
+    result = prime * result + ((translation == null) ? 0 : translation.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Transform other = (Transform) obj;
+    if (rotation == null) {
+      if (other.rotation != null)
+        return false;
+    } else if (!rotation.equals(other.rotation))
+      return false;
+    if (translation == null) {
+      if (other.translation != null)
+        return false;
+    } else if (!translation.equals(other.translation))
+      return false;
+    return true;
   }
 }

@@ -68,18 +68,6 @@ public class Quaternion {
     this.w = w;
   }
 
-  public double getAngle() {
-    return 2 * Math.acos(w);
-  }
-
-  public Vector3 getAxis() {
-    double length = Math.sqrt(1 - w * w);
-    if (length > 1e-9) {
-      return new Vector3(x / length, y / length, z / length);
-    }
-    return new Vector3(0, 0, 0);
-  }
-
   public Quaternion invert() {
     return new Quaternion(-x, -y, -z, w);
   }
@@ -137,6 +125,11 @@ public class Quaternion {
   }
 
   @Override
+  public String toString() {
+    return String.format("Quaternion<x: %.4f, y: %.4f, z: %.4f, w: %.4f>", x, y, z, w);
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -170,10 +163,5 @@ public class Quaternion {
     if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
       return false;
     return true;
-  }
-
-  @Override
-  public String toString() {
-    return String.format("Quaternion<x: %.4f, y: %.4f, z: %.4f, w: %.4f>", x, y, z, w);
   }
 }

@@ -27,20 +27,19 @@ import java.util.Map;
 
 /**
  * A tree of {@link FrameTransform}s.
- * 
  * <p>
  * {@link FrameTransformTree} does not currently support time travel. Lookups
  * always use the newest {@link TransformStamped}.
  * 
+ * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
- * 
  */
 public class FrameTransformTree {
 
   private final NameResolver nameResolver;
 
   /**
-   * A {@link Map} of the most recent {@link LazyFrameTransform} by source
+   * A {@link Map} of the most recent {@link LazyFrameTransform} by target
    * frame.
    */
   private final Map<GraphName, LazyFrameTransform> transforms;
@@ -51,14 +50,19 @@ public class FrameTransformTree {
   }
 
   /**
-   * Updates the transform tree with the provided transform.
+   * Updates the tree with the provided {@link geometry_msgs.TransformStamped}
+   * message.
+   * <p>
+   * Note that the tree is updated lazily. Modifications to the provided
+   * {@link geometry_msgs.TransformStamped} message may cause unpredictable
+   * results.
    * 
    * @param transformStamped
-   *          the transform to update
+   *          the {@link geometry_msgs.TransformStamped} message to update with
    */
   public void updateTransform(geometry_msgs.TransformStamped transformStamped) {
-    GraphName source = nameResolver.resolve(transformStamped.getChildFrameId());
-    transforms.put(source, new LazyFrameTransform(transformStamped));
+    GraphName target = nameResolver.resolve(transformStamped.getChildFrameId());
+    transforms.put(target, new LazyFrameTransform(transformStamped));
   }
 
   private FrameTransform getLatestTransform(GraphName frame) {
@@ -111,12 +115,13 @@ public class FrameTransformTree {
     FrameTransform result =
         new FrameTransform(Transform.newIdentityTransform(), sourceFrame, sourceFrame);
     while (true) {
-      FrameTransform parent = getLatestTransform(result.getTargetFrame());
-      if (parent == null) {
+      FrameTransform resultToParent = getLatestTransform(result.getTargetFrame());
+      if (resultToParent == null) {
         return result;
       }
-      Transform transform = result.getTransform().multiply(parent.getTransform());
-      GraphName targetFrame = nameResolver.resolve(parent.getSourceFrame());
+      // Now resultToParent.getSourceFrame() == result.getTargetFrame()
+      Transform transform = resultToParent.getTransform().multiply(result.getTransform());
+      GraphName targetFrame = nameResolver.resolve(resultToParent.getTargetFrame());
       result = new FrameTransform(transform, sourceFrame, targetFrame);
     }
   }

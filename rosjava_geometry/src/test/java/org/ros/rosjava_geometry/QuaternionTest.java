@@ -26,56 +26,6 @@ import org.junit.Test;
 public class QuaternionTest {
 
   @Test
-  public void testCalculateRotationAngleAxis() {
-    Quaternion quaternion;
-    Vector3 axis;
-
-    quaternion = new Quaternion(0, 0, 0, 1);
-    assertEquals(0.0, quaternion.getAngle(), 1e-9);
-    axis = quaternion.getAxis();
-    assertEquals(0, axis.getX(), 1e-9);
-    assertEquals(0, axis.getY(), 1e-9);
-    assertEquals(0, axis.getZ(), 1e-9);
-
-    quaternion = new Quaternion(0, 0, 1, 0);
-    assertEquals(Math.PI, quaternion.getAngle(), 1e-9);
-    axis = quaternion.getAxis();
-    assertEquals(0, axis.getX(), 1e-9);
-    assertEquals(0, axis.getY(), 1e-9);
-    assertEquals(1, axis.getZ(), 1e-9);
-
-    quaternion = new Quaternion(0, 0, -0.7071067811865475, 0.7071067811865475);
-    // The actual angle is -Math.PI / 2 but this is represented by a flipped
-    // rotation axis in the quaternion.
-    assertEquals(Math.PI / 2, quaternion.getAngle(), 1e-9);
-    axis = quaternion.getAxis();
-    assertEquals(0, axis.getX(), 1e-9);
-    assertEquals(0, axis.getY(), 1e-9);
-    assertEquals(-1, axis.getZ(), 1e-9);
-
-    quaternion = new Quaternion(0, 0, 0.9238795325112867, 0.38268343236508984);
-    assertEquals(0.75 * Math.PI, quaternion.getAngle(), 1e-9);
-    axis = quaternion.getAxis();
-    assertEquals(0, axis.getX(), 1e-9);
-    assertEquals(0, axis.getY(), 1e-9);
-    assertEquals(1, axis.getZ(), 1e-9);
-
-    quaternion = new Quaternion(0, 0, -0.9238795325112867, 0.38268343236508984);
-    assertEquals(0.75 * Math.PI, quaternion.getAngle(), 1e-9);
-    axis = quaternion.getAxis();
-    assertEquals(0, axis.getX(), 1e-9);
-    assertEquals(0, axis.getY(), 1e-9);
-    assertEquals(-1, axis.getZ(), 1e-9);
-
-    quaternion = new Quaternion(0, 0, 0.7071067811865475, -0.7071067811865475);
-    assertEquals(1.5 * Math.PI, quaternion.getAngle(), 1e-9);
-    axis = quaternion.getAxis();
-    assertEquals(0, axis.getX(), 1e-9);
-    assertEquals(0, axis.getY(), 1e-9);
-    assertEquals(1, axis.getZ(), 1e-9);
-  }
-
-  @Test
   public void testAxisAngleToQuaternion() {
     Quaternion quaternion;
 
@@ -136,7 +86,7 @@ public class QuaternionTest {
     Quaternion quaternion = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2);
     Quaternion inverse = quaternion.invert();
     Quaternion rotated = quaternion.multiply(inverse);
-    assertEquals(0, rotated.getAngle(), 1e-9);
+    assertEquals(1, rotated.getW(), 1e-9);
   }
 
   @Test

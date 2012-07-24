@@ -16,10 +16,12 @@
 
 package org.ros.rosjava_geometry;
 
+import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 
 /**
- * Describes a {@link Transform} from a source frame to a target frame.
+ * Describes a {@link Transform} from data in the source frame to data in the
+ * target frame.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -32,8 +34,8 @@ public class FrameTransform {
   public static FrameTransform
       fromTransformStamped(geometry_msgs.TransformStamped transformStamped) {
     Transform transform = Transform.newFromTransformMessage(transformStamped.getTransform());
-    String source = transformStamped.getHeader().getFrameId();
-    String target = transformStamped.getChildFrameId();
+    String target = transformStamped.getHeader().getFrameId();
+    String source = transformStamped.getChildFrameId();
     return new FrameTransform(transform, GraphName.of(source), GraphName.of(target));
   }
 
@@ -55,8 +57,54 @@ public class FrameTransform {
     return target;
   }
 
+  public geometry_msgs.TransformStamped toTransformStampedMessage(Time stamp,
+      geometry_msgs.TransformStamped result) {
+    result.getHeader().setFrameId(target.toString());
+    result.getHeader().setStamp(stamp);
+    result.setChildFrameId(source.toString());
+    transform.toTransformMessage(result.getTransform());
+    return result;
+  }
+
   @Override
   public String toString() {
     return String.format("FrameTransform<Source: %s, Target: %s, %s>", source, target, transform);
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((source == null) ? 0 : source.hashCode());
+    result = prime * result + ((target == null) ? 0 : target.hashCode());
+    result = prime * result + ((transform == null) ? 0 : transform.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    FrameTransform other = (FrameTransform) obj;
+    if (source == null) {
+      if (other.source != null)
+        return false;
+    } else if (!source.equals(other.source))
+      return false;
+    if (target == null) {
+      if (other.target != null)
+        return false;
+    } else if (!target.equals(other.target))
+      return false;
+    if (transform == null) {
+      if (other.transform != null)
+        return false;
+    } else if (!transform.equals(other.transform))
+      return false;
+    return true;
   }
 }
