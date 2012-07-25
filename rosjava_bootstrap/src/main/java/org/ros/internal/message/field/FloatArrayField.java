@@ -71,7 +71,7 @@ public class FloatArrayField extends Field {
     }
     value = new float[currentSize];
     for (int i = 0; i < currentSize; i++) {
-      value[i] = (Float) type.deserialize(buffer);
+      value[i] = buffer.readFloat();
     }
   }
 

@@ -71,7 +71,7 @@ public class ShortArrayField extends Field {
     }
     value = new short[currentSize];
     for (int i = 0; i < currentSize; i++) {
-      value[i] = (Short) type.deserialize(buffer);
+      value[i] = buffer.readShort();
     }
   }
 

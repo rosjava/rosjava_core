@@ -71,7 +71,7 @@ public class DoubleArrayField extends Field {
     }
     value = new double[currentSize];
     for (int i = 0; i < currentSize; i++) {
-      value[i] = (Double) type.deserialize(buffer);
+      value[i] = buffer.readDouble();
     }
   }
 

@@ -71,7 +71,7 @@ public class IntegerArrayField extends Field {
     }
     value = new int[currentSize];
     for (int i = 0; i < currentSize; i++) {
-      value[i] = (Integer) type.deserialize(buffer);
+      value[i] = buffer.readInt();
     }
   }
 

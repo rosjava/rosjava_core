@@ -71,7 +71,7 @@ public class ByteArrayField extends Field {
     }
     value = new byte[currentSize];
     for (int i = 0; i < currentSize; i++) {
-      value[i] = (Byte) type.deserialize(buffer);
+      value[i] = buffer.readByte();
     }
   }
 

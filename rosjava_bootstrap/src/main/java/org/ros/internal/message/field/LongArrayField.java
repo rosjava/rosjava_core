@@ -73,7 +73,7 @@ public class LongArrayField extends Field {
     }
     value = new long[currentSize];
     for (int i = 0; i < currentSize; i++) {
-      value[i] = (Long) type.deserialize(buffer);
+      value[i] = buffer.readLong();
     }
   }
 

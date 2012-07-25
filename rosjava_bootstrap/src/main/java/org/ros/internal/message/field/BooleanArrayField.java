@@ -71,7 +71,7 @@ public class BooleanArrayField extends Field {
     }
     value = new boolean[currentSize];
     for (int i = 0; i < currentSize; i++) {
-      value[i] = (Boolean) type.deserialize(buffer);
+      value[i] = buffer.readByte() == 1;
     }
   }
 
