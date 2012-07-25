@@ -33,7 +33,7 @@ public class FrameTransform {
 
   public static FrameTransform
       fromTransformStamped(geometry_msgs.TransformStamped transformStamped) {
-    Transform transform = Transform.newFromTransformMessage(transformStamped.getTransform());
+    Transform transform = Transform.fromTransformMessage(transformStamped.getTransform());
     String target = transformStamped.getHeader().getFrameId();
     String source = transformStamped.getChildFrameId();
     return new FrameTransform(transform, GraphName.of(source), GraphName.of(target));

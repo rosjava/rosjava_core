@@ -29,7 +29,7 @@ public class TransformTest {
   public void testMultiply() {
     Transform transform1 = new Transform(new Vector3(1, 0, 0), new Quaternion(0, 0, 0, 1));
     Transform transform2 =
-        new Transform(new Vector3(0, 1, 0), Quaternion.newFromAxisAngle(new Vector3(0, 0, 1),
+        new Transform(new Vector3(0, 1, 0), Quaternion.fromAxisAngle(new Vector3(0, 0, 1),
             Math.PI / 2));
 
     Transform result1 = transform1.multiply(transform2);
@@ -54,7 +54,7 @@ public class TransformTest {
   @Test
   public void testInvert() {
     Transform transform =
-        new Transform(new Vector3(0, 1, 0), Quaternion.newFromAxisAngle(new Vector3(0, 0, 1),
+        new Transform(new Vector3(0, 1, 0), Quaternion.fromAxisAngle(new Vector3(0, 0, 1),
             Math.PI / 2));
     Transform transformInverse = transform.invert();
 

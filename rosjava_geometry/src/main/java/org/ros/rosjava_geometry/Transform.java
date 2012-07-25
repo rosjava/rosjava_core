@@ -29,6 +29,32 @@ public class Transform {
   private Vector3 translation;
   private Quaternion rotation;
 
+  public static Transform fromTransformMessage(geometry_msgs.Transform message) {
+    return new Transform(Vector3.fromVector3Message(message.getTranslation()),
+        Quaternion.fromQuaternionMessage(message.getRotation()));
+  }
+
+  public static Transform fromPoseMessage(geometry_msgs.Pose message) {
+    return new Transform(Vector3.fromPointMessage(message.getPosition()),
+        Quaternion.fromQuaternionMessage(message.getOrientation()));
+  }
+
+  public static Transform identity() {
+    return new Transform(Vector3.zero(), Quaternion.identity());
+  }
+
+  public static Transform xRotation(double angle) {
+    return new Transform(Vector3.zero(), Quaternion.fromAxisAngle(Vector3.xAxis(), angle));
+  }
+
+  public static Transform yRotation(double angle) {
+    return new Transform(Vector3.zero(), Quaternion.fromAxisAngle(Vector3.yAxis(), angle));
+  }
+
+  public static Transform zRotation(double angle) {
+    return new Transform(Vector3.zero(), Quaternion.fromAxisAngle(Vector3.zAxis(), angle));
+  }
+
   public Transform(Vector3 translation, Quaternion rotation) {
     this.setTranslation(translation);
     this.setRotation(rotation);
@@ -98,20 +124,6 @@ public class Transform {
 
   public void setRotation(Quaternion rotation) {
     this.rotation = rotation;
-  }
-
-  public static Transform newFromTransformMessage(geometry_msgs.Transform message) {
-    return new Transform(Vector3.newFromVector3Message(message.getTranslation()),
-        Quaternion.newFromQuaternionMessage(message.getRotation()));
-  }
-
-  public static Transform newFromPoseMessage(geometry_msgs.Pose message) {
-    return new Transform(Vector3.newFromPointMessage(message.getPosition()),
-        Quaternion.newFromQuaternionMessage(message.getOrientation()));
-  }
-
-  public static Transform newIdentityTransform() {
-    return new Transform(Vector3.newZeroVector(), Quaternion.newIdentityQuaternion());
   }
 
   @Override

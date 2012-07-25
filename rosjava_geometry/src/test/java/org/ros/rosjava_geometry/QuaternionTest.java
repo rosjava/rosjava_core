@@ -29,43 +29,43 @@ public class QuaternionTest {
   public void testAxisAngleToQuaternion() {
     Quaternion quaternion;
 
-    quaternion = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), 0);
+    quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), 0);
     assertEquals(0, quaternion.getX(), 1e-9);
     assertEquals(0, quaternion.getY(), 1e-9);
     assertEquals(0, quaternion.getZ(), 1e-9);
     assertEquals(1, quaternion.getW(), 1e-9);
 
-    quaternion = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), Math.PI);
+    quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI);
     assertEquals(0, quaternion.getX(), 1e-9);
     assertEquals(0, quaternion.getY(), 1e-9);
     assertEquals(1, quaternion.getZ(), 1e-9);
     assertEquals(0, quaternion.getW(), 1e-9);
 
-    quaternion = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2);
+    quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2);
     assertEquals(0, quaternion.getX(), 1e-9);
     assertEquals(0, quaternion.getY(), 1e-9);
     assertEquals(0.7071067811865475, quaternion.getZ(), 1e-9);
     assertEquals(0.7071067811865475, quaternion.getW(), 1e-9);
 
-    quaternion = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), -Math.PI / 2);
+    quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), -Math.PI / 2);
     assertEquals(0, quaternion.getX(), 1e-9);
     assertEquals(0, quaternion.getY(), 1e-9);
     assertEquals(-0.7071067811865475, quaternion.getZ(), 1e-9);
     assertEquals(0.7071067811865475, quaternion.getW(), 1e-9);
 
-    quaternion = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), 0.75 * Math.PI);
+    quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), 0.75 * Math.PI);
     assertEquals(0, quaternion.getX(), 1e-9);
     assertEquals(0, quaternion.getY(), 1e-9);
     assertEquals(0.9238795325112867, quaternion.getZ(), 1e-9);
     assertEquals(0.38268343236508984, quaternion.getW(), 1e-9);
 
-    quaternion = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), -0.75 * Math.PI);
+    quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), -0.75 * Math.PI);
     assertEquals(0, quaternion.getX(), 1e-9);
     assertEquals(0, quaternion.getY(), 1e-9);
     assertEquals(-0.9238795325112867, quaternion.getZ(), 1e-9);
     assertEquals(0.38268343236508984, quaternion.getW(), 1e-9);
 
-    quaternion = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), 1.5 * Math.PI);
+    quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), 1.5 * Math.PI);
     assertEquals(0, quaternion.getX(), 1e-9);
     assertEquals(0, quaternion.getY(), 1e-9);
     assertEquals(0.7071067811865475, quaternion.getZ(), 1e-9);
@@ -74,7 +74,7 @@ public class QuaternionTest {
 
   @Test
   public void testInvert() {
-    Quaternion inverse = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2).invert();
+    Quaternion inverse = Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2).invert();
     assertEquals(0, inverse.getX(), 1e-9);
     assertEquals(0, inverse.getY(), 1e-9);
     assertEquals(-0.7071067811865475, inverse.getZ(), 1e-9);
@@ -83,7 +83,7 @@ public class QuaternionTest {
 
   @Test
   public void testMultiply() {
-    Quaternion quaternion = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2);
+    Quaternion quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2);
     Quaternion inverse = quaternion.invert();
     Quaternion rotated = quaternion.multiply(inverse);
     assertEquals(1, rotated.getW(), 1e-9);
@@ -91,7 +91,7 @@ public class QuaternionTest {
 
   @Test
   public void testRotateVector() {
-    Quaternion quaternion = Quaternion.newFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 2);
+    Quaternion quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2);
     Vector3 vector = new Vector3(1, 0, 0);
     Vector3 rotated = quaternion.rotateVector(vector);
     assertEquals(0, rotated.getX(), 1e-9);

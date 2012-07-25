@@ -27,6 +27,30 @@ public class Vector3 {
   private double y;
   private double z;
 
+  public static Vector3 fromVector3Message(geometry_msgs.Vector3 message) {
+    return new Vector3(message.getX(), message.getY(), message.getZ());
+  }
+
+  public static Vector3 fromPointMessage(geometry_msgs.Point message) {
+    return new Vector3(message.getX(), message.getY(), message.getZ());
+  }
+
+  public static Vector3 zero() {
+    return new Vector3(0, 0, 0);
+  }
+
+  public static Vector3 xAxis() {
+    return new Vector3(1, 0, 0);
+  }
+
+  public static Vector3 yAxis() {
+    return new Vector3(0, 1, 0);
+  }
+
+  public static Vector3 zAxis() {
+    return new Vector3(0, 0, 1);
+  }
+
   public Vector3(double x, double y, double z) {
     this.x = x;
     this.y = y;
@@ -52,7 +76,7 @@ public class Vector3 {
   public double length() {
     return Math.sqrt(x * x + y * y + z * z);
   }
-  
+
   public Vector3 normalized() {
     return new Vector3(x / length(), y / length(), z / length());
   }
@@ -93,18 +117,6 @@ public class Vector3 {
 
   public void setZ(double z) {
     this.z = z;
-  }
-
-  public static Vector3 newFromVector3Message(geometry_msgs.Vector3 message) {
-    return new Vector3(message.getX(), message.getY(), message.getZ());
-  }
-
-  public static Vector3 newFromPointMessage(geometry_msgs.Point message) {
-    return new Vector3(message.getX(), message.getY(), message.getZ());
-  }
-
-  public static Vector3 newZeroVector() {
-    return new Vector3(0, 0, 0);
   }
 
   @Override

@@ -113,7 +113,7 @@ public class FrameTransformTree {
   private FrameTransform newFrameTransformToRoot(GraphName frame) {
     GraphName sourceFrame = nameResolver.resolve(frame);
     FrameTransform result =
-        new FrameTransform(Transform.newIdentityTransform(), sourceFrame, sourceFrame);
+        new FrameTransform(Transform.identity(), sourceFrame, sourceFrame);
     while (true) {
       FrameTransform resultToParent = getLatestTransform(result.getTargetFrame());
       if (resultToParent == null) {

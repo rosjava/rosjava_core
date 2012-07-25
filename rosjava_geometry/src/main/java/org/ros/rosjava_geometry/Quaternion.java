@@ -30,7 +30,7 @@ public class Quaternion {
   private double z;
   private double w;
 
-  public static Quaternion newFromAxisAngle(Vector3 axis, double angle) {
+  public static Quaternion fromAxisAngle(Vector3 axis, double angle) {
     Vector3 normalized = axis.normalized();
     double sin = Math.sin(angle / 2.0d);
     double cos = Math.cos(angle / 2.0d);
@@ -38,7 +38,7 @@ public class Quaternion {
         normalized.getZ() * sin, cos);
   }
 
-  public static Quaternion newFromQuaternionMessage(geometry_msgs.Quaternion message) {
+  public static Quaternion fromQuaternionMessage(geometry_msgs.Quaternion message) {
     return new Quaternion(message.getX(), message.getY(), message.getZ(), message.getW());
   }
 
@@ -48,16 +48,16 @@ public class Quaternion {
     Preconditions.checkArgument(vector2.length() > 0,
         "Cannot calculate rotation between zero-length vectors.");
     if (vector1.normalized().equals(vector2.normalized())) {
-      return newIdentityQuaternion();
+      return identity();
     }
     double angle = Math.acos(vector1.dotProduct(vector2) / (vector1.length() * vector2.length()));
     double axisX = vector1.getY() * vector2.getZ() - vector1.getZ() * vector2.getY();
     double axisY = vector1.getZ() * vector2.getX() - vector1.getX() * vector2.getZ();
     double axisZ = vector1.getX() * vector2.getY() - vector1.getY() * vector2.getX();
-    return newFromAxisAngle(new Vector3(axisX, axisY, axisZ), angle);
+    return fromAxisAngle(new Vector3(axisX, axisY, axisZ), angle);
   }
 
-  public static Quaternion newIdentityQuaternion() {
+  public static Quaternion identity() {
     return new Quaternion(0, 0, 0, 1);
   }
 

@@ -42,7 +42,7 @@ public class FrameTransformTreeTest {
     {
       geometry_msgs.TransformStamped message =
           messageFactory.newFromType(geometry_msgs.TransformStamped._TYPE);
-      Transform transform = Transform.newIdentityTransform();
+      Transform transform = Transform.identity();
       FrameTransform frameTransform =
           new FrameTransform(transform, GraphName.of("baz"), GraphName.of("bar"));
       frameTransform.toTransformStampedMessage(new Time(), message);
@@ -52,7 +52,7 @@ public class FrameTransformTreeTest {
     {
       geometry_msgs.TransformStamped message =
           messageFactory.newFromType(geometry_msgs.TransformStamped._TYPE);
-      Transform transform = Transform.newIdentityTransform();
+      Transform transform = Transform.identity();
       FrameTransform frameTransform =
           new FrameTransform(transform, GraphName.of("bar"), GraphName.of("foo"));
       frameTransform.toTransformStampedMessage(new Time(), message);
@@ -63,7 +63,7 @@ public class FrameTransformTreeTest {
         frameTransformTree.newFrameTransform(GraphName.of("baz"), GraphName.of("foo"));
     assertEquals(nameResolver.resolve("baz"), frameTransform.getSourceFrame());
     assertEquals(nameResolver.resolve("foo"), frameTransform.getTargetFrame());
-    assertEquals(Transform.newIdentityTransform(), frameTransform.getTransform());
+    assertEquals(Transform.identity(), frameTransform.getTransform());
   }
 
   @Test
@@ -76,7 +76,7 @@ public class FrameTransformTreeTest {
     {
       geometry_msgs.TransformStamped message =
           messageFactory.newFromType(geometry_msgs.TransformStamped._TYPE);
-      Vector3 vector = Vector3.newZeroVector();
+      Vector3 vector = Vector3.zero();
       Quaternion quaternion = new Quaternion(Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
       Transform transform = new Transform(vector, quaternion);
       GraphName source = GraphName.of("baz");
@@ -90,7 +90,7 @@ public class FrameTransformTreeTest {
       geometry_msgs.TransformStamped message =
           messageFactory.newFromType(geometry_msgs.TransformStamped._TYPE);
       Vector3 vector = new Vector3(0, 1, 0);
-      Quaternion quaternion = Quaternion.newIdentityQuaternion();
+      Quaternion quaternion = Quaternion.identity();
       Transform transform = new Transform(vector, quaternion);
       GraphName source = GraphName.of("bar");
       GraphName target = GraphName.of("foo");
