@@ -17,12 +17,14 @@
 package org.ros.concurrent;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,7 +43,7 @@ public class CircularBlockingQueueTest {
   }
 
   @Test
-  public void testPutAndTake() throws InterruptedException {
+  public void testAddAndTake() throws InterruptedException {
     CircularBlockingQueue<String> queue = new CircularBlockingQueue<String>(10);
     String expectedString1 = "Hello, world!";
     String expectedString2 = "Goodbye, world!";
@@ -59,6 +61,23 @@ public class CircularBlockingQueueTest {
     queue.add(expectedString);
     queue.add("foo");
     assertEquals(expectedString, queue.take());
+  }
+
+  @Test
+  public void testIterator() throws InterruptedException {
+    CircularBlockingQueue<String> queue = new CircularBlockingQueue<String>(10);
+    String expectedString1 = "Hello, world!";
+    String expectedString2 = "Goodbye, world!";
+    queue.add(expectedString1);
+    queue.add(expectedString2);
+    Iterator<String> iterator = queue.iterator();
+    assertEquals(expectedString1, iterator.next());
+    assertEquals(expectedString2, iterator.next());
+    assertFalse(iterator.hasNext());
+    queue.take();
+    iterator = queue.iterator();
+    assertEquals(expectedString2, iterator.next());
+    assertFalse(iterator.hasNext());
   }
 
   @Test

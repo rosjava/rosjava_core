@@ -16,16 +16,17 @@
 
 package org.ros.concurrent;
 
+import java.util.Iterator;
 import java.util.Queue;
 
 /**
- * A {@link Queue} that removes the old elements when the number of elements
- * exceeds the limit and blocks on {@link #take()} when there are no elements
- * available.
+ * A {@link Queue}-like data structure that removes the old elements when the
+ * number of elements exceeds the limit and blocks on {@link #take()} when there
+ * are no elements available.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class CircularBlockingQueue<T> {
+public class CircularBlockingQueue<T> implements Iterable<T> {
 
   private final T[] queue;
   private final Object mutex;
@@ -65,8 +66,9 @@ public class CircularBlockingQueue<T> {
    * 
    * @param entry
    *          the entry to add
+   * @return {@code true}
    */
-  public void add(T entry) {
+  public boolean add(T entry) {
     synchronized (mutex) {
       queue[(start + length) % limit] = entry;
       if (length == limit) {
@@ -76,6 +78,7 @@ public class CircularBlockingQueue<T> {
       }
       mutex.notify();
     }
+    return true;
   }
 
   /**
@@ -101,10 +104,39 @@ public class CircularBlockingQueue<T> {
     return entry;
   }
 
-  /**
-   * @return {@code true} if the queue is empty, {@code false} otherwise
-   */
   public boolean isEmpty() {
     return length == 0;
+  }
+
+  /**
+   * Returns an iterator over the queue.
+   * <p>
+   * Note that this is not thread-safe and that {@link Iterator#remove()} is
+   * unsupported.
+   * 
+   * @see java.lang.Iterable#iterator()
+   */
+  @Override
+  public Iterator<T> iterator() {
+    return new Iterator<T>() {
+      int offset = 0;
+
+      @Override
+      public boolean hasNext() {
+        return offset < length;
+      }
+
+      @Override
+      public T next() {
+        T entry = queue[start + offset];
+        offset++;
+        return entry;
+      }
+
+      @Override
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+    };
   }
 }
