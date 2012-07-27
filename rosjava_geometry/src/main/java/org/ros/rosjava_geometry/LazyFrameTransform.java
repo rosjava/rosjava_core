@@ -16,6 +16,8 @@
 
 package org.ros.rosjava_geometry;
 
+import com.google.common.annotations.VisibleForTesting;
+
 /**
  * Lazily converts a {@link geometry_msgs.Transform} message to a
  * {@link Transform} on the first call to {@link #get()} and caches the result.
@@ -36,6 +38,13 @@ public class LazyFrameTransform {
     mutex = new Object();
   }
 
+  @VisibleForTesting
+  LazyFrameTransform(FrameTransform frameTransform) {
+    message = null;
+    mutex = null;
+    this.frameTransform = frameTransform;
+  }
+
   /**
    * @return the {@link FrameTransform} for the wrapped
    *         {@link geometry_msgs.TransformStamped} message
@@ -46,7 +55,7 @@ public class LazyFrameTransform {
     }
     synchronized (mutex) {
       if (frameTransform == null) {
-        frameTransform = FrameTransform.fromTransformStamped(message);
+        frameTransform = FrameTransform.fromTransformStampedMessage(message);
       }
     }
     return frameTransform;

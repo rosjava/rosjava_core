@@ -16,7 +16,7 @@
 
 package org.ros.internal.transport.queue;
 
-import org.ros.concurrent.CircularBlockingQueue;
+import org.ros.concurrent.CircularBlockingDeque;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,10 +37,10 @@ public class MessageReceiver<T> extends AbstractNamedChannelHandler {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(MessageReceiver.class);
 
-  private final CircularBlockingQueue<LazyMessage<T>> lazyMessages;
+  private final CircularBlockingDeque<LazyMessage<T>> lazyMessages;
   private final MessageDeserializer<T> deserializer;
 
-  public MessageReceiver(CircularBlockingQueue<LazyMessage<T>> lazyMessages,
+  public MessageReceiver(CircularBlockingDeque<LazyMessage<T>> lazyMessages,
       MessageDeserializer<T> deserializer) {
     this.lazyMessages = lazyMessages;
     this.deserializer = deserializer;
@@ -59,7 +59,7 @@ public class MessageReceiver<T> extends AbstractNamedChannelHandler {
     }
     // We have to make a defensive copy of the buffer here because Netty does
     // not guarantee that the returned ChannelBuffer will not be reused.
-    lazyMessages.add(new LazyMessage<T>(buffer.copy(), deserializer));
+    lazyMessages.addLast(new LazyMessage<T>(buffer.copy(), deserializer));
     super.messageReceived(ctx, e);
   }
 }

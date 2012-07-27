@@ -16,12 +16,14 @@
 
 package org.ros.rosjava_geometry;
 
+import com.google.common.base.Preconditions;
+
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 
 /**
  * Describes a {@link Transform} from data in the source frame to data in the
- * target frame.
+ * target frame at a specified {@link Time}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -30,19 +32,39 @@ public class FrameTransform {
   private final Transform transform;
   private final GraphName source;
   private final GraphName target;
+  private final Time time;
 
-  public static FrameTransform
-      fromTransformStamped(geometry_msgs.TransformStamped transformStamped) {
+  public static FrameTransform fromTransformStampedMessage(
+      geometry_msgs.TransformStamped transformStamped) {
     Transform transform = Transform.fromTransformMessage(transformStamped.getTransform());
     String target = transformStamped.getHeader().getFrameId();
     String source = transformStamped.getChildFrameId();
-    return new FrameTransform(transform, GraphName.of(source), GraphName.of(target));
+    Time stamp = transformStamped.getHeader().getStamp();
+    return new FrameTransform(transform, GraphName.of(source), GraphName.of(target), stamp);
   }
 
-  public FrameTransform(Transform transform, GraphName source, GraphName target) {
+  /**
+   * Allocates a new {@link FrameTransform}.
+   * 
+   * @param transform
+   *          the {@link Transform} that transforms data in the {@code source}
+   *          frame to data in the {@code target} frame
+   * @param source
+   *          the source frame
+   * @param target
+   *          the target frame
+   * @param time
+   *          the time associated with this {@link FrameTransform}, can be
+   *          {@null}
+   */
+  public FrameTransform(Transform transform, GraphName source, GraphName target, Time time) {
+    Preconditions.checkNotNull(transform);
+    Preconditions.checkNotNull(source);
+    Preconditions.checkNotNull(target);
     this.transform = transform;
     this.source = source;
     this.target = target;
+    this.time = time;
   }
 
   public Transform getTransform() {
@@ -57,10 +79,19 @@ public class FrameTransform {
     return target;
   }
 
-  public geometry_msgs.TransformStamped toTransformStampedMessage(Time stamp,
+  /**
+   * @return the time associated with the {@link FrameTransform} or {@code null}
+   *         if there is no associated time
+   */
+  public Time getTime() {
+    return time;
+  }
+
+  public geometry_msgs.TransformStamped toTransformStampedMessage(
       geometry_msgs.TransformStamped result) {
+    Preconditions.checkNotNull(time);
     result.getHeader().setFrameId(target.toString());
-    result.getHeader().setStamp(stamp);
+    result.getHeader().setStamp(time);
     result.setChildFrameId(source.toString());
     transform.toTransformMessage(result.getTransform());
     return result;
@@ -68,7 +99,8 @@ public class FrameTransform {
 
   @Override
   public String toString() {
-    return String.format("FrameTransform<Source: %s, Target: %s, %s>", source, target, transform);
+    return String.format("FrameTransform<Source: %s, Target: %s, %s, Time: %s>", source, target,
+        transform, time);
   }
 
   @Override
@@ -77,6 +109,7 @@ public class FrameTransform {
     int result = 1;
     result = prime * result + ((source == null) ? 0 : source.hashCode());
     result = prime * result + ((target == null) ? 0 : target.hashCode());
+    result = prime * result + ((time == null) ? 0 : time.hashCode());
     result = prime * result + ((transform == null) ? 0 : transform.hashCode());
     return result;
   }
@@ -99,6 +132,11 @@ public class FrameTransform {
       if (other.target != null)
         return false;
     } else if (!target.equals(other.target))
+      return false;
+    if (time == null) {
+      if (other.time != null)
+        return false;
+    } else if (!time.equals(other.time))
       return false;
     if (transform == null) {
       if (other.transform != null)

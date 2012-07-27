@@ -16,7 +16,7 @@
 
 package org.ros.internal.transport.queue;
 
-import org.ros.concurrent.CircularBlockingQueue;
+import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageListener;
@@ -43,8 +43,8 @@ public class IncomingMessageQueue<T> {
   private final MessageDispatcher<T> messageDispatcher;
 
   public IncomingMessageQueue(MessageDeserializer<T> deserializer, ExecutorService executorService) {
-    CircularBlockingQueue<LazyMessage<T>> lazyMessages =
-        new CircularBlockingQueue<LazyMessage<T>>(QUEUE_CAPACITY);
+    CircularBlockingDeque<LazyMessage<T>> lazyMessages =
+        new CircularBlockingDeque<LazyMessage<T>>(QUEUE_CAPACITY);
     messageReceiver = new MessageReceiver<T>(lazyMessages, deserializer);
     messageDispatcher = new MessageDispatcher<T>(lazyMessages, executorService);
     executorService.execute(messageDispatcher);

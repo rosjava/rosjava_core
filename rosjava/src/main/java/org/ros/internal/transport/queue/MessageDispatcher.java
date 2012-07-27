@@ -19,7 +19,7 @@ package org.ros.internal.transport.queue;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.CancellableLoop;
-import org.ros.concurrent.CircularBlockingQueue;
+import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.concurrent.EventDispatcher;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
@@ -38,7 +38,7 @@ public class MessageDispatcher<T> extends CancellableLoop {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(MessageDispatcher.class);
 
-  private final CircularBlockingQueue<LazyMessage<T>> lazyMessages;
+  private final CircularBlockingDeque<LazyMessage<T>> lazyMessages;
   private final ListenerGroup<MessageListener<T>> messageListeners;
 
   /**
@@ -50,7 +50,7 @@ public class MessageDispatcher<T> extends CancellableLoop {
   private boolean latchMode;
   private LazyMessage<T> latchedMessage;
 
-  public MessageDispatcher(CircularBlockingQueue<LazyMessage<T>> lazyMessages,
+  public MessageDispatcher(CircularBlockingDeque<LazyMessage<T>> lazyMessages,
       ExecutorService executorService) {
     this.lazyMessages = lazyMessages;
     messageListeners = new ListenerGroup<MessageListener<T>>(executorService);
@@ -114,7 +114,7 @@ public class MessageDispatcher<T> extends CancellableLoop {
 
   @Override
   public void loop() throws InterruptedException {
-    LazyMessage<T> lazyMessage = lazyMessages.take();
+    LazyMessage<T> lazyMessage = lazyMessages.takeFirst();
     synchronized (mutex) {
       latchedMessage = lazyMessage;
       if (DEBUG) {

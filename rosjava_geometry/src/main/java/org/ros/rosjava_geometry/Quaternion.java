@@ -131,6 +131,11 @@ public class Quaternion {
 
   @Override
   public int hashCode() {
+    // Ensure that -0 and 0 are considered equal.
+    double w = this.w == 0 ? 0 : this.w;
+    double x = this.x == 0 ? 0 : this.x;
+    double y = this.y == 0 ? 0 : this.y;
+    double z = this.z == 0 ? 0 : this.z;
     final int prime = 31;
     int result = 1;
     long temp;
@@ -154,13 +159,22 @@ public class Quaternion {
     if (getClass() != obj.getClass())
       return false;
     Quaternion other = (Quaternion) obj;
-    if (Double.doubleToLongBits(w) != Double.doubleToLongBits(other.w))
+    // Ensure that -0 and 0 are considered equal.
+    double w = this.w == 0 ? 0 : this.w;
+    double x = this.x == 0 ? 0 : this.x;
+    double y = this.y == 0 ? 0 : this.y;
+    double z = this.z == 0 ? 0 : this.z;
+    double otherW = other.w == 0 ? 0 : other.w;
+    double otherX = other.x == 0 ? 0 : other.x;
+    double otherY = other.y == 0 ? 0 : other.y;
+    double otherZ = other.z == 0 ? 0 : other.z;
+    if (Double.doubleToLongBits(w) != Double.doubleToLongBits(otherW))
       return false;
-    if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
+    if (Double.doubleToLongBits(x) != Double.doubleToLongBits(otherX))
       return false;
-    if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
+    if (Double.doubleToLongBits(y) != Double.doubleToLongBits(otherY))
       return false;
-    if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
+    if (Double.doubleToLongBits(z) != Double.doubleToLongBits(otherZ))
       return false;
     return true;
   }

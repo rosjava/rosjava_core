@@ -59,15 +59,13 @@ public class TransformBenchmark extends AbstractNodeMain {
         connectedNode.getTopicMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
     turtle2.getHeader().setFrameId("world");
     turtle2.setChildFrameId("turtle2");
-    final GraphName sourceFrame = GraphName.of("turtle1");
-    final GraphName targetFrame = GraphName.of("turtle2");
     final FrameTransformTree frameTransformTree = new FrameTransformTree(NameResolver.newRoot());
     connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
         updateTransform(turtle1, connectedNode, frameTransformTree);
         updateTransform(turtle2, connectedNode, frameTransformTree);
-        frameTransformTree.newFrameTransform(sourceFrame, targetFrame);
+        frameTransformTree.transform("turtle1", "turtle2");
         counter.incrementAndGet();
       }
     });
@@ -103,6 +101,6 @@ public class TransformBenchmark extends AbstractNodeMain {
     transformStamped.getTransform().getTranslation().setX(Math.random());
     transformStamped.getTransform().getTranslation().setY(Math.random());
     transformStamped.getTransform().getTranslation().setZ(Math.random());
-    frameTransformTree.updateTransform(transformStamped);
+    frameTransformTree.update(transformStamped);
   }
 }

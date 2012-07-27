@@ -26,20 +26,20 @@ package org.ros.concurrent;
 public class EventDispatcher<T> extends CancellableLoop {
 
   private final T listener;
-  private final CircularBlockingQueue<SignalRunnable<T>> events;
+  private final CircularBlockingDeque<SignalRunnable<T>> events;
 
   public EventDispatcher(T listener, int queueCapacity) {
     this.listener = listener;
-    events = new CircularBlockingQueue<SignalRunnable<T>>(queueCapacity);
+    events = new CircularBlockingDeque<SignalRunnable<T>>(queueCapacity);
   }
 
   public void signal(final SignalRunnable<T> signalRunnable) {
-    events.add(signalRunnable);
+    events.addLast(signalRunnable);
   }
 
   @Override
   public void loop() throws InterruptedException {
-    SignalRunnable<T> signalRunnable = events.take();
+    SignalRunnable<T> signalRunnable = events.takeFirst();
     signalRunnable.run(listener);
   }
 }

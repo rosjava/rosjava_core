@@ -16,8 +16,6 @@
 
 package org.ros.namespace;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.exception.RosRuntimeException;
 
 import java.util.Collections;
@@ -76,8 +74,10 @@ public class NameResolver {
    */
   public GraphName resolve(GraphName namespace, GraphName name) {
     GraphName remappedNamespace = lookUpRemapping(namespace);
-    Preconditions.checkArgument(remappedNamespace.isGlobal(),
-        "Namespace must be global. Tried to resolve: " + remappedNamespace);
+    if (!remappedNamespace.isGlobal()) {
+      throw new IllegalStateException(String.format(
+          "Namespace %s (remapped from %s) must be global.", remappedNamespace, namespace));
+    }
     GraphName remappedName = lookUpRemapping(name);
     if (remappedName.isGlobal()) {
       return remappedName;
