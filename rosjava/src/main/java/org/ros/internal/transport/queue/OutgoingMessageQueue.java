@@ -42,10 +42,10 @@ public class OutgoingMessageQueue<T> {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
 
-  private static final int QUEUE_CAPACITY = 16;
+  private static final int DEQUE_CAPACITY = 16;
 
   private final MessageSerializer<T> serializer;
-  private final CircularBlockingDeque<T> queue;
+  private final CircularBlockingDeque<T> deque;
   private final ChannelGroup channelGroup;
   private final Writer writer;
   private final MessageBufferPool messageBufferPool;
@@ -57,7 +57,7 @@ public class OutgoingMessageQueue<T> {
   private final class Writer extends CancellableLoop {
     @Override
     public void loop() throws InterruptedException {
-      T message = queue.takeFirst();
+      T message = deque.takeFirst();
       final ChannelBuffer buffer = messageBufferPool.acquire();
       serializer.serialize(message, buffer);
       if (DEBUG) {
@@ -79,7 +79,7 @@ public class OutgoingMessageQueue<T> {
 
   public OutgoingMessageQueue(MessageSerializer<T> serializer, ExecutorService executorService) {
     this.serializer = serializer;
-    queue = new CircularBlockingDeque<T>(QUEUE_CAPACITY);
+    deque = new CircularBlockingDeque<T>(DEQUE_CAPACITY);
     channelGroup = new DefaultChannelGroup();
     writer = new Writer();
     messageBufferPool = new MessageBufferPool();
@@ -101,7 +101,7 @@ public class OutgoingMessageQueue<T> {
    *          the message to add to the queue
    */
   public void add(T message) {
-    queue.addLast(message);
+    deque.addLast(message);
     setLatchedMessage(message);
   }
 

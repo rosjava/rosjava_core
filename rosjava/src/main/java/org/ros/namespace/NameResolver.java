@@ -75,7 +75,7 @@ public class NameResolver {
   public GraphName resolve(GraphName namespace, GraphName name) {
     GraphName remappedNamespace = lookUpRemapping(namespace);
     if (!remappedNamespace.isGlobal()) {
-      throw new IllegalStateException(String.format(
+      throw new IllegalArgumentException(String.format(
           "Namespace %s (remapped from %s) must be global.", remappedNamespace, namespace));
     }
     GraphName remappedName = lookUpRemapping(name);
