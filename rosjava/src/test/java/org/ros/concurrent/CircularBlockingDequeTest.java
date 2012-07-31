@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class CircularBlockingQueueTest {
+public class CircularBlockingDequeTest {
 
   private ExecutorService executorService;
 
@@ -44,52 +45,75 @@ public class CircularBlockingQueueTest {
 
   @Test
   public void testAddAndTake() throws InterruptedException {
-    CircularBlockingQueue<String> queue = new CircularBlockingQueue<String>(10);
+    CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(10);
     String expectedString1 = "Hello, world!";
     String expectedString2 = "Goodbye, world!";
-    queue.add(expectedString1);
-    queue.add(expectedString2);
-    assertEquals(expectedString1, queue.take());
-    assertEquals(expectedString2, queue.take());
+    deque.addLast(expectedString1);
+    deque.addLast(expectedString2);
+    assertEquals(expectedString1, deque.takeFirst());
+    assertEquals(expectedString2, deque.takeFirst());
+  }
+
+  @Test
+  public void testAddFirstAndTakeLast() throws InterruptedException {
+    CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(10);
+    String expectedString1 = "Hello, world!";
+    String expectedString2 = "Goodbye, world!";
+    deque.addLast(expectedString1);
+    deque.addLast(expectedString2);
+    assertEquals(expectedString1, deque.peekFirst());
+    assertEquals(expectedString2, deque.takeLast());
+    deque.addFirst(expectedString2);
+    assertEquals(expectedString1, deque.peekLast());
+    assertEquals(expectedString2, deque.takeFirst());
   }
 
   @Test
   public void testOverwrite() throws InterruptedException {
-    CircularBlockingQueue<String> queue = new CircularBlockingQueue<String>(2);
+    CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(2);
     String expectedString = "Hello, world!";
-    queue.add("overwritten");
-    queue.add(expectedString);
-    queue.add("foo");
-    assertEquals(expectedString, queue.take());
+    deque.addLast("overwritten");
+    deque.addLast(expectedString);
+    deque.addLast("foo");
+    assertEquals(expectedString, deque.takeFirst());
   }
 
   @Test
   public void testIterator() throws InterruptedException {
-    CircularBlockingQueue<String> queue = new CircularBlockingQueue<String>(10);
+    // We keep the queue short and throw in an unused element so that the deque
+    // wraps around the backing array.
+    CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(2);
+    deque.addLast("unused");
     String expectedString1 = "Hello, world!";
     String expectedString2 = "Goodbye, world!";
-    queue.add(expectedString1);
-    queue.add(expectedString2);
-    Iterator<String> iterator = queue.iterator();
+    deque.addLast(expectedString1);
+    deque.addLast(expectedString2);
+    Iterator<String> iterator = deque.iterator();
     assertEquals(expectedString1, iterator.next());
     assertEquals(expectedString2, iterator.next());
     assertFalse(iterator.hasNext());
-    queue.take();
-    iterator = queue.iterator();
+    try {
+      iterator.next();
+      fail();
+    } catch (NoSuchElementException e) {
+      // next() should throw an exception if there is no next element.
+    }
+    deque.takeFirst();
+    iterator = deque.iterator();
     assertEquals(expectedString2, iterator.next());
     assertFalse(iterator.hasNext());
   }
 
   @Test
   public void testBlockingTake() throws InterruptedException {
-    final CircularBlockingQueue<String> queue = new CircularBlockingQueue<String>(1);
+    final CircularBlockingDeque<String> deque = new CircularBlockingDeque<String>(1);
     final String expectedString = "Hello, world!";
     final CountDownLatch latch = new CountDownLatch(1);
     executorService.execute(new Runnable() {
       @Override
       public void run() {
         try {
-          assertEquals(expectedString, queue.take());
+          assertEquals(expectedString, deque.takeFirst());
         } catch (InterruptedException e) {
           fail();
         }
@@ -98,7 +122,7 @@ public class CircularBlockingQueueTest {
     });
     // Sleep to ensure we're waiting on take().
     Thread.sleep(5);
-    queue.add(expectedString);
+    deque.addLast(expectedString);
     assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 }
