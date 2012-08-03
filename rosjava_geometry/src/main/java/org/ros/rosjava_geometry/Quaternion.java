@@ -21,17 +21,18 @@ import com.google.common.base.Preconditions;
 /**
  * A quaternion.
  * 
+ * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class Quaternion {
 
-  private double x;
-  private double y;
-  private double z;
-  private double w;
+  private final double x;
+  private final double y;
+  private final double z;
+  private final double w;
 
   public static Quaternion fromAxisAngle(Vector3 axis, double angle) {
-    Vector3 normalized = axis.normalized();
+    Vector3 normalized = axis.normalize();
     double sin = Math.sin(angle / 2.0d);
     double cos = Math.cos(angle / 2.0d);
     return new Quaternion(normalized.getX() * sin, normalized.getY() * sin,
@@ -43,14 +44,14 @@ public class Quaternion {
   }
 
   public static Quaternion rotationBetweenVectors(Vector3 vector1, Vector3 vector2) {
-    Preconditions.checkArgument(vector1.length() > 0,
+    Preconditions.checkArgument(vector1.getMagnitude() > 0,
         "Cannot calculate rotation between zero-length vectors.");
-    Preconditions.checkArgument(vector2.length() > 0,
+    Preconditions.checkArgument(vector2.getMagnitude() > 0,
         "Cannot calculate rotation between zero-length vectors.");
-    if (vector1.normalized().equals(vector2.normalized())) {
+    if (vector1.normalize().equals(vector2.normalize())) {
       return identity();
     }
-    double angle = Math.acos(vector1.dotProduct(vector2) / (vector1.length() * vector2.length()));
+    double angle = Math.acos(vector1.dotProduct(vector2) / (vector1.getMagnitude() * vector2.getMagnitude()));
     double axisX = vector1.getY() * vector2.getZ() - vector1.getZ() * vector2.getY();
     double axisY = vector1.getZ() * vector2.getX() - vector1.getX() * vector2.getZ();
     double axisZ = vector1.getX() * vector2.getY() - vector1.getY() * vector2.getX();
@@ -78,10 +79,39 @@ public class Quaternion {
         * other.x, w * other.w - x * other.x - y * other.y - z * other.z);
   }
 
+  public Quaternion scale(double factor) {
+    return new Quaternion(x * factor, y * factor, z * factor, w * factor);
+  }
+
+  public Quaternion normalize() {
+    return new Quaternion(x / getMagnitude(), y / getMagnitude(), z / getMagnitude(), w
+        / getMagnitude());
+  }
+
   public Vector3 rotateVector(Vector3 vector) {
     Quaternion vectorQuaternion = new Quaternion(vector.getX(), vector.getY(), vector.getZ(), 0);
     Quaternion rotatedQuaternion = multiply(vectorQuaternion.multiply(invert()));
     return new Vector3(rotatedQuaternion.getX(), rotatedQuaternion.getY(), rotatedQuaternion.getZ());
+  }
+
+  public double getX() {
+    return x;
+  }
+
+  public double getY() {
+    return y;
+  }
+
+  public double getZ() {
+    return z;
+  }
+
+  public double getW() {
+    return w;
+  }
+
+  public double getMagnitude() {
+    return Math.sqrt(x * x + y * y + z * z + w * w);
   }
 
   public geometry_msgs.Quaternion toQuaternionMessage(geometry_msgs.Quaternion result) {
@@ -90,38 +120,6 @@ public class Quaternion {
     result.setZ(z);
     result.setW(w);
     return result;
-  }
-
-  public double getX() {
-    return x;
-  }
-
-  public void setX(double x) {
-    this.x = x;
-  }
-
-  public double getY() {
-    return y;
-  }
-
-  public void setY(double y) {
-    this.y = y;
-  }
-
-  public double getZ() {
-    return z;
-  }
-
-  public void setZ(double z) {
-    this.z = z;
-  }
-
-  public double getW() {
-    return w;
-  }
-
-  public void setW(double w) {
-    this.w = w;
   }
 
   @Override

@@ -62,9 +62,9 @@ public class Vector3Test {
 
   @Test
   public void testLength() {
-    assertEquals(2, new Vector3(2, 0, 0).length(), 1e-9);
-    assertEquals(2, new Vector3(0, 2, 0).length(), 1e-9);
-    assertEquals(2, new Vector3(0, 0, 2).length(), 1e-9);
-    assertEquals(Math.sqrt(3), new Vector3(1, 1, 1).length(), 1e-9);
+    assertEquals(2, new Vector3(2, 0, 0).getMagnitude(), 1e-9);
+    assertEquals(2, new Vector3(0, 2, 0).getMagnitude(), 1e-9);
+    assertEquals(2, new Vector3(0, 0, 2).getMagnitude(), 1e-9);
+    assertEquals(Math.sqrt(3), new Vector3(1, 1, 1).getMagnitude(), 1e-9);
   }
 }

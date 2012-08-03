@@ -19,13 +19,14 @@ package org.ros.rosjava_geometry;
 /**
  * A three dimensional vector.
  * 
+ * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class Vector3 {
 
-  private double x;
-  private double y;
-  private double z;
+  private final double x;
+  private final double y;
+  private final double z;
 
   public static Vector3 fromVector3Message(geometry_msgs.Vector3 message) {
     return new Vector3(message.getX(), message.getY(), message.getZ());
@@ -73,12 +74,24 @@ public class Vector3 {
     return x * other.x + y * other.y + z * other.z;
   }
 
-  public double length() {
-    return Math.sqrt(x * x + y * y + z * z);
+  public Vector3 normalize() {
+    return new Vector3(x / getMagnitude(), y / getMagnitude(), z / getMagnitude());
   }
 
-  public Vector3 normalized() {
-    return new Vector3(x / length(), y / length(), z / length());
+  public double getX() {
+    return x;
+  }
+
+  public double getY() {
+    return y;
+  }
+
+  public double getZ() {
+    return z;
+  }
+
+  public double getMagnitude() {
+    return Math.sqrt(x * x + y * y + z * z);
   }
 
   public geometry_msgs.Vector3 toVector3Message(geometry_msgs.Vector3 result) {
@@ -93,30 +106,6 @@ public class Vector3 {
     result.setY(y);
     result.setZ(z);
     return result;
-  }
-
-  public double getX() {
-    return x;
-  }
-
-  public void setX(double x) {
-    this.x = x;
-  }
-
-  public double getY() {
-    return y;
-  }
-
-  public void setY(double y) {
-    this.y = y;
-  }
-
-  public double getZ() {
-    return z;
-  }
-
-  public void setZ(double z) {
-    this.z = z;
   }
 
   @Override
