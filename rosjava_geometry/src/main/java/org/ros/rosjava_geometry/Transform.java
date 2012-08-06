@@ -55,13 +55,28 @@ public class Transform {
     return new Transform(Vector3.zero(), Quaternion.fromAxisAngle(Vector3.zAxis(), angle));
   }
 
-  public Transform(Vector3 translation, Quaternion rotation) {
-    this.setTranslation(translation);
-    this.setRotation(rotation);
+  public static Transform translation(double x, double y, double z) {
+    return new Transform(new Vector3(x, y, z), Quaternion.identity());
   }
 
+  public static Transform translation(Vector3 vector) {
+    return new Transform(vector, Quaternion.identity());
+  }
+
+  public Transform(Vector3 translation, Quaternion rotation) {
+    this.translation = translation;
+    this.rotation = rotation;
+  }
+
+  /**
+   * Apply another {@link Transform} to this {@link Transform}.
+   * 
+   * @param other
+   *          the {@link Transform} to apply to this {@link Transform}
+   * @return the resulting {@link Transform}
+   */
   public Transform multiply(Transform other) {
-    return new Transform(translate(other.getTranslation()), rotate(other.getRotation()));
+    return new Transform(apply(other.getTranslation()), apply(other.getRotation()));
   }
 
   public Transform invert() {
@@ -69,23 +84,33 @@ public class Transform {
     return new Transform(inverseRotation.rotateVector(translation.invert()), inverseRotation);
   }
 
-  public Vector3 translate(Vector3 vector) {
-    return translation.add(rotation.rotateVector(vector));
+  public Vector3 apply(Vector3 vector) {
+    return rotation.rotateVector(vector).add(translation);
   }
 
-  public Quaternion rotate(Quaternion quaternion) {
+  public Quaternion apply(Quaternion quaternion) {
     return rotation.multiply(quaternion);
   }
 
+  public Transform scale(double factor) {
+    return new Transform(translation, rotation.scale(factor));
+  }
+
+  /**
+   * @see <a
+   *      href="http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion">Quaternion
+   *      rotation matrix</a>
+   */
   public double[] toMatrix() {
     double x = getRotation().getX();
     double y = getRotation().getY();
     double z = getRotation().getZ();
     double w = getRotation().getW();
+    double mm = getRotation().getMagnitudeSquared();
     return new double[] {
-        1 - 2 * y * y - 2 * z * z, 2 * x * y + 2 * z * w, 2 * x * z - 2 * y * w, 0,
-        2 * x * y - 2 * z * w, 1 - 2 * x * x - 2 * z * z, 2 * y * z + 2 * x * w, 0,
-        2 * x * z + 2 * y * w, 2 * y * z - 2 * x * w, 1 - 2 * x * x - 2 * y * y, 0,
+        mm - 2 * y * y - 2 * z * z, 2 * x * y + 2 * z * w, 2 * x * z - 2 * y * w, 0,
+        2 * x * y - 2 * z * w, mm - 2 * x * x - 2 * z * z, 2 * y * z + 2 * x * w, 0,
+        2 * x * z + 2 * y * w, 2 * y * z - 2 * x * w, mm - 2 * x * x - 2 * y * y, 0,
         getTranslation().getX(), getTranslation().getY(), getTranslation().getZ(), 1
         };
   }
@@ -114,16 +139,8 @@ public class Transform {
     return translation;
   }
 
-  public void setTranslation(Vector3 translation) {
-    this.translation = translation;
-  }
-
   public Quaternion getRotation() {
     return rotation;
-  }
-
-  public void setRotation(Quaternion rotation) {
-    this.rotation = rotation;
   }
 
   @Override

@@ -51,7 +51,8 @@ public class Quaternion {
     if (vector1.normalize().equals(vector2.normalize())) {
       return identity();
     }
-    double angle = Math.acos(vector1.dotProduct(vector2) / (vector1.getMagnitude() * vector2.getMagnitude()));
+    double angle =
+        Math.acos(vector1.dotProduct(vector2) / (vector1.getMagnitude() * vector2.getMagnitude()));
     double axisX = vector1.getY() * vector2.getZ() - vector1.getZ() * vector2.getY();
     double axisY = vector1.getZ() * vector2.getX() - vector1.getX() * vector2.getZ();
     double axisZ = vector1.getX() * vector2.getY() - vector1.getY() * vector2.getX();
@@ -69,23 +70,28 @@ public class Quaternion {
     this.w = w;
   }
 
-  public Quaternion invert() {
+  public Quaternion scale(double factor) {
+    return new Quaternion(x * factor, y * factor, z * factor, w * factor);
+  }
+
+  public Quaternion conjugate() {
     return new Quaternion(-x, -y, -z, w);
+  }
+
+  public Quaternion invert() {
+    double mm = getMagnitudeSquared();
+    Preconditions.checkState(mm != 0);
+    return conjugate().scale(1 / mm);
+  }
+
+  public Quaternion normalize() {
+    return scale(1 / getMagnitude());
   }
 
   public Quaternion multiply(Quaternion other) {
     return new Quaternion(w * other.x + x * other.w + y * other.z - z * other.y, w * other.y + y
         * other.w + z * other.x - x * other.z, w * other.z + z * other.w + x * other.y - y
         * other.x, w * other.w - x * other.x - y * other.y - z * other.z);
-  }
-
-  public Quaternion scale(double factor) {
-    return new Quaternion(x * factor, y * factor, z * factor, w * factor);
-  }
-
-  public Quaternion normalize() {
-    return new Quaternion(x / getMagnitude(), y / getMagnitude(), z / getMagnitude(), w
-        / getMagnitude());
   }
 
   public Vector3 rotateVector(Vector3 vector) {
@@ -110,8 +116,12 @@ public class Quaternion {
     return w;
   }
 
+  public double getMagnitudeSquared() {
+    return x * x + y * y + z * z + w * w;
+  }
+
   public double getMagnitude() {
-    return Math.sqrt(x * x + y * y + z * z + w * w);
+    return Math.sqrt(getMagnitudeSquared());
   }
 
   public geometry_msgs.Quaternion toQuaternionMessage(geometry_msgs.Quaternion result) {

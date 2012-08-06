@@ -29,19 +29,19 @@ import com.google.common.annotations.VisibleForTesting;
 public class LazyFrameTransform {
 
   private final geometry_msgs.TransformStamped message;
-  private final Object mutex;
+
+  // Avoiding constructor code duplication.
+  private final Object mutex = new Object();
 
   private FrameTransform frameTransform;
 
   public LazyFrameTransform(geometry_msgs.TransformStamped message) {
     this.message = message;
-    mutex = new Object();
   }
 
   @VisibleForTesting
   LazyFrameTransform(FrameTransform frameTransform) {
     message = null;
-    mutex = null;
     this.frameTransform = frameTransform;
   }
 
@@ -50,13 +50,11 @@ public class LazyFrameTransform {
    *         {@link geometry_msgs.TransformStamped} message
    */
   public FrameTransform get() {
-    if (frameTransform != null) {
-      return frameTransform;
-    }
     synchronized (mutex) {
-      if (frameTransform == null) {
-        frameTransform = FrameTransform.fromTransformStampedMessage(message);
+      if (frameTransform != null) {
+        return frameTransform;
       }
+      frameTransform = FrameTransform.fromTransformStampedMessage(message);
     }
     return frameTransform;
   }
