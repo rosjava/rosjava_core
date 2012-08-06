@@ -34,12 +34,14 @@ public class SubscriberFactory {
   private final NodeIdentifier nodeIdentifier;
   private final TopicParticipantManager topicParticipantManager;
   private final ScheduledExecutorService executorService;
+  private final Object mutex;
 
   public SubscriberFactory(NodeIdentifier nodeIdentifier,
       TopicParticipantManager topicParticipantManager, ScheduledExecutorService executorService) {
     this.nodeIdentifier = nodeIdentifier;
     this.topicParticipantManager = topicParticipantManager;
     this.executorService = executorService;
+    mutex = new Object();
   }
 
   /**
@@ -60,7 +62,7 @@ public class SubscriberFactory {
       MessageDeserializer<T> messageDeserializer) {
     GraphName topicName = topicDeclaration.getName();
 
-    synchronized (topicParticipantManager) {
+    synchronized (mutex) {
       if (topicParticipantManager.hasSubscriber(topicName)) {
         return (DefaultSubscriber<T>) topicParticipantManager.getSubscriber(topicName);
       } else {

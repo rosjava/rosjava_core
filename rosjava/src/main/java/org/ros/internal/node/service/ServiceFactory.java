@@ -42,6 +42,7 @@ public class ServiceFactory {
   private final SlaveServer slaveServer;
   private final ServiceManager serviceManager;
   private final ScheduledExecutorService executorService;
+  private final Object mutex;
 
   public ServiceFactory(GraphName nodeName, SlaveServer slaveServer, ServiceManager serviceManager,
       ScheduledExecutorService executorService) {
@@ -49,6 +50,7 @@ public class ServiceFactory {
     this.slaveServer = slaveServer;
     this.serviceManager = serviceManager;
     this.executorService = executorService;
+    mutex = new Object();
   }
 
   /**
@@ -73,7 +75,7 @@ public class ServiceFactory {
     DefaultServiceServer<T, S> serviceServer;
     GraphName name = serviceDeclaration.getName();
 
-    synchronized (serviceManager) {
+    synchronized (mutex) {
       if (serviceManager.hasServer(name)) {
         throw new DuplicateServiceException(String.format("ServiceServer %s already exists.", name));
       } else {
@@ -126,7 +128,7 @@ public class ServiceFactory {
     GraphName name = serviceDeclaration.getName();
     boolean createdNewClient = false;
 
-    synchronized (serviceManager) {
+    synchronized (mutex) {
       if (serviceManager.hasClient(name)) {
         serviceClient = (DefaultServiceClient<T, S>) serviceManager.getClient(name);
       } else {

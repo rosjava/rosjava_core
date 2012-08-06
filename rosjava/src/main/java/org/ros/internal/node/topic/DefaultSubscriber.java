@@ -62,6 +62,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   private final IncomingMessageQueue<T> incomingMessageQueue;
   private final Set<PublisherIdentifier> knownPublishers;
   private final TcpClientManager tcpClientManager;
+  private final Object mutex;
 
   /**
    * Manages the {@link SubscriberListener}s for this {@link Subscriber}.
@@ -82,6 +83,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     incomingMessageQueue = new IncomingMessageQueue<T>(deserializer, executorService);
     knownPublishers = Sets.newHashSet();
     tcpClientManager = new TcpClientManager(executorService);
+    mutex = new Object();
     SubscriberHandshakeHandler<T> subscriberHandshakeHandler =
         new SubscriberHandshakeHandler<T>(toDeclaration().toConnectionHeader(),
             incomingMessageQueue, executorService);
@@ -138,18 +140,19 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
   }
 
   @VisibleForTesting
-  public synchronized void addPublisher(PublisherIdentifier publisherIdentifier,
-      InetSocketAddress address) {
-    // TODO(damonkohler): If the connection is dropped, knownPublishers should
-    // be updated.
-    if (knownPublishers.contains(publisherIdentifier)) {
-      return;
+  public void addPublisher(PublisherIdentifier publisherIdentifier, InetSocketAddress address) {
+    synchronized (mutex) {
+      // TODO(damonkohler): If the connection is dropped, knownPublishers should
+      // be updated.
+      if (knownPublishers.contains(publisherIdentifier)) {
+        return;
+      }
+      tcpClientManager.connect(toString(), address);
+      // TODO(damonkohler): knownPublishers is duplicate information that is
+      // already available to the TopicParticipantManager.
+      knownPublishers.add(publisherIdentifier);
+      signalOnNewPublisher(publisherIdentifier);
     }
-    tcpClientManager.connect(toString(), address);
-    // TODO(damonkohler): knownPublishers is duplicate information that is
-    // already available to the TopicParticipantManager.
-    knownPublishers.add(publisherIdentifier);
-    signalOnNewPublisher(publisherIdentifier);
   }
 
   /**

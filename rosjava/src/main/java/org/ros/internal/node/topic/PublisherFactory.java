@@ -36,6 +36,7 @@ public class PublisherFactory {
   private final MessageFactory messageFactory;
   private final ScheduledExecutorService executorService;
   private final NodeIdentifier nodeIdentifier;
+  private final Object mutex;
 
   public PublisherFactory(NodeIdentifier nodeIdentifier,
       TopicParticipantManager topicParticipantManager, MessageFactory messageFactory,
@@ -44,6 +45,7 @@ public class PublisherFactory {
     this.topicParticipantManager = topicParticipantManager;
     this.messageFactory = messageFactory;
     this.executorService = executorService;
+    mutex = new Object();
   }
 
   /**
@@ -63,8 +65,7 @@ public class PublisherFactory {
   public <T> Publisher<T> newOrExisting(TopicDeclaration topicDeclaration,
       MessageSerializer<T> messageSerializer) {
     GraphName topicName = topicDeclaration.getName();
-
-    synchronized (topicParticipantManager) {
+    synchronized (mutex) {
       if (topicParticipantManager.hasPublisher(topicName)) {
         return (DefaultPublisher<T>) topicParticipantManager.getPublisher(topicName);
       } else {

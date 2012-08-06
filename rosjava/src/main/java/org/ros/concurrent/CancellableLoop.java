@@ -26,6 +26,9 @@ import java.util.concurrent.ExecutorService;
  * @author khughes@google.com (Keith M. Hughes)
  */
 public abstract class CancellableLoop implements Runnable {
+
+  private final Object mutex;
+
   /**
    * {@code true} if the code has been run once, {@code false} otherwise.
    */
@@ -36,9 +39,13 @@ public abstract class CancellableLoop implements Runnable {
    */
   private Thread thread;
 
+  public CancellableLoop() {
+    mutex = new Object();
+  }
+
   @Override
   public void run() {
-    synchronized (this) {
+    synchronized (mutex) {
       Preconditions.checkState(!ranOnce, "CancellableLoops cannot be restarted.");
       ranOnce = true;
       thread = Thread.currentThread();

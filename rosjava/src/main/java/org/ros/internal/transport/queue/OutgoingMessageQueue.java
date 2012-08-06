@@ -50,6 +50,7 @@ public class OutgoingMessageQueue<T> {
   private final Writer writer;
   private final MessageBufferPool messageBufferPool;
   private final ChannelBuffer latchedBuffer;
+  private final Object mutex;
 
   private boolean latchMode;
   private T latchedMessage;
@@ -84,6 +85,7 @@ public class OutgoingMessageQueue<T> {
     writer = new Writer();
     messageBufferPool = new MessageBufferPool();
     latchedBuffer = MessageBuffers.dynamicBuffer();
+    mutex = new Object();
     latchMode = false;
     executorService.execute(writer);
   }
@@ -105,8 +107,10 @@ public class OutgoingMessageQueue<T> {
     setLatchedMessage(message);
   }
 
-  private synchronized void setLatchedMessage(T message) {
-    latchedMessage = message;
+  private void setLatchedMessage(T message) {
+    synchronized (mutex) {
+      latchedMessage = message;
+    }
   }
 
   /**
@@ -134,10 +138,12 @@ public class OutgoingMessageQueue<T> {
 
   // TODO(damonkohler): Avoid re-serializing the latched message if it hasn't
   // changed.
-  private synchronized void writeLatchedMessage(Channel channel) {
-    latchedBuffer.clear();
-    serializer.serialize(latchedMessage, latchedBuffer);
-    channel.write(latchedBuffer);
+  private void writeLatchedMessage(Channel channel) {
+    synchronized (mutex) {
+      latchedBuffer.clear();
+      serializer.serialize(latchedMessage, latchedBuffer);
+      channel.write(latchedBuffer);
+    }
   }
 
   /**

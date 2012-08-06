@@ -54,9 +54,7 @@ public class LazyMessage<T> {
 
   @VisibleForTesting
   LazyMessage(T message) {
-    buffer = null;
-    deserializer = null;
-    mutex = null;
+    this(null, null);
     this.message = message;
   }
 
@@ -64,13 +62,11 @@ public class LazyMessage<T> {
    * @return the deserialized message
    */
   public T get() {
-    if (message != null) {
-      return message;
-    }
     synchronized (mutex) {
-      if (message == null) {
-        message = deserializer.deserialize(buffer);
+      if (message != null) {
+        return message;
       }
+      message = deserializer.deserialize(buffer);
     }
     return message;
   }

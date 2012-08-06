@@ -35,6 +35,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class SwitchableMasterUriProvider implements MasterUriProvider {
 
+  private final Object mutex;
+
   /**
    * The current provider in use.
    */
@@ -51,6 +53,7 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
    */
   public SwitchableMasterUriProvider(MasterUriProvider provider) {
     this.provider = provider;
+    mutex = new Object();
   }
 
   @Override
@@ -58,7 +61,7 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
     MasterUriProvider providerToUse = null;
     ProviderRequest requestToUse = null;
 
-    synchronized (this) {
+    synchronized (mutex) {
       if (provider != null) {
         providerToUse = provider;
       } else {
@@ -80,7 +83,7 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
     // seems appropriate to wait rather than to return immediately.
 
     MasterUriProvider providerToUse = null;
-    synchronized (this) {
+    synchronized (mutex) {
       if (provider != null) {
         providerToUse = provider;
       }
@@ -105,15 +108,17 @@ public class SwitchableMasterUriProvider implements MasterUriProvider {
    * @param switcher
    *          the new provider
    */
-  public synchronized void switchProvider(MasterUriProviderSwitcher switcher) {
-    MasterUriProvider oldProvider = provider;
-    provider = switcher.switchProvider(oldProvider);
+  public void switchProvider(MasterUriProviderSwitcher switcher) {
+    synchronized (mutex) {
+      MasterUriProvider oldProvider = provider;
+      provider = switcher.switchProvider(oldProvider);
 
-    if (oldProvider == null) {
-      for (ProviderRequest request : pending) {
-        request.setProvider(provider);
+      if (oldProvider == null) {
+        for (ProviderRequest request : pending) {
+          request.setProvider(provider);
+        }
+        pending.clear();
       }
-      pending.clear();
     }
   }
 
