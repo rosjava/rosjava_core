@@ -17,6 +17,9 @@
 package org.ros.rosjava_geometry;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+
+import java.util.List;
 
 /**
  * A quaternion.
@@ -94,9 +97,9 @@ public class Quaternion {
         * other.x, w * other.w - x * other.x - y * other.y - z * other.z);
   }
 
-  public Vector3 rotateVector(Vector3 vector) {
+  public Vector3 rotateAndScaleVector(Vector3 vector) {
     Quaternion vectorQuaternion = new Quaternion(vector.getX(), vector.getY(), vector.getZ(), 0);
-    Quaternion rotatedQuaternion = multiply(vectorQuaternion.multiply(invert()));
+    Quaternion rotatedQuaternion = multiply(vectorQuaternion.multiply(conjugate()));
     return new Vector3(rotatedQuaternion.getX(), rotatedQuaternion.getY(), rotatedQuaternion.getZ());
   }
 
@@ -134,6 +137,20 @@ public class Quaternion {
     result.setZ(z);
     result.setW(w);
     return result;
+  }
+
+  public boolean almostEquals(Quaternion other, double epsilon) {
+    List<Double> epsilons = Lists.newArrayList();
+    epsilons.add(x - other.x);
+    epsilons.add(y - other.y);
+    epsilons.add(z - other.z);
+    epsilons.add(w - other.w);
+    for (double e : epsilons) {
+      if (Math.abs(e) > epsilon) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @Override

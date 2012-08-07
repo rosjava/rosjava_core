@@ -17,12 +17,9 @@
 package org.ros.rosjava_geometry;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
-
-import java.util.List;
 
 /**
  * A transformation in terms of translation, rotation, and scale.
@@ -87,12 +84,12 @@ public class Transform {
 
   public Transform invert() {
     Quaternion inverseRotationAndScale = rotationAndScale.invert();
-    return new Transform(inverseRotationAndScale.rotateVector(translation.invert()),
+    return new Transform(inverseRotationAndScale.rotateAndScaleVector(translation.invert()),
         inverseRotationAndScale);
   }
 
   public Vector3 apply(Vector3 vector) {
-    return rotationAndScale.rotateVector(vector).add(translation);
+    return rotationAndScale.rotateAndScaleVector(vector).add(translation);
   }
 
   public Quaternion apply(Quaternion quaternion) {
@@ -118,12 +115,10 @@ public class Transform {
     double z = rotationAndScale.getZ();
     double w = rotationAndScale.getW();
     double mm = rotationAndScale.getMagnitudeSquared();
-    return new double[] {
-        mm - 2 * y * y - 2 * z * z, 2 * x * y + 2 * z * w, 2 * x * z - 2 * y * w, 0,
-        2 * x * y - 2 * z * w, mm - 2 * x * x - 2 * z * z, 2 * y * z + 2 * x * w, 0,
+    return new double[] { mm - 2 * y * y - 2 * z * z, 2 * x * y + 2 * z * w, 2 * x * z - 2 * y * w,
+        0, 2 * x * y - 2 * z * w, mm - 2 * x * x - 2 * z * z, 2 * y * z + 2 * x * w, 0,
         2 * x * z + 2 * y * w, 2 * y * z - 2 * x * w, mm - 2 * x * x - 2 * y * y, 0,
-        translation.getX(), translation.getY(), translation.getZ(), 1
-        };
+        translation.getX(), translation.getY(), translation.getZ(), 1 };
   }
 
   public geometry_msgs.Transform toTransformMessage(geometry_msgs.Transform result) {
@@ -147,20 +142,8 @@ public class Transform {
   }
 
   public boolean almostEquals(Transform other, double epsilon) {
-    List<Double> epsilons = Lists.newArrayList();
-    epsilons.add(translation.getX() - other.getTranslation().getX());
-    epsilons.add(translation.getY() - other.getTranslation().getY());
-    epsilons.add(translation.getZ() - other.getTranslation().getZ());
-    epsilons.add(rotationAndScale.getX() - other.getRotationAndScale().getX());
-    epsilons.add(rotationAndScale.getY() - other.getRotationAndScale().getY());
-    epsilons.add(rotationAndScale.getZ() - other.getRotationAndScale().getZ());
-    epsilons.add(rotationAndScale.getW() - other.getRotationAndScale().getW());
-    for (double e : epsilons) {
-      if (Math.abs(e) > epsilon) {
-        return false;
-      }
-    }
-    return true;
+    return translation.almostEquals(other.translation, epsilon)
+        && rotationAndScale.almostEquals(other.rotationAndScale, epsilon);
   }
 
   @VisibleForTesting

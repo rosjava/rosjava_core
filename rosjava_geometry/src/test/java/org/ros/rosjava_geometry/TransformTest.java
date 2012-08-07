@@ -76,14 +76,45 @@ public class TransformTest {
     Random random = new Random();
     random.setSeed(42);
     for (int i = 0; i < 10000; i++) {
-      Vector3 vector = new Vector3(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Quaternion quaternion =
-          new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(),
-              random.nextDouble());
+      Vector3 vector = randomVector(random);
+      Quaternion quaternion = randomQuaternion(random);
       Transform transform = new Transform(vector, quaternion);
       Transform inverse = transform.invert();
       Transform neutral = transform.multiply(inverse);
       assertTrue(neutral.almostEquals(Transform.identity(), 1e-9));
     }
+  }
+
+  @Test
+  public void testMultiplyRandom() {
+    Random random = new Random();
+    random.setSeed(42);
+    for (int i = 0; i < 10000; i++) {
+      Vector3 data = randomVector(random);
+      Vector3 vector1 = randomVector(random);
+      Vector3 vector2 = randomVector(random);
+      Quaternion quaternion1 = randomQuaternion(random);
+      Quaternion quaternion2 = randomQuaternion(random);
+      Transform transform1 = new Transform(vector1, quaternion1);
+      Transform transform2 = new Transform(vector2, quaternion2);
+      Vector3 result1 = transform1.apply(transform2.apply(data));
+      Vector3 result2 = transform1.multiply(transform2).apply(data);
+      assertTrue(result1.almostEquals(result2, 1e-9));
+    }
+  }
+
+  @Test
+  public void testScale() {
+    assertTrue(Vector3.xAxis().scale(2)
+        .almostEquals(Transform.identity().scale(2).apply(Vector3.xAxis()), 1e-9));
+  }
+
+  private Quaternion randomQuaternion(Random random) {
+    return new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(),
+        random.nextDouble());
+  }
+
+  private Vector3 randomVector(Random random) {
+    return new Vector3(random.nextDouble(), random.nextDouble(), random.nextDouble());
   }
 }

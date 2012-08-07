@@ -16,6 +16,10 @@
 
 package org.ros.rosjava_geometry;
 
+import com.google.common.collect.Lists;
+
+import java.util.List;
+
 /**
  * A three dimensional vector.
  * 
@@ -78,6 +82,10 @@ public class Vector3 {
     return new Vector3(x / getMagnitude(), y / getMagnitude(), z / getMagnitude());
   }
 
+  public Vector3 scale(double factor) {
+    return new Vector3(x * factor, y * factor, z * factor);
+  }
+
   public double getX() {
     return x;
   }
@@ -90,8 +98,12 @@ public class Vector3 {
     return z;
   }
 
+  private double getMagnitudeSquared() {
+    return x * x + y * y + z * z;
+  }
+
   public double getMagnitude() {
-    return Math.sqrt(x * x + y * y + z * z);
+    return Math.sqrt(getMagnitudeSquared());
   }
 
   public geometry_msgs.Vector3 toVector3Message(geometry_msgs.Vector3 result) {
@@ -106,6 +118,19 @@ public class Vector3 {
     result.setY(y);
     result.setZ(z);
     return result;
+  }
+
+  public boolean almostEquals(Vector3 other, double epsilon) {
+    List<Double> epsilons = Lists.newArrayList();
+    epsilons.add(x - other.x);
+    epsilons.add(y - other.y);
+    epsilons.add(z - other.z);
+    for (double e : epsilons) {
+      if (Math.abs(e) > epsilon) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @Override

@@ -93,7 +93,7 @@ public class QuaternionTest {
   public void testRotateVector() {
     Quaternion quaternion = Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2);
     Vector3 vector = new Vector3(1, 0, 0);
-    Vector3 rotated = quaternion.rotateVector(vector);
+    Vector3 rotated = quaternion.rotateAndScaleVector(vector);
     assertEquals(0, rotated.getX(), 1e-9);
     assertEquals(1, rotated.getY(), 1e-9);
     assertEquals(0, rotated.getZ(), 1e-9);
