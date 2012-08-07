@@ -129,31 +129,97 @@ public class FrameTransformTreeTest {
     }
   }
 
-  @Test
-  public void testTransformToRoot() {
+  /**
+   * Fills the {@link FrameTransformTree} with the following frame topography:
+   * 
+   * <pre>
+   *       foo
+   *    bar   bop
+   * baz         fuz
+   * </pre>
+   */
+  private void updateFrameTransformTree() {
     {
-      Vector3 vector = Vector3.zero();
-      Quaternion quaternion = new Quaternion(Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
-      Transform transform = new Transform(vector, quaternion);
-      frameTransformTree.update(newTransformStampedMessage(transform, "baz", "bar", new Time()));
-    }
-
-    {
-      Vector3 vector = new Vector3(0, 1, 0);
-      Quaternion quaternion = Quaternion.identity();
-      Transform transform = new Transform(vector, quaternion);
+      Transform transform = Transform.translation(0, 1, 0);
       frameTransformTree.update(newTransformStampedMessage(transform, "bar", "foo", new Time()));
     }
+    {
+      Transform transform = Transform.xRotation(Math.PI / 2);
+      frameTransformTree.update(newTransformStampedMessage(transform, "baz", "bar", new Time()));
+    }
+    {
+      Transform transform = Transform.translation(1, 0, 0);
+      frameTransformTree.update(newTransformStampedMessage(transform, "bop", "foo", new Time()));
+    }
+    {
+      Transform transform = Transform.yRotation(Math.PI / 2);
+      frameTransformTree.update(newTransformStampedMessage(transform, "fuz", "bop", new Time()));
+    }
+  }
 
-    FrameTransform frameTransform = frameTransformTree.transform("baz", "foo");
+  private void checkBazToFooTransform(FrameTransform frameTransform) {
     // If we were to reverse the order of the transforms in our implementation,
     // we would expect the translation vector to be <0, 0, 1> instead.
-    Vector3 vector = new Vector3(0, 1, 0);
-    Quaternion quaternion = new Quaternion(Math.sqrt(0.5), 0, 0, Math.sqrt(0.5));
-    Transform transform = new Transform(vector, quaternion);
+    Transform transform = Transform.translation(0, 1, 0).multiply(Transform.xRotation(Math.PI / 2));
+    Quaternion rotationAndScale = transform.getRotationAndScale();
+    assertTrue(String.format("%s is not neutral.", rotationAndScale),
+        rotationAndScale.isAlmostNeutral(1e-9));
     assertEquals(nameResolver.resolve("baz"), frameTransform.getSourceFrame());
     assertEquals(nameResolver.resolve("foo"), frameTransform.getTargetFrame());
-    assertEquals(transform, frameTransform.getTransform());
+    assertTrue(transform.almostEquals(frameTransform.getTransform(), 1e-9));
+  }
+
+  @Test
+  public void testTransformBazToRoot() {
+    updateFrameTransformTree();
+    checkBazToFooTransform(frameTransformTree.transformToRoot(nameResolver.resolve("baz")));
+  }
+
+  @Test
+  public void testTransformBazToFoo() {
+    updateFrameTransformTree();
+    checkBazToFooTransform(frameTransformTree.transform("baz", "foo"));
+    checkBazToFooTransform(frameTransformTree.transform("foo", "baz").invert());
+  }
+
+  private void checkFuzToFooTransform(FrameTransform frameTransform) {
+    // If we were to reverse the order of the transforms in our implementation,
+    // we would expect the translation vector to be <0, 0, 1> instead.
+    Transform transform = Transform.translation(1, 0, 0).multiply(Transform.yRotation(Math.PI / 2));
+    Quaternion rotationAndScale = transform.getRotationAndScale();
+    assertTrue(String.format("%s is not neutral.", rotationAndScale),
+        rotationAndScale.isAlmostNeutral(1e-9));
+    assertEquals(nameResolver.resolve("fuz"), frameTransform.getSourceFrame());
+    assertEquals(nameResolver.resolve("foo"), frameTransform.getTargetFrame());
+    assertTrue(String.format("Expected %s != %s", transform, frameTransform.getTransform()),
+        transform.almostEquals(frameTransform.getTransform(), 1e-9));
+  }
+
+  @Test
+  public void testTransformFuzToRoot() {
+    updateFrameTransformTree();
+    checkFuzToFooTransform(frameTransformTree.transformToRoot(nameResolver.resolve("fuz")));
+  }
+
+  @Test
+  public void testTransformFuzToFoo() {
+    updateFrameTransformTree();
+    checkFuzToFooTransform(frameTransformTree.transform("fuz", "foo"));
+    checkFuzToFooTransform(frameTransformTree.transform("foo", "fuz").invert());
+  }
+
+  @Test
+  public void testTransformBazToFuz() {
+    updateFrameTransformTree();
+    FrameTransform frameTransform = frameTransformTree.transform("baz", "fuz");
+    Transform transform =
+        Transform.yRotation(Math.PI / 2).invert().multiply(Transform.translation(1, 0, 0).invert())
+            .multiply(Transform.translation(0, 1, 0)).multiply(Transform.xRotation(Math.PI / 2));
+    assertTrue(transform.getRotationAndScale().isAlmostNeutral(1e-9));
+    assertEquals(nameResolver.resolve("baz"), frameTransform.getSourceFrame());
+    assertEquals(nameResolver.resolve("fuz"), frameTransform.getTargetFrame());
+    assertTrue(String.format("Expected %s != %s", transform, frameTransform.getTransform()),
+        transform.almostEquals(frameTransform.getTransform(), 1e-9));
   }
 
   @Test

@@ -16,18 +16,24 @@
 
 package org.ros.rosjava_geometry;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
+
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 
+import java.util.List;
+
 /**
- * A transformation in terms of translation and rotation.
+ * A transformation in terms of translation, rotation, and scale.
  * 
+ * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
 public class Transform {
 
   private Vector3 translation;
-  private Quaternion rotation;
+  private Quaternion rotationAndScale;
 
   public static Transform fromTransformMessage(geometry_msgs.Transform message) {
     return new Transform(Vector3.fromVector3Message(message.getTranslation()),
@@ -65,7 +71,7 @@ public class Transform {
 
   public Transform(Vector3 translation, Quaternion rotation) {
     this.translation = translation;
-    this.rotation = rotation;
+    this.rotationAndScale = rotation;
   }
 
   /**
@@ -76,24 +82,29 @@ public class Transform {
    * @return the resulting {@link Transform}
    */
   public Transform multiply(Transform other) {
-    return new Transform(apply(other.getTranslation()), apply(other.getRotation()));
+    return new Transform(apply(other.translation), apply(other.rotationAndScale));
   }
 
   public Transform invert() {
-    Quaternion inverseRotation = rotation.invert();
-    return new Transform(inverseRotation.rotateVector(translation.invert()), inverseRotation);
+    Quaternion inverseRotationAndScale = rotationAndScale.invert();
+    return new Transform(inverseRotationAndScale.rotateVector(translation.invert()),
+        inverseRotationAndScale);
   }
 
   public Vector3 apply(Vector3 vector) {
-    return rotation.rotateVector(vector).add(translation);
+    return rotationAndScale.rotateVector(vector).add(translation);
   }
 
   public Quaternion apply(Quaternion quaternion) {
-    return rotation.multiply(quaternion);
+    return rotationAndScale.multiply(quaternion);
   }
 
   public Transform scale(double factor) {
-    return new Transform(translation, rotation.scale(factor));
+    return new Transform(translation, rotationAndScale.scale(Math.sqrt(factor)));
+  }
+
+  public double getScale() {
+    return rotationAndScale.getMagnitudeSquared();
   }
 
   /**
@@ -102,28 +113,28 @@ public class Transform {
    *      rotation matrix</a>
    */
   public double[] toMatrix() {
-    double x = getRotation().getX();
-    double y = getRotation().getY();
-    double z = getRotation().getZ();
-    double w = getRotation().getW();
-    double mm = getRotation().getMagnitudeSquared();
+    double x = rotationAndScale.getX();
+    double y = rotationAndScale.getY();
+    double z = rotationAndScale.getZ();
+    double w = rotationAndScale.getW();
+    double mm = rotationAndScale.getMagnitudeSquared();
     return new double[] {
         mm - 2 * y * y - 2 * z * z, 2 * x * y + 2 * z * w, 2 * x * z - 2 * y * w, 0,
         2 * x * y - 2 * z * w, mm - 2 * x * x - 2 * z * z, 2 * y * z + 2 * x * w, 0,
         2 * x * z + 2 * y * w, 2 * y * z - 2 * x * w, mm - 2 * x * x - 2 * y * y, 0,
-        getTranslation().getX(), getTranslation().getY(), getTranslation().getZ(), 1
+        translation.getX(), translation.getY(), translation.getZ(), 1
         };
   }
 
   public geometry_msgs.Transform toTransformMessage(geometry_msgs.Transform result) {
     result.setTranslation(translation.toVector3Message(result.getTranslation()));
-    result.setRotation(rotation.toQuaternionMessage(result.getRotation()));
+    result.setRotation(rotationAndScale.toQuaternionMessage(result.getRotation()));
     return result;
   }
 
   public geometry_msgs.Pose toPoseMessage(geometry_msgs.Pose result) {
     result.setPosition(translation.toPointMessage(result.getPosition()));
-    result.setOrientation(rotation.toQuaternionMessage(result.getOrientation()));
+    result.setOrientation(rotationAndScale.toQuaternionMessage(result.getOrientation()));
     return result;
   }
 
@@ -135,24 +146,43 @@ public class Transform {
     return result;
   }
 
-  public Vector3 getTranslation() {
+  public boolean almostEquals(Transform other, double epsilon) {
+    List<Double> epsilons = Lists.newArrayList();
+    epsilons.add(translation.getX() - other.getTranslation().getX());
+    epsilons.add(translation.getY() - other.getTranslation().getY());
+    epsilons.add(translation.getZ() - other.getTranslation().getZ());
+    epsilons.add(rotationAndScale.getX() - other.getRotationAndScale().getX());
+    epsilons.add(rotationAndScale.getY() - other.getRotationAndScale().getY());
+    epsilons.add(rotationAndScale.getZ() - other.getRotationAndScale().getZ());
+    epsilons.add(rotationAndScale.getW() - other.getRotationAndScale().getW());
+    for (double e : epsilons) {
+      if (Math.abs(e) > epsilon) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @VisibleForTesting
+  Vector3 getTranslation() {
     return translation;
   }
 
-  public Quaternion getRotation() {
-    return rotation;
+  @VisibleForTesting
+  Quaternion getRotationAndScale() {
+    return rotationAndScale;
   }
 
   @Override
   public String toString() {
-    return String.format("Transform<%s, %s>", translation, rotation);
+    return String.format("Transform<%s, %s>", translation, rotationAndScale);
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((rotation == null) ? 0 : rotation.hashCode());
+    result = prime * result + ((rotationAndScale == null) ? 0 : rotationAndScale.hashCode());
     result = prime * result + ((translation == null) ? 0 : translation.hashCode());
     return result;
   }
@@ -166,10 +196,10 @@ public class Transform {
     if (getClass() != obj.getClass())
       return false;
     Transform other = (Transform) obj;
-    if (rotation == null) {
-      if (other.rotation != null)
+    if (rotationAndScale == null) {
+      if (other.rotationAndScale != null)
         return false;
-    } else if (!rotation.equals(other.rotation))
+    } else if (!rotationAndScale.equals(other.rotationAndScale))
       return false;
     if (translation == null) {
       if (other.translation != null)

@@ -124,6 +124,10 @@ public class Quaternion {
     return Math.sqrt(getMagnitudeSquared());
   }
 
+  public boolean isAlmostNeutral(double epsilon) {
+    return Math.abs(1 - x * x - y * y - z * z - w * w) < epsilon;
+  }
+
   public geometry_msgs.Quaternion toQuaternionMessage(geometry_msgs.Quaternion result) {
     result.setX(x);
     result.setY(y);

@@ -17,8 +17,11 @@
 package org.ros.rosjava_geometry;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import java.util.Random;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -27,52 +30,60 @@ public class TransformTest {
 
   @Test
   public void testMultiply() {
-    Transform transform1 = new Transform(new Vector3(1, 0, 0), new Quaternion(0, 0, 0, 1));
+    Transform transform1 = new Transform(Vector3.xAxis(), Quaternion.identity());
     Transform transform2 =
-        new Transform(new Vector3(0, 1, 0), Quaternion.fromAxisAngle(new Vector3(0, 0, 1),
-            Math.PI / 2));
+        new Transform(Vector3.yAxis(), Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2));
 
     Transform result1 = transform1.multiply(transform2);
     assertEquals(1.0, result1.getTranslation().getX(), 1e-9);
     assertEquals(1.0, result1.getTranslation().getY(), 1e-9);
     assertEquals(0.0, result1.getTranslation().getZ(), 1e-9);
-    assertEquals(0.0, result1.getRotation().getX(), 1e-9);
-    assertEquals(0.0, result1.getRotation().getY(), 1e-9);
-    assertEquals(0.7071067811865475, result1.getRotation().getZ(), 1e-9);
-    assertEquals(0.7071067811865475, result1.getRotation().getW(), 1e-9);
+    assertEquals(0.0, result1.getRotationAndScale().getX(), 1e-9);
+    assertEquals(0.0, result1.getRotationAndScale().getY(), 1e-9);
+    assertEquals(0.7071067811865475, result1.getRotationAndScale().getZ(), 1e-9);
+    assertEquals(0.7071067811865475, result1.getRotationAndScale().getW(), 1e-9);
 
     Transform result2 = transform2.multiply(transform1);
     assertEquals(0.0, result2.getTranslation().getX(), 1e-9);
     assertEquals(2.0, result2.getTranslation().getY(), 1e-9);
     assertEquals(0.0, result2.getTranslation().getZ(), 1e-9);
-    assertEquals(0.0, result2.getRotation().getX(), 1e-9);
-    assertEquals(0.0, result2.getRotation().getY(), 1e-9);
-    assertEquals(0.7071067811865475, result2.getRotation().getZ(), 1e-9);
-    assertEquals(0.7071067811865475, result2.getRotation().getW(), 1e-9);
+    assertEquals(0.0, result2.getRotationAndScale().getX(), 1e-9);
+    assertEquals(0.0, result2.getRotationAndScale().getY(), 1e-9);
+    assertEquals(0.7071067811865475, result2.getRotationAndScale().getZ(), 1e-9);
+    assertEquals(0.7071067811865475, result2.getRotationAndScale().getW(), 1e-9);
   }
 
   @Test
   public void testInvert() {
     Transform transform =
-        new Transform(new Vector3(0, 1, 0), Quaternion.fromAxisAngle(new Vector3(0, 0, 1),
-            Math.PI / 2));
-    Transform transformInverse = transform.invert();
+        new Transform(Vector3.yAxis(), Quaternion.fromAxisAngle(Vector3.zAxis(), Math.PI / 2));
+    Transform inverse = transform.invert();
 
-    assertEquals(-1.0, transformInverse.getTranslation().getX(), 1e-9);
-    assertEquals(0.0, transformInverse.getTranslation().getY(), 1e-9);
-    assertEquals(0.0, transformInverse.getTranslation().getZ(), 1e-9);
-    assertEquals(0.0, transformInverse.getRotation().getX(), 1e-9);
-    assertEquals(0.0, transformInverse.getRotation().getY(), 1e-9);
-    assertEquals(-0.7071067811865475, transformInverse.getRotation().getZ(), 1e-9);
-    assertEquals(0.7071067811865475, transformInverse.getRotation().getW(), 1e-9);
+    assertEquals(-1.0, inverse.getTranslation().getX(), 1e-9);
+    assertEquals(0.0, inverse.getTranslation().getY(), 1e-9);
+    assertEquals(0.0, inverse.getTranslation().getZ(), 1e-9);
+    assertEquals(0.0, inverse.getRotationAndScale().getX(), 1e-9);
+    assertEquals(0.0, inverse.getRotationAndScale().getY(), 1e-9);
+    assertEquals(-0.7071067811865475, inverse.getRotationAndScale().getZ(), 1e-9);
+    assertEquals(0.7071067811865475, inverse.getRotationAndScale().getW(), 1e-9);
 
-    Transform neutral = transform.multiply(transformInverse);
-    assertEquals(0.0, neutral.getTranslation().getX(), 1e-9);
-    assertEquals(0.0, neutral.getTranslation().getY(), 1e-9);
-    assertEquals(0.0, neutral.getTranslation().getZ(), 1e-9);
-    assertEquals(0.0, neutral.getRotation().getX(), 1e-9);
-    assertEquals(0.0, neutral.getRotation().getY(), 1e-9);
-    assertEquals(0.0, neutral.getRotation().getZ(), 1e-9);
-    assertEquals(1.0, neutral.getRotation().getW(), 1e-9);
+    Transform neutral = transform.multiply(inverse);
+    assertTrue(neutral.almostEquals(Transform.identity(), 1e-9));
+  }
+
+  @Test
+  public void testInvertRandom() {
+    Random random = new Random();
+    random.setSeed(42);
+    for (int i = 0; i < 10000; i++) {
+      Vector3 vector = new Vector3(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Quaternion quaternion =
+          new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(),
+              random.nextDouble());
+      Transform transform = new Transform(vector, quaternion);
+      Transform inverse = transform.invert();
+      Transform neutral = transform.multiply(inverse);
+      assertTrue(neutral.almostEquals(Transform.identity(), 1e-9));
+    }
   }
 }

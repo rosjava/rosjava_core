@@ -196,27 +196,34 @@ public class FrameTransformTree {
       return new FrameTransform(Transform.identity(), resolvedSource, resolvedTarget, null);
     }
     FrameTransform sourceToRoot = transformToRoot(resolvedSource);
-    if (sourceToRoot != null && sourceToRoot.getTargetFrame().equals(resolvedTarget)) {
-      return sourceToRoot;
-    }
     FrameTransform targetToRoot = transformToRoot(resolvedTarget);
-    if (targetToRoot != null) {
-      if (targetToRoot.getTargetFrame().equals(resolvedTarget)) {
-        return targetToRoot;
-      }
-      if (targetToRoot.getTargetFrame().equals(resolvedSource)) {
-        Transform transform = targetToRoot.getTransform().invert();
-        return new FrameTransform(transform, resolvedSource, resolvedTarget, targetToRoot.getTime());
-      }
-    }
-    if (sourceToRoot == null || targetToRoot == null) {
+    if (sourceToRoot == null && targetToRoot == null) {
       return null;
     }
+    if (sourceToRoot == null) {
+      if (targetToRoot.getTargetFrame().equals(resolvedSource)) {
+        // resolvedSource is root.
+        return targetToRoot.invert();
+      } else {
+        return null;
+      }
+    }
+    if (targetToRoot == null) {
+      if (sourceToRoot.getTargetFrame().equals(resolvedTarget)) {
+        // resolvedTarget is root.
+        return sourceToRoot;
+      } else {
+        return null;
+      }
+    }
     if (sourceToRoot.getTargetFrame().equals(targetToRoot.getTargetFrame())) {
+      // Neither resolvedSource nor resolvedTarget is root and both share the
+      // same root.
       Transform transform =
           targetToRoot.getTransform().invert().multiply(sourceToRoot.getTransform());
       return new FrameTransform(transform, resolvedSource, resolvedTarget, sourceToRoot.getTime());
     }
+    // No known transform.
     return null;
   }
 
@@ -234,7 +241,8 @@ public class FrameTransformTree {
    *          the resolved source frame
    * @return the {@link Transform} from {@code source} to root
    */
-  private FrameTransform transformToRoot(GraphName resolvedSource) {
+  @VisibleForTesting
+  FrameTransform transformToRoot(GraphName resolvedSource) {
     FrameTransform result = getLatest(resolvedSource);
     if (result == null) {
       return null;

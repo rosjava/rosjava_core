@@ -79,6 +79,10 @@ public class FrameTransform {
     return target;
   }
 
+  public FrameTransform invert() {
+    return new FrameTransform(transform.invert(), target, source, time);
+  }
+
   /**
    * @return the time associated with the {@link FrameTransform} or {@code null}
    *         if there is no associated time
