@@ -76,14 +76,11 @@ public class TcpClientManager {
    * {@link Channel}s.
    */
   public void shutdown() {
-    for (TcpClient tcpClient : tcpClients) {
-      tcpClient.shutdown();
-    }
     channelGroup.close().awaitUninterruptibly();
     tcpClients.clear();
-    // Not calling channelFactory.releaseExternalResources() or
-    // bootstrap.releaseExternalResources() since only external resources are
-    // the ExecutorService and control of that must remain with the overall
+    // We don't call channelFactory.releaseExternalResources() or
+    // bootstrap.releaseExternalResources() since the only external resource is
+    // the ExecutorService which must remain in the control of the overall
     // application.
   }
 }

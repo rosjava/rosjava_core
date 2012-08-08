@@ -60,9 +60,8 @@ public class SubscriberFactory {
   @SuppressWarnings("unchecked")
   public <T> Subscriber<T> newOrExisting(TopicDeclaration topicDeclaration,
       MessageDeserializer<T> messageDeserializer) {
-    GraphName topicName = topicDeclaration.getName();
-
     synchronized (mutex) {
+      GraphName topicName = topicDeclaration.getName();
       if (topicParticipantManager.hasSubscriber(topicName)) {
         return (DefaultSubscriber<T>) topicParticipantManager.getSubscriber(topicName);
       } else {
