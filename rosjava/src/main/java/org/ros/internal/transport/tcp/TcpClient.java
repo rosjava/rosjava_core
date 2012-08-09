@@ -56,8 +56,8 @@ public class TcpClient {
   private final ChannelBufferFactory channelBufferFactory;
   private final ClientBootstrap bootstrap;
   private final List<NamedChannelHandler> namedChannelHandlers;
-
-  private TcpClientConnection tcpClientConnection;
+  
+  private Channel channel;
 
   public TcpClient(ChannelGroup channelGroup, Executor executor) {
     this.channelGroup = channelGroup;
@@ -86,8 +86,7 @@ public class TcpClient {
     this.namedChannelHandlers.addAll(namedChannelHandlers);
   }
 
-  public TcpClientConnection connect(String connectionName, SocketAddress socketAddress) {
-    tcpClientConnection = new TcpClientConnection(connectionName, bootstrap, socketAddress);
+  public Channel connect(String connectionName, SocketAddress socketAddress) {
     TcpClientPipelineFactory tcpClientPipelineFactory = new TcpClientPipelineFactory(channelGroup) {
       @Override
       public ChannelPipeline getPipeline() {
@@ -95,17 +94,13 @@ public class TcpClient {
         for (NamedChannelHandler namedChannelHandler : namedChannelHandlers) {
           pipeline.addLast(namedChannelHandler.getName(), namedChannelHandler);
         }
-        RetryingConnectionHandler retryingConnectionHandler =
-            tcpClientConnection.getRetryingConnectionHandler();
-        pipeline.addLast(retryingConnectionHandler.getName(), retryingConnectionHandler);
         return pipeline;
       }
     };
     bootstrap.setPipelineFactory(tcpClientPipelineFactory);
     ChannelFuture future = bootstrap.connect(socketAddress).awaitUninterruptibly();
     if (future.isSuccess()) {
-      Channel channel = future.getChannel();
-      tcpClientConnection.setChannel(channel);
+      channel = future.getChannel();
       if (DEBUG) {
         log.info("Connected to: " + socketAddress);
       }
@@ -113,18 +108,12 @@ public class TcpClient {
       // We expect the first connection to succeed. If not, fail fast.
       throw new RosRuntimeException("Connection exception: " + socketAddress, future.getCause());
     }
-    return tcpClientConnection;
+    return channel;
   }
 
   public ChannelFuture write(ChannelBuffer buffer) {
-    Preconditions.checkNotNull(tcpClientConnection);
-    return tcpClientConnection.write(buffer);
-  }
-
-  public void shutdown() {
-    if (tcpClientConnection != null) {
-      tcpClientConnection.setPersistent(false);
-      tcpClientConnection.setChannel(null);
-    }
+    Preconditions.checkNotNull(channel);
+    Preconditions.checkNotNull(buffer);
+    return channel.write(buffer);
   }
 }

@@ -17,7 +17,6 @@
 package org.ros.internal.transport;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.commons.logging.Log;
@@ -31,7 +30,6 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.junit.After;
@@ -198,13 +196,6 @@ public class MessageQueueIntegrationTest {
     assertTrue(secondLatch.await(3, TimeUnit.SECONDS));
   }
 
-  private void expectNoMessages() throws InterruptedException {
-    CountDownLatch firstLatch = expectMessage(firstIncomingMessageQueue);
-    CountDownLatch secondLatch = expectMessage(secondIncomingMessageQueue);
-    assertFalse(firstLatch.await(3, TimeUnit.SECONDS));
-    assertFalse(secondLatch.await(3, TimeUnit.SECONDS));
-  }
-
   @Test
   public void testSendAndReceiveMessage() throws InterruptedException {
     startRepeatingPublisher();
@@ -260,37 +251,5 @@ public class MessageQueueIntegrationTest {
     connect(firstTcpClientManager, serverChannel);
     outgoingMessageQueue.shutdown();
     outgoingMessageQueue.add(expectedMessage);
-  }
-
-  @Test
-  public void testReconnect() throws InterruptedException {
-    startRepeatingPublisher();
-    Channel serverChannel = buildServerChannel();
-    connect(firstTcpClientManager, serverChannel);
-    connect(secondTcpClientManager, serverChannel);
-    expectMessages();
-
-    // Disconnect the outgoing queue's incoming connections.
-    ChannelGroupFuture future = outgoingMessageQueue.getChannelGroup().close();
-    assertTrue(future.await(1, TimeUnit.SECONDS));
-    assertTrue(future.isCompleteSuccess());
-    expectMessages();
-
-    // Disconnect the outgoing queue's incoming connections again to see that
-    // retries work more than once.
-    future = outgoingMessageQueue.getChannelGroup().close();
-    assertTrue(future.await(1, TimeUnit.SECONDS));
-    assertTrue(future.isCompleteSuccess());
-    expectMessages();
-
-    // Shutdown to check that we will not reconnect.
-    firstTcpClientManager.shutdown();
-    secondTcpClientManager.shutdown();
-    firstIncomingMessageQueue.shutdown();
-    secondIncomingMessageQueue.shutdown();
-    future = outgoingMessageQueue.getChannelGroup().close();
-    assertTrue(future.await(1, TimeUnit.SECONDS));
-    assertTrue(future.isCompleteSuccess());
-    expectNoMessages();
   }
 }

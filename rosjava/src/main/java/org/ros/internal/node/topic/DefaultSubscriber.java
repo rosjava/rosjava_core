@@ -175,6 +175,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     signalOnShutdown(timeout, unit);
     incomingMessageQueue.shutdown();
     tcpClientManager.shutdown();
+    subscriberListeners.shutdown();
   }
 
   @Override
