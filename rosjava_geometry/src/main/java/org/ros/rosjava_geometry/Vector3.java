@@ -98,7 +98,7 @@ public class Vector3 {
     return z;
   }
 
-  private double getMagnitudeSquared() {
+  public double getMagnitudeSquared() {
     return x * x + y * y + z * z;
   }
 
