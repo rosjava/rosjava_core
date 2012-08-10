@@ -277,6 +277,13 @@ public class GraphName {
     return new GraphName(toString() + SEPARATOR + other.toString());
   }
 
+  /**
+   * @see #join(GraphName)
+   */
+  public GraphName join(String other) {
+    return join(GraphName.of(other));
+  }
+
   @Override
   public String toString() {
     return name;
