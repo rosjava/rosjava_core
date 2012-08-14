@@ -28,6 +28,11 @@ import java.util.List;
  */
 public class Vector3 {
 
+  private static final Vector3 ZERO = new Vector3(0, 0, 0);
+  private static final Vector3 X_AXIS = new Vector3(1, 0, 0);
+  private static final Vector3 Y_AXIS = new Vector3(0, 1, 0);
+  private static final Vector3 Z_AXIS = new Vector3(0, 0, 1);
+
   private final double x;
   private final double y;
   private final double z;
@@ -41,19 +46,19 @@ public class Vector3 {
   }
 
   public static Vector3 zero() {
-    return new Vector3(0, 0, 0);
+    return ZERO;
   }
 
   public static Vector3 xAxis() {
-    return new Vector3(1, 0, 0);
+    return X_AXIS;
   }
 
   public static Vector3 yAxis() {
-    return new Vector3(0, 1, 0);
+    return Y_AXIS;
   }
 
   public static Vector3 zAxis() {
-    return new Vector3(0, 0, 1);
+    return Z_AXIS;
   }
 
   public Vector3(double x, double y, double z) {
