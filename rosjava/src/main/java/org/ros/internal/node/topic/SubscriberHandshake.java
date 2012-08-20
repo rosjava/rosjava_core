@@ -16,6 +16,8 @@
 
 package org.ros.internal.node.topic;
 
+import com.google.common.base.Preconditions;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.BaseClientHandshake;
@@ -31,9 +33,12 @@ public class SubscriberHandshake extends BaseClientHandshake {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(SubscriberHandshake.class);
-  
+
   public SubscriberHandshake(ConnectionHeader outgoingConnectionHeader) {
     super(outgoingConnectionHeader);
+    Preconditions.checkNotNull(outgoingConnectionHeader.getField(ConnectionHeaderFields.TYPE));
+    Preconditions.checkNotNull(outgoingConnectionHeader
+        .getField(ConnectionHeaderFields.MD5_CHECKSUM));
   }
 
   @Override
@@ -43,12 +48,18 @@ public class SubscriberHandshake extends BaseClientHandshake {
       log.info("Incoming publisher connection header: " + incommingConnectionHeader);
     }
     setErrorMessage(incommingConnectionHeader.getField(ConnectionHeaderFields.ERROR));
-    if (!incommingConnectionHeader.getField(ConnectionHeaderFields.TYPE).equals(
-        outgoingConnectionHeader.getField(ConnectionHeaderFields.TYPE))) {
+    String incomingType = incommingConnectionHeader.getField(ConnectionHeaderFields.TYPE);
+    if (incomingType == null) {
+      setErrorMessage("Incoming type cannot be null.");
+    } else if (!incomingType.equals(outgoingConnectionHeader.getField(ConnectionHeaderFields.TYPE))) {
       setErrorMessage("Message types don't match.");
     }
-    if (!incommingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM).equals(
-        outgoingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM))) {
+    String incomingMd5Checksum =
+        incommingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
+    if (incomingMd5Checksum == null) {
+      setErrorMessage("Incoming MD5 checksum cannot be null.");
+    } else if (!incomingMd5Checksum.equals(outgoingConnectionHeader
+        .getField(ConnectionHeaderFields.MD5_CHECKSUM))) {
       setErrorMessage("Checksums don't match.");
     }
     return getErrorMessage() == null;
