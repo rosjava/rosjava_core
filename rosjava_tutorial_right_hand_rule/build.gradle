@@ -14,8 +14,11 @@
  * the License.
  */
 
-include 'rosjava_bootstrap', 'rosjava_messages', 'apache_xmlrpc_common',
-        'apache_xmlrpc_client', 'apache_xmlrpc_server', 'rosjava',
-        'rosjava_geometry', 'rosjava_tutorial_pubsub',
-        'rosjava_tutorial_services', 'rosjava_tutorial_right_hand_rule',
-        'rosjava_benchmarks', 'rosjava_test', 'docs'
+apply plugin: 'application'
+
+mainClassName = 'org.ros.RosRun'
+
+dependencies {
+  compile project(':rosjava')
+}
+
