@@ -1,0 +1,100 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Overview &mdash; rosjava_core 0.0.0-SNAPSHOT documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.0-SNAPSHOT',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="rosjava_core 0.0.0-SNAPSHOT documentation" href="index.html" />
+    <link rel="next" title="Installing rosjava_core" href="installing.html" />
+    <link rel="prev" title="rosjava_core" href="index.html" /> 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>rosjava_core 0.0.0-SNAPSHOT documentation</span></a></h1>
+        <h2 class="heading"><span>Overview</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">rosjava_core</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="installing.html">Installing rosjava_core</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>While rosjava is mostly feature complete, it is currently under active
+development. Consider all APIs and documentation to be volatile.</p>
+<p><a class="reference external" href="javadoc/index.html">Javadoc</a> is used extensively and cross referenced from
+this documentation.</p>
+<div class="section" id="android-friendly">
+<h2>Android friendly<a class="headerlink" href="#android-friendly" title="Permalink to this headline">¶</a></h2>
+<p>One of the primary goals of rosjava is to bring ROS to Android. See the
+android_core <a class="reference external" href="http://docs.rosjava.googlecode.com/hg/android_core/html/getting_started.html#getting-started" title="(in android_core v0.0.0-SNAPSHOT)"><em>Getting started</em></a> documentation for more
+information.</p>
+</div>
+<div class="section" id="asynchronous">
+<h2>Asynchronous<a class="headerlink" href="#asynchronous" title="Permalink to this headline">¶</a></h2>
+<p>Because ROS is heavily dependent on network communication, rosjava is
+asynchronous. No attempt is made to hide asynchronous behavior behind a
+synchronous API. As a result, the rosjava APIs may feel unfamiliar.</p>
+</div>
+<div class="section" id="more-threads-fewer-processes">
+<h2>More threads, fewer processes<a class="headerlink" href="#more-threads-fewer-processes" title="Permalink to this headline">¶</a></h2>
+<p>You will not find a <tt class="docutils literal"><span class="pre">spin()</span></tt> method in rosjav in rosjava. Unlike other client
+libraries, many rosjava nodes can run in a thread pool within a single JVM
+process. In this way, rosjava nodes are similar to C++ nodlets. In the future,
+rosjava nodes will support in memory communication in the same way that C++
+nodelets do today.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="index.html">rosjava_core</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="installing.html">Installing rosjava_core</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2012, Google, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
