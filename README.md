@@ -4,7 +4,7 @@ From [ROS.org](http://www.ros.org/wiki/): ROS is an open-source, meta-operating 
 
 Developed at Google in cooperation with Willow Garage, rosjava enables integration of Android and ROS compatible robots. This project is under active development and currently alpha quality software. Please report bugs and feature requests on the [issues list](https://github.com/rosjava/rosjava/issues?state=open).
 
-To get started, visit the [rosjava_core](http://rosjava.github.com/rosjava_core/) and [android_core](http://rosjava.github.com/android_core/index.html) documentation.
+To get started, visit the [rosjava_core](http://rosjava.github.com/rosjava_core/) and [android_core](http://rosjava.github.com/android_core/) documentation.
 
 Still have questions? Check out the ros-users [discussion list](https://code.ros.org/mailman/listinfo/ros-users), post questions to [ROS Answers](http://answers.ros.org/questions/) with the tag "rosjava," or join #ROS on irc.oftc.net.
 
