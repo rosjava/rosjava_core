@@ -12,7 +12,5 @@ rosjava was announced publicly during the [Cloud Robotics tech talk at Google I/
 
 Looking for a robot platform to experiment with ROS, Android, and cloud robotics? The [Willow Garage](http://www.willowgarage.com/) [TurtleBot](http://www.willowgarage.com/turtlebot) is a great mobile perception platform for [getting started with robotics development](http://www.youtube.com/watch?feature=player_embedded&v=MOEjL8JDvd0).
 
-Visit the rosjava_core and android_core wiki pages for instructions.
+Visit the [rosjava_core](http://ros.org/wiki/rosjava_core) and [android_core](http://ros.org/wiki/android_core) wiki pages for instructions.
 
-http://ros.org/wiki/rosjava_core
-http://ros.org/wiki/android_core
