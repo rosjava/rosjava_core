@@ -23,6 +23,7 @@ dependencies {
   compile 'dnsjava:dnsjava:2.1.1'
   compile 'org.apache.commons:com.springsource.org.apache.commons.logging:1.1.1'
   compile 'org.apache.commons:com.springsource.org.apache.commons.net:2.0.0'
+  compile fileTree(dir: '../out_libraries', include: '*.jar')
   testCompile 'junit:junit:4.8.2'
   testCompile 'org.mockito:mockito-all:1.8.5'
 }
