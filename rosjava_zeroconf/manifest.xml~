@@ -1,9 +1,0 @@
-<package>
-  <description brief="rosjava_zeroconf">
-
-  </description>
-  <author></author>
-  <license>Apache 2.0</license>
-  <review status="unreviewed" notes="" />
-  <url>http://ros.org/wiki/rosjava_zeroconf</url>
-</package>
