@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Export-Package: javax.jmdns;uses:="javax.jmdns.impl";version="0.0.0-SN
+ APSHOT",org.ros.zeroconf.jmdns;uses:="javax.jmdns";version="0.0.0-SNA
+ PSHOT",javax.jmdns.impl.tasks;uses:="javax.jmdns.impl,javax.jmdns.imp
+ l.constants";version="0.0.0-SNAPSHOT",javax.jmdns.impl;uses:="javax.j
+ mdns.impl.constants,javax.jmdns,javax.jmdns.impl.tasks,javax.jmdns.im
+ pl.tasks.state,javax.jmdns.impl.tasks.resolver";version="0.0.0-SNAPSH
+ OT",javax.jmdns.impl.constants;version="0.0.0-SNAPSHOT",javax.jmdns.i
+ mpl.tasks.state;uses:="javax.jmdns.impl,javax.jmdns.impl.constants,ja
+ vax.jmdns,javax.jmdns.impl.tasks";version="0.0.0-SNAPSHOT",javax.jmdn
+ s.impl.tasks.resolver;uses:="javax.jmdns.impl.tasks,javax.jmdns.impl,
+ javax.jmdns.impl.constants,javax.jmdns";version="0.0.0-SNAPSHOT"
+Bundle-Version: 0.0.0-SNAPSHOT
+Tool: Bnd-1.50.0
+Bundle-Name: rosjava_zeroconf
+Bnd-LastModified: 1361936194225
+Created-By: 1.6.0_24 (Sun Microsystems Inc.)
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.ros.rosjava
+

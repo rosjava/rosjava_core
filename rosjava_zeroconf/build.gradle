@@ -15,25 +15,12 @@
  */
 
 dependencies {
-  compile project(':rosjava_bootstrap')
-  compile project(':rosjava_messages')
-  compile project(':rosjava_zeroconf')
-  compile project(':apache_xmlrpc_common')
-  compile project(':apache_xmlrpc_server')
-  compile project(':apache_xmlrpc_client')
-  compile 'dnsjava:dnsjava:2.1.1'
-  compile 'org.apache.commons:com.springsource.org.apache.commons.logging:1.1.1'
-  compile 'org.apache.commons:com.springsource.org.apache.commons.net:2.0.0'
-  testCompile 'junit:junit:4.8.2'
-  testCompile 'org.mockito:mockito-all:1.8.5'
 }
 
 jar {
   manifest {
     version = '0.0.0-SNAPSHOT'
     symbolicName = 'org.ros.rosjava'
-    instruction 'Export-Package', '!org.ros.internal.*, org.ros.*'
-    instruction 'Private-Package', 'org.ros.internal.*'
   }
 }
 
