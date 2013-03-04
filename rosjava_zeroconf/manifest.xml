@@ -1,9 +1,0 @@
-<package>
-  <description brief="rosjava_zeroconf">
-  it is repository for zero configuration function.
-  </description>
-  <author>KazutoMurase(kattyokaccho3616@gmail.com)</author>
-  <license>Apache 2.0</license>
-  <review status="unreviewed" notes="" />
-  <url>http://ros.org/wiki/rosjava_zeroconf</url>
-</package>

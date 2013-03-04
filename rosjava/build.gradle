@@ -17,7 +17,6 @@
 dependencies {
   compile project(':rosjava_bootstrap')
   compile project(':rosjava_messages')
-  compile project(':rosjava_zeroconf')
   compile project(':apache_xmlrpc_common')
   compile project(':apache_xmlrpc_server')
   compile project(':apache_xmlrpc_client')
