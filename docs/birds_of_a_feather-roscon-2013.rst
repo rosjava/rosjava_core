@@ -29,7 +29,7 @@ General Topics
 
 **Java/Android Namespaces**
 
-- Damon's advice to take care when naming these (e.g. org.ros.android), follow the guidelines in his docs.
+- Damon's advice to take care when naming these (e.g. org.ros.android), follow the `documentation guidelines`_.
 
 **Pull Requests to Damon's Repos**
 
@@ -135,3 +135,5 @@ Don't know much about it yet. Some key points, it will replace adt and will inte
 development process (currently adt and eclipse are incompatible in various ways).
 
 We should really try this and see what advantages it offers. High priority!
+
+.. _documentation guidelines: http://rosjava.github.io/rosjava_core/best_practices.html#java-package-names
