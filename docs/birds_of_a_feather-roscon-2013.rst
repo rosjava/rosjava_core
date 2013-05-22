@@ -31,6 +31,9 @@ General Topics
 
 - Damon's advice to take care when naming these (e.g. org.ros.android), follow the `documentation guidelines`_.
 
+If you don't have an official url you can use to guarantee uniqueness - use your repo's github url,
+e.g. com.github.stonier.rosjava_wunderbar.
+
 **Pull Requests to Damon's Repos**
 
 - First sign the CLA
@@ -97,9 +100,13 @@ Have a gradle script take the web download and install to the local
 maven cache (maybe a package to do this?). Is it not possible to have in a maven repository
 and simply add that repository to the build.gradle file?
 
+*Update:* this is apparently a non-issue, it should be possible to use our own maven repo to
+pull jars for android packages from.
+
 **Why is gradle so slow for android**
 
-Dexxing everything, for each package.
+Dexxing everything, for each package. It is also building the apk file, whereas eclipse incremental builds
+only build the classes on the fly.
 
 **Preferred development environment**
 
@@ -108,7 +115,7 @@ import android code and develop inside eclipse. Note, if you touch a msg file, t
 to clean and rebuild everything from rosjava_messages and up otherwise jar files mismatch. That's a
 really long process.
 
-**OSRF Anroid App Patches**
+**OSRF Android App Patches**
 
 Minor patches into android_core, app manager stuff elsewhere (probably rocon_android for turtlebot
 hydro development for now (see below comment).
