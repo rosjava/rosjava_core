@@ -65,7 +65,7 @@ mkdir ~/my_workspace
 <span class="nb">cd</span> ~/my_workspace
 rosws init
 rosws merge /opt/ros/groovy/.rosinstall
-rosws merge https://raw.github.com/rosjava/rosjava_core/master/.rosinstall
+rosws set --git --version=groovy-devel rosjava_core 'git://github.com/rosjava/rosjava_core.git'
 rosws update
 <span class="nb">source </span>setup.bash
 </pre></div>
