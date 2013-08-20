@@ -14,3 +14,12 @@ Looking for a robot platform to experiment with ROS, Android, and cloud robotics
 
 Visit the [rosjava_core](http://ros.org/wiki/rosjava_core) and [android_core](http://ros.org/wiki/android_core) wiki pages for instructions.
 
+Pull Requests
+-------------
+
+You must sign a Contributor License Agreement (CLA) before we can accept any code. The CLA protects you and us.
+
+* If you are an individual writing original source code and you're sure you own the intellectual property, then you'll need to sign an [individual CLA](http://code.google.com/legal/individual-cla-v1.0.html).
+* If you work for a company that wants to allow you to contribute your work to SL4A, then you'll need to sign a [corporate CLA](http://code.google.com/legal/corporate-cla-v1.0.html).
+
+Follow either of the two links above to access the appropriate CLA and instructions for how to sign and return it.
