@@ -52,7 +52,13 @@ public class InetAddressFactory {
     }
     List<InetAddress> inetAddresses = Lists.newArrayList();
     for (NetworkInterface networkInterface : networkInterfaces) {
-      inetAddresses.addAll(Collections.list(networkInterface.getInetAddresses()));
+      try{
+        if (networkInterface.isUp()) {
+          inetAddresses.addAll(Collections.list(networkInterface.getInetAddresses()));
+        }
+      } catch (SocketException e) {
+        throw new RosRuntimeException(e);
+      }
     }
     return inetAddresses;
   }
