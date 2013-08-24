@@ -52,7 +52,7 @@ public class InetAddressFactory {
     }
     List<InetAddress> inetAddresses = Lists.newArrayList();
     for (NetworkInterface networkInterface : networkInterfaces) {
-      try{
+      try {
         if (networkInterface.isUp()) {
           inetAddresses.addAll(Collections.list(networkInterface.getInetAddresses()));
         }
