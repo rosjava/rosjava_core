@@ -59,7 +59,7 @@ public class TransformBenchmark extends AbstractNodeMain {
         connectedNode.getTopicMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
     turtle2.getHeader().setFrameId("world");
     turtle2.setChildFrameId("turtle2");
-    final FrameTransformTree frameTransformTree = new FrameTransformTree(NameResolver.newRoot());
+    final FrameTransformTree frameTransformTree = new FrameTransformTree();
     connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {

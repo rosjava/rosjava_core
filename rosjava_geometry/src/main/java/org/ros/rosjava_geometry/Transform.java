@@ -19,11 +19,10 @@ package org.ros.rosjava_geometry;
 import com.google.common.annotations.VisibleForTesting;
 
 import org.ros.message.Time;
-import org.ros.namespace.GraphName;
 
 /**
  * A transformation in terms of translation, rotation, and scale.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
@@ -73,7 +72,7 @@ public class Transform {
 
   /**
    * Apply another {@link Transform} to this {@link Transform}.
-   * 
+   *
    * @param other
    *          the {@link Transform} to apply to this {@link Transform}
    * @return the resulting {@link Transform}
@@ -133,7 +132,7 @@ public class Transform {
     return result;
   }
 
-  public geometry_msgs.PoseStamped toPoseStampedMessage(GraphName frame, Time stamp,
+  public geometry_msgs.PoseStamped toPoseStampedMessage(FrameName frame, Time stamp,
       geometry_msgs.PoseStamped result) {
     result.getHeader().setFrameId(frame.toString());
     result.getHeader().setStamp(stamp);
