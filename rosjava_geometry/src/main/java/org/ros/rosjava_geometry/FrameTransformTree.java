@@ -23,9 +23,6 @@ import com.google.common.collect.Maps;
 import geometry_msgs.TransformStamped;
 import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.message.Time;
-import org.ros.namespace.GraphName;
-import org.ros.namespace.NameResolver;
-
 import java.util.Map;
 
 /**
@@ -33,7 +30,7 @@ import java.util.Map;
  * <p>
  * {@link FrameTransformTree} does not currently support time travel. Lookups
  * always use the newest {@link TransformStamped}.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
  * @author moesenle@google.com (Lorenz Moesenlechner)
  */
@@ -41,7 +38,6 @@ public class FrameTransformTree {
 
   private static final int TRANSFORM_QUEUE_CAPACITY = 16;
 
-  private final NameResolver nameResolver;
   private final Object mutex;
 
   /**
@@ -49,11 +45,9 @@ public class FrameTransformTree {
    * frame. Lookups by target frame or by the pair of source and target are both
    * unnecessary because every frame can only have exactly one target.
    */
-  private final Map<GraphName, CircularBlockingDeque<LazyFrameTransform>> transforms;
+  private final Map<FrameName, CircularBlockingDeque<LazyFrameTransform>> transforms;
 
-  public FrameTransformTree(NameResolver nameResolver) {
-    Preconditions.checkNotNull(nameResolver);
-    this.nameResolver = nameResolver;
+  public FrameTransformTree() {
     mutex = new Object();
     transforms = Maps.newConcurrentMap();
   }
@@ -65,51 +59,50 @@ public class FrameTransformTree {
    * Note that the tree is updated lazily. Modifications to the provided
    * {@link geometry_msgs.TransformStamped} message may cause unpredictable
    * results.
-   * 
+   *
    * @param transformStamped
    *          the {@link geometry_msgs.TransformStamped} message to update with
    */
   public void update(geometry_msgs.TransformStamped transformStamped) {
     Preconditions.checkNotNull(transformStamped);
-    GraphName resolvedSource = nameResolver.resolve(transformStamped.getChildFrameId());
+    FrameName transformName = FrameName.of(transformStamped.getChildFrameId());
     LazyFrameTransform lazyFrameTransform = new LazyFrameTransform(transformStamped);
-    add(resolvedSource, lazyFrameTransform);
+    add(transformName, lazyFrameTransform);
   }
 
   @VisibleForTesting
   void update(FrameTransform frameTransform) {
     Preconditions.checkNotNull(frameTransform);
-    GraphName resolvedSource = frameTransform.getSourceFrame();
+    FrameName source = frameTransform.getSourceFrame();
     LazyFrameTransform lazyFrameTransform = new LazyFrameTransform(frameTransform);
-    add(resolvedSource, lazyFrameTransform);
+    add(source, lazyFrameTransform);
   }
 
-  private void add(GraphName resolvedSource, LazyFrameTransform lazyFrameTransform) {
-    if (!transforms.containsKey(resolvedSource)) {
-      transforms.put(resolvedSource, new CircularBlockingDeque<LazyFrameTransform>(
+  private void add(FrameName source, LazyFrameTransform lazyFrameTransform) {
+    if (!transforms.containsKey(source)) {
+      transforms.put(source, new CircularBlockingDeque<LazyFrameTransform>(
           TRANSFORM_QUEUE_CAPACITY));
     }
     synchronized (mutex) {
-      transforms.get(resolvedSource).addFirst(lazyFrameTransform);
+      transforms.get(source).addFirst(lazyFrameTransform);
     }
   }
 
   /**
    * Returns the most recent {@link FrameTransform} for target {@code source}.
-   * 
+   *
    * @param source
    *          the frame to look up
    * @return the most recent {@link FrameTransform} for {@code source} or
    *         {@code null} if no transform for {@code source} is available
    */
-  public FrameTransform lookUp(GraphName source) {
+  public FrameTransform lookUp(FrameName source) {
     Preconditions.checkNotNull(source);
-    GraphName resolvedSource = nameResolver.resolve(source);
-    return getLatest(resolvedSource);
+    return getLatest(source);
   }
 
-  private FrameTransform getLatest(GraphName resolvedSource) {
-    CircularBlockingDeque<LazyFrameTransform> deque = transforms.get(resolvedSource);
+  private FrameTransform getLatest(FrameName source) {
+    CircularBlockingDeque<LazyFrameTransform> deque = transforms.get(source);
     if (deque == null) {
       return null;
     }
@@ -121,17 +114,17 @@ public class FrameTransformTree {
   }
 
   /**
-   * @see #lookUp(GraphName)
+   * @see #lookUp(FrameName)
    */
   public FrameTransform get(String source) {
     Preconditions.checkNotNull(source);
-    return lookUp(GraphName.of(source));
+    return lookUp(FrameName.of(source));
   }
 
   /**
    * Returns the {@link FrameTransform} for {@code source} closest to
    * {@code time}.
-   * 
+   *
    * @param source
    *          the frame to look up
    * @param time
@@ -140,16 +133,15 @@ public class FrameTransformTree {
    * @return the most recent {@link FrameTransform} for {@code source} or
    *         {@code null} if no transform for {@code source} is available
    */
-  public FrameTransform lookUp(GraphName source, Time time) {
+  public FrameTransform lookUp(FrameName source, Time time) {
     Preconditions.checkNotNull(source);
     Preconditions.checkNotNull(time);
-    GraphName resolvedSource = nameResolver.resolve(source);
-    return get(resolvedSource, time);
+    return get(source, time);
   }
 
   // TODO(damonkohler): Use an efficient search.
-  private FrameTransform get(GraphName resolvedSource, Time time) {
-    CircularBlockingDeque<LazyFrameTransform> deque = transforms.get(resolvedSource);
+  private FrameTransform get(FrameName source, Time time) {
+    CircularBlockingDeque<LazyFrameTransform> deque = transforms.get(source);
     if (deque == null) {
       return null;
     }
@@ -176,32 +168,30 @@ public class FrameTransformTree {
   }
 
   /**
-   * @see #lookUp(GraphName, Time)
+   * @see #lookUp(FrameName, Time)
    */
   public FrameTransform get(String source, Time time) {
     Preconditions.checkNotNull(source);
-    return lookUp(GraphName.of(source), time);
+    return lookUp(FrameName.of(source), time);
   }
 
   /**
    * @return the {@link FrameTransform} from source the frame to the target
    *         frame, or {@code null} if no {@link FrameTransform} could be found
    */
-  public FrameTransform transform(GraphName source, GraphName target) {
+  public FrameTransform transform(FrameName source, FrameName target) {
     Preconditions.checkNotNull(source);
     Preconditions.checkNotNull(target);
-    GraphName resolvedSource = nameResolver.resolve(source);
-    GraphName resolvedTarget = nameResolver.resolve(target);
-    if (resolvedSource.equals(resolvedTarget)) {
-      return new FrameTransform(Transform.identity(), resolvedSource, resolvedTarget, null);
+    if (source.equals(target)) {
+      return new FrameTransform(Transform.identity(), source, target, null);
     }
-    FrameTransform sourceToRoot = transformToRoot(resolvedSource);
-    FrameTransform targetToRoot = transformToRoot(resolvedTarget);
+    FrameTransform sourceToRoot = transformToRoot(source);
+    FrameTransform targetToRoot = transformToRoot(target);
     if (sourceToRoot == null && targetToRoot == null) {
       return null;
     }
     if (sourceToRoot == null) {
-      if (targetToRoot.getTargetFrame().equals(resolvedSource)) {
+      if (targetToRoot.getTargetFrame().equals(source)) {
         // resolvedSource is root.
         return targetToRoot.invert();
       } else {
@@ -209,7 +199,7 @@ public class FrameTransformTree {
       }
     }
     if (targetToRoot == null) {
-      if (sourceToRoot.getTargetFrame().equals(resolvedTarget)) {
+      if (sourceToRoot.getTargetFrame().equals(target)) {
         // resolvedTarget is root.
         return sourceToRoot;
       } else {
@@ -221,29 +211,29 @@ public class FrameTransformTree {
       // same root.
       Transform transform =
           targetToRoot.getTransform().invert().multiply(sourceToRoot.getTransform());
-      return new FrameTransform(transform, resolvedSource, resolvedTarget, sourceToRoot.getTime());
+      return new FrameTransform(transform, source, target, sourceToRoot.getTime());
     }
     // No known transform.
     return null;
   }
 
   /**
-   * @see #transform(GraphName, GraphName)
+   * @see #transform(FrameName, FrameName)
    */
   public FrameTransform transform(String source, String target) {
     Preconditions.checkNotNull(source);
     Preconditions.checkNotNull(target);
-    return transform(GraphName.of(source), GraphName.of(target));
+    return transform(FrameName.of(source), FrameName.of(target));
   }
 
   /**
-   * @param resolvedSource
+   * @param source
    *          the resolved source frame
    * @return the {@link Transform} from {@code source} to root
    */
   @VisibleForTesting
-  FrameTransform transformToRoot(GraphName resolvedSource) {
-    FrameTransform result = getLatest(resolvedSource);
+  FrameTransform transformToRoot(FrameName source) {
+    FrameTransform result = getLatest(source);
     if (result == null) {
       return null;
     }
@@ -254,8 +244,8 @@ public class FrameTransformTree {
       }
       // Now resultToParent.getSourceFrame() == result.getTargetFrame()
       Transform transform = resultToParent.getTransform().multiply(result.getTransform());
-      GraphName resolvedTarget = resultToParent.getTargetFrame();
-      result = new FrameTransform(transform, resolvedSource, resolvedTarget, result.getTime());
+      FrameName target = resultToParent.getTargetFrame();
+      result = new FrameTransform(transform, source, target, result.getTime());
     }
   }
 }
