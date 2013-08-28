@@ -19,19 +19,18 @@ package org.ros.rosjava_geometry;
 import com.google.common.base.Preconditions;
 
 import org.ros.message.Time;
-import org.ros.namespace.GraphName;
 
 /**
  * Describes a {@link Transform} from data in the source frame to data in the
  * target frame at a specified {@link Time}.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class FrameTransform {
 
   private final Transform transform;
-  private final GraphName source;
-  private final GraphName target;
+  private final FrameName source;
+  private final FrameName target;
   private final Time time;
 
   public static FrameTransform fromTransformStampedMessage(
@@ -40,12 +39,12 @@ public class FrameTransform {
     String target = transformStamped.getHeader().getFrameId();
     String source = transformStamped.getChildFrameId();
     Time stamp = transformStamped.getHeader().getStamp();
-    return new FrameTransform(transform, GraphName.of(source), GraphName.of(target), stamp);
+    return new FrameTransform(transform, FrameName.of(source), FrameName.of(target), stamp);
   }
 
   /**
    * Allocates a new {@link FrameTransform}.
-   * 
+   *
    * @param transform
    *          the {@link Transform} that transforms data in the {@code source}
    *          frame to data in the {@code target} frame
@@ -57,7 +56,7 @@ public class FrameTransform {
    *          the time associated with this {@link FrameTransform}, can be
    *          {@null}
    */
-  public FrameTransform(Transform transform, GraphName source, GraphName target, Time time) {
+  public FrameTransform(Transform transform, FrameName source, FrameName target, Time time) {
     Preconditions.checkNotNull(transform);
     Preconditions.checkNotNull(source);
     Preconditions.checkNotNull(target);
@@ -71,11 +70,11 @@ public class FrameTransform {
     return transform;
   }
 
-  public GraphName getSourceFrame() {
+  public FrameName getSourceFrame() {
     return source;
   }
 
-  public GraphName getTargetFrame() {
+  public FrameName getTargetFrame() {
     return target;
   }
 
