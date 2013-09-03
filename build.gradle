@@ -36,7 +36,7 @@ subprojects {
     repositories {
       mavenLocal()
       maven {
-        url 'http://robotbrains.hideho.org/nexus/content/groups/ros-public'
+        url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
       }
     }
   }
