@@ -20,5 +20,6 @@ mainClassName = 'org.ros.RosRun'
 
 dependencies {
   compile project(':rosjava')
+  compile project(':rosjava_test_ros_msgs')
   compile 'junit:junit:4.8.2'
 }

@@ -11,5 +11,22 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rosjava_tools</build_depend>
+  <!-- message dependencies (to be generated from) -->
+  <build_depend>test_ros</build_depend>
+  <build_depend>rosgraph_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>tf2_msgs</build_depend>
+  <!-- common_msgs stack -->
+  <build_depend>diagnostic_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>actionlib_msgs</build_depend>
+  <build_depend>shape_msgs</build_depend>
+  <build_depend>stereo_msgs</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
+  <build_depend>visualization_msgs</build_depend>
+
+  <!-- We don't need the msg packages as run depends -->
 </package>
 

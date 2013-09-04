@@ -16,13 +16,22 @@
 
 dependencies {
   compile project(':rosjava_bootstrap')
+  compile project(':rosjava_common_msgs')
 }
 
+/* 
+  Should scan the package.xml of the message package we are generating 
+  and substitute that version number here. Just use the group version for now.
+  version = '0.3.0-SNAPSHOT'
+*/
 
 task generateSources(type: JavaExec) {
   def outputDir = "${buildDir}/generated-src"
   outputs.dir file(outputDir)
-  args outputDir
+  def List<String> argumentList = new ArrayList<String>()
+  argumentList.add(outputDir)
+  argumentList.add("tf2_msgs")
+  args argumentList
   classpath = configurations.runtime
   main = 'org.ros.internal.message.GenerateInterfaces'
 }
