@@ -27,7 +27,7 @@ import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
-import tf.tfMessage;
+import tf2_msgs.TFMessage;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,8 +40,8 @@ public class PubsubBenchmark extends AbstractNodeMain {
   private final AtomicInteger counter;
 
   private Publisher<std_msgs.String> statusPublisher;
-  private Publisher<tf.tfMessage> tfPublisher;
-  private Subscriber<tf.tfMessage> tfSubscriber;
+  private Publisher<tf2_msgs.TFMessage> tfPublisher;
+  private Subscriber<tf2_msgs.TFMessage> tfSubscriber;
   private Time time;
 
   public PubsubBenchmark() {
@@ -55,16 +55,16 @@ public class PubsubBenchmark extends AbstractNodeMain {
 
   @Override
   public void onStart(final ConnectedNode connectedNode) {
-    tfSubscriber = connectedNode.newSubscriber("tf", tf.tfMessage._TYPE);
-    tfSubscriber.addMessageListener(new MessageListener<tf.tfMessage>() {
+    tfSubscriber = connectedNode.newSubscriber("tf", tf2_msgs.TFMessage._TYPE);
+    tfSubscriber.addMessageListener(new MessageListener<tf2_msgs.TFMessage>() {
       @Override
-      public void onNewMessage(tfMessage message) {
+      public void onNewMessage(tf2_msgs.TFMessage message) {
         counter.incrementAndGet();
       }
     });
 
-    tfPublisher = connectedNode.newPublisher("tf", tf.tfMessage._TYPE);
-    final tf.tfMessage tfMessage = tfPublisher.newMessage();
+    tfPublisher = connectedNode.newPublisher("tf", tf2_msgs.TFMessage._TYPE);
+    final tf2_msgs.TFMessage tfMessage = tfPublisher.newMessage();
     geometry_msgs.TransformStamped transformStamped =
         connectedNode.getTopicMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
     tfMessage.getTransforms().add(transformStamped);
