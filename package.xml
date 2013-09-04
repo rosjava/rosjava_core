@@ -10,5 +10,11 @@
   <license>Apache 2.0</license>
 
   <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>genmsg</build_depend>
+  <build_depend>ros_comm</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>common_msgs</build_depend>
+  <build_depend>geometry</build_depend>
 </package>
 
