@@ -18,9 +18,14 @@ task wrapper(type: Wrapper) {
   gradleVersion = '1.5'
 }
 
+project.ext {
+  ros_maven_deployment_path = "$System.env.ROS_MAVEN_DEPLOYMENT_PATH"
+}
+
 allprojects {
   group 'ros.rosjava_core'
-  version = '0.0.0-SNAPSHOT'
+  /* version = '0.2.0-SNAPSHOT' */
+  version = '0.1.0'
 }
 
 subprojects {
@@ -37,6 +42,15 @@ subprojects {
       mavenLocal()
       maven {
         url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
+      }
+    }
+    if ( project.ros_maven_deployment_path != 'null' && project.ros_maven_deployment_path != '' ) {
+      uploadArchives {
+        repositories {
+          mavenDeployer {
+            repository(url: 'file://' + project.ros_maven_deployment_path)
+          }
+        }
       }
     }
   }

@@ -7,3 +7,5 @@ catkin_rosjava_setup()
 
 catkin_package()
 
+install(DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_MAVEN_DESTINATION}/ros/rosjava_core/ 
+        DESTINATION ${CATKIN_GLOBAL_MAVEN_DESTINATION}/ros/rosjava_core)
