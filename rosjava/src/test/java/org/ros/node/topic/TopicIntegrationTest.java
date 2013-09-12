@@ -175,13 +175,13 @@ public class TopicIntegrationTest extends RosTest {
     }, nodeConfiguration);
   }
 
-  private final class Listener implements MessageListener<test_ros.TestHeader> {
+  private final class Listener implements MessageListener<rosjava_test_msgs.TestHeader> {
     private final CountDownLatch latch = new CountDownLatch(10);
 
-    private test_ros.TestHeader lastMessage;
+    private rosjava_test_msgs.TestHeader lastMessage;
 
     @Override
-    public void onNewMessage(test_ros.TestHeader message) {
+    public void onNewMessage(rosjava_test_msgs.TestHeader message) {
       int seq = message.getHeader().getSeq();
       long stamp = message.getHeader().getStamp().totalNsecs();
       if (lastMessage != null) {
@@ -210,13 +210,13 @@ public class TopicIntegrationTest extends RosTest {
 
       @Override
       public void onStart(final ConnectedNode connectedNode) {
-        final Publisher<test_ros.TestHeader> publisher =
-            connectedNode.newPublisher("foo", test_ros.TestHeader._TYPE);
+        final Publisher<rosjava_test_msgs.TestHeader> publisher =
+            connectedNode.newPublisher("foo", rosjava_test_msgs.TestHeader._TYPE);
         connectedNode.executeCancellableLoop(new CancellableLoop() {
           @Override
           public void loop() throws InterruptedException {
-            test_ros.TestHeader message =
-                connectedNode.getTopicMessageFactory().newFromType(test_ros.TestHeader._TYPE);
+            rosjava_test_msgs.TestHeader message =
+                connectedNode.getTopicMessageFactory().newFromType(rosjava_test_msgs.TestHeader._TYPE);
             message.getHeader().setStamp(connectedNode.getCurrentTime());
             publisher.publish(message);
             // There needs to be some time between messages in order to
@@ -236,8 +236,8 @@ public class TopicIntegrationTest extends RosTest {
 
       @Override
       public void onStart(ConnectedNode connectedNode) {
-        Subscriber<test_ros.TestHeader> subscriber =
-            connectedNode.newSubscriber("foo", test_ros.TestHeader._TYPE);
+        Subscriber<rosjava_test_msgs.TestHeader> subscriber =
+            connectedNode.newSubscriber("foo", rosjava_test_msgs.TestHeader._TYPE);
         subscriber.addMessageListener(listener, QUEUE_CAPACITY);
       }
     }, nodeConfiguration);

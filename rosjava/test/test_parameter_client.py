@@ -48,7 +48,7 @@ import time
 import unittest
 
 from std_msgs.msg import String, Bool, Int64, Float64
-from test_ros.msg import Composite, CompositeA, CompositeB, TestArrays
+from rosjava_test_msgs.msg import Composite, CompositeA, CompositeB, TestArrays
 
 class TestParameterClient(unittest.TestCase):
         

@@ -67,31 +67,31 @@ public class PassthroughTestNode extends AbstractNodeMain {
     int64Subscriber.addMessageListener(int64_cb);
 
     // TestHeader pass through
-    final Publisher<test_ros.TestHeader> pub_header =
-        connectedNode.newPublisher("test_header_out", test_ros.TestHeader._TYPE);
-    MessageListener<test_ros.TestHeader> header_cb = new MessageListener<test_ros.TestHeader>() {
+    final Publisher<rosjava_test_msgs.TestHeader> pub_header =
+        connectedNode.newPublisher("test_header_out", rosjava_test_msgs.TestHeader._TYPE);
+    MessageListener<rosjava_test_msgs.TestHeader> header_cb = new MessageListener<rosjava_test_msgs.TestHeader>() {
       @Override
-      public void onNewMessage(test_ros.TestHeader m) {
+      public void onNewMessage(rosjava_test_msgs.TestHeader m) {
         m.setOrigCallerId(m.getCallerId());
         m.setCallerId(connectedNode.getName().toString());
         pub_header.publish(m);
       }
     };
-    Subscriber<test_ros.TestHeader> testHeaderSubscriber =
-        connectedNode.newSubscriber("test_header_in", "test_ros/TestHeader");
+    Subscriber<rosjava_test_msgs.TestHeader> testHeaderSubscriber =
+        connectedNode.newSubscriber("test_header_in", "rosjava_test_msgs/TestHeader");
     testHeaderSubscriber.addMessageListener(header_cb);
 
     // TestComposite pass through
-    final Publisher<test_ros.Composite> pub_composite =
-        connectedNode.newPublisher("composite_out", "test_ros/Composite");
-    MessageListener<test_ros.Composite> composite_cb = new MessageListener<test_ros.Composite>() {
+    final Publisher<rosjava_test_msgs.Composite> pub_composite =
+        connectedNode.newPublisher("composite_out", "rosjava_test_msgs/Composite");
+    MessageListener<rosjava_test_msgs.Composite> composite_cb = new MessageListener<rosjava_test_msgs.Composite>() {
       @Override
-      public void onNewMessage(test_ros.Composite m) {
+      public void onNewMessage(rosjava_test_msgs.Composite m) {
         pub_composite.publish(m);
       }
     };
-    Subscriber<test_ros.Composite> compositeSubscriber =
-        connectedNode.newSubscriber("composite_in", "test_ros/Composite");
+    Subscriber<rosjava_test_msgs.Composite> compositeSubscriber =
+        connectedNode.newSubscriber("composite_in", "rosjava_test_msgs/Composite");
     compositeSubscriber.addMessageListener(composite_cb);
   }
 }

@@ -55,10 +55,10 @@ public class ParameterServerTestNode extends AbstractNodeMain {
         connectedNode.newPublisher("bool", std_msgs.Bool._TYPE);
     final Publisher<std_msgs.Float64> pub_float =
         connectedNode.newPublisher("float", std_msgs.Float64._TYPE);
-    final Publisher<test_ros.Composite> pub_composite =
-        connectedNode.newPublisher("composite", test_ros.Composite._TYPE);
-    final Publisher<test_ros.TestArrays> pub_list =
-        connectedNode.newPublisher("list", test_ros.TestArrays._TYPE);
+    final Publisher<rosjava_test_msgs.Composite> pub_composite =
+        connectedNode.newPublisher("composite", rosjava_test_msgs.Composite._TYPE);
+    final Publisher<rosjava_test_msgs.TestArrays> pub_list =
+        connectedNode.newPublisher("list", rosjava_test_msgs.TestArrays._TYPE);
 
     ParameterTree param = connectedNode.getParameterTree();
 
@@ -90,8 +90,8 @@ public class ParameterServerTestNode extends AbstractNodeMain {
     float_m.setData(param.getDouble(resolver.resolve("float")));
     log.info("float: " + float_m.getData());
 
-    final test_ros.Composite composite_m =
-        topicMessageFactory.newFromType(test_ros.Composite._TYPE);
+    final rosjava_test_msgs.Composite composite_m =
+        topicMessageFactory.newFromType(rosjava_test_msgs.Composite._TYPE);
     Map composite_map = param.getMap(resolver.resolve("composite"));
     composite_m.getA().setW((Double) ((Map) composite_map.get("a")).get("w"));
     composite_m.getA().setX((Double) ((Map) composite_map.get("a")).get("x"));
@@ -101,7 +101,7 @@ public class ParameterServerTestNode extends AbstractNodeMain {
     composite_m.getB().setY((Double) ((Map) composite_map.get("b")).get("y"));
     composite_m.getB().setZ((Double) ((Map) composite_map.get("b")).get("z"));
 
-    final test_ros.TestArrays list_m = topicMessageFactory.newFromType(test_ros.TestArrays._TYPE);
+    final rosjava_test_msgs.TestArrays list_m = topicMessageFactory.newFromType(rosjava_test_msgs.TestArrays._TYPE);
     // only using the integer part for easier (non-float) comparison
     @SuppressWarnings("unchecked")
     List<Integer> list = (List<Integer>) param.getList(resolver.resolve("list"));
