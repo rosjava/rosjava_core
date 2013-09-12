@@ -15,21 +15,25 @@
  */
 
 dependencies {
-  compile project(':rosjava_bootstrap')
-  compile project(':rosjava_messages')
   compile project(':apache_xmlrpc_common')
   compile project(':apache_xmlrpc_server')
   compile project(':apache_xmlrpc_client')
+  compile 'org.ros.rosjava_bootstrap:message_generator:0.1.+'
+  compile 'org.ros.rosjava_messages:rosgraph_msgs:1.9.+'
+  compile 'org.ros.rosjava_messages:geometry_msgs:1.10.+'
+  compile 'org.ros.rosjava_messages:nav_msgs:1.10.+'
+  compile 'org.ros.rosjava_messages:tf2_msgs:0.4.+'
   compile 'dnsjava:dnsjava:2.1.1'
   compile 'org.apache.commons:com.springsource.org.apache.commons.logging:1.1.1'
   compile 'org.apache.commons:com.springsource.org.apache.commons.net:2.0.0'
+  compile 'com.google.guava:guava:12.0'
   testCompile 'junit:junit:4.8.2'
   testCompile 'org.mockito:mockito-all:1.8.5'
 }
 
 jar {
   manifest {
-    version = '0.0.0-SNAPSHOT'
+    version = project.version
     symbolicName = 'org.ros.rosjava'
     instruction 'Export-Package', '!org.ros.internal.*, org.ros.*'
     instruction 'Private-Package', 'org.ros.internal.*'
