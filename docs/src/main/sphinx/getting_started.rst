@@ -241,7 +241,7 @@ Services
 The following class (:javadoc:`org.ros.rosjava_tutorial_services.Server`) is
 available from the rosjava_tutorial_services package. In this example, we
 create a :javadoc:`org.ros.node.service.ServiceServer` for the
-``test_ros.AddTwoInts`` service. This should feel relatively familiar if you're
+``rosjava_test_msgs.AddTwoInts`` service. This should feel relatively familiar if you're
 a ROS veteran.
 
 .. literalinclude:: ../../../../rosjava_tutorial_services/src/main/java/org/ros/rosjava_tutorial_services/Server.java

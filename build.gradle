@@ -14,33 +14,37 @@
  * the License.
  */
 
-task wrapper(type: Wrapper) {
-  gradleVersion = '1.5'
+buildscript {
+    def rosMavenPath = "$System.env.ROS_MAVEN_PATH".split(':').collect { 'file://' + it }
+    repositories {
+        rosMavenPath.each { p ->
+            maven {
+                url p
+            }
+        }
+        mavenLocal()
+        maven {
+            url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
+        }
+    }
+    dependencies {
+        classpath group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '0.1.+'
+    }
 }
 
+apply plugin: 'catkin'
+
 allprojects {
-  group 'ros.rosjava_core'
-  version = '0.0.0-SNAPSHOT'
+    group 'org.ros.rosjava_core'
+    version = project.catkin.pkg.version
 }
 
 subprojects {
-  if (name != 'docs') {
-    apply plugin: 'java'
-    apply plugin: 'osgi'
-    apply plugin: 'eclipse'
-    apply plugin: 'maven'
-
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
-
-    repositories {
-      mavenLocal()
-      maven {
-        url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
-      }
+    if (name != 'docs') {
+        apply plugin: 'ros'
+        apply plugin: 'ros-java'
     }
-  }
 }
 
-defaultTasks 'install'
+defaultTasks 'uploadArchives'
 
