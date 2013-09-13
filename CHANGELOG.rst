@@ -1,0 +1,17 @@
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package rosjava_core
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+0.1.1 (2013-09-13)
+------------------
+* first official hydro release
+* tf_msgs -> tf2_msgs upgrade
+* fix hydro transform issues (frame naming policy)
+* message generation code moved out
+* message generation moved out
+* using gradle plugins to eliminate copied build logic
+* uses the github rosjava/rosjava_maven_repo for pulling external dependencies
+* uses local maven repositories embedded in the ros workspaces (share/maven)
+* cmake installation rules - deb building starting
+* test_ros messages -> rosjava_test_msgs
+
