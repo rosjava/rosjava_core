@@ -14,8 +14,6 @@
  * the License.
  */
 
-version='0.1.0'
-
 dependencies {
   compile 'org.ros.rosjava_messages:rosjava_test_msgs:0.1.+'
   compile 'org.ros.rosjava_bootstrap:message_generation:0.1.+'

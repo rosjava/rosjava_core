@@ -28,20 +28,22 @@ buildscript {
         }
     }
     dependencies {
-        classpath group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '0.1.0'
+        classpath group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '0.1.+'
     }
 }
 
+apply plugin: 'catkin'
+
 allprojects {
-  group 'org.ros.rosjava_core'
-  version = '0.1.0'
+    group 'org.ros.rosjava_core'
+    version = project.catkin.pkg.version
 }
 
 subprojects {
-  if (name != 'docs') {
-    apply plugin: 'ros'
-    apply plugin: 'ros-java'
-  }
+    if (name != 'docs') {
+        apply plugin: 'ros'
+        apply plugin: 'ros-java'
+    }
 }
 
 defaultTasks 'uploadArchives'
