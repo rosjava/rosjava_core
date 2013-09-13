@@ -43,7 +43,7 @@ public class ServiceIntegrationTest extends RosTest {
 
   @Test
   public void testPesistentServiceConnection() throws Exception {
-    final CountDownServiceServerListener<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> countDownServiceServerListener =
+    final CountDownServiceServerListener<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
@@ -53,20 +53,20 @@ public class ServiceIntegrationTest extends RosTest {
 
       @Override
       public void onStart(final ConnectedNode connectedNode) {
-        ServiceServer<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> serviceServer =
+        ServiceServer<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceServer =
             connectedNode
                 .newServiceServer(
                     SERVICE_NAME,
-                    test_ros.AddTwoInts._TYPE,
-                    new ServiceResponseBuilder<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse>() {
+                    rosjava_test_msgs.AddTwoInts._TYPE,
+                    new ServiceResponseBuilder<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse>() {
                       @Override
-                      public void build(test_ros.AddTwoIntsRequest request,
-                          test_ros.AddTwoIntsResponse response) {
+                      public void build(rosjava_test_msgs.AddTwoIntsRequest request,
+                          rosjava_test_msgs.AddTwoIntsResponse response) {
                         response.setSum(request.getA() + request.getB());
                       }
                     });
         try {
-          connectedNode.newServiceServer(SERVICE_NAME, test_ros.AddTwoInts._TYPE, null);
+          connectedNode.newServiceServer(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE, null);
           fail();
         } catch (DuplicateServiceException e) {
           // Only one ServiceServer with a given name can be created.
@@ -86,23 +86,23 @@ public class ServiceIntegrationTest extends RosTest {
 
       @Override
       public void onStart(ConnectedNode connectedNode) {
-        ServiceClient<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> serviceClient;
+        ServiceClient<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceClient;
         try {
-          serviceClient = connectedNode.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
+          serviceClient = connectedNode.newServiceClient(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE);
           // Test that requesting another client for the same service returns
           // the same instance.
           ServiceClient<?, ?> duplicate =
-              connectedNode.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
+              connectedNode.newServiceClient(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE);
           assertEquals(serviceClient, duplicate);
         } catch (ServiceNotFoundException e) {
           throw new RosRuntimeException(e);
         }
-        test_ros.AddTwoIntsRequest request = serviceClient.newMessage();
+        rosjava_test_msgs.AddTwoIntsRequest request = serviceClient.newMessage();
         request.setA(2);
         request.setB(2);
-        serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoIntsResponse>() {
+        serviceClient.call(request, new ServiceResponseListener<rosjava_test_msgs.AddTwoIntsResponse>() {
           @Override
-          public void onSuccess(test_ros.AddTwoIntsResponse response) {
+          public void onSuccess(rosjava_test_msgs.AddTwoIntsResponse response) {
             assertEquals(response.getSum(), 4);
             latch.countDown();
           }
@@ -116,9 +116,9 @@ public class ServiceIntegrationTest extends RosTest {
         // Regression test for issue 122.
         request.setA(3);
         request.setB(3);
-        serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoIntsResponse>() {
+        serviceClient.call(request, new ServiceResponseListener<rosjava_test_msgs.AddTwoIntsResponse>() {
           @Override
-          public void onSuccess(test_ros.AddTwoIntsResponse response) {
+          public void onSuccess(rosjava_test_msgs.AddTwoIntsResponse response) {
             assertEquals(response.getSum(), 6);
             latch.countDown();
           }
@@ -137,7 +137,7 @@ public class ServiceIntegrationTest extends RosTest {
   @Test
   public void testRequestFailure() throws Exception {
     final String errorMessage = "Error!";
-    final CountDownServiceServerListener<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> countDownServiceServerListener =
+    final CountDownServiceServerListener<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> countDownServiceServerListener =
         CountDownServiceServerListener.newDefault();
     nodeMainExecutor.execute(new AbstractNodeMain() {
       @Override
@@ -147,15 +147,15 @@ public class ServiceIntegrationTest extends RosTest {
 
       @Override
       public void onStart(ConnectedNode connectedNode) {
-        ServiceServer<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> serviceServer =
+        ServiceServer<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceServer =
             connectedNode
                 .newServiceServer(
                     SERVICE_NAME,
-                    test_ros.AddTwoInts._TYPE,
-                    new ServiceResponseBuilder<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse>() {
+                    rosjava_test_msgs.AddTwoInts._TYPE,
+                    new ServiceResponseBuilder<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse>() {
                       @Override
-                      public void build(test_ros.AddTwoIntsRequest request,
-                          test_ros.AddTwoIntsResponse response) throws ServiceException {
+                      public void build(rosjava_test_msgs.AddTwoIntsRequest request,
+                          rosjava_test_msgs.AddTwoIntsResponse response) throws ServiceException {
                         throw new ServiceException(errorMessage);
                       }
                     });
@@ -174,16 +174,16 @@ public class ServiceIntegrationTest extends RosTest {
 
       @Override
       public void onStart(ConnectedNode connectedNode) {
-        ServiceClient<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse> serviceClient;
+        ServiceClient<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse> serviceClient;
         try {
-          serviceClient = connectedNode.newServiceClient(SERVICE_NAME, test_ros.AddTwoInts._TYPE);
+          serviceClient = connectedNode.newServiceClient(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE);
         } catch (ServiceNotFoundException e) {
           throw new RosRuntimeException(e);
         }
-        test_ros.AddTwoIntsRequest request = serviceClient.newMessage();
-        serviceClient.call(request, new ServiceResponseListener<test_ros.AddTwoIntsResponse>() {
+        rosjava_test_msgs.AddTwoIntsRequest request = serviceClient.newMessage();
+        serviceClient.call(request, new ServiceResponseListener<rosjava_test_msgs.AddTwoIntsResponse>() {
           @Override
-          public void onSuccess(test_ros.AddTwoIntsResponse message) {
+          public void onSuccess(rosjava_test_msgs.AddTwoIntsResponse message) {
             fail();
           }
 

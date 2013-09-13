@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 from ros import rospy
-from ros import test_ros
-import test_ros.msg
+from ros import rosjava_test_msgs
+import rosjava_test_msgs.msg
 import random
 
 def publisher():
   rospy.init_node('composite_publisher')
-  pub = rospy.Publisher('composite_in', test_ros.msg.Composite)
+  pub = rospy.Publisher('composite_in', rosjava_test_msgs.msg.Composite)
   r = rospy.Rate(10)
-  m = test_ros.msg.Composite()
+  m = rosjava_test_msgs.msg.Composite()
   m.a.x = random.random() * 10000.
   m.a.y = random.random() * 10000.
   m.a.z = random.random() * 10000.

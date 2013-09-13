@@ -93,7 +93,7 @@ public interface ConnectedNode extends Node {
    * @param serviceName
    *          the name of the service
    * @param serviceType
-   *          the type of the service (e.g. "test_ros/AddTwoInts")
+   *          the type of the service (e.g. "rosjava_test_msgs/AddTwoInts")
    * @param serviceResponseBuilder
    *          called for every request to build a response
    * @return a {@link ServiceServer}
@@ -139,7 +139,7 @@ public interface ConnectedNode extends Node {
    * @param serviceName
    *          the name of the service
    * @param serviceType
-   *          the type of the service (e.g. "test_ros/AddTwoInts")
+   *          the type of the service (e.g. "rosjava_test_msgs/AddTwoInts")
    * @return a {@link ServiceClient}
    * @throws ServiceNotFoundException
    *           thrown if no matching service could be found

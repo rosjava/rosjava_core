@@ -14,10 +14,24 @@
  * the License.
  */
 
-include 'apache_xmlrpc_common', 'apache_xmlrpc_client', 'apache_xmlrpc_server',
-        'rosjava', 'rosjava_geometry', 'rosjava_tutorial_pubsub',
-        'rosjava_tutorial_services', 'rosjava_tutorial_right_hand_rule',
-        'rosjava_benchmarks', 'rosjava_test', 'docs'
+dependencies {
+  compile 'org.ros.rosjava_messages:rosjava_test_msgs:0.1.+'
+  compile 'org.ros.rosjava_bootstrap:message_generation:0.1.+'
+  testCompile 'junit:junit:4.8.2'
+}
+jar {
+  manifest {
+    version = project.version
+    symbolicName = 'org.ros.rosjava_core.message_generation_tests'
+  }
+}
 
-include 'message_generation_tests'
-        
+/* 
+ * Ugly hack to stop osgi/java plugin combination from barfing
+ * when there are no sources. 
+ */
+task bugfixtask << {
+    mkdir sourceSets.main.output.classesDir
+}
+
+jar.dependsOn(bugfixtask)

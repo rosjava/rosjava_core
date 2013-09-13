@@ -37,11 +37,11 @@ public class Server extends AbstractNodeMain {
 
   @Override
   public void onStart(ConnectedNode connectedNode) {
-    connectedNode.newServiceServer("add_two_ints", test_ros.AddTwoInts._TYPE,
-        new ServiceResponseBuilder<test_ros.AddTwoIntsRequest, test_ros.AddTwoIntsResponse>() {
+    connectedNode.newServiceServer("add_two_ints", rosjava_test_msgs.AddTwoInts._TYPE,
+        new ServiceResponseBuilder<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse>() {
           @Override
           public void
-              build(test_ros.AddTwoIntsRequest request, test_ros.AddTwoIntsResponse response) {
+              build(rosjava_test_msgs.AddTwoIntsRequest request, rosjava_test_msgs.AddTwoIntsResponse response) {
             response.setSum(request.getA() + request.getB());
           }
         });

@@ -38,14 +38,14 @@ NAME = 'composite_passthrough'
 import roslib; roslib.load_manifest(PKG)
 
 from ros import rospy
-from ros import test_ros
+from ros import rosjava_test_msgs
 from ros import rostest
 
 import sys
 import time
 import unittest
 
-from test_ros.msg import Composite
+from rosjava_test_msgs.msg import Composite
 
 class CompositePassthrough(unittest.TestCase):
         
