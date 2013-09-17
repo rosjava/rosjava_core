@@ -2,6 +2,11 @@
 Changelog for package rosjava_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.2 (2013-09-17)
+------------------
+* missing sensor_msgs dependency added.
+* gradle wrapper -> 1.7
+
 0.1.1 (2013-09-13)
 ------------------
 * first official hydro release
