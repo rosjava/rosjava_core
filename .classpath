@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="apache_xmlrpc_client/src/main/java"/>
+	<classpathentry kind="src" path="apache_xmlrpc_common/src/main/java"/>
+	<classpathentry kind="src" path="apache_xmlrpc_server/src/main/java"/>
+	<classpathentry kind="src" path="message_generation_tests/src/test/java"/>
+	<classpathentry kind="src" path="rosjava_benchmarks/src/main/java"/>
+	<classpathentry kind="src" path="rosjava_geometry/src/main/java"/>
+	<classpathentry kind="src" path="rosjava_geometry/src/test/java"/>
+	<classpathentry kind="src" path="rosjava_test/src/main/java"/>
+	<classpathentry kind="src" path="rosjava_tutorial_pubsub/src/main/java"/>
+	<classpathentry kind="src" path="rosjava_tutorial_right_hand_rule/src/main/java"/>
+	<classpathentry kind="src" path="rosjava_tutorial_services/src/main/java"/>
+	<classpathentry kind="src" path="rosjava/src/main/java"/>
+	<classpathentry kind="src" path="rosjava/src/test/java"/>
+	<classpathentry kind="lib" path="gradle/wrapper/gradle-wrapper.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
