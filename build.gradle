@@ -45,10 +45,9 @@ allprojects {
 
 subprojects {
     if (name != 'docs') {
-        apply plugin: 'ros'
         apply plugin: 'ros-java'
     }
 }
 
-defaultTasks 'uploadArchives'
+defaultTasks 'publishMavenJavaPublicationToMavenRepository'
 
