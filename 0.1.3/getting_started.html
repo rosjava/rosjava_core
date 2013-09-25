@@ -1,0 +1,695 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting started &mdash; rosjava_core 0.1.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="rosjava_core 0.1.3 documentation" href="index.html" />
+    <link rel="next" title="Advanced topics" href="advanced.html" />
+    <link rel="prev" title="Best practices" href="best_practices.html" /> 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>rosjava_core 0.1.3 documentation</span></a></h1>
+        <h2 class="heading"><span>Getting started</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="best_practices.html">Best practices</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="advanced.html">Advanced topics</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="getting-started">
+<span id="id1"></span><h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="creating-a-new-java-package">
+<h2>Creating a new Java package<a class="headerlink" href="#creating-a-new-java-package" title="Permalink to this headline">¶</a></h2>
+<p>Please refer to the <a class="reference external" href="http://wiki.ros.org/rosjava">RosWiki</a> for more information on how to create a new
+gradle/catkin project and subprojects. You might also wish to read the
+Gradle <a class="reference external" href="http://gradle.org/docs/current/userguide/tutorial_java_projects.html">Java tutorial</a> for more details.</p>
+</div>
+<div class="section" id="creating-nodes">
+<h2>Creating nodes<a class="headerlink" href="#creating-nodes" title="Permalink to this headline">¶</a></h2>
+<p>Typically ROS nodes are synonymous with processes. In rosjava, however, nodes
+are more like <a class="reference external" href="http://wiki.ros.org/nodelet">nodelet</a>s in that many nodes can run in a single
+process, the Java VM.</p>
+<p>Users, like yourself, do not create <a class="reference external" href="javadoc/org/ros/node/Node.html#">Node</a>s. Instead,
+programs are defined as implementations of <a class="reference external" href="javadoc/org/ros/node/NodeMain.html#">NodeMain</a>
+which are executed by the aptly named <a class="reference external" href="javadoc/org/ros/node/NodeMainExecutor.html#">NodeMainExecutor</a>.</p>
+<p>Let&#8217;s consider the following mostly empty <a class="reference external" href="javadoc/org/ros/node/NodeMain.html#">NodeMain</a>
+implementation:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">org.ros.namespace.GraphName</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.Node</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.NodeMain</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyNode</span> <span class="kd">implements</span> <span class="n">NodeMain</span> <span class="o">{</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="n">GraphName</span> <span class="nf">getDefaultNodeName</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">GraphName</span><span class="o">(</span><span class="s">&quot;my_node&quot;</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">(</span><span class="n">ConnectedNode</span> <span class="n">node</span><span class="o">)</span> <span class="o">{</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onShutdown</span><span class="o">(</span><span class="n">Node</span> <span class="n">node</span><span class="o">)</span> <span class="o">{</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onShutdownComplete</span><span class="o">(</span><span class="n">Node</span> <span class="n">node</span><span class="o">)</span> <span class="o">{</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onError</span><span class="o">(</span><span class="n">Node</span> <span class="n">node</span><span class="o">,</span> <span class="n">Throwable</span> <span class="n">throwable</span><span class="o">)</span> <span class="o">{</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>The <a class="reference external" href="javadoc/org/ros/node/NodeMain.html#getDefaultNodeName()">NodeMain.getDefaultNodeName</a> method returns the
+default name of the node. This name will be used unless a node name is
+specified in the <a class="reference external" href="javadoc/org/ros/node/NodeConfiguration.html#">NodeConfiguration</a> (more on that
+later). <a class="reference external" href="javadoc/org/ros/namespace/GraphName.html#">GraphName</a>s are used throughout rosjava
+when refering to nodes, topics, and parameters. Most methods which accept a
+<a class="reference external" href="javadoc/org/ros/namespace/GraphName.html#">GraphName</a> will also accept a string for
+convenience.</p>
+<p>The <a class="reference external" href="javadoc/org/ros/node/NodeListener.html#onStart(org.ros.node.ConnectedNode)">NodeListener.onStart</a>
+method is the entry point for your program (or node). The
+<a class="reference external" href="javadoc/org/ros/node/ConnectedNode.html#">ConnectedNode</a> parameter is the factory we use to build
+things like <a class="reference external" href="javadoc/org/ros/topic/Publisher.html#">Publisher</a>s and
+<a class="reference external" href="javadoc/org/ros/topic/Subscriber.html#">Subscriber</a>s.</p>
+<p>The <a class="reference external" href="javadoc/org/ros/node/NodeListener.html#onShutdown(org.ros.node.Node)">NodeListener.onShutdown</a> method is
+the first exit point for your program. It will be executed as soon as shutdown
+is started (i.e. before all publishers, subscribers, etc. have been shutdown).
+The shutdown of all created publishers, subscribers, etc. will be delayed until
+this method returns or the shutdown timeout expires.</p>
+<p>The <a class="reference external" href="javadoc/org/ros/node/NodeListener.html#onShutdownComplete(org.ros.node.Node)">NodeListener.onShutdownComplete</a>
+method is the final exit point for your program. It will be executed after all
+publishers, subscribers, etc. have been shutdown. This is the preferred place
+to handle clean up since it will not delay shutdown.</p>
+<p>The <a class="reference external" href="javadoc/org/ros/node/NodeListener.html#onError(org.ros.node.Node, java.lang.Throwable)">NodeListener.onError</a> method is called when an error occurs in the
+<a class="reference external" href="javadoc/org/ros/node/Node.html#">Node</a> itself. These errors are typically fatal.  The
+<a class="reference external" href="javadoc/org/ros/node/NodeListener.html#onShutdown(org.ros.node.Node)">NodeListener.onShutdown</a> and
+<a class="reference external" href="javadoc/org/ros/node/NodeListener.html#onShutdownComplete(org.ros.node.Node)">NodeListener.onShutdownComplete</a>
+methods will be called following the call to
+<a class="reference external" href="javadoc/org/ros/node/NodeListener.html#onError(org.ros.node.Node, java.lang.Throwable)">NodeListener.onError</a>.</p>
+</div>
+<div class="section" id="publishers-and-subscribers">
+<h2>Publishers and subscribers<a class="headerlink" href="#publishers-and-subscribers" title="Permalink to this headline">¶</a></h2>
+<p>The following class (<a class="reference external" href="javadoc/org/ros/rosjava_tutorial_pubsub/Talker.html#">Talker</a>) is
+available from the rosjava_tutorial_pubsub package. In this example, we create
+a publisher for the chatter topic. This should feel relatively familiar if
+you&#8217;re a ROS veteran. The <a class="reference external" href="javadoc/org/ros/topic/Publisher.html#">Publisher</a> publishes
+<tt class="docutils literal"><span class="pre">std_msgs.String</span></tt> messages to the <tt class="docutils literal"><span class="pre">/chatter</span></tt> topic.</p>
+<div class="highlight-java"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">ros</span><span class="o">.</span><span class="na">rosjava_tutorial_pubsub</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.ros.concurrent.CancellableLoop</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.namespace.GraphName</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.AbstractNodeMain</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.ConnectedNode</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.NodeMain</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.topic.Publisher</span><span class="o">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * A simple {@link Publisher} {@link NodeMain}.</span>
+<span class="cm"> * </span>
+<span class="cm"> * @author damonkohler@google.com (Damon Kohler)</span>
+<span class="cm"> */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Talker</span> <span class="kd">extends</span> <span class="n">AbstractNodeMain</span> <span class="o">{</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="n">GraphName</span> <span class="nf">getDefaultNodeName</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">GraphName</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">&quot;rosjava_tutorial_pubsub/talker&quot;</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">(</span><span class="kd">final</span> <span class="n">ConnectedNode</span> <span class="n">connectedNode</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kd">final</span> <span class="n">Publisher</span><span class="o">&lt;</span><span class="n">std_msgs</span><span class="o">.</span><span class="na">String</span><span class="o">&gt;</span> <span class="n">publisher</span> <span class="o">=</span>
+        <span class="n">connectedNode</span><span class="o">.</span><span class="na">newPublisher</span><span class="o">(</span><span class="s">&quot;chatter&quot;</span><span class="o">,</span> <span class="n">std_msgs</span><span class="o">.</span><span class="na">String</span><span class="o">.</span><span class="na">_TYPE</span><span class="o">);</span>
+    <span class="c1">// This CancellableLoop will be canceled automatically when the node shuts</span>
+    <span class="c1">// down.</span>
+<span class="hll">    <span class="n">connectedNode</span><span class="o">.</span><span class="na">executeCancellableLoop</span><span class="o">(</span><span class="k">new</span> <span class="n">CancellableLoop</span><span class="o">()</span> <span class="o">{</span>
+</span>      <span class="kd">private</span> <span class="kt">int</span> <span class="n">sequenceNumber</span><span class="o">;</span>
+
+      <span class="nd">@Override</span>
+      <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">setup</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">sequenceNumber</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+      <span class="o">}</span>
+
+      <span class="nd">@Override</span>
+      <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">loop</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+<span class="hll">        <span class="n">std_msgs</span><span class="o">.</span><span class="na">String</span> <span class="n">str</span> <span class="o">=</span> <span class="n">publisher</span><span class="o">.</span><span class="na">newMessage</span><span class="o">();</span>
+</span>        <span class="n">str</span><span class="o">.</span><span class="na">setData</span><span class="o">(</span><span class="s">&quot;Hello world! &quot;</span> <span class="o">+</span> <span class="n">sequenceNumber</span><span class="o">);</span>
+        <span class="n">publisher</span><span class="o">.</span><span class="na">publish</span><span class="o">(</span><span class="n">str</span><span class="o">);</span>
+        <span class="n">sequenceNumber</span><span class="o">++;</span>
+        <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+      <span class="o">}</span>
+    <span class="o">});</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+<p>Line 28 will probably feel unfamailiar even to ROS veterans. This is one
+example of rosjava&#8217;s asynchornous API. The intent of our
+<a class="reference external" href="javadoc/org/ros/rosjava_tutorial_pubsub/Talker.html#">Talker</a> class is to publish a hello
+world message to anyone who will listen once per second. One way to accomplish
+this is to publish the message and sleep in a loop. However, we don&#8217;t want to
+block the <a class="reference external" href="javadoc/org/ros/node/NodeListener.html#onStart(org.ros.node.Node)">NodeListener.onStart</a>
+method. So, we create a <a class="reference external" href="javadoc/org/ros/concurrent/CancellableLoop.html#">CancellableLoop</a> and ask
+the <a class="reference external" href="javadoc/org/ros/node/Node.html#">Node</a> to execute it. The loop will be interrupted
+automatically when the <a class="reference external" href="javadoc/org/ros/node/Node.html#">Node</a> exits.</p>
+<p>On line 38 we create a new <tt class="docutils literal"><span class="pre">std_msgs.String</span></tt> message to publish using the
+<a class="reference external" href="javadoc/org/ros/node/topic/Publisher.html#newMessage()">Publisher.newMessage</a> method. Messages in
+rosjava cannot be instantiated directly. More on that later.</p>
+<p>Now lets take a look at the <a class="reference external" href="javadoc/org/ros/rosjava_tutorial_pubsub/Listener.html#">Listener</a>
+class.</p>
+<div class="highlight-java"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">ros</span><span class="o">.</span><span class="na">rosjava_tutorial_pubsub</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.commons.logging.Log</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.message.MessageListener</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.namespace.GraphName</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.AbstractNodeMain</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.ConnectedNode</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.NodeMain</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.topic.Subscriber</span><span class="o">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * A simple {@link Subscriber} {@link NodeMain}.</span>
+<span class="cm"> * </span>
+<span class="cm"> * @author damonkohler@google.com (Damon Kohler)</span>
+<span class="cm"> */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Listener</span> <span class="kd">extends</span> <span class="n">AbstractNodeMain</span> <span class="o">{</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="n">GraphName</span> <span class="nf">getDefaultNodeName</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">GraphName</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">&quot;rosjava_tutorial_pubsub/listener&quot;</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">(</span><span class="n">ConnectedNode</span> <span class="n">connectedNode</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kd">final</span> <span class="n">Log</span> <span class="n">log</span> <span class="o">=</span> <span class="n">connectedNode</span><span class="o">.</span><span class="na">getLog</span><span class="o">();</span>
+    <span class="n">Subscriber</span><span class="o">&lt;</span><span class="n">std_msgs</span><span class="o">.</span><span class="na">String</span><span class="o">&gt;</span> <span class="n">subscriber</span> <span class="o">=</span> <span class="n">connectedNode</span><span class="o">.</span><span class="na">newSubscriber</span><span class="o">(</span><span class="s">&quot;chatter&quot;</span><span class="o">,</span> <span class="n">std_msgs</span><span class="o">.</span><span class="na">String</span><span class="o">.</span><span class="na">_TYPE</span><span class="o">);</span>
+<span class="hll">    <span class="n">subscriber</span><span class="o">.</span><span class="na">addMessageListener</span><span class="o">(</span><span class="k">new</span> <span class="n">MessageListener</span><span class="o">&lt;</span><span class="n">std_msgs</span><span class="o">.</span><span class="na">String</span><span class="o">&gt;()</span> <span class="o">{</span>
+</span><span class="hll">      <span class="nd">@Override</span>
+</span><span class="hll">      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onNewMessage</span><span class="o">(</span><span class="n">std_msgs</span><span class="o">.</span><span class="na">String</span> <span class="n">message</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="hll">        <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">&quot;I heard: \&quot;&quot;</span> <span class="o">+</span> <span class="n">message</span><span class="o">.</span><span class="na">getData</span><span class="o">()</span> <span class="o">+</span> <span class="s">&quot;\&quot;&quot;</span><span class="o">);</span>
+</span><span class="hll">      <span class="o">}</span>
+</span><span class="hll">    <span class="o">});</span>
+</span>  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+<p>In lines 27-32 we see another example of rosjava&#8217;s asynchornous API. We can add
+as many <a class="reference external" href="javadoc/org/ros/message/MessageListener.html#">MessageListener</a>s to our
+<a class="reference external" href="javadoc/org/ros/node/topic/Subscriber.html#">Subscriber</a> as we like. When a new message is
+received, all of our <a class="reference external" href="javadoc/org/ros/message/MessageListener.html#">MessageListener</a>s will be
+called with the incoming message as an argument to
+<a class="reference external" href="javadoc/org/ros/message/MessageListener.html#onNewMessage(T)">MessageListener.onNewMessage</a>.</p>
+</div>
+<div class="section" id="executing-nodes">
+<h2>Executing nodes<a class="headerlink" href="#executing-nodes" title="Permalink to this headline">¶</a></h2>
+<p>When packaging your application into jar, you can use <a class="reference external" href="javadoc/org/ros/RosRun.html#">RosRun</a>
+as the main class. <a class="reference external" href="javadoc/org/ros/RosRun.html#">RosRun</a> provides a
+<a class="reference external" href="javadoc/org/ros/node/NodeMainExecutor.html#">NodeMainExecutor</a> and a command line interface that will
+be familiar to ROS veterans. For example, the following steps will build and
+execute the <a class="reference external" href="javadoc/org/ros/rosjava_tutorial_pubsub/Talker.html#">Talker</a> and
+<a class="reference external" href="javadoc/org/ros/rosjava_tutorial_pubsub/Listener.html#">Listener</a> nodes in separate
+processes:</p>
+<div class="highlight-bash"><div class="highlight"><pre>roscd rosjava_tutorial_pubsub
+../gradlew installApp
+roscore &amp;
+./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker &amp;
+./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The above example launches roscore and the Talker node in the
+background. You could instead launch each in a separate terminal. Also, you
+may notice that rosrun cannot find the installed executable. This is a known
+issue that will be addressed in the future.</p>
+</div>
+<p>At this point, you should see the familiar &#8220;Hello, world!&#8221; messages start
+appearing in your terminal. You can also echo the topic using the
+<a class="reference external" href="http://wiki.ros.org/rostopic">rostopic</a> command line tool:</p>
+<div class="highlight-bash"><div class="highlight"><pre>rostopic <span class="nb">echo </span>chatter
+</pre></div>
+</div>
+<p>You can configure the executed nodes from the command line in the same way you
+would any other ROS executable. For example, the following commands will remap
+the default topic /chatter to /foo.</p>
+<div class="highlight-bash"><div class="highlight"><pre>./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker chatter:<span class="o">=</span>/foo &amp;
+./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener chatter:<span class="o">=</span>/foo
+</pre></div>
+</div>
+<p>See <a class="reference external" href="http://wiki.ros.org/Remapping%20Arguments">Remapping%20Arguments</a> for more information on passing arguments
+to ROS executables.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Only the arguments described in <a class="reference external" href="http://wiki.ros.org/Remapping%20Arguments">Remapping%20Arguments</a> are
+supported. Support for arbitrary command line arguments (i.e. argv) will be
+added in the future.</p>
+</div>
+</div>
+<div class="section" id="services">
+<h2>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h2>
+<p>The following class (<a class="reference external" href="javadoc/org/ros/rosjava_tutorial_services/Server.html#">Server</a>) is
+available from the rosjava_tutorial_services package. In this example, we
+create a <a class="reference external" href="javadoc/org/ros/node/service/ServiceServer.html#">ServiceServer</a> for the
+<tt class="docutils literal"><span class="pre">rosjava_test_msgs.AddTwoInts</span></tt> service. This should feel relatively familiar if you&#8217;re
+a ROS veteran.</p>
+<div class="highlight-java"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">ros</span><span class="o">.</span><span class="na">rosjava_tutorial_services</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.ros.namespace.GraphName</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.AbstractNodeMain</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.ConnectedNode</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.NodeMain</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.service.ServiceResponseBuilder</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.service.ServiceServer</span><span class="o">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * This is a simple {@link ServiceServer} {@link NodeMain}.</span>
+<span class="cm"> * </span>
+<span class="cm"> * @author damonkohler@google.com (Damon Kohler)</span>
+<span class="cm"> */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Server</span> <span class="kd">extends</span> <span class="n">AbstractNodeMain</span> <span class="o">{</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="n">GraphName</span> <span class="nf">getDefaultNodeName</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">GraphName</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">&quot;rosjava_tutorial_services/server&quot;</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">(</span><span class="n">ConnectedNode</span> <span class="n">connectedNode</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">connectedNode</span><span class="o">.</span><span class="na">newServiceServer</span><span class="o">(</span><span class="s">&quot;add_two_ints&quot;</span><span class="o">,</span> <span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoInts</span><span class="o">.</span><span class="na">_TYPE</span><span class="o">,</span>
+        <span class="k">new</span> <span class="n">ServiceResponseBuilder</span><span class="o">&lt;</span><span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoIntsRequest</span><span class="o">,</span> <span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoIntsResponse</span><span class="o">&gt;()</span> <span class="o">{</span>
+          <span class="nd">@Override</span>
+          <span class="kd">public</span> <span class="kt">void</span>
+              <span class="nf">build</span><span class="o">(</span><span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoIntsRequest</span> <span class="n">request</span><span class="o">,</span> <span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoIntsResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+<span class="hll">            <span class="n">response</span><span class="o">.</span><span class="na">setSum</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">getA</span><span class="o">()</span> <span class="o">+</span> <span class="n">request</span><span class="o">.</span><span class="na">getB</span><span class="o">());</span>
+</span>          <span class="o">}</span>
+        <span class="o">});</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+<p>The <a class="reference external" href="javadoc/org/ros/node/service/ServiceResponseBuilder.html#">ServiceResponseBuilder</a> is called
+asynchronously for each incoming request. On line 29 we modify the response
+output parameter to contain the sum of the two integers in the request. The
+response will be sent once the
+<a class="reference external" href="javadoc/org/ros/node/service/ServiceResponseBuilder.html#build(T, S)">ServiceResponseBuilder.build</a> returns.</p>
+<p>Now lets take a look at the <a class="reference external" href="javadoc/org/ros/rosjava_tutorial_services/Client.html#">Client</a>
+class.</p>
+<div class="highlight-java"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">ros</span><span class="o">.</span><span class="na">rosjava_tutorial_services</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.ros.exception.RemoteException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.exception.RosRuntimeException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.exception.ServiceNotFoundException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.namespace.GraphName</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.AbstractNodeMain</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.ConnectedNode</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.NodeMain</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.service.ServiceClient</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.ros.node.service.ServiceResponseListener</span><span class="o">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * A simple {@link ServiceClient} {@link NodeMain}.</span>
+<span class="cm"> * </span>
+<span class="cm"> * @author damonkohler@google.com (Damon Kohler)</span>
+<span class="cm"> */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Client</span> <span class="kd">extends</span> <span class="n">AbstractNodeMain</span> <span class="o">{</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="n">GraphName</span> <span class="nf">getDefaultNodeName</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">GraphName</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="s">&quot;rosjava_tutorial_services/client&quot;</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">(</span><span class="kd">final</span> <span class="n">ConnectedNode</span> <span class="n">connectedNode</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">ServiceClient</span><span class="o">&lt;</span><span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoIntsRequest</span><span class="o">,</span> <span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoIntsResponse</span><span class="o">&gt;</span> <span class="n">serviceClient</span><span class="o">;</span>
+    <span class="k">try</span> <span class="o">{</span>
+      <span class="n">serviceClient</span> <span class="o">=</span> <span class="n">connectedNode</span><span class="o">.</span><span class="na">newServiceClient</span><span class="o">(</span><span class="s">&quot;add_two_ints&quot;</span><span class="o">,</span> <span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoInts</span><span class="o">.</span><span class="na">_TYPE</span><span class="o">);</span>
+    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">ServiceNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+      <span class="k">throw</span> <span class="k">new</span> <span class="nf">RosRuntimeException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="kd">final</span> <span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoIntsRequest</span> <span class="n">request</span> <span class="o">=</span> <span class="n">serviceClient</span><span class="o">.</span><span class="na">newMessage</span><span class="o">();</span>
+    <span class="n">request</span><span class="o">.</span><span class="na">setA</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+    <span class="n">request</span><span class="o">.</span><span class="na">setB</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+<span class="hll">    <span class="n">serviceClient</span><span class="o">.</span><span class="na">call</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="k">new</span> <span class="n">ServiceResponseListener</span><span class="o">&lt;</span><span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoIntsResponse</span><span class="o">&gt;()</span> <span class="o">{</span>
+</span><span class="hll">      <span class="nd">@Override</span>
+</span><span class="hll">      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onSuccess</span><span class="o">(</span><span class="n">rosjava_test_msgs</span><span class="o">.</span><span class="na">AddTwoIntsResponse</span> <span class="n">response</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="hll">        <span class="n">connectedNode</span><span class="o">.</span><span class="na">getLog</span><span class="o">().</span><span class="na">info</span><span class="o">(</span>
+</span><span class="hll">            <span class="n">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">&quot;%d + %d = %d&quot;</span><span class="o">,</span> <span class="n">request</span><span class="o">.</span><span class="na">getA</span><span class="o">(),</span> <span class="n">request</span><span class="o">.</span><span class="na">getB</span><span class="o">(),</span> <span class="n">response</span><span class="o">.</span><span class="na">getSum</span><span class="o">()));</span>
+</span><span class="hll">      <span class="o">}</span>
+</span><span class="hll">
+</span><span class="hll">      <span class="nd">@Override</span>
+</span><span class="hll">      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onFailure</span><span class="o">(</span><span class="n">RemoteException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class="hll">        <span class="k">throw</span> <span class="k">new</span> <span class="nf">RosRuntimeException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+</span><span class="hll">      <span class="o">}</span>
+</span><span class="hll">    <span class="o">});</span>
+</span>  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</td></tr></table></div>
+<p>In lines 36-47 we see another example of rosjava&#8217;s asynchornous API. When the
+response is received, our
+<a class="reference external" href="javadoc/org/ros/node/service/ServiceResponseListener.html#">ServiceResponseListener</a> will be called with the
+incoming response as an argument to
+<a class="reference external" href="javadoc/org/ros/node/service/ServiceResponseListener.html#onSuccess(T)">ServiceResponseListener.onSuccess</a>. In the
+event that the server thows a <a class="reference external" href="javadoc/org/ros/exception/ServiceException.html#">ServiceException</a>
+while building the response,
+<a class="reference external" href="javadoc/org/ros/node/service/ServiceResponseListener.html#onFailure(RemoteException)">ServiceResponseListener.onFailure</a>
+will be called. The <a class="reference external" href="javadoc/org/ros/exception/RemoteException.html#">RemoteException</a> will contain
+the error message from the server.</p>
+<p>Building and executing these nodes works in the same manner as described above:</p>
+<div class="highlight-bash"><div class="highlight"><pre>roscd rosjava_tutorial_services
+../gradlew installApp
+roscore &amp;
+./build/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Server &amp;
+./build/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Client
+</pre></div>
+</div>
+<p>At this point, you should see the log message &#8220;2 + 2 = 4&#8221; appear in your
+terminal. You can also access the service using the <a class="reference external" href="http://wiki.ros.org/rosservice">rosservice</a>
+command line tool:</p>
+<div class="highlight-bash"><div class="highlight"><pre>rosservice add_two_ints 2 2
+</pre></div>
+</div>
+<p>Just as before, you can configure the executed nodes from the command line in
+the same way you would any other ROS executable. See
+<a class="reference external" href="http://wiki.ros.org/Remapping%20Arguments">Remapping%20Arguments</a> for more information on passing arguments to
+ROS executables.</p>
+</div>
+<div class="section" id="messages">
+<h2>Messages<a class="headerlink" href="#messages" title="Permalink to this headline">¶</a></h2>
+<p>Messages are defined as interfaces. Since this makes it impossible to
+instantiate the message directly, it&#8217;s necessary to use a
+<a class="reference external" href="javadoc/org/ros/message/MessageFactory.html#">MessageFactory</a> or helper methods such as
+<a class="reference external" href="javadoc/org/ros/node/topic/Publisher.html#newMessage()">Publisher.newMessage</a>. This indirection allows
+the underlying message implementation to change in the future.</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">Node</span> <span class="n">node</span><span class="o">;</span>
+
+<span class="o">...</span>
+
+<span class="n">PointCloud2</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="na">getTopicMessageFactory</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">newMessage</span><span class="o">(</span><span class="n">sensor_msgs</span><span class="o">.</span><span class="na">PointCloud</span><span class="o">.</span><span class="na">_TYPE</span><span class="o">);</span>
+</pre></div>
+</div>
+<p>If you want to use messages that you define:</p>
+<ul class="simple">
+<li>create a new package for those messages (e.g. my_msgs)</li>
+<li>ensure that my_msgs is in your ROS_PACKAGE_PATH (see <a class="reference external" href="http://wiki.ros.org/EnvironmentVariables">EnvironmentVariables</a>)</li>
+<li>reinstall rosjava_messages (see <a class="reference internal" href="building.html"><em>Building</em></a>)</li>
+</ul>
+<div class="highlight-bash"><div class="highlight"><pre>roscd rosjava_messages
+../gradlew install
+</pre></div>
+</div>
+</div>
+<div class="section" id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<p>rosjava offers full access to the ROS <a class="reference external" href="http://wiki.ros.org/Parameter Server">Parameter Server</a>. The
+<a class="reference external" href="http://wiki.ros.org/Parameter Server">Parameter Server</a> is a shared dictionary of configuration parameters
+accessible to all the nodes at runtime. It is meant to store configuration
+parameters that are easy to inspect and modify.</p>
+<p>Parameters are accessible via <a class="reference external" href="javadoc/org/ros/node/parameter/ParameterTree.html#">ParameterTree</a>s
+(provided by <a class="reference external" href="javadoc/org/ros/node/Node.html#">Node</a>s).</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">ParameterTree</span> <span class="n">params</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="na">newParameterTree</span><span class="o">();</span>
+</pre></div>
+</div>
+<div class="section" id="accessing-parameters">
+<h3>Accessing Parameters<a class="headerlink" href="#accessing-parameters" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference external" href="javadoc/org/ros/node/parameter/ParameterTree.html#">ParameterTree</a> API allows you to set and
+query lists, maps, and single objects of integers, strings and floats.</p>
+<p>Unlike typical ROS <a class="reference external" href="http://wiki.ros.org/Client Libraries">Client Libraries</a>, rosjava requires that the type
+of the parameter be known when you retrieve it. If the actual parameter type
+doesn&#8217;t match the expected type, an exception will be thrown.</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kt">boolean</span> <span class="n">foo</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="na">getBoolean</span><span class="o">(</span><span class="s">&quot;/foo&quot;</span><span class="o">);</span>
+<span class="kt">int</span> <span class="n">bar</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="na">getInteger</span><span class="o">(</span><span class="s">&quot;/bar&quot;</span><span class="o">,</span> <span class="mi">42</span> <span class="cm">/* default value */</span><span class="o">);</span>
+<span class="kt">double</span> <span class="n">baz</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="na">getDouble</span><span class="o">(</span><span class="s">&quot;/foo/baz&quot;</span><span class="o">);</span>
+
+<span class="n">params</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">&quot;/bloop&quot;</span><span class="o">,</span> <span class="s">&quot;Hello, world!&quot;</span><span class="o">);</span>
+<span class="n">String</span> <span class="n">helloWorld</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">&quot;/bloop&quot;</span><span class="o">);</span>
+
+<span class="n">List</span><span class="o">&lt;</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">numbers</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="na">getList</span><span class="o">(</span><span class="s">&quot;/numbers&quot;</span><span class="o">);</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">strings</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="na">getMap</span><span class="o">(</span><span class="s">&quot;/strings&quot;</span><span class="o">);</span>
+</pre></div>
+</div>
+<p>As with other ROS client libraries, it is possible to retrieve a subtree of
+parameters. However, you will be responsible for casting the values to their
+appropriate types.</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">subtree</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="na">getMap</span><span class="o">(</span><span class="s">&quot;/subtree&quot;</span><span class="o">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-a-parameterlistener">
+<h3>Using a ParameterListener<a class="headerlink" href="#using-a-parameterlistener" title="Permalink to this headline">¶</a></h3>
+<p>It is also possible to subscribe to a particular parameter using a
+<a class="reference external" href="javadoc/org/ros/node/parameter/ParameterListener.html#">ParameterListener</a>. Note that this does not
+work for parameter subtrees.</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">params</span><span class="o">.</span><span class="na">addParameterListener</span><span class="o">(</span><span class="s">&quot;/foo/bar&quot;</span><span class="o">,</span> <span class="k">new</span> <span class="n">ParameterListener</span><span class="o">()</span> <span class="o">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onNewValue</span><span class="o">(</span><span class="n">Object</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+    <span class="o">...</span>
+  <span class="o">}</span>
+<span class="o">});</span>
+</pre></div>
+</div>
+<p>Currently, ParameterListeners are not generic. Instead, you are responsible for
+casting the value appropriately.</p>
+</div>
+</div>
+<div class="section" id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<p>The logging interface for rosjava is accessed through
+<a class="reference external" href="javadoc/org/ros/node/Node.html#">Node</a> objects via the
+<a class="reference external" href="javadoc/org/ros/node/Node.html#getLog()">Node.getLog</a> method. This object returns an <a class="reference external" href="http://commons.apache.org/logging/commons-logging-1.1.1/apidocs/index.html">Apache
+Commons Log</a> object which handles the debug, info, error, warning, and fatal
+logging outputs for ROS.</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">node</span><span class="o">.</span><span class="na">getLog</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">&quot;debug message&quot;</span><span class="o">);</span>
+<span class="n">node</span><span class="o">.</span><span class="na">getLog</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">&quot; informative message&quot;</span><span class="o">);</span>
+
+<span class="n">node</span><span class="o">.</span><span class="na">getLog</span><span class="o">.</span><span class="na">warn</span><span class="o">(</span><span class="s">&quot;warning message&quot;</span><span class="o">);</span>
+
+<span class="c1">// report an error message</span>
+<span class="n">node</span><span class="o">.</span><span class="na">getLog</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">&quot;error message&quot;</span><span class="o">);</span>
+
+<span class="c1">// error message with an exception</span>
+<span class="c1">// so that it can print the stack trace</span>
+<span class="n">node</span><span class="o">.</span><span class="na">getLog</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="s">&quot;error message&quot;</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+
+<span class="n">node</span><span class="o">.</span><span class="na">fatal</span><span class="o">(</span><span class="s">&quot;message informing user of a fatal occurrence&quot;</span><span class="o">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="best_practices.html">Best practices</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="advanced.html">Advanced topics</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, Google, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
