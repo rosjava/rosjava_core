@@ -18,7 +18,7 @@ from docutils import nodes
 
 
 def make_roswiki_link(name, rawtext, text, lineno, inliner, options={}, content=[]):
-  refuri = 'http://ros.org/wiki/' + text
+  refuri = 'http://wiki.ros.org/' + text
   node = nodes.reference(rawtext, text, refuri=refuri, **options)
   return [node], []
 
