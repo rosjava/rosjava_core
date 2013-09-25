@@ -7,14 +7,13 @@ and Parameters. It also provides a Java implementation of `roscore`_.
 
 Support is best found on http://answers.ros.org/.
 
-Please file bugs and feature requests on the rosjava `issues`_ page. Starring
-issues that are important to you will help developers prioritize their work.
+Please file bugs and feature requests on the rosjava `issues`_ page.
 
 In addition to the following documentation, rosjava_core makes liberal use of
 `Javadoc`_.
 
 .. _roscore:  http://ros.org/wiki/roscore
-.. _issues: http://code.google.com/p/rosjava/issues/list
+.. _issues: https://github.com/rosjava/rosjava_core
 .. _Javadoc: javadoc/index.html
 
 Contents:

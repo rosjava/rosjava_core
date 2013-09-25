@@ -16,5 +16,8 @@ example:
 - org.ros.rosjava_geometry
 
 Only core packages (e.g. those in rosjava_core and android_core) should begin
-with org.ros.
+with org.ros. A suitably unique choice for github based repos would be
+the github url followed organization and repository/package name, e.g.
+
+- com.github.rosjava.rosjava_extras
 
