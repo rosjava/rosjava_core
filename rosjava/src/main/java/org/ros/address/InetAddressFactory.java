@@ -25,6 +25,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,13 +44,7 @@ public class InetAddressFactory {
     return address.getAddress().length == 4;
   }
 
-  private static Collection<InetAddress> getAllInetAddresses() {
-    List<NetworkInterface> networkInterfaces;
-    try {
-      networkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-    } catch (SocketException e) {
-      throw new RosRuntimeException(e);
-    }
+  private static List<InetAddress> listAllInetAddress (Collection<NetworkInterface> networkInterfaces) {
     List<InetAddress> inetAddresses = Lists.newArrayList();
     for (NetworkInterface networkInterface : networkInterfaces) {
       try {
@@ -63,14 +58,32 @@ public class InetAddressFactory {
     return inetAddresses;
   }
 
-  public static InetAddress newNonLoopback() {
-    for (InetAddress address : getAllInetAddresses()) {
+  private static Collection<InetAddress> getAllInetAddresses() {
+    List<NetworkInterface> networkInterfaces;
+    try {
+      networkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+    } catch (SocketException e) {
+      throw new RosRuntimeException(e);
+    }
+    return listAllInetAddress(networkInterfaces);
+  }
+
+  private static InetAddress filterInetAddresses (Collection<InetAddress> inetAddresses) {
+    for (InetAddress address : inetAddresses) {
       // IPv4 only for now.
       if (!address.isLoopbackAddress() && isIpv4(address)) {
         return address;
       }
     }
     throw new RosRuntimeException("No non-loopback interface found.");
+  }
+
+  public static InetAddress newNonLoopback() {
+    return filterInetAddresses(getAllInetAddresses());
+  }
+
+  public static InetAddress newNonLoopbackForNetworkInterface(NetworkInterface networkInterface) {
+    return filterInetAddresses(Collections.list(networkInterface.getInetAddresses()));
   }
 
   private static Collection<InetAddress> getAllInetAddressByName(String host) {
