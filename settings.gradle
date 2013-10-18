@@ -14,10 +14,17 @@
  * the License.
  */
 
-include 'apache_xmlrpc_common', 'apache_xmlrpc_client', 'apache_xmlrpc_server',
-        'rosjava', 'rosjava_geometry', 'rosjava_tutorial_pubsub',
-        'rosjava_tutorial_services', 'rosjava_tutorial_right_hand_rule',
-        'rosjava_benchmarks', 'rosjava_test', 'docs'
-
-include 'message_generation_tests'
-        
+include(
+    'apache_xmlrpc_client',
+    'apache_xmlrpc_common',
+    'apache_xmlrpc_server',
+    'docs',
+    'message_generation_tests',
+    'rosjava',
+    'rosjava_benchmarks',
+    'rosjava_geometry',
+    'rosjava_test',
+    'rosjava_tutorial_pubsub',
+    'rosjava_tutorial_right_hand_rule',
+    'rosjava_tutorial_services',
+    )
