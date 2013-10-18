@@ -19,7 +19,6 @@ include(
     'apache_xmlrpc_common',
     'apache_xmlrpc_server',
     'docs',
-    'message_generation_tests',
     'rosjava',
     'rosjava_benchmarks',
     'rosjava_geometry',
