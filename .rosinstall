@@ -1,4 +1,4 @@
 - git:
     local-name: rosjava_core
     uri: https://github.com/rosjava/rosjava_core/
-    version: groovy-devel
+    version: groovy
