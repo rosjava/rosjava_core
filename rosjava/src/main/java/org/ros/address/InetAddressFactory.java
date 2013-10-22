@@ -44,7 +44,13 @@ public class InetAddressFactory {
     return address.getAddress().length == 4;
   }
 
-  private static List<InetAddress> listAllInetAddress (Collection<NetworkInterface> networkInterfaces) {
+  private static Collection<InetAddress> getAllInetAddresses() {
+    List<NetworkInterface> networkInterfaces;
+    try {
+      networkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+    } catch (SocketException e) {
+      throw new RosRuntimeException(e);
+    }
     List<InetAddress> inetAddresses = Lists.newArrayList();
     for (NetworkInterface networkInterface : networkInterfaces) {
       try {
@@ -56,16 +62,6 @@ public class InetAddressFactory {
       }
     }
     return inetAddresses;
-  }
-
-  private static Collection<InetAddress> getAllInetAddresses() {
-    List<NetworkInterface> networkInterfaces;
-    try {
-      networkInterfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-    } catch (SocketException e) {
-      throw new RosRuntimeException(e);
-    }
-    return listAllInetAddress(networkInterfaces);
   }
 
   private static InetAddress filterInetAddresses (Collection<InetAddress> inetAddresses) {
@@ -86,7 +82,7 @@ public class InetAddressFactory {
     return filterInetAddresses(Collections.list(networkInterface.getInetAddresses()));
   }
 
-  private static Collection<InetAddress> getAllInetAddressByName(String host) {
+  private static Collection<InetAddress> getAllInetAddressesByName(String host) {
     InetAddress[] allAddressesByName;
     try {
       allAddressesByName = org.xbill.DNS.Address.getAllByName(host);
@@ -130,7 +126,7 @@ public class InetAddressFactory {
     } catch (UnknownHostException e) {
       throw new RosRuntimeException(e);
     }
-    Collection<InetAddress> allAddressesByName = getAllInetAddressByName(host);
+    Collection<InetAddress> allAddressesByName = getAllInetAddressesByName(host);
     // First, try to find a non-loopback IPv4 address.
     for (InetAddress address : allAddressesByName) {
       if (!address.isLoopbackAddress() && isIpv4(address)) {
