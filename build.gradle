@@ -15,39 +15,39 @@
  */
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '1.7'
+  gradleVersion = '1.8'
 }
 
 buildscript {
-    def rosMavenPath = "$System.env.ROS_MAVEN_PATH".split(':').collect { 'file://' + it }
-    repositories {
-        rosMavenPath.each { p ->
-            maven {
-                url p
-            }
-        }
-        mavenLocal()
-        maven {
-            url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
-        }
+  def rosMavenPath = "$System.env.ROS_MAVEN_PATH".split(':').collect { 'file://' + it }
+  repositories {
+    rosMavenPath.each { p ->
+      maven {
+        url p
+      }
     }
-    dependencies {
-        classpath group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '0.1.+'
+    mavenLocal()
+    maven {
+      url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
     }
+  }
+  dependencies {
+    classpath group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '0.1.+'
+  }
 }
 
 apply plugin: 'catkin'
 
 allprojects {
-    group 'org.ros.rosjava_core'
-    version = project.catkin.pkg.version
+  group 'org.ros.rosjava_core'
+  version = project.catkin.pkg.version
 }
 
 subprojects {
-    if (name != 'docs') {
-        apply plugin: 'ros-java'
-    }
+  if (name != 'docs') {
+    apply plugin: 'ros-java'
+    apply plugin: 'eclipse'
+  }
 }
 
 defaultTasks 'publishMavenJavaPublicationToMavenRepository'
-
