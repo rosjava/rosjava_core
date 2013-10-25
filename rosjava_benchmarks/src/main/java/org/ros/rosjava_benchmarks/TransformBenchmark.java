@@ -22,7 +22,6 @@ import org.ros.concurrent.WallTimeRate;
 import org.ros.message.Duration;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
-import org.ros.namespace.NameResolver;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
