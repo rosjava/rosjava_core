@@ -16,9 +16,10 @@
 
 package org.ros.rosjava_geometry;
 
-import com.google.common.base.Preconditions;
-
 import org.ros.message.Time;
+import org.ros.namespace.GraphName;
+
+import com.google.common.base.Preconditions;
 
 /**
  * Describes a {@link Transform} from data in the source frame to data in the
@@ -29,8 +30,8 @@ import org.ros.message.Time;
 public class FrameTransform {
 
   private final Transform transform;
-  private final FrameName source;
-  private final FrameName target;
+  private final GraphName source;
+  private final GraphName target;
   private final Time time;
 
   public static FrameTransform fromTransformStampedMessage(
@@ -39,7 +40,7 @@ public class FrameTransform {
     String target = transformStamped.getHeader().getFrameId();
     String source = transformStamped.getChildFrameId();
     Time stamp = transformStamped.getHeader().getStamp();
-    return new FrameTransform(transform, FrameName.of(source), FrameName.of(target), stamp);
+    return new FrameTransform(transform, GraphName.of(source), GraphName.of(target), stamp);
   }
 
   /**
@@ -56,13 +57,13 @@ public class FrameTransform {
    *          the time associated with this {@link FrameTransform}, can be
    *          {@null}
    */
-  public FrameTransform(Transform transform, FrameName source, FrameName target, Time time) {
+  public FrameTransform(Transform transform, GraphName source, GraphName target, Time time) {
     Preconditions.checkNotNull(transform);
     Preconditions.checkNotNull(source);
     Preconditions.checkNotNull(target);
     this.transform = transform;
-    this.source = source;
-    this.target = target;
+    this.source = source.toRelative();
+    this.target = target.toRelative();
     this.time = time;
   }
 
@@ -70,11 +71,11 @@ public class FrameTransform {
     return transform;
   }
 
-  public FrameName getSourceFrame() {
+  public GraphName getSourceFrame() {
     return source;
   }
 
-  public FrameName getTargetFrame() {
+  public GraphName getTargetFrame() {
     return target;
   }
 
