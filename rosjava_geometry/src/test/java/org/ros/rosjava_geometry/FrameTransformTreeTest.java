@@ -26,105 +26,105 @@ import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageFactory;
 import org.ros.message.Time;
-import org.ros.namespace.NameResolver;
+import org.ros.namespace.GraphName;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class FrameTransformTreeTest {
 
-  private NameResolver nameResolver;
   private FrameTransformTree frameTransformTree;
   private MessageDefinitionProvider messageDefinitionProvider;
   private MessageFactory messageFactory;
 
   @Before
   public void before() {
-    nameResolver = NameResolver.newRoot();
-    frameTransformTree = new FrameTransformTree(nameResolver);
+    frameTransformTree = new FrameTransformTree();
     messageDefinitionProvider = new MessageDefinitionReflectionProvider();
     messageFactory = new DefaultMessageFactory(messageDefinitionProvider);
   }
 
   @Test
   public void testUpdateAndGet() {
-    FrameTransform frameTransform =
-        new FrameTransform(Transform.identity(), nameResolver.resolve("foo"),
-            nameResolver.resolve("bar"), new Time());
+    FrameTransform frameTransform = new FrameTransform(Transform.identity(),
+        GraphName.of("foo"), GraphName.of("bar"), new Time());
     frameTransformTree.update(frameTransform);
     assertEquals(frameTransform, frameTransformTree.get("foo"));
   }
 
   @Test
   public void testUpdateAndGetWithTransformStampedMessage() {
-    FrameTransform frameTransform =
-        new FrameTransform(Transform.identity(), nameResolver.resolve("foo"),
-            nameResolver.resolve("bar"), new Time());
-    frameTransformTree.update(newTransformStampedMessage(Transform.identity(), "foo", "bar",
-        new Time()));
+    FrameTransform frameTransform = new FrameTransform(Transform.identity(),
+        GraphName.of("foo"), GraphName.of("bar"), new Time());
+    frameTransformTree.update(newTransformStampedMessage(Transform.identity(),
+        "foo", "bar", new Time()));
     assertEquals(frameTransform, frameTransformTree.get("foo"));
   }
 
-  private geometry_msgs.TransformStamped newTransformStampedMessage(Transform transform,
-      String source, String target, Time time) {
-    geometry_msgs.TransformStamped message =
-        messageFactory.newFromType(geometry_msgs.TransformStamped._TYPE);
-    FrameTransform frameTransform =
-        new FrameTransform(transform, nameResolver.resolve(source), nameResolver.resolve(target),
-            time);
+  private geometry_msgs.TransformStamped newTransformStampedMessage(
+      Transform transform, String source, String target, Time time) {
+    geometry_msgs.TransformStamped message = messageFactory
+        .newFromType(geometry_msgs.TransformStamped._TYPE);
+    FrameTransform frameTransform = new FrameTransform(transform,
+        GraphName.of(source), GraphName.of(target), time);
     frameTransform.toTransformStampedMessage(message);
     return message;
   }
 
   @Test
   public void testIdentityTransforms() {
-    frameTransformTree.update(newTransformStampedMessage(Transform.identity(), "baz", "bar",
-        new Time()));
-    frameTransformTree.update(newTransformStampedMessage(Transform.identity(), "bar", "foo",
-        new Time()));
+    frameTransformTree.update(newTransformStampedMessage(Transform.identity(),
+        "baz", "bar", new Time()));
+    frameTransformTree.update(newTransformStampedMessage(Transform.identity(),
+        "bar", "foo", new Time()));
 
     // Full tree transform.
     {
-      FrameTransform frameTransform = frameTransformTree.transform("baz", "foo");
+      FrameTransform frameTransform = frameTransformTree
+          .transform("baz", "foo");
       assertTrue(frameTransform != null);
-      assertEquals(nameResolver.resolve("baz"), frameTransform.getSourceFrame());
-      assertEquals(nameResolver.resolve("foo"), frameTransform.getTargetFrame());
+      assertEquals(GraphName.of("baz"), frameTransform.getSourceFrame());
+      assertEquals(GraphName.of("foo"), frameTransform.getTargetFrame());
       assertEquals(Transform.identity(), frameTransform.getTransform());
     }
 
     // Same node transform.
     {
-      FrameTransform frameTransform = frameTransformTree.transform("baz", "baz");
+      FrameTransform frameTransform = frameTransformTree
+          .transform("baz", "baz");
       assertTrue(frameTransform != null);
-      assertEquals(nameResolver.resolve("baz"), frameTransform.getSourceFrame());
-      assertEquals(nameResolver.resolve("baz"), frameTransform.getTargetFrame());
+      assertEquals(GraphName.of("baz"), frameTransform.getSourceFrame());
+      assertEquals(GraphName.of("baz"), frameTransform.getTargetFrame());
       assertEquals(Transform.identity(), frameTransform.getTransform());
     }
 
     // Same node transform.
     {
-      FrameTransform frameTransform = frameTransformTree.transform("bar", "bar");
+      FrameTransform frameTransform = frameTransformTree
+          .transform("bar", "bar");
       assertTrue(frameTransform != null);
-      assertEquals(nameResolver.resolve("bar"), frameTransform.getSourceFrame());
-      assertEquals(nameResolver.resolve("bar"), frameTransform.getTargetFrame());
+      assertEquals(GraphName.of("bar"), frameTransform.getSourceFrame());
+      assertEquals(GraphName.of("bar"), frameTransform.getTargetFrame());
       assertEquals(Transform.identity(), frameTransform.getTransform());
     }
 
     // Root-to-root transform.
     {
-      FrameTransform frameTransform = frameTransformTree.transform("foo", "foo");
+      FrameTransform frameTransform = frameTransformTree
+          .transform("foo", "foo");
       assertTrue(frameTransform != null);
-      assertEquals(nameResolver.resolve("foo"), frameTransform.getSourceFrame());
-      assertEquals(nameResolver.resolve("foo"), frameTransform.getTargetFrame());
+      assertEquals(GraphName.of("foo"), frameTransform.getSourceFrame());
+      assertEquals(GraphName.of("foo"), frameTransform.getTargetFrame());
       assertEquals(Transform.identity(), frameTransform.getTransform());
     }
 
     // Root-to-leaf transform.
     {
-      FrameTransform frameTransform = frameTransformTree.transform("foo", "baz");
+      FrameTransform frameTransform = frameTransformTree
+          .transform("foo", "baz");
       assertTrue(frameTransform != null);
-      assertEquals(nameResolver.resolve("foo"), frameTransform.getSourceFrame());
-      assertEquals(nameResolver.resolve("baz"), frameTransform.getTargetFrame());
+      assertEquals(GraphName.of("foo"), frameTransform.getSourceFrame());
+      assertEquals(GraphName.of("baz"), frameTransform.getTargetFrame());
       assertEquals(Transform.identity(), frameTransform.getTransform());
     }
   }
@@ -141,38 +141,44 @@ public class FrameTransformTreeTest {
   private void updateFrameTransformTree() {
     {
       Transform transform = Transform.translation(0, 1, 0);
-      frameTransformTree.update(newTransformStampedMessage(transform, "bar", "foo", new Time()));
+      frameTransformTree.update(newTransformStampedMessage(transform, "bar",
+          "foo", new Time()));
     }
     {
       Transform transform = Transform.xRotation(Math.PI / 2);
-      frameTransformTree.update(newTransformStampedMessage(transform, "baz", "bar", new Time()));
+      frameTransformTree.update(newTransformStampedMessage(transform, "baz",
+          "bar", new Time()));
     }
     {
       Transform transform = Transform.translation(1, 0, 0);
-      frameTransformTree.update(newTransformStampedMessage(transform, "bop", "foo", new Time()));
+      frameTransformTree.update(newTransformStampedMessage(transform, "bop",
+          "foo", new Time()));
     }
     {
       Transform transform = Transform.yRotation(Math.PI / 2);
-      frameTransformTree.update(newTransformStampedMessage(transform, "fuz", "bop", new Time()));
+      frameTransformTree.update(newTransformStampedMessage(transform, "fuz",
+          "bop", new Time()));
     }
   }
 
   private void checkBazToFooTransform(FrameTransform frameTransform) {
     // If we were to reverse the order of the transforms in our implementation,
     // we would expect the translation vector to be <0, 0, 1> instead.
-    Transform transform = Transform.translation(0, 1, 0).multiply(Transform.xRotation(Math.PI / 2));
+    Transform transform = Transform.translation(0, 1, 0).multiply(
+        Transform.xRotation(Math.PI / 2));
     Quaternion rotationAndScale = transform.getRotationAndScale();
     assertTrue(String.format("%s is not neutral.", rotationAndScale),
         rotationAndScale.isAlmostNeutral(1e-9));
-    assertEquals(nameResolver.resolve("baz"), frameTransform.getSourceFrame());
-    assertEquals(nameResolver.resolve("foo"), frameTransform.getTargetFrame());
+    assertEquals(GraphName.of("baz"), frameTransform.getSourceFrame());
+    assertEquals(GraphName.of("foo"), frameTransform.getTargetFrame());
     assertTrue(transform.almostEquals(frameTransform.getTransform(), 1e-9));
   }
 
   @Test
   public void testTransformBazToRoot() {
     updateFrameTransformTree();
-    checkBazToFooTransform(frameTransformTree.transformToRoot(nameResolver.resolve("baz")));
+    checkBazToFooTransform(frameTransformTree.transformToRoot(GraphName
+        .of("baz")));
   }
 
   @Test
@@ -185,20 +191,24 @@ public class FrameTransformTreeTest {
   private void checkFuzToFooTransform(FrameTransform frameTransform) {
     // If we were to reverse the order of the transforms in our implementation,
     // we would expect the translation vector to be <0, 0, 1> instead.
-    Transform transform = Transform.translation(1, 0, 0).multiply(Transform.yRotation(Math.PI / 2));
+    Transform transform = Transform.translation(1, 0, 0).multiply(
+        Transform.yRotation(Math.PI / 2));
     Quaternion rotationAndScale = transform.getRotationAndScale();
     assertTrue(String.format("%s is not neutral.", rotationAndScale),
         rotationAndScale.isAlmostNeutral(1e-9));
-    assertEquals(nameResolver.resolve("fuz"), frameTransform.getSourceFrame());
-    assertEquals(nameResolver.resolve("foo"), frameTransform.getTargetFrame());
-    assertTrue(String.format("Expected %s != %s", transform, frameTransform.getTransform()),
+    assertEquals(GraphName.of("fuz"), frameTransform.getSourceFrame());
+    assertEquals(GraphName.of("foo"), frameTransform.getTargetFrame());
+    assertTrue(
+        String.format("Expected %s != %s", transform,
+            frameTransform.getTransform()),
         transform.almostEquals(frameTransform.getTransform(), 1e-9));
   }
 
   @Test
   public void testTransformFuzToRoot() {
     updateFrameTransformTree();
-    checkFuzToFooTransform(frameTransformTree.transformToRoot(nameResolver.resolve("fuz")));
+    checkFuzToFooTransform(frameTransformTree.transformToRoot(GraphName
+        .of("fuz")));
   }
 
   @Test
@@ -212,27 +222,27 @@ public class FrameTransformTreeTest {
   public void testTransformBazToFuz() {
     updateFrameTransformTree();
     FrameTransform frameTransform = frameTransformTree.transform("baz", "fuz");
-    Transform transform =
-        Transform.yRotation(Math.PI / 2).invert().multiply(Transform.translation(1, 0, 0).invert())
-            .multiply(Transform.translation(0, 1, 0)).multiply(Transform.xRotation(Math.PI / 2));
+    Transform transform = Transform.yRotation(Math.PI / 2).invert()
+        .multiply(Transform.translation(1, 0, 0).invert())
+        .multiply(Transform.translation(0, 1, 0))
+        .multiply(Transform.xRotation(Math.PI / 2));
     assertTrue(transform.getRotationAndScale().isAlmostNeutral(1e-9));
-    assertEquals(nameResolver.resolve("baz"), frameTransform.getSourceFrame());
-    assertEquals(nameResolver.resolve("fuz"), frameTransform.getTargetFrame());
-    assertTrue(String.format("Expected %s != %s", transform, frameTransform.getTransform()),
+    assertEquals(GraphName.of("baz"), frameTransform.getSourceFrame());
+    assertEquals(GraphName.of("fuz"), frameTransform.getTargetFrame());
+    assertTrue(
+        String.format("Expected %s != %s", transform,
+            frameTransform.getTransform()),
         transform.almostEquals(frameTransform.getTransform(), 1e-9));
   }
 
   @Test
   public void testTimeTravel() {
-    FrameTransform frameTransform1 =
-        new FrameTransform(Transform.identity(), nameResolver.resolve("foo"),
-            nameResolver.resolve("bar"), new Time());
-    FrameTransform frameTransform2 =
-        new FrameTransform(Transform.identity(), nameResolver.resolve("foo"),
-            nameResolver.resolve("bar"), new Time(2));
-    FrameTransform frameTransform3 =
-        new FrameTransform(Transform.identity(), nameResolver.resolve("foo"),
-            nameResolver.resolve("bar"), new Time(4));
+    FrameTransform frameTransform1 = new FrameTransform(Transform.identity(),
+        GraphName.of("foo"), GraphName.of("bar"), new Time());
+    FrameTransform frameTransform2 = new FrameTransform(Transform.identity(),
+        GraphName.of("foo"), GraphName.of("bar"), new Time(2));
+    FrameTransform frameTransform3 = new FrameTransform(Transform.identity(),
+        GraphName.of("foo"), GraphName.of("bar"), new Time(4));
     frameTransformTree.update(frameTransform1);
     frameTransformTree.update(frameTransform2);
     frameTransformTree.update(frameTransform3);

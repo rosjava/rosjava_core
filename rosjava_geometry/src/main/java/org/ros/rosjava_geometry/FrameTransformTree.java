@@ -23,6 +23,8 @@ import com.google.common.collect.Maps;
 import geometry_msgs.TransformStamped;
 import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.message.Time;
+import org.ros.namespace.GraphName;
+
 import java.util.Map;
 
 /**
@@ -45,7 +47,7 @@ public class FrameTransformTree {
    * frame. Lookups by target frame or by the pair of source and target are both
    * unnecessary because every frame can only have exactly one target.
    */
-  private final Map<FrameName, CircularBlockingDeque<LazyFrameTransform>> transforms;
+  private final Map<GraphName, CircularBlockingDeque<LazyFrameTransform>> transforms;
 
   public FrameTransformTree() {
     mutex = new Object();
@@ -65,26 +67,28 @@ public class FrameTransformTree {
    */
   public void update(geometry_msgs.TransformStamped transformStamped) {
     Preconditions.checkNotNull(transformStamped);
-    FrameName transformName = FrameName.of(transformStamped.getChildFrameId());
+    GraphName source = GraphName.of(transformStamped.getChildFrameId());
     LazyFrameTransform lazyFrameTransform = new LazyFrameTransform(transformStamped);
-    add(transformName, lazyFrameTransform);
+    add(source, lazyFrameTransform);
   }
 
   @VisibleForTesting
   void update(FrameTransform frameTransform) {
     Preconditions.checkNotNull(frameTransform);
-    FrameName source = frameTransform.getSourceFrame();
+    GraphName source = frameTransform.getSourceFrame();
     LazyFrameTransform lazyFrameTransform = new LazyFrameTransform(frameTransform);
     add(source, lazyFrameTransform);
   }
 
-  private void add(FrameName source, LazyFrameTransform lazyFrameTransform) {
-    if (!transforms.containsKey(source)) {
-      transforms.put(source, new CircularBlockingDeque<LazyFrameTransform>(
+  private void add(GraphName source, LazyFrameTransform lazyFrameTransform) {
+    // This adds support for tf2 while maintaining backward compatibility with tf.
+    GraphName relativeSource = source.toRelative();
+    if (!transforms.containsKey(relativeSource)) {
+      transforms.put(relativeSource, new CircularBlockingDeque<LazyFrameTransform>(
           TRANSFORM_QUEUE_CAPACITY));
     }
     synchronized (mutex) {
-      transforms.get(source).addFirst(lazyFrameTransform);
+      transforms.get(relativeSource).addFirst(lazyFrameTransform);
     }
   }
 
@@ -96,12 +100,13 @@ public class FrameTransformTree {
    * @return the most recent {@link FrameTransform} for {@code source} or
    *         {@code null} if no transform for {@code source} is available
    */
-  public FrameTransform lookUp(FrameName source) {
+  public FrameTransform lookUp(GraphName source) {
     Preconditions.checkNotNull(source);
-    return getLatest(source);
+    // This adds support for tf2 while maintaining backward compatibility with tf.
+    return getLatest(source.toRelative());
   }
 
-  private FrameTransform getLatest(FrameName source) {
+  private FrameTransform getLatest(GraphName source) {
     CircularBlockingDeque<LazyFrameTransform> deque = transforms.get(source);
     if (deque == null) {
       return null;
@@ -114,11 +119,11 @@ public class FrameTransformTree {
   }
 
   /**
-   * @see #lookUp(FrameName)
+   * @see #lookUp(GraphName)
    */
   public FrameTransform get(String source) {
     Preconditions.checkNotNull(source);
-    return lookUp(FrameName.of(source));
+    return lookUp(GraphName.of(source));
   }
 
   /**
@@ -133,14 +138,14 @@ public class FrameTransformTree {
    * @return the most recent {@link FrameTransform} for {@code source} or
    *         {@code null} if no transform for {@code source} is available
    */
-  public FrameTransform lookUp(FrameName source, Time time) {
+  public FrameTransform lookUp(GraphName source, Time time) {
     Preconditions.checkNotNull(source);
     Preconditions.checkNotNull(time);
     return get(source, time);
   }
 
   // TODO(damonkohler): Use an efficient search.
-  private FrameTransform get(FrameName source, Time time) {
+  private FrameTransform get(GraphName source, Time time) {
     CircularBlockingDeque<LazyFrameTransform> deque = transforms.get(source);
     if (deque == null) {
       return null;
@@ -168,71 +173,74 @@ public class FrameTransformTree {
   }
 
   /**
-   * @see #lookUp(FrameName, Time)
+   * @see #lookUp(GraphName, Time)
    */
   public FrameTransform get(String source, Time time) {
     Preconditions.checkNotNull(source);
-    return lookUp(FrameName.of(source), time);
+    return lookUp(GraphName.of(source), time);
   }
 
   /**
    * @return the {@link FrameTransform} from source the frame to the target
    *         frame, or {@code null} if no {@link FrameTransform} could be found
    */
-  public FrameTransform transform(FrameName source, FrameName target) {
+  public FrameTransform transform(GraphName source, GraphName target) {
     Preconditions.checkNotNull(source);
     Preconditions.checkNotNull(target);
-    if (source.equals(target)) {
-      return new FrameTransform(Transform.identity(), source, target, null);
+    // This adds support for tf2 while maintaining backward compatibility with tf.
+    GraphName relativeSource = source.toRelative();
+    GraphName relativeTarget = target.toRelative();
+    if (relativeSource.equals(relativeTarget)) {
+      return new FrameTransform(Transform.identity(), relativeSource, relativeTarget, null);
     }
-    FrameTransform sourceToRoot = transformToRoot(source);
-    FrameTransform targetToRoot = transformToRoot(target);
+    FrameTransform sourceToRoot = transformToRoot(relativeSource);
+    FrameTransform targetToRoot = transformToRoot(relativeTarget);
     if (sourceToRoot == null && targetToRoot == null) {
       return null;
     }
     if (sourceToRoot == null) {
-      if (targetToRoot.getTargetFrame().equals(source)) {
-        // resolvedSource is root.
+      if (targetToRoot.getTargetFrame().equals(relativeSource)) {
+        // relativeSource is root.
         return targetToRoot.invert();
       } else {
         return null;
       }
     }
     if (targetToRoot == null) {
-      if (sourceToRoot.getTargetFrame().equals(target)) {
-        // resolvedTarget is root.
+      if (sourceToRoot.getTargetFrame().equals(relativeTarget)) {
+        // relativeTarget is root.
         return sourceToRoot;
       } else {
         return null;
       }
     }
     if (sourceToRoot.getTargetFrame().equals(targetToRoot.getTargetFrame())) {
-      // Neither resolvedSource nor resolvedTarget is root and both share the
+      // Neither relativeSource nor relativeTarget is root and both share the
       // same root.
       Transform transform =
           targetToRoot.getTransform().invert().multiply(sourceToRoot.getTransform());
-      return new FrameTransform(transform, source, target, sourceToRoot.getTime());
+      return new FrameTransform(transform, relativeSource, relativeTarget, sourceToRoot.getTime());
     }
     // No known transform.
     return null;
   }
 
   /**
-   * @see #transform(FrameName, FrameName)
+   * @see #transform(GraphName, GraphName)
    */
   public FrameTransform transform(String source, String target) {
     Preconditions.checkNotNull(source);
     Preconditions.checkNotNull(target);
-    return transform(FrameName.of(source), FrameName.of(target));
+    return transform(GraphName.of(source), GraphName.of(target));
   }
 
   /**
    * @param source
-   *          the resolved source frame
+   *          the source frame
    * @return the {@link Transform} from {@code source} to root
    */
   @VisibleForTesting
-  FrameTransform transformToRoot(FrameName source) {
+  FrameTransform transformToRoot(GraphName source) {
     FrameTransform result = getLatest(source);
     if (result == null) {
       return null;
@@ -244,7 +252,7 @@ public class FrameTransformTree {
       }
       // Now resultToParent.getSourceFrame() == result.getTargetFrame()
       Transform transform = resultToParent.getTransform().multiply(result.getTransform());
-      FrameName target = resultToParent.getTargetFrame();
+      GraphName target = resultToParent.getTargetFrame();
       result = new FrameTransform(transform, source, target, result.getTime());
     }
   }

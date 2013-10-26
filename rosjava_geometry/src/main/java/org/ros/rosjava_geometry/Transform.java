@@ -16,9 +16,8 @@
 
 package org.ros.rosjava_geometry;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import org.ros.message.Time;
+import org.ros.namespace.GraphName;
 
 /**
  * A transformation in terms of translation, rotation, and scale.
@@ -132,7 +131,7 @@ public class Transform {
     return result;
   }
 
-  public geometry_msgs.PoseStamped toPoseStampedMessage(FrameName frame, Time stamp,
+  public geometry_msgs.PoseStamped toPoseStampedMessage(GraphName frame, Time stamp,
       geometry_msgs.PoseStamped result) {
     result.getHeader().setFrameId(frame.toString());
     result.getHeader().setStamp(stamp);
@@ -145,13 +144,11 @@ public class Transform {
         && rotationAndScale.almostEquals(other.rotationAndScale, epsilon);
   }
 
-  @VisibleForTesting
-  Vector3 getTranslation() {
+  public Vector3 getTranslation() {
     return translation;
   }
 
-  @VisibleForTesting
-  Quaternion getRotationAndScale() {
+  public Quaternion getRotationAndScale() {
     return rotationAndScale;
   }
 
