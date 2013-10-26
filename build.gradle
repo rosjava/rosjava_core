@@ -32,7 +32,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '0.1.+'
+    classpath group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '[0.1,)'
   }
 }
 

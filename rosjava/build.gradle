@@ -18,12 +18,12 @@ dependencies {
   compile project(':apache_xmlrpc_common')
   compile project(':apache_xmlrpc_server')
   compile project(':apache_xmlrpc_client')
-  compile 'org.ros.rosjava_bootstrap:message_generation:0.1.+'
-  compile 'org.ros.rosjava_messages:rosjava_test_msgs:0.1.+'
-  compile 'org.ros.rosjava_messages:rosgraph_msgs:1.9.+'
-  compile 'org.ros.rosjava_messages:geometry_msgs:1.10.+'
-  compile 'org.ros.rosjava_messages:nav_msgs:1.10.+'
-  compile 'org.ros.rosjava_messages:tf2_msgs:0.4.+'
+  compile 'org.ros.rosjava_bootstrap:message_generation:[0.1,)'
+  compile 'org.ros.rosjava_messages:rosjava_test_msgs:[0.1,)'
+  compile 'org.ros.rosjava_messages:rosgraph_msgs:[1.9,)'
+  compile 'org.ros.rosjava_messages:geometry_msgs:[1.10,)'
+  compile 'org.ros.rosjava_messages:nav_msgs:[1.10,)'
+  compile 'org.ros.rosjava_messages:tf2_msgs:[0.4,)'
   compile 'dnsjava:dnsjava:2.1.1'
   compile 'org.apache.commons:com.springsource.org.apache.commons.logging:1.1.1'
   compile 'org.apache.commons:com.springsource.org.apache.commons.net:2.0.0'

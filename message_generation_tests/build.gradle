@@ -15,8 +15,8 @@
  */
 
 dependencies {
-  compile 'org.ros.rosjava_messages:rosjava_test_msgs:0.1.+'
-  compile 'org.ros.rosjava_bootstrap:message_generation:0.1.+'
+  compile 'org.ros.rosjava_messages:rosjava_test_msgs:[0.1,)'
+  compile 'org.ros.rosjava_bootstrap:message_generation:[0.1,)'
   testCompile 'junit:junit:4.8.2'
 }
 jar {
