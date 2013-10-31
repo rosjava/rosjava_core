@@ -20,6 +20,7 @@ task wrapper(type: Wrapper) {
 
 buildscript {
   def rosMavenPath = "$System.env.ROS_MAVEN_PATH".split(':').collect { 'file://' + it }
+  def rosMavenRepository = "$System.env.ROS_MAVEN_REPOSITORY"
   repositories {
     rosMavenPath.each { p ->
       maven {
@@ -28,11 +29,11 @@ buildscript {
     }
     mavenLocal()
     maven {
-      url 'https://github.com/rosjava/rosjava_mvn_repo/raw/master'
+      url rosMavenRepository
     }
   }
   dependencies {
-    classpath group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '[0.2,)'
+    classpath group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '[0.2,0.3)'
   }
 }
 

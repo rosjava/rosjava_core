@@ -20,6 +20,6 @@ mainClassName = 'org.ros.RosRun'
 
 dependencies {
   compile project(':rosjava')
-  compile 'org.ros.rosjava_messages:sensor_msgs:[1.10,)'
+  compile 'org.ros.rosjava_messages:sensor_msgs:[1.10,1.11)'
 }
 
