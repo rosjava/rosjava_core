@@ -2,6 +2,10 @@
 Changelog for package rosjava_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.6 (2013-11-01)
+------------------
+* Constrain open ranged dependencies.
+
 0.1.5 (2013-10-31)
 ------------------
 * use ROS_MAVEN_REPOSITORY
