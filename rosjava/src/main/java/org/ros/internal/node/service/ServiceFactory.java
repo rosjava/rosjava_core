@@ -44,8 +44,8 @@ public class ServiceFactory {
   private final ScheduledExecutorService executorService;
   private final Object mutex;
 
-  public ServiceFactory(GraphName nodeName, SlaveServer slaveServer, ServiceManager serviceManager,
-      ScheduledExecutorService executorService) {
+  public ServiceFactory(final GraphName nodeName, final SlaveServer slaveServer, final ServiceManager serviceManager,
+      final ScheduledExecutorService executorService) {
     this.nodeName = nodeName;
     this.slaveServer = slaveServer;
     this.serviceManager = serviceManager;
@@ -69,11 +69,11 @@ public class ServiceFactory {
    *          a {@link MessageFactory} to be used for creating responses
    * @return a {@link DefaultServiceServer} instance
    */
-  public <T, S> DefaultServiceServer<T, S> newServer(ServiceDeclaration serviceDeclaration,
-      ServiceResponseBuilder<T, S> responseBuilder, MessageDeserializer<T> deserializer,
-      MessageSerializer<S> serializer, MessageFactory messageFactory) {
+  public <T, S> DefaultServiceServer<T, S> newServer(final ServiceDeclaration serviceDeclaration,
+      final ServiceResponseBuilder<T, S> responseBuilder, final MessageDeserializer<T> deserializer,
+      final MessageSerializer<S> serializer, final MessageFactory messageFactory) {
     DefaultServiceServer<T, S> serviceServer;
-    GraphName name = serviceDeclaration.getName();
+    final GraphName name = serviceDeclaration.getName();
 
     synchronized (mutex) {
       if (serviceManager.hasServer(name)) {
@@ -96,7 +96,7 @@ public class ServiceFactory {
    *         {@code null} if it does not exist
    */
   @SuppressWarnings("unchecked")
-  public <T, S> DefaultServiceServer<T, S> getServer(GraphName name) {
+  public <T, S> DefaultServiceServer<T, S> getServer(final GraphName name) {
     if (serviceManager.hasServer(name)) {
       return (DefaultServiceServer<T, S>) serviceManager.getServer(name);
     }
@@ -120,24 +120,26 @@ public class ServiceFactory {
    * @return a {@link DefaultServiceClient} instance
    */
   @SuppressWarnings("unchecked")
-  public <T, S> DefaultServiceClient<T, S> newClient(ServiceDeclaration serviceDeclaration,
-      MessageSerializer<T> serializer, MessageDeserializer<S> deserializer,
-      MessageFactory messageFactory) {
+  public <T, S> DefaultServiceClient<T, S> newClient(final ServiceDeclaration serviceDeclaration,
+      final MessageSerializer<T> serializer, final MessageDeserializer<S> deserializer,
+      final MessageFactory messageFactory) {
     Preconditions.checkNotNull(serviceDeclaration.getUri());
     DefaultServiceClient<T, S> serviceClient;
-    GraphName name = serviceDeclaration.getName();
+    final GraphName name = serviceDeclaration.getName();
     boolean createdNewClient = false;
 
     synchronized (mutex) {
       if (serviceManager.hasClient(name)) {
         serviceClient = (DefaultServiceClient<T, S>) serviceManager.getClient(name);
-      } else {
-        serviceClient =
-            DefaultServiceClient.newDefault(nodeName, serviceDeclaration, serializer, deserializer,
-                messageFactory, executorService);
-        serviceManager.addClient(serviceClient);
-        createdNewClient = true;
+        if (serviceClient.isConnected()) {
+          return serviceClient;
+        }
       }
+      serviceClient =
+          DefaultServiceClient.newDefault(nodeName, serviceDeclaration, serializer, deserializer,
+              messageFactory, executorService);
+      serviceManager.addClient(serviceClient);
+      createdNewClient = true;
     }
 
     if (createdNewClient) {

@@ -55,20 +55,21 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     private String errorMessage;
 
     @Override
-    public void onSuccess(ConnectionHeader outgoingConnectionHeader,
-        ConnectionHeader incomingConnectionHeader) {
+    public void onSuccess(final ConnectionHeader outgoingConnectionHeader,
+        final ConnectionHeader incomingConnectionHeader) {
       success = true;
       latch.countDown();
     }
 
     @Override
-    public void onFailure(ConnectionHeader outgoingConnectionHeader, String errorMessage) {
+    public void
+    onFailure(final ConnectionHeader outgoingConnectionHeader, final String errorMessage) {
       this.errorMessage = errorMessage;
       success = false;
       latch.countDown();
     }
 
-    public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
+    public boolean await(final long timeout, final TimeUnit unit) throws InterruptedException {
       latch.await(timeout, unit);
       return success;
     }
@@ -95,17 +96,18 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   private TcpClient tcpClient;
 
-  public static <S, T> DefaultServiceClient<S, T> newDefault(GraphName nodeName,
-      ServiceDeclaration serviceDeclaration, MessageSerializer<S> serializer,
-      MessageDeserializer<T> deserializer, MessageFactory messageFactory,
-      ScheduledExecutorService executorService) {
+  public static <S, T> DefaultServiceClient<S, T> newDefault(final GraphName nodeName,
+      final ServiceDeclaration serviceDeclaration, final MessageSerializer<S> serializer,
+      final MessageDeserializer<T> deserializer, final MessageFactory messageFactory,
+      final ScheduledExecutorService executorService) {
     return new DefaultServiceClient<S, T>(nodeName, serviceDeclaration, serializer, deserializer,
         messageFactory, executorService);
   }
 
-  private DefaultServiceClient(GraphName nodeName, ServiceDeclaration serviceDeclaration,
-      MessageSerializer<T> serializer, MessageDeserializer<S> deserializer,
-      MessageFactory messageFactory, ScheduledExecutorService executorService) {
+  private DefaultServiceClient(final GraphName nodeName,
+      final ServiceDeclaration serviceDeclaration, final MessageSerializer<T> serializer,
+      final MessageDeserializer<S> deserializer, final MessageFactory messageFactory,
+      final ScheduledExecutorService executorService) {
     this.serviceDeclaration = serviceDeclaration;
     this.serializer = serializer;
     this.messageFactory = messageFactory;
@@ -117,7 +119,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     connectionHeader.addField(ConnectionHeaderFields.PERSISTENT, "1");
     connectionHeader.merge(serviceDeclaration.toConnectionHeader());
     tcpClientManager = new TcpClientManager(executorService);
-    ServiceClientHandshakeHandler<T, S> serviceClientHandshakeHandler =
+    final ServiceClientHandshakeHandler<T, S> serviceClientHandshakeHandler =
         new ServiceClientHandshakeHandler<T, S>(connectionHeader, responseListeners, deserializer,
             executorService);
     handshakeLatch = new HandshakeLatch();
@@ -126,31 +128,30 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   }
 
   @Override
-  public void connect(URI uri) {
+  public void connect(final URI uri) {
     Preconditions.checkNotNull(uri, "URI must be specified.");
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"), "Invalid service URI.");
-    Preconditions.checkState(tcpClient == null, "Already connected once.");
-    InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
+    Preconditions.checkState(tcpClient == null, "Already connected.");
+    final InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
     handshakeLatch.reset();
     tcpClient = tcpClientManager.connect(toString(), address);
     try {
       if (!handshakeLatch.await(1, TimeUnit.SECONDS)) {
         throw new RosRuntimeException(handshakeLatch.getErrorMessage());
       }
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       throw new RosRuntimeException("Handshake timed out.");
     }
   }
 
   @Override
   public void shutdown() {
-    Preconditions.checkNotNull(tcpClient, "Not connected.");
     tcpClientManager.shutdown();
   }
 
   @Override
-  public void call(T request, ServiceResponseListener<S> listener) {
-    ChannelBuffer buffer = messageBufferPool.acquire();
+  public void call(final T request, final ServiceResponseListener<S> listener) {
+    final ChannelBuffer buffer = messageBufferPool.acquire();
     serializer.serialize(request, buffer);
     responseListeners.add(listener);
     tcpClient.write(buffer).awaitUninterruptibly();
@@ -170,5 +171,10 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   @Override
   public T newMessage() {
     return messageFactory.newFromType(serviceDeclaration.getType());
+  }
+
+  @Override
+  public boolean isConnected() {
+    return tcpClient.getChannel().isConnected();
   }
 }

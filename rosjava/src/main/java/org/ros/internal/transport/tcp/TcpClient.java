@@ -56,10 +56,10 @@ public class TcpClient {
   private final ChannelBufferFactory channelBufferFactory;
   private final ClientBootstrap bootstrap;
   private final List<NamedChannelHandler> namedChannelHandlers;
-  
+
   private Channel channel;
 
-  public TcpClient(ChannelGroup channelGroup, Executor executor) {
+  public TcpClient(final ChannelGroup channelGroup, final Executor executor) {
     this.channelGroup = channelGroup;
     channelFactory = new NioClientSocketChannelFactory(executor, executor);
     channelBufferFactory = new HeapChannelBufferFactory(ByteOrder.LITTLE_ENDIAN);
@@ -70,35 +70,35 @@ public class TcpClient {
     namedChannelHandlers = Lists.newArrayList();
   }
 
-  public void setConnectionTimeout(long duration, TimeUnit unit) {
+  public void setConnectionTimeout(final long duration, final TimeUnit unit) {
     bootstrap.setOption("connectionTimeoutMillis", TimeUnit.MILLISECONDS.convert(duration, unit));
   }
 
-  public void setKeepAlive(boolean value) {
+  public void setKeepAlive(final boolean value) {
     bootstrap.setOption("keepAlive", value);
   }
 
-  public void addNamedChannelHandler(NamedChannelHandler namedChannelHandler) {
+  public void addNamedChannelHandler(final NamedChannelHandler namedChannelHandler) {
     namedChannelHandlers.add(namedChannelHandler);
   }
 
-  public void addAllNamedChannelHandlers(List<NamedChannelHandler> namedChannelHandlers) {
+  public void addAllNamedChannelHandlers(final List<NamedChannelHandler> namedChannelHandlers) {
     this.namedChannelHandlers.addAll(namedChannelHandlers);
   }
 
-  public Channel connect(String connectionName, SocketAddress socketAddress) {
-    TcpClientPipelineFactory tcpClientPipelineFactory = new TcpClientPipelineFactory(channelGroup) {
+  public void connect(final String connectionName, final SocketAddress socketAddress) {
+    final TcpClientPipelineFactory tcpClientPipelineFactory = new TcpClientPipelineFactory(channelGroup) {
       @Override
       public ChannelPipeline getPipeline() {
-        ChannelPipeline pipeline = super.getPipeline();
-        for (NamedChannelHandler namedChannelHandler : namedChannelHandlers) {
+        final ChannelPipeline pipeline = super.getPipeline();
+        for (final NamedChannelHandler namedChannelHandler : namedChannelHandlers) {
           pipeline.addLast(namedChannelHandler.getName(), namedChannelHandler);
         }
         return pipeline;
       }
     };
     bootstrap.setPipelineFactory(tcpClientPipelineFactory);
-    ChannelFuture future = bootstrap.connect(socketAddress).awaitUninterruptibly();
+    final ChannelFuture future = bootstrap.connect(socketAddress).awaitUninterruptibly();
     if (future.isSuccess()) {
       channel = future.getChannel();
       if (DEBUG) {
@@ -108,10 +108,13 @@ public class TcpClient {
       // We expect the first connection to succeed. If not, fail fast.
       throw new RosRuntimeException("Connection exception: " + socketAddress, future.getCause());
     }
+  }
+
+  public Channel getChannel() {
     return channel;
   }
 
-  public ChannelFuture write(ChannelBuffer buffer) {
+  public ChannelFuture write(final ChannelBuffer buffer) {
     Preconditions.checkNotNull(channel);
     Preconditions.checkNotNull(buffer);
     return channel.write(buffer);
