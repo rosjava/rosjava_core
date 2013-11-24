@@ -1,0 +1,106 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Building &mdash; rosjava_core 0.1.6 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.6',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="rosjava_core 0.1.6 documentation" href="index.html" />
+    <link rel="next" title="Best practices" href="best_practices.html" />
+    <link rel="prev" title="Installing" href="installing.html" /> 
+  </head>
+  <body>
+      <div class="header"><h1 class="heading"><a href="index.html">
+          <span>rosjava_core 0.1.6 documentation</span></a></h1>
+        <h2 class="heading"><span>Building</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="installing.html">Installing</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="best_practices.html">Best practices</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="building">
+<span id="id1"></span><h1>Building<a class="headerlink" href="#building" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="gradle">
+<h2>Gradle<a class="headerlink" href="#gradle" title="Permalink to this headline">¶</a></h2>
+<p>rosjava_core uses the <a class="reference external" href="http://www.gradle.org/">Gradle</a> build system in tandem with an external maven
+repository which supplies dependencies.</p>
+<p>To build rosjava_core and install it to your local <a class="reference external" href="http://maven.apache.org/">Maven</a> repository, execute
+the <a class="reference external" href="http://gradle.org/docs/current/userguide/gradle_wrapper.html">gradle wrapper</a>:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nb">cd </span>rosjava_core
+./gradlew install
+</pre></div>
+</div>
+<p>To build the documentation, you may execute the docs task:</p>
+<div class="highlight-bash"><div class="highlight"><pre>./gradlew docs
+</pre></div>
+</div>
+<p>To run the tests, you may execute the test task:</p>
+<div class="highlight-bash"><div class="highlight"><pre>./gradlew <span class="nb">test</span>
+</pre></div>
+</div>
+<p>To generate Eclipse project files, you may execute the eclipse:</p>
+<div class="highlight-bash"><div class="highlight"><pre>./gradlew eclipse
+</pre></div>
+</div>
+</div>
+<div class="section" id="catkin">
+<h2>Catkin<a class="headerlink" href="#catkin" title="Permalink to this headline">¶</a></h2>
+<p>It also has a very minimal catkin wrapper that relays build instructions to the
+underlying gradle builder. This lets the repository be easily built and
+deployed alongside other rosjava repositories in a ros environment. Refer to
+the <a class="reference external" href="http://wiki.ros.org/rosjava">RosWiki</a> for more information.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="installing.html">Installing</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="best_practices.html">Best practices</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2013, Google, Inc..
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
