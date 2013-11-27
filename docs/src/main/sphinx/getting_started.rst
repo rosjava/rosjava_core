@@ -39,7 +39,7 @@ implementation:
 
     @Override
     public GraphName getDefaultNodeName() {
-      return new GraphName("my_node");
+      return GraphName.of("my_node");
     }
 
     @Override
