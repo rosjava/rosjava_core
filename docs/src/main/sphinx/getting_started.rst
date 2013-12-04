@@ -8,7 +8,8 @@ Creating a new Java package
 
 Please refer to the `RosWiki`_ for more information on how to create a new
 gradle/catkin project and subprojects. You might also wish to read the 
-Gradle `Java tutorial`_ for more details.
+Gradle `Java tutorial`_ for more details about building Java projects with
+Gradle in general.
 
 .. _RosWiki: http://wiki.ros.org/rosjava
 .. _Maven plugin: http://gradle.org/docs/current/userguide/maven_plugin.html
@@ -151,11 +152,12 @@ processes:
 
 .. code-block:: bash
 
-  roscd rosjava_tutorial_pubsub
+  # source your devel/setup.bash
+  roscd rosjava_core/rosjava_tutorial_pubsub
   ../gradlew installApp
   roscore &
-  ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker &
-  ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener
+  ./build/install/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker &
+  ./build/install/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener
 
 .. note:: The above example launches roscore and the Talker node in the
   background. You could instead launch each in a separate terminal. Also, you
@@ -176,8 +178,8 @@ the default topic /chatter to /foo.
 
 .. code-block:: bash
 
-  ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker chatter:=/foo &
-  ./build/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener chatter:=/foo
+  ./build/install/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker chatter:=/foo &
+  ./build/install/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener chatter:=/foo
 
 See :roswiki:`Remapping%20Arguments` for more information on passing arguments
 to ROS executables.
@@ -231,11 +233,12 @@ Building and executing these nodes works in the same manner as described above:
 
 .. code-block:: bash
 
-  roscd rosjava_tutorial_services
+  # source your devel/setup.bash
+  roscd rosjava_core/rosjava_tutorial_pubsub
   ../gradlew installApp
   roscore &
-  ./build/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Server &
-  ./build/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Client
+  ./build/install/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Server &
+  ./build/install/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Client
 
 At this point, you should see the log message "2 + 2 = 4" appear in your
 terminal. You can also access the service using the :roswiki:`rosservice`
@@ -266,16 +269,8 @@ the underlying message implementation to change in the future. ::
   PointCloud2 msg = node.getTopicMessageFactory()
       .newMessage(sensor_msgs.PointCloud._TYPE);
 
-If you want to use messages that you define:
-
-- create a new package for those messages (e.g. my_msgs)
-- ensure that my_msgs is in your ROS_PACKAGE_PATH (see :roswiki:`EnvironmentVariables`)
-- reinstall rosjava_messages (see :doc:`building`)
-
-.. code-block:: bash
-
-  roscd rosjava_messages
-  ../gradlew install
+If you want to use messages that you define, whether they are officially released packages or your
+own custom packages, follow the instructions on the roswiki (refer to :roswiki:`rosjava/Messages`).
 
 Parameters
 ----------
@@ -357,4 +352,3 @@ logging outputs for ROS. ::
   node.fatal("message informing user of a fatal occurrence");
 
 .. _Apache Commons Log: http://commons.apache.org/logging/commons-logging-1.1.1/apidocs/index.html
-
