@@ -41,6 +41,11 @@ public interface ServiceClient<T, S> {
   void connect(URI uri);
 
   /**
+   * @return {@code true} if the {@link ServiceClient} is connected
+   */
+  boolean isConnected();
+
+  /**
    * Calls a method on the {@link ServiceServer}.
    * 
    * @param request
@@ -60,7 +65,7 @@ public interface ServiceClient<T, S> {
    * Stops the client (e.g. disconnect a persistent service connection).
    */
   void shutdown();
-  
+
   /**
    * @return a new request message
    */
