@@ -8,7 +8,8 @@ Creating a new Java package
 
 Please refer to the `RosWiki`_ for more information on how to create a new
 gradle/catkin project and subprojects. You might also wish to read the 
-Gradle `Java tutorial`_ for more details about building with gradle itself.
+Gradle `Java tutorial`_ for more details about building Java projects with
+Gradle in general.
 
 .. _RosWiki: http://wiki.ros.org/rosjava
 .. _Maven plugin: http://gradle.org/docs/current/userguide/maven_plugin.html
@@ -152,8 +153,7 @@ processes:
 .. code-block:: bash
 
   # source your devel/setup.bash
-  roscd rosjava_core
-  cd rosjava_tutorial_pubsub
+  roscd rosjava_core/rosjava_tutorial_pubsub
   ../gradlew installApp
   roscore &
   ./build/install/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker &
@@ -234,8 +234,7 @@ Building and executing these nodes works in the same manner as described above:
 .. code-block:: bash
 
   # source your devel/setup.bash
-  roscd rosjava_core
-  cd rosjava_tutorial_services
+  roscd rosjava_core/rosjava_tutorial_pubsub
   ../gradlew installApp
   roscore &
   ./build/install/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Server &
@@ -353,5 +352,3 @@ logging outputs for ROS. ::
   node.fatal("message informing user of a fatal occurrence");
 
 .. _Apache Commons Log: http://commons.apache.org/logging/commons-logging-1.1.1/apidocs/index.html
-
-
