@@ -27,6 +27,7 @@ you simply need to clone the github repository
 .. code-block:: bash
 
   git clone https://github.com/rosjava/rosjava_core
+  cd rosjava_core
   git checkout -b hydro origin/hydro
 
 and proceed immediately to the section on :ref:`building`.
