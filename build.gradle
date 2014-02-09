@@ -21,6 +21,9 @@ task wrapper(type: Wrapper) {
 buildscript {
   def rosMavenPath = "$System.env.ROS_MAVEN_PATH".split(':').collect { 'file://' + it }
   def rosMavenRepository = "$System.env.ROS_MAVEN_REPOSITORY"
+  if ( rosMavenRepository == 'null' ) {
+    rosMavenRepository = "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+  }
   repositories {
     rosMavenPath.each { p ->
       maven {
