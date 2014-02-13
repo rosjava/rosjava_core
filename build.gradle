@@ -15,40 +15,56 @@
  */
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '1.8'
+  gradleVersion = "1.9"
 }
 
 buildscript {
-  def rosMavenPath = "$System.env.ROS_MAVEN_PATH".split(':').collect { 'file://' + it }
-  def rosMavenRepository = "$System.env.ROS_MAVEN_REPOSITORY"
+  def rosMavenPath = System.getenv("ROS_MAVEN_PATH")
+  def rosMavenRepository = System.getenv("ROS_MAVEN_REPOSITORY")
+
   repositories {
-    rosMavenPath.each { p ->
-      maven {
-        url p
+    if (rosMavenPath != null) {
+      rosMavenPath.tokenize(":").each { path ->
+        maven {
+          url uri(path)
+        }
       }
     }
     mavenLocal()
     maven {
-      url rosMavenRepository
+      url "http://repository.springsource.com/maven/bundles/release"
     }
+    maven {
+      url "http://repository.springsource.com/maven/bundles/external"
+    }
+    if (rosMavenRepository != null) {
+      maven {
+        url rosMavenRepository
+      }
+    } else {
+      maven {
+        url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+      }
+    }
+    mavenCentral()
   }
+
   dependencies {
-    classpath group: 'org.ros.rosjava_bootstrap', name: 'gradle_plugins', version: '[0.2,0.3)'
+    classpath group: "org.ros.rosjava_bootstrap", name: "gradle_plugins", version: "[0.2,0.3)"
   }
 }
 
-apply plugin: 'catkin'
+apply plugin: "catkin"
 
 allprojects {
-  group 'org.ros.rosjava_core'
+  group "org.ros.rosjava_core"
   version = project.catkin.pkg.version
 }
 
 subprojects {
-  if (name != 'docs') {
-    apply plugin: 'ros-java'
-    apply plugin: 'eclipse'
+  if (name != "docs") {
+    apply plugin: "ros"
   }
 }
 
-defaultTasks 'publishMavenJavaPublicationToMavenRepository'
+defaultTasks "publishMavenJavaPublicationToMavenRepository"
