@@ -1,6 +1,8 @@
 .gradle
 build
 bin
-.classpath
 .project
+.classpath
 .settings
+*.iml
+.idea
