@@ -15,43 +15,11 @@
  */
 
 task wrapper(type: Wrapper) {
-  gradleVersion = "1.9"
+  gradleVersion = "1.10"
 }
 
 buildscript {
-  def rosMavenPath = System.getenv("ROS_MAVEN_PATH")
-  def rosMavenRepository = System.getenv("ROS_MAVEN_REPOSITORY")
-
-  repositories {
-    if (rosMavenPath != null) {
-      rosMavenPath.tokenize(":").each { path ->
-        maven {
-          url uri(path)
-        }
-      }
-    }
-    mavenLocal()
-    maven {
-      url "http://repository.springsource.com/maven/bundles/release"
-    }
-    maven {
-      url "http://repository.springsource.com/maven/bundles/external"
-    }
-    if (rosMavenRepository != null) {
-      maven {
-        url rosMavenRepository
-      }
-    } else {
-      maven {
-        url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
-      }
-    }
-    mavenCentral()
-  }
-
-  dependencies {
-    classpath group: "org.ros.rosjava_bootstrap", name: "gradle_plugins", version: "[0.2,0.3)"
-  }
+  apply from: "https://github.com/rosjava/rosjava_bootstrap/raw/master/buildscript.gradle"
 }
 
 apply plugin: "catkin"
@@ -64,7 +32,11 @@ allprojects {
 subprojects {
   if (name != "docs") {
     apply plugin: "ros"
+    apply plugin: "java"
+    apply plugin: "osgi"
+    apply plugin: "idea"
+    apply plugin: "eclipse"
   }
 }
 
-defaultTasks "publishMavenJavaPublicationToMavenRepository"
+defaultTasks "uploadArchives"
