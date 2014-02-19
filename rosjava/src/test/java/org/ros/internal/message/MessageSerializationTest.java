@@ -31,6 +31,7 @@ import java.util.List;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ * @author mick.gaillard@gmail.com (Mickael Gaillard)
  */
 public class MessageSerializationTest {
 
@@ -161,6 +162,71 @@ public class MessageSerializationTest {
   public void testString() {
     std_msgs.String message = defaultMessageFactory.newFromType(std_msgs.String._TYPE);
     message.setData("Hello, ROS!");
+    checkSerializeAndDeserialize(message);
+  }
+  
+  @Test
+  public void testStringUTF8() {
+    std_msgs.String message = defaultMessageFactory.newFromType(std_msgs.String._TYPE);
+    message.setData("éêè €àáßëœ 文字化け");
+    checkSerializeAndDeserialize(message);
+
+    // i18n test case
+    // base on http://www.inter-locale.com/whitepaper/learn/learn-to-test.html
+
+    // Combining Marks and Accents test
+    message.setData("àéîōũ");
+    checkSerializeAndDeserialize(message);
+
+    // DOS 860 test
+    message.setData("você nós mãe avô irmã criança");
+    checkSerializeAndDeserialize(message);
+
+    // Windows-1252 test
+    message.setData("€ŒœŠš™©‰ƒ");
+    checkSerializeAndDeserialize(message);
+
+    // Turkish test
+    message.setData("ışık bir İyi Günler");
+    checkSerializeAndDeserialize(message);
+
+    // Dakuten and handakuten marks test
+    message.setData("がざばだぱか゛さ゛た゛は");
+    checkSerializeAndDeserialize(message);
+
+    // Combining Grapheme Joiner character
+    message.setData("אִ͏ַ");
+    checkSerializeAndDeserialize(message);
+
+    // Bidi with Latin test
+    message.setData("abcאבגדabc ");
+    checkSerializeAndDeserialize(message);
+
+    message.setData("אבגדabcאבגד");
+    checkSerializeAndDeserialize(message);
+
+    message.setData("אבגד012אבגד");
+    checkSerializeAndDeserialize(message);
+
+    message.setData("אבגד 012 012");
+    checkSerializeAndDeserialize(message);
+
+    // Complex Scripts test
+    message.setData("สวัสดี");
+    checkSerializeAndDeserialize(message);
+
+    message.setData("டாஹ்கோ");
+    checkSerializeAndDeserialize(message);
+
+    message.setData("بِسْمِ اللّهِ الرَّحْمـَنِ الرَّحِيمِ");
+    checkSerializeAndDeserialize(message);
+
+    // Numeric Shaping test
+    message.setData("عدد مارس ١٩٩٨");
+    checkSerializeAndDeserialize(message);
+
+    // Common Scripts and Encodings test
+    message.setData("Слава Жанна Ювеналий Ярополк");
     checkSerializeAndDeserialize(message);
   }
 
