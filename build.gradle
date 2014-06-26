@@ -33,9 +33,8 @@ subprojects {
   if (name != 'docs') {
     apply plugin: "ros-java"
     apply plugin: "osgi"
-    /*
     apply plugin: "idea"
-    */
+    apply plugin: "eclipse"
   }
 }
 
