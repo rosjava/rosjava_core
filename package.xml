@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>rosjava_core</name>
-  <version>0.1.6</version>
+  <version>0.2.0</version>
   <description>
     An implementation of ROS in pure-Java with Android support.
   </description>
@@ -12,9 +12,11 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rosjava_build_tools</build_depend>
   <build_depend>rosjava_bootstrap</build_depend>
-  <build_depend>rosjava_messages</build_depend>
-  <run_depend>rosjava_build_tools</run_depend>
-  <run_depend>rosjava_bootstrap</run_depend>
-  <run_depend>rosjava_messages</run_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>rosjava_test_msgs</build_depend>
+  <build_depend>rosgraph_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>tf2_msgs</build_depend>
 </package>
 

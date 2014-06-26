@@ -11,6 +11,7 @@ project(rosjava_core)
 
 find_package(catkin REQUIRED rosjava_build_tools)
 
+#catkin_rosjava_setup(publishMavenJavaPublicationToMavenRepository installApp)
 catkin_rosjava_setup(publishMavenJavaPublicationToMavenRepository)
 
 catkin_package()
