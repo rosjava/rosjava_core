@@ -28,5 +28,3 @@ include(
     'docs',
     )
 
-/* include 'message_generation_tests' */
-        
