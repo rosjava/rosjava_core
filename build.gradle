@@ -19,14 +19,15 @@ task wrapper(type: Wrapper) {
 }
 
 buildscript {
-  apply from: "https://github.com/rosjava/rosjava_bootstrap/raw/indigo/buildscript.gradle"
+    apply from: "https://github.com/talregev/rosjava_mvn_repo/raw/master/buildscript.gradle"
 }
 
 apply plugin: "catkin"
 
 allprojects {
-  group 'org.ros.rosjava_core'
-  version = project.catkin.pkg.version
+    apply from: "https://github.com/talregev/rosjava_mvn_repo/raw/master/maven.gradle"
+    group 'org.ros.rosjava_core'
+    version = project.catkin.pkg.version
 }
 
 subprojects {

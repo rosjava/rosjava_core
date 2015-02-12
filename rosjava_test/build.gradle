@@ -20,5 +20,5 @@ mainClassName = 'org.ros.RosRun'
 
 dependencies {
   compile project(':rosjava')
-  compile 'junit:junit:4.8.2'
+  compile 'junit:junit:4.12'
 }
