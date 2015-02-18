@@ -9,3 +9,5 @@ bin
 *.iml
 .idea
 
+*.log
+/local.properties
