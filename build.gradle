@@ -39,4 +39,4 @@ subprojects {
   }
 }
 
-defaultTasks 'publishMavenJavaPublicationToMavenRepository', 'installApp'
+defaultTasks 'installDist', 'publishMavenJavaPublicationToMavenRepository'
