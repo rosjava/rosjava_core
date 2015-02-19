@@ -15,7 +15,6 @@
  */
 
 dependencies {
-  compile project(':apache_xmlrpc_common')
-  compile 'org.apache.commons:com.springsource.org.apache.commons.logging:1.1.1'
+    compile project(':apache_xmlrpc_common')
+    compile 'org.apache.directory.studio:org.apache.commons.logging:1.1.3'
 }
-

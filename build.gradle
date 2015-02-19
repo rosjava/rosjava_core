@@ -15,7 +15,7 @@
  */
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.2.1'
+  gradleVersion = '2.3'
 }
 
 buildscript {
@@ -25,28 +25,29 @@ buildscript {
 apply plugin: "catkin"
 
 allprojects {
-  group 'org.ros.rosjava_core'
-  version = project.catkin.pkg.version
+    apply from: "https://github.com/talregev/rosjava_bootstrap/raw/indigo/maven.gradle"
+    group 'org.ros.rosjava_core'
+    version = project.catkin.pkg.version
 }
 
 subprojects {
-  if (name != 'docs') {
-    /* 
-     * The ros plugin configures a few things:
-     * 
-     *  - local deployment repository : where it dumps the jars and packaged artifacts)
-     *  - local maven repositories    : where it finds your locally installed/built artifacts) 
-     *  - external maven repositories : where it goes looking if it can't find dependencies locally
-     * 
-     * To modify, or add repos to the default external maven repositories list, pull request against this code:
-     * 
-     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
-     */
-    apply plugin: "ros-java"
-    apply plugin: "osgi"
-    apply plugin: "idea"
-    apply plugin: "eclipse"
-  }
+    if (name != 'docs') {
+        /*
+         * The ros plugin configures a few things:
+         *
+         *  - local deployment repository : where it dumps the jars and packaged artifacts)
+         *  - local maven repositories    : where it finds your locally installed/built artifacts)
+         *  - external maven repositories : where it goes looking if it can't find dependencies locally
+         *
+         * To modify, or add repos to the default external maven repositories list, pull request against this code:
+         *
+         *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
+         */
+        apply plugin: "ros-java"
+        apply plugin: "osgi"
+        apply plugin: "idea"
+        apply plugin: "eclipse"
+    }
 }
 
-defaultTasks 'publishMavenJavaPublicationToMavenRepository', 'installApp'
+defaultTasks 'installDist', 'publishMavenJavaPublicationToMavenRepository'
