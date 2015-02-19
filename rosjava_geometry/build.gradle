@@ -15,6 +15,6 @@
  */
 
 dependencies {
-  compile project(':rosjava')
-  testCompile 'junit:junit:4.8.2'
+    compile project(':rosjava')
+    testCompile 'junit:junit:4.12'
 }
