@@ -18,5 +18,11 @@
   <build_depend>rosgraph_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>tf2_msgs</build_depend>
+
+  <!-- 
+    If genjava becomes official, drop rosjava_messages and depend directly.
+    Currently only required to ensure deb builds generate the reqd artifacts
+  -->
+  <build_depend>rosjava_messages</build_depend>
 </package>
 
