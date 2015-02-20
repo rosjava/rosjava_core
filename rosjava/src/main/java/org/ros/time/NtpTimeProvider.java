@@ -63,6 +63,7 @@ public class NtpTimeProvider implements TimeProvider {
     this.scheduledExecutorService = scheduledExecutorService;
     wallTimeProvider = new WallTimeProvider();
     ntpClient = new NTPUDPClient();
+    ntpClient.setDefaultTimeout(500); // timeout to 500ms
     offset = 0;
     scheduledFuture = null;
   }
@@ -70,12 +71,19 @@ public class NtpTimeProvider implements TimeProvider {
   /**
    * Update the current time offset from the configured NTP host.
    * 
-   * @throws IOException
+   * @throws IOException : if ntpClient.getTime() fails too often.
    */
   public void updateTime() throws IOException {
     List<Long> offsets = Lists.newArrayList();
+    int failures = 0;
     for (int i = 0; i < SAMPLE_SIZE; i++) {
-      offsets.add(computeOffset());
+      try { 
+    	  offsets.add(computeOffset());
+      } catch (IOException e) {
+    	  if ( ++failures > SAMPLE_SIZE/2 ) {
+    		  throw e;
+    	  }
+      }
     }
     offset = CollectionMath.median(offsets);
     log.info(String.format("NTP time offset: %d ms", offset));
