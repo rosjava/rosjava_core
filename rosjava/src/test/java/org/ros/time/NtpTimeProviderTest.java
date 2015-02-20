@@ -53,6 +53,7 @@ public class NtpTimeProviderTest extends RosTest {
         try {
           ntpTimeProvider.updateTime();
         } catch (IOException e) {
+          System.out.println("Dude");
           // Ignored. This is only a sanity check.
         }
         ntpTimeProvider.getCurrentTime();
