@@ -21,3 +21,6 @@ mainClassName = 'org.ros.RosRun'
 dependencies {
   compile project(':rosjava')
 }
+
+defaultTasks 'publishMavenJavaPublicationToMavenRepository', 'installApp'
+

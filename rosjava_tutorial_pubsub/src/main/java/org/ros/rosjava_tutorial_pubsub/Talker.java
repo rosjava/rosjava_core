@@ -29,6 +29,16 @@ import org.ros.node.topic.Publisher;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class Talker extends AbstractNodeMain {
+  private String topic_name;
+
+  public Talker() {
+    topic_name = "chatter";
+  }
+
+  public Talker(String topic)
+  {
+    topic_name = topic;
+  }
 
   @Override
   public GraphName getDefaultNodeName() {
@@ -38,7 +48,7 @@ public class Talker extends AbstractNodeMain {
   @Override
   public void onStart(final ConnectedNode connectedNode) {
     final Publisher<std_msgs.String> publisher =
-        connectedNode.newPublisher("chatter", std_msgs.String._TYPE);
+        connectedNode.newPublisher(topic_name, std_msgs.String._TYPE);
     // This CancellableLoop will be canceled automatically when the node shuts
     // down.
     connectedNode.executeCancellableLoop(new CancellableLoop() {
