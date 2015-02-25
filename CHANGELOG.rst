@@ -2,9 +2,25 @@
 Changelog
 =========
 
-0.2.0 (2015-02-18)
+0.2.1 (2015-02-25)
 ------------------
-* First build on indigo
+* allow setting of the talker topic name in pubsub tutorial.
+* A more robust ntp provider.
+* gradle 1.12 -> 2.2.1
+* Add a comment explaining the disabling of SNI.
+* Fix SSL connection errors with Java 1.7.
+* Adds APIs to check the status of a service connection.
+  Fixes bug that caused a disconnected service to be reused.
+  Fixes bug in DefaultSubscriber that used the wrong class for logging.
+* Changes FrameTransformTree to use GraphName instead of FrameName but still support tf2.
+* Removed listAllInetAddress private method.
+  Also renamed getAllInetAddressByName to getAllInetAddressesByName.
+* Adds newNonLoopbackForNetworkInterface
+  This is needed to allow the user to specify the ROS Hostname.
+  An example application can: Run the ROS application through a VPN
+  connection. The user would like to use the tunnel interface
+  to creates the nodes and master.
+* Contributors: Damon Kohler, Daniel Stonier, Lucas Chiesa, corot, damonkohler
 
 0.1.6 (2013-11-01)
 ------------------
