@@ -54,7 +54,7 @@ public abstract class CancellableLoop implements Runnable {
     } catch (InterruptedException e) {
       handleInterruptedException(e);
     } finally {
-      state.set(this);
+      state.set(FINISHED);
     }
   }
 
