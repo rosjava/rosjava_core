@@ -39,6 +39,7 @@ import org.ros.time.TimeProvider;
 import org.ros.time.WallTimeProvider;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -134,6 +135,23 @@ public class NodeConfiguration {
     configuration.setTcpRosAdvertiseAddressFactory(new PublicAdvertiseAddressFactory(host));
     configuration.setMasterUri(masterUri);
     return configuration;
+  }
+  
+  /**
+   * Creates a new {@link NodeConfiguration} for a publicly accessible {
+   * @link Node}
+   *
+   * @param masterUri
+   *          the {@link URI} for the master that the {@link Node} will register
+   *          with
+   * @return a new {@link NodeConfiguration} for a publicly accessible
+   *         {@link Node}
+   */
+  public static NodeConfiguration newPublic(URI masterUri) throws IOException {
+    java.net.Socket socket = new java.net.Socket(masterUri.getHost(), masterUri.getPort());
+    java.net.InetAddress local_network_address = socket.getLocalAddress();
+    socket.close();
+    return NodeConfiguration.newPublic(local_network_address.getHostAddress(), masterUri);
   }
 
   /**
