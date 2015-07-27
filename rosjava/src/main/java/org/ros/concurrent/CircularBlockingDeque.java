@@ -118,6 +118,7 @@ public class CircularBlockingDeque<T> implements Iterable<T> {
       while (true) {
         if (length > 0) {
           entry = deque[start];
+          deque[start] = null;
           start = (start + 1) % limit;
           length--;
           break;
@@ -155,7 +156,9 @@ public class CircularBlockingDeque<T> implements Iterable<T> {
     synchronized (mutex) {
       while (true) {
         if (length > 0) {
-          entry = deque[(start + length - 1) % limit];
+          int idx = (start + length - 1) % limit;
+          entry = deque[idx];
+          deque[idx] = null;
           length--;
           break;
         }
