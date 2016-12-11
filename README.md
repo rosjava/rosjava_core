@@ -21,7 +21,7 @@ documentation concerning the core libraries and examples. Also visit the roswiki
 information.
 
 Still have questions? Check out the ros-users [discussion
-list](https://code.ros.org/mailman/listinfo/ros-users), post questions to [ROS
+list](https://discourse.ros.org/c/rosjava), post questions to [ROS
 Answers](http://answers.ros.org/questions/) with the tag "rosjava," or join #ROS
 on irc.oftc.net.
 
