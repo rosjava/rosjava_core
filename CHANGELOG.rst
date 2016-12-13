@@ -2,6 +2,13 @@
 Changelog
 =========
 
+0.3.0 (2016-12-13)
+------------------
+* Updates for Kinetic release.
+* NativeNodeMain for C++ node integration.
+* NodeMainExecutorListener to listen to node shutdown - and other node lifecycle events
+  in the future.
+
 0.2.1 (2015-02-25)
 ------------------
 * allow setting of the talker topic name in pubsub tutorial.
