@@ -28,7 +28,7 @@ you simply need to clone the github repository
 
   git clone https://github.com/rosjava/rosjava_core
   cd rosjava_core
-  git checkout -b indigo origin/indigo
+  git checkout -b kinetic origin/kinetic
 
 and proceed immediately to the section on :ref:`building`.
 
