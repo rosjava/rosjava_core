@@ -29,10 +29,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.DefaultScheduledExecutorService;
 import org.ros.namespace.GraphName;
+import org.ros.exception.RosRuntimeException;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import org.ros.concurrent.SignalRunnable;
+import org.ros.concurrent.ListenerGroup;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Executes {@link NodeMain}s in separate threads.
@@ -48,6 +52,9 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
   private final ScheduledExecutorService scheduledExecutorService;
   private final Multimap<GraphName, ConnectedNode> connectedNodes;
   private final BiMap<Node, NodeMain> nodeMains;
+  private final Object mutex = new Object();
+  private CountDownLatch shutdownCountDownLatch;
+  private final ListenerGroup<NodeMainExecutorListener> nodeMainExecutorListeners;
 
   private class RegistrationListener implements NodeListener {
     @Override
@@ -108,6 +115,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
         DefaultNodeMainExecutor.this.shutdown();
       }
     }));
+    nodeMainExecutorListeners = new ListenerGroup<NodeMainExecutorListener>(scheduledExecutorService);
   }
 
   @Override
@@ -118,28 +126,37 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
   @Override
   public void execute(final NodeMain nodeMain, final NodeConfiguration nodeConfiguration,
       final Collection<NodeListener> nodeListeners) {
-    // NOTE(damonkohler): To avoid a race condition, we have to make our copy
-    // of the NodeConfiguration in the current thread.
-    final NodeConfiguration nodeConfigurationCopy = NodeConfiguration.copyOf(nodeConfiguration);
-    nodeConfigurationCopy.setDefaultNodeName(nodeMain.getDefaultNodeName());
-    Preconditions.checkNotNull(nodeConfigurationCopy.getNodeName(), "Node name not specified.");
-    if (DEBUG) {
-      log.info("Starting node: " + nodeConfigurationCopy.getNodeName());
-    }
-    scheduledExecutorService.execute(new Runnable() {
-      @Override
-      public void run() {
-        Collection<NodeListener> nodeListenersCopy = Lists.newArrayList();
-        nodeListenersCopy.add(new RegistrationListener());
-        nodeListenersCopy.add(nodeMain);
-        if (nodeListeners != null) {
-          nodeListenersCopy.addAll(nodeListeners);
-        }
-        // The new Node will call onStart().
-        Node node = nodeFactory.newNode(nodeConfigurationCopy, nodeListenersCopy);
-        nodeMains.put(node, nodeMain);
+    synchronized (mutex) {
+      if (shutdownCountDownLatch != null) {
+        throw new RosRuntimeException("Called execute() after calling shutdown().");
       }
-    });
+      // NOTE(damonkohler): To avoid a race condition, we have to make our copy
+      // of the NodeConfiguration in the current thread.
+      final NodeConfiguration nodeConfigurationCopy = NodeConfiguration.copyOf(nodeConfiguration);
+      nodeConfigurationCopy.setDefaultNodeName(nodeMain.getDefaultNodeName());
+      Preconditions.checkNotNull(nodeConfigurationCopy.getNodeName(), "Node name not specified.");
+      if (DEBUG) {
+        log.info("Starting node: " + nodeConfigurationCopy.getNodeName());
+      }
+      scheduledExecutorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          synchronized (mutex) {
+            if (shutdownCountDownLatch == null) {
+              Collection<NodeListener> nodeListenersCopy = Lists.newArrayList();
+              nodeListenersCopy.add(new RegistrationListener());
+              nodeListenersCopy.add(nodeMain);
+              if (nodeListeners != null) {
+                nodeListenersCopy.addAll(nodeListeners);
+              }
+              // The new Node will call onStart().
+              Node node = nodeFactory.newNode(nodeConfigurationCopy, nodeListenersCopy);
+              nodeMains.put(node, nodeMain);
+            }
+          }
+        }
+      });
+    }
   }
 
   @Override
@@ -157,11 +174,45 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
   @Override
   public void shutdown() {
-    synchronized (connectedNodes) {
-      for (ConnectedNode connectedNode : connectedNodes.values()) {
-        safelyShutdownNode(connectedNode);
+    synchronized (mutex) {
+      shutdownCountDownLatch = new CountDownLatch(connectedNodes.size());
+      scheduledExecutorService.execute(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            shutdownCountDownLatch.await();
+            signalShutdownComplete();
+          } catch (InterruptedException e) {
+            throw new RosRuntimeException(e);
+          }
+        }
+      });
+
+      for (final ConnectedNode connectedNode : connectedNodes.values()) {
+        scheduledExecutorService.execute(new Runnable() {
+          @Override
+          public void run() {
+           safelyShutdownNode(connectedNode);
+           shutdownCountDownLatch.countDown();
+          }
+        });
       }
     }
+  }
+
+  private void signalShutdownComplete() {
+    nodeMainExecutorListeners.signal(new SignalRunnable<NodeMainExecutorListener>() {
+      @Override
+      public void run(NodeMainExecutorListener listener) {
+	listener.onShutdownComplete();
+      }
+    });
+    log.info("Complete shutdown successful.");
+  }
+
+  @Override
+  public void addListener(final NodeMainExecutorListener nodeMainExecutorListener) {
+    nodeMainExecutorListeners.add(nodeMainExecutorListener);
   }
 
   /**
@@ -195,7 +246,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
    */
   private void registerNode(ConnectedNode connectedNode) {
     GraphName nodeName = connectedNode.getName();
-    synchronized (connectedNodes) {
+    synchronized (mutex) {
       for (ConnectedNode illegalConnectedNode : connectedNodes.get(nodeName)) {
         System.err.println(String.format(
             "Node name collision. Existing node %s (%s) will be shutdown.", nodeName,
@@ -213,7 +264,9 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
    *          the {@link Node} to unregister
    */
   private void unregisterNode(Node node) {
-    connectedNodes.get(node.getName()).remove(node);
-    nodeMains.remove(node);
+    synchronized (mutex) {
+      connectedNodes.get(node.getName()).remove(node);
+      nodeMains.remove(node);
+    }
   }
 }

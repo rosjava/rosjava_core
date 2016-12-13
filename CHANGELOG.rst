@@ -2,6 +2,13 @@
 Changelog
 =========
 
+0.3.0 (2016-12-13)
+------------------
+* Updates for Kinetic release.
+* NativeNodeMain for C++ node integration.
+* NodeMainExecutorListener to listen to node shutdown - and other node lifecycle events
+  in the future.
+
 0.2.1 (2015-02-25)
 ------------------
 * allow setting of the talker topic name in pubsub tutorial.
@@ -33,6 +40,15 @@ Changelog
 0.1.4 (2013-10-25)
 ------------------
 * official maven style open ended dependencies.
+
+0.2.0 (2013-10-25)
+------------------
+* official maven style open ranged dependencies
+* gradle 1.7 -> 1.8
+* message generation tests removed
+* eclipse support
+* non loopback for network interface
+
 
 0.1.3 (2013-09-23)
 ------------------

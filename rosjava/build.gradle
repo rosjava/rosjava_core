@@ -18,8 +18,8 @@ dependencies {
   compile project(':apache_xmlrpc_common')
   compile project(':apache_xmlrpc_server')
   compile project(':apache_xmlrpc_client')
-  compile 'org.ros.rosjava_bootstrap:message_generation:[0.2,0.3)'
-  compile 'org.ros.rosjava_messages:rosjava_test_msgs:[0.2,0.3)'
+  compile 'org.ros.rosjava_bootstrap:message_generation:[0.3,0.4)'
+  compile 'org.ros.rosjava_messages:rosjava_test_msgs:[0.3,0.4)'
   compile 'org.ros.rosjava_messages:rosgraph_msgs:[1.11,1.12)'
   compile 'org.ros.rosjava_messages:geometry_msgs:[1.11,1.12)'
   compile 'org.ros.rosjava_messages:nav_msgs:[1.11,1.12)'

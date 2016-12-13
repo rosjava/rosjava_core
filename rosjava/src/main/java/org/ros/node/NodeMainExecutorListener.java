@@ -1,12 +1,12 @@
 /*
- * Copyright (C) 2011 Google Inc.
- *
+ * Copyright (C) 2014 Google Inc.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -14,16 +14,18 @@
  * the License.
  */
 
-include(
-    'apache_xmlrpc_client',
-    'apache_xmlrpc_common',
-    'apache_xmlrpc_server',
-    'rosjava',
-    'rosjava_geometry',
-    'rosjava_benchmarks',
-    'rosjava_test',
-    'rosjava_tutorial_pubsub',
-    'rosjava_tutorial_right_hand_rule',
-    'rosjava_tutorial_services',
-    'docs',
-    )
+package org.ros.node;
+
+/**
+ * A listener for lifecycle events on a {@link NodeMainExecutor}.
+ */
+public interface NodeMainExecutorListener {
+  /**
+   * Called when the {@link NodeMainExecutor} has finished shutting down all of 
+   * its {@link Node}s.
+   * 
+   * @param node
+   *          the {@link Node} that has shut down
+   */
+  void onShutdownComplete();
+}
