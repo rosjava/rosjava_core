@@ -25,7 +25,7 @@ buildscript {
 apply plugin: "catkin"
 
 allprojects {
-  group 'org.ros.rosjava_core'
+  group "org.ros.rosjava_core"
   version = project.catkin.pkg.version
 }
 

@@ -34,6 +34,15 @@ Changelog
 ------------------
 * official maven style open ended dependencies.
 
+0.2.0 (2013-10-25)
+------------------
+* official maven style open ranged dependencies
+* gradle 1.7 -> 1.8
+* message generation tests removed
+* eclipse support
+* non loopback for network interface
+
+
 0.1.3 (2013-09-23)
 ------------------
 * use updated ros gradle plugins with maven-publish for publishing.
