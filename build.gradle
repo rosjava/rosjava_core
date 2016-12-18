@@ -19,7 +19,7 @@ task wrapper(type: Wrapper) {
 }
 
 buildscript {
-  apply from: "https://github.com/rosjava/rosjava_bootstrap/raw/indigo/buildscript.gradle"
+  apply from: "https://github.com/rosjava/rosjava_bootstrap/raw/kinetic/buildscript.gradle"
 }
 
 apply plugin: "catkin"
@@ -31,16 +31,16 @@ allprojects {
 
 subprojects {
   if (name != 'docs') {
-    /* 
+    /*
      * The ros plugin configures a few things:
-     * 
+     *
      *  - local deployment repository : where it dumps the jars and packaged artifacts)
-     *  - local maven repositories    : where it finds your locally installed/built artifacts) 
+     *  - local maven repositories    : where it finds your locally installed/built artifacts)
      *  - external maven repositories : where it goes looking if it can't find dependencies locally
-     * 
+     *
      * To modify, or add repos to the default external maven repositories list, pull request against this code:
-     * 
-     *   https://github.com/rosjava/rosjava_bootstrap/blob/indigo/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
+     *
+     *   https://github.com/rosjava/rosjava_bootstrap/blob/kinetic/gradle_plugins/src/main/groovy/org/ros/gradle_plugins/RosPlugin.groovy#L31
      */
     apply plugin: "ros-java"
     apply plugin: "osgi"
