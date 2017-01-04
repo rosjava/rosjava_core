@@ -1,15 +1,7 @@
 package org.ros.node;
 
-import org.ros.node.AbstractNodeMain;
-import org.ros.node.ConnectedNode;
-import org.ros.node.Node;
-import org.ros.namespace.GraphName;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * A java wrapper to load and run a native-code ROS node.
@@ -70,16 +62,16 @@ public abstract class NativeNodeMain extends AbstractNodeMain {
     this(libName, null);
   }
 
-  // These methods define the execution model interface for this node.
-  protected abstract void execute(String rosMasterUri, String rosHostName, String rosNodeName, String[] remappingArguments);
-  protected abstract void shutdown();
+  // These methods define the execution model interface for this node. Return values are error codes (not used by default).
+  protected abstract int execute(String rosMasterUri, String rosHostName, String rosNodeName, String[] remappingArguments);
+  protected abstract int shutdown();
   
   @Override
   public void onStart(final ConnectedNode connectedNode) {
     // retain important ROS info
     masterUri = connectedNode.getMasterUri().toString();
     hostName = connectedNode.getUri().getHost();
-    nodeName = this.libName;
+    nodeName = getDefaultNodeName().toString();
 
     // create a new thread to execute the native code.
     new Thread() {
