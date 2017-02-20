@@ -22,9 +22,10 @@ include(
     'rosjava_geometry',
     'rosjava_benchmarks',
     'rosjava_test',
+    'rosjava_helpers',
     'rosjava_tutorial_pubsub',
     'rosjava_tutorial_right_hand_rule',
     'rosjava_tutorial_services',
     'docs',
-    )
+)
 

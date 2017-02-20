@@ -1,0 +1,6 @@
+apply plugin: 'java'
+
+dependencies {
+    compile project(':rosjava')
+    compile 'org.yaml:snakeyaml:[1.17, 1.18)'
+}
