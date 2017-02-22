@@ -2,8 +2,8 @@
 Changelog
 =========
 
-Forthcoming
------------
+0.3.1 (2017-02-22)
+------------------
 * NativeNodeMain upgraded to upstream error codes to the application.
 * Parameter Node added to new Helper module.
 * publishMavenJavaPublicationToMavenRepository -> publish
