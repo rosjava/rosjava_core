@@ -126,4 +126,10 @@ public interface Node {
    * Shut the node down.
    */
   void shutdown();
+
+  /**
+   * Stops and Clears node listeners.
+   */
+
+  void removeListeners();
 }

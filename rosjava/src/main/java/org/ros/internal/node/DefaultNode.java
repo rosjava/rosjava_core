@@ -493,6 +493,11 @@ public class DefaultNode implements ConnectedNode {
     });
   }
 
+  @Override
+  public void removeListeners() {
+    nodeListeners.shutdown();
+  }
+
   /**
    * SignalRunnable all {@link NodeListener}s that the {@link Node} has started.
    * <p>
