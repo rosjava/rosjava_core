@@ -102,6 +102,25 @@ public class ListenerGroup<T> {
   }
 
   /**
+   * Removes and cancels the {@EventDispatcher} specified by the listener
+   * from the {@link ListenerGroup}.
+   * @param listener the listener to remove
+   * @return flag indicating successful removal
+     */
+  public boolean remove(T listener)
+  {
+    for (EventDispatcher<T> eventDispatcher : eventDispatchers) {
+      if(listener.equals(eventDispatcher.getListener()))
+      {
+        eventDispatcher.cancel();
+        eventDispatchers.remove(eventDispatcher);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * @return the number of listeners in the group
    */
   public int size() {
@@ -151,5 +170,6 @@ public class ListenerGroup<T> {
     for (EventDispatcher<T> eventDispatcher : eventDispatchers) {
       eventDispatcher.cancel();
     }
+    eventDispatchers.clear();
   }
 }
