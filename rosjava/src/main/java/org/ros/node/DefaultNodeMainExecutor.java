@@ -213,6 +213,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
    *          the {@link Node} to unregister
    */
   private void unregisterNode(Node node) {
+    node.removeListeners();
     connectedNodes.get(node.getName()).remove(node);
     nodeMains.remove(node);
   }

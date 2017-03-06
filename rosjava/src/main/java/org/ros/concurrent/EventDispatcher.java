@@ -42,4 +42,9 @@ public class EventDispatcher<T> extends CancellableLoop {
     SignalRunnable<T> signalRunnable = events.takeFirst();
     signalRunnable.run(listener);
   }
+
+  public T getListener()
+  {
+    return listener;
+  }
 }
