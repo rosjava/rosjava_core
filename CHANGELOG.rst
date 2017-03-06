@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Forthcoming
+-----------
+* Adds fix for shutting down DefaultNodeMainExecutor ListenerGroup to prevent leak in android when activities are destroyed.
+* Added ability to remove listener from ListenerGroup to fix android_core issue `#254 <https://github.com/rosjava/rosjava_core/issues/254>`_.
+
 0.3.1 (2017-02-22)
 ------------------
 * NativeNodeMain upgraded to upstream error codes to the application.
