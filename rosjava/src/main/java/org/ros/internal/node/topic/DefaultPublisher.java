@@ -109,6 +109,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   public void shutdown(long timeout, TimeUnit unit) {
     signalOnShutdown(timeout, unit);
     outgoingMessageQueue.shutdown();
+    listeners.shutdown();
   }
 
   @Override
