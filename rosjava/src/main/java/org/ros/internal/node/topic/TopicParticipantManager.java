@@ -136,6 +136,19 @@ public class TopicParticipantManager {
     publisherConnections.remove(publisher, subscriberIdentifier);
   }
 
+  public void shutdown(){
+    for(DefaultPublisher<?> publisher : publishers.values()){
+      publisher.shutdown();
+      removePublisher(publisher);
+    }
+    subscriberConnections.clear();
+    for(DefaultSubscriber<?> subscriber : subscribers.values()){
+      subscriber.shutdown();
+      removeSubscriber(subscriber);
+    }
+    publisherConnections.clear();
+  }
+
   public Collection<DefaultSubscriber<?>> getSubscribers() {
     return ImmutableList.copyOf(subscribers.values());
   }

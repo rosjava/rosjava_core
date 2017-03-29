@@ -405,14 +405,7 @@ public class DefaultNode implements ConnectedNode {
     // NOTE(damonkohler): We don't want to raise potentially spurious
     // exceptions during shutdown that would interrupt the process. This is
     // simply best effort cleanup.
-    for (DefaultPublisher<?> publisher : topicParticipantManager.getPublishers()) {
-      publisher.shutdown();
-      topicParticipantManager.removePublisher(publisher);
-    }
-    for (DefaultSubscriber<?> subscriber : topicParticipantManager.getSubscribers()) {
-      subscriber.shutdown();
-      topicParticipantManager.removeSubscriber(subscriber);
-    }
+    topicParticipantManager.shutdown();
     for (ServiceServer<?, ?> serviceServer : serviceManager.getServers()) {
       try {
         Response<Integer> response =
