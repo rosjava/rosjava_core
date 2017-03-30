@@ -39,6 +39,8 @@ import org.ros.internal.node.service.ServiceDeclaration;
 import org.ros.internal.node.service.ServiceFactory;
 import org.ros.internal.node.service.ServiceIdentifier;
 import org.ros.internal.node.service.ServiceManager;
+import org.ros.internal.node.topic.DefaultPublisher;
+import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherFactory;
 import org.ros.internal.node.topic.SubscriberFactory;
 import org.ros.internal.node.topic.TopicDeclaration;
@@ -403,12 +405,7 @@ public class DefaultNode implements ConnectedNode {
     // NOTE(damonkohler): We don't want to raise potentially spurious
     // exceptions during shutdown that would interrupt the process. This is
     // simply best effort cleanup.
-    for (Publisher<?> publisher : topicParticipantManager.getPublishers()) {
-      publisher.shutdown();
-    }
-    for (Subscriber<?> subscriber : topicParticipantManager.getSubscribers()) {
-      subscriber.shutdown();
-    }
+    topicParticipantManager.shutdown();
     for (ServiceServer<?, ?> serviceServer : serviceManager.getServers()) {
       try {
         Response<Integer> response =
