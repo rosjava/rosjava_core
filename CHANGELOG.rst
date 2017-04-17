@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Forthcoming
+-----------
+* Added fix to remove Publishers and Subscribers from topicParticipantManager on node shutdown. 
+* Added fix to remove listeners from DefaultPublisher on shutdown.
+* Contributors: Dan Ambrosio, Julian Cerruti
+
 0.3.2 (2017-03-06)
 ------------------
 * Adds fix for shutting down DefaultNodeMainExecutor ListenerGroup to prevent leak in android when activities are destroyed.
