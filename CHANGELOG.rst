@@ -2,8 +2,8 @@
 Changelog
 =========
 
-Forthcoming
------------
+0.3.3 (2017-04-17)
+------------------
 * Added fix to remove Publishers and Subscribers from topicParticipantManager on node shutdown. 
 * Added fix to remove listeners from DefaultPublisher on shutdown.
 * Contributors: Dan Ambrosio, Julian Cerruti
