@@ -21,6 +21,7 @@ import org.ros.internal.node.DefaultNode;
 import org.ros.concurrent.SharedScheduledExecutorService;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
@@ -43,6 +44,6 @@ public class DefaultNodeFactory implements NodeFactory {
 
   @Override
   public Node newNode(NodeConfiguration nodeConfiguration) {
-    return newNode(nodeConfiguration, null);
+    return newNode(nodeConfiguration, new LinkedList<NodeListener>());
   }
 }
