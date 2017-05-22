@@ -187,8 +187,20 @@ public class ParameterServer {
     }
   }
 
-  public Object search(GraphName name) {
-    throw new UnsupportedOperationException();
+  public Object search(GraphName namespace, GraphName name) {
+    GraphName search = namespace;
+    GraphName result = search.join(name.toRelative());
+    if (has(result)) {
+      return result;
+    }
+    while (!search.isRoot()) {
+      search = search.getParent();
+      result = search.join(name.toRelative());
+      if (has(result)) {
+        return result;
+      }
+    }
+    return null;
   }
 
   @SuppressWarnings("unchecked")

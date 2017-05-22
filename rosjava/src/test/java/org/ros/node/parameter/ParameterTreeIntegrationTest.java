@@ -86,6 +86,13 @@ public class ParameterTreeIntegrationTest extends RosTest {
   }
 
   @Test
+  public void testSearchParameter() {
+    parameters.set("/node_name/p_i", "value");
+    GraphName res = parameters.search("p_i");
+    assertEquals("/node_name/p_i", res.toString());
+  }
+
+  @Test
   public void testGetParameterWithDefault() {
     assertTrue(parameters.getBoolean("bloop", true));
     List<String> expectedList = Lists.newArrayList("foo", "bar", "baz");
