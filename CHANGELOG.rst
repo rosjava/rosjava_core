@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Forthcoming
+-----------
+* Implement parameter server's searchParam
+* fixed nullptr triggered by default node factory
+* Contributors: Julian Cerruti, Leroy Ruegemer
+
 0.3.3 (2017-04-17)
 ------------------
 * Added fix to remove Publishers and Subscribers from topicParticipantManager on node shutdown. 
