@@ -2,8 +2,8 @@
 Changelog
 =========
 
-Forthcoming
------------
+0.3.4 (2017-05-22)
+------------------
 * Implement parameter server's searchParam
 * fixed nullptr triggered by default node factory
 * Contributors: Julian Cerruti, Leroy Ruegemer
