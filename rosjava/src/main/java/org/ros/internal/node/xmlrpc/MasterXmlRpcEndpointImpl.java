@@ -214,7 +214,15 @@ public class MasterXmlRpcEndpointImpl implements MasterXmlRpcEndpoint,
 
   @Override
   public List<Object> searchParam(String callerId, String key) {
-    throw new UnsupportedOperationException();
+    GraphName ns = GraphName.of(callerId);
+    GraphName searchKey = GraphName.of(key);
+    Object value = parameterServer.search(ns, searchKey);
+    if (value != null) {
+      return Response.newSuccess("Success", value.toString()).toList();
+    } else {
+      return Response.newError("Parameter \"" + key + "\" in namespace \"" + ns.toString() +
+              "\" not found in parameter server", null).toList();
+    }
   }
 
   @Override

@@ -17,6 +17,7 @@
 package org.ros.internal.node.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
@@ -128,4 +129,31 @@ public class ParameterServerTest {
     assertTrue(names.contains(name2));
   }
 
+  @Test
+  public void testSearchParam() {
+    GraphName ns = GraphName.of("/a/b/c/d/e/f");
+    GraphName name1 = GraphName.of("s_1");
+
+    GraphName name2 = GraphName.of("/s_1");
+    server.set(name2, 1);
+    Object result = server.search(ns, name1);
+    assertEquals(name2, result);
+    server.delete(name2);
+
+    name2 = GraphName.of("/a/b/s_1");
+    server.set(name2, 1);
+    result = server.search(ns, name1);
+    assertEquals(name2, result);
+    server.delete(name2);
+
+    name2 = GraphName.of("/a/b/c/d/e/f/s_1");
+    server.set(name2, 1);
+    result = server.search(ns, name1);
+    assertEquals(name2, result);
+    server.delete(name2);
+
+    name1 = GraphName.of("s_j");
+    result = server.search(ns, name1);
+    assertEquals(null, result);
+  }
 }
