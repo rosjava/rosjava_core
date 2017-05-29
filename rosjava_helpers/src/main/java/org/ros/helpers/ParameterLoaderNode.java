@@ -40,7 +40,7 @@ import java.util.Map;
 public class ParameterLoaderNode extends AbstractNodeMain {
 
     public static final String NODE_NAME = "parameter_loader";
-    private final List<LoadedResource> params = new ArrayList<>();
+    private final List<LoadedResource> params = new ArrayList<LoadedResource>();
     private Log log;
 
     /**
@@ -57,6 +57,7 @@ public class ParameterLoaderNode extends AbstractNodeMain {
         this.params.add(new LoadedResource((new Yaml()).load(ymlInputStream), namespace));
     }
 
+    @SuppressWarnings("unchecked")
     private void addParams(ParameterTree parameterTree, String namespace, Map<String, Object> params) {
         for (Map.Entry<String, Object> e : params.entrySet()) {
             String fullKeyName = namespace + "/" + e.getKey();
