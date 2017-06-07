@@ -44,7 +44,7 @@ public class NtpTimeProvider implements TimeProvider {
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(NtpTimeProvider.class);
 
-  private static final int SAMPLE_SIZE = 11;
+  private int sampleSize = 11;
   
   private final InetAddress host;
   private final ScheduledExecutorService scheduledExecutorService;
@@ -76,12 +76,12 @@ public class NtpTimeProvider implements TimeProvider {
   public void updateTime() throws IOException {
     List<Long> offsets = Lists.newArrayList();
     int failures = 0;
-    for (int i = 0; i < SAMPLE_SIZE; i++) {
+    for (int i = 0; i < sampleSize; i++) {
       try { 
     	  offsets.add(computeOffset());
       } catch (IOException e) {
-    	  if ( ++failures > SAMPLE_SIZE/2 ) {
-    		  throw e;
+    	  if (++failures > sampleSize / 2) {
+            throw e;
     	  }
       }
     }
@@ -97,7 +97,9 @@ public class NtpTimeProvider implements TimeProvider {
     try {
       time = ntpClient.getTime(host);
     } catch (IOException e) {
-      log.error("Failed to read time from NTP server: " + host.getHostName(), e);
+      if (DEBUG) {
+        log.error("Failed to read time from NTP server: " + host.getHostName(), e);
+      }
       throw e;
     }
     time.computeDetails();
@@ -146,5 +148,15 @@ public class NtpTimeProvider implements TimeProvider {
   public Time getCurrentTime() {
     Time currentTime = wallTimeProvider.getCurrentTime();
     return currentTime.add(Duration.fromMillis(offset));
+  }
+
+  /**
+   * Sets how many samples will be taken from the NTP server
+   * when calling {@link #updateTime()}.
+   * @param sampleSize Number of samples to take. It has to be > 0.
+   */
+  public void setUpdateTimeSampleSize(int sampleSize) {
+    Preconditions.checkArgument(sampleSize > 0);
+    this.sampleSize = sampleSize;
   }
 }
