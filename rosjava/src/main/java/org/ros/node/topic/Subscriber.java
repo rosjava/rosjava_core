@@ -62,6 +62,18 @@ public interface Subscriber<T> extends TopicParticipant {
   void addMessageListener(MessageListener<T> messageListener);
 
   /**
+   * Removes a previously added {@link MessageListener}.
+   * @param messageListener {@link MessageListener} to remove.
+   * @return True if the listener was removed, false if it wasn't registered before.
+   */
+  boolean removeMessageListener(MessageListener<T> messageListener);
+
+  /**
+   * Removes all registered {@link MessageListener}s.
+   */
+  void removeAllMessageListeners();
+
+  /**
    * Shuts down and unregisters the {@link Subscriber}. using the default
    * timeout Shutdown is delayed by at most the specified timeout to allow
    * {@link SubscriberListener#onShutdown(Subscriber)} callbacks to complete.

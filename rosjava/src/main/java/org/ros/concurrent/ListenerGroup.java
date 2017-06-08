@@ -16,6 +16,7 @@
 
 package org.ros.concurrent;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import java.util.Collection;
@@ -107,11 +108,10 @@ public class ListenerGroup<T> {
    * @param listener the listener to remove
    * @return flag indicating successful removal
      */
-  public boolean remove(T listener)
-  {
+  public boolean remove(T listener) {
+    Preconditions.checkNotNull(listener);
     for (EventDispatcher<T> eventDispatcher : eventDispatchers) {
-      if(listener.equals(eventDispatcher.getListener()))
-      {
+      if (listener.equals(eventDispatcher.getListener())) {
         eventDispatcher.cancel();
         eventDispatchers.remove(eventDispatcher);
         return true;
