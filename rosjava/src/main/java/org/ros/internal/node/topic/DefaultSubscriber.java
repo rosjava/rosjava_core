@@ -139,6 +139,16 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     addMessageListener(messageListener, 1);
   }
 
+  @Override
+  public boolean removeMessageListener(MessageListener<T> messageListener) {
+    return incomingMessageQueue.removeListener(messageListener);
+  }
+
+  @Override
+  public void removeAllMessageListeners() {
+    incomingMessageQueue.removeAllListeners();
+  }
+
   @VisibleForTesting
   public void addPublisher(PublisherIdentifier publisherIdentifier, InetSocketAddress address) {
     synchronized (mutex) {

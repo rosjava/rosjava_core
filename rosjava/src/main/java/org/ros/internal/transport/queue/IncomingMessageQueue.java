@@ -71,6 +71,20 @@ public class IncomingMessageQueue<T> {
     messageDispatcher.addListener(messageListener, queueCapacity);
   }
 
+  /**
+   * @see MessageDispatcher#removeListener(MessageListener)
+   */
+  public boolean removeListener(MessageListener<T> messageListener) {
+    return messageDispatcher.removeListener(messageListener);
+  }
+
+  /**
+   * @see MessageDispatcher#removeAllListeners()
+   */
+  public void removeAllListeners() {
+    messageDispatcher.removeAllListeners();
+  }
+
   public void shutdown() {
     messageDispatcher.cancel();
   }

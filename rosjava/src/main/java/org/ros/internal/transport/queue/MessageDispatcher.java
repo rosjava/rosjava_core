@@ -80,6 +80,37 @@ public class MessageDispatcher<T> extends CancellableLoop {
   }
 
   /**
+   * Removes the specified {@link MessageListener} from the internal
+   * {@link ListenerGroup}.
+   * @param messageListener {@link MessageListener} to remove.
+   * @return True if the listener was removed, false if it wasn't registered before.
+   *
+   * @see ListenerGroup#remove(Object)
+   */
+  public boolean removeListener(MessageListener<T> messageListener) {
+    if (DEBUG) {
+      log.info("Removing listener.");
+    }
+    synchronized (mutex) {
+      return messageListeners.remove(messageListener);
+    }
+  }
+
+  /**
+   * Removes all the registered {@link MessageListener}s.
+   *
+   * @see ListenerGroup#shutdown()
+   */
+  public void removeAllListeners() {
+    if (DEBUG) {
+      log.info("Removing all listeners.");
+    }
+    synchronized (mutex) {
+      messageListeners.shutdown();
+    }
+  }
+
+  /**
    * Returns a newly allocated {@link SignalRunnable} for the specified
    * {@link LazyMessage}.
    * 
