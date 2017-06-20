@@ -53,6 +53,8 @@ public abstract class NativeNodeMain extends AbstractNodeMain {
     // if no remapping is needed, create an empty array
     if (remappings == null) {
       remappingArguments = new String[0];
+    } else {
+      remappingArguments = remappings;
     }
     
     log.info("Trying to load native library '" + libName + "'...");
