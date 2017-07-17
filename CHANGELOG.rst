@@ -2,8 +2,8 @@
 Changelog
 =========
 
-Forthcoming
------------
+0.3.5 (2017-07-17)
+------------------
 * Fix remapping member variable not set if argument is not null
 * Adding the capability to remove a messageListener from a subscriber.
 * Avoid flooding log with error messages on NTP sync failure
