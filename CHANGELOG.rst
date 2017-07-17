@@ -2,6 +2,16 @@
 Changelog
 =========
 
+Forthcoming
+-----------
+* Fix remapping member variable not set if argument is not null
+* Adding the capability to remove a messageListener from a subscriber.
+* Avoid flooding log with error messages on NTP sync failure
+* Fix to avoid logging the same error multiple times for NtpTimeProvider.
+* Fix: avoid exceptions on node shutdown
+* Fix to avoid spurious exceptions on node shutdown if there's an active topic.
+* Contributors: Juan Ignacio Ubeira, Julian Cerruti, Perrine Aguiar
+
 0.3.4 (2017-05-22)
 ------------------
 * Implement parameter server's searchParam
