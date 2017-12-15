@@ -26,6 +26,6 @@ include(
     'rosjava_tutorial_pubsub',
     'rosjava_tutorial_right_hand_rule',
     'rosjava_tutorial_services',
+    'rosjava_tutorial_custom_services',
     'docs',
 )
-
