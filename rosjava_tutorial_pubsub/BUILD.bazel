@@ -1,0 +1,13 @@
+java_binary(
+    name = "rosjava_tutorial_pubsub",
+    srcs = glob([
+        "src/main/**/*.java",
+    ]),
+    main_class = "org.ros.RosRun",
+    deps = [
+        "//3rdparty/jvm/org/apache/commons:com_springsource_org_apache_commons_logging",
+        "//3rdparty/jvm/org/ros/rosjava_messages:std_msgs",
+        "//rosjava",
+        "@com_github_rosjava_rosjava_bootstrap//message_generation",
+    ],
+)

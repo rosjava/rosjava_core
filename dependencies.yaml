@@ -1,0 +1,80 @@
+# If you edit this file, follow these instructions to generate the output
+# files:
+#
+# cd ..
+# git clone https://github.com/johnynek/bazel-deps
+# cd bazel-deps
+# bazel build src/scala/com/github/johnynek/bazel_deps:parseproject_deploy.jar
+# cd ../rosjava_core
+# ../bazel-deps/gen_maven_deps.sh generate -r $PWD -s 3rdparty/workspace.bzl -d dependencies.yaml
+
+options:
+  languages: [ "java" ]
+  resolvers:
+    - id: "jcenter"
+      type: "default"
+      url: https://jcenter.bintray.com/
+    - id: "rosjava_mvn_repo"
+      type: "default"
+      url: https://github.com/rosjava/rosjava_mvn_repo/raw/master
+  resolverCache: bazel_output_base
+  transitivity: runtime_deps
+  versionConflictPolicy: highest
+  buildHeader:
+    - "# Do not edit. bazel-deps autogenerates this file from dependencies.yaml."
+
+dependencies:
+  commons-pool:
+    commons-pool:
+      lang: java
+      version: "1.6"
+  com.google.guava:
+    guava:
+      lang: java
+      version: "12.0"
+  dnsjava:
+    dnsjava:
+      lang: java
+      version: "2.1.1"
+  io.netty:
+    netty:
+      lang: java
+      version: "3.5.13.Final"
+  junit:
+    junit:
+      lang: java
+      version: "4.8.2"
+  org.apache.commons:
+    com.springsource.org.apache.commons.codec:
+      lang: java
+      version: "1.3.0"
+    com.springsource.org.apache.commons.httpclient:
+      lang: java
+      version: "3.1.0"
+    com.springsource.org.apache.commons.io:
+      lang: java
+      version: "1.4.0"
+    com.springsource.org.apache.commons.lang:
+      lang: java
+      version: "2.4.0"
+    com.springsource.org.apache.commons.logging:
+      lang: java
+      version: "1.1.1"
+    com.springsource.org.apache.commons.net:
+      lang: java
+      version: "2.0.0"
+  org.apache.ws.commons:
+    ws-commons-util:
+      lang: java
+      version: "1.0.1"
+  org.mockito:
+    mockito-all:
+      lang: java
+      version: "1.8.5"
+  org.ros.rosjava_messages:
+    rosgraph_msgs:
+      lang: java
+      version: "1.11.2"
+    std_msgs:
+      lang: java
+      version: "0.5.11"

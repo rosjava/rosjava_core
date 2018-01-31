@@ -8,4 +8,4 @@ bin
 .settings
 *.iml
 .idea
-
+bazel-*

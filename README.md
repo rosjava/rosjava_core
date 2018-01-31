@@ -60,3 +60,44 @@ code. The CLA protects you and us.
 Follow either of the two links above to access the appropriate CLA and
 instructions for how to sign and return it. Damon will respond on either github
 or email to confirm.
+
+### Building with Bazel ###
+
+To build this project with Bazel, simply run:
+
+```
+bazel build //...
+```
+
+To depend on `rosjava_core` from another project, you'll need to use
+[bazel-deps](https://github.com/johnynek/bazel-deps).
+
+1. Start by copying (or merging) [dependencies.yaml][dependencies.yaml] in to
+   your project.
+1. Follow the instructions in that file to generate the BUILD files inside your
+   project.
+1. Add the following lines to your WORKSPACE file:
+
+```
+load("//3rdparty:workspace.bzl", "maven_dependencies")
+
+maven_dependencies()
+
+git_repository(
+    name = "com_github_rosjava_rosjava_core",
+    remote = "https://github.com/rosjava/rosjava_core",
+    commit = "HEAD",
+)
+
+load("@com_github_rosjava_rosjava_core//bazel:repositories.bzl", "rosjava_repositories")
+
+rosjava_repositories()
+```
+
+*You may want to use `http_archive` instead of `git_repository` for the reasons
+described in the [Bazel docs][git-repository-docs].*
+
+[git-repository-docs]: https://docs.bazel.build/versions/master/be/workspace.html#git_repository
+
+You can now depend on rosjava targets (eg
+`@com_github_rosjava_rosjava_core//rosjava`) as required by your application.
