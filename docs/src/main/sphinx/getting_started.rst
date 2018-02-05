@@ -154,7 +154,7 @@ processes:
 
   # source your devel/setup.bash
   roscd rosjava_core/rosjava_tutorial_pubsub
-  ../gradlew installApp
+  ../gradlew installDist
   roscore &
   ./build/install/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Talker &
   ./build/install/rosjava_tutorial_pubsub/bin/rosjava_tutorial_pubsub org.ros.rosjava_tutorial_pubsub.Listener
@@ -235,7 +235,7 @@ Building and executing these nodes works in the same manner as described above:
 
   # source your devel/setup.bash
   roscd rosjava_core/rosjava_tutorial_pubsub
-  ../gradlew installApp
+  ../gradlew installDist
   roscore &
   ./build/install/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Server &
   ./build/install/rosjava_tutorial_services/bin/rosjava_tutorial_services org.ros.rosjava_tutorial_services.Client
