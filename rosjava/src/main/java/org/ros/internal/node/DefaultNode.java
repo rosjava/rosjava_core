@@ -180,16 +180,25 @@ public class DefaultNode implements ConnectedNode {
     // possible during startup.
     registrar.start(slaveServer.toNodeIdentifier());
 
-    // During startup, we wait for 1) the RosoutLogger and 2) the TimeProvider.
-    final CountDownLatch latch = new CountDownLatch(2);
+    // Wait for the logger to register with the master. This ensures the master is running before
+    // requesting the use_sim_time parameter.
+    final CountDownLatch rosoutLatch = new CountDownLatch(1);
 
     log = new RosoutLogger(this);
     log.getPublisher().addListener(new DefaultPublisherListener<rosgraph_msgs.Log>() {
       @Override
       public void onMasterRegistrationSuccess(Publisher<rosgraph_msgs.Log> registrant) {
-        latch.countDown();
+        rosoutLatch.countDown();
       }
     });
+
+    try {
+      rosoutLatch.await();
+    } catch (InterruptedException e) {
+      signalOnError(e);
+      shutdown();
+      return;
+    }
 
     boolean useSimTime = false;
     try {
@@ -198,24 +207,28 @@ public class DefaultNode implements ConnectedNode {
               && parameterTree.getBoolean(Parameters.USE_SIM_TIME);
     } catch (Exception e) {
       signalOnError(e);
+      shutdown();
+      return;
     }
+
+    final CountDownLatch timeLatch = new CountDownLatch(1);
     if (useSimTime) {
       ClockTopicTimeProvider clockTopicTimeProvider = new ClockTopicTimeProvider(this);
       clockTopicTimeProvider.getSubscriber().addSubscriberListener(
           new DefaultSubscriberListener<rosgraph_msgs.Clock>() {
             @Override
             public void onMasterRegistrationSuccess(Subscriber<rosgraph_msgs.Clock> subscriber) {
-              latch.countDown();
+              timeLatch.countDown();
             }
           });
       timeProvider = clockTopicTimeProvider;
     } else {
       timeProvider = nodeConfiguration.getTimeProvider();
-      latch.countDown();
+      timeLatch.countDown();
     }
 
     try {
-      latch.await();
+      timeLatch.await();
     } catch (InterruptedException e) {
       signalOnError(e);
       shutdown();
