@@ -27,7 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import java.util.List;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -67,6 +69,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
         }
     }
 
+
     /**
      * @return an instance of {@link DefaultNodeMainExecutor} that uses a
      * {@link ScheduledExecutorService} that is suitable for both
@@ -75,7 +78,8 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
      */
     public static NodeMainExecutor newDefault() {
         return newDefault(new DefaultScheduledExecutorService());
-    }
+	}
+
 
     /**
      * @return an instance of {@link DefaultNodeMainExecutor} that uses the
@@ -83,6 +87,15 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
      */
     public static NodeMainExecutor newDefault(ScheduledExecutorService executorService) {
         return new DefaultNodeMainExecutor(new DefaultNodeFactory(executorService), executorService);
+    }
+  
+  @Override
+  public void shutdown() {
+    synchronized (connectedNodes) {
+      for (ConnectedNode connectedNode : new HashSet<>(connectedNodes.values())) {
+        safelyShutdownNode(connectedNode);
+      }
+
     }
 
     /**

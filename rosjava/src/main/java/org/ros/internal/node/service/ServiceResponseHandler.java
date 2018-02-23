@@ -18,6 +18,8 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
@@ -29,6 +31,7 @@ import org.ros.node.service.ServiceResponseListener;
 
 import java.nio.charset.Charset;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -38,11 +41,11 @@ import java.util.concurrent.ExecutorService;
  */
 class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
 
-  private final Queue<ServiceResponseListener<ResponseType>> responseListeners;
+  private final ConcurrentLinkedQueue<ServiceResponseListener<ResponseType>> responseListeners;
   private final MessageDeserializer<ResponseType> deserializer;
   private final ExecutorService executorService;
 
-  public ServiceResponseHandler(Queue<ServiceResponseListener<ResponseType>> messageListeners,
+  public ServiceResponseHandler(ConcurrentLinkedQueue<ServiceResponseListener<ResponseType>> messageListeners,
       MessageDeserializer<ResponseType> deserializer, ExecutorService executorService) {
     this.responseListeners = messageListeners;
     this.deserializer = deserializer;

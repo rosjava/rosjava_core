@@ -19,6 +19,8 @@ package org.ros.internal.node.service;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.Message;
@@ -38,6 +40,7 @@ import org.ros.node.service.ServiceResponseListener;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -90,7 +93,7 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
   private final MessageSerializer<T> serializer;
   private final MessageFactory messageFactory;
   private final MessageBufferPool messageBufferPool;
-  private final Queue<ServiceResponseListener<S>> responseListeners;
+  private final ConcurrentLinkedQueue<ServiceResponseListener<S>> responseListeners;
   private final ConnectionHeader connectionHeader;
   private final TcpClientManager tcpClientManager;
   private final HandshakeLatch handshakeLatch;
@@ -113,7 +116,7 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
     this.serializer = serializer;
     this.messageFactory = messageFactory;
     messageBufferPool = new MessageBufferPool();
-    responseListeners = Lists.newLinkedList();
+    responseListeners = new ConcurrentLinkedQueue<>();
     connectionHeader = new ConnectionHeader();
     connectionHeader.addField(ConnectionHeaderFields.CALLER_ID, nodeName.toString());
     // TODO(damonkohler): Support non-persistent connections.
@@ -151,7 +154,7 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
   }
 
   @Override
-  public void call(final T request, final ServiceResponseListener<S> listener) {
+  synchronized public void call(final T request, final ServiceResponseListener<S> listener) {
     final ChannelBuffer buffer = messageBufferPool.acquire();
     serializer.serialize(request, buffer);
     responseListeners.add(listener);
