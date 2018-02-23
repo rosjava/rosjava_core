@@ -31,6 +31,7 @@ import org.ros.concurrent.DefaultScheduledExecutorService;
 import org.ros.namespace.GraphName;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -158,7 +159,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
   @Override
   public void shutdown() {
     synchronized (connectedNodes) {
-      for (ConnectedNode connectedNode : connectedNodes.values()) {
+      for (ConnectedNode connectedNode : new HashSet<>(connectedNodes.values())) {
         safelyShutdownNode(connectedNode);
       }
     }
