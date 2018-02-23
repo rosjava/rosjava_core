@@ -29,6 +29,7 @@ import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.service.ServiceServer;
 
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -46,12 +47,12 @@ class ServiceClientHandshakeHandler<T, S> extends BaseClientHandshakeHandler {
 
   private static final Log log = LogFactory.getLog(ServiceClientHandshakeHandler.class);
   
-  private final Queue<ServiceResponseListener<S>> responseListeners;
+  private final ConcurrentLinkedQueue<ServiceResponseListener<S>> responseListeners;
   private final MessageDeserializer<S> deserializer;
   private final ExecutorService executorService;
 
   public ServiceClientHandshakeHandler(ConnectionHeader outgoingConnectionHeader,
-      Queue<ServiceResponseListener<S>> responseListeners,
+      ConcurrentLinkedQueue<ServiceResponseListener<S>> responseListeners,
       MessageDeserializer<S> deserializer, ExecutorService executorService) {
     super(new ServiceClientHandshake(outgoingConnectionHeader), executorService);
     this.responseListeners = responseListeners;
