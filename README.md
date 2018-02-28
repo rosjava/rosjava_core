@@ -85,8 +85,8 @@ maven_dependencies()
 
 git_repository(
     name = "com_github_rosjava_rosjava_core",
-    remote = "https://github.com/rosjava/rosjava_core",
-    commit = "HEAD",
+    commit = "{insert commit SHA for HEAD}",
+    remote = "https://github.com/rosjava/rosjava_core.git",
 )
 
 load("@com_github_rosjava_rosjava_core//bazel:repositories.bzl", "rosjava_repositories")
