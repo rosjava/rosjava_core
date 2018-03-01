@@ -1,0 +1,11 @@
+java_library(
+    name = "apache_xmlrpc_common",
+    srcs = glob([
+        "src/main/**/*.java",
+    ]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//3rdparty/jvm/org/apache/commons:com_springsource_org_apache_commons_httpclient",
+        "//3rdparty/jvm/org/apache/ws/commons:ws_commons_util",
+    ],
+)
