@@ -199,7 +199,6 @@ public abstract class XmlRpcStreamServer extends XmlRpcServer
 			try {
 				istream = getInputStream(pConfig, pConnection);
 				XmlRpcRequest request = getRequest(pConfig, istream);
-		        // adding multicall functionality here
 				if (request.getMethodName().equals("system.multicall")) {
 					result = executeMulticall(request);
 				} else {
