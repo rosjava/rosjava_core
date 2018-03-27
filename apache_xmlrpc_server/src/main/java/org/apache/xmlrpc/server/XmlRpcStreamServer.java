@@ -22,6 +22,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -197,7 +199,12 @@ public abstract class XmlRpcStreamServer extends XmlRpcServer
 			try {
 				istream = getInputStream(pConfig, pConnection);
 				XmlRpcRequest request = getRequest(pConfig, istream);
-				result = execute(request);
+		        // adding multicall functionality here
+				if (request.getMethodName().equals("system.multicall")) {
+					result = executeMulticall(request);
+				} else {
+					result = execute(request);
+				}
 				istream.close();
 				istream = null;
 				error = null;
@@ -250,6 +257,53 @@ public abstract class XmlRpcStreamServer extends XmlRpcServer
 			if (pConnection != null) { try { pConnection.close(); } catch (Throwable ignore) {} }
 		}
 		log.debug("execute: <-");
+	}
+	
+	private Object[] executeMulticall(final XmlRpcRequest pRequest) {
+		if (pRequest.getParameterCount() != 1)
+			return null;
+
+		Object[] reqs = (Object[]) pRequest.getParameter(0); // call requests
+		ArrayList<Object> results = new ArrayList<Object>(); // call results
+		final XmlRpcRequestConfig pConfig = pRequest.getConfig();
+		// TODO: make concurrent calls?
+		for (int i = 0; i < reqs.length; i++) {
+			Object result = null;
+			try {
+				@SuppressWarnings("unchecked")
+				HashMap<String, Object> req = (HashMap<String, Object>) reqs[i];
+				final String methodName = (String) req.get("methodName");
+				final Object[] params = (Object[]) req.get("params");
+				result = execute(new XmlRpcRequest() {
+					@Override
+					public XmlRpcRequestConfig getConfig() {
+						return pConfig;
+					}
+
+					@Override
+					public String getMethodName() {
+						return methodName;
+					}
+
+					@Override
+					public int getParameterCount() {
+						return params == null ? 0 : params.length;
+					}
+
+					@Override
+					public Object getParameter(int pIndex) {
+						return params[pIndex];
+					}
+				});
+			} catch (Throwable t) {
+				logError(t);
+				// TODO: should this return an XmlRpc fault?
+				result = null;
+			}
+			results.add(result);
+		}
+		Object[] retobj = new Object[] { results };
+		return retobj;
 	}
 
     protected void logError(Throwable t) {
