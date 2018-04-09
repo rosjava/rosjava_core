@@ -63,7 +63,10 @@ public class RetryingExecutorService {
     @Override
     public void loop() throws InterruptedException {
       Future<Boolean> future = completionService.take();
-      final Callable<Boolean> callable = callables.remove(future);
+      final Callable<Boolean> callable;
+      synchronized (mutex) {
+        callable = callables.remove(future);
+      }
       boolean retry;
       try {
         retry = future.get();
