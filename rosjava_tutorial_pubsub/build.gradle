@@ -22,5 +22,5 @@ dependencies {
   compile project(':rosjava')
 }
 
-defaultTasks 'publish', 'installApp'
+defaultTasks 'publish', 'installDist'
 
