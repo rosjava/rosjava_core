@@ -18,3 +18,36 @@ java_library(
         "@com_github_rosjava_rosjava_bootstrap//message_generation",
     ],
 )
+
+java_library(
+    name = "test_lib",
+    srcs = [
+        "src/test/java/org/ros/Assert.java",
+    ],
+    deps = [
+        ":rosjava",
+        "//3rdparty/jvm/junit",
+    ],
+)
+
+load("@com_googlesource_gerrit_bazlets//tools:junit.bzl", "junit_tests")
+
+junit_tests(
+    name = "RosjavaTests",
+    srcs = glob([
+        "src/test/java/**/*Test.java",
+    ]),
+    deps = [
+        ":rosjava",
+        ":test_lib",
+        "//3rdparty/jvm/com/google/guava",
+        "//3rdparty/jvm/io/netty",
+        "//3rdparty/jvm/junit",
+        "//3rdparty/jvm/org/apache/commons:com_springsource_org_apache_commons_logging",
+        "//3rdparty/jvm/org/mockito:mockito_all",
+        "//3rdparty/jvm/org/ros/rosjava_messages:nav_msgs",
+        "//3rdparty/jvm/org/ros/rosjava_messages:rosjava_test_msgs",
+        "//3rdparty/jvm/org/ros/rosjava_messages:std_msgs",
+        "@com_github_rosjava_rosjava_bootstrap//message_generation",
+    ],
+)
