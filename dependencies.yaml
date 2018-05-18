@@ -72,9 +72,15 @@ dependencies:
       lang: java
       version: "1.8.5"
   org.ros.rosjava_messages:
+    nav_msgs:
+      lang: java
+      version: "1.12.5"
     rosgraph_msgs:
       lang: java
       version: "1.11.2"
+    rosjava_test_msgs:
+      lang: java
+      version: "0.3.0"
     std_msgs:
       lang: java
       version: "0.5.11"
