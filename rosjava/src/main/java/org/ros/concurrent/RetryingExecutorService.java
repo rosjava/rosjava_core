@@ -63,7 +63,13 @@ public class RetryingExecutorService {
     @Override
     public void loop() throws InterruptedException {
       Future<Boolean> future = completionService.take();
-      final Callable<Boolean> callable = callables.remove(future);
+      Callable<Boolean> callable;
+      CountDownLatch latch;
+      // Grab the mutex to make sure submit() of the future that we took is finished.
+      synchronized (mutex) {
+        callable = callables.remove(future);
+        latch = latches.get(callable);
+      }
       boolean retry;
       try {
         retry = future.get();
@@ -74,14 +80,15 @@ public class RetryingExecutorService {
         if (DEBUG) {
           log.info("Retry requested.");
         }
+        final Callable<Boolean> finalCallable = callable;
         scheduledExecutorService.schedule(new Runnable() {
           @Override
           public void run() {
-            submit(callable);
+            submit(finalCallable);
           }
         }, retryDelay, retryTimeUnit);
       } else {
-        latches.get(callable).countDown();
+        latch.countDown();
       }
     }
   }
