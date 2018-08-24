@@ -16,6 +16,8 @@
 
 package org.ros.helpers;
 
+import com.google.common.base.Preconditions;
+
 import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
@@ -47,36 +49,39 @@ public class ParameterLoaderNode extends AbstractNodeMain {
      * Default constructor
      * @param resources Array of resources with their respective namespace to load.
      */
-    public ParameterLoaderNode(ArrayList<Resource> resources) {
+    public ParameterLoaderNode(List<Resource> resources) {
+        Preconditions.checkNotNull(resources);
         for (Resource r : resources) {
+            Preconditions.checkNotNull(r.inputStream);
             addSingleYmlInput(r.inputStream, r.namespace == null ? "" : r.namespace);
         }
     }
 
     private void addSingleYmlInput(InputStream ymlInputStream, String namespace) {
-        this.params.add(new LoadedResource((new Yaml()).load(ymlInputStream), namespace));
+        Object loadedYaml = new Yaml().load(ymlInputStream);
+        if (loadedYaml != null && loadedYaml instanceof Map<?, ?>) {
+            this.params.add(new LoadedResource(Map.class.cast(loadedYaml), namespace));
+        }
     }
 
-    @SuppressWarnings("unchecked")
-    private void addParams(ParameterTree parameterTree, String namespace, Map<String, Object> params) {
-        for (Map.Entry<String, Object> e : params.entrySet()) {
-            String fullKeyName = namespace + "/" + e.getKey();
+    private void addParams(ParameterTree parameterTree, String namespace, Map<?, ?> params) {
+        for (Map.Entry<?, ?> e : params.entrySet()) {
+            String fullKeyName = namespace + "/" + e.getKey().toString();
             if (log != null) {
-                log.info("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
+                log.debug("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
             }
-
             if (e.getValue() instanceof String) {
-                parameterTree.set(fullKeyName, (String)e.getValue());
+                parameterTree.set(fullKeyName, String.class.cast(e.getValue()));
             } else if (e.getValue() instanceof Integer) {
-                parameterTree.set(fullKeyName, (Integer)e.getValue());
+                parameterTree.set(fullKeyName, Integer.class.cast(e.getValue()));
             } else if (e.getValue() instanceof Double) {
-                parameterTree.set(fullKeyName, (Double)e.getValue());
+                parameterTree.set(fullKeyName, Double.class.cast(e.getValue()));
             } else if (e.getValue() instanceof Map) {
-                parameterTree.set(fullKeyName, (Map)e.getValue());
+                parameterTree.set(fullKeyName, Map.class.cast(e.getValue()));
             } else if (e.getValue() instanceof Boolean) {
-                parameterTree.set(fullKeyName, (Boolean)e.getValue());
+                parameterTree.set(fullKeyName, Boolean.class.cast(e.getValue()));
             } else if (e.getValue() instanceof List) {
-                parameterTree.set(fullKeyName, (List)e.getValue());
+                parameterTree.set(fullKeyName, List.class.cast(e.getValue()));
             } else if (log != null) {
                 log.debug("I don't know what type parameter " + fullKeyName + " is. Value = " + e.getValue());
                 log.debug("Class name is: " + e.getValue().getClass().getName());
@@ -95,18 +100,16 @@ public class ParameterLoaderNode extends AbstractNodeMain {
 
     @Override
     public void onStart(ConnectedNode connectedNode) {
-        if (params != null) {
-            ParameterTree parameterTree = connectedNode.getParameterTree();
-            log = connectedNode.getLog();
+        ParameterTree parameterTree = connectedNode.getParameterTree();
+        log = connectedNode.getLog();
 
-            // TODO: For some reason, setting the / param when using a rosjava master doesn't work
-            // It does work fine with an external master, and also setting other params of any type
-            for (LoadedResource r : params) {
-                addParams(parameterTree, r.namespace, r.resource);
-            }
-
-            connectedNode.shutdown();
+        // TODO: For some reason, setting the / param when using a rosjava master doesn't work
+        // It does work fine with an external master, and also setting other params of any type
+        for (LoadedResource r : params) {
+            addParams(parameterTree, r.namespace, r.resource);
         }
+
+        connectedNode.shutdown();
     }
 
     /**
@@ -128,11 +131,11 @@ public class ParameterLoaderNode extends AbstractNodeMain {
      * keep the code simple.
      */
     private class LoadedResource {
-        public Map<String, Object> resource;
-        public String namespace;
+        private Map<?, ?> resource;
+        private String namespace;
 
-        LoadedResource(Object resource, String namespace) {
-            this.resource = (Map<String, Object>) resource;
+        LoadedResource(Map resource, String namespace) {
+            this.resource = resource;
             this.namespace = namespace;
         }
     }
