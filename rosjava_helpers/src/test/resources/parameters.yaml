@@ -1,0 +1,9 @@
+  string_param: "bar"
+  int_param: 1823
+  double_param: 1.74
+  boolean_param: false
+  list_param:
+    - "Hello"
+    - 1
+    - 2.3
+    - true
