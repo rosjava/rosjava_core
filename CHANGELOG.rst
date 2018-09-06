@@ -2,6 +2,17 @@
 Changelog
 =========
 
+Forthcoming
+------------------
+* Using `time=0` by default; prevents `NullPointerException` when using `sim_time`.
+* Fix: waiting for master before getting `/use_sim_time`.
+* Gradle upgraded to 3.5.1.
+* Added Bazel build support.
+* Supporting XMLRPC multicalls - prevents ROS master from shutting down when a launchfile is launched.
+* Fix for race condition in `RetryingExecutorService`.
+* Improved error checking and tests for `rosjava_helpers`.
+* Contributors: Juan Ignacio Ubeira, Rodrigo Queiro, Wojciech Mlynarczyk.
+
 0.3.5 (2017-07-17)
 ------------------
 * Fix remapping member variable not set if argument is not null
