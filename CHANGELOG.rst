@@ -2,7 +2,7 @@
 Changelog
 =========
 
-Forthcoming
+0.3.6 (2018-09-06)
 ------------------
 * Using `time=0` by default; prevents `NullPointerException` when using `sim_time`.
 * Fix: waiting for master before getting `/use_sim_time`.
