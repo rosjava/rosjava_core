@@ -2,8 +2,8 @@
 Changelog
 =========
 
-Forthcoming
------------
+0.3.7 (2019-01-22)
+------------------
 * Gradle update to 4.10.2.
 * Use new http_archive rule for Bazel deps.
 * Contributors: Juan Ignacio Ubeira, Rodrigo Queiro
