@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Forthcoming
+-----------
+* Gradle update to 4.10.2.
+* Use new http_archive rule for Bazel deps.
+* Contributors: Juan Ignacio Ubeira, Rodrigo Queiro
+
 0.3.6 (2018-09-06)
 ------------------
 * Using `time=0` by default; prevents `NullPointerException` when using `sim_time`.
