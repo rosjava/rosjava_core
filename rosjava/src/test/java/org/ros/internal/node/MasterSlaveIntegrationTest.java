@@ -62,7 +62,7 @@ public class MasterSlaveIntegrationTest {
         new SlaveServer(GraphName.of("/foo"), BindAddress.newPrivate(),
             AdvertiseAddress.newPrivate(), BindAddress.newPrivate(), AdvertiseAddress.newPrivate(),
             masterClient, topicParticipantManager, serviceManager, parameterManager,
-            executorService);
+            executorService, null);
     slaveServer.start();
     slaveClient = new SlaveClient(GraphName.of("/bar"), slaveServer.getUri());
   }

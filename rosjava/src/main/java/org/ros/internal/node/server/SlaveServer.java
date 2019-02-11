@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 
 import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
+import org.ros.internal.node.DefaultNode;
 import org.ros.internal.node.client.MasterClient;
 import org.ros.internal.node.parameter.ParameterManager;
 import org.ros.internal.node.service.ServiceManager;
@@ -52,12 +53,15 @@ public class SlaveServer extends XmlRpcServer {
   private final TopicParticipantManager topicParticipantManager;
   private final ParameterManager parameterManager;
   private final TcpRosServer tcpRosServer;
+  private final DefaultNode defaultNode;
+  private boolean shutdownStarted;
 
   public SlaveServer(GraphName nodeName, BindAddress tcpRosBindAddress,
       AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress,
       AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master,
       TopicParticipantManager topicParticipantManager, ServiceManager serviceManager,
-      ParameterManager parameterManager, ScheduledExecutorService executorService) {
+      ParameterManager parameterManager, ScheduledExecutorService executorService,
+      DefaultNode defaultNode) {
     super(xmlRpcBindAddress, xmlRpcAdvertiseAddress);
     this.nodeName = nodeName;
     this.masterClient = master;
@@ -66,6 +70,7 @@ public class SlaveServer extends XmlRpcServer {
     this.tcpRosServer =
         new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicParticipantManager,
             serviceManager, executorService);
+    this.defaultNode = defaultNode;
   }
 
   public AdvertiseAddress getTcpRosAdvertiseAddress() {
@@ -81,13 +86,22 @@ public class SlaveServer extends XmlRpcServer {
     super.start(org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl.class,
         new SlaveXmlRpcEndpointImpl(this));
     tcpRosServer.start();
+    shutdownStarted = false;
   }
 
   // TODO(damonkohler): This should also shut down the Node.
   @Override
   public void shutdown() {
+    // prevent recursive call of this method
+    if (shutdownStarted) {
+      return;
+    }
+    shutdownStarted = true;
     super.shutdown();
     tcpRosServer.shutdown();
+    if (defaultNode != null) {
+      defaultNode.shutdown();
+    }
   }
 
   public List<Object> getBusStats(String callerId) {

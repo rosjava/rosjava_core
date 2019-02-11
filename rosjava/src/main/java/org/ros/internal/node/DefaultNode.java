@@ -146,7 +146,7 @@ public class DefaultNode implements ConnectedNode {
             nodeConfiguration.getTcpRosAdvertiseAddress(),
             nodeConfiguration.getXmlRpcBindAddress(),
             nodeConfiguration.getXmlRpcAdvertiseAddress(), masterClient, topicParticipantManager,
-            serviceManager, parameterManager, scheduledExecutorService);
+            serviceManager, parameterManager, scheduledExecutorService, this);
     slaveServer.start();
 
     NodeIdentifier nodeIdentifier = slaveServer.toNodeIdentifier();
