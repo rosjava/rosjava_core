@@ -23,6 +23,7 @@ import org.ros.internal.message.topic.TopicDescription;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
 import org.ros.namespace.GraphName;
+import org.ros.node.topic.TransportHints;
 
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ public class TopicDeclaration {
 
   private final TopicIdentifier topicIdentifier;
   private final TopicDescription topicDescription;
+  private final TransportHints transportHints;
 
   /**
    * @param header
@@ -49,19 +51,26 @@ public class TopicDeclaration {
     String definition = header.get(ConnectionHeaderFields.MESSAGE_DEFINITION);
     String md5Checksum = header.get(ConnectionHeaderFields.MD5_CHECKSUM);
     TopicDescription topicDescription = new TopicDescription(type, definition, md5Checksum);
-    return new TopicDeclaration(new TopicIdentifier(name), topicDescription);
+    boolean tcpNoDelay = "1".equals(header.get(ConnectionHeaderFields.TCP_NODELAY));
+    return new TopicDeclaration(new TopicIdentifier(name), topicDescription, new TransportHints(tcpNoDelay));
   }
 
   public static TopicDeclaration newFromTopicName(GraphName topicName,
-      TopicDescription topicDescription) {
-    return new TopicDeclaration(new TopicIdentifier(topicName), topicDescription);
+      TopicDescription topicDescription, TransportHints transportHints) {
+    return new TopicDeclaration(new TopicIdentifier(topicName), topicDescription, transportHints);
   }
 
-  public TopicDeclaration(TopicIdentifier topicIdentifier, TopicDescription topicDescription) {
+  public TopicDeclaration(TopicIdentifier topicIdentifier, TopicDescription topicDescription, TransportHints transportHints) {
     Preconditions.checkNotNull(topicIdentifier);
     Preconditions.checkNotNull(topicDescription);
     this.topicIdentifier = topicIdentifier;
     this.topicDescription = topicDescription;
+
+    if (transportHints != null) {
+      this.transportHints = transportHints;
+    } else {
+      this.transportHints = new TransportHints();
+    }
   }
 
   public TopicIdentifier getIdentifier() {
@@ -84,6 +93,7 @@ public class TopicDeclaration {
         topicDescription.getDefinition());
     connectionHeader.addField(ConnectionHeaderFields.MD5_CHECKSUM,
         topicDescription.getMd5Checksum());
+    connectionHeader.addField(ConnectionHeaderFields.TCP_NODELAY, transportHints.getTcpNoDelay() ? "1" : "0");
     return connectionHeader;
   }
 
