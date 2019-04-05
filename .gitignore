@@ -9,3 +9,4 @@ bin
 *.iml
 .idea
 bazel-*
+local.properties
