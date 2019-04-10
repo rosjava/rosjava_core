@@ -65,6 +65,7 @@ import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.DefaultSubscriberListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import org.ros.node.topic.TransportHints;
 import org.ros.time.ClockTopicTimeProvider;
 import org.ros.time.TimeProvider;
 
@@ -283,7 +284,7 @@ public class DefaultNode implements ConnectedNode {
     TopicDescription topicDescription =
         nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
     TopicDeclaration topicDeclaration =
-        TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription);
+        TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription, null);
     org.ros.message.MessageSerializer<T> serializer = newMessageSerializer(messageType);
     return publisherFactory.newOrExisting(topicDeclaration, serializer);
   }
@@ -295,11 +296,16 @@ public class DefaultNode implements ConnectedNode {
 
   @Override
   public <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType) {
+    return newSubscriber(topicName, messageType, null);
+  }
+
+  @Override
+  public <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType, TransportHints transportHints) {
     GraphName resolvedTopicName = resolveName(topicName);
     TopicDescription topicDescription =
         nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
     TopicDeclaration topicDeclaration =
-        TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription);
+        TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription, transportHints);
     MessageDeserializer<T> deserializer = newMessageDeserializer(messageType);
     Subscriber<T> subscriber = subscriberFactory.newOrExisting(topicDeclaration, deserializer);
     return subscriber;
@@ -307,7 +313,12 @@ public class DefaultNode implements ConnectedNode {
 
   @Override
   public <T> Subscriber<T> newSubscriber(String topicName, String messageType) {
-    return newSubscriber(GraphName.of(topicName), messageType);
+    return newSubscriber(GraphName.of(topicName), messageType, null);
+  }
+
+  @Override
+  public <T> Subscriber<T> newSubscriber(String topicName, String messageType, TransportHints transportHints) {
+    return newSubscriber(GraphName.of(topicName), messageType, transportHints);
   }
 
   @Override

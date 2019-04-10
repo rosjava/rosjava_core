@@ -26,6 +26,7 @@ import org.ros.node.service.ServiceResponseBuilder;
 import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import org.ros.node.topic.TransportHints;
 
 import java.net.URI;
 
@@ -83,9 +84,27 @@ public interface ConnectedNode extends Node {
   <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType);
 
   /**
+   * @param <T>
+   *          the message type to create the {@link Subscriber} for
+   * @param topicName
+   *          the topic name to be subscribed to, this will be auto resolved
+   * @param messageType
+   *          the message data type (e.g. "std_msgs/String")
+   * @param transportHints
+   *          the transport hints
+   * @return a {@link Subscriber} for the specified topic
+   */
+  <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType, TransportHints transportHints);
+
+  /**
    * @see #newSubscriber(GraphName, String)
    */
   <T> Subscriber<T> newSubscriber(String topicName, String messageType);
+
+  /**
+   * @see #newSubscriber(GraphName, String, TransportHints)
+   */
+  <T> Subscriber<T> newSubscriber(String topicName, String messageType, TransportHints transportHints);
 
   /**
    * Create a new {@link ServiceServer}.

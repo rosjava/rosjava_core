@@ -43,7 +43,7 @@ public class TopicListResultFactory implements ResultFactory<List<TopicDeclarati
       String name = (String) ((Object[]) topic)[0];
       String type = (String) ((Object[]) topic)[1];
       descriptions.add(TopicDeclaration.newFromTopicName(GraphName.of(name), new TopicDescription(type, null,
-          null)));
+          null), null));
     }
     return descriptions;
   }

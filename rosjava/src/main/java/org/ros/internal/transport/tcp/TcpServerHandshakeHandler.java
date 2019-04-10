@@ -96,6 +96,10 @@ public class TcpServerHandshakeHandler extends SimpleChannelHandler {
     DefaultPublisher<?> publisher = topicParticipantManager.getPublisher(topicName);
     ChannelBuffer outgoingBuffer = publisher.finishHandshake(incomingConnectionHeader);
     Channel channel = ctx.getChannel();
+    if (incomingConnectionHeader.hasField(ConnectionHeaderFields.TCP_NODELAY)) {
+      boolean tcpNoDelay = "1".equals(incomingConnectionHeader.getField(ConnectionHeaderFields.TCP_NODELAY));
+      channel.getConfig().setOption("tcpNoDelay", tcpNoDelay);
+    }
     ChannelFuture future = channel.write(outgoingBuffer).await();
     if (!future.isSuccess()) {
       throw new RosRuntimeException(future.getCause());
