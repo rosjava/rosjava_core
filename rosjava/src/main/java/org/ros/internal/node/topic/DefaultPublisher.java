@@ -35,6 +35,7 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -63,6 +64,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
   private final ListenerGroup<PublisherListener<T>> listeners;
   private final NodeIdentifier nodeIdentifier;
   private final MessageFactory messageFactory;
+  private CountDownLatch shutdownLatch;
 
   public DefaultPublisher(NodeIdentifier nodeIdentifier, TopicDeclaration topicDeclaration,
       MessageSerializer<T> serializer, MessageFactory messageFactory,
@@ -105,9 +107,20 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
     return outgoingMessageQueue.getLatchMode();
   }
 
+  /**
+   * Sends shutdown signals and awaits for them to be received by
+   * {@link DefaultPublisher#signalOnMasterUnregistrationSuccess()} or
+   * {@link DefaultPublisher#signalOnMasterUnregistrationFailure()} before continuing shutdown
+   */
   @Override
   public void shutdown(long timeout, TimeUnit unit) {
+    shutdownLatch = new CountDownLatch(listeners.size());
     signalOnShutdown(timeout, unit);
+    try {
+      shutdownLatch.await(timeout, unit);
+    } catch (InterruptedException e) {
+      log.error(e.getMessage(), e);
+    }
     outgoingMessageQueue.shutdown();
     listeners.shutdown();
   }
@@ -252,6 +265,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onMasterUnregistrationSuccess(publisher);
+        shutdownLatch.countDown();
       }
     });
   }
@@ -269,6 +283,7 @@ public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publ
       @Override
       public void run(PublisherListener<T> listener) {
         listener.onMasterUnregistrationFailure(publisher);
+        shutdownLatch.countDown();
       }
     });
   }

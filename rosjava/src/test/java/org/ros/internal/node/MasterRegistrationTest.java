@@ -73,4 +73,25 @@ public class MasterRegistrationTest extends RosTest {
     publisher.shutdown();
     assertTrue(publisherListener.awaitMasterUnregistrationSuccess(1, TimeUnit.SECONDS));
   }
+
+  @Test
+  public void testUnregisterPublisherFailure() throws InterruptedException {
+    publisherListener = CountDownPublisherListener.newDefault();
+    nodeMainExecutor.execute(new AbstractNodeMain() {
+      @Override
+      public GraphName getDefaultNodeName() {
+        return GraphName.of("node");
+      }
+
+      @Override
+      public void onStart(ConnectedNode connectedNode) {
+        publisher = connectedNode.newPublisher("topic", std_msgs.String._TYPE);
+        publisher.addListener(publisherListener);
+      }
+    }, nodeConfiguration);
+    assertTrue(publisherListener.awaitMasterRegistrationSuccess(1, TimeUnit.SECONDS));
+    rosCore.shutdown();
+    publisher.shutdown();
+    assertTrue(publisherListener.awaitMasterUnregistrationFailure(6, TimeUnit.SECONDS));
+  }
 }
