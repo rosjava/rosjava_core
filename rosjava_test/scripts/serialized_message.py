@@ -23,7 +23,7 @@ message serialization.
 
 __author__ = 'damonkohler@google.com (Damon Kohler)'
 
-import StringIO
+import io
 
 import roslib; roslib.load_manifest('rosjava_test')
 import rospy
@@ -31,7 +31,7 @@ import rospy
 import nav_msgs.msg as nav_msgs
 
 message = nav_msgs.Odometry()
-buf = StringIO.StringIO()
+buf = io.StringIO()
 message.serialize(buf)
-print ''.join('0x%02x,' % ord(c) for c in buf.getvalue())[:-1]
+print(''.join('0x%02x,' % ord(c) for c in buf.getvalue())[:-1])
 

@@ -85,7 +85,7 @@ class TestParameterClient(unittest.TestCase):
 
     def test_parameter_client_read(self):
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for client to load"
+        print("waiting for 20 seconds for client to load")
 
         tests = self.tests
         msgs = [None]
@@ -95,36 +95,36 @@ class TestParameterClient(unittest.TestCase):
             time.sleep(0.2)
             msgs = [getattr(self, t+'_msg') for t in tests]
 
-        print "msgs: %s"%(msgs)
+        print("msgs: %s"%(msgs))
         
-        self.failIf(timeout_t < time.time(), "timeout exceeded")
-        self.failIf(rospy.is_shutdown(), "node shutdown")            
-        self.failIf(any(1 for m in msgs if m is None), "did not receive all expected messages: "+str(msgs))
+        self.assertFalse(timeout_t < time.time(), "timeout exceeded")
+        self.assertFalse(rospy.is_shutdown(), "node shutdown")            
+        self.assertFalse(any(1 for m in msgs if m is None), "did not receive all expected messages: "+str(msgs))
 
         ns = rospy.get_param('parameter_namespace')
         for t in tests:
             p_name = roslib.names.ns_join(ns, t)
             value = rospy.get_param(p_name, t)
             msg = getattr(self, "%s_msg"%(t))
-            print "get param: %s"%(p_name)
-            print "param value: %s"%(value)
-            print "msg value: %s"%(msg)
+            print("get param: %s"%(p_name))
+            print("param value: %s"%(value))
+            print("msg value: %s"%(msg))
             if t == 'composite':
-                print "value", p_name, value
+                print("value", p_name, value)
                 m = Composite(CompositeA(**value['a']), CompositeB(**value['b']))
-                self.assertAlmostEquals(m.a.x, msg.a.x)
-                self.assertAlmostEquals(m.a.y, msg.a.y)
-                self.assertAlmostEquals(m.a.z, msg.a.z)
-                self.assertAlmostEquals(m.a.w, msg.a.w)
-                self.assertAlmostEquals(m.b.x, msg.b.x)
-                self.assertAlmostEquals(m.b.y, msg.b.y)
-                self.assertAlmostEquals(m.b.z, msg.b.z)
+                self.assertAlmostEqual(m.a.x, msg.a.x)
+                self.assertAlmostEqual(m.a.y, msg.a.y)
+                self.assertAlmostEqual(m.a.z, msg.a.z)
+                self.assertAlmostEqual(m.a.w, msg.a.w)
+                self.assertAlmostEqual(m.b.x, msg.b.x)
+                self.assertAlmostEqual(m.b.y, msg.b.y)
+                self.assertAlmostEqual(m.b.z, msg.b.z)
             elif t == 'list':
-                self.assertEquals(list(value), list(msg.int32_array))
+                self.assertEqual(list(value), list(msg.int32_array))
             elif t == 'float':
-                self.assertAlmostEquals(value, msg.data)
+                self.assertAlmostEqual(value, msg.data)
             else:
-                self.assertEquals(value, msg.data)
+                self.assertEqual(value, msg.data)
 
     def test_set_parameter(self):
         # make sure client copied each parameter correct
@@ -137,23 +137,23 @@ class TestParameterClient(unittest.TestCase):
             source_value = rospy.get_param(source_name)
             target_value = rospy.get_param(target_name)
             if t != 'float':
-                self.assertEquals(source_value, target_value)
+                self.assertEqual(source_value, target_value)
             else:
-                self.assertAlmostEquals(source_value, target_value)
+                self.assertAlmostEqual(source_value, target_value)
         
     def test_tilde_parameter(self):
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for client to load"
+        print("waiting for 20 seconds for client to load")
         while self.tilde_msg is None and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
-        self.failIf(timeout_t < time.time(), "timeout exceeded")
-        self.failIf(rospy.is_shutdown(), "node shutdown")            
-        self.failIf(self.tilde_msg is None)
+        self.assertFalse(timeout_t < time.time(), "timeout exceeded")
+        self.assertFalse(rospy.is_shutdown(), "node shutdown")            
+        self.assertFalse(self.tilde_msg is None)
         
-        self.assertEquals(rospy.get_param('param_client/tilde'), self.tilde_msg.data)
+        self.assertEqual(rospy.get_param('param_client/tilde'), self.tilde_msg.data)
 
 if __name__ == '__main__':
     import rostest
