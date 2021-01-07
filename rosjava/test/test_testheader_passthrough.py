@@ -67,32 +67,32 @@ class TestHeaderPassthrough(unittest.TestCase):
     def test_testheader_passthrough(self):
         # 20 seconds to validate fixture
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for fixture to verify"
+        print("waiting for 20 seconds for fixture to verify")
         while self.fixture_curr is None and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
-        self.failIf(timeout_t < time.time(), "timeout exceeded")
-        self.failIf(rospy.is_shutdown(), "node shutdown")            
-        self.failIf(self.fixture_curr is None, "no data from fixture")
-        self.assertEquals('/node0', self.fixture_curr.caller_id)
-        self.assertEquals('', self.fixture_curr.orig_caller_id)
+        self.assertFalse(timeout_t < time.time(), "timeout exceeded")
+        self.assertFalse(rospy.is_shutdown(), "node shutdown")            
+        self.assertFalse(self.fixture_curr is None, "no data from fixture")
+        self.assertEqual('/node0', self.fixture_curr.caller_id)
+        self.assertEqual('', self.fixture_curr.orig_caller_id)
 
         # another 20 seconds to validate client
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for client to verify"
+        print("waiting for 20 seconds for client to verify")
         while self.test_curr is None and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
-        self.failIf(self.test_curr is None, "no data from test")
-        self.assertEquals('/rosjava_node', self.test_curr.caller_id)
-        self.assertEquals('/node0', self.test_curr.orig_caller_id)
+        self.assertFalse(self.test_curr is None, "no data from test")
+        self.assertEqual('/rosjava_node', self.test_curr.caller_id)
+        self.assertEqual('/node0', self.test_curr.orig_caller_id)
         t = self.test_curr.header.stamp.to_sec()
         # be really generous here, just need to be in the ballpark.
-        self.assert_(abs(time.time() - t) < 60.)
+        self.assertTrue(abs(time.time() - t) < 60.)
 
 if __name__ == '__main__':
     import rostest
