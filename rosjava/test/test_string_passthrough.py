@@ -51,7 +51,7 @@ class TestStringPassthrough(unittest.TestCase):
         
     def setUp(self):
         rospy.init_node(NAME)
-        self.nodes = ['/node%s'%(i) for i in xrange(10)]
+        self.nodes = ['/node%s'%(i) for i in range(10)]
         self.nodes_set = set(self.nodes)
         
         # keep track of nodes that have done callbacks
@@ -70,31 +70,31 @@ class TestStringPassthrough(unittest.TestCase):
     def test_string_passthrough(self):
         # 20 seconds to validate fixture
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for fixture to verify"
+        print("waiting for 20 seconds for fixture to verify")
         while not self.fixture_nodes_cb == self.nodes_set and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
-        self.failIf(timeout_t < time.time(), "timeout exceeded")
-        self.failIf(rospy.is_shutdown(), "node shutdown")            
-        self.assertEquals(self.nodes_set, self.fixture_nodes_cb, "fixture did not validate: %s vs %s"%(self.nodes_set, self.fixture_nodes_cb))
+        self.assertFalse(timeout_t < time.time(), "timeout exceeded")
+        self.assertFalse(rospy.is_shutdown(), "node shutdown")            
+        self.assertEqual(self.nodes_set, self.fixture_nodes_cb, "fixture did not validate: %s vs %s"%(self.nodes_set, self.fixture_nodes_cb))
 
         # another 20 seconds to validate client
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for client to verify"
+        print("waiting for 20 seconds for client to verify")
         while not self.test_nodes_cb == self.nodes_set and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
-        self.assertEquals(self.nodes_set, self.test_nodes_cb, "passthrough did not pass along all message")
+        self.assertEqual(self.nodes_set, self.test_nodes_cb, "passthrough did not pass along all message")
 
         # Create a new Publisher here.  This will validate publisherUpdate()
         pub = rospy.Publisher('string_in', String)
         msg = 'test_publisherUpdate'
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for client to verify"
+        print("waiting for 20 seconds for client to verify")
         while not msg in self.nodes_set and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():

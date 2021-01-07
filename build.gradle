@@ -19,7 +19,12 @@ task wrapper(type: Wrapper) {
 }
 
 buildscript {
-  apply from: "https://github.com/rosjava/rosjava_bootstrap/raw/kinetic/buildscript.gradle"
+    try{
+      apply from: "https://raw.githubusercontent.com/mojin-robotics/rosjava_bootstrap/kinetic/buildscript.gradle"
+    } catch (all) {
+      //local copy of rosjava_bootstrap buildscript.gradle
+      apply from: "buildscript.gradle"
+    }
 }
 
 apply plugin: "catkin"

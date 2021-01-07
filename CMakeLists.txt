@@ -2,7 +2,7 @@
 # CMake
 ##############################################################################
 
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(rosjava_core)
 
 ##############################################################################
@@ -30,5 +30,5 @@ catkin_package()
 # Installation
 ##############################################################################
 
-install(DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_MAVEN_DESTINATION}/org/ros/rosjava_core/ 
+install(DIRECTORY ${ROS_MAVEN_DEPLOYMENT_REPOSITORY}/org/ros/rosjava_core/
         DESTINATION ${CATKIN_GLOBAL_MAVEN_DESTINATION}/org/ros/rosjava_core)

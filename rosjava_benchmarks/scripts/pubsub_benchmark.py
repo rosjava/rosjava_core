@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Copyright (C) 2012 Google Inc.
 #
@@ -32,7 +32,7 @@ class PubsubBenchmark(object):
 
   def callback(self, _):
     with self.lock:
-      self.count.next()
+      next(self.count)
 
   def run(self):
     tf_publisher = rospy.Publisher('tf', tf_msgs.tfMessage)
@@ -41,7 +41,7 @@ class PubsubBenchmark(object):
     while not rospy.is_shutdown():
       tf_publisher.publish(tf_msgs.tfMessage())
       if (rospy.Time.now() - self.time) > rospy.Duration(5):
-        status_publisher.publish(std_msgs.String('%.2f Hz' % (self.count.next() / 5.0)))
+        status_publisher.publish(std_msgs.String('%.2f Hz' % (next(self.count) / 5.0)))
         with self.lock:
           self.count = itertools.count()
           self.time = rospy.Time.now()

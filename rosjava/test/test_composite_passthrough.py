@@ -67,37 +67,37 @@ class CompositePassthrough(unittest.TestCase):
     def test_composite_passthrough(self):
         # 20 seconds to validate fixture
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for fixture to verify"
+        print("waiting for 20 seconds for fixture to verify")
         while self.fixture_curr is None and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
-        self.failIf(timeout_t < time.time(), "timeout exceeded")
-        self.failIf(rospy.is_shutdown(), "node shutdown")            
-        self.failIf(self.fixture_curr is None, "no data from fixture")
+        self.assertFalse(timeout_t < time.time(), "timeout exceeded")
+        self.assertFalse(rospy.is_shutdown(), "node shutdown")            
+        self.assertFalse(self.fixture_curr is None, "no data from fixture")
         m = self.fixture_curr
-        self.assertAlmostEquals(m.a.x, m.b.x)
-        self.assertAlmostEquals(m.a.y, m.b.y)
-        self.assertAlmostEquals(m.a.z, m.b.z)
+        self.assertAlmostEqual(m.a.x, m.b.x)
+        self.assertAlmostEqual(m.a.y, m.b.y)
+        self.assertAlmostEqual(m.a.z, m.b.z)
 
         # another 20 seconds to validate client
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for client to verify"
+        print("waiting for 20 seconds for client to verify")
         while self.test_curr is None and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
-        self.failIf(self.test_curr is None, "no data from test")
+        self.assertFalse(self.test_curr is None, "no data from test")
         m = self.test_curr
-        self.assertAlmostEquals(m.a.x, m.b.x)
-        self.assertAlmostEquals(m.a.y, m.b.y)
-        self.assertAlmostEquals(m.a.z, m.b.z)
+        self.assertAlmostEqual(m.a.x, m.b.x)
+        self.assertAlmostEqual(m.a.y, m.b.y)
+        self.assertAlmostEqual(m.a.z, m.b.z)
 
         # a.w = a.x + a.y + a.z.  Just make sure we're in the ballpark
         a = self.test_curr.a
-        self.assert_(abs(a.x + a.y + a.z - a.w) < 10.)
+        self.assertTrue(abs(a.x + a.y + a.z - a.w) < 10.)
 
 if __name__ == '__main__':
     import rostest

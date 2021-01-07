@@ -70,28 +70,28 @@ class TestInt64Passthrough(unittest.TestCase):
     def test_int64_passthrough(self):
         # 20 seconds to validate fixture
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for fixture to verify"
+        print("waiting for 20 seconds for fixture to verify")
         while self.fixture_prev is None and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
-        self.failIf(timeout_t < time.time(), "timeout exceeded")
-        self.failIf(rospy.is_shutdown(), "node shutdown")            
-        self.failIf(self.fixture_prev is None, "no data from fixture")
-        self.failIf(self.fixture_curr is None, "no data from fixture")
-        self.assertEquals(self.fixture_prev.data + 1, self.fixture_curr.data, "fixture should incr by one")
+        self.assertFalse(timeout_t < time.time(), "timeout exceeded")
+        self.assertFalse(rospy.is_shutdown(), "node shutdown")            
+        self.assertFalse(self.fixture_prev is None, "no data from fixture")
+        self.assertFalse(self.fixture_curr is None, "no data from fixture")
+        self.assertEqual(self.fixture_prev.data + 1, self.fixture_curr.data, "fixture should incr by one")
 
         # another 20 seconds to validate client
         timeout_t = time.time() + 20.
-        print "waiting for 20 seconds for client to verify"
+        print("waiting for 20 seconds for client to verify")
         while self.test_prev is None and \
                 not rospy.is_shutdown() and \
                 timeout_t > time.time():
             time.sleep(0.2)
 
-        self.failIf(self.test_prev is None, "no data from test")
-        self.assertEquals(self.test_prev.data + 1, self.test_curr.data, "test does not appear to match fixture data")
+        self.assertFalse(self.test_prev is None, "no data from test")
+        self.assertEqual(self.test_prev.data + 1, self.test_curr.data, "test does not appear to match fixture data")
 
 
 if __name__ == '__main__':
