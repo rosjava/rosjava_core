@@ -36,7 +36,6 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
@@ -49,7 +48,9 @@ public class SlaveServer extends XmlRpcServer {
     private final ParameterManager parameterManager;
     private final TcpRosServer tcpRosServer;
     private final Node node;
-    private final AtomicBoolean shutdownStarted;
+    private boolean shutdownStarted = false;
+    private final Object shutdownLock = new Object();
+
 
     public SlaveServer(GraphName nodeName, BindAddress tcpRosBindAddress, AdvertiseAddress tcpRosAdvertiseAddress, BindAddress xmlRpcBindAddress, AdvertiseAddress xmlRpcAdvertiseAddress, MasterClient master, TopicParticipantManager topicParticipantManager, ServiceManager serviceManager, ParameterManager parameterManager, ScheduledExecutorService executorService, Node node) {
         super(xmlRpcBindAddress, xmlRpcAdvertiseAddress);
@@ -59,7 +60,6 @@ public class SlaveServer extends XmlRpcServer {
         this.parameterManager = parameterManager;
         this.tcpRosServer = new TcpRosServer(tcpRosBindAddress, tcpRosAdvertiseAddress, topicParticipantManager, serviceManager, executorService);
         this.node = node;
-        this.shutdownStarted = new AtomicBoolean(false);
     }
 
     public AdvertiseAddress getTcpRosAdvertiseAddress() {
@@ -80,14 +80,21 @@ public class SlaveServer extends XmlRpcServer {
     @Override
     public void shutdown() {
         // prevent recursive call of this method
-        if (this.shutdownStarted.compareAndSet(false,true)) {
-            this.shutdownStarted.set(true);
-            super.shutdown();
-            tcpRosServer.shutdown();
-            if (this.node != null) {
-                this.node.shutdown();
+        synchronized (this.shutdownLock) {
+            if (this.shutdownStarted) {
+                return;
+            } else {
+                this.shutdownStarted = true;
             }
         }
+
+
+        super.shutdown();
+        this.tcpRosServer.shutdown();
+        if (this.node != null) {
+            this.node.shutdown();
+        }
+
     }
 
     public List<Object> getBusStats(String callerId) {
