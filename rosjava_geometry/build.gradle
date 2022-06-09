@@ -13,8 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
+plugins{
+  id 'java-library'
+}
 dependencies {
-  compile project(':rosjava')
-  testCompile 'junit:junit:4.8.2'
+  api 'org.ros.rosjava_messages:geometry_msgs:[1.12,1.13)'
+  implementation project(':rosjava')
+  testImplementation 'junit:junit:4.8.2'
 }

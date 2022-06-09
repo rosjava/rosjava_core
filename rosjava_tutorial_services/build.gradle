@@ -19,5 +19,6 @@ apply plugin: 'application'
 mainClassName = 'org.ros.RosRun'
 
 dependencies {
-  compile project(':rosjava')
+  implementation project(':rosjava')
+  implementation 'org.ros.rosjava_messages:rosjava_test_msgs:0.3.0'
 }

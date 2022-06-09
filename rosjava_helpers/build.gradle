@@ -1,6 +1,6 @@
 dependencies {
-    compile project(':rosjava')
-    compile 'org.yaml:snakeyaml:[1.17, 1.18)'
-    testCompile 'junit:junit:4.8.2'
-    testCompile project(':rosjava').sourceSets.test.output
+    implementation project(':rosjava')
+    implementation 'org.yaml:snakeyaml:[1.17, 1.18)'
+    testImplementation 'junit:junit:4.8.2'
+    testImplementation project(':rosjava').sourceSets.test.output
 }
