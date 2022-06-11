@@ -27,7 +27,7 @@ import org.xml.sax.SAXParseException;
 public class DoubleParser extends AtomicParser {
 	protected void setResult(String pResult) throws SAXException {
 		try {
-			super.setResult(new Double(pResult));
+			super.setResult(Double.parseDouble(pResult));
 		} catch (NumberFormatException e) {
 			throw new SAXParseException("Failed to parse double value: " + pResult,
 										getDocumentLocator());

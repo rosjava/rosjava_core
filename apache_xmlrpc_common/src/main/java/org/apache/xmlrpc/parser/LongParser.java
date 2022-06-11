@@ -27,7 +27,7 @@ import org.xml.sax.SAXParseException;
 public class LongParser extends AtomicParser {
 	protected void setResult(String pResult) throws SAXException {
 		try {
-			super.setResult(new Long(pResult.trim()));
+			super.setResult(Long.parseLong(pResult.trim()));
 		} catch (NumberFormatException e) {
 			throw new SAXParseException("Failed to parse long value: " + pResult,
 										getDocumentLocator());

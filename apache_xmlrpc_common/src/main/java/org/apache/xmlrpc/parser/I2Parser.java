@@ -27,7 +27,7 @@ import org.xml.sax.SAXParseException;
 public class I2Parser extends AtomicParser {
 	protected void setResult(String pResult) throws SAXException {
 		try {
-			super.setResult(new Short(pResult.trim()));
+			super.setResult(Short.parseShort(pResult.trim()));
 		} catch (NumberFormatException e) {
 			throw new SAXParseException("Failed to parse short value: " + pResult,
 										getDocumentLocator());

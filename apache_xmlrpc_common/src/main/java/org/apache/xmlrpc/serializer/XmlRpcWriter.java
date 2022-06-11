@@ -139,7 +139,7 @@ public class XmlRpcWriter {
 		handler.startElement("", "methodResponse", "methodResponse", ZERO_ATTRIBUTES);
 		handler.startElement("", "fault", "fault", ZERO_ATTRIBUTES);
 		Map map = new HashMap();
-        map.put("faultCode", new Integer(pCode));
+        map.put("faultCode", Integer.parseInt(pCode));
         map.put("faultString", pMessage == null ? "" : pMessage);
         if (pThrowable != null  &&  extensions  &&  (pConfig instanceof XmlRpcStreamRequestConfig)  &&
                 ((XmlRpcStreamRequestConfig) pConfig).isEnabledForExceptions()) {

@@ -27,7 +27,7 @@ import org.xml.sax.SAXParseException;
 public class I4Parser extends AtomicParser {
 	protected void setResult(String pResult) throws SAXException {
 		try {
-			super.setResult(new Integer(pResult.trim()));
+			super.setResult(Integer.parseInt(pResult.trim()));
 		} catch (NumberFormatException e) {
 			throw new SAXParseException("Failed to parse integer value: " + pResult,
 										getDocumentLocator());
