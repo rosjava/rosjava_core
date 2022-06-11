@@ -19,7 +19,7 @@ package org.ros.exception;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceNotFoundException extends RosException {
+public final class ServiceNotFoundException extends RosException {
 
   public ServiceNotFoundException(final Throwable throwable) {
     super(throwable);
