@@ -23,7 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.DefaultScheduledExecutorService;
 import org.ros.namespace.GraphName;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -133,17 +135,18 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
 
     @Override
     public void shutdownNodeMain(NodeMain nodeMain) {
-        Node node = nodeMains.inverse().get(nodeMain);
+        final Node node = this.nodeMains.inverse().get(nodeMain);
         if (node != null) {
-            safelyShutdownNode(node);
+            this.safelyShutdownNode(node);
         }
     }
 
     @Override
     public void shutdown() {
-        synchronized (connectedNodes) {
-            for (ConnectedNode connectedNode : connectedNodes.values()) {
-                safelyShutdownNode(connectedNode);
+        synchronized (this.connectedNodes) {
+            final List<ConnectedNode> connectedNodesList = new ArrayList<>(this.connectedNodes.values());
+            for (final ConnectedNode connectedNode : connectedNodesList) {
+                this.safelyShutdownNode(connectedNode);
             }
         }
     }
@@ -162,7 +165,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
             log.error("Exception thrown while shutting down node.", e);
             // We don't expect any more callbacks from a node that throws an exception
             // while shutting down. So, we unregister it immediately.
-            unregisterNode(node);
+            this.unregisterNode(node);
             success = false;
         }
         if (success) {
@@ -176,15 +179,15 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
      * @param connectedNode the {@link ConnectedNode} to register
      */
     private void registerNode(ConnectedNode connectedNode) {
-        GraphName nodeName = connectedNode.getName();
-        synchronized (connectedNodes) {
-            for (ConnectedNode illegalConnectedNode : connectedNodes.get(nodeName)) {
+        final GraphName nodeName = connectedNode.getName();
+        synchronized (this.connectedNodes) {
+            for (final ConnectedNode illegalConnectedNode : this.connectedNodes.get(nodeName)) {
                 System.err.println(String.format(
                         "Node name collision. Existing node %s (%s) will be shutdown.", nodeName,
                         illegalConnectedNode.getUri()));
                 illegalConnectedNode.shutdown();
             }
-            connectedNodes.put(nodeName, connectedNode);
+            this.connectedNodes.put(nodeName, connectedNode);
         }
     }
 
@@ -193,9 +196,11 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
      *
      * @param node the {@link Node} to unregister
      */
-    private void unregisterNode(Node node) {
+    private void unregisterNode(final Node node) {
         node.removeListeners();
-        connectedNodes.get(node.getName()).remove(node);
-        nodeMains.remove(node);
+        synchronized (this.connectedNodes) {
+            this.connectedNodes.get(node.getName()).remove(node);
+        }
+        this.nodeMains.remove(node);
     }
 }
