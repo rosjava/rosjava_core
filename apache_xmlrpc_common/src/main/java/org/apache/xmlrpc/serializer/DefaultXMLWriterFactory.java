@@ -47,8 +47,8 @@ public class DefaultXMLWriterFactory implements XmlWriterFactory {
 			StringWriter sw = new StringWriter();
 			csw.setWriter(sw);
 			csw.startDocument();
-			csw.startElement("", "test", "test", new AttributesImpl());
-			csw.endElement("", "test", "test");
+			csw.startElement(XmlRpcConstants.EMPTY_STRING, "test", "test", new AttributesImpl());
+			csw.endElement(XmlRpcConstants.EMPTY_STRING, "test", "test");
 			csw.endDocument();
 			xwf = new CharSetXmlWriterFactory();
 		} catch (Throwable t) {

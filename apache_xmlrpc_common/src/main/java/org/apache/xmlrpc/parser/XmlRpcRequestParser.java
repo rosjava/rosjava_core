@@ -26,6 +26,7 @@ import javax.xml.namespace.QName;
 import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.apache.xmlrpc.common.TypeFactory;
 import org.apache.xmlrpc.common.XmlRpcStreamConfig;
+import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -74,7 +75,7 @@ public class XmlRpcRequestParser extends RecursiveTypeParserImpl {
 							 Attributes pAttrs) throws SAXException {
 		switch (level++) {
 			case 0:
-				if (!"".equals(pURI)  ||  !"methodCall".equals(pLocalName)) {
+				if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !XmlRpcConstants.METHOD_CALL.equals(pLocalName)) {
 					throw new SAXParseException("Expected root element 'methodCall', got "
 							+ new QName(pURI, pLocalName),
 							getDocumentLocator());
@@ -82,7 +83,7 @@ public class XmlRpcRequestParser extends RecursiveTypeParserImpl {
 				break;
 			case 1:
 				if (methodName == null) {
-					if ("".equals(pURI)  &&  "methodName".equals(pLocalName)) {
+					if (XmlRpcConstants.EMPTY_STRING.equals(pURI)  &&  XmlRpcConstants.METHOD_NAME.equals(pLocalName)) {
 						inMethodName = true;
 					} else {
 						throw new SAXParseException("Expected methodName element, got "
@@ -90,7 +91,7 @@ public class XmlRpcRequestParser extends RecursiveTypeParserImpl {
 													getDocumentLocator());
 					}
 				} else if (params == null) {
-					if ("".equals(pURI)  &&  "params".equals(pLocalName)) {
+					if (XmlRpcConstants.EMPTY_STRING.equals(pURI)  &&  XmlRpcConstants.PARAMS.equals(pLocalName)) {
 						params = new ArrayList();
 					} else {
 						throw new SAXParseException("Expected params element, got "
@@ -104,14 +105,14 @@ public class XmlRpcRequestParser extends RecursiveTypeParserImpl {
 				}
 				break;
 			case 2:
-				if (!"".equals(pURI)  ||  !"param".equals(pLocalName)) {
+				if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !XmlRpcConstants.PARAM.equals(pLocalName)) {
 					throw new SAXParseException("Expected param element, got "
 												+ new QName(pURI, pLocalName),
 												getDocumentLocator());
 				}
 				break;
 			case 3:
-				if (!"".equals(pURI)  ||  !"value".equals(pLocalName)) {
+				if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !XmlRpcConstants.VALUE.equals(pLocalName)) {
 					throw new SAXParseException("Expected value element, got "
 												+ new QName(pURI, pLocalName),
 												getDocumentLocator());
@@ -130,9 +131,9 @@ public class XmlRpcRequestParser extends RecursiveTypeParserImpl {
 				break;
 			case 1:
 				if (inMethodName) {
-					if ("".equals(pURI)  &&  "methodName".equals(pLocalName)) {
+					if (XmlRpcConstants.EMPTY_STRING.equals(pURI)  &&  XmlRpcConstants.METHOD_NAME.equals(pLocalName)) {
 						if (methodName == null) {
-							methodName = "";
+							methodName = XmlRpcConstants.EMPTY_STRING;
 						}
 					} else {
 						throw new SAXParseException("Expected /methodName, got "
@@ -140,21 +141,21 @@ public class XmlRpcRequestParser extends RecursiveTypeParserImpl {
 													getDocumentLocator());
 					}
 					inMethodName = false;
-				} else if (!"".equals(pURI)  ||  !"params".equals(pLocalName)) {
+				} else if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !XmlRpcConstants.PARAMS.equals(pLocalName)) {
 					throw new SAXParseException("Expected /params, got "
 							+ new QName(pURI, pLocalName),
 							getDocumentLocator());
 				}
 				break;
 			case 2:
-				if (!"".equals(pURI)  ||  !"param".equals(pLocalName)) {
+				if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !XmlRpcConstants.PARAM.equals(pLocalName)) {
 					throw new SAXParseException("Expected /param, got "
 												+ new QName(pURI, pLocalName),
 												getDocumentLocator());
 				}
 				break;
 			case 3:
-				if (!"".equals(pURI)  ||  !"value".equals(pLocalName)) {
+				if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !XmlRpcConstants.VALUE.equals(pLocalName)) {
 					throw new SAXParseException("Expected /value, got "
 												+ new QName(pURI, pLocalName),
 												getDocumentLocator());

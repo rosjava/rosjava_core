@@ -14,7 +14,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 package org.apache.xmlrpc.serializer;
 
@@ -32,15 +32,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
-
+import static org.apache.xmlrpc.serializer.XmlRpcConstants.*;
 
 /** This class is responsible for writing an XmlRpc request or an
  * XmlRpc response to an output stream.
  */
 public class XmlRpcWriter {
-	/** The namespace URI for proprietary XML-RPC extensions.
-	 */
-	public static final String EXTENSIONS_URI = "http://ws.apache.org/xmlrpc/namespaces/extensions";
 	private static final Attributes ZERO_ATTRIBUTES = new AttributesImpl();
 	private final XmlRpcStreamConfig config;
 	private final TypeFactory typeFactory;
@@ -66,24 +63,24 @@ public class XmlRpcWriter {
 		handler.startDocument();
 		boolean extensions = pRequest.getConfig().isEnabledForExtensions();
 		if (extensions) {
-			handler.startPrefixMapping("ex", XmlRpcWriter.EXTENSIONS_URI);
+			handler.startPrefixMapping(EX, EXTENSIONS_URI);
 		}
-		handler.startElement("", "methodCall", "methodCall", ZERO_ATTRIBUTES);
-		handler.startElement("", "methodName", "methodName", ZERO_ATTRIBUTES);
+		handler.startElement(EMPTY_STRING, METHOD_CALL, METHOD_CALL, ZERO_ATTRIBUTES);
+		handler.startElement(EMPTY_STRING, METHOD_NAME, METHOD_NAME, ZERO_ATTRIBUTES);
 		String s = pRequest.getMethodName();
 		handler.characters(s.toCharArray(), 0, s.length());
-		handler.endElement("", "methodName", "methodName");
-		handler.startElement("", "params", "params", ZERO_ATTRIBUTES);
+		handler.endElement(EMPTY_STRING, METHOD_NAME, METHOD_NAME);
+		handler.startElement(EMPTY_STRING, PARAMS, PARAMS, ZERO_ATTRIBUTES);
 		int num = pRequest.getParameterCount();
 		for (int i = 0;  i < num;  i++) {
-			handler.startElement("", "param", "param", ZERO_ATTRIBUTES);
+			handler.startElement(EMPTY_STRING, PARAM, PARAM, ZERO_ATTRIBUTES);
 			writeValue(pRequest.getParameter(i));
-			handler.endElement("", "param", "param");
+			handler.endElement(EMPTY_STRING, PARAM, PARAM);
 		}
-		handler.endElement("", "params", "params");
-        handler.endElement("", "methodCall", "methodCall");
+		handler.endElement(EMPTY_STRING, PARAMS, PARAMS);
+        handler.endElement(EMPTY_STRING, METHOD_CALL, METHOD_CALL);
 		if (extensions) {
-			handler.endPrefixMapping("ex");
+			handler.endPrefixMapping(EX);
 		}
 		handler.endDocument();
 	}
@@ -97,17 +94,17 @@ public class XmlRpcWriter {
 		handler.startDocument();
 		boolean extensions = pConfig.isEnabledForExtensions();
 		if (extensions) {
-			handler.startPrefixMapping("ex", XmlRpcWriter.EXTENSIONS_URI);
+			handler.startPrefixMapping(EX, EXTENSIONS_URI);
 		}
-		handler.startElement("", "methodResponse", "methodResponse", ZERO_ATTRIBUTES);
-		handler.startElement("", "params", "params", ZERO_ATTRIBUTES);
-		handler.startElement("", "param", "param", ZERO_ATTRIBUTES);
+		handler.startElement(EMPTY_STRING, METHOD_RESPONSE, METHOD_RESPONSE, ZERO_ATTRIBUTES);
+		handler.startElement(EMPTY_STRING, PARAMS, PARAMS, ZERO_ATTRIBUTES);
+		handler.startElement(EMPTY_STRING, PARAM, PARAM, ZERO_ATTRIBUTES);
 		writeValue(pResult);
-		handler.endElement("", "param", "param");
-		handler.endElement("", "params", "params");
-		handler.endElement("", "methodResponse", "methodResponse");
+		handler.endElement(EMPTY_STRING, PARAM, PARAM);
+		handler.endElement(EMPTY_STRING, PARAMS, PARAMS);
+		handler.endElement(EMPTY_STRING, METHOD_RESPONSE, METHOD_RESPONSE);
 		if (extensions) {
-			handler.endPrefixMapping("ex");
+			handler.endPrefixMapping(EX);
 		}
 		handler.endDocument();
 	}
@@ -131,34 +128,34 @@ public class XmlRpcWriter {
 	 */
 	public void write(XmlRpcRequestConfig pConfig, int pCode, String pMessage,
             Throwable pThrowable) throws SAXException {
-		handler.startDocument();
-		boolean extensions = pConfig.isEnabledForExtensions();
+		this.handler.startDocument();
+		final boolean extensions = pConfig.isEnabledForExtensions();
 		if (extensions) {
-			handler.startPrefixMapping("ex", XmlRpcWriter.EXTENSIONS_URI);
+			this.handler.startPrefixMapping(EX, EXTENSIONS_URI);
 		}
-		handler.startElement("", "methodResponse", "methodResponse", ZERO_ATTRIBUTES);
-		handler.startElement("", "fault", "fault", ZERO_ATTRIBUTES);
-		Map map = new HashMap();
-        map.put("faultCode", Integer.parseInt(pCode));
-        map.put("faultString", pMessage == null ? "" : pMessage);
+		this.handler.startElement(EMPTY_STRING, METHOD_RESPONSE, METHOD_RESPONSE, ZERO_ATTRIBUTES);
+		this.handler.startElement(EMPTY_STRING, FAULT, FAULT, ZERO_ATTRIBUTES);
+		final Map map = new HashMap();
+        map.put(FAULT_CODE, Integer.valueOf(pCode));
+        map.put(FAULT_STRING, pMessage == null ? EMPTY_STRING : pMessage);
         if (pThrowable != null  &&  extensions  &&  (pConfig instanceof XmlRpcStreamRequestConfig)  &&
                 ((XmlRpcStreamRequestConfig) pConfig).isEnabledForExceptions()) {
             try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                final ObjectOutputStream oos = new ObjectOutputStream(baos);
                 oos.writeObject(pThrowable);
                 oos.close();
                 baos.close();
-                map.put("faultCause", baos.toByteArray());
+                map.put(FAULT_CAUSE, baos.toByteArray());
             } catch (Throwable t) {
                 // Ignore me
             }
         }
         writeValue(map);
-		handler.endElement("", "fault", "fault");
-		handler.endElement("", "methodResponse", "methodResponse");
+		handler.endElement(EMPTY_STRING, FAULT, FAULT);
+		handler.endElement(EMPTY_STRING, METHOD_RESPONSE, METHOD_RESPONSE);
 		if (extensions) {
-			handler.endPrefixMapping("ex");
+			handler.endPrefixMapping(EX);
 		}
 		handler.endDocument();
 	}
@@ -168,7 +165,7 @@ public class XmlRpcWriter {
 	 * @throws SAXException Writing the object failed.
 	 */
 	protected void writeValue(Object pObject) throws SAXException {
-		TypeSerializer serializer = typeFactory.getSerializer(config, pObject);
+		final TypeSerializer serializer = this.typeFactory.getSerializer(config, pObject);
 		if (serializer == null) {
 			throw new SAXException("Unsupported Java type: " + pObject.getClass().getName());
 		}

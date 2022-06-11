@@ -18,6 +18,7 @@
  */
 package org.apache.xmlrpc.parser;
 
+import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -26,7 +27,7 @@ import org.xml.sax.SAXParseException;
  */
 public class NullParser extends AtomicParser {
 	protected void setResult(String pResult) throws SAXException {
-		if (pResult == null  ||  "".equals(pResult.trim())) {
+		if (pResult == null  ||  XmlRpcConstants.EMPTY_STRING.equals(pResult.trim())) {
 			super.setResult((Object) null);
 		} else {
 			throw new SAXParseException("Unexpected characters in nil element.",
