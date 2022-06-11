@@ -38,8 +38,9 @@ import com.google.common.collect.Sets;
  * A ROS parameter server.
  * 
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
-public class ParameterServer {
+public final class ParameterServer {
 
   private static final Log log = LogFactory.getLog(ParameterServer.class);
 
@@ -53,12 +54,12 @@ public class ParameterServer {
     masterName = GraphName.of("/master");
   }
 
-  public void subscribe(GraphName name, NodeIdentifier nodeIdentifier) {
+  public final void subscribe(GraphName name, NodeIdentifier nodeIdentifier) {
     subscribers.put(name, nodeIdentifier);
   }
 
-  private Stack<String> getGraphNameParts(GraphName name) {
-    Stack<String> parts = new Stack<String>();
+  private final Stack<String> getGraphNameParts(GraphName name) {
+    final Stack<String> parts = new Stack<String>();
     GraphName tip = name;
     while (!tip.isRoot()) {
       parts.add(tip.getBasename().toString());
@@ -68,9 +69,9 @@ public class ParameterServer {
   }
 
   @SuppressWarnings("unchecked")
-  public Object get(GraphName name) {
+  public final  Object get(GraphName name) {
     Preconditions.checkArgument(name.isGlobal());
-    Stack<String> parts = getGraphNameParts(name);
+    final Stack<String> parts = getGraphNameParts(name);
     Object possibleSubtree = tree;
     while (!parts.empty() && possibleSubtree != null) {
       if (!(possibleSubtree instanceof Map)) {
@@ -82,18 +83,18 @@ public class ParameterServer {
   }
 
   @SuppressWarnings("unchecked")
-  private void setValue(GraphName name, Object value) {
+  private final void setValue(GraphName name, Object value) {
     Preconditions.checkArgument(name.isGlobal());
-    Stack<String> parts = getGraphNameParts(name);
+    final Stack<String> parts = getGraphNameParts(name);
     Map<String, Object> subtree = tree;
     while (!parts.empty()) {
-      String part = parts.pop();
+      final String part = parts.pop();
       if (parts.empty()) {
         subtree.put(part, value);
       } else if (subtree.containsKey(part) && subtree.get(part) instanceof Map) {
         subtree = (Map<String, Object>) subtree.get(part);
       } else {
-        Map<String, Object> newSubtree = Maps.newHashMap();
+        final Map<String, Object> newSubtree = Maps.newHashMap();
         subtree.put(part, newSubtree);
         subtree = newSubtree;
       }
@@ -104,11 +105,11 @@ public class ParameterServer {
     void update(SlaveClient client);
   }
 
-  private <T> void update(GraphName name, T value, Updater updater) {
-    setValue(name, value);
+  private final  <T> void update(GraphName name, T value, Updater updater) {
+    this.setValue(name, value);
     synchronized (subscribers) {
-      for (NodeIdentifier nodeIdentifier : subscribers.get(name)) {
-        SlaveClient client = new SlaveClient(masterName, nodeIdentifier.getUri());
+      for (final NodeIdentifier nodeIdentifier : subscribers.get(name)) {
+        final SlaveClient client = new SlaveClient(masterName, nodeIdentifier.getUri());
         try {
           updater.update(client);
         } catch (Exception e) {
@@ -118,7 +119,7 @@ public class ParameterServer {
     }
   }
 
-  public void set(final GraphName name, final boolean value) {
+  public final void set(final GraphName name, final boolean value) {
     update(name, value, new Updater() {
       @Override
       public void update(SlaveClient client) {
