@@ -31,9 +31,11 @@ import org.ros.node.NodeMain;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Create {@link NodeConfiguration} instances using a ROS command-line and
@@ -108,7 +110,7 @@ public class CommandLineLoader {
     public NodeConfiguration build() {
         parseRemappingArguments();
         // TODO(damonkohler): Add support for starting up a private node.
-        NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(getHost());
+        final NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(getHost());
         nodeConfiguration.setParentResolver(buildParentResolver());
         nodeConfiguration.setRosRoot(getRosRoot());
         nodeConfiguration.setRosPackagePath(getRosPackagePath());
@@ -120,9 +122,9 @@ public class CommandLineLoader {
     }
 
     private void parseRemappingArguments() {
-        for (String remapping : remappingArguments) {
+        for (final String remapping : remappingArguments) {
             Preconditions.checkState(remapping.contains(":="));
-            String[] remap = remapping.split(":=");
+            final String[] remap = remapping.split(":=");
             if (remap.length > 2) {
                 throw new IllegalArgumentException("Invalid remapping argument: " + remapping);
             }
@@ -143,12 +145,14 @@ public class CommandLineLoader {
      * </ol>
      */
     private NameResolver buildParentResolver() {
-        GraphName namespace = GraphName.root();
-        if (specialRemappings.containsKey(CommandLineVariables.ROS_NAMESPACE)) {
+        final GraphName namespace;
+        if (this.specialRemappings.containsKey(CommandLineVariables.ROS_NAMESPACE)) {
             namespace =
-                    GraphName.of(specialRemappings.get(CommandLineVariables.ROS_NAMESPACE)).toGlobal();
-        } else if (environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
-            namespace = GraphName.of(environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
+                    GraphName.of(this.specialRemappings.get(CommandLineVariables.ROS_NAMESPACE)).toGlobal();
+        } else if (this.environment.containsKey(EnvironmentVariables.ROS_NAMESPACE)) {
+            namespace = GraphName.of(this.environment.get(EnvironmentVariables.ROS_NAMESPACE)).toGlobal();
+        } else {
+            namespace = GraphName.root();
         }
         return new NameResolver(namespace, remappings);
     }
@@ -189,16 +193,22 @@ public class CommandLineLoader {
      * </ol>
      */
     private URI getMasterUri() {
-        URI uri = NodeConfiguration.DEFAULT_MASTER_URI;
+        String uriString="";
         try {
+            final URI uri;
             if (specialRemappings.containsKey(CommandLineVariables.ROS_MASTER_URI)) {
-                uri = new URI(specialRemappings.get(CommandLineVariables.ROS_MASTER_URI));
+                uriString = specialRemappings.get(CommandLineVariables.ROS_MASTER_URI);
+                uri = new URI(uriString);
             } else if (environment.containsKey(EnvironmentVariables.ROS_MASTER_URI)) {
-                uri = new URI(environment.get(EnvironmentVariables.ROS_MASTER_URI));
+                uriString = environment.get(EnvironmentVariables.ROS_MASTER_URI);
+                uri = new URI(uriString);
+            } else {
+                uriString = NodeConfiguration.DEFAULT_MASTER_URI_STRING;
+                uri = NodeConfiguration.DEFAULT_MASTER_URI;
             }
             return uri;
         } catch (URISyntaxException e) {
-            throw new RosRuntimeException("Invalid master URI: " + uri);
+            throw new RosRuntimeException("Invalid master URI: " + uriString);
         }
     }
 
@@ -213,15 +223,12 @@ public class CommandLineLoader {
     }
 
     private List<File> getRosPackagePath() {
-        if (environment.containsKey(EnvironmentVariables.ROS_PACKAGE_PATH)) {
-            String rosPackagePath = environment.get(EnvironmentVariables.ROS_PACKAGE_PATH);
-            List<File> paths = Lists.newArrayList();
-            for (String path : rosPackagePath.split(File.pathSeparator)) {
-                paths.add(new File(path));
-            }
-            return paths;
+        if (this.environment.containsKey(EnvironmentVariables.ROS_PACKAGE_PATH)) {
+            final String rosPackagePath = this.environment.get(EnvironmentVariables.ROS_PACKAGE_PATH);
+            return Arrays.stream(rosPackagePath.split(File.pathSeparator)).distinct().map(File::new).collect(Collectors.toUnmodifiableList());
+
         } else {
-            return Lists.newArrayList();
+            return Collections.emptyList();
         }
     }
 
