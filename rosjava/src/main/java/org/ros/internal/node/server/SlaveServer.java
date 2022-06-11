@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public final class SlaveServer extends XmlRpcServer {
+public class SlaveServer extends XmlRpcServer {
 
     private final GraphName nodeName;
     private final MasterClient masterClient;
@@ -62,7 +62,7 @@ public final class SlaveServer extends XmlRpcServer {
         this.shutdownStarted = new AtomicBoolean(false);
     }
 
-    public final AdvertiseAddress getTcpRosAdvertiseAddress() {
+    public AdvertiseAddress getTcpRosAdvertiseAddress() {
         return tcpRosServer.getAdvertiseAddress();
     }
 
@@ -71,14 +71,14 @@ public final class SlaveServer extends XmlRpcServer {
      * {@link TcpRosServer} is initialized first so that the slave server returns
      * correct information when topics are requested.
      */
-    public final void start() {
+    public void start() {
         super.start(org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl.class, new SlaveXmlRpcEndpointImpl(this));
         tcpRosServer.start();
     }
 
 
     @Override
-    public final void shutdown() {
+    public void shutdown() {
         // prevent recursive call of this method
         if (this.shutdownStarted.compareAndSet(false, true)) {
             this.shutdownStarted.set(true);
@@ -90,11 +90,11 @@ public final class SlaveServer extends XmlRpcServer {
         }
     }
 
-    public final List<Object> getBusStats(String callerId) {
+    public List<Object> getBusStats(String callerId) {
         throw new UnsupportedOperationException();
     }
 
-    public final List<Object> getBusInfo(String callerId) {
+    public List<Object> getBusInfo(String callerId) {
         final List<Object> busInfo = Lists.newArrayList();
         // The connection ID field is opaque to the user. A monotonically increasing
         // integer for now is sufficient.
@@ -133,7 +133,7 @@ public final class SlaveServer extends XmlRpcServer {
         return busInfo;
     }
 
-    public final URI getMasterUri() {
+    public URI getMasterUri() {
         return masterClient.getRemoteUri();
     }
 
@@ -142,15 +142,15 @@ public final class SlaveServer extends XmlRpcServer {
      * {@link UnsupportedOperationException} otherwise.
      */
     @Override
-    public final int getPid() {
+    public int getPid() {
         return Process.getPid();
     }
 
-    public final List<DefaultSubscriber<?>> getSubscriptions() {
+    public List<DefaultSubscriber<?>> getSubscriptions() {
         return topicParticipantManager.getSubscribers();
     }
 
-    public final List<DefaultPublisher<?>> getPublications() {
+    public List<DefaultPublisher<?>> getPublications() {
         return topicParticipantManager.getPublishers();
     }
 
@@ -160,11 +160,11 @@ public final class SlaveServer extends XmlRpcServer {
      *
      * @return the number of parameter subscribers that received the update
      */
-    public final int paramUpdate(GraphName parameterName, Object parameterValue) {
+    public int paramUpdate(GraphName parameterName, Object parameterValue) {
         return parameterManager.updateParameter(parameterName, parameterValue);
     }
 
-    public final void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
+    public void publisherUpdate(String callerId, String topicName, Collection<URI> publisherUris) {
         GraphName graphName = GraphName.of(topicName);
         if (topicParticipantManager.hasSubscriber(graphName)) {
             DefaultSubscriber<?> subscriber = topicParticipantManager.getSubscriber(graphName);
@@ -174,7 +174,7 @@ public final class SlaveServer extends XmlRpcServer {
         }
     }
 
-    public final ProtocolDescription requestTopic(String topicName, Collection<String> protocols) throws ServerException {
+    public ProtocolDescription requestTopic(String topicName, Collection<String> protocols) throws ServerException {
         // TODO(damonkohler): Use NameResolver.
         // Canonicalize topic name.
         final GraphName graphName = GraphName.of(topicName).toGlobal();
@@ -196,7 +196,7 @@ public final class SlaveServer extends XmlRpcServer {
     /**
      * @return a {@link NodeIdentifier} for this {@link SlaveServer}
      */
-    public final NodeIdentifier toNodeIdentifier() {
+    public NodeIdentifier toNodeIdentifier() {
         return new NodeIdentifier(nodeName, getUri());
     }
 }
