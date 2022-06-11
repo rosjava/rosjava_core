@@ -27,15 +27,15 @@ dependencies {
 
   implementation 'org.ros.rosjava_messages:rosgraph_msgs:[1.11,1.12)'
 
-  implementation 'dnsjava:dnsjava:2.1.1'
+  implementation 'dnsjava:dnsjava:3.5.1'
 
-  implementation 'org.apache.commons:com.springsource.org.apache.commons.net:2.0.0'
-  implementation 'com.google.guava:guava:12.0'
+  implementation 'commons-net:commons-net:3.8.0'
+  implementation 'com.google.guava:guava:31.1-jre'
 
   testImplementation 'org.ros.rosjava_messages:nav_msgs:[1.12,1.13)'
   testImplementation 'org.ros.rosjava_messages:rosjava_test_msgs:0.3.0'
   testImplementation 'junit:junit:4.8.2'
-  testImplementation 'org.mockito:mockito-all:1.8.5'
+  testImplementation 'org.mockito:mockito-all:1.10.19'
 }
 
 jar {
