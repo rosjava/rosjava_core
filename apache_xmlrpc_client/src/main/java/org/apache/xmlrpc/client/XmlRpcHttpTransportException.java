@@ -8,7 +8,7 @@ import org.apache.xmlrpc.XmlRpcException;
  * general, the 400 and 500 level HTTP status codes will
  * result in an XmlRpcHttpTransportException being thrown.
  */
-public class XmlRpcHttpTransportException extends XmlRpcException {
+public final class XmlRpcHttpTransportException extends XmlRpcException {
     private static final long serialVersionUID = -6933992871198450027L;
 
     private final int status;
@@ -41,7 +41,7 @@ public class XmlRpcHttpTransportException extends XmlRpcException {
      * Get the HTTP status code that resulted in this exception.
      * @return the HTTP status code that resulted in this exception.
      */
-    public int getStatusCode()
+    public final int getStatusCode()
     {
         return status;
     }
@@ -50,7 +50,7 @@ public class XmlRpcHttpTransportException extends XmlRpcException {
      * Get the status message returned by the HTTP server.
      * @return the status message returned by the HTTP server.
      */
-    public String getStatusMessage()
+    public final String getStatusMessage()
     {
         return statusMessage;
     }
