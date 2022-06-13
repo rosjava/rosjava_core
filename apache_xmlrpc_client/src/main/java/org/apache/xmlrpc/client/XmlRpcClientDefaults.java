@@ -25,7 +25,7 @@ import org.apache.xmlrpc.serializer.XmlWriterFactory;
 /**
  * This class is responsible to provide default settings.
  */
-public class XmlRpcClientDefaults {
+final class XmlRpcClientDefaults {
     private static final XmlWriterFactory xmlWriterFactory = new DefaultXMLWriterFactory();
 
     /**

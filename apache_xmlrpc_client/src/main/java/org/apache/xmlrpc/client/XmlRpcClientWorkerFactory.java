@@ -25,7 +25,7 @@ import org.apache.xmlrpc.common.XmlRpcWorkerFactory;
 /** A worker factory for the client, creating instances of
  * {@link org.apache.xmlrpc.client.XmlRpcClientWorker}.
  */
-public class XmlRpcClientWorkerFactory extends XmlRpcWorkerFactory {
+final class XmlRpcClientWorkerFactory extends XmlRpcWorkerFactory {
 	/** Creates a new instance.
 	 * @param pClient The factory controller.
 	 */

@@ -23,7 +23,7 @@ package org.apache.xmlrpc.client;
  * {@link org.apache.xmlrpc.client.XmlRpcTransport}. The implementation
  * is typically based on singletons.
  */
-public interface XmlRpcTransportFactory {
+interface XmlRpcTransportFactory {
     /** Returns an instance of {@link XmlRpcTransport}. This may
 	 * be a singleton, but the caller should not depend on that:
 	 * A new instance may as well be created for any request.

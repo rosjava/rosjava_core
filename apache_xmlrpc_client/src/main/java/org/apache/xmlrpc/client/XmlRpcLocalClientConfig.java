@@ -25,6 +25,6 @@ import org.apache.xmlrpc.common.XmlRpcRequestProcessorFactory;
  * rpc calls are mainly useful for testing, because you don't need
  * a running server.
  */
-public interface XmlRpcLocalClientConfig extends XmlRpcClientConfig,
+interface XmlRpcLocalClientConfig extends XmlRpcClientConfig,
 		XmlRpcRequestProcessorFactory {
 }

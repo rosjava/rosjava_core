@@ -41,7 +41,7 @@ import org.xml.sax.XMLReader;
  * stream for sending the request and an input stream for receiving
  * the response,
  */
-public abstract class XmlRpcStreamTransport extends XmlRpcTransportImpl {
+abstract class XmlRpcStreamTransport extends XmlRpcTransportImpl {
     protected interface ReqWriter {
         /**
          * Writes the requests data to the given output stream.

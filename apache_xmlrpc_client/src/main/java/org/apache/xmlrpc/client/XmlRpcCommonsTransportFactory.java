@@ -24,7 +24,7 @@ import org.apache.commons.httpclient.HttpClient;
 /** An HTTP transport factory, which is based on the Jakarta Commons
  * HTTP Client.
  */
-public class XmlRpcCommonsTransportFactory extends XmlRpcTransportFactoryImpl {
+public final class XmlRpcCommonsTransportFactory extends XmlRpcTransportFactoryImpl {
     private HttpClient httpClient;
 
     /** Creates a new instance.

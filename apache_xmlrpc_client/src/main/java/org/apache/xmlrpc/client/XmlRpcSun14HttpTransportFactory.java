@@ -25,7 +25,7 @@ import javax.net.ssl.SSLSocketFactory;
  * Default implementation of an HTTP transport factory in Java 1.4, based
  * on the {@link java.net.HttpURLConnection} class.
  */
-public class XmlRpcSun14HttpTransportFactory extends XmlRpcTransportFactoryImpl {
+class XmlRpcSun14HttpTransportFactory extends XmlRpcTransportFactoryImpl {
     private SSLSocketFactory sslSocketFactory;
 
     /**
