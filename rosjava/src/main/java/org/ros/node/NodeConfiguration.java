@@ -60,10 +60,11 @@ public class NodeConfiguration {
    * The default master {@link URI}.
    */
   public static final URI DEFAULT_MASTER_URI;
+  public static final String DEFAULT_MASTER_URI_STRING="http://localhost:11311/";
 
   static {
     try {
-      DEFAULT_MASTER_URI = new URI("http://localhost:11311/");
+      DEFAULT_MASTER_URI = new URI(DEFAULT_MASTER_URI_STRING);
     } catch (URISyntaxException e) {
       throw new RosRuntimeException(e);
     }
