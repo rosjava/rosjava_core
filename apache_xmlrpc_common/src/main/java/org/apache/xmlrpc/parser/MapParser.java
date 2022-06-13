@@ -28,6 +28,7 @@ import org.apache.xmlrpc.common.TypeFactory;
 import org.apache.xmlrpc.common.XmlRpcStreamConfig;
 import org.apache.xmlrpc.serializer.MapSerializer;
 import org.apache.xmlrpc.serializer.TypeSerializerImpl;
+import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -99,14 +100,14 @@ public class MapParser extends RecursiveTypeParserImpl {
 							 Attributes pAttrs) throws SAXException {
 		switch (level++) {
 			case 0:
-				if (!"".equals(pURI)  ||  !MapSerializer.STRUCT_TAG.equals(pLocalName)) {
+				if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !MapSerializer.STRUCT_TAG.equals(pLocalName)) {
 					throw new SAXParseException("Expected " + MapSerializer.STRUCT_TAG + ", got "
 												+ new QName(pURI, pLocalName),
 												getDocumentLocator());
 				}
 				break;
 			case 1:
-				if (!"".equals(pURI)  ||  !MapSerializer.MEMBER_TAG.equals(pLocalName)) {
+				if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !MapSerializer.MEMBER_TAG.equals(pLocalName)) {
 					throw new SAXParseException("Expected " + MapSerializer.MEMBER_TAG + ", got "
 												+ new QName(pURI, pLocalName),
 												getDocumentLocator());
@@ -121,15 +122,15 @@ public class MapParser extends RecursiveTypeParserImpl {
 												+ ", got " + new QName(pURI, pLocalName),
 												getDocumentLocator());
 				}
-				if ("".equals(pURI)  &&  MapSerializer.NAME_TAG.equals(pLocalName)) {
+				if (XmlRpcConstants.EMPTY_STRING.equals(pURI)  &&  MapSerializer.NAME_TAG.equals(pLocalName)) {
 					if (nameObject == null) {
 						inName = true;
 					} else {
-						throw new SAXParseException("Expected " + TypeSerializerImpl.VALUE_TAG
+						throw new SAXParseException("Expected " + XmlRpcConstants.VALUE
 													+ ", got " + new QName(pURI, pLocalName),
 													getDocumentLocator());
 					}
-				} else if ("".equals(pURI)  &&  TypeSerializerImpl.VALUE_TAG.equals(pLocalName)) {
+				} else if (XmlRpcConstants.EMPTY_STRING.equals(pURI)  &&  XmlRpcConstants.VALUE.equals(pLocalName)) {
 					if (nameObject == null) {
 						throw new SAXParseException("Expected " + MapSerializer.NAME_TAG
 													+ ", got " + new QName(pURI, pLocalName),
@@ -142,7 +143,7 @@ public class MapParser extends RecursiveTypeParserImpl {
 				}
 				break;
             case 3:
-                if (inName  &&  "".equals(pURI)  &&  TypeSerializerImpl.VALUE_TAG.equals(pLocalName)) {
+                if (inName  &&  XmlRpcConstants.EMPTY_STRING.equals(pURI)  &&  XmlRpcConstants.VALUE.equals(pLocalName)) {
                     if (cfg.isEnabledForExtensions()) {
                         inValue = true;
                         startValueTag();
@@ -187,7 +188,7 @@ public class MapParser extends RecursiveTypeParserImpl {
 				}
 				break;
             case 3:
-                if (inName  &&  inValue  &&  "".equals(pURI)  &&  TypeSerializerImpl.VALUE_TAG.equals(pLocalName)) {
+                if (inName  &&  inValue  &&  XmlRpcConstants.EMPTY_STRING.equals(pURI)  &&  XmlRpcConstants.VALUE.equals(pLocalName)) {
                     endValueTag();
                 } else {
                     super.endElement(pURI, pLocalName, pQName);

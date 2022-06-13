@@ -16,14 +16,9 @@
 
 package org.ros.internal.node;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.ros.Assert.assertGraphNameEquals;
-
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
-
+import org.junit.Assume;
 import org.junit.Test;
 import org.ros.RosCore;
 import org.ros.RosTest;
@@ -49,6 +44,10 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.ros.Assert.assertGraphNameEquals;
 
 /**
  * Tests for the {@link DefaultNode}.
@@ -86,7 +85,7 @@ public class DefaultNodeTest extends RosTest {
   @Test
   public void testCreatePublic() throws Exception {
     String host = InetAddress.getLocalHost().getCanonicalHostName();
-    assertFalse(InetAddresses.isInetAddress(host));
+    Assume.assumeTrue(!InetAddresses.isInetAddress(host));
     checkNodeAddress(host);
   }
 

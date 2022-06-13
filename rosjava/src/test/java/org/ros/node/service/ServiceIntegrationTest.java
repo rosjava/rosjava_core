@@ -58,13 +58,7 @@ public class ServiceIntegrationTest extends RosTest {
                 .newServiceServer(
                     SERVICE_NAME,
                     rosjava_test_msgs.AddTwoInts._TYPE,
-                    new ServiceResponseBuilder<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse>() {
-                      @Override
-                      public void build(rosjava_test_msgs.AddTwoIntsRequest request,
-                          rosjava_test_msgs.AddTwoIntsResponse response) {
-                        response.setSum(request.getA() + request.getB());
-                      }
-                    });
+                        (request, response) -> response.setSum(request.getA() + request.getB()));
         try {
           connectedNode.newServiceServer(SERVICE_NAME, rosjava_test_msgs.AddTwoInts._TYPE, null);
           fail();
@@ -152,13 +146,9 @@ public class ServiceIntegrationTest extends RosTest {
                 .newServiceServer(
                     SERVICE_NAME,
                     rosjava_test_msgs.AddTwoInts._TYPE,
-                    new ServiceResponseBuilder<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse>() {
-                      @Override
-                      public void build(rosjava_test_msgs.AddTwoIntsRequest request,
-                          rosjava_test_msgs.AddTwoIntsResponse response) throws ServiceException {
-                        throw new ServiceException(errorMessage);
-                      }
-                    });
+                        (request, response) -> {
+                          throw new ServiceException(errorMessage);
+                        });
         serviceServer.addListener(countDownServiceServerListener);
       }
     }, nodeConfiguration);

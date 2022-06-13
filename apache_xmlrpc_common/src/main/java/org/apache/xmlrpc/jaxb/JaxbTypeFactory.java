@@ -27,7 +27,7 @@ import org.apache.xmlrpc.common.XmlRpcController;
 import org.apache.xmlrpc.common.XmlRpcStreamConfig;
 import org.apache.xmlrpc.parser.TypeParser;
 import org.apache.xmlrpc.serializer.TypeSerializer;
-import org.apache.xmlrpc.serializer.XmlRpcWriter;
+import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.xml.sax.SAXException;
 
 
@@ -52,7 +52,7 @@ public class JaxbTypeFactory extends TypeFactoryImpl {
 	public TypeParser getParser(XmlRpcStreamConfig pConfig, NamespaceContextImpl pContext, String pURI, String pLocalName) {
 		TypeParser tp = super.getParser(pConfig, pContext, pURI, pLocalName);
 		if (tp == null) {
-			if (XmlRpcWriter.EXTENSIONS_URI.equals(pURI)  &&  JaxbSerializer.JAXB_TAG.equals(pLocalName)) {
+			if (XmlRpcConstants.EXTENSIONS_URI.equals(pURI)  &&  JaxbSerializer.JAXB_TAG.equals(pLocalName)) {
 				return new JaxbParser(context);
 			}
 		}

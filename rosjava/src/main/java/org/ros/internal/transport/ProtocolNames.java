@@ -16,17 +16,16 @@
 
 package org.ros.internal.transport;
 
-import java.util.Collection;
-
-import com.google.common.collect.Sets;
+import java.util.Set;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
+ *
  */
 public interface ProtocolNames {
   
   public static final String TCPROS = "TCPROS";
   public static final String UDPROS = "UDPROS";
-  public static final Collection<String> SUPPORTED = Sets.newHashSet(TCPROS);
+  public static final Set<String> SUPPORTED = Set.of(TCPROS);
   
 }

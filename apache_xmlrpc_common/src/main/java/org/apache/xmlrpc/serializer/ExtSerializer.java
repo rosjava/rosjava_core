@@ -20,7 +20,7 @@ package org.apache.xmlrpc.serializer;
 
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
-
+import static org.apache.xmlrpc.serializer.XmlRpcConstants.*;
 
 /** Base class for external XML representations, like DOM,
  * or JAXB.
@@ -37,10 +37,10 @@ public abstract class ExtSerializer implements TypeSerializer {
 			throws SAXException {
 		final String tag = getTagName();
 		final String exTag = "ex:" + getTagName();
-		pHandler.startElement("", TypeSerializerImpl.VALUE_TAG, TypeSerializerImpl.VALUE_TAG, TypeSerializerImpl.ZERO_ATTRIBUTES); 
-		pHandler.startElement(XmlRpcWriter.EXTENSIONS_URI, tag, exTag, TypeSerializerImpl.ZERO_ATTRIBUTES);
+		pHandler.startElement(EMPTY_STRING, VALUE, VALUE, TypeSerializerImpl.ZERO_ATTRIBUTES);
+		pHandler.startElement(EXTENSIONS_URI, tag, exTag, TypeSerializerImpl.ZERO_ATTRIBUTES);
 		serialize(pHandler, pObject);
-		pHandler.endElement(XmlRpcWriter.EXTENSIONS_URI, tag, exTag);
-		pHandler.endElement("", TypeSerializerImpl.VALUE_TAG, TypeSerializerImpl.VALUE_TAG); 
+		pHandler.endElement(EXTENSIONS_URI, tag, exTag);
+		pHandler.endElement(EMPTY_STRING, VALUE, VALUE);
 	}
 }

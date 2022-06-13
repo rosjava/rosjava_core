@@ -33,9 +33,9 @@ public class NullSerializer extends TypeSerializerImpl {
 	public static final String EX_NIL_TAG = "ex:nil";
 
 	public void write(ContentHandler pHandler, Object pObject) throws SAXException {
-		pHandler.startElement("", VALUE_TAG, VALUE_TAG, ZERO_ATTRIBUTES);
-		pHandler.startElement(XmlRpcWriter.EXTENSIONS_URI, NIL_TAG, EX_NIL_TAG, ZERO_ATTRIBUTES);
-		pHandler.endElement(XmlRpcWriter.EXTENSIONS_URI, NIL_TAG, EX_NIL_TAG);
-		pHandler.endElement("", VALUE_TAG, VALUE_TAG);
+		pHandler.startElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.VALUE, XmlRpcConstants.VALUE, ZERO_ATTRIBUTES);
+		pHandler.startElement(XmlRpcConstants.EXTENSIONS_URI, NIL_TAG, EX_NIL_TAG, ZERO_ATTRIBUTES);
+		pHandler.endElement(XmlRpcConstants.EXTENSIONS_URI, NIL_TAG, EX_NIL_TAG);
+		pHandler.endElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.VALUE, XmlRpcConstants.VALUE);
 	}
 }

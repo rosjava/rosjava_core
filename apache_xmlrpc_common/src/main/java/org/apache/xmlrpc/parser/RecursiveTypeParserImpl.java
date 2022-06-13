@@ -25,7 +25,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.common.TypeFactory;
 import org.apache.xmlrpc.common.XmlRpcExtensionException;
 import org.apache.xmlrpc.common.XmlRpcStreamConfig;
-import org.apache.xmlrpc.serializer.XmlRpcWriter;
+import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -114,7 +114,7 @@ public abstract class RecursiveTypeParserImpl extends TypeParserImpl {
 			if (typeParser == null) {
 				typeParser = factory.getParser(cfg, context, pURI, pLocalName);
 				if (typeParser == null) {
-					if (XmlRpcWriter.EXTENSIONS_URI.equals(pURI)  &&  !cfg.isEnabledForExtensions()) {
+					if (XmlRpcConstants.EXTENSIONS_URI.equals(pURI)  &&  !cfg.isEnabledForExtensions()) {
 						String msg = "The tag " + new QName(pURI, pLocalName) + " is invalid, if isEnabledForExtensions() == false.";
 						throw new SAXParseException(msg, getDocumentLocator(),
 													new XmlRpcExtensionException(msg));

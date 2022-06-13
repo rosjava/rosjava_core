@@ -47,27 +47,7 @@ import org.apache.xmlrpc.parser.ObjectArrayParser;
 import org.apache.xmlrpc.parser.SerializableParser;
 import org.apache.xmlrpc.parser.StringParser;
 import org.apache.xmlrpc.parser.TypeParser;
-import org.apache.xmlrpc.serializer.BigDecimalSerializer;
-import org.apache.xmlrpc.serializer.BigIntegerSerializer;
-import org.apache.xmlrpc.serializer.BooleanSerializer;
-import org.apache.xmlrpc.serializer.ByteArraySerializer;
-import org.apache.xmlrpc.serializer.CalendarSerializer;
-import org.apache.xmlrpc.serializer.DateSerializer;
-import org.apache.xmlrpc.serializer.DoubleSerializer;
-import org.apache.xmlrpc.serializer.FloatSerializer;
-import org.apache.xmlrpc.serializer.I1Serializer;
-import org.apache.xmlrpc.serializer.I2Serializer;
-import org.apache.xmlrpc.serializer.I4Serializer;
-import org.apache.xmlrpc.serializer.I8Serializer;
-import org.apache.xmlrpc.serializer.ListSerializer;
-import org.apache.xmlrpc.serializer.MapSerializer;
-import org.apache.xmlrpc.serializer.NodeSerializer;
-import org.apache.xmlrpc.serializer.NullSerializer;
-import org.apache.xmlrpc.serializer.ObjectArraySerializer;
-import org.apache.xmlrpc.serializer.SerializableSerializer;
-import org.apache.xmlrpc.serializer.StringSerializer;
-import org.apache.xmlrpc.serializer.TypeSerializer;
-import org.apache.xmlrpc.serializer.XmlRpcWriter;
+import org.apache.xmlrpc.serializer.*;
 import org.apache.xmlrpc.util.XmlRpcDateTimeDateFormat;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -203,7 +183,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	public TypeParser getParser(XmlRpcStreamConfig pConfig, NamespaceContextImpl pContext, String pURI, String pLocalName) {
-		if (XmlRpcWriter.EXTENSIONS_URI.equals(pURI)) {
+		if (XmlRpcConstants.EXTENSIONS_URI.equals(pURI)) {
 			if (!pConfig.isEnabledForExtensions()) {
 				return null;
 			}
@@ -223,12 +203,12 @@ public class TypeFactoryImpl implements TypeFactory {
                 return new BigDecimalParser();
             } else if (BigIntegerSerializer.BIGINTEGER_TAG.equals(pLocalName)) {
                 return new BigIntegerParser();
-			} else if (SerializableSerializer.SERIALIZABLE_TAG.equals(pLocalName)) {
+			} else if (XmlRpcConstants.SERIALIZABLE.equals(pLocalName)) {
 				return new SerializableParser();
 			} else if (CalendarSerializer.CALENDAR_TAG.equals(pLocalName)) {
 			    return new CalendarParser();
             }
-		} else if ("".equals(pURI)) {
+		} else if (XmlRpcConstants.EMPTY_STRING.equals(pURI)) {
 			if (I4Serializer.INT_TAG.equals(pLocalName)  ||  I4Serializer.I4_TAG.equals(pLocalName)) {
 				return new I4Parser();
 			} else if (BooleanSerializer.BOOLEAN_TAG.equals(pLocalName)) {
@@ -242,11 +222,11 @@ public class TypeFactoryImpl implements TypeFactory {
                         return controller.getConfig().getTimeZone();
                     }
                 });
-			} else if (ObjectArraySerializer.ARRAY_TAG.equals(pLocalName)) {
+			} else if (XmlRpcConstants.ARRAY.equals(pLocalName)) {
 				return new ObjectArrayParser(pConfig, pContext, this);
 			} else if (MapSerializer.STRUCT_TAG.equals(pLocalName)) {
 				return new MapParser(pConfig, pContext, this);
-			} else if (ByteArraySerializer.BASE_64_TAG.equals(pLocalName)) {
+			} else if (XmlRpcConstants.BASE_64.equals(pLocalName)) {
 				return new ByteArrayParser();
 			} else if (StringSerializer.STRING_TAG.equals(pLocalName)) {
 				return new StringParser();

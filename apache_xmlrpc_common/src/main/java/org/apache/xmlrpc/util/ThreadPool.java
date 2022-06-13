@@ -198,6 +198,7 @@ public class ThreadPool {
 	 * the task will be executed later.
 	 * @deprecated No longer in use.
 	 */
+	@Deprecated
 	public boolean addTask(Task pTask) {
 	    final Poolable poolable = getPoolable(pTask, true);
 	    if (poolable != null) {

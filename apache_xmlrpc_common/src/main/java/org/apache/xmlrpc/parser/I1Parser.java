@@ -27,7 +27,7 @@ import org.xml.sax.SAXParseException;
 public class I1Parser extends AtomicParser {
 	protected void setResult(String pResult) throws SAXException {
 		try {
-			super.setResult(new Byte(pResult.trim()));
+			super.setResult(Byte.parseByte(pResult.trim()));
 		} catch (NumberFormatException e) {
 			throw new SAXParseException("Failed to parse byte value: " + pResult,
 										getDocumentLocator());

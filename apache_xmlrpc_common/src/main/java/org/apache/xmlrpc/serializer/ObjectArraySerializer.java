@@ -27,12 +27,6 @@ import org.xml.sax.SAXException;
 /** A {@link TypeSerializer} for object arrays.
  */
 public class ObjectArraySerializer extends TypeSerializerImpl {
-	/** Tag name of an array value.
-	 */
-	public static final String ARRAY_TAG = "array";
-	/** Tag name of an arrays data.
-	 */
-	public static final String DATA_TAG = "data";
 
 	private final XmlRpcStreamConfig config;
 	private final TypeFactory typeFactory;
@@ -59,12 +53,12 @@ public class ObjectArraySerializer extends TypeSerializerImpl {
 		}
 	}
 	public void write(final ContentHandler pHandler, Object pObject) throws SAXException {
-		pHandler.startElement("", VALUE_TAG, VALUE_TAG, ZERO_ATTRIBUTES);
-		pHandler.startElement("", ARRAY_TAG, ARRAY_TAG, ZERO_ATTRIBUTES);
-		pHandler.startElement("", DATA_TAG, DATA_TAG, ZERO_ATTRIBUTES);
+		pHandler.startElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.VALUE, XmlRpcConstants.VALUE, ZERO_ATTRIBUTES);
+		pHandler.startElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.ARRAY, XmlRpcConstants.ARRAY, ZERO_ATTRIBUTES);
+		pHandler.startElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.DATA, XmlRpcConstants.DATA, ZERO_ATTRIBUTES);
 		writeData(pHandler, pObject);
-		pHandler.endElement("", DATA_TAG, DATA_TAG);
-		pHandler.endElement("", ARRAY_TAG, ARRAY_TAG);
-		pHandler.endElement("", VALUE_TAG, VALUE_TAG);
+		pHandler.endElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.DATA, XmlRpcConstants.DATA);
+		pHandler.endElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.ARRAY, XmlRpcConstants.ARRAY);
+		pHandler.endElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.VALUE, XmlRpcConstants.VALUE);
 	}
 }

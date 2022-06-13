@@ -19,7 +19,7 @@ package org.ros.exception;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DuplicateServiceException extends RosRuntimeException {
+public final class DuplicateServiceException extends RosRuntimeException {
 
   public DuplicateServiceException(final String message) {
     super(message);

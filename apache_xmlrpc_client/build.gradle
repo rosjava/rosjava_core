@@ -16,6 +16,5 @@
 
 dependencies {
   implementation project(':apache_xmlrpc_common')
-  implementation 'org.apache.ws.commons:ws-commons-util:1.0.1'
 }
 

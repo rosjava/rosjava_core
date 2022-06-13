@@ -33,14 +33,10 @@ import org.xml.sax.SAXException;
  * instances of {@link java.io.Serializable}.
  */
 public class SerializableSerializer extends TypeSerializerImpl {
-	/** Tag name of a base64 value.
-	 */
-	public static final String SERIALIZABLE_TAG = "serializable";
-	private static final String EX_SERIALIZABLE_TAG = "ex:" + SERIALIZABLE_TAG;
 
 	public void write(final ContentHandler pHandler, Object pObject) throws SAXException {
-		pHandler.startElement("", VALUE_TAG, VALUE_TAG, ZERO_ATTRIBUTES);
-		pHandler.startElement("", SERIALIZABLE_TAG, EX_SERIALIZABLE_TAG, ZERO_ATTRIBUTES);
+		pHandler.startElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.VALUE, XmlRpcConstants.VALUE, ZERO_ATTRIBUTES);
+		pHandler.startElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.SERIALIZABLE, XmlRpcConstants.EX_SERIALIZABLE, ZERO_ATTRIBUTES);
 		char[] buffer = new char[1024];
 		Encoder encoder = new Base64.SAXEncoder(buffer, 0, null, pHandler);
 		try {
@@ -53,7 +49,7 @@ public class SerializableSerializer extends TypeSerializerImpl {
 		} catch (IOException e) {
 			throw new SAXException(e);
 		}
-		pHandler.endElement("", SERIALIZABLE_TAG, EX_SERIALIZABLE_TAG);
-		pHandler.endElement("", VALUE_TAG, VALUE_TAG);
+		pHandler.endElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.SERIALIZABLE, XmlRpcConstants.EX_SERIALIZABLE);
+		pHandler.endElement(XmlRpcConstants.EMPTY_STRING, XmlRpcConstants.VALUE, XmlRpcConstants.VALUE);
 	}
 }

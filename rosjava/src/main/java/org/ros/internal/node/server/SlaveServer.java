@@ -80,7 +80,7 @@ public class SlaveServer extends XmlRpcServer {
     @Override
     public void shutdown() {
         // prevent recursive call of this method
-        if (this.shutdownStarted.compareAndSet(false,true)) {
+        if (this.shutdownStarted.compareAndSet(false, true)) {
             this.shutdownStarted.set(true);
             super.shutdown();
             tcpRosServer.shutdown();
@@ -95,13 +95,13 @@ public class SlaveServer extends XmlRpcServer {
     }
 
     public List<Object> getBusInfo(String callerId) {
-        List<Object> busInfo = Lists.newArrayList();
+        final List<Object> busInfo = Lists.newArrayList();
         // The connection ID field is opaque to the user. A monotonically increasing
         // integer for now is sufficient.
         int id = 0;
-        for (DefaultPublisher<?> publisher : getPublications()) {
-            for (SubscriberIdentifier subscriberIdentifier : topicParticipantManager.getPublisherConnections(publisher)) {
-                List<String> publisherBusInfo = Lists.newArrayList();
+        for (final DefaultPublisher<?> publisher : getPublications()) {
+            for (final SubscriberIdentifier subscriberIdentifier : topicParticipantManager.getPublisherConnections(publisher)) {
+                final List<String> publisherBusInfo = Lists.newArrayList();
                 publisherBusInfo.add(Integer.toString(id));
                 publisherBusInfo.add(subscriberIdentifier.getNodeIdentifier().getName().toString());
                 // TODO(damonkohler): Pull out BusInfo constants.
@@ -113,9 +113,9 @@ public class SlaveServer extends XmlRpcServer {
                 id++;
             }
         }
-        for (DefaultSubscriber<?> subscriber : getSubscriptions()) {
-            for (PublisherIdentifier publisherIdentifer : topicParticipantManager.getSubscriberConnections(subscriber)) {
-                List<String> subscriberBusInfo = Lists.newArrayList();
+        for (final DefaultSubscriber<?> subscriber : getSubscriptions()) {
+            for (final PublisherIdentifier publisherIdentifer : topicParticipantManager.getSubscriberConnections(subscriber)) {
+                final List<String> subscriberBusInfo = Lists.newArrayList();
                 subscriberBusInfo.add(Integer.toString(id));
                 // Subscriber connection PublisherIdentifiers are populated with node
                 // URIs instead of names. As a result, the only identifier information
@@ -146,11 +146,11 @@ public class SlaveServer extends XmlRpcServer {
         return Process.getPid();
     }
 
-    public Collection<DefaultSubscriber<?>> getSubscriptions() {
+    public List<DefaultSubscriber<?>> getSubscriptions() {
         return topicParticipantManager.getSubscribers();
     }
 
-    public Collection<DefaultPublisher<?>> getPublications() {
+    public List<DefaultPublisher<?>> getPublications() {
         return topicParticipantManager.getPublishers();
     }
 
@@ -177,11 +177,11 @@ public class SlaveServer extends XmlRpcServer {
     public ProtocolDescription requestTopic(String topicName, Collection<String> protocols) throws ServerException {
         // TODO(damonkohler): Use NameResolver.
         // Canonicalize topic name.
-        GraphName graphName = GraphName.of(topicName).toGlobal();
+        final GraphName graphName = GraphName.of(topicName).toGlobal();
         if (!topicParticipantManager.hasPublisher(graphName)) {
             throw new ServerException("No publishers for topic: " + graphName);
         }
-        for (String protocol : protocols) {
+        for (final String protocol : protocols) {
             if (protocol.equals(ProtocolNames.TCPROS)) {
                 try {
                     return new TcpRosProtocolDescription(tcpRosServer.getAdvertiseAddress());

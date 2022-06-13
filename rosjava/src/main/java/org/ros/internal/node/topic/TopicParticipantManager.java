@@ -26,15 +26,18 @@ import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages a collection of {@link Publisher}s and {@link Subscriber}s.
  * 
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
-public class TopicParticipantManager {
+public final class TopicParticipantManager {
 
   /**
    * A mapping from topic name to {@link Subscriber}.
@@ -149,19 +152,19 @@ public class TopicParticipantManager {
     publisherConnections.clear();
   }
 
-  public Collection<DefaultSubscriber<?>> getSubscribers() {
+  public List<DefaultSubscriber<?>> getSubscribers() {
     return ImmutableList.copyOf(subscribers.values());
   }
 
-  public Collection<PublisherIdentifier> getSubscriberConnections(DefaultSubscriber<?> subscriber) {
+  public List<PublisherIdentifier> getSubscriberConnections(DefaultSubscriber<?> subscriber) {
     return ImmutableList.copyOf(subscriberConnections.get(subscriber));
   }
 
-  public Collection<DefaultPublisher<?>> getPublishers() {
+  public List<DefaultPublisher<?>> getPublishers() {
     return ImmutableList.copyOf(publishers.values());
   }
 
-  public Collection<SubscriberIdentifier> getPublisherConnections(DefaultPublisher<?> publisher) {
+  public List<SubscriberIdentifier> getPublisherConnections(DefaultPublisher<?> publisher) {
     return ImmutableList.copyOf(publisherConnections.get(publisher));
   }
 }

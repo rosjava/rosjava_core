@@ -26,8 +26,7 @@ import javax.xml.namespace.QName;
 import org.apache.ws.commons.util.NamespaceContextImpl;
 import org.apache.xmlrpc.common.TypeFactory;
 import org.apache.xmlrpc.common.XmlRpcStreamConfig;
-import org.apache.xmlrpc.serializer.ObjectArraySerializer;
-import org.apache.xmlrpc.serializer.TypeSerializerImpl;
+import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -79,21 +78,21 @@ public class ObjectArrayParser extends RecursiveTypeParserImpl {
 	public void startElement(String pURI, String pLocalName, String pQName, Attributes pAttrs) throws SAXException {
 		switch (level++) {
 			case 0:
-				if (!"".equals(pURI)  ||  !ObjectArraySerializer.ARRAY_TAG.equals(pLocalName)) {
+				if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !XmlRpcConstants.ARRAY.equals(pLocalName)) {
 					throw new SAXParseException("Expected array element, got "
 												+ new QName(pURI, pLocalName),
 												getDocumentLocator());
 				}
 				break;
 			case 1:
-				if (!"".equals(pURI)  ||  !ObjectArraySerializer.DATA_TAG.equals(pLocalName)) {
+				if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !XmlRpcConstants.DATA.equals(pLocalName)) {
 					throw new SAXParseException("Expected data element, got "
 												+ new QName(pURI, pLocalName),
 												getDocumentLocator());
 				}
 				break;
 			case 2:
-				if (!"".equals(pURI)  ||  !TypeSerializerImpl.VALUE_TAG.equals(pLocalName)) {
+				if (!XmlRpcConstants.EMPTY_STRING.equals(pURI)  ||  !XmlRpcConstants.VALUE.equals(pLocalName)) {
 					throw new SAXParseException("Expected data element, got "
 												+ new QName(pURI, pLocalName),
 												getDocumentLocator());

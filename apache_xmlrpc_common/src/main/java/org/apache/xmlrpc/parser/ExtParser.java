@@ -23,7 +23,7 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
-import org.apache.xmlrpc.serializer.XmlRpcWriter;
+import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
@@ -121,10 +121,10 @@ public abstract class ExtParser implements TypeParser {
 		switch (level++) {
 			case 0:
 				final String tag = getTagName();
-				if (!XmlRpcWriter.EXTENSIONS_URI.equals(pURI)  ||
+				if (!XmlRpcConstants.EXTENSIONS_URI.equals(pURI)  ||
 					!tag.equals(pLocalName)) {
 					throw new SAXParseException("Expected " +
-												new QName(XmlRpcWriter.EXTENSIONS_URI, tag) +
+												new QName(XmlRpcConstants.EXTENSIONS_URI, tag) +
 												", got " +
 												new QName(pURI, pLocalName),
 												locator);

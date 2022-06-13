@@ -27,7 +27,7 @@ import org.xml.sax.SAXParseException;
 public class FloatParser extends AtomicParser {
 	protected void setResult(String pResult) throws SAXException {
 		try {
-			super.setResult(new Float(pResult));
+			super.setResult(Float.parseFloat(pResult));
 		} catch (NumberFormatException e) {
 			throw new SAXParseException("Failed to parse float value: " + pResult,
 										getDocumentLocator());
