@@ -24,7 +24,7 @@ import org.apache.xmlrpc.XmlRpcRequest;
 /** A callback interface for an asynchronous XML-RPC call.
  * @since 3.0
  */
-public interface AsyncCallback {
+interface AsyncCallback {
     /** Call went ok, handle result.
      * @param pRequest The request being performed.
      * @param pResult The result object, which was returned by the server.

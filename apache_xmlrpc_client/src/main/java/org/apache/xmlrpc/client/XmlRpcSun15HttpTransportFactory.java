@@ -25,7 +25,7 @@ import java.net.Proxy;
  * Default implementation of an HTTP transport in Java 1.5, based on the
  * {@link java.net.HttpURLConnection} class.
  */
-public class XmlRpcSun15HttpTransportFactory extends XmlRpcSun14HttpTransportFactory {
+final class XmlRpcSun15HttpTransportFactory extends XmlRpcSun14HttpTransportFactory {
     private Proxy proxy;
 
     /**

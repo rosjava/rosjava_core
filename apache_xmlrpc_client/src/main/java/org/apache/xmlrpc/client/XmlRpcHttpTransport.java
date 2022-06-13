@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
  * concrete implementations, like {@link org.apache.xmlrpc.client.XmlRpcSunHttpTransport},
  * or {@link org.apache.xmlrpc.client.XmlRpcCommonsTransport}.
  */
-public abstract class XmlRpcHttpTransport extends XmlRpcStreamTransport {
+abstract class XmlRpcHttpTransport extends XmlRpcStreamTransport {
     protected class ByteArrayReqWriter implements ReqWriter {
         private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ByteArrayReqWriter(XmlRpcRequest pRequest)
@@ -87,15 +87,15 @@ public abstract class XmlRpcHttpTransport extends XmlRpcStreamTransport {
         }
     }
 
-    private String userAgent;
+    private final String userAgent;
 
 
 	protected XmlRpcHttpTransport(XmlRpcClient pClient, String pUserAgent) {
 		super(pClient);
-		userAgent = pUserAgent;
+		this.userAgent = pUserAgent;
 	}
 
-	protected String getUserAgent() { return userAgent; }
+	protected String getUserAgent() { return this.userAgent; }
 
 	protected abstract void setRequestHeader(String pHeader, String pValue);
 

@@ -30,7 +30,7 @@ import javax.net.ssl.SSLSocketFactory;
  * {@link java.net.HttpURLConnection} class. Adds support for the
  * {@link SSLSocketFactory}.
  */
-public class XmlRpcSun14HttpTransport extends XmlRpcSunHttpTransport {
+class XmlRpcSun14HttpTransport extends XmlRpcSunHttpTransport {
     private SSLSocketFactory sslSocketFactory;
 
     /**

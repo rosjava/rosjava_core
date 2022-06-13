@@ -34,7 +34,7 @@ import org.xml.sax.SAXException;
 /** Default implementation of an HTTP transport, based on the
  * {@link java.net.HttpURLConnection} class.
  */
-public class XmlRpcSunHttpTransport extends XmlRpcHttpTransport {
+class XmlRpcSunHttpTransport extends XmlRpcHttpTransport {
 	private static final String userAgent = USER_AGENT + " (Sun HTTP Transport)";
 	private URLConnection conn;
 

@@ -27,7 +27,7 @@ import org.apache.xmlrpc.XmlRpcRequestConfig;
 /** Default implementation of
  * {@link org.apache.xmlrpc.XmlRpcRequest}.
  */
-public class XmlRpcClientRequestImpl implements XmlRpcRequest {
+final class XmlRpcClientRequestImpl implements XmlRpcRequest {
     private static final Object[] ZERO_PARAMS = new Object[0];
     private final XmlRpcRequestConfig config;
 	private final String methodName;

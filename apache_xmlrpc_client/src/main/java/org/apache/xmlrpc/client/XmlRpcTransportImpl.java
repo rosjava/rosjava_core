@@ -21,7 +21,7 @@ package org.apache.xmlrpc.client;
 
 /** Abstract base implementation of an {@link org.apache.xmlrpc.client.XmlRpcTransport}.
  */
-public abstract class XmlRpcTransportImpl implements XmlRpcTransport {
+abstract class XmlRpcTransportImpl implements XmlRpcTransport {
 	private final XmlRpcClient client;
 
 	/** Creates a new instance.

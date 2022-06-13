@@ -29,7 +29,7 @@ import org.apache.xmlrpc.common.XmlRpcWorker;
  * pool is limitation of the maximum number of concurrent requests.
  * @since 3.0
  */
-public class XmlRpcClientWorker implements XmlRpcWorker {
+final class XmlRpcClientWorker implements XmlRpcWorker {
 	private final XmlRpcClientWorkerFactory factory;
 
 	/** Creates a new instance.

@@ -27,7 +27,7 @@ import org.apache.xmlrpc.common.XmlRpcRequestProcessor;
 
 /** Default implementation of a clients request configuration.
  */
-public class XmlRpcClientConfigImpl extends XmlRpcHttpRequestConfigImpl
+public final class XmlRpcClientConfigImpl extends XmlRpcHttpRequestConfigImpl
 		implements XmlRpcHttpClientConfig, XmlRpcLocalClientConfig, Cloneable, Serializable {
 	private static final long serialVersionUID = 4121131450507800889L;
 	private URL serverURL;

@@ -40,10 +40,10 @@ import org.apache.xmlrpc.XmlRpcRequest;
  *   }
  * </pre>
  */
-public class TimingOutCallback implements AsyncCallback {
+public final class TimingOutCallback implements AsyncCallback {
     /** This exception is thrown, if the request times out.
      */
-    public static class TimeoutException extends XmlRpcException {
+    public static final class TimeoutException extends XmlRpcException {
         private static final long serialVersionUID = 4875266372372105081L;
 
         /** Creates a new instance with the given error code and

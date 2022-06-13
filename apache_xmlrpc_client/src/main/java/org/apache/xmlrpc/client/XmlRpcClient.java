@@ -48,7 +48,7 @@ import org.apache.xmlrpc.serializer.XmlWriterFactory;
  * of concurrent requests.</p>
  * @since 3.0
  */
-public class XmlRpcClient extends XmlRpcController {
+public final class XmlRpcClient extends XmlRpcController {
 	private XmlRpcTransportFactory transportFactory = XmlRpcClientDefaults.newTransportFactory(this);
 	private XmlRpcClientConfig config = XmlRpcClientDefaults.newXmlRpcClientConfig();
 	private XmlWriterFactory xmlWriterFactory = XmlRpcClientDefaults.newXmlWriterFactory();
@@ -112,8 +112,8 @@ public class XmlRpcClient extends XmlRpcController {
 	 * for any request.
 	 * @return The clients transport factory.
 	 */
-	public XmlRpcTransportFactory getTransportFactory() {
-		return transportFactory;
+	public final XmlRpcTransportFactory getTransportFactory() {
+		return this.transportFactory;
 	}
 
 	/** Performs a request with the clients default configuration.
@@ -242,6 +242,6 @@ public class XmlRpcClient extends XmlRpcController {
 	 * {@link org.apache.ws.commons.serialize.XMLWriter}.
 	 */
 	public void setXmlWriterFactory(XmlWriterFactory pFactory) {
-		xmlWriterFactory = pFactory;
+		this.xmlWriterFactory = pFactory;
 	}
 }
