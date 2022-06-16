@@ -16,13 +16,13 @@
 
 package org.ros;
 
-import org.apache.commons.logging.Log;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.message.MessageFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
+import org.ros.node.RosLog;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.topic.Publisher;
 
@@ -62,7 +62,7 @@ public class ParameterServerTestNode extends AbstractNodeMain {
 
     ParameterTree param = connectedNode.getParameterTree();
 
-    Log log = connectedNode.getLog();
+    final RosLog log = connectedNode.getLog();
     MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
     final std_msgs.String tilde_m = topicMessageFactory.newFromType(std_msgs.String._TYPE);

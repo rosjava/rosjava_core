@@ -16,13 +16,14 @@
 
 package org.ros.node;
 
-import org.apache.commons.logging.Log;
+
 import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.node.xmlrpc.MasterXmlRpcEndpoint;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializationFactory;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NodeNameResolver;
+import org.slf4j.Logger;
 
 import java.net.URI;
 import java.util.concurrent.ScheduledExecutorService;
@@ -73,7 +74,7 @@ public interface Node {
   /**
    * @return Logger for this node, which will also perform logging to /rosout.
    */
-  Log getLog();
+  RosLog getLog();
 
   /**
    * @return the {@link MessageSerializationFactory} used by this node
