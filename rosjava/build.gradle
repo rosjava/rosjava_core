@@ -13,37 +13,37 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-plugins{
-  id 'java-library'
+plugins {
+    id 'java-library'
 }
 dependencies {
-  api 'org.ros.rosjava_bootstrap:message_generation:[0.3,0.4)'
-  api 'org.ros.rosjava_messages:std_msgs:[0.5.9,0.5.11)'
-  api 'org.apache.commons:com.springsource.org.apache.commons.logging:1.1.1'
+    api 'org.ros.rosjava_bootstrap:message_generation:[0.3,0.4)'
+    api 'org.ros.rosjava_messages:std_msgs:[0.5.9,0.5.11)'
+    implementation 'org.slf4j:slf4j-api:1.7.30'
 
-  implementation project(':apache_xmlrpc_common')
-  implementation project(':apache_xmlrpc_server')
-  implementation project(':apache_xmlrpc_client')
+    implementation project(':apache_xmlrpc_common')
+    implementation project(':apache_xmlrpc_server')
+    implementation project(':apache_xmlrpc_client')
 
-  implementation 'org.ros.rosjava_messages:rosgraph_msgs:[1.11,1.12)'
+    implementation 'org.ros.rosjava_messages:rosgraph_msgs:[1.11,1.12)'
 
-  implementation 'dnsjava:dnsjava:3.5.1'
+    implementation 'dnsjava:dnsjava:3.5.1'
 
-  implementation 'commons-net:commons-net:3.8.0'
-  implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'commons-net:commons-net:3.8.0'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
 
-  testImplementation 'org.ros.rosjava_messages:nav_msgs:[1.12,1.13)'
-  testImplementation 'org.ros.rosjava_messages:rosjava_test_msgs:0.3.0'
-  testImplementation 'junit:junit:4.8.2'
-  testImplementation 'org.mockito:mockito-all:1.10.19'
+    testImplementation 'org.ros.rosjava_messages:nav_msgs:[1.12,1.13)'
+    testImplementation 'org.ros.rosjava_messages:rosjava_test_msgs:0.3.0'
+    testImplementation 'junit:junit:4.8.2'
+    testImplementation 'org.mockito:mockito-all:1.10.19'
 }
 
 jar {
-  manifest {
-    version = project.version
+    manifest {
+        version = project.version
 //    attributes 'symbolicName' : 'org.ros.rosjava'
 //    instruction 'Export-Package', '!org.ros.internal.*, org.ros.*'
 //    instruction 'Private-Package', 'org.ros.internal.*'
-  }
+    }
 }
 

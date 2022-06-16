@@ -47,12 +47,13 @@ subprojects {
     apply plugin: "eclipse"
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+
     repositories{
+      mavenCentral()
+      jcenter()
       maven {
         url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
       }
-      mavenCentral()
-      jcenter()
       maven {
         url "https://repository.springsource.com/maven/bundles/release"
       }
