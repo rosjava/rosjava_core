@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -34,11 +35,11 @@ public class ListenerGroup<T> {
   private final static int DEFAULT_QUEUE_CAPACITY = 128;
 
   private final ExecutorService executorService;
-  private final Collection<EventDispatcher<T>> eventDispatchers;
+  private final List<EventDispatcher<T>> eventDispatchers;
 
   public ListenerGroup(ExecutorService executorService) {
     this.executorService = executorService;
-    eventDispatchers = Lists.newCopyOnWriteArrayList();
+    this.eventDispatchers = Lists.newCopyOnWriteArrayList();
   }
 
   /**
@@ -51,10 +52,10 @@ public class ListenerGroup<T> {
    * @return the {@link EventDispatcher} responsible for calling the specified
    *         listener
    */
-  public EventDispatcher<T> add(T listener, int queueCapacity) {
-    EventDispatcher<T> eventDispatcher = new EventDispatcher<T>(listener, queueCapacity);
-    eventDispatchers.add(eventDispatcher);
-    executorService.execute(eventDispatcher);
+  public final EventDispatcher<T> add(T listener, int queueCapacity) {
+    final EventDispatcher<T> eventDispatcher = new EventDispatcher<T>(listener, queueCapacity);
+    this.eventDispatchers.add(eventDispatcher);
+    this.executorService.execute(eventDispatcher);
     return eventDispatcher;
   }
 
