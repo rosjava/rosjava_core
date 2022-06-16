@@ -17,7 +17,6 @@
 package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.logging.Log;
 import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerGroup;
@@ -55,6 +54,7 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.*;
 import org.ros.time.ClockTopicTimeProvider;
 import org.ros.time.TimeProvider;
+import rosgraph_msgs.Log;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -62,6 +62,7 @@ import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * The default implementation of a {@link Node}.
@@ -73,9 +74,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultNode implements ConnectedNode {
 
-    private static final boolean DEBUG = false;
-
-    // TODO(damonkohler): Move to NodeConfiguration.
     /**
      * The maximum delay before shutdown will begin even if all
      * {@link NodeListener}s have not yet returned from their
@@ -101,7 +99,7 @@ public class DefaultNode implements ConnectedNode {
     private final ServiceFactory serviceFactory;
     private final Registrar registrar;
 
-    private RosoutLogger log;
+    private RosoutLogger rosoutLogger;
     private TimeProvider timeProvider;
 
     /**
@@ -166,19 +164,22 @@ public class DefaultNode implements ConnectedNode {
         // requesting the use_sim_time parameter.
         final CountDownLatch rosoutLatch = new CountDownLatch(1);
 
-        this.log = new RosoutLogger(this);
-      this.log.getPublisher().addListener(new DefaultPublisherListener<rosgraph_msgs.Log>() {
+
+        final DefaultPublisherListener<Log> defaultPublisherListener = new DefaultPublisherListener<>() {
             @Override
-            public void onMasterRegistrationSuccess(Publisher<rosgraph_msgs.Log> registrant) {
+            public void onMasterRegistrationSuccess(Publisher<Log> registrant) {
                 rosoutLatch.countDown();
             }
-        });
-
+        };
+        final Consumer<Publisher<Log>> consumer = publisher -> publisher.addListener(defaultPublisherListener);
+        this.rosoutLogger = new RosoutLogger(this, consumer);
         try {
             rosoutLatch.await();
+
+//          TODO: SpyrosKoukas  this.rosoutLogger.getPublisher().removeListener()
         } catch (InterruptedException e) {
             this.signalOnError(e);
-          this.shutdown();
+            this.shutdown();
             return;
         }
 
@@ -242,7 +243,7 @@ public class DefaultNode implements ConnectedNode {
 
     @SuppressWarnings("unchecked")
     private <T> MessageDeserializer<T> newServiceResponseDeserializer(String serviceType) {
-        return  this.nodeConfiguration.getMessageSerializationFactory()
+        return this.nodeConfiguration.getMessageSerializationFactory()
                 .newServiceResponseDeserializer(serviceType);
     }
 
@@ -387,8 +388,8 @@ public class DefaultNode implements ConnectedNode {
     }
 
     @Override
-    public Log getLog() {
-        return log;
+    public RosLog getLog() {
+        return rosoutLogger;
     }
 
     @Override
@@ -403,23 +404,25 @@ public class DefaultNode implements ConnectedNode {
 
     @Override
     public void shutdown() {
-        signalOnShutdown();
+        this.signalOnShutdown();
         // NOTE(damonkohler): We don't want to raise potentially spurious
         // exceptions during shutdown that would interrupt the process. This is
         // simply best effort cleanup.
+        final String exceptionWhileShuttingDownMsg = "Exception while shutting down, during best effort cleanup";
         for (final ServiceServer<?, ?> serviceServer : this.serviceManager.getServers()) {
             try {
                 final Response<Integer> response =
                         this.masterClient.unregisterService(this.slaveServer.toNodeIdentifier(), serviceServer);
-                if (DEBUG) {
+                if (this.rosoutLogger.isDebugEnabled()) {
                     if (response.getResult() == 0) {
-                        System.err.println("Failed to unregister service: " + serviceServer.getName());
+                        final String msg = "Failed to unregister service: " + serviceServer.getName();
+                        this.rosoutLogger.error(msg);
                     }
                 }
             } catch (final XmlRpcTimeoutException e) {
-                log.error(e);
+                this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
             } catch (final RemoteException e) {
-                log.error(e);
+                this.rosoutLogger.error(exceptionWhileShuttingDownMsg, e);
             }
         }
         for (final ServiceClient<?, ?> serviceClient : this.serviceManager.getClients()) {

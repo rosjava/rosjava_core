@@ -16,17 +16,12 @@
 package org.ros.helpers;
 
 
-import org.apache.commons.logging.Log;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.RosTest;
 import org.ros.exception.ParameterNotFoundException;
 import org.ros.namespace.GraphName;
-import org.ros.node.AbstractNodeMain;
-import org.ros.node.ConnectedNode;
-import org.ros.node.DefaultNodeListener;
-import org.ros.node.Node;
-import org.ros.node.NodeListener;
+import org.ros.node.*;
 import org.ros.node.parameter.ParameterTree;
 
 import java.util.ArrayList;
@@ -45,7 +40,7 @@ import static org.junit.Assert.fail;
 public class ParameterLoaderNodeTest extends RosTest {
 
     private ParameterTree parameters;
-    private Log log;
+    private RosLog log;
 
     @Before
     public void setup() throws InterruptedException {

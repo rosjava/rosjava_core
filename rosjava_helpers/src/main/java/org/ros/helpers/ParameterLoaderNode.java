@@ -17,12 +17,12 @@
 package org.ros.helpers;
 
 import com.google.common.base.Preconditions;
-
-import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
+import org.ros.node.RosLog;
 import org.ros.node.parameter.ParameterTree;
+
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -43,32 +43,33 @@ public class ParameterLoaderNode extends AbstractNodeMain {
 
     public static final String NODE_NAME = "parameter_loader";
     private final List<LoadedResource> params = new ArrayList<LoadedResource>();
-    private Log log;
+    private RosLog log = null;
 
     /**
      * Default constructor
+     *
      * @param resources Array of resources with their respective namespace to load.
      */
     public ParameterLoaderNode(List<Resource> resources) {
         Preconditions.checkNotNull(resources);
-        for (Resource r : resources) {
-            Preconditions.checkNotNull(r.inputStream);
-            addSingleYmlInput(r.inputStream, r.namespace == null ? "" : r.namespace);
+        for (final Resource resource : resources) {
+            Preconditions.checkNotNull(resource.inputStream);
+            addSingleYmlInput(resource.inputStream, resource.namespace == null ? "" : resource.namespace);
         }
     }
 
-    private void addSingleYmlInput(InputStream ymlInputStream, String namespace) {
+    private final void addSingleYmlInput(InputStream ymlInputStream, String namespace) {
         Object loadedYaml = new Yaml().load(ymlInputStream);
         if (loadedYaml != null && loadedYaml instanceof Map<?, ?>) {
             this.params.add(new LoadedResource(Map.class.cast(loadedYaml), namespace));
         }
     }
 
-    private void addParams(ParameterTree parameterTree, String namespace, Map<?, ?> params) {
-        for (Map.Entry<?, ?> e : params.entrySet()) {
+    private final void addParams(final ParameterTree parameterTree, String namespace, Map<?, ?> params) {
+        for (final Map.Entry<?, ?> e : params.entrySet()) {
             String fullKeyName = namespace + "/" + e.getKey().toString();
-            if (log != null) {
-                log.debug("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
+            if (this.log != null && this.log.isDebugEnabled()) {
+                this.log.debug("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
             }
             if (e.getValue() instanceof String) {
                 parameterTree.set(fullKeyName, String.class.cast(e.getValue()));
@@ -82,9 +83,9 @@ public class ParameterLoaderNode extends AbstractNodeMain {
                 parameterTree.set(fullKeyName, Boolean.class.cast(e.getValue()));
             } else if (e.getValue() instanceof List) {
                 parameterTree.set(fullKeyName, List.class.cast(e.getValue()));
-            } else if (log != null) {
-                log.debug("I don't know what type parameter " + fullKeyName + " is. Value = " + e.getValue());
-                log.debug("Class name is: " + e.getValue().getClass().getName());
+            } else if (this.log!=null && this.log.isDebugEnabled()) {
+                this.log.debug("Unknown type parameter " + fullKeyName + " is. Value = " + e.getValue());
+                this.log.debug("Class name is: " + e.getValue().getClass().getName());
             }
         }
     }
@@ -99,16 +100,15 @@ public class ParameterLoaderNode extends AbstractNodeMain {
     }
 
     @Override
-    public void onStart(ConnectedNode connectedNode) {
+    public void onStart(final ConnectedNode connectedNode) {
         ParameterTree parameterTree = connectedNode.getParameterTree();
-        log = connectedNode.getLog();
+        this.log = connectedNode.getLog();
 
         // TODO: For some reason, setting the / param when using a rosjava master doesn't work
         // It does work fine with an external master, and also setting other params of any type
-        for (LoadedResource r : params) {
-            addParams(parameterTree, r.namespace, r.resource);
+        for (final LoadedResource loadedResource : this.params) {
+            this.addParams(parameterTree, loadedResource.namespace, loadedResource.resource);
         }
-
         connectedNode.shutdown();
     }
 

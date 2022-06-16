@@ -16,6 +16,8 @@
 
 dependencies {
   implementation project(':apache_xmlrpc_common')
-  implementation 'org.apache.commons:com.springsource.org.apache.commons.logging:1.1.1'
+  implementation 'org.slf4j:slf4j-api:1.7.30'
+  implementation 'com.google.guava:guava:31.1-jre'
+  implementation 'org.apache.commons:commons-lang3:3.12.0'
 }
 

@@ -41,6 +41,8 @@ import org.apache.xmlrpc.serializer.DefaultXMLWriterFactory;
 import org.apache.xmlrpc.serializer.XmlRpcWriter;
 import org.apache.xmlrpc.serializer.XmlWriterFactory;
 import org.apache.xmlrpc.util.SAXParsers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -55,8 +57,8 @@ public abstract class XmlRpcStreamServer extends XmlRpcServer
 		implements XmlRpcStreamRequestProcessor {
 	private static final Log log = LogFactory.getLog(XmlRpcStreamServer.class);
 	private XmlWriterFactory writerFactory = new DefaultXMLWriterFactory();
-	private static final XmlRpcErrorLogger theErrorLogger = new XmlRpcErrorLogger();
-	private XmlRpcErrorLogger errorLogger = theErrorLogger;
+	private static final Logger logger = LoggerFactory.getLogger(XmlRpcStreamServer.class);;
+
 	
 	protected XmlRpcRequest getRequest(final XmlRpcStreamRequestConfig pConfig,
 									   InputStream pStream) throws XmlRpcException {
@@ -307,20 +309,8 @@ public abstract class XmlRpcStreamServer extends XmlRpcServer
 
     protected void logError(Throwable t) {
         final String msg = t.getMessage() == null ? t.getClass().getName() : t.getMessage();
-        errorLogger.log(msg, t);
+		logger.debug(msg, t);
     }
 
-    /**
-     * Returns the error logger.
-     */
-    public XmlRpcErrorLogger getErrorLogger() {
-        return errorLogger;
-    }
 
-    /**
-     * Sets the error logger.
-     */
-    public void setErrorLogger(XmlRpcErrorLogger pErrorLogger) {
-        errorLogger = pErrorLogger;
-    }
 }

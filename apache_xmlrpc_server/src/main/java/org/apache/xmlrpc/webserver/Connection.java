@@ -14,23 +14,11 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 package org.apache.xmlrpc.webserver;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.Socket;
-import java.net.SocketException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.StringTokenizer;
-
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.xmlrpc.common.ServerStreamConnection;
 import org.apache.xmlrpc.common.XmlRpcHttpRequestConfig;
 import org.apache.xmlrpc.common.XmlRpcNotAuthorizedException;
@@ -39,14 +27,24 @@ import org.apache.xmlrpc.server.XmlRpcStreamServer;
 import org.apache.xmlrpc.util.HttpUtil;
 import org.apache.xmlrpc.util.LimitedInputStream;
 import org.apache.xmlrpc.util.ThreadPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.net.Socket;
+import java.net.SocketException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 
-
-/** Handler for a single clients connection. This implementation
+/**
+ * Handler for a single clients connection. This implementation
  * is able to do HTTP keepalive. In other words, it can serve
  * multiple requests via a single, physical connection.
  */
 public class Connection implements ThreadPool.InterruptableTask, ServerStreamConnection {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
     private static final String US_ASCII = "US-ASCII";
     private static final byte[] ctype = toHTTPBytes("Content-Type: text/xml\r\n");
     private static final byte[] clength = toHTTPBytes("Content-Length: ");
@@ -66,11 +64,15 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
             super(pMessage);
             requestData = pData;
         }
-        RequestData getRequestData() { return requestData; }
+
+        RequestData getRequestData() {
+            return requestData;
+        }
     }
 
     private static class BadEncodingException extends RequestException {
         private static final long serialVersionUID = -2674424938251521248L;
+
         BadEncodingException(RequestData pData, String pTransferEncoding) {
             super(pData, pTransferEncoding);
         }
@@ -78,12 +80,14 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
 
     private static class BadRequestException extends RequestException {
         private static final long serialVersionUID = 3257848779234554934L;
+
         BadRequestException(RequestData pData, String pTransferEncoding) {
             super(pData, pTransferEncoding);
         }
     }
 
-    /** Returns the US-ASCII encoded byte representation of text for
+    /**
+     * Returns the US-ASCII encoded byte representation of text for
      * HTTP use (as per section 2.2 of RFC 2068).
      */
     private static final byte[] toHTTPBytes(String text) {
@@ -91,7 +95,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
             return text.getBytes(US_ASCII);
         } catch (UnsupportedEncodingException e) {
             throw new Error(e.getMessage() +
-            ": HTTP requires US-ASCII encoding");
+                    ": HTTP requires US-ASCII encoding");
         }
     }
 
@@ -106,11 +110,14 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
     private boolean shuttingDown;
     private boolean firstByte;
 
-    /** Creates a new webserver connection on the given socket.
+    /**
+     * Creates a new webserver connection on the given socket.
+     *
      * @param pWebServer The webserver maintaining this connection.
-     * @param pServer The server being used to execute requests.
-     * @param pSocket The server socket to handle; the <code>Connection</code>
-     * is responsible for closing this socket.
+     * @param pServer    The server being used to execute requests.
+     * @param pSocket    The server socket to handle; the <code>Connection</code>
+     *                   is responsible for closing this socket.
+     *
      * @throws IOException
      */
     public Connection(WebServer pWebServer, XmlRpcStreamServer pServer, Socket pSocket)
@@ -118,7 +125,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         webServer = pWebServer;
         server = pServer;
         socket = pSocket;
-        input = new BufferedInputStream(socket.getInputStream()){
+        input = new BufferedInputStream(socket.getInputStream()) {
             /** It may happen, that the XML parser invokes close().
              * Closing the input stream must not occur, because
              * that would close the whole socket. So we suppress it.
@@ -129,9 +136,12 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         output = new BufferedOutputStream(socket.getOutputStream());
     }
 
-    /** Returns the connections request configuration by
+    /**
+     * Returns the connections request configuration by
      * merging the HTTP request headers and the servers configuration.
+     *
      * @return The connections request configuration.
+     *
      * @throws IOException Reading the request headers failed.
      */
     private RequestData getRequestConfig() throws IOException {
@@ -148,13 +158,13 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
 
         // reset user authentication
         String line = readLine();
-        if (line == null  &&  firstByte) {
+        if (line == null && firstByte) {
             return null;
         }
         // Netscape sends an extra \n\r after bodypart, swallow it
         if (line != null && line.length() == 0) {
             line = readLine();
-            if (line == null  ||  line.length() == 0) {
+            if (line == null || line.length() == 0) {
                 return null;
             }
         }
@@ -180,7 +190,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
                     requestData.setContentLength(Integer.parseInt(cLength.trim()));
                 } else if (lineLower.startsWith("connection:")) {
                     requestData.setKeepAlive(serverConfig.isKeepAliveEnabled()
-                            &&  lineLower.indexOf("keep-alive") > -1);
+                            && lineLower.indexOf("keep-alive") > -1);
                 } else if (lineLower.startsWith("authorization:")) {
                     String credentials = line.substring("authorization:".length());
                     HttpUtil.parseAuthorization(requestData, credentials);
@@ -200,33 +210,46 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
 
     public void run() {
         try {
-            for (int i = 0;  ;  i++) {
+            for (int i = 0; ; i++) {
                 RequestData data = getRequestConfig();
                 if (data == null) {
                     break;
                 }
                 server.execute(data, this);
                 output.flush();
-                if (!data.isKeepAlive()  ||  !data.isSuccess()) {
+                if (!data.isKeepAlive() || !data.isSuccess()) {
                     break;
                 }
             }
-        } catch (RequestException e) {
-            webServer.log(e.getClass().getName() + ": " + e.getMessage());
+        } catch (final RequestException exception) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error(ExceptionUtils.getStackTrace(exception));
+            }
             try {
-                writeErrorHeader(e.requestData, e, -1);
+                writeErrorHeader(exception.requestData, exception, -1);
                 output.flush();
             } catch (IOException e1) {
                 /* Ignore me */
             }
         } catch (Throwable t) {
             if (!shuttingDown) {
-                webServer.log(t);
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error(ExceptionUtils.getStackTrace(t));
+                }
             }
         } finally {
-            try { output.close(); } catch (Throwable ignore) {}
-            try { input.close(); } catch (Throwable ignore) {}
-            try { socket.close(); } catch (Throwable ignore) {}
+            try {
+                output.close();
+            } catch (Throwable ignore) {
+            }
+            try {
+                input.close();
+            } catch (Throwable ignore) {
+            }
+            try {
+                socket.close();
+            } catch (Throwable ignore) {
+            }
         }
     }
 
@@ -236,7 +259,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         }
         int next;
         int count = 0;
-        for (;;) {
+        for (; ; ) {
             try {
                 next = input.read();
                 firstByte = false;
@@ -260,10 +283,13 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         return new String(buffer, 0, count, US_ASCII);
     }
 
-    /** Writes the response header and the response to the
+    /**
+     * Writes the response header and the response to the
      * output stream.
-     * @param pData The request data.
+     *
+     * @param pData   The request data.
      * @param pBuffer The {@link ByteArrayOutputStream} holding the response.
+     *
      * @throws IOException Writing the response failed.
      */
     public void writeResponse(RequestData pData, OutputStream pBuffer)
@@ -273,9 +299,12 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         response.writeTo(output);
     }
 
-    /** Writes the response header to the output stream.	 * 
-     * @param pData The request data
+    /**
+     * Writes the response header to the output stream.	 *
+     *
+     * @param pData          The request data
      * @param pContentLength The content length, if known, or -1.
+     *
      * @throws IOException Writing the response failed.
      */
     public void writeResponseHeader(RequestData pData, int pContentLength)
@@ -286,7 +315,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         output.write(pData.isKeepAlive() ? conkeep : conclose);
         output.write(ctype);
         if (headers != null) {
-            for (Iterator iter = headers.entrySet().iterator();  iter.hasNext();  ) {
+            for (Iterator iter = headers.entrySet().iterator(); iter.hasNext(); ) {
                 Map.Entry entry = (Map.Entry) iter.next();
                 String header = (String) entry.getKey();
                 String value = (String) entry.getValue();
@@ -303,10 +332,13 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         pData.setSuccess(true);
     }
 
-    /** Writes an error response to the output stream.
-     * @param pData The request data.
-     * @param pError The error being reported.
+    /**
+     * Writes an error response to the output stream.
+     *
+     * @param pData   The request data.
+     * @param pError  The error being reported.
      * @param pStream The {@link ByteArrayOutputStream} with the error response.
+     *
      * @throws IOException Writing the response failed.
      */
     public void writeError(RequestData pData, Throwable pError, ByteArrayOutputStream pStream)
@@ -316,10 +348,13 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         output.flush();
     }
 
-    /** Writes an error responses headers to the output stream.
-     * @param pData The request data.
-     * @param pError The error being reported.
+    /**
+     * Writes an error responses headers to the output stream.
+     *
+     * @param pData          The request data.
+     * @param pError         The error being reported.
      * @param pContentLength The response length, if known, or -1.
+     *
      * @throws IOException Writing the response failed.
      */
     public void writeErrorHeader(RequestData pData, Throwable pError, int pContentLength)
@@ -375,7 +410,8 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         output.write(newline);
     }
 
-    /** Sets a response header value.
+    /**
+     * Sets a response header value.
      */
     public void setResponseHeader(String pHeader, String pValue) {
         headers.put(pHeader, pValue);
@@ -385,7 +421,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
     public OutputStream newOutputStream() throws IOException {
         boolean useContentLength;
         useContentLength = !requestData.isEnabledForExtensions()
-            ||  !((XmlRpcHttpRequestConfig) requestData).isContentLengthOptional();
+                || !((XmlRpcHttpRequestConfig) requestData).isContentLengthOptional();
         if (useContentLength) {
             return new ByteArrayOutputStream();
         } else {
