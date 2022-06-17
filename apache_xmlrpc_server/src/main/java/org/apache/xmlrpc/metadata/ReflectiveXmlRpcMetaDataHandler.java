@@ -29,7 +29,7 @@ import org.apache.xmlrpc.server.RequestProcessorFactoryFactory.RequestProcessorF
 
 /** Default implementation of {@link XmlRpcMetaDataHandler}.
  */
-public class ReflectiveXmlRpcMetaDataHandler extends ReflectiveXmlRpcHandler
+public final class ReflectiveXmlRpcMetaDataHandler extends ReflectiveXmlRpcHandler
 		implements XmlRpcMetaDataHandler {
 	private final String[][] signatures;
 	private final String methodHelp;

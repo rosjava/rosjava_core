@@ -25,7 +25,7 @@ import java.io.IOException;
  * the <code>Content-Length</code> header: It guarantees to return
  * at most a given number of bytes.
  */
-public class LimitedInputStream extends InputStream {
+public final class LimitedInputStream extends InputStream {
     // bytes remaining to be read from the input stream. This is
     // initialized from CONTENT_LENGTH (or getContentLength()).
     // This is used in order to correctly return a -1 when all the

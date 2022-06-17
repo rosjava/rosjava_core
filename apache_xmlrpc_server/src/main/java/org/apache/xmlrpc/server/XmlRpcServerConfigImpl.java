@@ -23,7 +23,7 @@ import org.apache.xmlrpc.XmlRpcConfigImpl;
 
 /** Default implementation of {@link org.apache.xmlrpc.server.XmlRpcServerConfig}.
  */
-public class XmlRpcServerConfigImpl extends XmlRpcConfigImpl
+public final class XmlRpcServerConfigImpl extends XmlRpcConfigImpl
 		implements XmlRpcServerConfig, XmlRpcHttpServerConfig {
 	private boolean isKeepAliveEnabled;
     private boolean isEnabledForExceptions;

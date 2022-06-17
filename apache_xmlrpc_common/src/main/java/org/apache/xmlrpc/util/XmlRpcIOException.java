@@ -26,7 +26,7 @@ import java.io.IOException;
  * particular instance of {@link IOException} allows
  * to catch it and throw the linked exception instead.
  */
-public class XmlRpcIOException extends IOException {
+public final class XmlRpcIOException extends IOException {
 	private static final long serialVersionUID = -7704704099502077919L;
 	private final Throwable linkedException;
 

@@ -37,7 +37,7 @@ import org.apache.xmlrpc.common.XmlRpcInvocationException;
  * implementation. The client uses the {@link ClientFactory} to
  * obtain an implementation, which is based on running XML-RPC calls.</p>
  */
-public class ClientFactory {
+final class ClientFactory {
     private final XmlRpcClient client;
     private final TypeConverterFactory typeConverterFactory;
     private boolean objectMethodLocal;

@@ -47,7 +47,7 @@ import java.util.List;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class MasterClient extends Client<MasterXmlRpcEndpoint> {
+public final class MasterClient extends Client<MasterXmlRpcEndpoint> {
 
   /**
    * Create a new {@link MasterClient} connected to the specified

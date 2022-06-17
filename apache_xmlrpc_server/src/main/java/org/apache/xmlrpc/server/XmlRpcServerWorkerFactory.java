@@ -24,7 +24,7 @@ import org.apache.xmlrpc.common.XmlRpcWorkerFactory;
 
 /** Server specific worker factory.
  */
-public class XmlRpcServerWorkerFactory extends XmlRpcWorkerFactory {
+final class XmlRpcServerWorkerFactory extends XmlRpcWorkerFactory {
 	/** Creates a new factory with the given controller.
 	 * @param pServer The factory controller.
 	 */

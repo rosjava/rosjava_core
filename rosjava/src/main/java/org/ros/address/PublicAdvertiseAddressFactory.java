@@ -21,7 +21,7 @@ package org.ros.address;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class PublicAdvertiseAddressFactory implements AdvertiseAddressFactory {
+public final class PublicAdvertiseAddressFactory implements AdvertiseAddressFactory {
 
   private final String host;
 

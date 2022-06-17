@@ -24,7 +24,7 @@ import org.xml.sax.SAXParseException;
 
 /** Parser for byte values.
  */
-public class I1Parser extends AtomicParser {
+public final class I1Parser extends AtomicParser {
 	protected void setResult(String pResult) throws SAXException {
 		try {
 			super.setResult(Byte.parseByte(pResult.trim()));

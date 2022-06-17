@@ -27,7 +27,7 @@ import org.apache.xmlrpc.common.XmlRpcWorker;
 
 /** Server specific implementation of {@link XmlRpcWorker}.
  */
-public class XmlRpcServerWorker implements XmlRpcWorker {
+final class XmlRpcServerWorker implements XmlRpcWorker {
 	private final XmlRpcServerWorkerFactory factory;
 
 	/** Creates a new instance.

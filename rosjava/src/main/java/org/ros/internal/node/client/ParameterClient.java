@@ -40,7 +40,7 @@ import java.util.Map;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
+public final class ParameterClient extends Client<ParameterServerXmlRpcEndpoint> {
 
   private final NodeIdentifier nodeIdentifier;
   private final String nodeName;

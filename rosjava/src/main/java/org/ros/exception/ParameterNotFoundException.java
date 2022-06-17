@@ -21,7 +21,7 @@ package org.ros.exception;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ParameterNotFoundException extends RosRuntimeException {
+public final class ParameterNotFoundException extends RosRuntimeException {
 
   public ParameterNotFoundException(String message) {
     super(message);

@@ -36,7 +36,7 @@ import org.apache.xmlrpc.XmlRpcException;
  * generated. A typical use would be, to specify interface names
  * as the property keys and implementations as the values.
  */
-public class PropertyHandlerMapping extends AbstractReflectiveHandlerMapping {
+public final class PropertyHandlerMapping extends AbstractReflectiveHandlerMapping {
     /**
      * Reads handler definitions from a resource file.
      * @param pClassLoader The class loader being used to load

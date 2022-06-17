@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutorService;
  * @param <T>
  *          the message type
  */
-public class MessageDispatcher<T> extends CancellableLoop {
+public final class MessageDispatcher<T> extends CancellableLoop {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(MessageDispatcher.class);

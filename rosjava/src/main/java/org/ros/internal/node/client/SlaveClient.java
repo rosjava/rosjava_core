@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class SlaveClient extends Client<SlaveXmlRpcEndpoint> {
+public final class SlaveClient extends Client<SlaveXmlRpcEndpoint> {
 
   private final GraphName nodeName;
 
