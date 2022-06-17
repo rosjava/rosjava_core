@@ -16,6 +16,7 @@
 
 package org.ros.node.topic;
 
+import org.ros.internal.message.Message;
 import org.ros.internal.node.RegistrantListener;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 
@@ -24,7 +25,7 @@ import org.ros.internal.node.topic.SubscriberIdentifier;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public interface PublisherListener<T> extends RegistrantListener<Publisher<T>> {
+public interface PublisherListener<T extends Message> extends RegistrantListener<Publisher<T>> {
 
   /**
    * A {@link Subscriber} has connected to the {@link Publisher}.

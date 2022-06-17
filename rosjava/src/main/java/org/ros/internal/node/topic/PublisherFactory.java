@@ -16,6 +16,7 @@
 
 package org.ros.internal.node.topic;
 
+import org.ros.internal.message.Message;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageSerializer;
@@ -62,8 +63,8 @@ public class PublisherFactory {
    * @return a new or cached {@link Publisher} instance
    */
   @SuppressWarnings("unchecked")
-  public <T> Publisher<T> newOrExisting(TopicDeclaration topicDeclaration,
-      MessageSerializer<T> messageSerializer) {
+  public <T extends Message> Publisher<T> newOrExisting(TopicDeclaration topicDeclaration,
+                                                        MessageSerializer<T> messageSerializer) {
     GraphName topicName = topicDeclaration.getName();
     synchronized (mutex) {
       if (topicParticipantManager.hasPublisher(topicName)) {

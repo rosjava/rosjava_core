@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.CancellableLoop;
+import org.ros.internal.message.Message;
 import org.ros.node.topic.Publisher;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -30,13 +31,13 @@ import java.util.concurrent.ScheduledExecutorService;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class RepeatingPublisher<MessageType> {
+public class RepeatingPublisher<T extends Message> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(RepeatingPublisher.class);
 
-  private final Publisher<MessageType> publisher;
-  private final MessageType message;
+  private final Publisher<T> publisher;
+  private final T message;
   private final int frequency;
   private final RepeatingPublisherLoop runnable;
 
@@ -62,8 +63,8 @@ public class RepeatingPublisher<MessageType> {
    * @param frequency
    *          the frequency of publication in Hz
    */
-  public RepeatingPublisher(Publisher<MessageType> publisher, MessageType message, int frequency,
-      ScheduledExecutorService executorService) {
+  public RepeatingPublisher(Publisher<T> publisher, T message, int frequency,
+                            ScheduledExecutorService executorService) {
     this.publisher = publisher;
     this.message = message;
     this.frequency = frequency;

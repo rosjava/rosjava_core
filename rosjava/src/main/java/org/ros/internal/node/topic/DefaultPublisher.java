@@ -24,6 +24,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
+import org.ros.internal.message.Message;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
@@ -44,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultPublisher<T> extends DefaultTopicParticipant implements Publisher<T> {
+public class DefaultPublisher<T extends Message> extends DefaultTopicParticipant implements Publisher<T> {
 
   private static final boolean DEBUG = false;
   private static final Log log = LogFactory.getLog(DefaultPublisher.class);

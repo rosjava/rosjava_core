@@ -16,6 +16,7 @@
 
 package org.ros.node.topic;
 
+import org.ros.internal.message.Message;
 import org.ros.internal.node.topic.SubscriberIdentifier;
 
 import org.ros.internal.node.CountDownRegistrantListener;
@@ -29,13 +30,13 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class CountDownPublisherListener<T> extends CountDownRegistrantListener<Publisher<T>>
+public class CountDownPublisherListener<T extends Message> extends CountDownRegistrantListener<Publisher<T>>
     implements PublisherListener<T> {
 
   private final CountDownLatch shutdownLatch;
   private final CountDownLatch newSubscriberLatch;
 
-  public static <T> CountDownPublisherListener<T> newDefault() {
+  public static <T extends Message> CountDownPublisherListener<T> newDefault() {
     return newFromCounts(1, 1, 1, 1, 1);
   }
 
@@ -51,7 +52,7 @@ public class CountDownPublisherListener<T> extends CountDownRegistrantListener<P
    * @param newSubscriberCount
    *          the number of new subscribers to wait for
    */
-  public static <T> CountDownPublisherListener<T> newFromCounts(int masterRegistrationSuccessCount,
+  public static <T extends Message> CountDownPublisherListener<T> newFromCounts(int masterRegistrationSuccessCount,
       int masterRegistrationFailureCount, int masterUnregistrationSuccessCount,
       int masterUnregistrationFailureCount, int newSubscriberCount) {
     return new CountDownPublisherListener<T>(new CountDownLatch(masterRegistrationSuccessCount),
