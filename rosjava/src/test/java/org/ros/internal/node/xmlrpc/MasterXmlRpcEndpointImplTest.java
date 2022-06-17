@@ -41,8 +41,8 @@ public class MasterXmlRpcEndpointImplTest {
 
   @Test
   public void testGetUri() throws Exception {
-    URI testUri = new URI("http://foo.bar:8080");
-    MasterServer mockMaster = mock(MasterServer.class);
+    final URI testUri = new URI("http://foo.bar:8080");
+    final MasterServer mockMaster = mock(MasterServer.class);
     when(mockMaster.getUri()).thenReturn(testUri);
     MasterXmlRpcEndpointImpl master = new MasterXmlRpcEndpointImpl(mockMaster);
     List<Object> response = master.getUri("/caller");
