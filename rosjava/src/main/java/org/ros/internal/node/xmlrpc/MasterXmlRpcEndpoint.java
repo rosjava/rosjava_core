@@ -27,12 +27,10 @@ public interface MasterXmlRpcEndpoint extends XmlRpcEndpoint {
 
   /**
    * Get the PID for the master process.
-   * 
-   * @param callerId
-   *          ROS caller ID
+   *
    * @return The pid of the process.
    */
-  List<Object> getPid(String callerId);
+  int getPid();
 
   /**
    * Register the caller as a provider of the specified service.
