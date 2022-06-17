@@ -16,6 +16,7 @@
 
 package org.ros.node.service;
 
+import org.ros.internal.message.Message;
 import org.ros.internal.node.CountDownRegistrantListener;
 
 import java.util.concurrent.CountDownLatch;
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class CountDownServiceServerListener<T, S> extends
+public class CountDownServiceServerListener<T extends Message, S extends Message> extends
     CountDownRegistrantListener<ServiceServer<T, S>> implements ServiceServerListener<T, S> {
 
   private final CountDownLatch shutdownLatch;
@@ -36,7 +37,7 @@ public class CountDownServiceServerListener<T, S> extends
    * Construct a {@link CountDownServiceServerListener} with all counts set to
    * 1.
    */
-  public static <T, S> CountDownServiceServerListener<T, S> newDefault() {
+  public static <T extends Message, S extends Message> CountDownServiceServerListener<T, S> newDefault() {
     return newFromCounts(1, 1, 1, 1);
   }
 
@@ -50,7 +51,7 @@ public class CountDownServiceServerListener<T, S> extends
    * @param masterUnregistrationFailureCount
    *          the number of failing master unregistrations to wait for
    */
-  public static <T, S> CountDownServiceServerListener<T, S> newFromCounts(
+  public static <T extends Message, S extends Message> CountDownServiceServerListener<T, S> newFromCounts(
       int masterRegistrationSuccessCount, int masterRegistrationFailureCount,
       int masterUnregistrationSuccessCount, int masterUnregistrationFailureCount) {
     return new CountDownServiceServerListener<T, S>(new CountDownLatch(

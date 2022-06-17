@@ -19,6 +19,7 @@ package org.ros.internal.node.service;
 import com.google.common.base.Preconditions;
 
 import org.ros.exception.DuplicateServiceException;
+import org.ros.internal.message.Message;
 import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.MessageDeserializer;
@@ -69,9 +70,9 @@ public class ServiceFactory {
    *          a {@link MessageFactory} to be used for creating responses
    * @return a {@link DefaultServiceServer} instance
    */
-  public <T, S> DefaultServiceServer<T, S> newServer(final ServiceDeclaration serviceDeclaration,
-      final ServiceResponseBuilder<T, S> responseBuilder, final MessageDeserializer<T> deserializer,
-      final MessageSerializer<S> serializer, final MessageFactory messageFactory) {
+  public <T extends Message, S extends Message> DefaultServiceServer<T, S> newServer(final ServiceDeclaration serviceDeclaration,
+                                                                    final ServiceResponseBuilder<T, S> responseBuilder, final MessageDeserializer<T> deserializer,
+                                                                    final MessageSerializer<S> serializer, final MessageFactory messageFactory) {
     DefaultServiceServer<T, S> serviceServer;
     final GraphName name = serviceDeclaration.getName();
 
@@ -96,7 +97,7 @@ public class ServiceFactory {
    *         {@code null} if it does not exist
    */
   @SuppressWarnings("unchecked")
-  public <T, S> DefaultServiceServer<T, S> getServer(final GraphName name) {
+  public <T extends Message, S extends Message> DefaultServiceServer<T, S> getServer(final GraphName name) {
     if (serviceManager.hasServer(name)) {
       return (DefaultServiceServer<T, S>) serviceManager.getServer(name);
     }
@@ -120,7 +121,7 @@ public class ServiceFactory {
    * @return a {@link DefaultServiceClient} instance
    */
   @SuppressWarnings("unchecked")
-  public <T, S> DefaultServiceClient<T, S> newClient(final ServiceDeclaration serviceDeclaration,
+  public <T extends Message, S extends Message> DefaultServiceClient<T, S> newClient(final ServiceDeclaration serviceDeclaration,
       final MessageSerializer<T> serializer, final MessageDeserializer<S> deserializer,
       final MessageFactory messageFactory) {
     Preconditions.checkNotNull(serviceDeclaration.getUri());

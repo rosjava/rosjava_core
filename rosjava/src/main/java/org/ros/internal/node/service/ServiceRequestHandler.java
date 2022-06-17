@@ -22,6 +22,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.ros.exception.ServiceException;
+import org.ros.internal.message.Message;
 import org.ros.internal.message.MessageBufferPool;
 import org.ros.message.MessageDeserializer;
 import org.ros.message.MessageFactory;
@@ -35,7 +36,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-class ServiceRequestHandler<T, S> extends SimpleChannelHandler {
+class ServiceRequestHandler<T extends Message, S extends Message> extends SimpleChannelHandler {
 
   private final ServiceDeclaration serviceDeclaration;
   private final ServiceResponseBuilder<T, S> responseBuilder;

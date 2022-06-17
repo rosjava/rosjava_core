@@ -16,6 +16,7 @@
 
 package org.ros.node.service;
 
+import org.ros.internal.message.Message;
 import org.ros.internal.node.RegistrantListener;
 
 /**
@@ -28,7 +29,7 @@ import org.ros.internal.node.RegistrantListener;
  * @param <S>
  *          the {@link ServiceServer} returns responses of this type
  */
-public interface ServiceServerListener<T, S> extends RegistrantListener<ServiceServer<T, S>> {
+public interface ServiceServerListener<T  extends Message, S  extends Message> extends RegistrantListener<ServiceServer<T, S>> {
 
   /**
    * @param serviceServer
