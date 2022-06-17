@@ -31,7 +31,7 @@ public interface ServiceManagerListener {
    * @param server
    *          the {@link ServiceServer} that was added
    */
-  void onServiceServerAdded(DefaultServiceServer<?, ?> server);
+  void onServiceServerAdded(ServiceServer<?, ?> server);
   
   /**
    * Called when a new {@link ServiceServer} is added.
@@ -39,5 +39,5 @@ public interface ServiceManagerListener {
    * @param server
    *          the {@link ServiceServer} that was added
    */
-  void onServiceServerRemoved(DefaultServiceServer<?, ?> server);
+  void onServiceServerRemoved(ServiceServer<?, ?> server);
 }
