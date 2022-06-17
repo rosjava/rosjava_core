@@ -31,6 +31,8 @@ import org.ros.concurrent.CircularBlockingDeque;
 import org.ros.internal.message.MessageBufferPool;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 
@@ -40,7 +42,7 @@ import java.util.concurrent.ExecutorService;
 public class OutgoingMessageQueue<T> {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(OutgoingMessageQueue.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OutgoingMessageQueue.class);
 
   private static final int DEQUE_CAPACITY = 16;
 
@@ -62,7 +64,7 @@ public class OutgoingMessageQueue<T> {
       final ChannelBuffer buffer = messageBufferPool.acquire();
       serializer.serialize(message, buffer);
       if (DEBUG) {
-        log.info(String.format("Writing %d bytes to %d channels.", buffer.readableBytes(),
+        LOGGER.info(String.format("Writing %d bytes to %d channels.", buffer.readableBytes(),
             channelGroup.size()));
       }
       // Note that the buffer is automatically "duplicated" by Netty to avoid
@@ -127,7 +129,7 @@ public class OutgoingMessageQueue<T> {
    */
   public void addChannel(Channel channel) {
     if (!writer.isRunning()) {
-      log.warn("Failed to add channel. Cannot add channels after shutdown.");
+      LOGGER.warn("Failed to add channel. Cannot add channels after shutdown.");
       return;
     }
     if (latchMode && latchedMessage != null) {

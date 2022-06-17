@@ -62,33 +62,33 @@ public class ParameterServerTestNode extends AbstractNodeMain {
 
     ParameterTree param = connectedNode.getParameterTree();
 
-    final RosLog log = connectedNode.getLog();
+    final RosLog rosLog = connectedNode.getLog();
     MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
 
     final std_msgs.String tilde_m = topicMessageFactory.newFromType(std_msgs.String._TYPE);
     tilde_m.setData(param.getString(connectedNode.resolveName("~tilde").toString()));
-    log.info("tilde: " + tilde_m.getData());
+    rosLog.info("tilde: " + tilde_m.getData());
 
     GraphName paramNamespace = GraphName.of(param.getString("parameter_namespace"));
     GraphName targetNamespace = GraphName.of(param.getString("target_namespace"));
-    log.info("parameter_namespace: " + paramNamespace);
-    log.info("target_namespace: " + targetNamespace);
+    rosLog.info("parameter_namespace: " + paramNamespace);
+    rosLog.info("target_namespace: " + targetNamespace);
     NameResolver resolver = connectedNode.getResolver().newChild(paramNamespace);
     NameResolver setResolver = connectedNode.getResolver().newChild(targetNamespace);
 
     final std_msgs.String string_m = topicMessageFactory.newFromType(std_msgs.String._TYPE);
     string_m.setData(param.getString(resolver.resolve("string")));
-    log.info("string: " + string_m.getData());
+    rosLog.info("string: " + string_m.getData());
     final std_msgs.Int64 int_m = topicMessageFactory.newFromType(std_msgs.Int64._TYPE);
     int_m.setData(param.getInteger(resolver.resolve("int")));
-    log.info("int: " + int_m.getData());
+    rosLog.info("int: " + int_m.getData());
 
     final std_msgs.Bool bool_m = topicMessageFactory.newFromType(std_msgs.Bool._TYPE);
     bool_m.setData(param.getBoolean(resolver.resolve("bool")));
-    log.info("bool: " + bool_m.getData());
+    rosLog.info("bool: " + bool_m.getData());
     final std_msgs.Float64 float_m = topicMessageFactory.newFromType(std_msgs.Float64._TYPE);
     float_m.setData(param.getDouble(resolver.resolve("float")));
-    log.info("float: " + float_m.getData());
+    rosLog.info("float: " + float_m.getData());
 
     final rosjava_test_msgs.Composite composite_m =
         topicMessageFactory.newFromType(rosjava_test_msgs.Composite._TYPE);

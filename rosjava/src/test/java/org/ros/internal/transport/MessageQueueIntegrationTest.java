@@ -51,6 +51,8 @@ import org.ros.internal.transport.tcp.TcpServerPipelineFactory;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageIdentifier;
 import org.ros.message.MessageListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
@@ -65,7 +67,7 @@ import java.util.concurrent.TimeUnit;
 public class MessageQueueIntegrationTest {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(MessageQueueIntegrationTest.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MessageQueueIntegrationTest.class);
 
   private static final int QUEUE_CAPACITY = 128;
 
@@ -81,7 +83,7 @@ public class MessageQueueIntegrationTest {
     @Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
       if (DEBUG) {
-        log.info("Channel connected: " + e.getChannel().toString());
+        LOGGER.info("Channel connected: " + e.getChannel().toString());
       }
       Channel channel = e.getChannel();
       outgoingMessageQueue.addChannel(channel);
@@ -92,7 +94,7 @@ public class MessageQueueIntegrationTest {
     public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e)
         throws Exception {
       if (DEBUG) {
-        log.info("Channel disconnected: " + e.getChannel().toString());
+        LOGGER.info("Channel disconnected: " + e.getChannel().toString());
       }
       super.channelDisconnected(ctx, e);
     }
@@ -100,7 +102,7 @@ public class MessageQueueIntegrationTest {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
       if (DEBUG) {
-        log.info("Channel exception: " + e.getChannel().toString());
+        LOGGER.info("Channel exception: " + e.getChannel().toString());
       }
       e.getChannel().close();
       throw new RuntimeException(e.getCause());

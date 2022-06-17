@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
+import org.ros.internal.message.Message;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.transport.ProtocolNames;
 import org.ros.internal.transport.queue.IncomingMessageQueue;
@@ -33,6 +34,8 @@ import org.ros.node.topic.DefaultSubscriberListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 import org.ros.node.topic.SubscriberListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
@@ -45,9 +48,9 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Subscriber<T> {
+public class DefaultSubscriber<T extends Message> extends DefaultTopicParticipant implements Subscriber<T> {
 
-  private static final Log log = LogFactory.getLog(DefaultSubscriber.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSubscriber.class);
 
   /**
    * The maximum delay before shutdown will begin even if all
@@ -69,7 +72,7 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
    */
   private final ListenerGroup<SubscriberListener<T>> subscriberListeners;
 
-  public static <S> DefaultSubscriber<S> newDefault(NodeIdentifier nodeIdentifier,
+  public static <S extends Message> DefaultSubscriber<S> newDefault(NodeIdentifier nodeIdentifier,
       TopicDeclaration description, ScheduledExecutorService executorService,
       MessageDeserializer<S> deserializer) {
     return new DefaultSubscriber<S>(nodeIdentifier, description, deserializer, executorService);
@@ -92,22 +95,22 @@ public class DefaultSubscriber<T> extends DefaultTopicParticipant implements Sub
     subscriberListeners.add(new DefaultSubscriberListener<T>() {
       @Override
       public void onMasterRegistrationSuccess(Subscriber<T> registrant) {
-        log.info("Subscriber registered: " + DefaultSubscriber.this);
+        LOGGER.info("Subscriber registered: " + DefaultSubscriber.this);
       }
 
       @Override
       public void onMasterRegistrationFailure(Subscriber<T> registrant) {
-        log.info("Subscriber registration failed: " + DefaultSubscriber.this);
+        LOGGER.info("Subscriber registration failed: " + DefaultSubscriber.this);
       }
 
       @Override
       public void onMasterUnregistrationSuccess(Subscriber<T> registrant) {
-        log.info("Subscriber unregistered: " + DefaultSubscriber.this);
+        LOGGER.info("Subscriber unregistered: " + DefaultSubscriber.this);
       }
 
       @Override
       public void onMasterUnregistrationFailure(Subscriber<T> registrant) {
-        log.info("Subscriber unregistration failed: " + DefaultSubscriber.this);
+        LOGGER.info("Subscriber unregistration failed: " + DefaultSubscriber.this);
       }
     });
   }

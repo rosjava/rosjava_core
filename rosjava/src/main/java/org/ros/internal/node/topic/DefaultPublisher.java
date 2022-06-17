@@ -35,6 +35,8 @@ import org.ros.node.topic.DefaultPublisherListener;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.PublisherListener;
 import org.ros.node.topic.Subscriber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 public class DefaultPublisher<T extends Message> extends DefaultTopicParticipant implements Publisher<T> {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(DefaultPublisher.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPublisher.class);
 
   /**
    * The maximum delay before shutdown will begin even if all
@@ -78,22 +80,22 @@ public class DefaultPublisher<T extends Message> extends DefaultTopicParticipant
     listeners.add(new DefaultPublisherListener<T>() {
       @Override
       public void onMasterRegistrationSuccess(Publisher<T> registrant) {
-        log.info("Publisher registered: " + DefaultPublisher.this);
+        LOGGER.info("Publisher registered: " + DefaultPublisher.this);
       }
 
       @Override
       public void onMasterRegistrationFailure(Publisher<T> registrant) {
-        log.info("Publisher registration failed: " + DefaultPublisher.this);
+        LOGGER.info("Publisher registration failed: " + DefaultPublisher.this);
       }
 
       @Override
       public void onMasterUnregistrationSuccess(Publisher<T> registrant) {
-        log.info("Publisher unregistered: " + DefaultPublisher.this);
+        LOGGER.info("Publisher unregistered: " + DefaultPublisher.this);
       }
 
       @Override
       public void onMasterUnregistrationFailure(Publisher<T> registrant) {
-        log.info("Publisher unregistration failed: " + DefaultPublisher.this);
+        LOGGER.info("Publisher unregistration failed: " + DefaultPublisher.this);
       }
     });
   }
@@ -120,7 +122,7 @@ public class DefaultPublisher<T extends Message> extends DefaultTopicParticipant
     try {
       shutdownLatch.await(timeout, unit);
     } catch (InterruptedException e) {
-      log.error(e.getMessage(), e);
+      LOGGER.error(e.getMessage(), e);
     }
     outgoingMessageQueue.shutdown();
     listeners.shutdown();
@@ -157,7 +159,7 @@ public class DefaultPublisher<T extends Message> extends DefaultTopicParticipant
   @Override
   public void publish(T message) {
     if (DEBUG) {
-      log.info(String.format("Publishing message %s on topic %s.", message, getTopicName()));
+      LOGGER.info(String.format("Publishing message %s on topic %s.", message, getTopicName()));
     }
     outgoingMessageQueue.add(message);
   }
@@ -172,8 +174,8 @@ public class DefaultPublisher<T extends Message> extends DefaultTopicParticipant
   public ChannelBuffer finishHandshake(ConnectionHeader incomingHeader) {
     ConnectionHeader topicDefinitionHeader = getTopicDeclarationHeader();
     if (DEBUG) {
-      log.info("Subscriber handshake header: " + incomingHeader);
-      log.info("Publisher handshake header: " + topicDefinitionHeader);
+      LOGGER.info("Subscriber handshake header: " + incomingHeader);
+      LOGGER.info("Publisher handshake header: " + topicDefinitionHeader);
     }
     // TODO(damonkohler): Return errors to the subscriber over the wire.
     String incomingType = incomingHeader.getField(ConnectionHeaderFields.TYPE);
@@ -207,7 +209,7 @@ public class DefaultPublisher<T extends Message> extends DefaultTopicParticipant
    */
   public void addSubscriber(SubscriberIdentifier subscriberIdentifer, Channel channel) {
     if (DEBUG) {
-      log.info(String.format("Adding subscriber %s channel %s to publisher %s.",
+      LOGGER.info(String.format("Adding subscriber %s channel %s to publisher %s.",
           subscriberIdentifer, channel, this));
     }
     outgoingMessageQueue.addChannel(channel);

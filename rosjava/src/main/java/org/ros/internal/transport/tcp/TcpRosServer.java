@@ -31,6 +31,8 @@ import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicParticipantManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
@@ -50,7 +52,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public class TcpRosServer {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(TcpRosServer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TcpRosServer.class);
 
   private final BindAddress bindAddress;
   private final AdvertiseAddress advertiseAddress;
@@ -92,8 +94,8 @@ public class TcpRosServer {
       }
     });
     if (DEBUG) {
-      log.info("Bound to: " + bindAddress);
-      log.info("Advertising: " + advertiseAddress);
+      LOGGER.info("Bound to: " + bindAddress);
+      LOGGER.info("Advertising: " + advertiseAddress);
     }
   }
 
@@ -105,7 +107,7 @@ public class TcpRosServer {
    */
   public void shutdown() {
     if (DEBUG) {
-      log.info("Shutting down: " + getAddress());
+      LOGGER.info("Shutting down: " + getAddress());
     }
     if (outgoingChannel != null) {
       outgoingChannel.close().awaitUninterruptibly();

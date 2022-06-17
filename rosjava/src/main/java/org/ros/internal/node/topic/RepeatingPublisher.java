@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.message.Message;
 import org.ros.node.topic.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -34,7 +36,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public class RepeatingPublisher<T extends Message> {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(RepeatingPublisher.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RepeatingPublisher.class);
 
   private final Publisher<T> publisher;
   private final T message;
@@ -51,7 +53,7 @@ public class RepeatingPublisher<T extends Message> {
     public void loop() throws InterruptedException {
       publisher.publish(message);
       if (DEBUG) {
-        log.info(String.format("Published message %s to publisher %s ", message, publisher));
+        LOGGER.info(String.format("Published message %s to publisher %s ", message, publisher));
       }
       Thread.sleep((long) (1000.0d / frequency));
     }

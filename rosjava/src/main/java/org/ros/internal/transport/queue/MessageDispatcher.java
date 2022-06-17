@@ -16,7 +16,6 @@
 
 package org.ros.internal.transport.queue;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.CircularBlockingDeque;
@@ -24,6 +23,8 @@ import org.ros.concurrent.EventDispatcher;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.message.MessageListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 
@@ -36,7 +37,7 @@ import java.util.concurrent.ExecutorService;
 public final class MessageDispatcher<T> extends CancellableLoop {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(MessageDispatcher.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MessageDispatcher.class);
 
   private final CircularBlockingDeque<LazyMessage<T>> lazyMessages;
   private final ListenerGroup<MessageListener<T>> messageListeners;
@@ -68,7 +69,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    */
   public void addListener(MessageListener<T> messageListener, int limit) {
     if (DEBUG) {
-      log.info("Adding listener.");
+      LOGGER.info("Adding listener.");
     }
     synchronized (mutex) {
       EventDispatcher<MessageListener<T>> eventDispatcher =
@@ -89,7 +90,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    */
   public boolean removeListener(MessageListener<T> messageListener) {
     if (DEBUG) {
-      log.info("Removing listener.");
+      LOGGER.info("Removing listener.");
     }
     synchronized (mutex) {
       return messageListeners.remove(messageListener);
@@ -103,7 +104,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
    */
   public void removeAllListeners() {
     if (DEBUG) {
-      log.info("Removing all listeners.");
+      LOGGER.info("Removing all listeners.");
     }
     synchronized (mutex) {
       messageListeners.shutdown();
@@ -149,7 +150,7 @@ public final class MessageDispatcher<T> extends CancellableLoop {
     synchronized (mutex) {
       latchedMessage = lazyMessage;
       if (DEBUG) {
-        log.info("Dispatching message: " + latchedMessage.get());
+        LOGGER.info("Dispatching message: " + latchedMessage.get());
       }
       messageListeners.signal(newSignalRunnable(latchedMessage));
     }

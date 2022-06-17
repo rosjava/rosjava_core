@@ -23,6 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.BaseClientHandshake;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handshake logic from the subscriber side of a topic connection.
@@ -32,7 +34,7 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 public class SubscriberHandshake extends BaseClientHandshake {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(SubscriberHandshake.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SubscriberHandshake.class);
 
   public SubscriberHandshake(ConnectionHeader outgoingConnectionHeader) {
     super(outgoingConnectionHeader);
@@ -44,8 +46,8 @@ public class SubscriberHandshake extends BaseClientHandshake {
   @Override
   public boolean handshake(ConnectionHeader incommingConnectionHeader) {
     if (DEBUG) {
-      log.info("Outgoing subscriber connection header: " + outgoingConnectionHeader);
-      log.info("Incoming publisher connection header: " + incommingConnectionHeader);
+      LOGGER.info("Outgoing subscriber connection header: " + outgoingConnectionHeader);
+      LOGGER.info("Incoming publisher connection header: " + incommingConnectionHeader);
     }
     setErrorMessage(incommingConnectionHeader.getField(ConnectionHeaderFields.ERROR));
     String incomingType = incommingConnectionHeader.getField(ConnectionHeaderFields.TYPE);

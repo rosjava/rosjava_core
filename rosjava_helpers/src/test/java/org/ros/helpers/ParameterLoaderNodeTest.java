@@ -40,7 +40,7 @@ import static org.junit.Assert.fail;
 public class ParameterLoaderNodeTest extends RosTest {
 
     private ParameterTree parameters;
-    private RosLog log;
+    private RosLog rosLog;
 
     @Before
     public void setup() throws InterruptedException {
@@ -54,7 +54,7 @@ public class ParameterLoaderNodeTest extends RosTest {
             @Override
             public void onStart(ConnectedNode connectedNode) {
                 parameters = connectedNode.getParameterTree();
-                log = connectedNode.getLog();
+                rosLog = connectedNode.getLog();
                 latch.countDown();
             }
         }, nodeConfiguration);
@@ -105,7 +105,7 @@ public class ParameterLoaderNodeTest extends RosTest {
             assertEquals(2.3, list.get(2));
             assertEquals(true, list.get(3));
         } catch (ParameterNotFoundException e) {
-            log.error("Error: " + e.getMessage());
+            rosLog.error("Error: " + e.getMessage());
             fail();
         }
     }

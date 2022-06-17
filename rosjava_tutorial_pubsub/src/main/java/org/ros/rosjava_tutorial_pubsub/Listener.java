@@ -38,8 +38,8 @@ public class Listener extends AbstractNodeMain {
 
   @Override
   public void onStart(ConnectedNode connectedNode) {
-    final RosLog log = connectedNode.getLog();
-    Subscriber<std_msgs.String> subscriber = connectedNode.newSubscriber("chatter", std_msgs.String._TYPE);
-    subscriber.addMessageListener(message -> log.info("I heard: \"" + message.getData() + "\""));
+    final RosLog rosLog = connectedNode.getLog();
+    final Subscriber<std_msgs.String> subscriber = connectedNode.newSubscriber("chatter", std_msgs.String._TYPE);
+    subscriber.addMessageListener(message -> rosLog.info("I heard: \"" + message.getData() + "\""));
   }
 }

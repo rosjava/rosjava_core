@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MessageReceiver<T> extends AbstractNamedChannelHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(MessageReceiver.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageReceiver.class);
 
     private final CircularBlockingDeque<LazyMessage<T>> lazyMessages;
     private final MessageDeserializer<T> deserializer;
@@ -51,8 +51,8 @@ public class MessageReceiver<T> extends AbstractNamedChannelHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         ChannelBuffer buffer = (ChannelBuffer) e.getMessage();
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Received %d byte message.", buffer.readableBytes()));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(String.format("Received %d byte message.", buffer.readableBytes()));
         }
         // We have to make a defensive copy of the buffer here because Netty does
         // not guarantee that the returned ChannelBuffer will not be reused.

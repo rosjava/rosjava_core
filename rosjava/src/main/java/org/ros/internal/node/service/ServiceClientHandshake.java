@@ -21,6 +21,8 @@ import org.apache.commons.logging.LogFactory;
 import org.ros.internal.node.BaseClientHandshake;
 import org.ros.internal.transport.ConnectionHeader;
 import org.ros.internal.transport.ConnectionHeaderFields;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handshake logic from the client side of a service connection.
@@ -30,7 +32,7 @@ import org.ros.internal.transport.ConnectionHeaderFields;
 public class ServiceClientHandshake extends BaseClientHandshake {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(ServiceClientHandshake.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ServiceClientHandshake.class);
 
   public ServiceClientHandshake(ConnectionHeader outgoingConnectionHeader) {
     super(outgoingConnectionHeader);
@@ -39,8 +41,8 @@ public class ServiceClientHandshake extends BaseClientHandshake {
   @Override
   public boolean handshake(ConnectionHeader incommingConnectionHeader) {
     if (DEBUG) {
-      log.info("Outgoing service client connection header: " + outgoingConnectionHeader);
-      log.info("Incoming service server connection header: " + incommingConnectionHeader);
+      LOGGER.info("Outgoing service client connection header: " + outgoingConnectionHeader);
+      LOGGER.info("Incoming service server connection header: " + incommingConnectionHeader);
     }
     setErrorMessage(incommingConnectionHeader.getField(ConnectionHeaderFields.ERROR));
     if (getErrorMessage() != null) {

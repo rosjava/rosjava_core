@@ -26,6 +26,8 @@ import org.ros.address.AdvertiseAddress;
 import org.ros.address.BindAddress;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.system.Process;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -42,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 public class XmlRpcServer {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(XmlRpcServer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(XmlRpcServer.class);
 
   private final WebServer server;
   private final AdvertiseAddress advertiseAddress;
@@ -90,7 +92,7 @@ public class XmlRpcServer {
       throw new RosRuntimeException(e);
     }
     if (DEBUG) {
-      log.info("Bound to: " + getUri());
+      LOGGER.info("Bound to: " + getUri());
     }
     this.startLatch.countDown();
   }

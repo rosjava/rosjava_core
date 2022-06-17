@@ -32,6 +32,8 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.ros.exception.RosRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
 import java.nio.ByteOrder;
@@ -45,7 +47,7 @@ import java.util.concurrent.TimeUnit;
 public class TcpClient {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(TcpClient.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TcpClient.class);
 
   private static final int DEFAULT_CONNECTION_TIMEOUT_DURATION = 5;
   private static final TimeUnit DEFAULT_CONNECTION_TIMEOUT_UNIT = TimeUnit.SECONDS;
@@ -102,7 +104,7 @@ public class TcpClient {
     if (future.isSuccess()) {
       channel = future.getChannel();
       if (DEBUG) {
-        log.info("Connected to: " + socketAddress);
+        LOGGER.info("Connected to: " + socketAddress);
       }
     } else {
       // We expect the first connection to succeed. If not, fail fast.

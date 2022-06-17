@@ -29,6 +29,8 @@ import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.transport.ProtocolDescription;
 import org.ros.namespace.GraphName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -45,7 +47,7 @@ import java.util.Vector;
 public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(SlaveXmlRpcEndpointImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SlaveXmlRpcEndpointImpl.class);
 
   private final SlaveServer slave;
 
@@ -72,7 +74,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
 
   @Override
   public List<Object> shutdown(String callerId, String message) {
-    log.info("Shutdown requested by " + callerId + " with message \"" + message + "\"");
+    LOGGER.info("Shutdown requested by " + callerId + " with message \"" + message + "\"");
     slave.shutdown();
     return Response.newSuccess("Shutdown successful.", null).toList();
   }
@@ -197,7 +199,7 @@ public class SlaveXmlRpcEndpointImpl implements SlaveXmlRpcEndpoint {
     }
     List<Object> response = Response.newSuccess(protocol.toString(), protocol.toList()).toList();
     if (DEBUG) {
-      log.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
+      LOGGER.info("requestTopic(" + topic + ", " + requestedProtocols + ") response: "
           + response.toString());
     }
     return response;

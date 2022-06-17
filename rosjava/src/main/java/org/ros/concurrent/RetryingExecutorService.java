@@ -21,6 +21,8 @@ import com.google.common.collect.Maps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.exception.RosRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -43,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 public class RetryingExecutorService {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(RetryingExecutorService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(RetryingExecutorService.class);
 
   private static final long DEFAULT_RETRY_DELAY = 5;
   private static final TimeUnit DEFAULT_RETRY_TIME_UNIT = TimeUnit.SECONDS;
@@ -78,7 +80,7 @@ public class RetryingExecutorService {
       }
       if (retry) {
         if (DEBUG) {
-          log.info("Retry requested.");
+          LOGGER.info("Retry requested.");
         }
         final Callable<Boolean> finalCallable = callable;
         scheduledExecutorService.schedule(new Runnable() {

@@ -18,6 +18,7 @@ package org.ros.internal.node.client;
 
 import com.google.common.base.Preconditions;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.Holder;
@@ -33,6 +34,8 @@ import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.TopicParticipantManagerListener;
 import org.ros.node.service.ServiceServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.Collection;
@@ -49,9 +52,9 @@ import java.util.concurrent.TimeUnit;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public final class Registrar implements TopicParticipantManagerListener, ServiceManagerListener {
+  private static final Logger LOGGER = LoggerFactory.getLogger(Registrar.class);
+  private static final boolean DEBUG = LOGGER.isDebugEnabled();
 
-  private static final boolean DEBUG = true;
-  private static final Log log = LogFactory.getLog(Registrar.class);
 
   private static final int SHUTDOWN_TIMEOUT = 5;
   private static final TimeUnit SHUTDOWN_TIMEOUT_UNITS = TimeUnit.SECONDS;
@@ -77,7 +80,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
     nodeIdentifier = null;
     running = false;
     if (DEBUG) {
-      log.info("MasterXmlRpcEndpoint URI: " + masterClient.getRemoteUri());
+      LOGGER.debug("MasterXmlRpcEndpoint URI: " + masterClient.getRemoteUri());
     }
   }
 
@@ -100,7 +103,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
       retryingExecutorService.submit(callable);
       return true;
     }
-    log.warn("Registrar no longer running, request ignored.");
+    LOGGER.warn("Registrar no longer running, request ignored.");
     return false;
   }
 
@@ -108,17 +111,15 @@ public final class Registrar implements TopicParticipantManagerListener, Service
     Preconditions.checkNotNull(nodeIdentifier, "Registrar not started.");
     boolean success;
     try {
-      Response<T> response = callable.call();
+      final Response<T> response = callable.call();
       if (DEBUG) {
-        log.info(response);
+        LOGGER.debug("Response:"+response);
       }
       success = response.isSuccess();
     } catch (Exception e) {
-      if (DEBUG) {
-        log.error("Exception caught while communicating with master.", e);
-      } else {
-        log.error("Exception caught while communicating with master.");
-      }
+
+      LOGGER.error("Exception caught while communicating with master."+ ExceptionUtils.getStackTrace(e));
+
       success = false;
     }
     return success;
@@ -127,7 +128,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
   @Override
   public void onPublisherAdded(final DefaultPublisher<?> publisher) {
     if (DEBUG) {
-      log.info("Registering publisher: " + publisher);
+      LOGGER.info("Registering publisher: " + publisher);
     }
     boolean submitted = submit(new Callable<Boolean>() {
       @Override
@@ -159,7 +160,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
   @Override
   public void onPublisherRemoved(final DefaultPublisher<?> publisher) {
     if (DEBUG) {
-      log.info("Unregistering publisher: " + publisher);
+      LOGGER.info("Unregistering publisher: " + publisher);
     }
     boolean submitted = submit(new Callable<Boolean>() {
       @Override
@@ -191,7 +192,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
   @Override
   public void onSubscriberAdded(final DefaultSubscriber<?> subscriber) {
     if (DEBUG) {
-      log.info("Registering subscriber: " + subscriber);
+      LOGGER.info("Registering subscriber: " + subscriber);
     }
     boolean submitted = submit(new Callable<Boolean>() {
       @Override
@@ -228,7 +229,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
   @Override
   public void onSubscriberRemoved(final DefaultSubscriber<?> subscriber) {
     if (DEBUG) {
-      log.info("Unregistering subscriber: " + subscriber);
+      LOGGER.info("Unregistering subscriber: " + subscriber);
     }
     boolean submitted = submit(new Callable<Boolean>() {
       @Override
@@ -260,7 +261,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
   @Override
   public void onServiceServerAdded(final ServiceServer<?, ?> serviceServer) {
     if (DEBUG) {
-      log.info("Registering service: " + serviceServer);
+      LOGGER.info("Registering service: " + serviceServer);
     }
     boolean submitted = submit(new Callable<Boolean>() {
       @Override
@@ -292,7 +293,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
   @Override
   public void onServiceServerRemoved(final ServiceServer<?, ?> serviceServer) {
     if (DEBUG) {
-      log.info("Unregistering service: " + serviceServer);
+      LOGGER.info("Unregistering service: " + serviceServer);
     }
     boolean submitted = submit(new Callable<Boolean>() {
       @Override

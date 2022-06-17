@@ -55,9 +55,9 @@ import org.xml.sax.XMLReader;
  */
 public abstract class XmlRpcStreamServer extends XmlRpcServer
 		implements XmlRpcStreamRequestProcessor {
-	private static final Log log = LogFactory.getLog(XmlRpcStreamServer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(XmlRpcStreamServer.class);
 	private XmlWriterFactory writerFactory = new DefaultXMLWriterFactory();
-	private static final Logger logger = LoggerFactory.getLogger(XmlRpcStreamServer.class);;
+
 
 	
 	protected XmlRpcRequest getRequest(final XmlRpcStreamRequestConfig pConfig,
@@ -193,7 +193,7 @@ public abstract class XmlRpcStreamServer extends XmlRpcServer
 	public void execute(XmlRpcStreamRequestConfig pConfig,
 						ServerStreamConnection pConnection)
 			throws XmlRpcException {
-		log.debug("execute: ->");
+		LOGGER.debug("execute: ->");
 		try {
 			Object result;
 			Throwable error;
@@ -209,7 +209,7 @@ public abstract class XmlRpcStreamServer extends XmlRpcServer
 				istream.close();
 				istream = null;
 				error = null;
-				log.debug("execute: Request performed successfully");
+				LOGGER.debug("execute: Request performed successfully");
 			} catch (Throwable t) {
 				logError(t);
 				result = null;
@@ -257,7 +257,7 @@ public abstract class XmlRpcStreamServer extends XmlRpcServer
 		} finally {
 			if (pConnection != null) { try { pConnection.close(); } catch (Throwable ignore) {} }
 		}
-		log.debug("execute: <-");
+		LOGGER.debug("execute: <-");
 	}
 	
 	private Object[] executeMulticall(final XmlRpcRequest pRequest) {
@@ -309,7 +309,7 @@ public abstract class XmlRpcStreamServer extends XmlRpcServer
 
     protected void logError(Throwable t) {
         final String msg = t.getMessage() == null ? t.getClass().getName() : t.getMessage();
-		logger.debug(msg, t);
+		LOGGER.debug(msg, t);
     }
 
 

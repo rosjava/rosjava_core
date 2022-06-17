@@ -27,6 +27,8 @@ import org.ros.internal.transport.tcp.TcpClientPipelineFactory;
 import org.ros.message.MessageDeserializer;
 import org.ros.node.service.ServiceResponseListener;
 import org.ros.node.service.ServiceServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
@@ -44,7 +46,7 @@ import java.util.concurrent.ExecutorService;
  */
 class ServiceClientHandshakeHandler<T, S> extends BaseClientHandshakeHandler {
 
-  private static final Log log = LogFactory.getLog(ServiceClientHandshakeHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ServiceClientHandshakeHandler.class);
   
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final MessageDeserializer<S> deserializer;
@@ -72,7 +74,7 @@ class ServiceClientHandshakeHandler<T, S> extends BaseClientHandshakeHandler {
 
   @Override
   protected void onFailure(String errorMessage, ChannelHandlerContext ctx, MessageEvent e) {
-    log.error("Service client handshake failed: " + errorMessage);
+    LOGGER.error("Service client handshake failed: " + errorMessage);
     e.getChannel().close();
   }
 

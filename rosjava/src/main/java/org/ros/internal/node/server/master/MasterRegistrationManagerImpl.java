@@ -29,6 +29,8 @@ import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceServer;
 
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages all registration logic for the {@link MasterServer}.
@@ -40,7 +42,7 @@ import com.google.common.collect.Maps;
  */
 public class MasterRegistrationManagerImpl {
 
-  private static final Log log = LogFactory.getLog(MasterRegistrationManagerImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MasterRegistrationManagerImpl.class);
 
   /**
    * A map from node names to the information about the mode.
@@ -87,8 +89,8 @@ public class MasterRegistrationManagerImpl {
    */
   public TopicRegistrationInfo registerPublisher(GraphName nodeName, URI nodeSlaveUri,
       GraphName topicName, String topicMessageType) {
-    if (log.isDebugEnabled()) {
-      log.debug(String.format(
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(String.format(
           "Registering publisher topic %s with message type %s on node %s with slave URI %s",
           topicName, topicMessageType, nodeName, nodeSlaveUri));
     }
@@ -113,8 +115,8 @@ public class MasterRegistrationManagerImpl {
    *         call.
    */
   public boolean unregisterPublisher(GraphName nodeName, GraphName topicName) {
-    if (log.isDebugEnabled()) {
-      log.debug(String.format("Unregistering publisher of topic %s from node %s",
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(String.format("Unregistering publisher of topic %s from node %s",
           topicName, nodeName));
     }
 
@@ -130,8 +132,8 @@ public class MasterRegistrationManagerImpl {
         return true;
       } else {
         // never was a node with that name
-        if (log.isWarnEnabled()) {
-          log.warn(String.format("Received unregister publisher for topic %s on unknown node %s",
+        if (LOGGER.isWarnEnabled()) {
+          LOGGER.warn(String.format("Received unregister publisher for topic %s on unknown node %s",
               topicName, nodeName));
         }
 
@@ -139,8 +141,8 @@ public class MasterRegistrationManagerImpl {
       }
     } else {
       // If no topic, there will be no node registration.
-      if (log.isWarnEnabled()) {
-        log.warn(String.format("Received unregister publisher for unknown topic %s on node %s",
+      if (LOGGER.isWarnEnabled()) {
+        LOGGER.warn(String.format("Received unregister publisher for unknown topic %s on node %s",
             topicName, nodeName));
       }
 
@@ -164,8 +166,8 @@ public class MasterRegistrationManagerImpl {
    */
   public TopicRegistrationInfo registerSubscriber(GraphName nodeName, URI nodeSlaveUri,
       GraphName topicName, String topicMessageType) {
-    if (log.isDebugEnabled()) {
-      log.debug(String.format(
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(String.format(
           "Registering subscriber topic %s with message type %s on node %s with slave URI %s",
           topicName, topicMessageType, nodeName, nodeSlaveUri));
     }
@@ -190,8 +192,8 @@ public class MasterRegistrationManagerImpl {
    *         call.
    */
   public boolean unregisterSubscriber(GraphName nodeName, GraphName topicName) {
-    if (log.isDebugEnabled()) {
-      log.debug(String.format("Unregistering subscriber of topic %s from node %s",
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(String.format("Unregistering subscriber of topic %s from node %s",
           topicName, nodeName));
     }
 
@@ -205,16 +207,16 @@ public class MasterRegistrationManagerImpl {
         return true;
       } else {
         // never was a node with that name
-        if (log.isWarnEnabled()) {
-          log.warn(String.format("Received unregister subscriber for topic %s on unknown node %s",
+        if (LOGGER.isWarnEnabled()) {
+          LOGGER.warn(String.format("Received unregister subscriber for topic %s on unknown node %s",
               topicName, nodeName));
         }
         return false;
       }
     } else {
       // If no topic, there will be no node registration.
-      if (log.isWarnEnabled()) {
-        log.warn(String.format("Received unregister subscriber for unknown topic %s on node %s",
+      if (LOGGER.isWarnEnabled()) {
+        LOGGER.warn(String.format("Received unregister subscriber for unknown topic %s on node %s",
             topicName, nodeName));
       }
       return false;
@@ -237,8 +239,8 @@ public class MasterRegistrationManagerImpl {
    */
   public ServiceRegistrationInfo registerService(GraphName nodeName, URI nodeSlaveUri,
       GraphName serviceName, URI serviceUri) {
-    if (log.isDebugEnabled()) {
-      log.debug(String.format(
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(String.format(
           "Registering service %s with server URI %s on node %s with slave URI %s", serviceName,
           serviceUri, nodeName, nodeSlaveUri));
     }
@@ -250,8 +252,8 @@ public class MasterRegistrationManagerImpl {
       NodeRegistrationInfo previousServiceNode = service.getNode();
       if (previousServiceNode == node) {
         // If node is the same, no need to do anything
-        if (log.isWarnEnabled()) {
-          log.warn(String
+        if (LOGGER.isWarnEnabled()) {
+          LOGGER.warn(String
               .format(
                   "Registering already known service %s with server URI %s on node %s with slave URI %s",
                   serviceName, serviceUri, nodeName, nodeSlaveUri));
@@ -287,8 +289,8 @@ public class MasterRegistrationManagerImpl {
    *         call.
    */
   public boolean unregisterService(GraphName nodeName, GraphName serviceName, URI serviceUri) {
-    if (log.isDebugEnabled()) {
-      log.debug(String.format("Unregistering service %s from node %s", serviceName, nodeName));
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug(String.format("Unregistering service %s from node %s", serviceName, nodeName));
     }
 
     ServiceRegistrationInfo service = services.get(serviceName);
@@ -304,8 +306,8 @@ public class MasterRegistrationManagerImpl {
         return true;
       } else {
         // never was a node with that name
-        if (log.isWarnEnabled()) {
-          log.warn(String.format("Received unregister for service %s on unknown node %s",
+        if (LOGGER.isWarnEnabled()) {
+          LOGGER.warn(String.format("Received unregister for service %s on unknown node %s",
               serviceName, nodeName));
         }
 
@@ -316,8 +318,8 @@ public class MasterRegistrationManagerImpl {
       }
     } else {
       // If no service, there will be no node registration.
-      if (log.isWarnEnabled()) {
-        log.warn(String.format("Received unregister for unknown service %s on node %s",
+      if (LOGGER.isWarnEnabled()) {
+        LOGGER.warn(String.format("Received unregister for unknown service %s on node %s",
             serviceName, nodeName));
       }
 
@@ -431,7 +433,7 @@ public class MasterRegistrationManagerImpl {
         listener.onNodeReplacement(node);
       } catch (Exception e) {
         // No matter what, we want to keep going
-        log.error("Error during onNodeReplacement call", e);
+        LOGGER.error("Error during onNodeReplacement call", e);
       }
     }
 

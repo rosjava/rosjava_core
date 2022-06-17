@@ -28,6 +28,8 @@ import org.ros.internal.transport.queue.IncomingMessageQueue;
 import org.ros.internal.transport.tcp.NamedChannelHandler;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 
@@ -42,7 +44,7 @@ import java.util.concurrent.ExecutorService;
  */
 class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
 
-  private static final Log log = LogFactory.getLog(SubscriberHandshakeHandler.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SubscriberHandshakeHandler.class);
 
   private final IncomingMessageQueue<T> incomingMessageQueue;
 
@@ -67,7 +69,7 @@ class SubscriberHandshakeHandler<T> extends BaseClientHandshakeHandler {
 
   @Override
   protected void onFailure(String errorMessage, ChannelHandlerContext ctx, MessageEvent e) {
-    log.error("Subscriber handshake failed: " + errorMessage);
+    LOGGER.error("Subscriber handshake failed: " + errorMessage);
     e.getChannel().close();
   }
 

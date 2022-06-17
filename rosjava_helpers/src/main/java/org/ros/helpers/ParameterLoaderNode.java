@@ -43,7 +43,7 @@ public class ParameterLoaderNode extends AbstractNodeMain {
 
     public static final String NODE_NAME = "parameter_loader";
     private final List<LoadedResource> params = new ArrayList<LoadedResource>();
-    private RosLog log = null;
+    private RosLog rosLog = null;
 
     /**
      * Default constructor
@@ -68,8 +68,8 @@ public class ParameterLoaderNode extends AbstractNodeMain {
     private final void addParams(final ParameterTree parameterTree, String namespace, Map<?, ?> params) {
         for (final Map.Entry<?, ?> e : params.entrySet()) {
             String fullKeyName = namespace + "/" + e.getKey().toString();
-            if (this.log != null && this.log.isDebugEnabled()) {
-                this.log.debug("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
+            if (this.rosLog != null && this.rosLog.isDebugEnabled()) {
+                this.rosLog.debug("Loading parameter " + fullKeyName + " \nValue = " + e.getValue());
             }
             if (e.getValue() instanceof String) {
                 parameterTree.set(fullKeyName, String.class.cast(e.getValue()));
@@ -83,9 +83,9 @@ public class ParameterLoaderNode extends AbstractNodeMain {
                 parameterTree.set(fullKeyName, Boolean.class.cast(e.getValue()));
             } else if (e.getValue() instanceof List) {
                 parameterTree.set(fullKeyName, List.class.cast(e.getValue()));
-            } else if (this.log!=null && this.log.isDebugEnabled()) {
-                this.log.debug("Unknown type parameter " + fullKeyName + " is. Value = " + e.getValue());
-                this.log.debug("Class name is: " + e.getValue().getClass().getName());
+            } else if (this.rosLog !=null && this.rosLog.isDebugEnabled()) {
+                this.rosLog.debug("Unknown type parameter " + fullKeyName + " is. Value = " + e.getValue());
+                this.rosLog.debug("Class name is: " + e.getValue().getClass().getName());
             }
         }
     }
@@ -102,7 +102,7 @@ public class ParameterLoaderNode extends AbstractNodeMain {
     @Override
     public void onStart(final ConnectedNode connectedNode) {
         ParameterTree parameterTree = connectedNode.getParameterTree();
-        this.log = connectedNode.getLog();
+        this.rosLog = connectedNode.getLog();
 
         // TODO: For some reason, setting the / param when using a rosjava master doesn't work
         // It does work fine with an external master, and also setting other params of any type

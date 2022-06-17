@@ -26,6 +26,8 @@ import org.apache.commons.net.ntp.TimeInfo;
 import org.ros.math.CollectionMath;
 import org.ros.message.Duration;
 import org.ros.message.Time;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -42,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 public class NtpTimeProvider implements TimeProvider {
 
   private static final boolean DEBUG = false;
-  private static final Log log = LogFactory.getLog(NtpTimeProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(NtpTimeProvider.class);
 
   private int sampleSize = 11;
   
@@ -86,19 +88,19 @@ public class NtpTimeProvider implements TimeProvider {
       }
     }
     offset = CollectionMath.median(offsets);
-    log.info(String.format("NTP time offset: %d ms", offset));
+    LOGGER.info(String.format("NTP time offset: %d ms", offset));
   }
 
   private long computeOffset() throws IOException {
     if (DEBUG) {
-      log.info("Updating time offset from NTP server: " + host.getHostName());
+      LOGGER.info("Updating time offset from NTP server: " + host.getHostName());
     }
     TimeInfo time;
     try {
       time = ntpClient.getTime(host);
     } catch (IOException e) {
       if (DEBUG) {
-        log.error("Failed to read time from NTP server: " + host.getHostName(), e);
+        LOGGER.error("Failed to read time from NTP server: " + host.getHostName(), e);
       }
       throw e;
     }
@@ -129,7 +131,7 @@ public class NtpTimeProvider implements TimeProvider {
             try {
               updateTime();
             } catch (IOException e) {
-              log.error("Periodic NTP update failed.", e);
+              LOGGER.error("Periodic NTP update failed.", e);
             }
           }
         }, 0, period, unit);
