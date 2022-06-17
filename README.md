@@ -2,10 +2,13 @@
 rosjava is the first pure Java implementation of ROS.
 ## About [SpyrosKou/rosjava_core](https://github.com/SpyrosKou/rosjava_core) fork
 This fork has the following changes:
-1. **Reduced visibility of API elements** 
+1. **Targets the JRE**
+   This version targets the JRE in Windows, Unix/Linux and Mac. Android compatibility has not been tested and has not been actively pursued. 
+
+2. **Reduced visibility of API elements** 
    Access modifiers have been added to reduce the visibility of all API elements (e.g. interfaces, classes and methods). This reduction aims to minimize the number of classes/methods accessible outside the projects packages. This simplifies usage inside an IDE since developers are presented with less autocomplete options, reducing the breadth of API elements that developers/users needs to consider. 
 
-2. **More programmer friendly API**
+3. **More programmer friendly API**
    The API is stricter, improving the developer experience and the ease of use. For instance Service Servers, Publishers and Service Clients parameter types now extend org.ros.internal.message.Message indicating what the type parameters should be and benefit from the compiler during compile time.
 
 
