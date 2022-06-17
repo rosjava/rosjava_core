@@ -19,6 +19,7 @@
 package org.apache.xmlrpc.webserver;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.apache.xmlrpc.server.XmlRpcStreamServer;
 import org.apache.xmlrpc.util.ThreadPool;
 import org.slf4j.Logger;
@@ -68,37 +69,37 @@ import java.util.StringTokenizer;
  *   webServer.start();
  * </pre>
  */
-public class WebServer implements Runnable {
+public final class WebServer implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
 
-    private class AddressMatcher {
+
+    private final class AddressMatcher {
         private final int pattern[];
 
         AddressMatcher(String pAddress) {
             try {
-                pattern = new int[4];
-                StringTokenizer st = new StringTokenizer(pAddress, ".");
+                this.pattern = new int[4];
+                final StringTokenizer st = new StringTokenizer(pAddress, ".");
                 if (st.countTokens() != 4) {
                     throw new IllegalArgumentException();
                 }
                 for (int i = 0; i < 4; i++) {
-                    String next = st.nextToken();
+                    final String next = st.nextToken();
                     if ("*".equals(next)) {
-                        pattern[i] = 256;
+                        this.pattern[i] = 256;
                     } else {
                         /* Note: *Not* pattern[i] = Integer.parseInt(next);
                          * See XMLRPC-145
                          */
-                        pattern[i] = (byte) Integer.parseInt(next);
+                        this.pattern[i] = (byte) Integer.parseInt(next);
                     }
                 }
             } catch (Exception e) {
-                throw new IllegalArgumentException("\"" + pAddress
-                        + "\" does not represent a valid IP address");
+                throw new IllegalArgumentException("\"" + pAddress + "\" does not represent a valid IP address");
             }
         }
 
-        boolean matches(byte[] pAddress) {
+        final boolean matches(byte[] pAddress) {
             for (int i = 0; i < 4; i++) {
                 if (pattern[i] > 255) {
                     continue; // Wildcard
@@ -114,8 +115,8 @@ public class WebServer implements Runnable {
     protected ServerSocket serverSocket;
     private Thread listener;
     private ThreadPool pool;
-    protected final List accept = new ArrayList();
-    protected final List deny = new ArrayList();
+    protected final List<AddressMatcher> accept = new ArrayList();
+    protected final List<AddressMatcher> deny = new ArrayList();
     protected final XmlRpcStreamServer server = newXmlRpcStreamServer();
 
     protected XmlRpcStreamServer newXmlRpcStreamServer() {
@@ -166,8 +167,7 @@ public class WebServer implements Runnable {
      *
      * @throws IOException Error creating listener socket.
      */
-    protected ServerSocket createServerSocket(int pPort, int backlog, InetAddress addr)
-            throws IOException {
+    protected ServerSocket createServerSocket(int pPort, int backlog, InetAddress addr) throws IOException {
         return new ServerSocket(pPort, backlog, addr);
     }
 
@@ -221,14 +221,14 @@ public class WebServer implements Runnable {
      * @throws IOException Binding the server socket failed.
      * @see #run()
      */
-    public void start() throws IOException {
-        setupServerSocket(50);
+    public final void start() throws IOException {
+        this.setupServerSocket(50);
 
         // The listener reference is released upon shutdown().
-        if (listener == null) {
-            listener = new Thread(this, "XML-RPC Weblistener");
+        if (this.listener == null) {
+            this.listener = new Thread(this, XmlRpcConstants.XML_RPC_WEBLISTENER);
             // Not marked as daemon thread since run directly via main().
-            listener.start();
+            this.listener.start();
         }
     }
 
@@ -240,8 +240,8 @@ public class WebServer implements Runnable {
      * @see #acceptClient(java.lang.String)
      * @see #denyClient(java.lang.String)
      */
-    public void setParanoid(boolean pParanoid) {
-        paranoid = pParanoid;
+    final void setParanoid(boolean pParanoid) {
+        this.paranoid = pParanoid;
     }
 
     /**
@@ -252,8 +252,8 @@ public class WebServer implements Runnable {
      * @see #acceptClient(java.lang.String)
      * @see #denyClient(java.lang.String)
      */
-    protected boolean isParanoid() {
-        return paranoid;
+    final boolean isParanoid() {
+        return this.paranoid;
     }
 
     /**
@@ -267,8 +267,8 @@ public class WebServer implements Runnable {
      * @see #denyClient(java.lang.String)
      * @see #setParanoid(boolean)
      */
-    public void acceptClient(String pAddress) {
-        accept.add(new AddressMatcher(pAddress));
+    final void acceptClient(String pAddress) {
+        this.accept.add(new AddressMatcher(pAddress));
     }
 
     /**
@@ -282,8 +282,8 @@ public class WebServer implements Runnable {
      * @see #acceptClient(java.lang.String)
      * @see #setParanoid(boolean)
      */
-    public void denyClient(String pAddress) {
-        deny.add(new AddressMatcher(pAddress));
+    final void denyClient(String pAddress) {
+        this.deny.add(new AddressMatcher(pAddress));
     }
 
     /**
@@ -294,7 +294,7 @@ public class WebServer implements Runnable {
      *
      * @return Whether the connection should be allowed.
      */
-    protected boolean allowConnection(Socket s) {
+    final boolean allowConnection(Socket s) {
         if (!paranoid) {
             return true;
         }
@@ -302,14 +302,14 @@ public class WebServer implements Runnable {
         int l = deny.size();
         byte addr[] = s.getInetAddress().getAddress();
         for (int i = 0; i < l; i++) {
-            AddressMatcher match = (AddressMatcher) deny.get(i);
+            final AddressMatcher match = deny.get(i);
             if (match.matches(addr)) {
                 return false;
             }
         }
         l = accept.size();
         for (int i = 0; i < l; i++) {
-            AddressMatcher match = (AddressMatcher) accept.get(i);
+            final AddressMatcher match = accept.get(i);
             if (match.matches(addr)) {
                 return true;
             }
@@ -317,8 +317,7 @@ public class WebServer implements Runnable {
         return false;
     }
 
-    protected ThreadPool.Task newTask(WebServer pServer, XmlRpcStreamServer pXmlRpcServer,
-                                      Socket pSocket) throws IOException {
+    final ThreadPool.Task newTask(WebServer pServer, XmlRpcStreamServer pXmlRpcServer, Socket pSocket) throws IOException {
         return new Connection(pServer, pXmlRpcServer, pSocket);
     }
 
@@ -333,8 +332,8 @@ public class WebServer implements Runnable {
      * @see #start()
      * @see #shutdown()
      */
-    public void run() {
-        pool = newThreadPool();
+    public final void run() {
+        this.pool = newThreadPool();
         try {
             while (listener != null) {
                 try {
@@ -356,7 +355,7 @@ public class WebServer implements Runnable {
                                 socket = null;
                             } else {
 
-                                LOGGER.error("Maximum load of " + pool.getMaxThreads()+ " exceeded, rejecting client");
+                                LOGGER.error("Maximum load of " + pool.getMaxThreads() + " exceeded, rejecting client");
                             }
                         }
                     } finally {
@@ -392,7 +391,7 @@ public class WebServer implements Runnable {
         }
     }
 
-    protected ThreadPool newThreadPool() {
+    final ThreadPool newThreadPool() {
         return new ThreadPool(server.getMaxThreads(), "XML-RPC");
     }
 
@@ -403,7 +402,7 @@ public class WebServer implements Runnable {
      *
      * @see #run()
      */
-    public synchronized void shutdown() {
+    public final synchronized void shutdown() {
         // Stop accepting client connections
         if (listener != null) {
             Thread l = listener;
@@ -421,18 +420,17 @@ public class WebServer implements Runnable {
      *
      * @return Servers port number
      */
-    public int getPort() {
-        return serverSocket.getLocalPort();
+    public final int getPort() {
+        return this.serverSocket.getLocalPort();
     }
 
 
-
-     /**
+    /**
      * Returns the {@link org.apache.xmlrpc.server.XmlRpcServer}.
      *
      * @return The server object.
      */
-    public XmlRpcStreamServer getXmlRpcServer() {
-        return server;
+    public final XmlRpcStreamServer getXmlRpcServer() {
+        return this.server;
     }
 }
