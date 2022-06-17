@@ -49,8 +49,8 @@ public class XmlRpcServer {
   private final CountDownLatch startLatch;
 
   public XmlRpcServer(BindAddress bindAddress, AdvertiseAddress advertiseAddress) {
-    InetSocketAddress address = bindAddress.toInetSocketAddress();
-    server = new WebServer(address.getPort(), address.getAddress());
+    final InetSocketAddress address = bindAddress.toInetSocketAddress();
+    this.server = new WebServer(address.getPort(), address.getAddress());
     this.advertiseAddress = advertiseAddress;
     this.advertiseAddress.setPortCallable(new Callable<Integer>() {
       @Override
@@ -72,8 +72,8 @@ public class XmlRpcServer {
    */
   public <T extends org.ros.internal.node.xmlrpc.XmlRpcEndpoint> void start(Class<T> instanceClass,
       T instance) {
-    org.apache.xmlrpc.server.XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
-    PropertyHandlerMapping phm = new PropertyHandlerMapping();
+    final org.apache.xmlrpc.server.XmlRpcServer xmlRpcServer = server.getXmlRpcServer();
+    final PropertyHandlerMapping phm = new PropertyHandlerMapping();
     phm.setRequestProcessorFactoryFactory(new NodeRequestProcessorFactoryFactory<T>(instance));
     try {
       phm.addHandler("", instanceClass);
@@ -81,7 +81,7 @@ public class XmlRpcServer {
       throw new RosRuntimeException(e);
     }
     xmlRpcServer.setHandlerMapping(phm);
-    XmlRpcServerConfigImpl serverConfig = (XmlRpcServerConfigImpl) xmlRpcServer.getConfig();
+    final XmlRpcServerConfigImpl serverConfig = (XmlRpcServerConfigImpl) xmlRpcServer.getConfig();
     serverConfig.setEnabledForExtensions(false);
     serverConfig.setContentLengthOptional(false);
     try {
@@ -92,43 +92,45 @@ public class XmlRpcServer {
     if (DEBUG) {
       log.info("Bound to: " + getUri());
     }
-    startLatch.countDown();
+    this.startLatch.countDown();
   }
 
   /**
    * Shut the remote call server down.
    */
   public void shutdown() {
-    server.shutdown();
+    this.server.shutdown();
   }
 
   /**
    * @return the {@link URI} of the server
    */
-  public URI getUri() {
-    return advertiseAddress.toUri("http");
+  public final URI getUri() {
+    return this.advertiseAddress.toUri("http");
   }
 
-  public InetSocketAddress getAddress() {
-    return advertiseAddress.toInetSocketAddress();
+  public final InetSocketAddress getAddress() {
+    return this.advertiseAddress.toInetSocketAddress();
   }
 
-  public AdvertiseAddress getAdvertiseAddress() {
-    return advertiseAddress;
+  public final AdvertiseAddress getAdvertiseAddress() {
+    return this.advertiseAddress;
   }
 
-  public void awaitStart() throws InterruptedException {
-    startLatch.await();
+  public final void awaitStart() throws InterruptedException {
+    this.startLatch.await();
   }
 
-  public boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
-    return startLatch.await(timeout, unit);
+  public final boolean awaitStart(long timeout, TimeUnit unit) throws InterruptedException {
+    return this.startLatch.await(timeout, unit);
   }
 
   /**
+   *
    * @return PID of node process if available, throws
    *         {@link UnsupportedOperationException} otherwise.
    */
+  //Not final for mocking
   public int getPid() {
     return Process.getPid();
   }

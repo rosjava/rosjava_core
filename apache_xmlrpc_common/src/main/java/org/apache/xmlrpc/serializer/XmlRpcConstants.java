@@ -24,6 +24,7 @@ public abstract class XmlRpcConstants {
     public static final String FAULT_CAUSE = "faultCause";
     public static final String ROSRPC = "rosrpc";
     public static final String XML_RPC = "XML-RPC";
+    public static final String XML_RPC_WEBLISTENER = "XML-RPC Weblistener";
     /**
      * Tag name of a base64 value.
      */

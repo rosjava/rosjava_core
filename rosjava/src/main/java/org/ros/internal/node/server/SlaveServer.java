@@ -83,7 +83,7 @@ public class SlaveServer extends XmlRpcServer {
         if (this.shutdownStarted.compareAndSet(false, true)) {
             this.shutdownStarted.set(true);
             super.shutdown();
-            tcpRosServer.shutdown();
+            this.tcpRosServer.shutdown();
             if (this.node != null) {
                 this.node.shutdown();
             }
@@ -137,14 +137,6 @@ public class SlaveServer extends XmlRpcServer {
         return masterClient.getRemoteUri();
     }
 
-    /**
-     * @return PID of this process if available, throws
-     * {@link UnsupportedOperationException} otherwise.
-     */
-    @Override
-    public int getPid() {
-        return Process.getPid();
-    }
 
     public List<DefaultSubscriber<?>> getSubscriptions() {
         return topicParticipantManager.getSubscribers();
