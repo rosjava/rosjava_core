@@ -16,6 +16,7 @@
 
 package org.ros.internal.node.topic;
 
+import org.ros.internal.message.Message;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.message.MessageDeserializer;
 import org.ros.namespace.GraphName;
@@ -58,8 +59,8 @@ public class SubscriberFactory {
    * @return a new or cached {@link Subscriber} instance
    */
   @SuppressWarnings("unchecked")
-  public <T> Subscriber<T> newOrExisting(TopicDeclaration topicDeclaration,
-      MessageDeserializer<T> messageDeserializer) {
+  public <T extends Message> Subscriber<T> newOrExisting(TopicDeclaration topicDeclaration,
+                                                         MessageDeserializer<T> messageDeserializer) {
     synchronized (mutex) {
       GraphName topicName = topicDeclaration.getName();
       if (topicParticipantManager.hasSubscriber(topicName)) {
