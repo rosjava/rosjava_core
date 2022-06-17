@@ -98,7 +98,7 @@ public class MasterServer extends XmlRpcServer implements MasterRegistrationList
     if (DEBUG) {
       LOGGER.info("Starting master server.");
     }
-    super.start(MasterXmlRpcEndpointImpl.class, new MasterXmlRpcEndpointImpl(this));
+    super.start(new MasterXmlRpcEndpointImpl(this));
   }
 
   /**

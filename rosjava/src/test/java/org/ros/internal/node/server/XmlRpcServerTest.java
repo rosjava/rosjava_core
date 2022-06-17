@@ -46,7 +46,7 @@ public class XmlRpcServerTest {
     } catch (RuntimeException e) {
     }
 
-    xmlRpcServer.start(FakeNode.class, new FakeNode());
+    xmlRpcServer.start(new FakeNode());
     URI uri = xmlRpcServer.getUri();
     assertEquals("override", uri.getHost());
     assertTrue(uri.getPort() > 0);
@@ -64,7 +64,7 @@ public class XmlRpcServerTest {
     } catch (RuntimeException e) {
     }
 
-    xmlRpcServer.start(FakeNode.class, new FakeNode());
+    xmlRpcServer.start(new FakeNode());
     URI uri = xmlRpcServer.getUri();
     assertEquals(Address.LOOPBACK, uri.getHost());
     assertTrue(uri.getPort() > 0);

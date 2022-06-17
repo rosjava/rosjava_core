@@ -72,7 +72,7 @@ public class SlaveServer extends XmlRpcServer {
      * correct information when topics are requested.
      */
     public void start() {
-        super.start(org.ros.internal.node.xmlrpc.SlaveXmlRpcEndpointImpl.class, new SlaveXmlRpcEndpointImpl(this));
+        super.start(new SlaveXmlRpcEndpointImpl(this));
         tcpRosServer.start();
     }
 
