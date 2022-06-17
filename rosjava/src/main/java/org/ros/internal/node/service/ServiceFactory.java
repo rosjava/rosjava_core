@@ -43,7 +43,7 @@ public class ServiceFactory {
   private final SlaveServer slaveServer;
   private final ServiceManager serviceManager;
   private final ScheduledExecutorService executorService;
-  private final Object mutex;
+  private final Object mutex=new Object();
 
   public ServiceFactory(final GraphName nodeName, final SlaveServer slaveServer, final ServiceManager serviceManager,
       final ScheduledExecutorService executorService) {
@@ -51,7 +51,6 @@ public class ServiceFactory {
     this.slaveServer = slaveServer;
     this.serviceManager = serviceManager;
     this.executorService = executorService;
-    mutex = new Object();
   }
 
   /**
@@ -70,24 +69,25 @@ public class ServiceFactory {
    *          a {@link MessageFactory} to be used for creating responses
    * @return a {@link DefaultServiceServer} instance
    */
-  public <T extends Message, S extends Message> DefaultServiceServer<T, S> newServer(final ServiceDeclaration serviceDeclaration,
+  public <T extends Message, S extends Message> DefaultServiceServer<T, S>  newServer(final ServiceDeclaration serviceDeclaration,
                                                                     final ServiceResponseBuilder<T, S> responseBuilder, final MessageDeserializer<T> deserializer,
                                                                     final MessageSerializer<S> serializer, final MessageFactory messageFactory) {
-    DefaultServiceServer<T, S> serviceServer;
+
     final GraphName name = serviceDeclaration.getName();
 
-    synchronized (mutex) {
+    synchronized (this.mutex) {
       if (serviceManager.hasServer(name)) {
         throw new DuplicateServiceException(String.format("ServiceServer %s already exists.", name));
       } else {
-        serviceServer =
-            new DefaultServiceServer<T, S>(serviceDeclaration, responseBuilder,
-                slaveServer.getTcpRosAdvertiseAddress(), deserializer, serializer, messageFactory,
-                executorService);
-        serviceManager.addServer(serviceServer);
+       final DefaultServiceServer<T, S> serviceServer =
+                new DefaultServiceServer<>(serviceDeclaration, responseBuilder,
+                        slaveServer.getTcpRosAdvertiseAddress(), deserializer, serializer, messageFactory,
+                        executorService);
+        this.serviceManager.addServer(serviceServer);
+        return serviceServer;
       }
     }
-    return serviceServer;
+
   }
 
   /**

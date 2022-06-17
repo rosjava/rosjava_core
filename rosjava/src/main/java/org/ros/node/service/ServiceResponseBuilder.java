@@ -40,5 +40,5 @@ public interface ServiceResponseBuilder<T extends Message, S extends Message> {
    *          the response that will be sent
    * @throws ServiceException
    */
-  void build(T request, S response) throws ServiceException;
+  public void build(T request, S response) throws ServiceException;
 }
