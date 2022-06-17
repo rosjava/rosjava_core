@@ -35,7 +35,7 @@ import java.util.TimeZone;
  * </pre>
  * This class accepts and creates instances of {@link Calendar}.
  */
-public abstract class XmlRpcDateTimeFormat extends Format {
+abstract class XmlRpcDateTimeFormat extends Format {
     private static final long serialVersionUID = -8008230377361175138L;
 
     /** Returns the time zone, which is used to interpret date/time
