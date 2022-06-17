@@ -34,7 +34,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -46,6 +46,7 @@ import java.util.StringTokenizer;
  */
 public class Connection implements ThreadPool.InterruptableTask, ServerStreamConnection {
     private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
+    private static final String US_ASCII = "US-ASCII";
     private static final byte[] ctype = toHTTPBytes("Content-Type: text/xml\r\n");
     private static final byte[] clength = toHTTPBytes("Content-Length: ");
     private static final byte[] newline = toHTTPBytes("\r\n");
@@ -55,6 +56,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
     private static final byte[] ok = toHTTPBytes(" 200 OK\r\n");
     private static final byte[] serverName = toHTTPBytes("Server: Apache XML-RPC 1.0\r\n");
     private static final byte[] wwwAuthenticate = toHTTPBytes("WWW-Authenticate: Basic realm=XML-RPC\r\n");
+    private static final int LINE_BUFFER_SIZE = 2048;
 
     private static abstract class RequestException extends IOException {
         private static final long serialVersionUID = 2113732921468653309L;
@@ -100,7 +102,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
     private final OutputStream output;
     private final XmlRpcStreamServer server;
     private byte[] buffer;
-    private Map headers;
+    private Map<String, String> headers=new HashMap<>();
     private RequestData requestData;
     private boolean shuttingDown;
     private boolean firstByte;
@@ -117,10 +119,10 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
      */
     public Connection(WebServer pWebServer, XmlRpcStreamServer pServer, Socket pSocket)
             throws IOException {
-        webServer = pWebServer;
-        server = pServer;
-        socket = pSocket;
-        input = new BufferedInputStream(socket.getInputStream()) {
+        this.webServer = pWebServer;
+        this.server = pServer;
+        this.socket = pSocket;
+        this.input = new BufferedInputStream(socket.getInputStream()) {
             /** It may happen, that the XML parser invokes close().
              * Closing the input stream must not occur, because
              * that would close the whole socket. So we suppress it.
@@ -141,9 +143,9 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
      */
     private RequestData getRequestConfig() throws IOException {
         requestData = new RequestData(this);
-        if (headers != null) {
-            headers.clear();
-        }
+
+        this.headers.clear();
+
         firstByte = true;
         XmlRpcHttpServerConfig serverConfig = (XmlRpcHttpServerConfig) server.getConfig();
         requestData.setBasicEncoding(serverConfig.getBasicEncoding());
@@ -203,15 +205,15 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         return requestData;
     }
 
-    public void run() {
+    public final void run() {
         try {
             for (int i = 0; ; i++) {
-                RequestData data = getRequestConfig();
+                final RequestData data = getRequestConfig();
                 if (data == null) {
                     break;
                 }
-                server.execute(data, this);
-                output.flush();
+                this.server.execute(data, this);
+                this.output.flush();
                 if (!data.isKeepAlive() || !data.isSuccess()) {
                     break;
                 }
@@ -221,45 +223,45 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
                 LOGGER.error(ExceptionUtils.getStackTrace(exception));
             }
             try {
-                writeErrorHeader(exception.requestData, exception, -1);
-                output.flush();
+                this.writeErrorHeader(exception.requestData, exception, -1);
+                this.output.flush();
             } catch (IOException e1) {
                 /* Ignore me */
             }
-        } catch (Throwable t) {
-            if (!shuttingDown) {
+        } catch (final Throwable throwable) {
+            if (!this.shuttingDown) {
                 if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error(ExceptionUtils.getStackTrace(t));
+                    LOGGER.error(ExceptionUtils.getStackTrace(throwable));
                 }
             }
         } finally {
             try {
-                output.close();
+                this.output.close();
             } catch (Throwable ignore) {
             }
             try {
-                input.close();
+                this.input.close();
             } catch (Throwable ignore) {
             }
             try {
-                socket.close();
-            } catch (Throwable ignore) {
+                this.socket.close();
+            } catch (final Throwable ignore) {
             }
         }
     }
 
-    private String readLine() throws IOException {
-        if (buffer == null) {
-            buffer = new byte[2048];
+    private final String readLine() throws IOException {
+        if (this.buffer == null) {
+            this.buffer = new byte[LINE_BUFFER_SIZE];
         }
         int next;
         int count = 0;
         for (; ; ) {
             try {
                 next = input.read();
-                firstByte = false;
-            } catch (SocketException e) {
-                if (firstByte) {
+                this.firstByte = false;
+            } catch (final SocketException e) {
+                if (this.firstByte) {
                     return null;
                 } else {
                     throw e;
@@ -269,7 +271,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
                 break;
             }
             if (next != '\r') {
-                buffer[count++] = (byte) next;
+                this.buffer[count++] = (byte) next;
             }
             if (count >= buffer.length) {
                 throw new IOException("HTTP Header too long");
@@ -287,9 +289,9 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
      *
      * @throws IOException Writing the response failed.
      */
-    public void writeResponse(RequestData pData, OutputStream pBuffer)
+    public final void writeResponse(RequestData pData, OutputStream pBuffer)
             throws IOException {
-        ByteArrayOutputStream response = (ByteArrayOutputStream) pBuffer;
+        final ByteArrayOutputStream response = (ByteArrayOutputStream) pBuffer;
         writeResponseHeader(pData, response.size());
         response.writeTo(output);
     }
@@ -302,27 +304,26 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
      *
      * @throws IOException Writing the response failed.
      */
-    public void writeResponseHeader(RequestData pData, int pContentLength)
+    public final void writeResponseHeader(RequestData pData, int pContentLength)
             throws IOException {
-        output.write(toHTTPBytes(pData.getHttpVersion()));
-        output.write(ok);
-        output.write(serverName);
-        output.write(pData.isKeepAlive() ? conkeep : conclose);
-        output.write(ctype);
-        if (headers != null) {
-            for (Iterator iter = headers.entrySet().iterator(); iter.hasNext(); ) {
-                Map.Entry entry = (Map.Entry) iter.next();
-                String header = (String) entry.getKey();
-                String value = (String) entry.getValue();
-                output.write(toHTTPBytes(header + ": " + value + "\r\n"));
-            }
+        this.output.write(toHTTPBytes(pData.getHttpVersion()));
+        this.output.write(ok);
+        this.output.write(serverName);
+        this.output.write(pData.isKeepAlive() ? conkeep : conclose);
+        this.output.write(ctype);
+
+        for (Map.Entry<String, String> entry : this.headers.entrySet()) {
+            final String header = entry.getKey();
+            final String value = entry.getValue();
+            this.output.write(toHTTPBytes(header + ": " + value + "\r\n"));
         }
+
         if (pContentLength != -1) {
-            output.write(clength);
-            output.write(toHTTPBytes(Integer.toString(pContentLength)));
-            output.write(doubleNewline);
+            this.output.write(clength);
+            this.output.write(toHTTPBytes(Integer.toString(pContentLength)));
+            this.output.write(doubleNewline);
         } else {
-            output.write(newline);
+            this.output.write(newline);
         }
         pData.setSuccess(true);
     }
@@ -336,11 +337,11 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
      *
      * @throws IOException Writing the response failed.
      */
-    public void writeError(RequestData pData, Throwable pError, ByteArrayOutputStream pStream)
+    public final void writeError(RequestData pData, Throwable pError, ByteArrayOutputStream pStream)
             throws IOException {
         writeErrorHeader(pData, pError, pStream.size());
         pStream.writeTo(output);
-        output.flush();
+        this.output.flush();
     }
 
     /**
@@ -352,25 +353,25 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
      *
      * @throws IOException Writing the response failed.
      */
-    public void writeErrorHeader(RequestData pData, Throwable pError, int pContentLength)
+    public final void writeErrorHeader(RequestData pData, Throwable pError, int pContentLength)
             throws IOException {
         if (pError instanceof BadRequestException) {
             final byte[] content = toHTTPBytes("Method " + pData.getMethod()
                     + " not implemented (try POST)\r\n");
-            output.write(toHTTPBytes(pData.getHttpVersion()));
-            output.write(toHTTPBytes(" 400 Bad Request"));
-            output.write(newline);
-            output.write(serverName);
+            this.output.write(toHTTPBytes(pData.getHttpVersion()));
+            this.output.write(toHTTPBytes(" 400 Bad Request"));
+            this.output.write(newline);
+            this.output.write(serverName);
             writeContentLengthHeader(content.length);
-            output.write(newline);
-            output.write(content);
+            this.output.write(newline);
+            this.output.write(content);
         } else if (pError instanceof BadEncodingException) {
             final byte[] content = toHTTPBytes("The Transfer-Encoding " + pError.getMessage()
                     + " is not implemented.\r\n");
-            output.write(toHTTPBytes(pData.getHttpVersion()));
-            output.write(toHTTPBytes(" 501 Not Implemented"));
-            output.write(newline);
-            output.write(serverName);
+            this.output.write(toHTTPBytes(pData.getHttpVersion()));
+            this.output.write(toHTTPBytes(" 501 Not Implemented"));
+            this.output.write(newline);
+            this.output.write(serverName);
             writeContentLengthHeader(content.length);
             output.write(newline);
             output.write(content);
@@ -408,14 +409,13 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
     /**
      * Sets a response header value.
      */
-    public void setResponseHeader(String pHeader, String pValue) {
+    public final void setResponseHeader(String pHeader, String pValue) {
         headers.put(pHeader, pValue);
     }
 
 
-    public OutputStream newOutputStream() throws IOException {
-        boolean useContentLength;
-        useContentLength = !requestData.isEnabledForExtensions()
+    public final OutputStream newOutputStream() {
+        final boolean useContentLength = !requestData.isEnabledForExtensions()
                 || !((XmlRpcHttpRequestConfig) requestData).isContentLengthOptional();
         if (useContentLength) {
             return new ByteArrayOutputStream();
@@ -424,8 +424,8 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         }
     }
 
-    public InputStream newInputStream() throws IOException {
-        int contentLength = requestData.getContentLength();
+    public final InputStream newInputStream() {
+        final int contentLength = requestData.getContentLength();
         if (contentLength == -1) {
             return input;
         } else {
@@ -433,11 +433,38 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
         }
     }
 
-    public void close() throws IOException {
+    /**
+     * Currently does nothing
+     */
+    @Override
+    public final void close() throws IOException{
+
+        this.shuttingDown=true;
+        try{
+            this.input.close();
+
+        }catch (final Exception ignore){
+
+        }
+        try{
+            this.output.close();
+
+        }catch (final Exception ignore){
+
+        }
+        try{
+            this.socket.close();
+
+        }catch (final Exception ignore){
+
+        }
+
+        this.headers.clear();
+
     }
 
-    public void shutdown() throws Throwable {
-        shuttingDown = true;
-        socket.close();
+    public final void shutdown() throws IOException {
+        this.shuttingDown = true;
+        this.socket.close();
     }
 }
