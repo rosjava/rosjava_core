@@ -16,6 +16,7 @@
 
 package org.ros.node.topic;
 
+import org.ros.internal.message.Message;
 import org.ros.internal.node.topic.PublisherIdentifier;
 
 /**
@@ -23,7 +24,7 @@ import org.ros.internal.node.topic.PublisherIdentifier;
  * 
  * @author khughes@google.com (Keith M. Hughes)
  */
-public class DefaultSubscriberListener<T> implements SubscriberListener<T> {
+public class DefaultSubscriberListener<T extends Message> implements SubscriberListener<T> {
 
   @Override
   public void onMasterRegistrationSuccess(Subscriber<T> subscriber) {
