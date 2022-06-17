@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -16,226 +16,212 @@
 
 package org.ros.internal.node.server;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.*;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.internal.node.client.SlaveClient;
 import org.ros.namespace.GraphName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.Sets;
+import java.util.*;
 
 /**
  * A ROS parameter server.
- * 
+ *
  * @author damonkohler@google.com (Damon Kohler)
  * @author Spyros Koukas
  */
 public final class ParameterServer {
 
-  private static final Log log = LogFactory.getLog(ParameterServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParameterServer.class);
 
-  private final Map<String, Object> tree;
-  private final Multimap<GraphName, NodeIdentifier> subscribers;
-  private final GraphName masterName;
+    private final Map<String, Object> tree = Maps.newConcurrentMap();
+    private final Multimap<GraphName, NodeIdentifier> subscribers = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, NodeIdentifier>create());
+    private final GraphName masterName = GraphName.of("/master");
 
-  public ParameterServer() {
-    tree = Maps.newConcurrentMap();
-    subscribers = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, NodeIdentifier>create());
-    masterName = GraphName.of("/master");
-  }
-
-  public final void subscribe(GraphName name, NodeIdentifier nodeIdentifier) {
-    subscribers.put(name, nodeIdentifier);
-  }
-
-  private final Stack<String> getGraphNameParts(GraphName name) {
-    final Stack<String> parts = new Stack<String>();
-    GraphName tip = name;
-    while (!tip.isRoot()) {
-      parts.add(tip.getBasename().toString());
-      tip = tip.getParent();
+    public final void subscribe(GraphName name, NodeIdentifier nodeIdentifier) {
+        this.subscribers.put(name, nodeIdentifier);
     }
-    return parts;
-  }
 
-  @SuppressWarnings("unchecked")
-  public final  Object get(GraphName name) {
-    Preconditions.checkArgument(name.isGlobal());
-    final Stack<String> parts = getGraphNameParts(name);
-    Object possibleSubtree = tree;
-    while (!parts.empty() && possibleSubtree != null) {
-      if (!(possibleSubtree instanceof Map)) {
-        return null;
-      }
-      possibleSubtree = ((Map<String, Object>) possibleSubtree).get(parts.pop());
-    }
-    return possibleSubtree;
-  }
-
-  @SuppressWarnings("unchecked")
-  private final void setValue(GraphName name, Object value) {
-    Preconditions.checkArgument(name.isGlobal());
-    final Stack<String> parts = getGraphNameParts(name);
-    Map<String, Object> subtree = tree;
-    while (!parts.empty()) {
-      final String part = parts.pop();
-      if (parts.empty()) {
-        subtree.put(part, value);
-      } else if (subtree.containsKey(part) && subtree.get(part) instanceof Map) {
-        subtree = (Map<String, Object>) subtree.get(part);
-      } else {
-        final Map<String, Object> newSubtree = Maps.newHashMap();
-        subtree.put(part, newSubtree);
-        subtree = newSubtree;
-      }
-    }
-  }
-
-  private interface Updater {
-    void update(SlaveClient client);
-  }
-
-  private final  <T> void update(GraphName name, T value, Updater updater) {
-    this.setValue(name, value);
-    synchronized (subscribers) {
-      for (final NodeIdentifier nodeIdentifier : subscribers.get(name)) {
-        final SlaveClient client = new SlaveClient(masterName, nodeIdentifier.getUri());
-        try {
-          updater.update(client);
-        } catch (Exception e) {
-          log.error(e);
+    private final Stack<String> getGraphNameParts(GraphName name) {
+        final Stack<String> parts = new Stack<String>();
+        GraphName tip = name;
+        while (!tip.isRoot()) {
+            parts.add(tip.getBasename().toString());
+            tip = tip.getParent();
         }
-      }
+        return parts;
     }
-  }
 
-  public final void set(final GraphName name, final boolean value) {
-    update(name, value, new Updater() {
-      @Override
-      public void update(SlaveClient client) {
-        client.paramUpdate(name, value);
-      }
-    });
-  }
-
-  public void set(final GraphName name, final int value) {
-    update(name, value, new Updater() {
-      @Override
-      public void update(SlaveClient client) {
-        client.paramUpdate(name, value);
-      }
-    });
-  }
-
-  public void set(final GraphName name, final double value) {
-    update(name, value, new Updater() {
-      @Override
-      public void update(SlaveClient client) {
-        client.paramUpdate(name, value);
-      }
-    });
-  }
-
-  public void set(final GraphName name, final String value) {
-    update(name, value, new Updater() {
-      @Override
-      public void update(SlaveClient client) {
-        client.paramUpdate(name, value);
-      }
-    });
-  }
-
-  public void set(final GraphName name, final List<?> value) {
-    update(name, value, new Updater() {
-      @Override
-      public void update(SlaveClient client) {
-        client.paramUpdate(name, value);
-      }
-    });
-  }
-
-  public void set(final GraphName name, final Map<?, ?> value) {
-    update(name, value, new Updater() {
-      @Override
-      public void update(SlaveClient client) {
-        client.paramUpdate(name, value);
-      }
-    });
-  }
-
-  @SuppressWarnings("unchecked")
-  public void delete(GraphName name) {
-    Preconditions.checkArgument(name.isGlobal());
-    Stack<String> parts = getGraphNameParts(name);
-    Map<String, Object> subtree = tree;
-    while (!parts.empty() && subtree.containsKey(parts.peek())) {
-      String part = parts.pop();
-      if (parts.empty()) {
-        subtree.remove(part);
-      } else {
-        subtree = (Map<String, Object>) subtree.get(part);
-      }
+    @SuppressWarnings("unchecked")
+    public final Object get(GraphName name) {
+        Preconditions.checkArgument(name.isGlobal());
+        final Stack<String> parts = getGraphNameParts(name);
+        Object possibleSubtree = tree;
+        while (!parts.empty() && possibleSubtree != null) {
+            if (!(possibleSubtree instanceof Map)) {
+                return null;
+            }
+            possibleSubtree = ((Map<String, Object>) possibleSubtree).get(parts.pop());
+        }
+        return possibleSubtree;
     }
-  }
 
-  public Object search(GraphName namespace, GraphName name) {
-    GraphName search = namespace;
-    GraphName result = search.join(name.toRelative());
-    if (has(result)) {
-      return result;
+    @SuppressWarnings("unchecked")
+    private final void setValue(GraphName name, Object value) {
+        Preconditions.checkArgument(name.isGlobal());
+        final Stack<String> parts = getGraphNameParts(name);
+        Map<String, Object> subtree = tree;
+        while (!parts.empty()) {
+            final String part = parts.pop();
+            if (parts.empty()) {
+                subtree.put(part, value);
+            } else if (subtree.containsKey(part) && subtree.get(part) instanceof Map) {
+                subtree = (Map<String, Object>) subtree.get(part);
+            } else {
+                final Map<String, Object> newSubtree = Maps.newHashMap();
+                subtree.put(part, newSubtree);
+                subtree = newSubtree;
+            }
+        }
     }
-    while (!search.isRoot()) {
-      search = search.getParent();
-      result = search.join(name.toRelative());
-      if (has(result)) {
-        return result;
-      }
-    }
-    return null;
-  }
 
-  @SuppressWarnings("unchecked")
-  public boolean has(GraphName name) {
-    Preconditions.checkArgument(name.isGlobal());
-    Stack<String> parts = getGraphNameParts(name);
-    Map<String, Object> subtree = tree;
-    while (!parts.empty() && subtree.containsKey(parts.peek())) {
-      String part = parts.pop();
-      if (!parts.empty()) {
-        subtree = (Map<String, Object>) subtree.get(part);
-      }
+    private interface Updater {
+        void update(SlaveClient client);
     }
-    return parts.empty();
-  }
 
-  @SuppressWarnings("unchecked")
-  private Set<GraphName> getSubtreeNames(GraphName parent, Map<String, Object> subtree,
-      Set<GraphName> names) {
-    for (String name : subtree.keySet()) {
-      Object possibleSubtree = subtree.get(name);
-      if (possibleSubtree instanceof Map) {
-        names.addAll(getSubtreeNames(parent.join(GraphName.of(name)),
-            (Map<String, Object>) possibleSubtree, names));
-      } else {
-        names.add(parent.join(GraphName.of(name)));
-      }
+    private final <T> void update(GraphName name, T value, Updater updater) {
+        this.setValue(name, value);
+        synchronized (subscribers) {
+            for (final NodeIdentifier nodeIdentifier : subscribers.get(name)) {
+                final SlaveClient client = new SlaveClient(masterName, nodeIdentifier.getUri());
+                try {
+                    updater.update(client);
+                } catch (Exception e) {
+                    LOGGER.error(ExceptionUtils.getStackTrace(e));
+                }
+            }
+        }
     }
-    return names;
-  }
 
-  public Collection<GraphName> getNames() {
-    Set<GraphName> names = Sets.newHashSet();
-    return getSubtreeNames(GraphName.root(), tree, names);
-  }
+    public final void set(final GraphName name, final boolean value) {
+        update(name, value, new Updater() {
+            @Override
+            public void update(SlaveClient client) {
+                client.paramUpdate(name, value);
+            }
+        });
+    }
+
+    public void set(final GraphName name, final int value) {
+        update(name, value, new Updater() {
+            @Override
+            public void update(SlaveClient client) {
+                client.paramUpdate(name, value);
+            }
+        });
+    }
+
+    public void set(final GraphName name, final double value) {
+        update(name, value, new Updater() {
+            @Override
+            public void update(SlaveClient client) {
+                client.paramUpdate(name, value);
+            }
+        });
+    }
+
+    public void set(final GraphName name, final String value) {
+        update(name, value, new Updater() {
+            @Override
+            public void update(SlaveClient client) {
+                client.paramUpdate(name, value);
+            }
+        });
+    }
+
+    public void set(final GraphName name, final List<?> value) {
+        update(name, value, new Updater() {
+            @Override
+            public void update(SlaveClient client) {
+                client.paramUpdate(name, value);
+            }
+        });
+    }
+
+    public void set(final GraphName name, final Map<?, ?> value) {
+        update(name, value, new Updater() {
+            @Override
+            public void update(SlaveClient client) {
+                client.paramUpdate(name, value);
+            }
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    public void delete(GraphName name) {
+        Preconditions.checkArgument(name.isGlobal());
+        Stack<String> parts = getGraphNameParts(name);
+        Map<String, Object> subtree = tree;
+        while (!parts.empty() && subtree.containsKey(parts.peek())) {
+            String part = parts.pop();
+            if (parts.empty()) {
+                subtree.remove(part);
+            } else {
+                subtree = (Map<String, Object>) subtree.get(part);
+            }
+        }
+    }
+
+    public Object search(GraphName namespace, GraphName name) {
+        GraphName search = namespace;
+        GraphName result = search.join(name.toRelative());
+        if (has(result)) {
+            return result;
+        }
+        while (!search.isRoot()) {
+            search = search.getParent();
+            result = search.join(name.toRelative());
+            if (has(result)) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean has(GraphName name) {
+        Preconditions.checkArgument(name.isGlobal());
+        Stack<String> parts = getGraphNameParts(name);
+        Map<String, Object> subtree = tree;
+        while (!parts.empty() && subtree.containsKey(parts.peek())) {
+            String part = parts.pop();
+            if (!parts.empty()) {
+                subtree = (Map<String, Object>) subtree.get(part);
+            }
+        }
+        return parts.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Set<GraphName> getSubtreeNames(GraphName parent, Map<String, Object> subtree,
+                                           Set<GraphName> names) {
+        for (String name : subtree.keySet()) {
+            Object possibleSubtree = subtree.get(name);
+            if (possibleSubtree instanceof Map) {
+                names.addAll(getSubtreeNames(parent.join(GraphName.of(name)),
+                        (Map<String, Object>) possibleSubtree, names));
+            } else {
+                names.add(parent.join(GraphName.of(name)));
+            }
+        }
+        return names;
+    }
+
+    public final Set<GraphName> getNames() {
+        final Set<GraphName> names = Sets.newHashSet();
+        return getSubtreeNames(GraphName.root(), tree, names);
+    }
 
 }
