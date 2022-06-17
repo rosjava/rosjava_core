@@ -22,6 +22,7 @@ public abstract class XmlRpcConstants {
     public static final String FAULT_CODE = "faultCode";
     public static final String FAULT_STRING = "faultString";
     public static final String FAULT_CAUSE = "faultCause";
+    public static final String ROSRPC = "rosrpc";
     /**
      * Tag name of a base64 value.
      */

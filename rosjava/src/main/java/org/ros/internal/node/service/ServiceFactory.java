@@ -19,6 +19,7 @@ package org.ros.internal.node.service;
 import com.google.common.base.Preconditions;
 
 import org.ros.exception.DuplicateServiceException;
+import org.ros.internal.message.Message;
 import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.message.MessageDeserializer;
@@ -42,7 +43,7 @@ public class ServiceFactory {
   private final SlaveServer slaveServer;
   private final ServiceManager serviceManager;
   private final ScheduledExecutorService executorService;
-  private final Object mutex;
+  private final Object mutex=new Object();
 
   public ServiceFactory(final GraphName nodeName, final SlaveServer slaveServer, final ServiceManager serviceManager,
       final ScheduledExecutorService executorService) {
@@ -50,7 +51,6 @@ public class ServiceFactory {
     this.slaveServer = slaveServer;
     this.serviceManager = serviceManager;
     this.executorService = executorService;
-    mutex = new Object();
   }
 
   /**
@@ -69,24 +69,25 @@ public class ServiceFactory {
    *          a {@link MessageFactory} to be used for creating responses
    * @return a {@link DefaultServiceServer} instance
    */
-  public <T, S> DefaultServiceServer<T, S> newServer(final ServiceDeclaration serviceDeclaration,
-      final ServiceResponseBuilder<T, S> responseBuilder, final MessageDeserializer<T> deserializer,
-      final MessageSerializer<S> serializer, final MessageFactory messageFactory) {
-    DefaultServiceServer<T, S> serviceServer;
+  public <T extends Message, S extends Message> DefaultServiceServer<T, S>  newServer(final ServiceDeclaration serviceDeclaration,
+                                                                    final ServiceResponseBuilder<T, S> responseBuilder, final MessageDeserializer<T> deserializer,
+                                                                    final MessageSerializer<S> serializer, final MessageFactory messageFactory) {
+
     final GraphName name = serviceDeclaration.getName();
 
-    synchronized (mutex) {
+    synchronized (this.mutex) {
       if (serviceManager.hasServer(name)) {
         throw new DuplicateServiceException(String.format("ServiceServer %s already exists.", name));
       } else {
-        serviceServer =
-            new DefaultServiceServer<T, S>(serviceDeclaration, responseBuilder,
-                slaveServer.getTcpRosAdvertiseAddress(), deserializer, serializer, messageFactory,
-                executorService);
-        serviceManager.addServer(serviceServer);
+       final DefaultServiceServer<T, S> serviceServer =
+                new DefaultServiceServer<>(serviceDeclaration, responseBuilder,
+                        slaveServer.getTcpRosAdvertiseAddress(), deserializer, serializer, messageFactory,
+                        executorService);
+        this.serviceManager.addServer(serviceServer);
+        return serviceServer;
       }
     }
-    return serviceServer;
+
   }
 
   /**
@@ -96,7 +97,7 @@ public class ServiceFactory {
    *         {@code null} if it does not exist
    */
   @SuppressWarnings("unchecked")
-  public <T, S> DefaultServiceServer<T, S> getServer(final GraphName name) {
+  public <T extends Message, S extends Message> DefaultServiceServer<T, S> getServer(final GraphName name) {
     if (serviceManager.hasServer(name)) {
       return (DefaultServiceServer<T, S>) serviceManager.getServer(name);
     }
@@ -120,7 +121,7 @@ public class ServiceFactory {
    * @return a {@link DefaultServiceClient} instance
    */
   @SuppressWarnings("unchecked")
-  public <T, S> DefaultServiceClient<T, S> newClient(final ServiceDeclaration serviceDeclaration,
+  public <T extends Message, S extends Message> DefaultServiceClient<T, S> newClient(final ServiceDeclaration serviceDeclaration,
       final MessageSerializer<T> serializer, final MessageDeserializer<S> deserializer,
       final MessageFactory messageFactory) {
     Preconditions.checkNotNull(serviceDeclaration.getUri());

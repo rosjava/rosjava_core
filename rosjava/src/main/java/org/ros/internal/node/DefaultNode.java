@@ -23,6 +23,7 @@ import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
+import org.ros.internal.message.Message;
 import org.ros.internal.message.service.ServiceDescription;
 import org.ros.internal.message.topic.TopicDescription;
 import org.ros.internal.node.client.MasterClient;
@@ -226,41 +227,41 @@ public class DefaultNode implements ConnectedNode {
         return this.registrar;
     }
 
-    private <T> org.ros.message.MessageSerializer<T> newMessageSerializer(String messageType) {
+    private <T extends Message> org.ros.message.MessageSerializer<T> newMessageSerializer(String messageType) {
         return this.nodeConfiguration.getMessageSerializationFactory().newMessageSerializer(messageType);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> MessageDeserializer<T> newMessageDeserializer(String messageType) {
+    private <T extends Message> MessageDeserializer<T> newMessageDeserializer(String messageType) {
         return this.nodeConfiguration.getMessageSerializationFactory().newMessageDeserializer(messageType);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> MessageSerializer<T> newServiceResponseSerializer(String serviceType) {
+    private <T extends Message> MessageSerializer<T> newServiceResponseSerializer(String serviceType) {
         return this.nodeConfiguration.getMessageSerializationFactory()
                 .newServiceResponseSerializer(serviceType);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> MessageDeserializer<T> newServiceResponseDeserializer(String serviceType) {
-        return this.nodeConfiguration.getMessageSerializationFactory()
+    private <T extends Message> MessageDeserializer<T> newServiceResponseDeserializer(String serviceType) {
+        return  this.nodeConfiguration.getMessageSerializationFactory()
                 .newServiceResponseDeserializer(serviceType);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> MessageSerializer<T> newServiceRequestSerializer(String serviceType) {
+    private <T extends Message> MessageSerializer<T> newServiceRequestSerializer(String serviceType) {
         return this.nodeConfiguration.getMessageSerializationFactory()
                 .newServiceRequestSerializer(serviceType);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> MessageDeserializer<T> newServiceRequestDeserializer(String serviceType) {
+    private <T extends Message> MessageDeserializer<T> newServiceRequestDeserializer(String serviceType) {
         return this.nodeConfiguration.getMessageSerializationFactory()
                 .newServiceRequestDeserializer(serviceType);
     }
 
     @Override
-    public <T> Publisher<T> newPublisher(GraphName topicName, String messageType) {
+    public <T extends Message> Publisher<T> newPublisher(GraphName topicName, String messageType) {
         final GraphName resolvedTopicName = resolveName(topicName);
         final TopicDescription topicDescription =
                 this.nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
@@ -271,17 +272,17 @@ public class DefaultNode implements ConnectedNode {
     }
 
     @Override
-    public <T> Publisher<T> newPublisher(String topicName, String messageType) {
+    public <T extends Message> Publisher<T> newPublisher(String topicName, String messageType) {
         return newPublisher(GraphName.of(topicName), messageType);
     }
 
     @Override
-    public <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType) {
+    public <T extends Message> Subscriber<T> newSubscriber(GraphName topicName, String messageType) {
         return newSubscriber(topicName, messageType, null);
     }
 
     @Override
-    public <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType, TransportHints transportHints) {
+    public <T extends Message> Subscriber<T> newSubscriber(GraphName topicName, String messageType, TransportHints transportHints) {
         final GraphName resolvedTopicName = resolveName(topicName);
         final TopicDescription topicDescription =
                 this.nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
@@ -293,18 +294,18 @@ public class DefaultNode implements ConnectedNode {
     }
 
     @Override
-    public <T> Subscriber<T> newSubscriber(String topicName, String messageType) {
+    public <T extends Message> Subscriber<T> newSubscriber(String topicName, String messageType) {
         return newSubscriber(GraphName.of(topicName), messageType, null);
     }
 
     @Override
-    public <T> Subscriber<T> newSubscriber(String topicName, String messageType, TransportHints transportHints) {
+    public <T extends Message> Subscriber<T> newSubscriber(String topicName, String messageType, TransportHints transportHints) {
         return newSubscriber(GraphName.of(topicName), messageType, transportHints);
     }
 
     @Override
-    public <T, S> ServiceServer<T, S> newServiceServer(GraphName serviceName, String serviceType,
-                                                       ServiceResponseBuilder<T, S> responseBuilder) {
+    public <T extends Message, S extends Message> ServiceServer<T, S> newServiceServer(GraphName serviceName, String serviceType,
+                                                                       ServiceResponseBuilder<T, S> responseBuilder) {
         final GraphName resolvedServiceName = resolveName(serviceName);
         // TODO(damonkohler): It's rather non-obvious that the URI will be
         // created later on the fly.
@@ -319,19 +320,19 @@ public class DefaultNode implements ConnectedNode {
     }
 
     @Override
-    public <T, S> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
+    public <T extends Message, S extends Message> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
                                                        ServiceResponseBuilder<T, S> responseBuilder) {
         return newServiceServer(GraphName.of(serviceName), serviceType, responseBuilder);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T, S> ServiceServer<T, S> getServiceServer(GraphName serviceName) {
+    public <T  extends Message, S extends Message> ServiceServer<T, S> getServiceServer(GraphName serviceName) {
         return (ServiceServer<T, S>) serviceManager.getServer(serviceName);
     }
 
     @Override
-    public <T, S> ServiceServer<T, S> getServiceServer(String serviceName) {
+    public <T extends Message, S extends Message> ServiceServer<T, S> getServiceServer(String serviceName) {
         return getServiceServer(GraphName.of(serviceName));
     }
 
@@ -353,7 +354,7 @@ public class DefaultNode implements ConnectedNode {
     }
 
     @Override
-    public <T, S> ServiceClient<T, S> newServiceClient(GraphName serviceName, String serviceType)
+    public <T extends Message, S extends Message> ServiceClient<T, S> newServiceClient(GraphName serviceName, String serviceType)
             throws ServiceNotFoundException {
         final GraphName resolvedServiceName = resolveName(serviceName);
         final URI uri = lookupServiceUri(resolvedServiceName);
@@ -372,7 +373,7 @@ public class DefaultNode implements ConnectedNode {
     }
 
     @Override
-    public <T, S> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
+    public <T extends Message, S extends Message> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
             throws ServiceNotFoundException {
         return newServiceClient(GraphName.of(serviceName), serviceType);
     }

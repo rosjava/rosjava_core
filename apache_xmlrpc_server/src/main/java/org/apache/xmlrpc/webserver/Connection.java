@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -45,7 +46,6 @@ import java.util.StringTokenizer;
  */
 public class Connection implements ThreadPool.InterruptableTask, ServerStreamConnection {
     private static final Logger LOGGER = LoggerFactory.getLogger(Connection.class);
-    private static final String US_ASCII = "US-ASCII";
     private static final byte[] ctype = toHTTPBytes("Content-Type: text/xml\r\n");
     private static final byte[] clength = toHTTPBytes("Content-Length: ");
     private static final byte[] newline = toHTTPBytes("\r\n");
@@ -91,12 +91,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
      * HTTP use (as per section 2.2 of RFC 2068).
      */
     private static final byte[] toHTTPBytes(String text) {
-        try {
-            return text.getBytes(US_ASCII);
-        } catch (UnsupportedEncodingException e) {
-            throw new Error(e.getMessage() +
-                    ": HTTP requires US-ASCII encoding");
-        }
+        return text.getBytes(StandardCharsets.US_ASCII);
     }
 
     private final WebServer webServer;
@@ -280,7 +275,7 @@ public class Connection implements ThreadPool.InterruptableTask, ServerStreamCon
                 throw new IOException("HTTP Header too long");
             }
         }
-        return new String(buffer, 0, count, US_ASCII);
+        return new String(buffer, 0, count, StandardCharsets.US_ASCII);
     }
 
     /**

@@ -16,10 +16,12 @@
 
 package org.ros.node.service;
 
+import org.ros.internal.message.Message;
+
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultServiceServerListener<T, S> implements ServiceServerListener<T, S> {
+public class DefaultServiceServerListener<T extends Message, S extends Message> implements ServiceServerListener<T, S> {
 
   @Override
   public void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {

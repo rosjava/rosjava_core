@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
+import org.ros.internal.message.Message;
 import org.ros.internal.message.MessageBufferPool;
 import org.ros.internal.transport.ClientHandshakeListener;
 import org.ros.internal.transport.ConnectionHeader;
@@ -46,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
+final class DefaultServiceClient<T extends Message, S extends Message> implements ServiceClient<T, S> {
 
   private final class HandshakeLatch implements ClientHandshakeListener {
 
@@ -96,7 +97,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   private TcpClient tcpClient;
 
-  public static <S, T> DefaultServiceClient<S, T> newDefault(final GraphName nodeName,
+  public static <S extends Message, T extends Message> DefaultServiceClient<S, T> newDefault(final GraphName nodeName,
       final ServiceDeclaration serviceDeclaration, final MessageSerializer<S> serializer,
       final MessageDeserializer<T> deserializer, final MessageFactory messageFactory,
       final ScheduledExecutorService executorService) {

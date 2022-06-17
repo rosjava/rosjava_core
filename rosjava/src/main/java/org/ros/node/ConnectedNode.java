@@ -17,6 +17,7 @@
 package org.ros.node;
 
 import org.ros.exception.ServiceNotFoundException;
+import org.ros.internal.message.Message;
 import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.namespace.NameResolver;
@@ -65,12 +66,12 @@ public interface ConnectedNode extends Node {
    *          the message data type (e.g. "std_msgs/String")
    * @return a {@link Publisher} for the specified topic
    */
-  <T> Publisher<T> newPublisher(GraphName topicName, String messageType);
+  <T extends Message> Publisher<T> newPublisher(GraphName topicName, String messageType);
 
   /**
    * @see #newPublisher(GraphName, String)
    */
-  <T> Publisher<T> newPublisher(String topicName, String messageType);
+  <T extends Message> Publisher<T> newPublisher(String topicName, String messageType);
 
   /**
    * @param <T>
@@ -81,7 +82,7 @@ public interface ConnectedNode extends Node {
    *          the message data type (e.g. "std_msgs/String")
    * @return a {@link Subscriber} for the specified topic
    */
-  <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType);
+  <T extends Message> Subscriber<T> newSubscriber(GraphName topicName, String messageType);
 
   /**
    * @param <T>
@@ -94,17 +95,17 @@ public interface ConnectedNode extends Node {
    *          the transport hints
    * @return a {@link Subscriber} for the specified topic
    */
-  <T> Subscriber<T> newSubscriber(GraphName topicName, String messageType, TransportHints transportHints);
+  <T extends Message> Subscriber<T> newSubscriber(GraphName topicName, String messageType, TransportHints transportHints);
 
   /**
    * @see #newSubscriber(GraphName, String)
    */
-  <T> Subscriber<T> newSubscriber(String topicName, String messageType);
+  <T extends Message> Subscriber<T> newSubscriber(String topicName, String messageType);
 
   /**
    * @see #newSubscriber(GraphName, String, TransportHints)
    */
-  <T> Subscriber<T> newSubscriber(String topicName, String messageType, TransportHints transportHints);
+  <T extends Message> Subscriber<T> newSubscriber(String topicName, String messageType, TransportHints transportHints);
 
   /**
    * Create a new {@link ServiceServer}.
@@ -117,14 +118,14 @@ public interface ConnectedNode extends Node {
    *          called for every request to build a response
    * @return a {@link ServiceServer}
    */
-  <T, S> ServiceServer<T, S> newServiceServer(GraphName serviceName, String serviceType,
-      ServiceResponseBuilder<T, S> serviceResponseBuilder);
+  <T extends Message, S extends Message> ServiceServer<T , S> newServiceServer(GraphName serviceName, String serviceType,
+                                                               ServiceResponseBuilder<T, S> serviceResponseBuilder);
 
   /**
    * @see ConnectedNode#newServiceServer(GraphName, String,
    *      ServiceResponseBuilder)
    */
-  <T, S> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
+  <T extends Message, S extends Message> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
       ServiceResponseBuilder<T, S> serviceResponseBuilder);
 
   /**
@@ -133,12 +134,12 @@ public interface ConnectedNode extends Node {
    * @return the {@link ServiceServer} with the given name or {@code null} if it
    *         does not exist
    */
-  <T, S> ServiceServer<T, S> getServiceServer(GraphName serviceName);
+  <T extends Message, S extends Message> ServiceServer<T, S> getServiceServer(GraphName serviceName);
 
   /**
    * @see ConnectedNode#getServiceServer(GraphName)
    */
-  <T, S> ServiceServer<T, S> getServiceServer(String serviceName);
+  <T extends Message, S extends Message> ServiceServer<T, S> getServiceServer(String serviceName);
 
   /**
    * @param serviceName
@@ -163,13 +164,13 @@ public interface ConnectedNode extends Node {
    * @throws ServiceNotFoundException
    *           thrown if no matching service could be found
    */
-  <T, S> ServiceClient<T, S> newServiceClient(GraphName serviceName, String serviceType)
+  <T extends Message, S extends Message> ServiceClient<T, S> newServiceClient(GraphName serviceName, String serviceType)
       throws ServiceNotFoundException;
 
   /**
    * @see #newServiceClient(GraphName, String)
    */
-  <T, S> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
+  <T extends Message, S extends Message> ServiceClient<T, S> newServiceClient(String serviceName, String serviceType)
       throws ServiceNotFoundException;
 
   /**

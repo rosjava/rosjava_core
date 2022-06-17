@@ -17,6 +17,7 @@
 package org.ros.node.service;
 
 import org.ros.exception.ServiceException;
+import org.ros.internal.message.Message;
 
 /**
  * Builds a service response given a service request.
@@ -28,7 +29,7 @@ import org.ros.exception.ServiceException;
  * @param <S>
  *          the {@link ServiceServer} returns responses of this type
  */
-public interface ServiceResponseBuilder<T, S> {
+public interface ServiceResponseBuilder<T extends Message, S extends Message> {
 
   /**
    * Builds a service response given a service request.
@@ -39,5 +40,5 @@ public interface ServiceResponseBuilder<T, S> {
    *          the response that will be sent
    * @throws ServiceException
    */
-  void build(T request, S response) throws ServiceException;
+  public void build(T request, S response) throws ServiceException;
 }

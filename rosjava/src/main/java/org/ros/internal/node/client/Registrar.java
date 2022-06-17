@@ -27,12 +27,12 @@ import org.ros.internal.node.response.Response;
 import org.ros.internal.node.server.NodeIdentifier;
 import org.ros.internal.node.server.SlaveServer;
 import org.ros.internal.node.server.master.MasterServer;
-import org.ros.internal.node.service.DefaultServiceServer;
 import org.ros.internal.node.service.ServiceManagerListener;
 import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.TopicParticipantManagerListener;
+import org.ros.node.service.ServiceServer;
 
 import java.net.URI;
 import java.util.Collection;
@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Registrar implements TopicParticipantManagerListener, ServiceManagerListener {
+public final class Registrar implements TopicParticipantManagerListener, ServiceManagerListener {
 
   private static final boolean DEBUG = true;
   private static final Log log = LogFactory.getLog(Registrar.class);
@@ -258,7 +258,7 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
   }
 
   @Override
-  public void onServiceServerAdded(final DefaultServiceServer<?, ?> serviceServer) {
+  public void onServiceServerAdded(final ServiceServer<?, ?> serviceServer) {
     if (DEBUG) {
       log.info("Registering service: " + serviceServer);
     }
@@ -272,9 +272,9 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
           }
         });
         if (success) {
-          serviceServer.signalOnMasterRegistrationSuccess();
+          serviceServer.onMasterRegistrationSuccess();
         } else {
-          serviceServer.signalOnMasterRegistrationFailure();
+          serviceServer.onMasterRegistrationFailure();
         }
         return !success;
       }
@@ -283,14 +283,14 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
       executorService.execute(new Runnable() {
         @Override
         public void run() {
-          serviceServer.signalOnMasterRegistrationFailure();
+          serviceServer.onMasterRegistrationFailure();
         }
       });
     }
   }
 
   @Override
-  public void onServiceServerRemoved(final DefaultServiceServer<?, ?> serviceServer) {
+  public void onServiceServerRemoved(final ServiceServer<?, ?> serviceServer) {
     if (DEBUG) {
       log.info("Unregistering service: " + serviceServer);
     }
@@ -304,9 +304,9 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
           }
         });
         if (success) {
-          serviceServer.signalOnMasterUnregistrationSuccess();
+          serviceServer.onMasterUnregistrationSuccess();
         } else {
-          serviceServer.signalOnMasterUnregistrationFailure();
+          serviceServer.onMasterUnregistrationFailure();
         }
         return !success;
       }
@@ -315,7 +315,7 @@ public class Registrar implements TopicParticipantManagerListener, ServiceManage
       executorService.execute(new Runnable() {
         @Override
         public void run() {
-          serviceServer.signalOnMasterUnregistrationFailure();
+          serviceServer.onMasterUnregistrationFailure();
         }
       });
     }

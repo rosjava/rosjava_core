@@ -16,6 +16,7 @@
 
 package org.ros.node.service;
 
+import org.ros.internal.message.Message;
 import org.ros.namespace.GraphName;
 
 import java.net.URI;
@@ -30,7 +31,7 @@ import java.net.URI;
  * @param <S>
  *          the {@link ServiceServer} returns responses of this type
  */
-public interface ServiceClient<T, S> {
+public interface ServiceClient<T extends Message, S extends Message> {
 
   /**
    * Connects to a {@link ServiceServer}.
