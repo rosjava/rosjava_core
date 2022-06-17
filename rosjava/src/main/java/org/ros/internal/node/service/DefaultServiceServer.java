@@ -17,8 +17,6 @@
 package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.xmlrpc.serializer.XmlRpcConstants;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandler;
@@ -50,7 +48,6 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPublisher.class);
 
-
     private final ServiceDeclaration serviceDeclaration;
     private final ServiceResponseBuilder<T, S> serviceResponseBuilder;
     private final AdvertiseAddress advertiseAddress;
@@ -77,41 +74,38 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
 
     private final class LoggerServiceListener extends DefaultServiceServerListener<T, S> {
         private LoggerServiceListener() {
-
         }
 
         @Override
-        public void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {
+        public final void onMasterRegistrationSuccess(ServiceServer<T, S> registrant) {
             LOGGER.info("Service registered: " + DefaultServiceServer.this);
         }
 
         @Override
-        public void onMasterRegistrationFailure(ServiceServer<T, S> registrant) {
+        public final void onMasterRegistrationFailure(ServiceServer<T, S> registrant) {
             LOGGER.info("Service registration failed: " + DefaultServiceServer.this);
         }
 
         @Override
-        public void onMasterUnregistrationSuccess(ServiceServer<T, S> registrant) {
+        public final void onMasterUnregistrationSuccess(ServiceServer<T, S> registrant) {
             LOGGER.info("Service unregistered: " + DefaultServiceServer.this);
         }
 
         @Override
-        public void onMasterUnregistrationFailure(ServiceServer<T, S> registrant) {
+        public final void onMasterUnregistrationFailure(ServiceServer<T, S> registrant) {
             LOGGER.info("Service unregistration failed: " + DefaultServiceServer.this);
         }
     }
 
-    public final ChannelBuffer finishHandshake(ConnectionHeader incomingConnectionHeader) {
+    public final ChannelBuffer finishHandshake(final ConnectionHeader incomingConnectionHeader) {
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Client handshake header: " + incomingConnectionHeader);
         }
         final ConnectionHeader connectionHeader = toDeclaration().toConnectionHeader();
         final String expectedChecksum = connectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
-        final String incomingChecksum =
-                incomingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
+        final String incomingChecksum = incomingConnectionHeader.getField(ConnectionHeaderFields.MD5_CHECKSUM);
         // TODO(damonkohler): Pull out header field comparison logic.
-        Preconditions.checkState(incomingChecksum.equals(expectedChecksum)
-                || incomingChecksum.equals("*"));
+        Preconditions.checkState(incomingChecksum.equals(expectedChecksum) || "*".equals(incomingChecksum));
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Server handshake header: " + connectionHeader);
         }
@@ -119,26 +113,26 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
     }
 
     @Override
-    public URI getUri() {
+    public final URI getUri() {
         return advertiseAddress.toUri(XmlRpcConstants.ROSRPC);
     }
 
     @Override
-    public GraphName getName() {
-        return serviceDeclaration.getName();
+    public final GraphName getName() {
+        return this.serviceDeclaration.getName();
     }
 
     /**
      * @return a new {@link ServiceDeclaration} with this
      * {@link DefaultServiceServer}'s {@link URI}
      */
-    ServiceDeclaration toDeclaration() {
-        ServiceIdentifier identifier = new ServiceIdentifier(serviceDeclaration.getName(), getUri());
+    final ServiceDeclaration toDeclaration() {
+        final ServiceIdentifier identifier = new ServiceIdentifier(serviceDeclaration.getName(), getUri());
         return new ServiceDeclaration(identifier, new ServiceDescription(serviceDeclaration.getType(),
                 serviceDeclaration.getDefinition(), serviceDeclaration.getMd5Checksum()));
     }
 
-    public ChannelHandler newRequestHandler() {
+    public final ChannelHandler newRequestHandler() {
         return new ServiceRequestHandler<T, S>(serviceDeclaration, serviceResponseBuilder,
                 messageDeserializer, messageSerializer, messageFactory, scheduledExecutorService);
     }
@@ -150,11 +144,11 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      * <p>
      * Each listener is called in a separate thread.
      */
-    public void onMasterRegistrationSuccess() {
+    public final void onMasterRegistrationSuccess() {
         final ServiceServer<T, S> serviceServer = this;
-        listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+        this.listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
             @Override
-            public void run(ServiceServerListener<T, S> listener) {
+            public final void run(ServiceServerListener<T, S> listener) {
                 listener.onMasterRegistrationSuccess(serviceServer);
             }
         });
@@ -167,11 +161,11 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      * <p>
      * Each listener is called in a separate thread.
      */
-    public void onMasterRegistrationFailure() {
+    public final void onMasterRegistrationFailure() {
         final ServiceServer<T, S> serviceServer = this;
-        listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+        this.listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
             @Override
-            public void run(ServiceServerListener<T, S> listener) {
+            public final void run(ServiceServerListener<T, S> listener) {
                 listener.onMasterRegistrationFailure(serviceServer);
             }
         });
@@ -184,11 +178,11 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      * <p>
      * Each listener is called in a separate thread.
      */
-    public void onMasterUnregistrationSuccess() {
+    public final void onMasterUnregistrationSuccess() {
         final ServiceServer<T, S> serviceServer = this;
-        listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+        this.listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
             @Override
-            public void run(ServiceServerListener<T, S> listener) {
+            public final void run(ServiceServerListener<T, S> listener) {
                 listener.onMasterUnregistrationSuccess(serviceServer);
             }
         });
@@ -201,28 +195,28 @@ final class DefaultServiceServer<T extends Message, S extends Message> implement
      * <p>
      * Each listener is called in a separate thread.
      */
-    public void onMasterUnregistrationFailure() {
+    public final void onMasterUnregistrationFailure() {
         final ServiceServer<T, S> serviceServer = this;
-        listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
+        this.listenerGroup.signal(new SignalRunnable<ServiceServerListener<T, S>>() {
             @Override
-            public void run(ServiceServerListener<T, S> listener) {
+            public final void run(ServiceServerListener<T, S> listener) {
                 listener.onMasterUnregistrationFailure(serviceServer);
             }
         });
     }
 
     @Override
-    public void shutdown() {
+    public final void shutdown() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void addListener(ServiceServerListener<T, S> listener) {
-        listenerGroup.add(listener);
+    public final void addListener(ServiceServerListener<T, S> listener) {
+        this.listenerGroup.add(listener);
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return "ServiceServer<" + toDeclaration() + ">";
     }
 }
