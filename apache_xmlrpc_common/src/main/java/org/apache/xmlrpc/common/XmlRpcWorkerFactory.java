@@ -27,14 +27,14 @@ import java.util.List;
 public abstract class XmlRpcWorkerFactory {
 	private final XmlRpcWorker singleton = newWorker();
 	private final XmlRpcController controller;
-	private final List pool = new ArrayList();
+	private final List<XmlRpcWorker> pool = new ArrayList<>();
 	private int numThreads;
 
 	/** Creates a new instance.
 	 * @param pController The client controlling the factory.
 	 */
 	public XmlRpcWorkerFactory(XmlRpcController pController) {
-		controller = pController;
+		this.controller = pController;
 	}
 
 	/** Creates a new worker instance.
@@ -48,7 +48,7 @@ public abstract class XmlRpcWorkerFactory {
 	 * {@link org.apache.xmlrpc.server.XmlRpcServer}.
 	 */
 	public XmlRpcController getController() {
-		return controller;
+		return this.controller;
 	}
 
 	/** Returns a worker for synchronous processing.
@@ -58,18 +58,18 @@ public abstract class XmlRpcWorkerFactory {
 	 * threads is exceeded.
 	 */
 	public synchronized XmlRpcWorker getWorker() throws XmlRpcLoadException {
-		int max = controller.getMaxThreads();
-		if (max > 0  &&  numThreads == max) {
+		int max = this.controller.getMaxThreads();
+		if (max > 0  &&  this.numThreads == max) {
 			throw new XmlRpcLoadException("Maximum number of concurrent requests exceeded: " + max);
 		}
 		if (max == 0) {
-			return singleton;
+			return this.singleton;
 		}
-        ++numThreads;
-		if (pool.size() == 0) {
+        ++this.numThreads;
+		if (this.pool.isEmpty()) {
 			return newWorker();
 		} else {
-			return (XmlRpcWorker) pool.remove(pool.size() - 1);
+			return this.pool.remove(this.pool.size() - 1);
 		}
 	}
 
@@ -78,13 +78,13 @@ public abstract class XmlRpcWorkerFactory {
 	 * @param pWorker The worker being released.
 	 */
 	public synchronized void releaseWorker(XmlRpcWorker pWorker) {
-		--numThreads;
-		int max = controller.getMaxThreads();
-		if (pWorker == singleton) {
+		--this.numThreads;
+		int max = this.controller.getMaxThreads();
+		if (pWorker == this.singleton) {
 			// Do nothing, it's the singleton
 		} else {
-			if (pool.size() < max) {
-				pool.add(pWorker);
+			if (this.pool.size() < max) {
+				this.pool.add(pWorker);
 			}
 		}
 	}
@@ -93,6 +93,6 @@ public abstract class XmlRpcWorkerFactory {
 	 * @return Current number of concurrent requests.
 	 */
 	public synchronized int getCurrentRequests() {
-		return numThreads;
+		return this.numThreads;
 	}
 }
