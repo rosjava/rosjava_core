@@ -16,6 +16,7 @@
 
 package org.ros.node.topic;
 
+import org.ros.internal.message.Message;
 import org.ros.internal.node.topic.TopicParticipant;
 
 import java.util.concurrent.TimeUnit;
@@ -29,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * @param <T>
  *          the {@link Publisher} may only publish messages of this type
  */
-public interface Publisher<T> extends TopicParticipant {
+public interface Publisher<T extends Message> extends TopicParticipant {
 
   /**
    * @see <a
