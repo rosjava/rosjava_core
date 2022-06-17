@@ -16,6 +16,8 @@
 
 package org.ros.concurrent;
 
+import java.util.function.Consumer;
+
 /**
  * Decouples specific listener interfaces from the signaling implementation.
  * 
