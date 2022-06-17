@@ -1,4 +1,24 @@
+# rosjava
 rosjava is the first pure Java implementation of ROS.
+## About [SpyrosKou/rosjava_core](https://github.com/SpyrosKou/rosjava_core) fork
+This fork has the following changes:
+1. **Reduced visibility of API elements** 
+   Access modifiers have been added to reduce the visibility of all API elements (e.g. interfaces, classes and methods). This reduction aims to minimize the number of classes/methods accessible outside the projects packages. This simplifies usage inside an IDE since developers are presented with less autocomplete options, reducing the breadth of API elements that developers/users needs to consider. 
+
+2. **More programmer friendly API**
+   The API is stricter, improving the developer experience and the ease of use. For instance Service Servers, Publishers and Service Clients parameter types now extend org.ros.internal.message.Message indicating what the type parameters should be and benefit from the compiler during compile time.
+
+
+4. **Reduce extensibility of classes & methods**  
+  This fork is assumes usage as a library and reduces inheritance to the minimum. The goal is to allow for inheritance only where intended, simplifying both the usage of the fork and its development. 
+
+
+3. **Update dependencies**  
+   1. Update dependency versions
+   2. Replace [Apache Commons Logging](https://commons.apache.org/proper/commons-logging/) with [SL4J](https://www.slf4j.org/)
+   
+
+4.  **Update Java and Gradle versions used**
 
 From [ROS.org](http://www.ros.org/wiki/): ROS is an open-source, meta-operating
 system for your robot. It provides the services you would expect from an
