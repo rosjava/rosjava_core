@@ -14,7 +14,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
- * under the License.    
+ * under the License.
  */
 package org.apache.xmlrpc.util;
 
@@ -22,41 +22,57 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/** Simple thread pool. A task is executed by obtaining a thread from
+/**
+ * Simple thread pool. A task is executed by obtaining a thread from
  * the pool
  */
-public class ThreadPool {
-	/** The thread pool contains instances of {@link ThreadPool.Task}.
-	 */
-	public interface Task {
-		/** Performs the task.
-		 * @throws Throwable The task failed, and the worker thread won't be used again.
-		 */
-		void run() throws Throwable;
-	}
+public final class ThreadPool {
+    private final ThreadGroup threadGroup;
+    private final int maxSize;
+    private final List<Poolable> waitingThreads = new ArrayList();
+    private final List<Poolable> runningThreads = new ArrayList();
+    private final List<Task> waitingTasks = new ArrayList();
+    private int num;
 
-    /** A task, which may be interrupted, if the pool is shutting down. 
+    /**
+     * The thread pool contains instances of {@link ThreadPool.Task}.
+     */
+    public interface Task {
+        /**
+         * Performs the task.
+         *
+         * @throws Throwable The task failed, and the worker thread won't be used again.
+         */
+        void run() throws Throwable;
+    }
+
+    /**
+     * A task, which may be interrupted, if the pool is shutting down.
      */
     public interface InterruptableTask extends Task {
-        /** Interrupts the task.
+        /**
+         * Interrupts the task.
+         *
          * @throws Throwable Shutting down the task failed.
          */
         void shutdown() throws Throwable;
     }
 
-    private class Poolable {
+    private final class Poolable {
         private volatile boolean shuttingDown;
         private Task task;
-        private Thread thread;
-        Poolable(ThreadGroup pGroup, int pNum) {
-            thread = new Thread(pGroup, pGroup.getName() + "-" + pNum){
-                public void run() {
-                    while (!shuttingDown) {
-                        final Task t = getTask();
-                        if (t == null) {
+        private final Thread thread;
+
+        Poolable(final ThreadGroup pGroup, int pNum) {
+            this.thread = new Thread(pGroup, pGroup.getName() + "-" + pNum) {
+
+                public final void run() {
+                    while (!Poolable.this.shuttingDown) {
+                        final Task task = getTask();
+                        if (task == null) {
                             try {
                                 synchronized (this) {
-                                    if (!shuttingDown  &&  getTask() == null) {
+                                    if (!Poolable.this.shuttingDown && getTask() == null) {
                                         wait();
                                     }
                                 }
@@ -65,7 +81,7 @@ public class ThreadPool {
                             }
                         } else {
                             try {
-                                t.run();
+                                task.run();
                                 resetTask();
                                 repool(Poolable.this);
                             } catch (Throwable e) {
@@ -79,10 +95,11 @@ public class ThreadPool {
             };
             thread.start();
         }
+
         synchronized void shutdown() {
-            shuttingDown = true;
+            this.shuttingDown = true;
             final Task t = getTask();
-            if (t != null  &&  t instanceof InterruptableTask) {
+            if (t != null && t instanceof InterruptableTask) {
                 try {
                     ((InterruptableTask) t).shutdown();
                 } catch (Throwable th) {
@@ -94,140 +111,133 @@ public class ThreadPool {
                 thread.notify();
             }
         }
-        private Task getTask() {
-            return task;
+
+        private final Task getTask() {
+            return this.task;
         }
-        private void resetTask() {
-            task = null;
+
+        private final void resetTask() {
+            this.task = null;
         }
-        void start(Task pTask) {
-            task = pTask;
+
+        final void start(Task pTask) {
+            this.task = pTask;
             synchronized (thread) {
-                thread.notify();
+                this.thread.notify();
             }
         }
     }
 
-	private final ThreadGroup threadGroup;
-	private final int maxSize;
-	private final List waitingThreads = new ArrayList();
-	private final List runningThreads = new ArrayList();
-	private final List waitingTasks = new ArrayList();
-	private int num;
 
+    /**
+     * Creates a new instance.
+     *
+     * @param pMaxSize Maximum number of concurrent threads.
+     * @param pName    Thread group name.
+     */
+    public ThreadPool(int pMaxSize, String pName) {
+        this.maxSize = pMaxSize;
+        this.threadGroup = new ThreadGroup(pName);
+    }
 
-	/** Creates a new instance.
-	 * @param pMaxSize Maximum number of concurrent threads.
-	 * @param pName Thread group name.
-	 */
-	public ThreadPool(int pMaxSize, String pName) {
-		maxSize = pMaxSize;
-		threadGroup = new ThreadGroup(pName);
-	}
+    private final synchronized void remove(final Poolable pPoolable) {
+        this.runningThreads.remove(pPoolable);
+        this.waitingThreads.remove(pPoolable);
+    }
 
-	private synchronized void remove(Poolable pPoolable) {
-        runningThreads.remove(pPoolable);
-        waitingThreads.remove(pPoolable);
-	}
+    final void repool(Poolable pPoolable) {
+        boolean discarding = false;
+        Task task = null;
+        Poolable poolable = null;
+        synchronized (this) {
+            if (runningThreads.remove(pPoolable)) {
+                if (maxSize != 0 && this.runningThreads.size() + this.waitingThreads.size() >= maxSize) {
+                    discarding = true;
+                } else {
+                    waitingThreads.add(pPoolable);
+                    if (waitingTasks.size() > 0) {
+                        task =  this.waitingTasks.remove(this.waitingTasks.size() - 1);
+                        poolable = getPoolable(task, false);
+                    }
+                }
+            } else {
+                discarding = true;
+            }
+            if (discarding) {
+                remove(pPoolable);
+            }
+        }
+        if (poolable != null) {
+            poolable.start(task);
+        }
+        if (discarding) {
+            pPoolable.shutdown();
+        }
+    }
 
-	void repool(Poolable pPoolable) {
-	    boolean discarding = false;
-	    Task task = null;
-	    Poolable poolable = null;
-	    synchronized (this) {
-	        if (runningThreads.remove(pPoolable)) {
-	            if (maxSize != 0  &&  runningThreads.size() + waitingThreads.size() >= maxSize) {
-	                discarding = true;
-	            } else {
-	                waitingThreads.add(pPoolable);
-	                if (waitingTasks.size() > 0) {
-	                    task = (Task) waitingTasks.remove(waitingTasks.size() - 1);
-	                    poolable = getPoolable(task, false);
-	                }
-	            }
-	        } else {
-	            discarding = true;
-	        }
-	        if (discarding) {
-	            remove(pPoolable);
-	        }
-	    }
-	    if (poolable != null) {
-	        poolable.start(task);
-	    }
-	    if (discarding) {
-	        pPoolable.shutdown();
-	    }
-	}
+    /**
+     * Starts a task immediately.
+     *
+     * @param pTask The task being started.
+     *
+     * @return True, if the task could be started immediately. False, if
+     * the maximum number of concurrent tasks was exceeded.
+     */
+    public final boolean startTask(Task pTask) {
+        final Poolable poolable = getPoolable(pTask, false);
+        if (poolable == null) {
+            return false;
+        }
+        poolable.start(pTask);
+        return true;
+    }
 
-	/** Starts a task immediately.
-	 * @param pTask The task being started.
-	 * @return True, if the task could be started immediately. False, if
-	 * the maxmimum number of concurrent tasks was exceeded. If so, you
-	 * might consider to use the {@link #addTask(ThreadPool.Task)} method instead.
-	 */
-	public boolean startTask(Task pTask) {
-	    final Poolable poolable = getPoolable(pTask, false);
-	    if (poolable == null) {
-	        return false;
-	    }
-	    poolable.start(pTask);
-		return true;
-	}
-
-	private synchronized Poolable getPoolable(Task pTask, boolean pQueue) {
-        if (maxSize != 0  &&  runningThreads.size() >= maxSize) {
+    private final synchronized Poolable getPoolable(final Task pTask, final boolean pQueue) {
+        if (this.maxSize != 0 && this.runningThreads.size() >= this.maxSize) {
             if (pQueue) {
-                waitingTasks.add(pTask);
+                this.waitingTasks.add(pTask);
             }
             return null;
         }
-        Poolable poolable;
-        if (waitingThreads.size() > 0) {
-            poolable = (Poolable) waitingThreads.remove(waitingThreads.size()-1);
+        final Poolable poolable;
+        if (!this.waitingThreads.isEmpty()) {
+            poolable = this.waitingThreads.remove(waitingThreads.size() - 1);
         } else {
             poolable = new Poolable(threadGroup, num++);
         }
-        runningThreads.add(poolable);
+        this.runningThreads.add(poolable);
         return poolable;
-	}
-	
-	/** Adds a task for immediate or deferred execution.
-	 * @param pTask The task being added.
-	 * @return True, if the task was started immediately. False, if
-	 * the task will be executed later.
-	 * @deprecated No longer in use.
-	 */
-	@Deprecated
-	public boolean addTask(Task pTask) {
-	    final Poolable poolable = getPoolable(pTask, true);
-	    if (poolable != null) {
-	        poolable.start(pTask);
-	        return true;
-	    }
-	    return false;
-	}
+    }
 
-	/** Closes the pool.
-	 */
-	public synchronized void shutdown() {
-        while (!waitingThreads.isEmpty()) {
-            Poolable poolable = (Poolable) waitingThreads.remove(waitingThreads.size()-1);
+
+    /**
+     * Closes the pool.
+     */
+    public synchronized void shutdown() {
+        for (final Poolable poolable : this.waitingThreads) {
             poolable.shutdown();
         }
-        while (!runningThreads.isEmpty()) {
-            Poolable poolable = (Poolable) runningThreads.remove(runningThreads.size()-1);
+        this.waitingThreads.clear();
+        for (final Poolable poolable : this.runningThreads) {
             poolable.shutdown();
         }
-	}
+        this.runningThreads.clear();
+    }
 
-	/** Returns the maximum number of concurrent threads.
-	 * @return Maximum number of threads.
-	 */
-	public int getMaxThreads() { return maxSize; }
+    /**
+     * Returns the maximum number of concurrent threads.
+     *
+     * @return Maximum number of threads.
+     */
+    public final int getMaxThreads() {
+        return this.maxSize;
+    }
 
-	/** Returns the number of threads, which have actually been created,
+    /**
+     * Returns the number of threads, which have actually been created,
      * as opposed to the number of currently running threads.
-	 */
-    public synchronized int getNumThreads() { return num; }
+     */
+    public final synchronized int getNumThreads() {
+        return this.num;
+    }
 }
