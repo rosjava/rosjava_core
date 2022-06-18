@@ -19,6 +19,14 @@ plugins {
 dependencies {
     api 'org.ros.rosjava_bootstrap:message_generation:[0.3,0.4)'
     api 'org.ros.rosjava_messages:std_msgs:[0.5.9,0.5.11)'
+
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'io.netty:netty:3.5.2.Final'
+//    implementation 'commons-codec:commons-codec:1.15'
+//    implementation 'commons-io:commons-io:2.11.0'
+//    implementation 'commons-pool:commons-pool:1.6'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+
     implementation 'org.slf4j:slf4j-api:1.7.30'
 
     implementation project(':apache_xmlrpc_common')
