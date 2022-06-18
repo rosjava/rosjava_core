@@ -17,10 +17,13 @@
 package org.ros.internal.node;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
+import org.ros.exception.DuplicateServiceException;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
@@ -184,7 +187,7 @@ public class DefaultNode implements ConnectedNode {
             return;
         }
 
-        boolean useSimTime = false;
+        final boolean useSimTime;
         try {
             useSimTime =
                     parameterTree.has(Parameters.USE_SIM_TIME)
@@ -244,7 +247,7 @@ public class DefaultNode implements ConnectedNode {
 
     @SuppressWarnings("unchecked")
     private <T extends Message> MessageDeserializer<T> newServiceResponseDeserializer(String serviceType) {
-        return  this.nodeConfiguration.getMessageSerializationFactory()
+        return this.nodeConfiguration.getMessageSerializationFactory()
                 .newServiceResponseDeserializer(serviceType);
     }
 
@@ -265,8 +268,7 @@ public class DefaultNode implements ConnectedNode {
         final GraphName resolvedTopicName = resolveName(topicName);
         final TopicDescription topicDescription =
                 this.nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
-        final TopicDeclaration topicDeclaration =
-                TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription, null);
+        final TopicDeclaration topicDeclaration = TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription, null);
         final org.ros.message.MessageSerializer<T> serializer = newMessageSerializer(messageType);
         return this.publisherFactory.newOrExisting(topicDeclaration, serializer);
     }
@@ -284,10 +286,8 @@ public class DefaultNode implements ConnectedNode {
     @Override
     public <T extends Message> Subscriber<T> newSubscriber(GraphName topicName, String messageType, TransportHints transportHints) {
         final GraphName resolvedTopicName = resolveName(topicName);
-        final TopicDescription topicDescription =
-                this.nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
-        final TopicDeclaration topicDeclaration =
-                TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription, transportHints);
+        final TopicDescription topicDescription = this.nodeConfiguration.getTopicDescriptionFactory().newFromType(messageType);
+        final TopicDeclaration topicDeclaration = TopicDeclaration.newFromTopicName(resolvedTopicName, topicDescription, transportHints);
         final MessageDeserializer<T> deserializer = newMessageDeserializer(messageType);
         final Subscriber<T> subscriber = this.subscriberFactory.newOrExisting(topicDeclaration, deserializer);
         return subscriber;
@@ -305,8 +305,17 @@ public class DefaultNode implements ConnectedNode {
 
     @Override
     public <T extends Message, S extends Message> ServiceServer<T, S> newServiceServer(GraphName serviceName, String serviceType,
-                                                                       ServiceResponseBuilder<T, S> responseBuilder) {
+                                                                                       ServiceResponseBuilder<T, S> responseBuilder) {
+        Preconditions.checkNotNull(responseBuilder, "ResponseBuilder should not be null");
+        Preconditions.checkNotNull(serviceName, "serviceName should not be null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(serviceType), "serviceType should not be blank");
+
+
         final GraphName resolvedServiceName = resolveName(serviceName);
+//        final URI uri = lookupServiceUri(resolvedServiceName);
+//        if (uri != null) {
+//            throw new DuplicateServiceException("Service " + resolvedServiceName + " is already registered with URI: " + uri);
+//        }
         // TODO(damonkohler): It's rather non-obvious that the URI will be
         // created later on the fly.
         final ServiceIdentifier identifier = new ServiceIdentifier(resolvedServiceName, null);
@@ -321,13 +330,15 @@ public class DefaultNode implements ConnectedNode {
 
     @Override
     public <T extends Message, S extends Message> ServiceServer<T, S> newServiceServer(String serviceName, String serviceType,
-                                                       ServiceResponseBuilder<T, S> responseBuilder) {
+                                                                                       ServiceResponseBuilder<T, S> responseBuilder) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(serviceName), "serviceName should not be blank");
+
         return newServiceServer(GraphName.of(serviceName), serviceType, responseBuilder);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T  extends Message, S extends Message> ServiceServer<T, S> getServiceServer(GraphName serviceName) {
+    public <T extends Message, S extends Message> ServiceServer<T, S> getServiceServer(GraphName serviceName) {
         return (ServiceServer<T, S>) serviceManager.getServer(serviceName);
     }
 
