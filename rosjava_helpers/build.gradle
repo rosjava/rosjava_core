@@ -1,5 +1,6 @@
 dependencies {
     implementation project(':rosjava')
+    implementation 'com.google.guava:guava:31.1-jre'
     implementation 'org.yaml:snakeyaml:1.30'
     testImplementation 'junit:junit:4.8.2'
     testImplementation project(':rosjava').sourceSets.test.output

@@ -29,6 +29,7 @@ subprojects {
     targetCompatibility = JavaVersion.VERSION_17
 
     repositories{
+      mavenLocal()
       mavenCentral()
       jcenter()
       maven {
