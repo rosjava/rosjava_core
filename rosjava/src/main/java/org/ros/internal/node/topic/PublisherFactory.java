@@ -65,12 +65,12 @@ public class PublisherFactory {
   @SuppressWarnings("unchecked")
   public <T extends Message> Publisher<T> newOrExisting(TopicDeclaration topicDeclaration,
                                                         MessageSerializer<T> messageSerializer) {
-    GraphName topicName = topicDeclaration.getName();
+    final GraphName topicName = topicDeclaration.getName();
     synchronized (mutex) {
-      if (topicParticipantManager.hasPublisher(topicName)) {
-        return (DefaultPublisher<T>) topicParticipantManager.getPublisher(topicName);
+      if (this.topicParticipantManager.hasPublisher(topicName)) {
+        return (DefaultPublisher<T>) this.topicParticipantManager.getPublisher(topicName);
       } else {
-        DefaultPublisher<T> publisher =
+        final DefaultPublisher<T> publisher =
             new DefaultPublisher<T>(nodeIdentifier, topicDeclaration, messageSerializer,
                 messageFactory, executorService);
         publisher.addListener(new DefaultPublisherListener<T>() {

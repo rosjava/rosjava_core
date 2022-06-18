@@ -25,7 +25,7 @@ import java.net.URI;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class ServiceIdentifier {
+public final class ServiceIdentifier {
 
   private final GraphName name;
   private final URI uri;

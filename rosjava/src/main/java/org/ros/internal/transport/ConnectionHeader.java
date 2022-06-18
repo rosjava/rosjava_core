@@ -18,9 +18,6 @@ package org.ros.internal.transport;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.MessageBuffers;

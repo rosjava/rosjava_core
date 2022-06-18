@@ -245,11 +245,11 @@ public class MasterRegistrationManagerImpl {
           serviceUri, nodeName, nodeSlaveUri));
     }
 
-    NodeRegistrationInfo node = obtainNodeRegistrationInfo(nodeName, nodeSlaveUri);
+    final NodeRegistrationInfo node = obtainNodeRegistrationInfo(nodeName, nodeSlaveUri);
 
-    ServiceRegistrationInfo service = services.get(serviceName);
+     ServiceRegistrationInfo service = services.get(serviceName);
     if (service != null) {
-      NodeRegistrationInfo previousServiceNode = service.getNode();
+      final NodeRegistrationInfo previousServiceNode = service.getNode();
       if (previousServiceNode == node) {
         // If node is the same, no need to do anything
         if (LOGGER.isWarnEnabled()) {
@@ -452,15 +452,15 @@ public class MasterRegistrationManagerImpl {
    *          the node being replaced
    */
   private void cleanupNode(NodeRegistrationInfo node) {
-    for (TopicRegistrationInfo topic : node.getPublishers()) {
+    for (final TopicRegistrationInfo topic : node.getPublishers()) {
       topic.removePublisher(node);
     }
 
-    for (TopicRegistrationInfo topic : node.getSubscribers()) {
+    for (final TopicRegistrationInfo topic : node.getSubscribers()) {
       topic.removeSubscriber(node);
     }
 
-    for (ServiceRegistrationInfo service : node.getServices()) {
+    for (final ServiceRegistrationInfo service : node.getServices()) {
       services.remove(service.getServiceName());
     }
   }

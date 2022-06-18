@@ -76,7 +76,7 @@ public class ServiceFactory {
     final GraphName name = serviceDeclaration.getName();
 
     synchronized (this.mutex) {
-      if (serviceManager.hasServer(name)) {
+      if (this.serviceManager.hasServer(name)) {
         throw new DuplicateServiceException(String.format("ServiceServer %s already exists.", name));
       } else {
        final DefaultServiceServer<T, S> serviceServer =
