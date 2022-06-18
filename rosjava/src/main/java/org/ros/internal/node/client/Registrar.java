@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -33,6 +33,7 @@ import org.ros.internal.node.topic.DefaultPublisher;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.internal.node.topic.TopicParticipantManagerListener;
+import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Manages topic, and service registrations of a {@link SlaveServer} with the
  * {@link MasterServer}.
- * 
+ *
  * @author kwc@willowgarage.com (Ken Conley)
  * @author damonkohler@google.com (Damon Kohler)
  */
@@ -88,7 +89,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
    * Failed registration actions are retried periodically until they succeed.
    * This method adjusts the delay between successive retry attempts for any
    * particular registration action.
-   * 
+   *
    * @param delay
    *          the delay in units of {@code unit} between retries
    * @param unit
@@ -258,35 +259,24 @@ public final class Registrar implements TopicParticipantManagerListener, Service
     }
   }
 
+
+
   @Override
   public void onServiceServerAdded(final ServiceServer<?, ?> serviceServer) {
     if (DEBUG) {
       LOGGER.info("Registering service: " + serviceServer);
     }
-    boolean submitted = submit(new Callable<Boolean>() {
-      @Override
-      public Boolean call() throws Exception {
-        boolean success = callMaster(new Callable<Response<Void>>() {
-          @Override
-          public Response<Void> call() throws Exception {
-            return masterClient.registerService(nodeIdentifier, serviceServer);
-          }
-        });
-        if (success) {
-          serviceServer.onMasterRegistrationSuccess();
-        } else {
-          serviceServer.onMasterRegistrationFailure();
-        }
-        return !success;
+    boolean submitted = submit(() -> {
+      boolean success = callMaster(() -> masterClient.registerService(nodeIdentifier, serviceServer));
+      if (success) {
+        serviceServer.onMasterRegistrationSuccess();
+      } else {
+        serviceServer.onMasterRegistrationFailure();
       }
+      return !success;
     });
     if (!submitted) {
-      executorService.execute(new Runnable() {
-        @Override
-        public void run() {
-          serviceServer.onMasterRegistrationFailure();
-        }
-      });
+      executorService.execute(() -> serviceServer.onMasterRegistrationFailure());
     }
   }
 
@@ -325,7 +315,7 @@ public final class Registrar implements TopicParticipantManagerListener, Service
   /**
    * Starts the {@link Registrar} for the {@link SlaveServer} identified by the
    * given {@link NodeIdentifier}.
-   * 
+   *
    * @param nodeIdentifier
    *          the {@link NodeIdentifier} for the {@link SlaveServer} this
    *          {@link Registrar} is responsible for
@@ -339,12 +329,12 @@ public final class Registrar implements TopicParticipantManagerListener, Service
 
   /**
    * Shuts down the {@link Registrar}.
-   * 
+   *
    * <p>
    * No further registration requests will be accepted. All queued registration
    * jobs have up to {@link #SHUTDOWN_TIMEOUT} {@link #SHUTDOWN_TIMEOUT_UNITS}
    * to complete before being canceled.
-   * 
+   *
    * <p>
    * Calling {@link #shutdown()} more than once has no effect.
    */
