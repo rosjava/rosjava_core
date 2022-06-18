@@ -18,6 +18,7 @@ plugins{
 }
 dependencies {
   api 'org.ros.rosjava_messages:geometry_msgs:[1.12,1.13)'
+  implementation 'com.google.guava:guava:31.1-jre'
   implementation project(':rosjava')
   testImplementation 'junit:junit:4.8.2'
 }

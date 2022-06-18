@@ -20,7 +20,7 @@ import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.NodeMain;
-import org.ros.node.service.ServiceResponseBuilder;
+import org.ros.node.service.*;
 import org.ros.node.service.ServiceServer;
 
 /**
@@ -35,15 +35,12 @@ public class Server extends AbstractNodeMain {
     return GraphName.of("rosjava_tutorial_services/server");
   }
 
+
+    private final void createResponse(final rosjava_test_msgs.AddTwoIntsRequest request,final  rosjava_test_msgs.AddTwoIntsResponse response) {
+        response.setSum(request.getA() + request.getB());
+    }
   @Override
   public void onStart(ConnectedNode connectedNode) {
-    connectedNode.newServiceServer("add_two_ints", rosjava_test_msgs.AddTwoInts._TYPE,
-        new ServiceResponseBuilder<rosjava_test_msgs.AddTwoIntsRequest, rosjava_test_msgs.AddTwoIntsResponse>() {
-          @Override
-          public void
-              build(rosjava_test_msgs.AddTwoIntsRequest request, rosjava_test_msgs.AddTwoIntsResponse response) {
-            response.setSum(request.getA() + request.getB());
-          }
-        });
+    connectedNode.newServiceServer("add_two_ints", rosjava_test_msgs.AddTwoInts._TYPE,this::createResponse);
   }
 }
