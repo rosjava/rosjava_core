@@ -23,6 +23,9 @@ import org.ros.internal.message.Message;
 import org.ros.namespace.GraphName;
 import org.ros.node.service.ServiceClient;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 /**
  * A {@link NodeMain} which provides a service client
  *
@@ -30,6 +33,7 @@ import org.ros.node.service.ServiceClient;
  */
 public class ServiceClientNode<T extends Message, S extends Message> extends AbstractNodeMain {
     private final GraphName graphName;
+    private CountDownLatch countDownLatch = new CountDownLatch(1);
 
     /**
      * Getter for serviceClient
@@ -60,6 +64,7 @@ public class ServiceClientNode<T extends Message, S extends Message> extends Abs
         } catch (final ServiceNotFoundException exception) {
             throw new RuntimeException(exception);
         }
+        this.countDownLatch.countDown();
     }
 
     @Override
@@ -71,6 +76,35 @@ public class ServiceClientNode<T extends Message, S extends Message> extends Abs
             }
             this.serviceClient = null;
         }
+    }
+
+    /**
+     * Awaits for the Node to start.
+     * The thread however can be interrupted or it can return if the Node has shutdown.
+     *
+     * @return true if the Node is started and the service client is connected
+     *
+     * @throws InterruptedException
+     */
+    public boolean awaitConnection() throws InterruptedException {
+        this.countDownLatch.await();
+        return this.serviceClient != null && this.serviceClient.isConnected();
+    }
+
+    /**
+     * Awaits for the Node to start.
+     * The thread however can be interrupted or it can return if the Node has shutdown.
+     *
+     * @param time
+     * @param unit
+     *
+     * @return true if the Node is started and the service client is connected
+     *
+     * @throws InterruptedException
+     */
+    public boolean awaitConnection(final long time, final TimeUnit unit) throws InterruptedException {
+        return this.countDownLatch.await(time, unit) &&
+                this.serviceClient != null && this.serviceClient.isConnected();
     }
 
     @Override
