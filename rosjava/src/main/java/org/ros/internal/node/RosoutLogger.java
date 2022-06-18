@@ -17,7 +17,7 @@
 package org.ros.internal.node;
 
 import com.google.common.base.Preconditions;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ros.Topics;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
@@ -64,7 +64,7 @@ final class RosoutLogger implements org.ros.node.RosLog {
     /**
      * Starts logging connected to ROS, if usePublisher is not null it is applied
      *
-     * @param defaultNode
+     * @param connectedNode
      * @param usePublisher
      */
     RosoutLogger(final ConnectedNode connectedNode, final Consumer<Publisher<Log>> usePublisher) {
