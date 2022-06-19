@@ -132,8 +132,12 @@ public class MessageQueueIntegrationTest {
 
   @After
   public void tearDown() {
-    outgoingMessageQueue.shutdown();
-    executorService.shutdown();
+    if(this.outgoingMessageQueue!=null){
+      this.outgoingMessageQueue.shutdown();
+    }
+    if(this.executorService!=null) {
+      executorService.shutdown();
+    }
   }
 
   private void startRepeatingPublisher() {
