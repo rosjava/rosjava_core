@@ -28,6 +28,7 @@ import org.jboss.netty.channel.group.ChannelGroupFutureListener;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.CircularBlockingDeque;
+import org.ros.internal.message.Message;
 import org.ros.internal.message.MessageBufferPool;
 import org.ros.internal.message.MessageBuffers;
 import org.ros.message.MessageSerializer;
@@ -39,7 +40,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class OutgoingMessageQueue<T> {
+public class OutgoingMessageQueue<T extends Message> {
 
   private static final boolean DEBUG = false;
   private static final Logger LOGGER = LoggerFactory.getLogger(OutgoingMessageQueue.class);
