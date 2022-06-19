@@ -15,19 +15,20 @@
  */
 plugins {
     id 'java-library'
+    id 'application'
 }
 dependencies {
-    api 'org.ros.rosjava_bootstrap:message_generation:[0.3,0.4)'
+    api 'org.ros.rosjava_bootstrap:message_generation:noetic-0.1'
     api 'org.ros.rosjava_messages:std_msgs:[0.5.9,0.5.11)'
 
     implementation 'com.google.guava:guava:31.1-jre'
-    implementation 'io.netty:netty:3.5.2.Final'
+    implementation 'io.netty:netty:3.10.6.Final'
 //    implementation 'commons-codec:commons-codec:1.15'
 //    implementation 'commons-io:commons-io:2.11.0'
 //    implementation 'commons-pool:commons-pool:1.6'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
-    implementation 'org.slf4j:slf4j-api:1.7.30'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
 
     implementation project(':apache_xmlrpc_common')
     implementation project(':apache_xmlrpc_server')
@@ -42,10 +43,10 @@ dependencies {
 
     testImplementation 'org.ros.rosjava_messages:nav_msgs:[1.12,1.13)'
     testImplementation 'org.ros.rosjava_messages:rosjava_test_msgs:0.3.0'
-    testImplementation 'junit:junit:4.8.2'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-all:1.10.19'
-    testImplementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.16.0'
-    testImplementation 'org.apache.logging.log4j:log4j-core:2.16.0'
+    testImplementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.2'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.17.2'
 }
 
 jar {
@@ -55,5 +56,9 @@ jar {
 //    instruction 'Export-Package', '!org.ros.internal.*, org.ros.*'
 //    instruction 'Private-Package', 'org.ros.internal.*'
     }
+}
+
+repositories {
+    mavenCentral()
 }
 
