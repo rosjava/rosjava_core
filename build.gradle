@@ -33,7 +33,8 @@ subprojects {
       mavenCentral()
       jcenter()
       maven {
-        url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
+        url "https://github.com/SpyrosKou/rosjava_mvn_repo/raw/noetic"
+//        url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
       }
     }
   }
