@@ -76,7 +76,7 @@ public class NodeConfiguration {
   private List<File> rosPackagePath;
   private GraphName nodeName;
   private TopicDescriptionFactory topicDescriptionFactory;
-  private MessageFactory topicMessageFactory;
+  private MessageFactory defaultMessageFactory;
   private ServiceDescriptionFactory serviceDescriptionFactory;
   private MessageFactory serviceRequestMessageFactory;
   private MessageFactory serviceResponseMessageFactory;
@@ -101,7 +101,7 @@ public class NodeConfiguration {
     copy.rosPackagePath = nodeConfiguration.rosPackagePath;
     copy.nodeName = nodeConfiguration.nodeName;
     copy.topicDescriptionFactory = nodeConfiguration.topicDescriptionFactory;
-    copy.topicMessageFactory = nodeConfiguration.topicMessageFactory;
+    copy.defaultMessageFactory = nodeConfiguration.defaultMessageFactory;
     copy.serviceDescriptionFactory = nodeConfiguration.serviceDescriptionFactory;
     copy.serviceRequestMessageFactory = nodeConfiguration.serviceRequestMessageFactory;
     copy.serviceResponseMessageFactory = nodeConfiguration.serviceResponseMessageFactory;
@@ -182,7 +182,7 @@ public class NodeConfiguration {
   private NodeConfiguration() {
     MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
     setTopicDescriptionFactory(new TopicDescriptionFactory(messageDefinitionProvider));
-    setTopicMessageFactory(new DefaultMessageFactory(messageDefinitionProvider));
+    setDefaultMessageFactory(new DefaultMessageFactory(messageDefinitionProvider));
     setServiceDescriptionFactory(new ServiceDescriptionFactory(messageDefinitionProvider));
     setServiceRequestMessageFactory(new ServiceRequestMessageFactory(messageDefinitionProvider));
     setServiceResponseMessageFactory(new ServiceResponseMessageFactory(messageDefinitionProvider));
@@ -359,17 +359,17 @@ public class NodeConfiguration {
   }
 
   /**
-   * @param topicMessageFactory
+   * @param defaultMessageFactory
    *          the {@link MessageFactory} for the {@link Node}
    * @return this {@link NodeConfiguration}
    */
-  public NodeConfiguration setTopicMessageFactory(MessageFactory topicMessageFactory) {
-    this.topicMessageFactory = topicMessageFactory;
+  public NodeConfiguration setDefaultMessageFactory(MessageFactory defaultMessageFactory) {
+    this.defaultMessageFactory = defaultMessageFactory;
     return this;
   }
 
-  public MessageFactory getTopicMessageFactory() {
-    return topicMessageFactory;
+  public MessageFactory getDefaultMessageFactory() {
+    return defaultMessageFactory;
   }
 
   /**

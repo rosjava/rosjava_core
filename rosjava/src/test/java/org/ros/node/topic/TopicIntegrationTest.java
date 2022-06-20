@@ -23,8 +23,8 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import org.ros.RosTest;
 import org.ros.concurrent.CancellableLoop;
+import org.ros.internal.message.DefaultMessageFactory;
 import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
-import org.ros.internal.message.topic.TopicMessageFactory;
 import org.ros.internal.node.topic.DefaultSubscriber;
 import org.ros.internal.node.topic.PublisherIdentifier;
 import org.ros.message.MessageDefinitionProvider;
@@ -50,8 +50,8 @@ public class TopicIntegrationTest extends RosTest {
 
   public TopicIntegrationTest() {
     MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
-    TopicMessageFactory topicMessageFactory = new TopicMessageFactory(messageDefinitionProvider);
-    expectedMessage = topicMessageFactory.newFromType(std_msgs.String._TYPE);
+    DefaultMessageFactory defaultMessageFactory = new DefaultMessageFactory(messageDefinitionProvider);
+    expectedMessage = defaultMessageFactory.newFromType(std_msgs.String._TYPE);
     expectedMessage.setData("Would you like to play a game?");
   }
 
@@ -216,7 +216,7 @@ public class TopicIntegrationTest extends RosTest {
           @Override
           public void loop() throws InterruptedException {
             rosjava_test_msgs.TestHeader message =
-                connectedNode.getTopicMessageFactory().newFromType(rosjava_test_msgs.TestHeader._TYPE);
+                connectedNode.getDefaultMessageFactory().newFromType(rosjava_test_msgs.TestHeader._TYPE);
             message.getHeader().setStamp(connectedNode.getCurrentTime());
             publisher.publish(message);
             // There needs to be some time between messages in order to

@@ -37,10 +37,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.internal.message.DefaultMessageDeserializer;
+import org.ros.internal.message.DefaultMessageFactory;
 import org.ros.internal.message.DefaultMessageSerializer;
 import org.ros.internal.message.Message;
 import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
-import org.ros.internal.message.topic.TopicMessageFactory;
 import org.ros.internal.node.service.ServiceManager;
 import org.ros.internal.node.topic.TopicParticipantManager;
 import org.ros.internal.transport.queue.IncomingMessageQueue;
@@ -113,17 +113,17 @@ public class MessageQueueIntegrationTest {
   public void setup() {
     executorService = Executors.newCachedThreadPool();
     MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
-    TopicMessageFactory topicMessageFactory = new TopicMessageFactory(messageDefinitionProvider);
-    expectedMessage = topicMessageFactory.newFromType(std_msgs.String._TYPE);
+    final DefaultMessageFactory defaultMessageFactory = new DefaultMessageFactory(messageDefinitionProvider);
+    expectedMessage = defaultMessageFactory.newFromType(std_msgs.String._TYPE);
     expectedMessage.setData("Would you like to play a game?");
     outgoingMessageQueue =
         new OutgoingMessageQueue<Message>(new DefaultMessageSerializer(), executorService);
     firstIncomingMessageQueue =
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
-            MessageIdentifier.of(std_msgs.String._TYPE), topicMessageFactory), executorService);
+            MessageIdentifier.of(std_msgs.String._TYPE), defaultMessageFactory), executorService);
     secondIncomingMessageQueue =
         new IncomingMessageQueue<std_msgs.String>(new DefaultMessageDeserializer<std_msgs.String>(
-            MessageIdentifier.of(std_msgs.String._TYPE), topicMessageFactory), executorService);
+            MessageIdentifier.of(std_msgs.String._TYPE), defaultMessageFactory), executorService);
     firstTcpClientManager = new TcpClientManager(executorService);
     firstTcpClientManager.addNamedChannelHandler(firstIncomingMessageQueue.getMessageReceiver());
     secondTcpClientManager = new TcpClientManager(executorService);

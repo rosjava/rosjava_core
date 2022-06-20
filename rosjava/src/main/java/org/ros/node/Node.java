@@ -84,7 +84,7 @@ public interface Node {
   /**
    * @return the {@link MessageFactory} used by this node
    */
-  MessageFactory getTopicMessageFactory();
+  MessageFactory getDefaultMessageFactory();
 
   /**
    * @return the {@link MessageFactory} used by this node for service responses

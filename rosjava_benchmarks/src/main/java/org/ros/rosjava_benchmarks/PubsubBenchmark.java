@@ -66,7 +66,7 @@ public class PubsubBenchmark extends AbstractNodeMain {
     tfPublisher = connectedNode.newPublisher("tf", tf2_msgs.TFMessage._TYPE);
     final tf2_msgs.TFMessage tfMessage = tfPublisher.newMessage();
     geometry_msgs.TransformStamped transformStamped =
-        connectedNode.getTopicMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
+        connectedNode.getDefaultMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
     tfMessage.getTransforms().add(transformStamped);
     connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override

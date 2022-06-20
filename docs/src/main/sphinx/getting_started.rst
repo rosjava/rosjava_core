@@ -266,7 +266,7 @@ the underlying message implementation to change in the future. ::
 
   ...
 
-  PointCloud2 msg = node.getTopicMessageFactory()
+  PointCloud2 msg = node.getDefaultMessageFactory()
       .newMessage(sensor_msgs.PointCloud._TYPE);
 
 If you want to use messages that you define, whether they are officially released packages or your

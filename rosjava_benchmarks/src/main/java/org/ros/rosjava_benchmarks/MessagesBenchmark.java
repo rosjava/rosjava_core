@@ -53,7 +53,7 @@ public class MessagesBenchmark extends AbstractNodeMain {
       @Override
       protected void loop() throws InterruptedException {
         geometry_msgs.TransformStamped message =
-            connectedNode.getTopicMessageFactory()
+            connectedNode.getDefaultMessageFactory()
                 .newFromType(geometry_msgs.TransformStamped._TYPE);
         message.getHeader().setFrameId("world");
         message.setChildFrameId("turtle");

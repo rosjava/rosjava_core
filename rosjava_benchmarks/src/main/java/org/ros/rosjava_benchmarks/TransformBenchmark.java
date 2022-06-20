@@ -51,11 +51,11 @@ public class TransformBenchmark extends AbstractNodeMain {
   @Override
   public void onStart(final ConnectedNode connectedNode) {
     final geometry_msgs.TransformStamped turtle1 =
-        connectedNode.getTopicMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
+        connectedNode.getDefaultMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
     turtle1.getHeader().setFrameId("world");
     turtle1.setChildFrameId("turtle1");
     final geometry_msgs.TransformStamped turtle2 =
-        connectedNode.getTopicMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
+        connectedNode.getDefaultMessageFactory().newFromType(geometry_msgs.TransformStamped._TYPE);
     turtle2.getHeader().setFrameId("world");
     turtle2.setChildFrameId("turtle2");
     final FrameTransformTree frameTransformTree = new FrameTransformTree();
