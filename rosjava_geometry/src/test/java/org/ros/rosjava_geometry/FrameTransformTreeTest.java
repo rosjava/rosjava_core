@@ -19,6 +19,7 @@ package org.ros.rosjava_geometry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.internal.message.DefaultMessageFactory;
@@ -39,15 +40,21 @@ public class FrameTransformTreeTest {
 
   @Before
   public void before() {
-    frameTransformTree = new FrameTransformTree();
-    messageDefinitionProvider = new MessageDefinitionReflectionProvider();
-    messageFactory = new DefaultMessageFactory(messageDefinitionProvider);
+    this.frameTransformTree = new FrameTransformTree();
+    this.messageDefinitionProvider = new MessageDefinitionReflectionProvider();
+    this.messageFactory = new DefaultMessageFactory(messageDefinitionProvider);
+  }
+
+  @After
+  public void after(){
+     this.frameTransformTree = null;
+    this.messageDefinitionProvider = null;
+    this.messageFactory = null;
   }
 
   @Test
   public void testUpdateAndGet() {
-    FrameTransform frameTransform = new FrameTransform(Transform.identity(),
-        GraphName.of("foo"), GraphName.of("bar"), new Time());
+    final FrameTransform frameTransform = new FrameTransform(Transform.identity(),GraphName.of("foo"), GraphName.of("bar"), new Time());
     frameTransformTree.update(frameTransform);
     assertEquals(frameTransform, frameTransformTree.get("foo"));
   }
