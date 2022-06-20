@@ -23,7 +23,6 @@ import org.ros.Parameters;
 import org.ros.concurrent.CancellableLoop;
 import org.ros.concurrent.ListenerGroup;
 import org.ros.concurrent.SignalRunnable;
-import org.ros.exception.DuplicateServiceException;
 import org.ros.exception.RemoteException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
@@ -146,7 +145,7 @@ public class DefaultNode implements ConnectedNode {
 
         this.publisherFactory =
                 new PublisherFactory(nodeIdentifier, this.topicParticipantManager,
-                        nodeConfiguration.getDefaultMessageFactory(), scheduledExecutorService);
+                        nodeConfiguration.getMessageFactory(), scheduledExecutorService);
         this.subscriberFactory =
                 new SubscriberFactory(nodeIdentifier, this.topicParticipantManager, scheduledExecutorService);
         this.serviceFactory =
@@ -473,7 +472,7 @@ public class DefaultNode implements ConnectedNode {
 
     @Override
     public MessageFactory getDefaultMessageFactory() {
-        return this.nodeConfiguration.getDefaultMessageFactory();
+        return this.nodeConfiguration.getMessageFactory();
     }
 
     @Override

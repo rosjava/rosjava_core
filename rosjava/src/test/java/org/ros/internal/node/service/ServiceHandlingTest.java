@@ -15,7 +15,7 @@ import org.ros.node.service.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+
 import org.ros.node.Node;
 import org.ros.node.NodeConfiguration;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class ServiceHandlingTest extends RosTest {
      */
     @Test public void testServiceResponeOrder() throws Exception {
         final NodeConfiguration secondConfig = NodeConfiguration.newPrivate(rosCore.getUri());
-        final MessageFactory messageFactory = secondConfig.getTopicMessageFactory();
+        final MessageFactory messageFactory = secondConfig.getMessageFactory();
         final CountDownLatch countDownLatch = new CountDownLatch(100);
         final String SERVICE_NAME = "test_service";
         final int NUM_THREADS = 10;
