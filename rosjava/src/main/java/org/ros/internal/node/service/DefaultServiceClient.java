@@ -51,44 +51,6 @@ import java.util.concurrent.TimeUnit;
  * @author damonkohler@google.com (Damon Kohler)
  */
 final class DefaultServiceClient<T extends Message, S extends Message> implements ServiceClient<T, S> {
-
-  private final class HandshakeLatch implements ClientHandshakeListener {
-
-    private CountDownLatch latch;
-    private boolean success;
-    private String errorMessage;
-
-    @Override
-    public void onSuccess(final ConnectionHeader outgoingConnectionHeader,
-        final ConnectionHeader incomingConnectionHeader) {
-      success = true;
-      latch.countDown();
-    }
-
-    @Override
-    public void
-    onFailure(final ConnectionHeader outgoingConnectionHeader, final String errorMessage) {
-      this.errorMessage = errorMessage;
-      success = false;
-      latch.countDown();
-    }
-
-    public boolean await(final long timeout, final TimeUnit unit) throws InterruptedException {
-      latch.await(timeout, unit);
-      return success;
-    }
-
-    public String getErrorMessage() {
-      return errorMessage;
-    }
-
-    public void reset() {
-      latch = new CountDownLatch(1);
-      success = false;
-      errorMessage = null;
-    }
-  }
-
   private final ServiceDeclaration serviceDeclaration;
   private final MessageSerializer<T> serializer;
   private final MessageFactory messageFactory;
@@ -97,10 +59,46 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
   private final ConnectionHeader connectionHeader;
   private final TcpClientManager tcpClientManager;
   private final HandshakeLatch handshakeLatch;
-
   private TcpClient tcpClient;
+  private final class HandshakeLatch implements ClientHandshakeListener {
 
-  public static <S extends Message, T extends Message> DefaultServiceClient<S, T> newDefault(final GraphName nodeName,
+  private CountDownLatch latch;
+  private boolean success;
+  private String errorMessage;
+
+    @Override
+    public final void onSuccess(final ConnectionHeader outgoingConnectionHeader,
+        final ConnectionHeader incomingConnectionHeader) {
+      this.success = true;
+      this.latch.countDown();
+    }
+
+    @Override
+    public final void onFailure(final ConnectionHeader outgoingConnectionHeader, final String errorMessage) {
+      this.errorMessage = errorMessage;
+      this.success = false;
+      this.latch.countDown();
+    }
+
+    final boolean await(final long timeout, final TimeUnit unit) throws InterruptedException {
+      this.latch.await(timeout, unit);
+      return success;
+    }
+
+    final String getErrorMessage() {
+      return this.errorMessage;
+    }
+
+    final void reset() {
+      this.latch = new CountDownLatch(1);
+      this.success = false;
+      this.errorMessage = null;
+    }
+  }
+
+
+
+   final static <S extends Message, T extends Message> DefaultServiceClient<S, T> newDefault(final GraphName nodeName,
       final ServiceDeclaration serviceDeclaration, final MessageSerializer<S> serializer,
       final MessageDeserializer<T> deserializer, final MessageFactory messageFactory,
       final ScheduledExecutorService executorService) {
@@ -115,33 +113,33 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
     this.serviceDeclaration = serviceDeclaration;
     this.serializer = serializer;
     this.messageFactory = messageFactory;
-    messageBufferPool = new MessageBufferPool();
-    responseListeners = new ConcurrentLinkedQueue<>();
-    connectionHeader = new ConnectionHeader();
-    connectionHeader.addField(ConnectionHeaderFields.CALLER_ID, nodeName.toString());
+    this.messageBufferPool = new MessageBufferPool();
+    this.responseListeners = new ConcurrentLinkedQueue<>();
+    this.connectionHeader = new ConnectionHeader();
+    this.connectionHeader.addField(ConnectionHeaderFields.CALLER_ID, nodeName.toString());
     // TODO(damonkohler): Support non-persistent connections.
-    connectionHeader.addField(ConnectionHeaderFields.PERSISTENT, "1");
-    connectionHeader.merge(serviceDeclaration.toConnectionHeader());
-    tcpClientManager = new TcpClientManager(executorService);
+    this.connectionHeader.addField(ConnectionHeaderFields.PERSISTENT, "1");
+    this.connectionHeader.merge(serviceDeclaration.toConnectionHeader());
+    this.tcpClientManager = new TcpClientManager(executorService);
     final ServiceClientHandshakeHandler<T, S> serviceClientHandshakeHandler =
         new ServiceClientHandshakeHandler<T, S>(connectionHeader, responseListeners, deserializer,
             executorService);
-    handshakeLatch = new HandshakeLatch();
+    this.handshakeLatch = new HandshakeLatch();
     serviceClientHandshakeHandler.addListener(handshakeLatch);
-    tcpClientManager.addNamedChannelHandler(serviceClientHandshakeHandler);
+    this.tcpClientManager.addNamedChannelHandler(serviceClientHandshakeHandler);
   }
 
   @Override
-  public void connect(final URI uri) {
+  public final void connect(final URI uri) {
     Preconditions.checkNotNull(uri, "URI must be specified.");
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"), "Invalid service URI.");
     Preconditions.checkState(tcpClient == null, "Already connected.");
     final InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
-    handshakeLatch.reset();
-    tcpClient = tcpClientManager.connect(toString(), address);
+    this.handshakeLatch.reset();
+    this.tcpClient = this.tcpClientManager.connect(toString(), address);
     try {
-      if (!handshakeLatch.await(1, TimeUnit.SECONDS)) {
-        throw new RosRuntimeException(handshakeLatch.getErrorMessage());
+      if (!this.handshakeLatch.await(1, TimeUnit.SECONDS)) {
+        throw new RosRuntimeException(this.handshakeLatch.getErrorMessage());
       }
     } catch (final InterruptedException e) {
       throw new RosRuntimeException("Handshake timed out.");
@@ -149,36 +147,36 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
   }
 
   @Override
-  public void shutdown() {
-    tcpClientManager.shutdown();
+  public final void shutdown() {
+    this.tcpClientManager.shutdown();
   }
 
   @Override
-  synchronized public void call(final T request, final ServiceResponseListener<S> listener) {
-    final ChannelBuffer buffer = messageBufferPool.acquire();
-    serializer.serialize(request, buffer);
-    responseListeners.add(listener);
-    tcpClient.write(buffer).awaitUninterruptibly();
-    messageBufferPool.release(buffer);
+  synchronized public final void call(final T request, final ServiceResponseListener<S> listener) {
+    final ChannelBuffer buffer = this.messageBufferPool.acquire();
+    this.serializer.serialize(request, buffer);
+    this.responseListeners.add(listener);
+    this.tcpClient.write(buffer).awaitUninterruptibly();
+    this.messageBufferPool.release(buffer);
   }
 
   @Override
-  public GraphName getName() {
-    return serviceDeclaration.getName();
+  public final GraphName getName() {
+    return this.serviceDeclaration.getName();
   }
 
   @Override
-  public String toString() {
-    return "ServiceClient<" + serviceDeclaration + ">";
+  public final String toString() {
+    return "ServiceClient<" + this.serviceDeclaration + ">";
   }
 
   @Override
-  public T newMessage() {
-    return messageFactory.newFromType(serviceDeclaration.getType());
+  public final T newMessage() {
+    return this.messageFactory.newFromType(this.serviceDeclaration.getType());
   }
 
   @Override
-  public boolean isConnected() {
-    return tcpClient.getChannel().isConnected();
+  public final boolean isConnected() {
+    return this.tcpClient.getChannel().isConnected();
   }
 }
