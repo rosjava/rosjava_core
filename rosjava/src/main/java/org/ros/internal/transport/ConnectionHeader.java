@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -80,7 +81,7 @@ public class ConnectionHeader {
   }
 
   private static String decodeAsciiString(ChannelBuffer buffer, int length) {
-    return buffer.readBytes(length).toString(Charset.forName("US-ASCII"));
+    return buffer.readBytes(length).toString(StandardCharsets.US_ASCII);
   }
 
   public ConnectionHeader() {
@@ -98,7 +99,7 @@ public class ConnectionHeader {
     for (Entry<String, String> entry : fields.entrySet()) {
       String field = entry.getKey() + "=" + entry.getValue();
       buffer.writeInt(field.length());
-      buffer.writeBytes(field.getBytes(Charset.forName("US-ASCII")));
+      buffer.writeBytes(field.getBytes(StandardCharsets.US_ASCII));
     }
     return buffer;
   }
