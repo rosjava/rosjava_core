@@ -21,6 +21,8 @@ mainClassName = 'org.ros.RosRun'
 dependencies {
   implementation project(':rosjava')
   implementation project(':rosjava_geometry')
-  implementation 'org.ros.rosjava_messages:tf2_msgs:[0.5,0.6)'
+  implementation 'org.ros.rosjava_messages:tf2_msgs:[0.5,0.6)', {
+    exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
+  }
 
 }

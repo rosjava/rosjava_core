@@ -19,7 +19,9 @@ plugins {
 }
 dependencies {
     api 'org.ros.rosjava_bootstrap:message_generation:noetic-0.1'
-    api 'org.ros.rosjava_messages:std_msgs:[0.5.9,0.5.11)'
+    api 'org.ros.rosjava_messages:std_msgs:[0.5.9,0.5.11)', {
+        exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
+    }
 
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'io.netty:netty:3.10.6.Final'
@@ -34,15 +36,21 @@ dependencies {
     implementation project(':apache_xmlrpc_server')
     implementation project(':apache_xmlrpc_client')
 
-    implementation 'org.ros.rosjava_messages:rosgraph_msgs:[1.11,1.12)'
+    implementation 'org.ros.rosjava_messages:rosgraph_msgs:[1.11,1.12)', {
+        exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
+    }
 
     implementation 'dnsjava:dnsjava:3.5.1'
 
     implementation 'commons-net:commons-net:3.8.0'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
-    testImplementation 'org.ros.rosjava_messages:nav_msgs:[1.12,1.13)'
-    testImplementation 'org.ros.rosjava_messages:rosjava_test_msgs:0.3.0'
+    testImplementation 'org.ros.rosjava_messages:nav_msgs:[1.12,1.13)', {
+        exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
+    }
+    testImplementation 'org.ros.rosjava_messages:rosjava_test_msgs:0.3.0', {
+        exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
+    }
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-all:1.10.19'
     testImplementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.2'

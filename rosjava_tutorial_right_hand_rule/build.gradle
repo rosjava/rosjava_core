@@ -20,7 +20,11 @@ mainClassName = 'org.ros.RosRun'
 
 dependencies {
   implementation project(':rosjava')
-  implementation 'org.ros.rosjava_messages:sensor_msgs:[1.12,1.13)'
-  implementation 'org.ros.rosjava_messages:geometry_msgs:[1.12,1.13)'
+  implementation 'org.ros.rosjava_messages:sensor_msgs:[1.12,1.13)', {
+    exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
+  }
+  implementation 'org.ros.rosjava_messages:geometry_msgs:[1.12,1.13)', {
+    exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
+  }
 }
 
