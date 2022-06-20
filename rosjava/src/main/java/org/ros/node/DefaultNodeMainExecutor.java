@@ -18,8 +18,6 @@ package org.ros.node;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.ros.concurrent.DefaultScheduledExecutorService;
 import org.ros.namespace.GraphName;
 import org.slf4j.Logger;
@@ -27,9 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -78,7 +75,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
      */
     public static NodeMainExecutor newDefault() {
         return newDefault(new DefaultScheduledExecutorService());
-	}
+    }
 
 
     /**
@@ -88,22 +85,15 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
     public static NodeMainExecutor newDefault(ScheduledExecutorService executorService) {
         return new DefaultNodeMainExecutor(new DefaultNodeFactory(executorService), executorService);
     }
-  
-  @Override
-  public void shutdown() {
-    synchronized (connectedNodes) {
-      for (ConnectedNode connectedNode : new HashSet<>(connectedNodes.values())) {
-        safelyShutdownNode(connectedNode);
-      }
 
-    }
+
 
     /**
      * @param nodeFactory              {@link NodeFactory} to use for node creation.
      * @param scheduledExecutorService {@link NodeMain}s will be executed using this
      */
-    private DefaultNodeMainExecutor(NodeFactory nodeFactory,
-                                    ScheduledExecutorService scheduledExecutorService) {
+    DefaultNodeMainExecutor(NodeFactory nodeFactory,
+                            ScheduledExecutorService scheduledExecutorService) {
         this.nodeFactory = nodeFactory;
         this.scheduledExecutorService = scheduledExecutorService;
         this.connectedNodes = Multimaps.synchronizedMultimap(HashMultimap.<GraphName, ConnectedNode>create());
@@ -155,6 +145,7 @@ public class DefaultNodeMainExecutor implements NodeMainExecutor {
             this.safelyShutdownNode(node);
         }
     }
+
 
     @Override
     public void shutdown() {
