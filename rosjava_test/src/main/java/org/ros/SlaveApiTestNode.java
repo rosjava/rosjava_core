@@ -71,12 +71,12 @@ public class SlaveApiTestNode extends AbstractNodeMain {
     connectedNode.executeCancellableLoop(new CancellableLoop() {
       @Override
       protected void loop() throws InterruptedException {
-        MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
-        std_msgs.String chatter = topicMessageFactory.newFromType(std_msgs.String._TYPE);
+        MessageFactory defaultMessageFactory = connectedNode.getDefaultMessageFactory();
+        std_msgs.String chatter = defaultMessageFactory.newFromType(std_msgs.String._TYPE);
         chatter.setData("hello " + System.currentTimeMillis());
         pub_string.publish(chatter);
 
-        std_msgs.Int64 num = topicMessageFactory.newFromType(std_msgs.Int64._TYPE);
+        std_msgs.Int64 num = defaultMessageFactory.newFromType(std_msgs.Int64._TYPE);
         num.setData(1);
         pub_int64_pubsub.publish(num);
         Thread.sleep(100);

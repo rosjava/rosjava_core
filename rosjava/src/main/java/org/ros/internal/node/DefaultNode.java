@@ -146,7 +146,7 @@ public class DefaultNode implements ConnectedNode {
 
         this.publisherFactory =
                 new PublisherFactory(nodeIdentifier, this.topicParticipantManager,
-                        nodeConfiguration.getTopicMessageFactory(), scheduledExecutorService);
+                        nodeConfiguration.getDefaultMessageFactory(), scheduledExecutorService);
         this.subscriberFactory =
                 new SubscriberFactory(nodeIdentifier, this.topicParticipantManager, scheduledExecutorService);
         this.serviceFactory =
@@ -472,8 +472,8 @@ public class DefaultNode implements ConnectedNode {
     }
 
     @Override
-    public MessageFactory getTopicMessageFactory() {
-        return this.nodeConfiguration.getTopicMessageFactory();
+    public MessageFactory getDefaultMessageFactory() {
+        return this.nodeConfiguration.getDefaultMessageFactory();
     }
 
     @Override

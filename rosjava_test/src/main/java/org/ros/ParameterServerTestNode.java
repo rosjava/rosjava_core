@@ -63,9 +63,9 @@ public class ParameterServerTestNode extends AbstractNodeMain {
     ParameterTree param = connectedNode.getParameterTree();
 
     final RosLog rosLog = connectedNode.getLog();
-    MessageFactory topicMessageFactory = connectedNode.getTopicMessageFactory();
+    final MessageFactory defaultMessageFactory = connectedNode.getDefaultMessageFactory();
 
-    final std_msgs.String tilde_m = topicMessageFactory.newFromType(std_msgs.String._TYPE);
+    final std_msgs.String tilde_m = defaultMessageFactory.newFromType(std_msgs.String._TYPE);
     tilde_m.setData(param.getString(connectedNode.resolveName("~tilde").toString()));
     rosLog.info("tilde: " + tilde_m.getData());
 
@@ -76,22 +76,22 @@ public class ParameterServerTestNode extends AbstractNodeMain {
     NameResolver resolver = connectedNode.getResolver().newChild(paramNamespace);
     NameResolver setResolver = connectedNode.getResolver().newChild(targetNamespace);
 
-    final std_msgs.String string_m = topicMessageFactory.newFromType(std_msgs.String._TYPE);
+    final std_msgs.String string_m = defaultMessageFactory.newFromType(std_msgs.String._TYPE);
     string_m.setData(param.getString(resolver.resolve("string")));
     rosLog.info("string: " + string_m.getData());
-    final std_msgs.Int64 int_m = topicMessageFactory.newFromType(std_msgs.Int64._TYPE);
+    final std_msgs.Int64 int_m = defaultMessageFactory.newFromType(std_msgs.Int64._TYPE);
     int_m.setData(param.getInteger(resolver.resolve("int")));
     rosLog.info("int: " + int_m.getData());
 
-    final std_msgs.Bool bool_m = topicMessageFactory.newFromType(std_msgs.Bool._TYPE);
+    final std_msgs.Bool bool_m = defaultMessageFactory.newFromType(std_msgs.Bool._TYPE);
     bool_m.setData(param.getBoolean(resolver.resolve("bool")));
     rosLog.info("bool: " + bool_m.getData());
-    final std_msgs.Float64 float_m = topicMessageFactory.newFromType(std_msgs.Float64._TYPE);
+    final std_msgs.Float64 float_m = defaultMessageFactory.newFromType(std_msgs.Float64._TYPE);
     float_m.setData(param.getDouble(resolver.resolve("float")));
     rosLog.info("float: " + float_m.getData());
 
     final rosjava_test_msgs.Composite composite_m =
-        topicMessageFactory.newFromType(rosjava_test_msgs.Composite._TYPE);
+        defaultMessageFactory.newFromType(rosjava_test_msgs.Composite._TYPE);
     Map composite_map = param.getMap(resolver.resolve("composite"));
     composite_m.getA().setW((Double) ((Map) composite_map.get("a")).get("w"));
     composite_m.getA().setX((Double) ((Map) composite_map.get("a")).get("x"));
@@ -101,7 +101,7 @@ public class ParameterServerTestNode extends AbstractNodeMain {
     composite_m.getB().setY((Double) ((Map) composite_map.get("b")).get("y"));
     composite_m.getB().setZ((Double) ((Map) composite_map.get("b")).get("z"));
 
-    final rosjava_test_msgs.TestArrays list_m = topicMessageFactory.newFromType(rosjava_test_msgs.TestArrays._TYPE);
+    final rosjava_test_msgs.TestArrays list_m = defaultMessageFactory.newFromType(rosjava_test_msgs.TestArrays._TYPE);
     // only using the integer part for easier (non-float) comparison
     @SuppressWarnings("unchecked")
     List<Integer> list = (List<Integer>) param.getList(resolver.resolve("list"));
