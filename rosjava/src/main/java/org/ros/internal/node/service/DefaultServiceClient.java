@@ -19,8 +19,6 @@ package org.ros.internal.node.service;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.Message;
@@ -49,22 +47,25 @@ import java.util.concurrent.TimeUnit;
  * Default implementation of a {@link ServiceClient}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
+ * @author Spyros Koukas
  */
 final class DefaultServiceClient<T extends Message, S extends Message> implements ServiceClient<T, S> {
   private final ServiceDeclaration serviceDeclaration;
   private final MessageSerializer<T> serializer;
   private final MessageFactory messageFactory;
-  private final MessageBufferPool messageBufferPool;
-  private final ConcurrentLinkedQueue<ServiceResponseListener<S>> responseListeners;
-  private final ConnectionHeader connectionHeader;
+  private final MessageBufferPool  messageBufferPool = new MessageBufferPool();
+  private final ConcurrentLinkedQueue<ServiceResponseListener<S>> responseListeners=new ConcurrentLinkedQueue<>();
+  private final ConnectionHeader connectionHeader = new ConnectionHeader();
   private final TcpClientManager tcpClientManager;
-  private final HandshakeLatch handshakeLatch;
+  private final HandshakeLatch handshakeLatch = new HandshakeLatch();
+
   private TcpClient tcpClient;
+
   private final class HandshakeLatch implements ClientHandshakeListener {
 
-  private CountDownLatch latch;
-  private boolean success;
-  private String errorMessage;
+    private CountDownLatch latch;
+    private boolean success;
+    private String errorMessage;
 
     @Override
     public final void onSuccess(final ConnectionHeader outgoingConnectionHeader,
@@ -113,9 +114,7 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
     this.serviceDeclaration = serviceDeclaration;
     this.serializer = serializer;
     this.messageFactory = messageFactory;
-    this.messageBufferPool = new MessageBufferPool();
-    this.responseListeners = new ConcurrentLinkedQueue<>();
-    this.connectionHeader = new ConnectionHeader();
+
     this.connectionHeader.addField(ConnectionHeaderFields.CALLER_ID, nodeName.toString());
     // TODO(damonkohler): Support non-persistent connections.
     this.connectionHeader.addField(ConnectionHeaderFields.PERSISTENT, "1");
@@ -124,7 +123,7 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
     final ServiceClientHandshakeHandler<T, S> serviceClientHandshakeHandler =
         new ServiceClientHandshakeHandler<T, S>(connectionHeader, responseListeners, deserializer,
             executorService);
-    this.handshakeLatch = new HandshakeLatch();
+
     serviceClientHandshakeHandler.addListener(handshakeLatch);
     this.tcpClientManager.addNamedChannelHandler(serviceClientHandshakeHandler);
   }
@@ -161,7 +160,7 @@ final class DefaultServiceClient<T extends Message, S extends Message> implement
   }
 
   @Override
-  public final GraphName getName() {
+  public GraphName getName() {
     return this.serviceDeclaration.getName();
   }
 

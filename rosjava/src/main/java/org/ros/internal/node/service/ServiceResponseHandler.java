@@ -18,8 +18,6 @@ package org.ros.internal.node.service;
 
 import com.google.common.base.Preconditions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
@@ -30,6 +28,7 @@ import org.ros.message.MessageDeserializer;
 import org.ros.node.service.ServiceResponseListener;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -39,7 +38,7 @@ import java.util.concurrent.ExecutorService;
  * 
  * @author damonkohler@google.com (Damon Kohler)
  */
-class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
+final class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
 
   private final ConcurrentLinkedQueue<ServiceResponseListener<ResponseType>> responseListeners;
   private final MessageDeserializer<ResponseType> deserializer;
@@ -53,20 +52,17 @@ class ServiceResponseHandler<ResponseType> extends SimpleChannelHandler {
   }
 
   @Override
-  public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-    final ServiceResponseListener<ResponseType> listener = responseListeners.poll();
+  public final void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
+    final ServiceResponseListener<ResponseType> listener = this.responseListeners.poll();
     Preconditions.checkNotNull(listener, "No listener for incoming service response.");
     final ServiceServerResponse response = (ServiceServerResponse) e.getMessage();
     final ChannelBuffer buffer = response.getMessage();
-    executorService.execute(new Runnable() {
-      @Override
-      public void run() {
-        if (response.getErrorCode() == 1) {
-          listener.onSuccess(deserializer.deserialize(buffer));
-        } else {
-          String message = Charset.forName("US-ASCII").decode(buffer.toByteBuffer()).toString();
-          listener.onFailure(new RemoteException(StatusCode.ERROR, message));
-        }
+    executorService.execute(() -> {
+      if (response.getErrorCode() == 1) {
+        listener.onSuccess(deserializer.deserialize(buffer));
+      } else {
+       final String message = StandardCharsets.US_ASCII.decode(buffer.toByteBuffer()).toString();
+        listener.onFailure(new RemoteException(StatusCode.ERROR, message));
       }
     });
   }

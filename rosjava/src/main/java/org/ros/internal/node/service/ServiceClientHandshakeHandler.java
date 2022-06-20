@@ -38,14 +38,15 @@ import java.util.concurrent.ExecutorService;
  * Performs a handshake with the connected {@link ServiceServer}.
  * 
  * @author damonkohler@google.com (Damon Kohler)
- * 
+ * @author Spyros Koukas
+ *
  * @param <T>
  *          the connected {@link ServiceServer} responds to requests of this
  *          type
  * @param <S>
  *          the connected {@link ServiceServer} returns responses of this type
  */
-class ServiceClientHandshakeHandler<T, S> extends BaseClientHandshakeHandler {
+final class ServiceClientHandshakeHandler<T, S> extends BaseClientHandshakeHandler {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ServiceClientHandshakeHandler.class);
   
