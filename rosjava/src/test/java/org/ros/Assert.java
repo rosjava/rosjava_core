@@ -23,9 +23,9 @@ import org.ros.namespace.GraphName;
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
-public class Assert {
+public final class Assert {
 
-  public static void assertGraphNameEquals(String name, GraphName graphName) {
+  public static final void assertGraphNameEquals(String name, GraphName graphName) {
     assertEquals(name, graphName.toString());
   }
 }

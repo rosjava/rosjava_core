@@ -20,5 +20,7 @@ mainClassName = 'org.ros.RosRun'
 
 dependencies {
   implementation project(':rosjava')
-  implementation 'org.ros.rosjava_messages:rosjava_test_msgs:0.3.0'
+  implementation 'org.ros.rosjava_messages:rosjava_test_msgs:0.3.0', {
+    exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
+  }
 }

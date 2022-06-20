@@ -17,7 +17,9 @@ plugins{
   id 'java-library'
 }
 dependencies {
-  api 'org.ros.rosjava_messages:geometry_msgs:[1.12,1.13)'
+  api 'org.ros.rosjava_messages:geometry_msgs:[1.12,1.13)', {
+    exclude group: "org.ros.rosjava_bootstrap", module: "message_generation"
+  }
   implementation 'com.google.guava:guava:31.1-jre'
   implementation project(':rosjava')
   testImplementation 'junit:junit:4.13.2'
