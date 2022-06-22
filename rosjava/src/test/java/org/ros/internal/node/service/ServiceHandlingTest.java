@@ -2,22 +2,19 @@ package org.ros.internal.node.service;
 
 import org.apache.commons.logging.Log;
 import org.ros.exception.RemoteException;
+import org.ros.node.*;
 import rosjava_test_msgs.AddTwoInts;
 import rosjava_test_msgs.AddTwoIntsRequest;
 import rosjava_test_msgs.AddTwoIntsResponse;
 import org.ros.RosTest;
 import org.ros.message.MessageFactory;
 import org.ros.namespace.GraphName;
-import org.ros.node.AbstractNodeMain;
-import org.ros.node.ConnectedNode;
 import org.ros.node.service.*;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.ros.node.Node;
-import org.ros.node.NodeConfiguration;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -126,11 +123,11 @@ public class ServiceHandlingTest extends RosTest {
         final ServiceClient<AddTwoIntsRequest, AddTwoIntsResponse> serviceClient;
         final String service;
         final boolean[] done = new boolean[1];
-        final Log log;
+        final RosLog log;
         final boolean[] correct = new boolean[1];
 
         ClientThread(int reqA, int reqB, CountDownLatch countDownLatch, MessageFactory messageFactory,
-                     String service, ServiceClient<AddTwoIntsRequest, AddTwoIntsResponse> serviceClient, Log log) {
+                     String service, ServiceClient<AddTwoIntsRequest, AddTwoIntsResponse> serviceClient, RosLog log) {
             this.a = reqA;
             this.b = reqB;
             this.countDownLatch = countDownLatch;
