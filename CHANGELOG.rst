@@ -2,6 +2,26 @@
 Changelog
 =========
 
+
+latest
+-----------------
+* Gradle update to 7.5
+
+
+
+0.3.8 (2022-07-04)
+------------------
+* Gradle update to 7.4.2.
+* Use/Target Java 17
+* Updated the versions of the dependencies used
+* Replaced [Apache Commons Logging](https://commons.apache.org/proper/commons-logging/) with [SL4J](https://www.slf4j.org/). Apache Commons Logging is still used by some dependencies.
+* Reduced the public API elements (Interfaces, Classes Methods)
+* Reduced inheritance potential by declaring methods and classes final.
+* Has only been tested in JRE (not android)
+* Stricter, more programmer friendly generics
+
+* Contributors: Spyros Koukas
+
 0.3.7 (2019-01-22)
 ------------------
 * Gradle update to 4.10.2.
