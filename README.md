@@ -13,8 +13,8 @@ requests on the [issues
 list](https://github.com/rosjava/rosjava/issues?state=open).
 
 To get started, visit the
-[rosjava_core](http://rosjava.github.com/rosjava_core/latest) and
-[android_core](http://rosjava.github.com/android_core/latest) pages for
+[rosjava_core](https://rosjava.github.io/rosjava_core/latest/) and
+[android_core](https://rosjava.github.io/android_core/latest) pages for
 documentation concerning the core libraries and examples. Also visit the roswiki
 [rosjava](http://wiki.ros.org/rosjava) and
 [android](http://wiki.ros.org/android) pages for more general rosjava-android
